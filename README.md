@@ -150,6 +150,7 @@ See [the experimental protocol](docs/RESEARCH.md).
 - [Research protocol](docs/RESEARCH.md)
 - [Extending the system](docs/EXTENDING.md)
 - [Implementation plan](docs/PLAN.md)
+- [Live model validation and its limits](docs/VALIDATION.md)
 
 ```sh
 uv run ruff check .
