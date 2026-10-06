@@ -17,15 +17,16 @@ def locate(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
     seen: dict[str, int] = {}
     for event in events:
         action = event["action"]
-        if action["tool"] == "finish":
-            continue
+        stopped = action["tool"] == "finish"
         signature = digest(action)
         repeated = seen.get(signature, 0)
         seen[signature] = repeated + 1
         failed = event["actual_result"].get("exit_code", 0) != 0
         changed = bool(event["changes"])
         reason = (
-            "Repeated action with no new progress"
+            "Agent stopped at this decision"
+            if stopped
+            else "Repeated action with no new progress"
             if repeated
             else (
                 "Tool returned a failure"
@@ -35,7 +36,13 @@ def locate(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 else "Earlier information may have redirected the agent"
             )
         )
-        score = 4 * int(failed) + 2 * min(repeated, 3) + int(changed) + 1 / event["step"]
+        score = (
+            4 * int(failed)
+            + 3 * int(stopped)
+            + 2 * min(repeated, 3)
+            + int(changed)
+            + 1 / event["step"]
+        )
         ranked.append({"step": event["step"], "score": round(score, 3), "reason": reason})
     return sorted(ranked, key=lambda r: (-r["score"], r["step"]))
 

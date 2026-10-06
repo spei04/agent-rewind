@@ -67,6 +67,14 @@ Use a pinned model version where available. Prices are deployment configuration,
 not inferred from the model name. Model credentials remain on workers and never
 enter a sandbox or the browser.
 
+Reasoning models can set `REWIND_MODEL_REASONING_EFFORT=high` and a larger
+`REWIND_MODEL_MAX_OUTPUT_TOKENS` (for example, 8192) to allow for reasoning and
+the final action. The reasoning setting is part of the saved policy identity.
+`REWIND_MODEL_MAX_INPUT_TOKENS` bounds input before dispatch using a conservative
+byte-based estimate. Configure input prices to cover cache writes and every
+pricing tier allowed by this bound. Usage-derived costs are estimates at those
+configured rates, not provider invoices.
+
 Pull the environment explicitly:
 
 ```sh

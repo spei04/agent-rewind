@@ -51,6 +51,8 @@ class ChatPolicy:
             "prompt_digest": digest(SYSTEM),
             "seed_supported": self.settings.model_seed_supported,
             "max_output_tokens": self.settings.model_max_output_tokens,
+            "max_input_tokens": self.settings.model_max_input_tokens,
+            "reasoning_effort": self.settings.model_reasoning_effort,
             "input_price": self.settings.model_input_price,
             "output_price": self.settings.model_output_price,
         }
@@ -81,9 +83,13 @@ class ChatPolicy:
         }
         if self.settings.model_seed_supported:
             body["seed"] = (seed + step) % (2**31 - 1)
+        if self.settings.model_reasoning_effort:
+            body["reasoning_effort"] = self.settings.model_reasoning_effort
         # Conservative allowance: one input token per serialized UTF-8 byte plus
         # protocol overhead. Reservations remain consumed on ambiguous failures.
         upper_input = len(canonical(body)) + 4096
+        if upper_input > self.settings.model_max_input_tokens:
+            raise ValueError("Model input exceeds the configured conservative token bound.")
         reserve = math.ceil(
             upper_input * self.settings.model_input_price
             + self.settings.model_max_output_tokens * self.settings.model_output_price

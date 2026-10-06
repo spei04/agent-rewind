@@ -1,6 +1,21 @@
-from agent_rewind.experiments import Experiments
+from agent_rewind.experiments import Experiments, locate
 from agent_rewind.models import Intervention, StudyRequest
 from agent_rewind.statistics import paired_evidence
+
+
+def test_premature_finish_remains_available_for_intervention_discovery():
+    ranked = locate(
+        [
+            {
+                "step": 1,
+                "action": {"tool": "finish"},
+                "actual_result": {"exit_code": 0},
+                "changes": {},
+            }
+        ]
+    )
+    assert len(ranked) == 1
+    assert ranked[0]["step"] == 1
 
 
 def test_zero_discordance_does_not_produce_zero_width_interval():

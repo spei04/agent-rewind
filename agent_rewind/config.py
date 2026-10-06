@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Literal
 from urllib.parse import urlparse
 
-from pydantic import SecretStr, model_validator
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -34,7 +34,11 @@ class Settings(BaseSettings):
     model_input_price: float = 0
     model_output_price: float = 0
     model_seed_supported: bool = False
-    model_max_output_tokens: int = 2048
+    model_reasoning_effort: Literal[
+        "", "none", "minimal", "low", "medium", "high", "xhigh", "max"
+    ] = ""
+    model_max_input_tokens: int = Field(default=128000, ge=1000, le=1000000)
+    model_max_output_tokens: int = Field(default=2048, ge=1, le=128000)
     model_timeout_seconds: int = 90
     max_job_seconds: int = 7200
 
