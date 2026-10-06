@@ -9,6 +9,8 @@ from typing import Any, Protocol
 
 import docker
 from docker.errors import DockerException
+from docker.models.containers import Container
+from docker.models.volumes import Volume
 
 from .config import Settings
 from .database import identifier
@@ -144,10 +146,9 @@ class DockerRunner:
                         "agent-rewind.created": str(time.time()),
                     },
                 )
-                uploader = self.client.containers.run(
+                uploader = self.client.containers.create(
                     image,
                     entrypoint=["/bin/sh", "-c", "exec sleep 600"],
-                    detach=True,
                     network_mode="none",
                     read_only=True,
                     user="1000:1000",
@@ -155,14 +156,17 @@ class DockerRunner:
                     cap_drop=["ALL"],
                     security_opt=["no-new-privileges"],
                     runtime=self.settings.sandbox_runtime,
-                    mem_limit="64m",
-                    pids_limit=16,
+                    mem_limit=f"{self.settings.sandbox_memory_mb}m",
+                    memswap_limit=f"{self.settings.sandbox_memory_mb}m",
+                    nano_cpus=1_000_000_000,
+                    pids_limit=128,
                     volumes={grader_volume.name: {"bind": "/workspace", "mode": "rw"}},
                     labels={
                         "agent-rewind.managed": "true",
                         "agent-rewind.created": str(time.time()),
                     },
                 )
+                uploader.start()
                 uploader.put_archive("/workspace", pack(evaluator))
                 mounts[grader_volume.name] = {"bind": "/evaluator", "mode": "ro"}
             container = self.client.containers.create(
@@ -238,20 +242,29 @@ class DockerRunner:
             }
         finally:
             # All process state is intentionally discarded at a tool boundary.
-            try:
-                if container is not None:
-                    self._remove_container(container)
-            finally:
+            self._cleanup_resources([container, uploader], [volume, grader_volume])
+
+    def _cleanup_resources(
+        self, containers: list[Container | None], volumes: list[Volume | None]
+    ) -> None:
+        errors: list[Exception] = []
+        for container in containers:
+            if container is not None:
                 try:
-                    if uploader is not None:
-                        self._remove_container(uploader)
-                finally:
+                    self._remove_container(container)
+                except Exception as exc:
+                    errors.append(exc)
+        for volume in volumes:
+            if volume is not None:
+                try:
                     volume.remove(force=True)
-                    if grader_volume is not None:
-                        grader_volume.remove(force=True)
+                except Exception as exc:
+                    errors.append(exc)
+        if errors:
+            raise ExceptionGroup("Sandbox cleanup failed; orphan reaping is required.", errors)
 
     @staticmethod
-    def _remove_container(container: docker.models.containers.Container) -> None:
+    def _remove_container(container: Container) -> None:
         container.reload()
         status = container.attrs.get("State", {})
         # gVisor must receive termination while runnable so its init can reap
