@@ -1,0 +1,59 @@
+name: checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: rewind
+        ports: [5432:5432]
+        options: >-
+          --health-cmd 'pg_isready -U postgres -d rewind'
+          --health-interval 5s --health-timeout 3s --health-retries 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install uv==0.11.21
+      - run: uv sync --frozen --group dev
+      - run: uv run ruff check . && uv run ruff format --check . && uv run mypy agent_rewind
+      - run: uv run pytest -q
+        env:
+          REWIND_TEST_POSTGRES: postgresql+psycopg://postgres:test-only@127.0.0.1:5432/rewind
+      - run: node --check agent_rewind/web/app.js
+      - run: uv build --no-sources
+  isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install uv==0.11.21
+      - run: uv sync --frozen --group dev
+      - name: Install the signed gVisor package
+        run: |
+          curl -fsSL https://gvisor.dev/archive.key | sudo gpg --dearmor -o /usr/share/keyrings/gvisor-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/gvisor-archive-keyring.gpg] https://storage.googleapis.com/gvisor/releases release main" | sudo tee /etc/apt/sources.list.d/gvisor.list
+          sudo apt-get update
+          sudo apt-get install -y runsc
+          sudo runsc install
+          sudo systemctl restart docker
+          runsc --version
+      - run: docker pull python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d && docker tag python@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d python:3.12-slim
+      - run: uv run pytest tests/test_docker.py -q
+        env:
+          REWIND_TEST_DOCKER: '1'
+          REWIND_TEST_RUNTIME: runsc

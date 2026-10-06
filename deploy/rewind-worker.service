@@ -1,0 +1,23 @@
+[Unit]
+Description=Agent Rewind execution worker
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=rewind-worker
+Group=rewind-worker
+SupplementaryGroups=docker
+WorkingDirectory=/opt/agent-rewind
+EnvironmentFile=/etc/agent-rewind/worker.env
+ExecStart=/opt/agent-rewind/.venv/bin/rewind worker
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/agent-rewind
+
+[Install]
+WantedBy=multi-user.target

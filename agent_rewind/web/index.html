@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Agent Rewind</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <aside>
+      <a class="brand" href="/" aria-label="Agent Rewind home"
+        ><svg width="28" height="26" viewBox="0 0 28 26" aria-hidden="true">
+          <path
+            d="M13 4 2 13l11 9V4Zm13 0-11 9 11 9V4Z"
+            fill="currentColor"
+          /></svg
+        ><span
+          >agent rewind<span class="brand-sub">DECISION EXPERIMENTS</span></span
+        ></a
+      >
+      <div class="workspace-label">
+        <span class="dot"></span> ORGANIZATION WORKSPACE
+      </div>
+      <nav>
+        <button class="nav-button active" data-view="runs">
+          Runs <span id="run-count">0</span></button
+        ><button class="nav-button" data-view="studies">
+          Intervention studies</button
+        ><button class="nav-button" data-view="jobs">Execution jobs</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <span class="mono">SELF-HOSTED · v0.1</span>
+        <p>One decision is a hypothesis.<br />Repeated trials are evidence.</p>
+        <div id="identity">Authentication required</div>
+        <button id="logout" class="quiet hidden">Sign out</button>
+      </div>
+    </aside>
+    <main>
+      <header>
+        <div class="breadcrumb">
+          WORKSPACE <span>/</span> <span id="page-label">Runs</span>
+        </div>
+        <div class="header-actions">
+          <span id="connection" class="muted">Not connected</span
+          ><button id="refresh" class="quiet">Refresh</button
+          ><button id="new-run" class="primary">＋ Record a run</button>
+        </div>
+      </header>
+      <div id="notice" role="status" aria-live="polite" class="hidden"></div>
+      <section id="login-panel" class="login-panel">
+        <div>
+          <span class="eyebrow">YOUR WORKSPACE, YOUR EVIDENCE</span>
+          <h1>Find the decision<br />worth changing.</h1>
+          <p>
+            Restore the environment. Change one action.<br />Find out whether
+            the improvement holds up.
+          </p>
+        </div>
+        <form id="login-form">
+          <h2>Connect to your deployment</h2>
+          <label for="api-key">Service API key</label
+          ><input
+            id="api-key"
+            type="password"
+            autocomplete="off"
+            placeholder="rw_…"
+            required
+          />
+          <p class="hint">
+            Use a scoped Agent Rewind key. Model provider keys belong on the
+            worker.
+          </p>
+          <button class="primary" type="submit">Open workspace →</button
+          ><a href="/auth/login" class="oidc">Sign in with your organization</a>
+        </form>
+      </section>
+      <section id="runs-view" class="view hidden">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">EXECUTION HISTORY</span>
+            <h1>Every decision leaves a trail.</h1>
+          </div>
+          <p>
+            Open a run to inspect its checkpoints<br />and explore a different
+            outcome.
+          </p>
+        </div>
+        <div class="workbench">
+          <section class="run-list panel">
+            <div class="panel-head">
+              <h2>Recorded runs</h2>
+              <span class="mono">LIVE</span>
+            </div>
+            <div id="run-list"></div>
+          </section>
+          <section class="inspector panel">
+            <div id="run-empty" class="empty">
+              <span class="empty-symbol">↶</span>
+              <h2>Your first turning point starts here.</h2>
+              <p>
+                Record a coding task with a configured worker.<br />Its
+                decisions and saved workspaces will appear here.
+              </p>
+              <button id="empty-record" class="secondary">Record a run</button>
+            </div>
+            <div id="run-detail" class="hidden">
+              <div class="detail-heading">
+                <div>
+                  <span class="eyebrow" id="run-id"></span>
+                  <h2 id="run-title"></h2>
+                </div>
+                <span id="run-status" class="badge"></span>
+              </div>
+              <div id="run-meta" class="meta-row"></div>
+              <div id="ancestry" class="ancestry"></div>
+              <button id="compare" class="quiet hidden">
+                Compare with source
+              </button>
+              <div class="timeline-heading">
+                <h3>Decision timeline</h3>
+                <span class="mono">← → TO REWIND</span>
+              </div>
+              <div
+                id="timeline"
+                class="timeline"
+                aria-label="Decision timeline"
+              ></div>
+              <div class="decision-head">
+                <h3 id="decision-title"></h3>
+                <span id="checkpoint" class="mono muted"></span>
+              </div>
+              <div class="tabs">
+                <button class="selected" data-tab="observation">
+                  Action & observation</button
+                ><button data-tab="files">Workspace before decision</button>
+              </div>
+              <div id="observation-tab">
+                <div class="code-heading">EXECUTED ACTION</div>
+                <pre id="action-output"></pre>
+                <div class="code-heading">OBSERVED TOOL RESULT</div>
+                <pre id="tool-output"></pre>
+                <div id="changed-files" class="muted"></div>
+              </div>
+              <div id="files-tab" class="hidden">
+                <div id="file-list" class="file-list"></div>
+                <pre id="file-content">
+Select a file to inspect the saved contents.</pre
+                >
+              </div>
+              <div class="intervention">
+                <div>
+                  <span class="eyebrow">CHANGE ONE THING</span>
+                  <h3>Explore an alternative</h3>
+                  <p>
+                    The source run stays intact. A new branch continues from
+                    this decision.
+                  </p>
+                </div>
+                <label for="intervention-kind">Intervention type</label
+                ><select id="intervention-kind">
+                  <option value="tool_result">
+                    Replace the observed tool result
+                  </option>
+                  <option value="action">
+                    Replace the executed action
+                  </option></select
+                ><label for="replacement">Replacement JSON</label
+                ><textarea
+                  id="replacement"
+                  spellcheck="false"
+                  rows="7"
+                ></textarea>
+                <div class="branch-options">
+                  <label
+                    >Trial seed<input
+                      type="number"
+                      id="branch-seed"
+                      value="1"
+                      min="0" /></label
+                  ><label
+                    >Budget (USD)<input
+                      type="number"
+                      id="branch-budget"
+                      value="10"
+                      min="0.01"
+                      max="200"
+                      step="0.01" /></label
+                  ><button id="branch" class="primary">Create branch ↗</button>
+                </div>
+              </div>
+              <div class="research-callout">
+                <div>
+                  <h3>Where should you intervene?</h3>
+                  <p>
+                    Rank suspicious decisions, screen alternatives, and confirm
+                    the best candidate on fresh trials.
+                  </p>
+                </div>
+                <button id="investigate" class="secondary">
+                  Investigate failure →
+                </button>
+              </div>
+              <details>
+                <summary>Independent evaluator result</summary>
+                <pre id="evaluation"></pre>
+              </details>
+            </div>
+          </section>
+        </div>
+      </section>
+      <section id="studies-view" class="view hidden">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">THE INTERVENTION ATLAS</span>
+            <h1>A rescue is an example.<br />A study is evidence.</h1>
+          </div>
+          <p>
+            Screening chooses a candidate.<br />Confirmation tests it on fresh
+            trials.
+          </p>
+        </div>
+        <div id="studies-list"></div>
+      </section>
+      <section id="jobs-view" class="view hidden">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">WORKER ACTIVITY</span>
+            <h1>Execution jobs</h1>
+          </div>
+          <p>
+            Leased execution, explicit budgets,<br />and retained partial
+            results.
+          </p>
+        </div>
+        <div id="jobs-list" class="panel"></div>
+      </section>
+    </main>
+    <dialog id="task-dialog">
+      <form id="task-form">
+        <div class="dialog-heading">
+          <h2>Record a coding task</h2>
+          <button type="button" class="quiet close-dialog">Close</button>
+        </div>
+        <p>
+          Load a task manifest with source files, a pinned environment image,
+          and an independent evaluator.
+        </p>
+        <label for="task-upload">Load a JSON manifest</label
+        ><input
+          type="file"
+          id="task-upload"
+          accept="application/json,.json"
+        /><label for="task-json">Task manifest</label
+        ><textarea
+          id="task-json"
+          rows="15"
+          spellcheck="false"
+          required
+          placeholder='{"name": "Fix a bug", "instruction": "…", "image": "…", "files": {}, "evaluator_files": {}, "evaluator_command": "…"}'
+        ></textarea>
+        <p class="hint">
+          The image must already exist on the worker and be allowed by its
+          administrator.
+        </p>
+        <button class="primary" type="submit">Queue recording →</button>
+      </form>
+    </dialog>
+    <dialog id="study-dialog">
+      <form id="study-form">
+        <div class="dialog-heading">
+          <h2>Investigate this failure</h2>
+          <button type="button" class="quiet close-dialog">Close</button>
+        </div>
+        <p>
+          Generate up to three alternative actions at suspicious decisions.
+          Screen them alongside an unchanged negative control, then freeze one
+          candidate for confirmation.
+        </p>
+        <div class="branch-options">
+          <label
+            >Screening pairs per candidate<input
+              id="screen-trials"
+              type="number"
+              value="8"
+              min="2"
+              max="50" /></label
+          ><label
+            >Confirmation pairs<input
+              id="confirm-trials"
+              type="number"
+              value="30"
+              min="5"
+              max="200" /></label
+          ><label
+            >Total budget (USD)<input
+              id="study-budget"
+              type="number"
+              value="200"
+              min="1"
+              max="200"
+          /></label>
+        </div>
+        <p class="hint">
+          A pair includes an unchanged control and an intervention branch. Model
+          seeds are advisory when supported. Incomplete trials remain visible.
+        </p>
+        <button class="primary" type="submit">
+          Start intervention study →
+        </button>
+      </form>
+    </dialog>
+    <dialog id="compare-dialog">
+      <div class="dialog-heading">
+        <h2>Trajectory comparison</h2>
+        <button type="button" class="quiet close-dialog">Close</button>
+      </div>
+      <pre id="compare-output"></pre>
+    </dialog>
+  </body>
+</html>

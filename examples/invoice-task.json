@@ -1,0 +1,20 @@
+{
+  "name": "Fix discount and shipping rounding",
+  "instruction": "Fix quote() for the current billing rules. Inspect the repository, implement the correction, and run the available tests. Do not change tests to hide failures.",
+  "image": "python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d",
+  "files": {
+    "README.md": "Billing migration. Current rules are in docs/contract.md. Run python -m unittest discover -s tests.\n",
+    "docs/contract.md": "Apply the percentage discount to merchandise, then tax the discounted merchandise. Round the final merchandise amount once, half up, to integer cents. Add shipping last; never discount or tax shipping. Use integer arithmetic.\n",
+    "docs/legacy.md": "Archived v1: add shipping to the subtotal, discount, round down, then tax and round down again.\n",
+    "invoice.py": "def quote(subtotal, discount_pct, tax_pct, shipping):\n    base = (subtotal + shipping) * (100 - discount_pct) // 100\n    return base * (100 + tax_pct) // 100\n",
+    "tests/test_invoice.py": "import unittest\nfrom invoice import quote\n\nclass QuoteTests(unittest.TestCase):\n    def test_basic(self):\n        self.assertEqual(quote(10000, 10, 10, 0), 9900)\n    def test_shipping(self):\n        self.assertEqual(quote(0, 0, 20, 500), 500)\n"
+  },
+  "evaluator_files": {
+    "grade.py": "import sys\nsys.path.insert(0, \"/workspace\")\nfrom invoice import quote\n\ncases = [(1999,15,8,499),(999,33,7,0),(101,50,10,200),(1,50,0,0),(15,10,5,0),(0,0,20,500),(2501,17,19,349),(100,100,10,500)]\nfor s,d,t,shipping in cases:\n    expected = (s * (100-d) * (100+t) + 5000)//10000 + shipping\n    actual = quote(s,d,t,shipping)\n    assert actual == expected, (s,d,t,shipping,actual,expected)\nprint(\"PASS: 8 independent cases\")\n"
+  },
+  "evaluator_command": "python -I /evaluator/grade.py",
+  "max_steps": 30,
+  "command_timeout": 30,
+  "budget_usd": 10.0,
+  "seed": 0
+}
