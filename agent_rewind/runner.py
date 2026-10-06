@@ -151,6 +151,7 @@ class DockerRunner:
                     network_mode="none",
                     read_only=True,
                     user="1000:1000",
+                    init=True,
                     cap_drop=["ALL"],
                     security_opt=["no-new-privileges"],
                     runtime=self.settings.sandbox_runtime,
@@ -168,6 +169,7 @@ class DockerRunner:
                 image=image,
                 entrypoint=["/bin/sh", "-c", "exec sleep 600"],
                 user="1000:1000",
+                init=True,
                 working_dir="/workspace",
                 network_mode="none",
                 read_only=True,
@@ -238,15 +240,27 @@ class DockerRunner:
             # All process state is intentionally discarded at a tool boundary.
             try:
                 if container is not None:
-                    container.remove(force=True)
+                    self._remove_container(container)
             finally:
                 try:
                     if uploader is not None:
-                        uploader.remove(force=True)
+                        self._remove_container(uploader)
                 finally:
                     volume.remove(force=True)
                     if grader_volume is not None:
                         grader_volume.remove(force=True)
+
+    @staticmethod
+    def _remove_container(container: docker.models.containers.Container) -> None:
+        container.reload()
+        status = container.attrs.get("State", {})
+        # gVisor must receive termination while runnable so its init can reap
+        # processes and notify the container shim before Docker removes mounts.
+        if status.get("Paused"):
+            container.unpause()
+        if status.get("Running"):
+            container.stop(timeout=1)
+        container.remove(force=True)
 
     def cleanup(self, older_than_seconds: int = 3600) -> int:
         """Reap abandoned resources only after their maximum lifetime has elapsed."""
@@ -257,7 +271,7 @@ class DockerRunner:
         ):
             created = float(container.labels.get("agent-rewind.created", time.time()))
             if created < cutoff:
-                container.remove(force=True)
+                self._remove_container(container)
                 removed += 1
         for volume in self.client.volumes.list(filters={"label": "agent-rewind.managed=true"}):
             labels = volume.attrs.get("Labels") or {}

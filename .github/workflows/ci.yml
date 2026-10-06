@@ -14,7 +14,7 @@ jobs:
           POSTGRES_DB: rewind
         ports: [5432:5432]
         options: >-
-          --health-cmd 'pg_isready -U postgres -d rewind'
+          --health-cmd pg_isready
           --health-interval 5s --health-timeout 3s --health-retries 15
     steps:
       - uses: actions/checkout@v4
