@@ -97,7 +97,7 @@
       "layer": "api",
       "given": "Same client_operation_id and body but different keys",
       "when": "POST runs",
-      "then": "Same operation; new key is atomically bound as an alias. Reusing that alias with a different client ID/body conflicts; no duplicate job."
+      "then": "Same operation; new key is atomically bound as an alias. Reusing that alias with a different client ID/body conflicts; no duplicate job. Composite operation-key FK rejects mismatched project, principal or kind even when operation ID exists."
     },
     {
       "id": "CT-M1-013",
@@ -137,7 +137,7 @@
       "layer": "storage",
       "given": "Same bytes in separate projects",
       "when": "Create/read scoped artifact refs",
-      "then": "No existence/read oracle across projects; authorization before cache lookup."
+      "then": "No existence/read oracle across projects; authorization before cache lookup. Composite artifact reference FKs reject a foreign-project object or owner, with matching unique target keys in the migration."
     },
     {
       "id": "CT-M1-018",

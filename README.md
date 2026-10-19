@@ -149,7 +149,8 @@ See [the experimental protocol](docs/RESEARCH.md).
 - [Security boundaries](docs/SECURITY.md)
 - [Research protocol](docs/RESEARCH.md)
 - [Extending the system](docs/EXTENDING.md)
-- [Implementation plan](docs/PLAN.md)
+- [Enterprise roadmap](docs/PLAN.md)
+- [Execution backlog and approval gates](docs/EXECUTION_BACKLOG.md)
 - [Live model validation and its limits](docs/VALIDATION.md)
 
 ```sh

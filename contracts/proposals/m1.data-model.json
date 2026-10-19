@@ -95,6 +95,7 @@
       },
       "constraints": [
         "UNIQUE(project_id,principal_id,kind,client_operation_id)",
+        "UNIQUE(project_id,principal_id,kind,id)",
         "Publish operations+jobs+scope+audit atomically after confirmed artifact upload.",
         "Same canonical request returns original IDs; changed request conflicts; recheck current access.",
         "Retain through operation lifetime plus at least 90 days."
@@ -113,6 +114,7 @@
       },
       "constraints": [
         "UNIQUE(project_id,digest,format_version)",
+        "UNIQUE(project_id,id)",
         "byte_count >= 0; IDs are authorization-scoped locators, never public access tokens.",
         "M1 retains existing encrypted format as version 1; no online re-encryption yet."
       ],
@@ -128,7 +130,8 @@
       },
       "constraints": [
         "PK(project_id,owner_kind,owner_id,artifact_id,role)",
-        "Composite scope checks tie owner and artifact to the same project.",
+        "Composite FK(project_id,artifact_id) -> artifact_objects(project_id,id)",
+        "Composite FK(project_id,owner_kind,owner_id) -> resource_scopes(project_id,resource_kind,resource_id)",
         "Publish reference only after confirmed object write/hash verification; no deletion API in M1."
       ],
       "owner": "storage"
@@ -203,7 +206,7 @@
       },
       "constraints": [
         "PK(project_id,principal_id,kind,key_hash)",
-        "Composite scope/owner/kind matches the referenced operation.",
+        "Composite FK(project_id,principal_id,kind,operation_id) -> operations(project_id,principal_id,kind,id)",
         "A retry with an existing client_operation_id and a new key records an alias atomically after comparing the canonical digest.",
         "A key already bound to a different operation/request conflicts; all aliases live as long as their operation."
       ],
