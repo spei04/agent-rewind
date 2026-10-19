@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "corpus_id": "synthetic-c01-contract-corpus",
+  "created_at": "2026-10-19T00:00:00Z",
+  "evidence_class": "synthetic",
+  "storage_profile_id": "synthetic-private-storage",
+  "storage_owner_id": "synthetic-storage-owner",
+  "purpose": "independent-confirmation",
+  "retention": {
+    "owner_id": "synthetic-retention-owner",
+    "review_at": "2026-11-19T00:00:00Z",
+    "delete_after": "2027-01-19T00:00:00Z"
+  },
+  "publication": {
+    "raw_content": "forbidden",
+    "aggregates": "separate-review-required",
+    "redaction_policy": {
+      "path": "policies/synthetic-redaction-v1.json",
+      "sha256": "6a49b98e6f37da9d0c65fd305782b4d2ad774d4e131027bb28fe7636425acf01"
+    }
+  },
+  "tasks": [
+    {
+      "task_id": "synthetic-task-1",
+      "workflow_id": "manual-action-recovery",
+      "run_ids": [
+        "11111111111111111111111111111111"
+      ],
+      "source": {
+        "source_id": "synthetic-source-1",
+        "revision": "0000000000000000000000000000000000000000",
+        "artifact": {
+          "path": "tasks/synthetic-1/source.json",
+          "sha256": "efd4bacf6a6e52990b2a8b4feea8db19424c0937807fb19dfd18a21dd98b9796"
+        }
+      },
+      "evaluator": {
+        "evaluator_id": "synthetic-grader-1",
+        "revision": "0000000000000000000000000000000000000000",
+        "artifact": {
+          "path": "tasks/synthetic-1/evaluator.json",
+          "sha256": "ddb3bb001aa4c5c60d7279911e5fdba8d715ebfbcc4daeaa5c6291982d17c161"
+        },
+        "command_sha256": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+        "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+      },
+      "permission": {
+        "status": "approved",
+        "rights_owner_id": "synthetic-rights-owner",
+        "approved_by": "synthetic-approver",
+        "approved_at": "2026-10-18T00:00:00Z",
+        "valid_from": "2026-10-19T00:00:00Z",
+        "valid_until": "2027-04-19T00:00:00Z",
+        "evidence": {
+          "path": "permissions/synthetic-1.json",
+          "sha256": "610f6a31474937d0ddf8969fc70681954e93f58e6c6a91135c0c65017401b0fd"
+        },
+        "allowed_processors": [
+          "synthetic-model-region-a-no-retention"
+        ],
+        "allowed_purposes": [
+          "debugging",
+          "intervention-screening",
+          "independent-confirmation"
+        ]
+      }
+    },
+    {
+      "task_id": "synthetic-task-2",
+      "workflow_id": "automatic-intervention-evaluation",
+      "run_ids": [
+        "22222222222222222222222222222222"
+      ],
+      "source": {
+        "source_id": "synthetic-source-2",
+        "revision": "0000000000000000000000000000000000000000",
+        "artifact": {
+          "path": "tasks/synthetic-2/source.json",
+          "sha256": "5c3e292fd2b728f6564898ec55c6a100174cc63f17281f9a211f7b376b4faa88"
+        }
+      },
+      "evaluator": {
+        "evaluator_id": "synthetic-grader-2",
+        "revision": "0000000000000000000000000000000000000000",
+        "artifact": {
+          "path": "tasks/synthetic-2/evaluator.json",
+          "sha256": "a072a00f1e0ecaf49c2d2027d023fafa1e4ea830f16e14e28dd2258be42c3623"
+        },
+        "command_sha256": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+        "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+      },
+      "permission": {
+        "status": "approved",
+        "rights_owner_id": "synthetic-rights-owner",
+        "approved_by": "synthetic-approver",
+        "approved_at": "2026-10-18T00:00:00Z",
+        "valid_from": "2026-10-19T00:00:00Z",
+        "valid_until": "2027-04-19T00:00:00Z",
+        "evidence": {
+          "path": "permissions/synthetic-2.json",
+          "sha256": "1b28211b8520fb682bf22b2016fae4e718f98e321b730892998daaa84b885eb7"
+        },
+        "allowed_processors": [
+          "synthetic-model-region-a-no-retention"
+        ],
+        "allowed_purposes": [
+          "debugging",
+          "intervention-screening",
+          "independent-confirmation"
+        ]
+      }
+    }
+  ]
+}
