@@ -1,0 +1,700 @@
+{
+  "contract": "C04",
+  "schema_version": 1,
+  "status": "proposed-for-AR-004-B",
+  "runtime_implemented": false,
+  "error_rules": {
+    "invalid_request": {
+      "statuses": [
+        422,
+        413
+      ],
+      "messages": [
+        "Request does not match the supported input contract.",
+        "Request body exceeds 9 MiB.",
+        "Task manifest exceeds 8 MiB."
+      ],
+      "retryable": false
+    },
+    "unauthenticated": {
+      "statuses": [
+        401
+      ],
+      "messages": [
+        "Authentication is required."
+      ],
+      "retryable": false
+    },
+    "forbidden": {
+      "statuses": [
+        403
+      ],
+      "messages": [
+        "This action is not permitted."
+      ],
+      "retryable": false
+    },
+    "not_found": {
+      "statuses": [
+        404
+      ],
+      "messages": [
+        "Resource not found."
+      ],
+      "retryable": false
+    },
+    "invalid_cursor": {
+      "statuses": [
+        422
+      ],
+      "messages": [
+        "Cursor is invalid for this request."
+      ],
+      "retryable": false
+    },
+    "idempotency_conflict": {
+      "statuses": [
+        409
+      ],
+      "messages": [
+        "Request identity was already used with different input."
+      ],
+      "retryable": false
+    },
+    "budget_exhausted": {
+      "statuses": [
+        409
+      ],
+      "messages": [
+        "The permitted budget is exhausted."
+      ],
+      "retryable": false
+    },
+    "quota_exceeded": {
+      "statuses": [
+        429
+      ],
+      "messages": [
+        "Admission quota is temporarily exceeded."
+      ],
+      "retryable": true
+    },
+    "dependency_unavailable": {
+      "statuses": [
+        503
+      ],
+      "messages": [
+        "A required service is temporarily unavailable."
+      ],
+      "retryable": true
+    },
+    "schema_incompatible": {
+      "statuses": [
+        503
+      ],
+      "messages": [
+        "Service schema is not compatible with this release."
+      ],
+      "retryable": false
+    },
+    "internal_error": {
+      "statuses": [
+        500
+      ],
+      "messages": [
+        "The request could not be completed."
+      ],
+      "retryable": false
+    },
+    "outcome_uncertain": {
+      "statuses": [
+        503
+      ],
+      "messages": [
+        "The operation outcome is not yet known; reconcile the original request.",
+        "The provider outcome is not yet known; do not dispatch a new call."
+      ],
+      "retryable": false
+    }
+  },
+  "errors": [
+    {
+      "id": "malformed",
+      "http_status": 422,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "invalid_request",
+        "message": "Request does not match the supported input contract.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "transport_limit",
+      "http_status": 413,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "invalid_request",
+        "message": "Request body exceeds 9 MiB.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "manifest_limit",
+      "http_status": 413,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "invalid_request",
+        "message": "Task manifest exceeds 8 MiB.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "missing_credentials",
+      "http_status": 401,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store",
+        "WWW-Authenticate": "Bearer"
+      },
+      "body": {
+        "code": "unauthenticated",
+        "message": "Authentication is required.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "action_denied",
+      "http_status": 403,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "forbidden",
+        "message": "This action is not permitted.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "absent_resource",
+      "http_status": 404,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "not_found",
+        "message": "Resource not found.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "inaccessible_resource",
+      "http_status": 404,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "not_found",
+        "message": "Resource not found.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "cursor",
+      "http_status": 422,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "invalid_cursor",
+        "message": "Cursor is invalid for this request.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "changed_request",
+      "http_status": 409,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "idempotency_conflict",
+        "message": "Request identity was already used with different input.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "budget",
+      "http_status": 409,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "budget_exhausted",
+        "message": "The permitted budget is exhausted.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "quota",
+      "http_status": 429,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store",
+        "Retry-After": "5"
+      },
+      "body": {
+        "code": "quota_exceeded",
+        "message": "Admission quota is temporarily exceeded.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": true
+      }
+    },
+    {
+      "id": "dependency_before_admission",
+      "http_status": 503,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "dependency_unavailable",
+        "message": "A required service is temporarily unavailable.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": true
+      }
+    },
+    {
+      "id": "schema",
+      "http_status": 503,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "schema_incompatible",
+        "message": "Service schema is not compatible with this release.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "unexpected",
+      "http_status": 500,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "internal_error",
+        "message": "The request could not be completed.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "ambiguous_admission",
+      "http_status": 503,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "outcome_uncertain",
+        "message": "The operation outcome is not yet known; reconcile the original request.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    },
+    {
+      "id": "ambiguous_provider",
+      "http_status": 503,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "body": {
+        "code": "outcome_uncertain",
+        "message": "The provider outcome is not yet known; do not dispatch a new call.",
+        "request_id": "0123456789abcdef0123456789abcdef",
+        "retryable": false
+      }
+    }
+  ],
+  "successes": [
+    {
+      "id": "admitted",
+      "http_status": 202,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "schema": "Accepted",
+      "body": {
+        "operation_id": "11111111111111111111111111111111",
+        "job_id": "22222222222222222222222222222222"
+      }
+    },
+    {
+      "id": "empty_page",
+      "http_status": 200,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "schema": "RunPage",
+      "body": {
+        "items": [],
+        "next_cursor": null
+      }
+    },
+    {
+      "id": "cancellation_intent",
+      "http_status": 202,
+      "headers": {
+        "X-Request-ID": "0123456789abcdef0123456789abcdef",
+        "Cache-Control": "no-store"
+      },
+      "schema": "Cancellation",
+      "body": {
+        "operation_id": "11111111111111111111111111111111",
+        "cancel_requested": true,
+        "status": "running"
+      }
+    },
+    {
+      "id": "read_uncertain_operation",
+      "http_status": 200,
+      "headers": {
+        "X-Request-ID": "33333333333333333333333333333333",
+        "Cache-Control": "no-store"
+      },
+      "schema": "Operation",
+      "body": {
+        "id": "11111111111111111111111111111111",
+        "project_id": "44444444444444444444444444444444",
+        "job_id": "22222222222222222222222222222222",
+        "client_operation_id": "55555555555555555555555555555555",
+        "status": "failed",
+        "cancel_requested": false,
+        "result_run_id": null,
+        "budget_microusd": 1000000,
+        "reserved_microusd": 10000,
+        "error": {
+          "code": "outcome_uncertain",
+          "message": "The provider outcome is not yet known; do not dispatch a new call.",
+          "request_id": "0123456789abcdef0123456789abcdef",
+          "retryable": false
+        }
+      }
+    }
+  ],
+  "readiness_cases": [
+    {
+      "id": "ready",
+      "checks": {
+        "database": "ready",
+        "schema": "ready",
+        "artifacts": "ready",
+        "encryption": "ready"
+      },
+      "draining": false,
+      "expected_liveness": 200,
+      "expected_readiness": 200,
+      "expected_code": null
+    },
+    {
+      "id": "database_down",
+      "checks": {
+        "database": "not_ready",
+        "schema": "ready",
+        "artifacts": "ready",
+        "encryption": "ready"
+      },
+      "draining": false,
+      "expected_liveness": 200,
+      "expected_readiness": 503,
+      "expected_code": "dependency_unavailable"
+    },
+    {
+      "id": "unsupported_schema",
+      "checks": {
+        "database": "ready",
+        "schema": "not_ready",
+        "artifacts": "ready",
+        "encryption": "ready"
+      },
+      "draining": false,
+      "expected_liveness": 200,
+      "expected_readiness": 503,
+      "expected_code": "schema_incompatible"
+    },
+    {
+      "id": "artifact_timeout",
+      "checks": {
+        "database": "ready",
+        "schema": "ready",
+        "artifacts": "not_ready",
+        "encryption": "ready"
+      },
+      "draining": false,
+      "expected_liveness": 200,
+      "expected_readiness": 503,
+      "expected_code": "dependency_unavailable"
+    },
+    {
+      "id": "key_unavailable",
+      "checks": {
+        "database": "ready",
+        "schema": "ready",
+        "artifacts": "ready",
+        "encryption": "not_ready"
+      },
+      "draining": false,
+      "expected_liveness": 200,
+      "expected_readiness": 503,
+      "expected_code": "dependency_unavailable"
+    },
+    {
+      "id": "unknown_probe",
+      "checks": {
+        "database": "unknown",
+        "schema": "unknown",
+        "artifacts": "unknown",
+        "encryption": "unknown"
+      },
+      "draining": false,
+      "expected_liveness": 200,
+      "expected_readiness": 503,
+      "expected_code": "dependency_unavailable"
+    },
+    {
+      "id": "draining",
+      "checks": {
+        "database": "ready",
+        "schema": "ready",
+        "artifacts": "ready",
+        "encryption": "ready"
+      },
+      "draining": true,
+      "expected_liveness": 200,
+      "expected_readiness": 503,
+      "expected_code": "dependency_unavailable"
+    }
+  ],
+  "readiness_policy": {
+    "positive_cache_seconds": 5,
+    "maximum_probe_seconds": 1,
+    "sentinel_maximum_bytes": 4096,
+    "required_checks": [
+      "database",
+      "schema",
+      "artifacts",
+      "encryption"
+    ]
+  },
+  "label_vocabulary": {
+    "route": [
+      "v1.runs.list",
+      "v1.runs.submit",
+      "v1.runs.read",
+      "v1.operations.read",
+      "v1.operations.cancel",
+      "legacy",
+      "auth",
+      "health",
+      "static",
+      "unmatched"
+    ],
+    "method": [
+      "GET",
+      "POST",
+      "DELETE",
+      "OPTIONS",
+      "OTHER"
+    ],
+    "status_class": [
+      "2xx",
+      "3xx",
+      "4xx",
+      "5xx",
+      "other"
+    ],
+    "error_code": [
+      "invalid_request",
+      "unauthenticated",
+      "forbidden",
+      "not_found",
+      "invalid_cursor",
+      "idempotency_conflict",
+      "budget_exhausted",
+      "quota_exceeded",
+      "dependency_unavailable",
+      "schema_incompatible",
+      "internal_error",
+      "outcome_uncertain"
+    ],
+    "job_kind": [
+      "run",
+      "branch",
+      "study",
+      "investigate"
+    ],
+    "queue_outcome": [
+      "started",
+      "rejected"
+    ],
+    "component": [
+      "database",
+      "schema",
+      "artifacts",
+      "encryption"
+    ],
+    "process_role": [
+      "api",
+      "worker"
+    ],
+    "call_purpose": [
+      "continuation",
+      "discovery"
+    ],
+    "call_outcome": [
+      "observed",
+      "uncertain",
+      "rejected"
+    ]
+  },
+  "metrics": {
+    "http_requests_total": {
+      "labels": [
+        "route",
+        "method",
+        "status_class"
+      ],
+      "maximum_label_combinations": 250
+    },
+    "http_errors_total": {
+      "labels": [
+        "route",
+        "error_code"
+      ],
+      "maximum_label_combinations": 120
+    },
+    "queue_delay_seconds": {
+      "labels": [
+        "job_kind",
+        "queue_outcome"
+      ],
+      "maximum_label_combinations": 8
+    },
+    "dependency_ready": {
+      "labels": [
+        "component",
+        "process_role"
+      ],
+      "maximum_label_combinations": 8
+    },
+    "provider_calls_total": {
+      "labels": [
+        "call_purpose",
+        "call_outcome"
+      ],
+      "maximum_label_combinations": 6
+    }
+  },
+  "valid_metric_examples": [
+    {
+      "metric": "http_errors_total",
+      "labels": {
+        "route": "v1.runs.submit",
+        "error_code": "outcome_uncertain"
+      }
+    },
+    {
+      "metric": "provider_calls_total",
+      "labels": {
+        "call_purpose": "continuation",
+        "call_outcome": "uncertain"
+      }
+    }
+  ],
+  "rejected_metric_examples": [
+    {
+      "metric": "http_requests_total",
+      "labels": {
+        "route": "/api/runs/0123456789abcdef",
+        "method": "GET",
+        "status_class": "2xx"
+      }
+    },
+    {
+      "metric": "http_requests_total",
+      "labels": {
+        "route": "legacy",
+        "method": "GET",
+        "status_class": "2xx",
+        "customer_id": "private-customer"
+      }
+    },
+    {
+      "metric": "http_errors_total",
+      "labels": {
+        "route": "v1.runs.submit",
+        "error_code": "synthetic-secret-token"
+      }
+    },
+    {
+      "metric": "provider_calls_total",
+      "labels": {
+        "call_purpose": "continuation",
+        "call_outcome": "uncertain",
+        "request_id": "0123456789abcdef0123456789abcdef"
+      }
+    },
+    {
+      "metric": "provider_calls_total",
+      "labels": {
+        "call_purpose": "source: print(private_payload)",
+        "call_outcome": "observed"
+      }
+    },
+    {
+      "metric": "unknown_metric",
+      "labels": {}
+    }
+  ],
+  "reconciliation": {
+    "add_error_codes": [
+      "outcome_uncertain"
+    ],
+    "add_responses": [
+      "500"
+    ],
+    "csrf_header": "X-Rewind-CSRF",
+    "legacy_healthz": "Preserve existing DB-check behavior during migration; deploy /livez and /readyz explicitly."
+  }
+}
