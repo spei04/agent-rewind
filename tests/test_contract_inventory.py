@@ -1,9 +1,15 @@
 """Negative checks for the design-time contract inventory, without service startup."""
 
 import copy
+import runpy
 import unittest
+from pathlib import Path
 
-from scripts.check_m1_contracts import check, load
+# The pytest console entrypoint need not put the repository root on sys.path.
+checker = runpy.run_path(
+    str(Path(__file__).resolve().parents[1] / "scripts" / "check_m1_contracts.py")
+)
+check, load = checker["check"], checker["load"]
 
 
 class ContractInventoryTests(unittest.TestCase):
