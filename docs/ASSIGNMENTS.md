@@ -10,6 +10,9 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | 2026-10-19 | A — workflow/contracts | AR-001-B: usefulness metrics and interaction acceptance | work/workflow-contracts | Assigned after AR-001-A merge; reuse existing checkout and owned environment. |
 
+| 2026-10-19 | B — platform/trust boundaries | AR-003-A: trust boundary and deployment threat review | work/trust-boundaries | Assigned after delivery of AR-004-A; its fixed PR remains in CI. C01 prerequisite merged. No provisioning. |
+| 2026-10-19 | C — corpus/quality | AR-002-A: corpus permission and provenance manifest | work/corpus-permissions | Assigned after delivery of AR-005-A; its PR remains in CI. C01 prerequisite merged. No real corpus ingestion. |
+
 Each delivery records its commit, targeted checks, limitations and reviewer disposition here. A completed assignment frees its checkout for the next task after integration and consumer checks. Private evidence and credentials never belong in this log.
 
 The managed checkout tool could not operate on the cloud repository from this local chat (reported “Not a git repository”). These independent contributors use ordinary cloud Git worktrees; no project copy was recreated on the Mac. Only the lead updates roadmap/backlog status and this assignment log, avoiding concurrent edits.
