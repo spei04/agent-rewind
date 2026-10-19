@@ -21,7 +21,7 @@ Reviewed PLAN, README and the current-release architecture, deployment, security
 | REV-01 | Five/ten-day packages had generic a/b splits with no assignable PR boundary. | 145 specific tasks, 0.5–4 engineering days each, with scope, exclusions, contracts, tests, review and acceptance. Parent IDs retained for traceability. |
 | REV-02 | Real storage/KMS/runtime verification depended on IaC scheduled after runtime, creating a coarse milestone loop. | AR-033-A/B are early M4 foundation tasks after G0/ENV0; AR-033-C/D integrate and independently reinstall later. Task graph, not package-level all-to-all edges, governs starts. |
 | REV-03 | Reference cloud uses GCS but current artifact implementation only provides local/S3 paths. | AR-016-C explicitly implements native GCS and real-store conformance. No assumption that S3 support proves GCS compatibility. |
-| REV-04 | 42–50 week GA and 28–34 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff. | Retire dated windows. 427 base engineering days; 145.5-day effort-only longest path excludes role contention and external waits. Reforecast after Day 10 and each gate using actual throughput; no committed launch date. |
+| REV-04 | 42–50 week GA and 28–34 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff. | Retire dated windows. 427 base engineering days; 146-day effort-only longest path excludes role contention and external waits. Reforecast after Day 10 and each gate using actual throughput; no committed launch date. |
 | REV-05 | Uniform effort estimates concealed research, independent review and customer integration uncertainty. | Each task has confidence/range. 25% portfolio reserve is separate; audit fixes, procurement gaps, customer remediation and staffing/vendor waits remain explicitly unestimated gates. |
 | REV-06 | Five M1 operations cannot support all branch, study, admin, export and SDK consumers. | Contract producer PRs AR-027-A/029-A/032-A/034-A precede their services/consumers; runtime consumers cannot start on an absent future schema. |
 | REV-07 | Logical artifact and idempotency scope references lacked explicit matching composite unique/FK constraints. | Tighten m1.data-model.json artifact/project/owner and operation/principal/kind constraints; add corresponding scope-negative assertions to existing planned acceptance cases. |
@@ -54,12 +54,12 @@ QE and PL are material resource constraints. At the Day 10 review, redistribute 
 
 ## Critical path, parallel tracks and contingencies
 
-The task DAG has **511 edges**, **26 explicit gates**, no cycles and a **145.5-engineering-day longest effort path**. At 70% delivery availability this alone is about 41.6 workweeks before role contention, mandatory elapsed windows and external waits. It is a lower bound, not a launch forecast. Zero effort on an external gate means engineering effort is not estimated; it never means the gate is already satisfied or has zero lead time.
+The task DAG has **514 edges**, **26 explicit gates**, no cycles and a **146-engineering-day longest effort path**. At 70% delivery availability this alone is about 41.7 workweeks before role contention, mandatory elapsed windows and external waits. It is a lower bound, not a launch forecast. Zero effort on an external gate means engineering effort is not estimated; it never means the gate is already satisfied or has zero lead time.
 
 The computed effort path, including integration joins, is:
 
 ```text
-E0 → AR-001-A → AR-002-A → AR-002-B → AR-004-B → AR-004-C → G0 → AR-005-B →
+E0 → AR-005-A → AR-012-A → AR-004-B → AR-004-C → G0 → AR-005-B →
 AR-005-C → AR-007-A → AR-007-B → AR-007-C → AR-008-A → AR-008-B → AR-010-A → AR-010-B →
 AR-012-B → AR-014-A → AR-014-B → AR-017-A → AR-023-A → AR-023-B → AR-023-C → AR-025-A →
 AR-025-B → AR-025-C → AR-026-B → AR-026-C → AR-029-B → AR-030-B → AR-031-B → AR-031-C →
@@ -72,7 +72,7 @@ Calendar-critical competitors include ENV0/IDP0 provisioning, PARTNER0/DATA0 acc
 
 | Parallel track | Earliest usable handoff | Work that may overlap | Join / constraint |
 | --- | --- | --- | --- |
-| Foundation | G0 and reviewed M1 proposal | Migration BE; safe diagnostics PL; QE fixture harness; TL reviews ownership | Scoped repositories before run/object consumers; admission before budget integration |
+| Foundation | G0 and reviewed M1 proposal | Migration BE; reference config PL; independent QE review; readiness follows revision guard | Scoped repositories before run/object consumers; admission before budget integration |
 | Reference environment | AR-033-A plus ENV0 | Early staging AR-033-B can overlap M1 contracts | One PL owns worker, storage, KMS and IaC; sequence by capacity |
 | Execution / study design | G1 plus adapter and trial contract producers | Runtime conformance BE/PL; estimator RS; study schema BE | Same BE cannot own both at once; protocol review before consumers |
 | Product | AR-027-A then service handoff | FE timeline/editor; RS synthetic ranking; TL SDK transport | Study/report SDK waits for AR-029-B; full UI cannot consume nonexistent endpoints |
@@ -87,7 +87,7 @@ After the first two weeks, use dependency-ready milestone scheduling. The former
 
 | Milestone | Base effort | Scheduling after Day 10 | Explicit exit / integration checkpoint |
 | --- | ---: | --- | --- |
-| M0 | 8.5 days | Days 1–9 conditional on real approval; unresolved decisions extend M0 | [G0](#g0): M0 accepted; schemas and initial migration scope reviewed. |
+| M0 | 8.5 days | Preparatory work and freeze in Days 1–10; ARCH0/AR-004-C/G0 follow reviewed output | [G0](#g0): M0 accepted; schemas and initial migration scope reviewed. |
 | M1 | 39.5 days | Continue remaining foundation work after G0; first integration is migration plus revision guard | [G1](#g1): Historical identities intact; all 24 M1 behavioral cases, scope/lease/budget concurrency and compatibility pass. |
 | M2 | 69 days | Start each task after its foundation inputs; joins G1 plus early staging | [G2](#g2): Real gVisor isolation/restore/cleanup, cloud store/key rotation, fail-closed lease and accounted live smoke verified. |
 | M3 | 70 days | Trial/statistics work may overlap M2 after its contracts; joins G2 | [G3](#g3): Resumable distributed studies preserve frozen protocol, missingness and all call accounting; reports independently recompute. |
@@ -96,7 +96,7 @@ After the first two weeks, use dependency-ready milestone scheduling. The former
 | M6 | 78 days | Hardening overlaps stable M3–M5; readiness closure only after G5 | [G6](#g6): Forecast load/24h soak, zone/regional recovery, independent security retest, procurement, support and upgrade evidence pass with no prohibited blocker. |
 | M7 | 30 days | Only after G6 and launch approval; >=30-day operating review | [G7](#g7): Controlled launch accepted and 30-day operating review complete; next scope separately approved. |
 
-Integration checkpoints: Day 5 fixture/workflow review; Day 8 G0 decision packet; Day 10 scope/capacity reforecast; AR-005-C historical upgrade and runtime guard; AR-012-B all M1 cases; AR-019-C real runtime/store/key/fault evidence; AR-026-C distributed study integrity; AR-034-D independent browser/SDK flow; AR-035-C pre-ingestion recovery; AR-039-C two-partner pilot review; AR-047-C readiness audit; AR-048-C release decision; AR-049-C accepted rollout; AR-050-C 30-day closure. During active M1–M4 work, merge small reviewed PRs, run daily shared synthetic integration and twice-weekly cross-role reviews. A review meeting is not a passing gate.
+Integration checkpoints: Day 5 fixture/workflow review; Day 8 producer handoff; Day 10 freeze packet and scope/capacity reforecast; ARCH0/G0 after reviewed output; AR-005-C historical upgrade and runtime guard; AR-012-B all M1 cases; AR-019-C real runtime/store/key/fault evidence; AR-026-C distributed study integrity; AR-034-D independent browser/SDK flow; AR-035-C pre-ingestion recovery; AR-039-C two-partner pilot review; AR-047-C readiness audit; AR-048-C release decision; AR-049-C accepted rollout; AR-050-C 30-day closure. During active M1–M4 work, merge small reviewed PRs, run daily shared synthetic integration and twice-weekly cross-role reviews. A review meeting is not a passing gate.
 
 ## First two weeks — day-by-day
 
@@ -110,12 +110,12 @@ Working days, not dates; no weekend work assumed. Each allocation below is **0.5
 | W1 / Day 4 | FE: [AR-001-B](#ar-001-b) (0.5d); RS: [AR-002-A](#ar-002-a) (0.5d); PL: [AR-003-A](#ar-003-a) (0.5d); QE: [AR-012-A](#ar-012-a) (0.5d) | Review metric denominators, corpus rights shape and denied network paths. |
 | W1 / Day 5 | RS: [AR-002-B](#ar-002-b) (0.5d); PL: [AR-003-B](#ar-003-b) (0.5d); QE: [AR-012-A](#ar-012-a) (0.5d) | Week 1 integration: reconcile workflow/contract/fixture inventory; unresolved access or staffing gets owner and date. |
 | W2 / Day 6 | RS: [AR-002-B](#ar-002-b) (0.5d); PL: [AR-003-B](#ar-003-b) (0.5d); QE: [AR-012-A](#ar-012-a) (0.5d) | Freeze proposed split/evaluator assumptions; actual funding and customer rights remain pending conditions. |
-| W2 / Day 7 | TL: [AR-004-B](#ar-004-b) (0.5d); PL: [AR-011-A](#ar-011-a) (0.5d); QE: [AR-012-A](#ar-012-a) (0.5d) | Cross-role contract review and negative fixture checks. No behavioral acceptance claimed. |
-| W2 / Day 8 | TL: [AR-004-B](#ar-004-b) (0.5d); PL: [AR-011-A](#ar-011-a) (0.5d) | G0 decision packet: named team, funded scope, region/data policy, contracts and first migration slice; send for actual owner decision. |
-| W2 / Day 9 | TL: [AR-004-C](#ar-004-c) (0.5d) | Conditional on ARCH0 actual approval; record G0 or keep blocked. Review days 1–8 throughput, role load and unknowns. |
-| W2 / Day 10 | BE: [AR-005-B](#ar-005-b) (0.5d); PL: [AR-011-B](#ar-011-b) (0.5d) | Conditional on G0: start migration and safe-error PRs only. Both continue beyond day 10. If G0 pending, no runtime work; resolve decision gaps. |
+| W2 / Day 7 | PL: [AR-011-A](#ar-011-a) (0.5d); QE: [AR-012-A](#ar-012-a) (0.5d) | Cross-role contract review and negative fixture checks. No behavioral acceptance claimed. |
+| W2 / Day 8 | PL: [AR-011-A](#ar-011-a) (0.5d) | Finish observability producer review; freeze waits for AR-011-A and AR-012-A. |
+| W2 / Day 9 | TL: [AR-004-B](#ar-004-b) (0.5d) | Cross-role consumer review against completed producers; resolve compatibility and ownership. |
+| W2 / Day 10 | TL: [AR-004-B](#ar-004-b) (0.5d) | Complete freeze proposal and capacity reforecast. ARCH0/AR-004-C/G0 follow reviewed output; no runtime work in this conditional fortnight. |
 
-Day 9 is conditional on actual ARCH0 approval after the Day 8 packet. If it does not arrive, AR-004-C stays blocked and Day 10 implementation does not start. Only already-authorized decision/fixture review continues. Day 10 starts AR-005-B (0.5 of 3 days) and AR-011-B (0.5 of 2 days); neither is falsely marked complete. Project authorization implementation AR-007-A waits for AR-005-C, so it is deliberately absent from the first fortnight. No task is scheduled before a predecessor is complete; same-day finish/start assumptions are not used.
+Days 9–10 consume the completed AR-011-A and AR-012-A outputs. ARCH0 and AR-004-C/G0 follow the reviewed freeze; decision latency is not assumed zero. After G0, migration AR-005-B and reference configuration AR-033-A may proceed in parallel. Readiness AR-011-B and project authorization AR-007-A wait for AR-005-C revision guards. No task is scheduled before a predecessor is complete; same-day finish/start assumptions are not used.
 
 ## Interface and schema contract register
 
@@ -411,7 +411,7 @@ M0 / P0 · 3 PRs · 2.5 engineering days · In progress · [Tracking issue #4](h
 - **Objective:** Resolve architecture and interface decisions before runtime changes. This task delivers consumer review and m1 contract freeze proposal.
 - **Implementation scope / PR boundary:** Resolve API/schema/test disagreements, explicit composite scope constraints and deferred endpoint ownership.
 - **Out of scope:** No implementation sign-off or invented reviewers.
-- **Prerequisites:** [AR-002-B](#ar-002-b), [AR-003-B](#ar-003-b), [AR-004-A](#ar-004-a), [AR-005-A](#ar-005-a). E0 applies transitively; required producer contracts must be reviewed.
+- **Prerequisites:** [AR-002-B](#ar-002-b), [AR-003-B](#ar-003-b), [AR-004-A](#ar-004-a), [AR-005-A](#ar-005-a), [AR-011-A](#ar-011-a), [AR-012-A](#ar-012-a). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C04; definitions and producer availability in the contract register.
 - **Acceptance criteria:** BE, PL, FE, RS, QE and SEC review results recorded; incompatible changes have decision owner.
 - **Required automated tests:** Run contract structure, dependency and historical-fixture manifest checks.
@@ -483,7 +483,7 @@ M1 / P0 · 3 PRs · 6 engineering days · In progress · [Tracking issue #5](htt
 #### AR-005-C — Runtime revision guard and recovery guide
 
 - **Objective:** Upgrade stored history safely without changing evidence identity. This task delivers runtime revision guard and recovery guide.
-- **Implementation scope / PR boundary:** Remove runtime create_all, check compatible revision at API/worker readiness and document failed-upgrade recovery.
+- **Implementation scope / PR boundary:** Replace legacy CLI create_all with explicit versioned migrations; add read-only compatible-revision guards to API/worker and document failed-upgrade recovery.
 - **Out of scope:** No HA rolling upgrade claim.
 - **Prerequisites:** [AR-005-B](#ar-005-b). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C04; definitions and producer availability in the contract register.
@@ -742,7 +742,7 @@ M1 / P0 · 3 PRs · 5 engineering days · In progress · [Tracking issue #11](ht
 - **Objective:** Diagnose failures without exposing secrets or losing request context. This task delivers safe exception mapping and readiness enforcement.
 - **Implementation scope / PR boundary:** Implement redacted boundary handlers and safe DB/store/schema readiness responses.
 - **Out of scope:** No broad observability platform deployment.
-- **Prerequisites:** [G0](#g0), [AR-011-A](#ar-011-a). E0 applies transitively; required producer contracts must be reviewed.
+- **Prerequisites:** [G0](#g0), [AR-011-A](#ar-011-a), [AR-005-C](#ar-005-c). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C04; definitions and producer availability in the contract register.
 - **Acceptance criteria:** Known faults map to stable codes; unknown faults return safe message and correlated restricted diagnostic.
 - **Required automated tests:** M1-022/023 secret canaries, malformed exceptions and dependency outage.
@@ -790,7 +790,7 @@ M1 / P0 · 2 PRs · 5 engineering days · In progress · [Tracking issue #12](ht
 - **Effort / confidence:** 2 engineering days; planning range 1.6–2.4; high confidence.
 - **Responsible role:** QE; required reviewers: TL, domain owner. Assigned contributor: Engineer C — quality/contract integration.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Implemented / verification pending; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
+- **Progress:** Verified; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-012-b"></a>
 
@@ -3041,9 +3041,9 @@ No question above asks to reapprove the already selected core architecture. The 
 
 ## Dependency review, progress and maintenance
 
-Completed planning validation on 2026-10-19: 145 unique task IDs across 50 parents; all required fields present; task sizes <=4 days; all 511 edges resolve; acyclic graph including external/integration/elapsed gates; every implementation task depends on E0; every producer contract is an ancestor of its consumer; every milestone gate joins its required tasks; first-ten-day predecessor and effort-capacity checks pass under explicit E0/ARCH0 timing conditions. Rollups reconcile to 427 days. Conditional schedule validation is not evidence those approvals exist.
+Completed planning validation on 2026-10-19: 145 unique task IDs across 50 parents; all required fields present; task sizes <=4 days; all 514 edges resolve; acyclic graph including external/integration/elapsed gates; every implementation task depends on E0; every producer contract is an ancestor of its consumer; every milestone gate joins its required tasks; first-ten-day predecessor and effort-capacity checks pass under the explicit E0 timing condition; ARCH0/G0 follow the first fortnight. Rollups reconcile to 427 days. Conditional schedule validation is not evidence those approvals exist.
 
-The 12 existing GitHub issues remain parent trackers, with task-card links and updated rollups. All 12 bodies, open states and approval labels were read back; both milestone descriptions were updated. Nineteen obsolete coarse parent dependency edges were removed because they cannot represent preparatory child handoffs; exact dependencies remain in the validated 511-edge task/gate graph. No task is closed merely because this backlog exists. Future child issues should be materialized from these IDs when their milestone is authorized; preserve exact scope/dependencies and link them back here. This avoids treating unapproved later contracts as active assignments. No application behavioral tests, load tests, production security assessment, deployment rehearsal or recovery drill was run in this planning-only revision.
+The 12 existing GitHub issues remain parent trackers, with task-card links and updated rollups. All 12 bodies, open states and approval labels were read back; both milestone descriptions were updated. Nineteen obsolete coarse parent dependency edges were removed because they cannot represent preparatory child handoffs; exact dependencies remain in the validated 514-edge task/gate graph. No task is closed merely because this backlog exists. Future child issues should be materialized from these IDs when their milestone is authorized; preserve exact scope/dependencies and link them back here. This avoids treating unapproved later contracts as active assignments. No application behavioral tests, load tests, production security assessment, deployment rehearsal or recovery drill was run in this planning-only revision.
 
 Update procedure for each completed PR: update task status and evidence in the machine-readable ledger and this card; recalculate parent/milestone effort/status and dependency changes; update PLAN Section 10/14 and the matching issue; rerun ID/required-field/DAG/contract-availability/first-fortnight allocation checks; verify local links and draft OpenAPI structure. Any added edge, new gate or changed estimate requires schedule revalidation. Do not mark a task Verified without applicable commit/environment evidence, reviewer disposition and explicit limitations.
 
@@ -3052,3 +3052,5 @@ Update procedure for each completed PR: update task status and evidence in the m
 | 2026-10-19 | Review findings resolved into proposed backlog; 145 task cards, task-level dependencies, contracts/gates, conditional daily schedule and milestone rollups prepared and checked. | All execution tasks Not started. Product owner reviews E0 approval scope and unresolved decisions. |
 
 | 2026-10-19 | E0 approved by project owner; three independent contributor assignments started. | AR-001-A, AR-004-A and AR-005-A in progress; task-specific gates remain applicable. |
+
+Execution dependency review, 2026-10-19: added AR-011-A and AR-012-A before AR-004-B, and AR-005-C before AR-011-B. All 514 edges resolve; graph, producer ancestry, day-by-day ordering and role capacity rechecked. Total effort remains 427 days; the longest effort path increases from 145.5 to 146 days. AR-012-A is verified at merged 8c3a7b9; its 24 runtime cases remain planned.

@@ -903,7 +903,9 @@
         "AR-002-B",
         "AR-003-B",
         "AR-004-A",
-        "AR-005-A"
+        "AR-005-A",
+        "AR-011-A",
+        "AR-012-A"
       ],
       "contracts": [
         "C04"
@@ -1053,7 +1055,7 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Remove runtime create_all, check compatible revision at API/worker readiness and document failed-upgrade recovery",
+      "scope": "Replace legacy CLI create_all with explicit versioned migrations; add read-only compatible-revision guards to API/worker and document failed-upgrade recovery",
       "acceptance": "No runtime DDL; unsupported revision prevents admission and worker dispatch; compatible rollback demonstrated on fixture",
       "tests": "Least-privilege DB startup, future revision, upgrade failure and recovery tests",
       "security_reliability": "Fail closed when schema cannot be read; retain rollback evidence",
@@ -1068,7 +1070,7 @@
         "TL",
         "QE"
       ],
-      "pull_request_boundary": "Remove runtime create_all, check compatible revision at API/worker readiness and document failed-upgrade recovery. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
+      "pull_request_boundary": "Replace legacy CLI create_all with explicit versioned migrations; add read-only compatible-revision guards to API/worker and document failed-upgrade recovery. No HA rolling upgrade claim.",
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
     },
     {
@@ -1506,7 +1508,8 @@
       "confidence": "medium",
       "dependencies": [
         "G0",
-        "AR-011-A"
+        "AR-011-A",
+        "AR-005-C"
       ],
       "contracts": [
         "C04"
@@ -1586,7 +1589,7 @@
       "tests": "Deliberately broken contract fixtures rejected; current proposed set accepted",
       "security_reliability": "Fixtures remain synthetic and approval status stays pending",
       "out_of_scope": "No claim that planned acceptance cases are implemented",
-      "status": "Implemented / verification pending",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.6,
@@ -1601,8 +1604,9 @@
       "assigned_to": "Engineer C \u2014 quality/contract integration",
       "evidence": {
         "commit": "a5dcdcbe981d729b13e87f78719c3bc46b7b543b",
+        "merge_commit": "8c3a7b9",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/22",
-        "checks": "70 scoped tests; independent RV-003 exact reproductions reject, supported fixtures pass. Final-head hosted CI pending."
+        "checks": "70 scoped tests, independent exact-revision review, core and gVisor CI passed. Integrated main: 402 core tests passed, one environment-dependent skip; contract checker, Ruff and formatting passed. All 24 M1 runtime cases remain planned."
       }
     },
     {
@@ -6499,7 +6503,6 @@
     {
       "day": 7,
       "work": {
-        "AR-004-B": 0.5,
         "AR-011-A": 0.5,
         "AR-012-A": 0.5
       },
@@ -6508,37 +6511,34 @@
     {
       "day": 8,
       "work": {
-        "AR-004-B": 0.5,
         "AR-011-A": 0.5
       },
-      "checkpoint": "G0 decision packet: named team, funded scope, region/data policy, contracts and first migration slice; send for actual owner decision."
+      "checkpoint": "Finish observability producer review; freeze waits for AR-011-A and AR-012-A."
     },
     {
       "day": 9,
       "work": {
-        "AR-004-C": 0.5
+        "AR-004-B": 0.5
       },
-      "checkpoint": "Conditional on ARCH0 actual approval; record G0 or keep blocked. Review days 1\u20138 throughput, role load and unknowns."
+      "checkpoint": "Cross-role consumer review against completed producers; resolve compatibility and ownership decisions."
     },
     {
       "day": 10,
       "work": {
-        "AR-005-B": 0.5,
-        "AR-011-B": 0.5
+        "AR-004-B": 0.5
       },
-      "checkpoint": "Conditional on G0: start migration and safe-error PRs only. Both continue beyond day 10. If G0 pending, no runtime work; resolve decision gaps."
+      "checkpoint": "Complete freeze proposal and capacity reforecast. ARCH0/AR-004-C/G0 follow reviewed output; migration then starts, readiness follows AR-005-C."
     }
   ],
   "first_two_weeks_conditions": {
-    "E0": 0,
-    "ARCH0": 8.5
+    "E0": 0
   },
   "estimate_policy": "Engineering effort includes implementation, task tests, ordinary review/rework and task documentation. Core capacity scenario is six roles at 3.5 delivery days/week each; 30% reserved for coordination/support. High range 0.8\u20131.2x, medium 1\u20131.5x, low 1\u20132x; ranges are planning bounds, not calibrated probabilities. 25% program integration reserve is an alternate portfolio allowance, not additive to summed upper ranges. External assessment fees/waits, unbounded finding remediation, hiring, unknown customer gaps and ongoing operations are excluded and require re-estimate.",
   "validation": {
     "task_count": 145,
     "parent_count": 50,
     "gate_count": 26,
-    "edge_count": 511,
+    "edge_count": 514,
     "dag_acyclic": true,
     "contract_producers_available_before_consumers": true,
     "schedule_no_predecessor_violations_conditional_on_stated_approvals": true,
@@ -6563,12 +6563,11 @@
     },
     "base_effort_days": 427.0,
     "upper_range_days": 720.6,
-    "effort_only_critical_path_days": 145.5,
+    "effort_only_critical_path_days": 146.0,
     "effort_only_critical_path": [
       "E0",
-      "AR-001-A",
-      "AR-002-A",
-      "AR-002-B",
+      "AR-005-A",
+      "AR-012-A",
       "AR-004-B",
       "AR-004-C",
       "G0",
@@ -6622,7 +6621,9 @@
       "AR-050-C",
       "G7"
     ],
-    "critical_path_excludes_external_waits": true
+    "critical_path_excludes_external_waits": true,
+    "revision_notes": "2026-10-19: added observability/harness before freeze and revision guard before readiness; DAG, producer ancestry and conditional schedule rechecked. Runtime start follows first fortnight.",
+    "independent_review": "Engineer C independently verified 145 task statuses/prerequisites, 514-edge DAG, producer ancestry, conditional schedule, 427-day rollup and 146-day path; four stale narrative references corrected before publication."
   },
   "review_findings": [
     {
@@ -6716,11 +6717,27 @@
       1,
       2
     ],
-    "all_open": true,
+    "all_open": false,
     "all_blocked_on_approval": false,
     "read_back_verified": "2026-10-19",
     "removed_obsolete_parent_dependency_edges": 19,
-    "dependency_authority": "Task-level ledger; coarse parent edges cannot represent preparatory and integration child handoffs."
+    "dependency_authority": "Task-level ledger; coarse parent edges cannot represent preparatory and integration child handoffs.",
+    "closed_internal_scope_issues": [
+      1,
+      2,
+      3
+    ],
+    "open_parent_issues": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ]
   },
   "execution_capacity": {
     "lead": "Project lead",
