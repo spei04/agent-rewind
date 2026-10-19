@@ -319,7 +319,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #2](htt
 - **Effort / confidence:** 1 engineering days; planning range 1–1.5; medium confidence.
 - **Responsible role:** RS; required reviewers: QE, independent statistical reviewer. Named assignee pending staffing.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Implemented / verification pending; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
+- **Progress:** Verified; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-002-b"></a>
 

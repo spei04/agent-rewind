@@ -529,7 +529,7 @@ Role abbreviations: TL technical lead/backend, BE execution/backend, PL platform
 
 | Package | Milestone / priority | Assignable task cards / objective | Entry prerequisites from outside package | Primary roles / base effort | Status |
 | --- | --- | --- | --- | --- | --- |
-| AR-001 | M0 / P0 | [AR-001](EXECUTION_BACKLOG.md#ar-001): 2 PRs. Make supported investigations and their business value explicit. | [E0](EXECUTION_BACKLOG.md#e0) | Verified |
+| AR-001 | M0 / P0 | [AR-001](EXECUTION_BACKLOG.md#ar-001): 2 PRs. Make supported investigations and their business value explicit. | [E0](EXECUTION_BACKLOG.md#e0) | FE/TL / 2 days | Verified |
 | AR-002 | M0 / P0 | [AR-002](EXECUTION_BACKLOG.md#ar-002): 2 PRs. Protect corpus rights and establish a credible natural-failure evaluation protocol. | [AR-001-A](EXECUTION_BACKLOG.md#ar-001-a), [AR-001-B](EXECUTION_BACKLOG.md#ar-001-b) | RS / 2 days | In progress |
 | AR-003 | M0 / P0 | [AR-003](EXECUTION_BACKLOG.md#ar-003): 2 PRs. Bound deployment trust, operating responsibility and financial exposure. | [AR-001-A](EXECUTION_BACKLOG.md#ar-001-a) | PL / 2 days | In progress |
 | AR-004 | M0 / P0 | [AR-004](EXECUTION_BACKLOG.md#ar-004): 3 PRs. Resolve architecture and interface decisions before runtime changes. | [AR-002-B](EXECUTION_BACKLOG.md#ar-002-b), [AR-003-B](EXECUTION_BACKLOG.md#ar-003-b), [AR-005-A](EXECUTION_BACKLOG.md#ar-005-a), [ARCH0](EXECUTION_BACKLOG.md#arch0), [E0](EXECUTION_BACKLOG.md#e0) | BE/TL / 2.5 days | In progress |
@@ -540,7 +540,7 @@ Role abbreviations: TL technical lead/backend, BE execution/backend, PL platform
 | AR-009 | M1 / P0 | [AR-009](EXECUTION_BACKLOG.md#ar-009): 2 PRs. Keep published evidence immutable, scoped and complete. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-007-A](EXECUTION_BACKLOG.md#ar-007-a), [AR-007-B](EXECUTION_BACKLOG.md#ar-007-b) | PL / 4 days | NS |
 | AR-010 | M1 / P0 | [AR-010](EXECUTION_BACKLOG.md#ar-010): 2 PRs. Enforce budget limits before every potentially paid action. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-008-B](EXECUTION_BACKLOG.md#ar-008-b) | BE / 5 days | NS |
 | AR-011 | M1 / P0 | [AR-011](EXECUTION_BACKLOG.md#ar-011): 3 PRs. Diagnose failures without exposing secrets or losing request context. | [AR-004-A](EXECUTION_BACKLOG.md#ar-004-a), [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [G0](EXECUTION_BACKLOG.md#g0) | PL / 5 days | In progress |
-| AR-012 | M1 / P0 | [AR-012](EXECUTION_BACKLOG.md#ar-012): 2 PRs. Detect incompatible or unsafe foundation changes before integration. | [AR-004-A](EXECUTION_BACKLOG.md#ar-004-a), [AR-005-A](EXECUTION_BACKLOG.md#ar-005-a), [AR-006-B](EXECUTION_BACKLOG.md#ar-006-b), [AR-008-B](EXECUTION_BACKLOG.md#ar-008-b), [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-010-B](EXECUTION_BACKLOG.md#ar-010-b), [AR-011-C](EXECUTION_BACKLOG.md#ar-011-c) | In progress |
+| AR-012 | M1 / P0 | [AR-012](EXECUTION_BACKLOG.md#ar-012): 2 PRs. Detect incompatible or unsafe foundation changes before integration. | [AR-004-A](EXECUTION_BACKLOG.md#ar-004-a), [AR-005-A](EXECUTION_BACKLOG.md#ar-005-a), [AR-006-B](EXECUTION_BACKLOG.md#ar-006-b), [AR-008-B](EXECUTION_BACKLOG.md#ar-008-b), [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-010-B](EXECUTION_BACKLOG.md#ar-010-b), [AR-011-C](EXECUTION_BACKLOG.md#ar-011-c) | QE / 5 days | In progress |
 | AR-013 | M2 / P0 | [AR-013](EXECUTION_BACKLOG.md#ar-013): 3 PRs. Execute untrusted code within an accountable Linux sandbox boundary. | [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-011-C](EXECUTION_BACKLOG.md#ar-011-c), [AR-033-A](EXECUTION_BACKLOG.md#ar-033-a), [AR-033-B](EXECUTION_BACKLOG.md#ar-033-b) | PL/QE / 10 days | NS |
 | AR-014 | M2 / P0 | [AR-014](EXECUTION_BACKLOG.md#ar-014): 3 PRs. Restore only supported state and explain why a checkpoint cannot branch. | [AR-006-B](EXECUTION_BACKLOG.md#ar-006-b), [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-012-B](EXECUTION_BACKLOG.md#ar-012-b), [AR-013-C](EXECUTION_BACKLOG.md#ar-013-c) | BE/QE / 10 days | NS |
 | AR-015 | M2 / P0 | [AR-015](EXECUTION_BACKLOG.md#ar-015): 3 PRs. Keep artifact memory, disk and restore latency within admitted bounds. | [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-013-A](EXECUTION_BACKLOG.md#ar-013-a), [AR-014-A](EXECUTION_BACKLOG.md#ar-014-a), [AR-014-C](EXECUTION_BACKLOG.md#ar-014-c), [AR-033-B](EXECUTION_BACKLOG.md#ar-033-b) | PL/QE / 10 days | NS |
@@ -596,7 +596,7 @@ Post-GA candidates remain **uncommitted P2**: remote customer workers, additiona
 
 | Package | GitHub issue | Preparation state |
 | --- | --- | --- |
-| AR-001 | [Confirm customer workflows](https://github.com/spei04/agent-rewind/issues/1) | Needs decision review |
+| AR-001 | [Confirm customer workflows](https://github.com/spei04/agent-rewind/issues/1) | Internal workflows/metrics verified; real partner evidence remains gated |
 | AR-002 | [Specify permitted corpus and evaluator protocol](https://github.com/spei04/agent-rewind/issues/2) | Needs decision review |
 | AR-003 | [Review trust, deployment and budget](https://github.com/spei04/agent-rewind/issues/3) | Needs decision review |
 | AR-004 | [Approve contracts and first slice](https://github.com/spei04/agent-rewind/issues/4) | Approval pending |
@@ -818,7 +818,7 @@ The original brief is filled in this single roadmap. The later request explicitl
 | 2026-10-19 | Staged delivery / Stage 2: M0/M1 packet prepared | Four-stage workflow added; 12 detailed issues and two milestones created. Three draft contract artifacts define five API operations, twelve logical entities and 24 planned acceptance cases. OpenAPI structure/references validated and 19 native dependencies read back against the roadmap; runtime cases remain unexecuted. | Product owner reviews assumptions/contracts before Stage 3. |
 | 2026-10-19 | Execution backlog: draft → prepared and checked | 14 planning findings resolved; 145 bounded PR tasks, 26 gates, 18 contract entries, 427-day rollup, 511-edge acyclic dependency graph and conditional ten-day capacity/prerequisite checks. Draft scope FKs tightened. All execution tasks remain Not started; no runtime changes or paid work. | Product owner reviews E0 scope, staffing/funding/data decisions; runtime work waits for G0. |
 
-Execution checkpoint: AR-001-A/B, AR-003-A, AR-004-A and AR-005-A verified through PRs #13–17. AR-002-A is in review; AR-003-B, AR-011-A and AR-012-A are assigned. [Assignment log and management checkpoint](ASSIGNMENTS.md) contain exact evidence, storage constraint and unchanged budget.
+Execution checkpoint: AR-001-A/B, AR-003-A, AR-004-A and AR-005-A verified through PRs #13–17. AR-002-A verified through PR #18; AR-003-B, AR-011-A and AR-012-A are assigned. [Assignment log and management checkpoint](ASSIGNMENTS.md) contain exact evidence, storage constraint and unchanged budget.
 
 ### 14.4 Immediate next action
 

@@ -651,7 +651,7 @@
       "tests": "Schema cases for missing rights, duplicate task IDs and disallowed processor",
       "security_reliability": "Never commit proprietary tasks; aggregate evidence only",
       "out_of_scope": "No acquisition or paid model trials",
-      "status": "Implemented / verification pending",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -665,9 +665,9 @@
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
       "assigned_to": "Engineer C \u2014 corpus/quality",
       "evidence": {
-        "commit": "7b1cd66a7074599954c8dfa9428964ae4215f6e5",
+        "commit": "096b48f",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/18",
-        "checks": "46 corpus/workflow tests, repository lint/format/type checks passed. Lead accepted offline validation boundaries; CI pending."
+        "checks": "46 corpus/workflow tests, repository lint/format/type checks; core and real gVisor CI passed. Lead reviewed offline boundaries; real ingestion remains unavailable."
       }
     },
     {
