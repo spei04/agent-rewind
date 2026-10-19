@@ -65,7 +65,7 @@ Source inspected on 2026-10-19 at the baseline above. Historical test results be
 
 Use **Not started**, **In progress**, **Blocked**, **Implemented / verification pending**, and **Verified**. A checked box means its stated acceptance evidence exists. Historical implementation is not retroactively marked enterprise-ready. Milestone completion requires all exit gates, not just merged code. Each implementation change updates its task row, requirement row, and dated evidence log in this file. No fabricated overall percentage.
 
-Current planning work: repository/template inspection, blueprint, challenge review, and document validation complete; publication in progress. M0 approval and every new implementation milestone remain open.
+Current planning work: repository/template inspection, blueprint, challenge review, document validation, and publication complete. Broad implementation awaits product-owner approval. M0 approval and every new implementation milestone remain open.
 
 ### 1.4 Decisions still requiring confirmation
 
@@ -765,7 +765,7 @@ The supplied brief lists separate repository artifacts. This document contains t
 - [x] PRD, ADRs, contracts, capacity/cost model, threat model, evaluation program, roadmap, ownership, backlog, operations and traceability drafted.
 - [x] Principal-engineering challenge review recorded and incorporated in Section 13.3.
 - [x] Cross-references, task dependencies, effort totals and document integrity validated.
-- [ ] Roadmap committed and published to the personal repository.
+- [x] Roadmap committed and published to the personal repository.
 - [ ] Product owner approves broad implementation under the stated scope and assumptions.
 
 ### 14.3 Dated progress ledger
@@ -776,7 +776,8 @@ The supplied brief lists separate repository artifacts. This document contains t
 | 2026-10-19 | Planning: Not started → In progress | Supplied brief and baseline inspected; original short plan expanded into this single authoritative roadmap. No runtime implementation or infrastructure changes in this planning pass. | Validate plan consistency and publish. |
 | 2026-10-19 | Design challenge: draft → reviewed | Section 13.3 records revisions to isolation, recovery, staffing, costs, scope and research claims. This is an internal design review, not independent security/statistical certification. | Product owner reviews proposed decisions and provisional assumptions. |
 | 2026-10-19 | Document consistency: pending → verified | Local repository links/anchors, 50 unique work packages, acyclic dependency graph, 430-day effort reconciliation, 133-day serialized task path and clean diff checks. Schedule revised to match dependency/capacity assumptions. No application tests or paid inference rerun for this documentation-only change. | Commit and publish the single roadmap. |
+| 2026-10-19 | Roadmap: In progress → Verified (planning deliverable only) | [Published roadmap commit](https://github.com/spei04/agent-rewind/commit/a72380d28a4de9c50def2180bf43d1db1f9f4a03) in the public personal repository. Document checks passed; no broad implementation, paid inference or infrastructure provisioning performed. | Product-owner approval, then M0; maintain task/evidence status in this file. |
 
 ### 14.4 Immediate next action
 
-Finish document validation and publication, then request approval of this plan. The supplied brief explicitly requires: “Do not begin broad implementation until I approve the plan.” After approval, start **AR-001–004 / M0**, resolve the named assumptions and create only the first ready implementation issues. Subsequent work updates this file's task states, traceability and evidence ledger as it proceeds; no scheduled automation is implied.
+Review and approve this plan, including the provisional team, workload, schedule, deployment and budget assumptions. The supplied brief explicitly requires: “Do not begin broad implementation until I approve the plan.” After approval, start **AR-001–004 / M0**, resolve the named assumptions and create only the first ready implementation issues. Subsequent work updates this file's task states, traceability and evidence ledger as it proceeds; no scheduled automation is implied.
