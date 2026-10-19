@@ -1,0 +1,340 @@
+{
+  "$defs": {
+    "CorpusTask": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "workflow_id": {
+          "enum": [
+            "manual-action-recovery",
+            "automatic-intervention-evaluation"
+          ],
+          "title": "Workflow Id",
+          "type": "string"
+        },
+        "run_ids": {
+          "items": {
+            "pattern": "^[0-9a-f]{32}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Run Ids",
+          "type": "array"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceIdentity"
+        },
+        "evaluator": {
+          "$ref": "#/$defs/EvaluatorIdentity"
+        },
+        "permission": {
+          "$ref": "#/$defs/Permission"
+        }
+      },
+      "required": [
+        "task_id",
+        "workflow_id",
+        "run_ids",
+        "source",
+        "evaluator",
+        "permission"
+      ],
+      "title": "CorpusTask",
+      "type": "object"
+    },
+    "EvaluatorIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "evaluator_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+          "title": "Evaluator Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "artifact": {
+          "$ref": "#/$defs/PrivateObject"
+        },
+        "command_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Command Sha256",
+          "type": "string"
+        },
+        "image_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Image Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evaluator_id",
+        "revision",
+        "artifact",
+        "command_sha256",
+        "image_digest"
+      ],
+      "title": "EvaluatorIdentity",
+      "type": "object"
+    },
+    "Permission": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "approved",
+          "title": "Status",
+          "type": "string"
+        },
+        "rights_owner_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+          "title": "Rights Owner Id",
+          "type": "string"
+        },
+        "approved_by": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+          "title": "Approved By",
+          "type": "string"
+        },
+        "approved_at": {
+          "format": "date-time",
+          "title": "Approved At",
+          "type": "string"
+        },
+        "valid_from": {
+          "format": "date-time",
+          "title": "Valid From",
+          "type": "string"
+        },
+        "valid_until": {
+          "format": "date-time",
+          "title": "Valid Until",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/PrivateObject"
+        },
+        "allowed_processors": {
+          "items": {
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+            "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Allowed Processors",
+          "type": "array"
+        },
+        "allowed_purposes": {
+          "items": {
+            "enum": [
+              "debugging",
+              "intervention-screening",
+              "independent-confirmation"
+            ],
+            "type": "string"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "title": "Allowed Purposes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "rights_owner_id",
+        "approved_by",
+        "approved_at",
+        "valid_from",
+        "valid_until",
+        "evidence",
+        "allowed_processors",
+        "allowed_purposes"
+      ],
+      "title": "Permission",
+      "type": "object"
+    },
+    "PrivateObject": {
+      "additionalProperties": false,
+      "description": "A relative key within the separately approved storage profile; never a URL.",
+      "properties": {
+        "path": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "title": "PrivateObject",
+      "type": "object"
+    },
+    "PublicationRules": {
+      "additionalProperties": false,
+      "properties": {
+        "raw_content": {
+          "const": "forbidden",
+          "title": "Raw Content",
+          "type": "string"
+        },
+        "aggregates": {
+          "const": "separate-review-required",
+          "title": "Aggregates",
+          "type": "string"
+        },
+        "redaction_policy": {
+          "$ref": "#/$defs/PrivateObject"
+        }
+      },
+      "required": [
+        "raw_content",
+        "aggregates",
+        "redaction_policy"
+      ],
+      "title": "PublicationRules",
+      "type": "object"
+    },
+    "Retention": {
+      "additionalProperties": false,
+      "properties": {
+        "owner_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+          "title": "Owner Id",
+          "type": "string"
+        },
+        "review_at": {
+          "format": "date-time",
+          "title": "Review At",
+          "type": "string"
+        },
+        "delete_after": {
+          "format": "date-time",
+          "title": "Delete After",
+          "type": "string"
+        }
+      },
+      "required": [
+        "owner_id",
+        "review_at",
+        "delete_after"
+      ],
+      "title": "Retention",
+      "type": "object"
+    },
+    "SourceIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "artifact": {
+          "$ref": "#/$defs/PrivateObject"
+        }
+      },
+      "required": [
+        "source_id",
+        "revision",
+        "artifact"
+      ],
+      "title": "SourceIdentity",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "corpus_id": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+      "title": "Corpus Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "evidence_class": {
+      "enum": [
+        "synthetic",
+        "customer-permitted"
+      ],
+      "title": "Evidence Class",
+      "type": "string"
+    },
+    "storage_profile_id": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+      "title": "Storage Profile Id",
+      "type": "string"
+    },
+    "storage_owner_id": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+      "title": "Storage Owner Id",
+      "type": "string"
+    },
+    "purpose": {
+      "enum": [
+        "debugging",
+        "intervention-screening",
+        "independent-confirmation"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    },
+    "retention": {
+      "$ref": "#/$defs/Retention"
+    },
+    "publication": {
+      "$ref": "#/$defs/PublicationRules"
+    },
+    "tasks": {
+      "items": {
+        "$ref": "#/$defs/CorpusTask"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "title": "Tasks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "corpus_id",
+    "created_at",
+    "evidence_class",
+    "storage_profile_id",
+    "storage_owner_id",
+    "purpose",
+    "retention",
+    "publication",
+    "tasks"
+  ],
+  "title": "CorpusManifest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/spei04/agent-rewind/blob/main/contracts/corpus-manifest.v1.schema.json",
+  "description": "Private C02 corpus manifest syntax. Admission additionally requires validate_corpus_manifest with trusted processor/storage policy and the current time. No legal or customer approval is established by schema validation."
+}
