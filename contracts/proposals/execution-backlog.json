@@ -11,7 +11,8 @@
       "children": [
         "AR-001-A",
         "AR-001-B"
-      ]
+      ],
+      "status": "Verified"
     },
     "AR-002": {
       "milestone": "M0",
@@ -21,7 +22,8 @@
       "children": [
         "AR-002-A",
         "AR-002-B"
-      ]
+      ],
+      "status": "In progress"
     },
     "AR-003": {
       "milestone": "M0",
@@ -31,7 +33,8 @@
       "children": [
         "AR-003-A",
         "AR-003-B"
-      ]
+      ],
+      "status": "In progress"
     },
     "AR-004": {
       "milestone": "M0",
@@ -42,7 +45,8 @@
         "AR-004-A",
         "AR-004-B",
         "AR-004-C"
-      ]
+      ],
+      "status": "In progress"
     },
     "AR-005": {
       "milestone": "M1",
@@ -53,7 +57,8 @@
         "AR-005-A",
         "AR-005-B",
         "AR-005-C"
-      ]
+      ],
+      "status": "In progress"
     },
     "AR-006": {
       "milestone": "M1",
@@ -63,7 +68,8 @@
       "children": [
         "AR-006-A",
         "AR-006-B"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-007": {
       "milestone": "M1",
@@ -74,7 +80,8 @@
         "AR-007-A",
         "AR-007-B",
         "AR-007-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-008": {
       "milestone": "M1",
@@ -84,7 +91,8 @@
       "children": [
         "AR-008-A",
         "AR-008-B"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-009": {
       "milestone": "M1",
@@ -94,7 +102,8 @@
       "children": [
         "AR-009-A",
         "AR-009-B"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-010": {
       "milestone": "M1",
@@ -104,7 +113,8 @@
       "children": [
         "AR-010-A",
         "AR-010-B"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-011": {
       "milestone": "M1",
@@ -115,7 +125,8 @@
         "AR-011-A",
         "AR-011-B",
         "AR-011-C"
-      ]
+      ],
+      "status": "In progress"
     },
     "AR-012": {
       "milestone": "M1",
@@ -125,7 +136,8 @@
       "children": [
         "AR-012-A",
         "AR-012-B"
-      ]
+      ],
+      "status": "In progress"
     },
     "AR-013": {
       "milestone": "M2",
@@ -136,7 +148,8 @@
         "AR-013-A",
         "AR-013-B",
         "AR-013-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-014": {
       "milestone": "M2",
@@ -147,7 +160,8 @@
         "AR-014-A",
         "AR-014-B",
         "AR-014-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-015": {
       "milestone": "M2",
@@ -158,7 +172,8 @@
         "AR-015-A",
         "AR-015-B",
         "AR-015-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-016": {
       "milestone": "M2",
@@ -170,7 +185,8 @@
         "AR-016-B",
         "AR-016-C",
         "AR-016-D"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-017": {
       "milestone": "M2",
@@ -181,7 +197,8 @@
         "AR-017-A",
         "AR-017-B",
         "AR-017-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-018": {
       "milestone": "M2",
@@ -192,7 +209,8 @@
         "AR-018-A",
         "AR-018-B",
         "AR-018-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-019": {
       "milestone": "M2",
@@ -203,7 +221,8 @@
         "AR-019-A",
         "AR-019-B",
         "AR-019-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-020": {
       "milestone": "M3",
@@ -214,7 +233,8 @@
         "AR-020-A",
         "AR-020-B",
         "AR-020-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-021": {
       "milestone": "M3",
@@ -225,7 +245,8 @@
         "AR-021-A",
         "AR-021-B",
         "AR-021-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-022": {
       "milestone": "M3",
@@ -236,7 +257,8 @@
         "AR-022-A",
         "AR-022-B",
         "AR-022-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-023": {
       "milestone": "M3",
@@ -247,7 +269,8 @@
         "AR-023-A",
         "AR-023-B",
         "AR-023-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-024": {
       "milestone": "M3",
@@ -258,7 +281,8 @@
         "AR-024-A",
         "AR-024-B",
         "AR-024-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-025": {
       "milestone": "M3",
@@ -269,7 +293,8 @@
         "AR-025-A",
         "AR-025-B",
         "AR-025-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-026": {
       "milestone": "M3",
@@ -280,7 +305,8 @@
         "AR-026-A",
         "AR-026-B",
         "AR-026-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-027": {
       "milestone": "M4",
@@ -291,7 +317,8 @@
         "AR-027-A",
         "AR-027-B",
         "AR-027-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-028": {
       "milestone": "M4",
@@ -302,7 +329,8 @@
         "AR-028-A",
         "AR-028-B",
         "AR-028-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-029": {
       "milestone": "M4",
@@ -313,7 +341,8 @@
         "AR-029-A",
         "AR-029-B",
         "AR-029-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-030": {
       "milestone": "M4",
@@ -324,7 +353,8 @@
         "AR-030-A",
         "AR-030-B",
         "AR-030-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-031": {
       "milestone": "M4",
@@ -335,7 +365,8 @@
         "AR-031-A",
         "AR-031-B",
         "AR-031-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-032": {
       "milestone": "M4",
@@ -346,7 +377,8 @@
         "AR-032-A",
         "AR-032-B",
         "AR-032-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-033": {
       "milestone": "M4",
@@ -358,7 +390,8 @@
         "AR-033-B",
         "AR-033-C",
         "AR-033-D"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-034": {
       "milestone": "M4",
@@ -370,7 +403,8 @@
         "AR-034-B",
         "AR-034-C",
         "AR-034-D"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-035": {
       "milestone": "M5",
@@ -381,7 +415,8 @@
         "AR-035-A",
         "AR-035-B",
         "AR-035-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-036": {
       "milestone": "M5",
@@ -392,7 +427,8 @@
         "AR-036-A",
         "AR-036-B",
         "AR-036-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-037": {
       "milestone": "M5",
@@ -403,7 +439,8 @@
         "AR-037-A",
         "AR-037-B",
         "AR-037-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-038": {
       "milestone": "M5",
@@ -414,7 +451,8 @@
         "AR-038-A",
         "AR-038-B",
         "AR-038-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-039": {
       "milestone": "M5",
@@ -425,7 +463,8 @@
         "AR-039-A",
         "AR-039-B",
         "AR-039-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-040": {
       "milestone": "M6",
@@ -436,7 +475,8 @@
         "AR-040-A",
         "AR-040-B",
         "AR-040-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-041": {
       "milestone": "M6",
@@ -447,7 +487,8 @@
         "AR-041-A",
         "AR-041-B",
         "AR-041-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-042": {
       "milestone": "M6",
@@ -458,7 +499,8 @@
         "AR-042-A",
         "AR-042-B",
         "AR-042-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-043": {
       "milestone": "M6",
@@ -469,7 +511,8 @@
         "AR-043-A",
         "AR-043-B",
         "AR-043-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-044": {
       "milestone": "M6",
@@ -480,7 +523,8 @@
         "AR-044-A",
         "AR-044-B",
         "AR-044-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-045": {
       "milestone": "M6",
@@ -491,7 +535,8 @@
         "AR-045-A",
         "AR-045-B",
         "AR-045-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-046": {
       "milestone": "M6",
@@ -502,7 +547,8 @@
         "AR-046-A",
         "AR-046-B",
         "AR-046-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-047": {
       "milestone": "M6",
@@ -513,7 +559,8 @@
         "AR-047-A",
         "AR-047-B",
         "AR-047-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-048": {
       "milestone": "M7",
@@ -524,7 +571,8 @@
         "AR-048-A",
         "AR-048-B",
         "AR-048-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-049": {
       "milestone": "M7",
@@ -535,7 +583,8 @@
         "AR-049-A",
         "AR-049-B",
         "AR-049-C"
-      ]
+      ],
+      "status": "Not started"
     },
     "AR-050": {
       "milestone": "M7",
@@ -546,7 +595,8 @@
         "AR-050-A",
         "AR-050-B",
         "AR-050-C"
-      ]
+      ],
+      "status": "Not started"
     }
   },
   "tasks": [

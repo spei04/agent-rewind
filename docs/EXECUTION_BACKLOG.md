@@ -142,6 +142,9 @@ C04 links the [M1 API](../contracts/proposals/m1.openapi.json), [logical data mo
 | C18 — Capacity workload/SLIs | [AR-040-A](#ar-040-a) | Plan Section 5 workload distributions and latency/error/resource bounds, queue fairness, five-minute burst, 24-hour soak and hardware/cost identity. |
 | C19 — Regional recovery manifest | [AR-042-A](#ar-042-a) | Coherent DB/object/key/deletion backups; approved region; RPO/RTO, restore ordering, integrity and off-device evidence. |
 
+Current availability: C01 workflow/metric contracts are reviewed. C02 permission/provenance and C03 trust boundaries are reviewed; their protocol/capacity supplements are in progress or review. C04 remains a draft with reviewed inventory and observability inputs, pending reconciliation and G0. The machine-readable register records each current status.
+
+
 ## Gate register
 
 E0 is **Satisfied** by the project owner’s explicit execution approval on 2026-10-19. Other gates remain open until their evidence is recorded. Integration gates join every listed required task; partial packages cannot close a milestone. External conditions require actual evidence from the responsible owner. Elapsed windows require both the minimum duration and valid measurements. No automated checker manufactures human approval.
@@ -262,7 +265,7 @@ A task is one independently reviewable PR or evidence/decision-record PR. It may
 
 ### AR-001 — Make supported investigations and their business value explicit
 
-M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #1](https://github.com/spei04/agent-rewind/issues/1)
+M0 / P0 · 2 PRs · 2 engineering days · Verified · [Tracking issue #1](https://github.com/spei04/agent-rewind/issues/1)
 
 <a id="ar-001-a"></a>
 
@@ -302,7 +305,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #1](htt
 
 ### AR-002 — Protect corpus rights and establish a credible natural-failure evaluation protocol
 
-M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #2](https://github.com/spei04/agent-rewind/issues/2)
+M0 / P0 · 2 PRs · 2 engineering days · In progress · [Tracking issue #2](https://github.com/spei04/agent-rewind/issues/2)
 
 <a id="ar-002-a"></a>
 
@@ -342,7 +345,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #2](htt
 
 ### AR-003 — Bound deployment trust, operating responsibility and financial exposure
 
-M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #3](https://github.com/spei04/agent-rewind/issues/3)
+M0 / P0 · 2 PRs · 2 engineering days · In progress · [Tracking issue #3](https://github.com/spei04/agent-rewind/issues/3)
 
 <a id="ar-003-a"></a>
 
@@ -382,7 +385,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #3](htt
 
 ### AR-004 — Resolve architecture and interface decisions before runtime changes
 
-M0 / P0 · 3 PRs · 2.5 engineering days · Not started · [Tracking issue #4](https://github.com/spei04/agent-rewind/issues/4)
+M0 / P0 · 3 PRs · 2.5 engineering days · In progress · [Tracking issue #4](https://github.com/spei04/agent-rewind/issues/4)
 
 <a id="ar-004-a"></a>
 
@@ -439,7 +442,7 @@ M0 / P0 · 3 PRs · 2.5 engineering days · Not started · [Tracking issue #4](h
 
 ### AR-005 — Upgrade stored history safely without changing evidence identity
 
-M1 / P0 · 3 PRs · 6 engineering days · Not started · [Tracking issue #5](https://github.com/spei04/agent-rewind/issues/5)
+M1 / P0 · 3 PRs · 6 engineering days · In progress · [Tracking issue #5](https://github.com/spei04/agent-rewind/issues/5)
 
 <a id="ar-005-a"></a>
 
@@ -713,7 +716,7 @@ M1 / P0 · 2 PRs · 5 engineering days · Not started · [Tracking issue #10](ht
 
 ### AR-011 — Diagnose failures without exposing secrets or losing request context
 
-M1 / P0 · 3 PRs · 5 engineering days · Not started · [Tracking issue #11](https://github.com/spei04/agent-rewind/issues/11)
+M1 / P0 · 3 PRs · 5 engineering days · In progress · [Tracking issue #11](https://github.com/spei04/agent-rewind/issues/11)
 
 <a id="ar-011-a"></a>
 
@@ -770,7 +773,7 @@ M1 / P0 · 3 PRs · 5 engineering days · Not started · [Tracking issue #11](ht
 
 ### AR-012 — Detect incompatible or unsafe foundation changes before integration
 
-M1 / P0 · 2 PRs · 5 engineering days · Not started · [Tracking issue #12](https://github.com/spei04/agent-rewind/issues/12)
+M1 / P0 · 2 PRs · 5 engineering days · In progress · [Tracking issue #12](https://github.com/spei04/agent-rewind/issues/12)
 
 <a id="ar-012-a"></a>
 
