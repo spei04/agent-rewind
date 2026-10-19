@@ -1,0 +1,1002 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Agent Rewind M1 proposed API",
+    "version": "0.1.0-draft",
+    "description": "Stage 2 design artifact; not implemented or approved. A bounded M1 subset, not the complete enterprise API. Legacy routes remain until an explicit compatibility migration. See docs/PLAN.md Sections 1.5 and 10.1."
+  },
+  "x-approval-status": "pending",
+  "x-source-baseline": "8f1ae757005c95c50a789e4fa0a10aae9b3c4024",
+  "security": [
+    {
+      "serviceKey": []
+    },
+    {
+      "sessionCookie": []
+    }
+  ],
+  "paths": {
+    "/api/v1/projects/{project_id}/runs": {
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listProjectRuns",
+        "summary": "List only authorized run summaries, newest first.",
+        "x-minimum-role": "viewer",
+        "x-csrf-required-for-cookie-auth": false,
+        "responses": {
+          "200": {
+            "description": "List only authorized run summaries, newest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient action permission on an accessible project",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Absent or inaccessible resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Admission rate or resource quota exceeded; Retry-After header required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "description": "Seconds until client should retry admission."
+              }
+            }
+          },
+          "503": {
+            "description": "Required authority unavailable; fail closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 2048
+            }
+          }
+        ],
+        "description": "Cursor binds project, filters, upper watermark and (created_at,id) descending position; reject altered/cross-project cursor. Exclude inserts after the initial page watermark. Do not load event/workspace bodies to list runs."
+      },
+      "post": {
+        "operationId": "submitProjectRun",
+        "summary": "Admit one idempotent recording operation.",
+        "x-minimum-role": "operator",
+        "x-csrf-required-for-cookie-auth": true,
+        "responses": {
+          "202": {
+            "description": "Admit one idempotent recording operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Accepted"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient action permission on an accessible project",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Absent or inaccessible resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Admission rate or resource quota exceeded; Retry-After header required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "description": "Seconds until client should retry admission."
+              }
+            }
+          },
+          "503": {
+            "description": "Required authority unavailable; fail closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Same idempotency key or client operation ID with a different canonical request; or exhausted permitted budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Transport or manifest size exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._:-]+$"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "description": "Required with session-cookie authentication, with matching allowed Origin."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitRun"
+              }
+            }
+          }
+        },
+        "description": "Scope operation uniqueness to principal+project+operation kind+key. Same key/body returns the original 202 IDs; changing body returns 409. client_operation_id additionally prevents retry under a different key from creating another job. Reserve actual paid calls separately in the hierarchical ledger; admission is not provider dispatch. Preserve the $200 job ceiling. Do not permit arbitrary adapter module paths."
+      }
+    },
+    "/api/v1/projects/{project_id}/runs/{run_id}": {
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          }
+        },
+        {
+          "name": "run_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getProjectRun",
+        "summary": "Read a bounded run summary in the authorized project.",
+        "x-minimum-role": "viewer",
+        "x-csrf-required-for-cookie-auth": false,
+        "responses": {
+          "200": {
+            "description": "Read a bounded run summary in the authorized project.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunSummary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient action permission on an accessible project",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Absent or inaccessible resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Admission rate or resource quota exceeded; Retry-After header required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "description": "Seconds until client should retry admission."
+              }
+            }
+          },
+          "503": {
+            "description": "Required authority unavailable; fail closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project_id}/operations/{operation_id}": {
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          }
+        },
+        {
+          "name": "operation_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getProjectOperation",
+        "summary": "Read operation status and budget totals in the authorized project.",
+        "x-minimum-role": "viewer",
+        "x-csrf-required-for-cookie-auth": false,
+        "responses": {
+          "200": {
+            "description": "Read operation status and budget totals in the authorized project.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient action permission on an accessible project",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Absent or inaccessible resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Admission rate or resource quota exceeded; Retry-After header required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "description": "Seconds until client should retry admission."
+              }
+            }
+          },
+          "503": {
+            "description": "Required authority unavailable; fail closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project_id}/operations/{operation_id}/cancel": {
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          }
+        },
+        {
+          "name": "operation_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "cancelProjectOperation",
+        "summary": "Record idempotent cancellation intent.",
+        "x-minimum-role": "operator",
+        "x-csrf-required-for-cookie-auth": true,
+        "responses": {
+          "202": {
+            "description": "Record idempotent cancellation intent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cancellation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient action permission on an accessible project",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Absent or inaccessible resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Admission rate or resource quota exceeded; Retry-After header required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "description": "Seconds until client should retry admission."
+              }
+            }
+          },
+          "503": {
+            "description": "Required authority unavailable; fail closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "description": "Required for cookie-authenticated writes."
+          }
+        ],
+        "description": "Queued jobs become cancelled; running jobs record intent. Terminal jobs retain their terminal state. No promise to cancel a dispatched provider request or refund its reservation."
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "serviceKey": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "rewind_session"
+      }
+    },
+    "schemas": {
+      "TaskDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "instruction": {
+            "maxLength": 20000,
+            "minLength": 1,
+            "title": "Instruction",
+            "type": "string"
+          },
+          "image": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Image",
+            "type": "string"
+          },
+          "files": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Files",
+            "type": "object"
+          },
+          "evaluator_files": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Evaluator Files",
+            "type": "object"
+          },
+          "evaluator_command": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Evaluator Command",
+            "type": "string"
+          },
+          "max_steps": {
+            "default": 30,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Max Steps",
+            "type": "integer"
+          },
+          "command_timeout": {
+            "default": 30,
+            "maximum": 120,
+            "minimum": 1,
+            "title": "Command Timeout",
+            "type": "integer"
+          },
+          "redact_patterns": {
+            "items": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "maxItems": 16,
+            "title": "Redact Patterns",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "instruction",
+          "image",
+          "files",
+          "evaluator_files",
+          "evaluator_command"
+        ],
+        "title": "TaskDefinition",
+        "type": "object",
+        "description": "Existing TaskSpec fields without budget_usd/seed. Preserve current semantic validation: normalized paths, disjoint source/evaluator paths, at most 2,000 initial files, 8 MiB manifest limit, and redaction pattern length 120. These cross-field rules are not all expressible by this schema."
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "invalid_request",
+              "unauthenticated",
+              "forbidden",
+              "not_found",
+              "idempotency_conflict",
+              "invalid_cursor",
+              "budget_exhausted",
+              "quota_exceeded",
+              "dependency_unavailable",
+              "schema_incompatible",
+              "internal_error"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "request_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "retryable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "request_id",
+          "retryable"
+        ]
+      },
+      "SubmitRun": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "client_operation_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "adapter_config_id": {
+            "type": "string",
+            "enum": [
+              "native-v1"
+            ],
+            "description": "M1 supports the administrator-configured native adapter only. Resolve and freeze full policy identity on admission."
+          },
+          "task": {
+            "$ref": "#/components/schemas/TaskDefinition"
+          },
+          "seed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "budget_microusd": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200000000
+          }
+        },
+        "required": [
+          "client_operation_id",
+          "adapter_config_id",
+          "task",
+          "seed",
+          "budget_microusd"
+        ]
+      },
+      "Accepted": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "job_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          }
+        },
+        "required": [
+          "operation_id",
+          "job_id"
+        ]
+      },
+      "RunSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "project_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "running",
+              "complete",
+              "failed",
+              "incomplete"
+            ]
+          },
+          "branchable": {
+            "type": "boolean"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{32}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event_head": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "created_at",
+          "status",
+          "branchable",
+          "parent_id",
+          "event_head"
+        ]
+      },
+      "RunPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "$ref": "#/components/schemas/RunSummary"
+            }
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2048
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ]
+      },
+      "Operation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "project_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "job_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "client_operation_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "cancel_requested": {
+            "type": "boolean"
+          },
+          "result_run_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{32}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "budget_microusd": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "reserved_microusd": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Error"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "job_id",
+          "client_operation_id",
+          "status",
+          "cancel_requested",
+          "result_run_id",
+          "budget_microusd",
+          "reserved_microusd",
+          "error"
+        ]
+      },
+      "Cancellation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "cancel_requested": {
+            "const": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ]
+          }
+        },
+        "required": [
+          "operation_id",
+          "cancel_requested",
+          "status"
+        ]
+      }
+    }
+  }
+}

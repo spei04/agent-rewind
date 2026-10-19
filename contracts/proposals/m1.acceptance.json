@@ -1,0 +1,213 @@
+{
+  "contract_version": 1,
+  "status": "planned-not-executed",
+  "scope": "M0/M1 engineering acceptance plan. These are test requirements, not claims of passing tests.",
+  "cases": [
+    {
+      "id": "CT-M1-001",
+      "issue": "AR-005",
+      "layer": "migration",
+      "given": "Empty SQLite development and PostgreSQL databases",
+      "when": "Run explicit migration twice",
+      "then": "One expected revision head; idempotent second execution; no app startup DDL."
+    },
+    {
+      "id": "CT-M1-002",
+      "issue": "AR-005",
+      "layer": "migration",
+      "given": "Known v0.1 fixture with binary artifacts, parent branch and budget values",
+      "when": "Adopt baseline then upgrade",
+      "then": "IDs, event hashes, content digests and reservations unchanged."
+    },
+    {
+      "id": "CT-M1-003",
+      "issue": "AR-005",
+      "layer": "migration",
+      "given": "Unknown schema or newer revision",
+      "when": "Attempt adoption/startup",
+      "then": "Refuse safely with schema_incompatible; no schema writes."
+    },
+    {
+      "id": "CT-M1-004",
+      "issue": "AR-005",
+      "layer": "migration",
+      "given": "Backfill interrupted mid-batch",
+      "when": "Resume migration and retry concurrent migrator",
+      "then": "No duplicated/lost rows; one migrator owns lock; compatibility state explicit."
+    },
+    {
+      "id": "CT-M1-005",
+      "issue": "AR-006",
+      "layer": "api",
+      "given": "Runs with equal timestamps and inserts between pages",
+      "when": "Page with limit=2",
+      "then": "Stable descending (created_at,id), no duplicates, initial watermark honored."
+    },
+    {
+      "id": "CT-M1-006",
+      "issue": "AR-006",
+      "layer": "api",
+      "given": "Forged or foreign-project cursor",
+      "when": "List runs",
+      "then": "422 invalid_cursor or 404 inaccessible project; no foreign data."
+    },
+    {
+      "id": "CT-M1-007",
+      "issue": "AR-007",
+      "layer": "authorization",
+      "given": "Viewer, operator and admin in two projects",
+      "when": "Read/write/list legacy and v1 resources",
+      "then": "Viewer cannot mutate; unauthorized IDs return 404; admin action mapping explicit."
+    },
+    {
+      "id": "CT-M1-008",
+      "issue": "AR-007",
+      "layer": "authorization",
+      "given": "Previously accepted idempotent request then membership revoked",
+      "when": "Replay identical request",
+      "then": "Access denied, no payload/operation IDs leaked from idempotency cache."
+    },
+    {
+      "id": "CT-M1-009",
+      "issue": "AR-007",
+      "layer": "authorization",
+      "given": "Foreign study/run/parent/file/key IDs including compare route",
+      "when": "Try all existing object routes",
+      "then": "No authorization bypass through legacy endpoints or nested refs."
+    },
+    {
+      "id": "CT-M1-010",
+      "issue": "AR-008",
+      "layer": "api",
+      "given": "Eight concurrent identical requests",
+      "when": "POST runs with one key/body",
+      "then": "One job+operation+audit creation; every accepted response returns original IDs."
+    },
+    {
+      "id": "CT-M1-011",
+      "issue": "AR-008",
+      "layer": "api",
+      "given": "Same key or client_operation_id with changed request",
+      "when": "POST runs",
+      "then": "409 idempotency_conflict; no extra job."
+    },
+    {
+      "id": "CT-M1-012",
+      "issue": "AR-008",
+      "layer": "api",
+      "given": "Same client_operation_id and body but different keys",
+      "when": "POST runs",
+      "then": "Same operation; new key is atomically bound as an alias. Reusing that alias with a different client ID/body conflicts; no duplicate job."
+    },
+    {
+      "id": "CT-M1-013",
+      "issue": "AR-008",
+      "layer": "api",
+      "given": "Oversized manifest, bad path or unknown adapter",
+      "when": "POST runs",
+      "then": "413/422 and zero admitted jobs; no submitted private contents in error."
+    },
+    {
+      "id": "CT-M1-014",
+      "issue": "AR-008",
+      "layer": "api",
+      "given": "Queued/running/terminal operations",
+      "when": "Cancel repeatedly",
+      "then": "Intent idempotent; queued cancelled, running flagged, terminal state preserved."
+    },
+    {
+      "id": "CT-M1-015",
+      "issue": "AR-009",
+      "layer": "storage",
+      "given": "Object write succeeds and metadata transaction fails",
+      "when": "Retry publication",
+      "then": "No broken committed reference; orphan identifiable; no plaintext object."
+    },
+    {
+      "id": "CT-M1-016",
+      "issue": "AR-009",
+      "layer": "storage",
+      "given": "Corrupt ciphertext/hash or missing object",
+      "when": "Resolve artifact through permitted resource",
+      "then": "Integrity/missing failure visible; no successful body or fabricated empty snapshot."
+    },
+    {
+      "id": "CT-M1-017",
+      "issue": "AR-009",
+      "layer": "storage",
+      "given": "Same bytes in separate projects",
+      "when": "Create/read scoped artifact refs",
+      "then": "No existence/read oracle across projects; authorization before cache lookup."
+    },
+    {
+      "id": "CT-M1-018",
+      "issue": "AR-010",
+      "layer": "accounting",
+      "given": "Eight concurrent reservations that jointly exceed a shared cap",
+      "when": "Reserve against org/project/job accounts",
+      "then": "Only cap-compliant reservations succeed; all account updates commit or none."
+    },
+    {
+      "id": "CT-M1-019",
+      "issue": "AR-010",
+      "layer": "accounting",
+      "given": "Expired owner, cancellation, timeout and repeated logical call ID",
+      "when": "Reserve/dispatch boundary",
+      "then": "No new reservation after fence/cancel; timeout held; identical logical call not double counted."
+    },
+    {
+      "id": "CT-M1-020",
+      "issue": "AR-010",
+      "layer": "accounting",
+      "given": "Billing period changes while a call is uncertain",
+      "when": "Reconcile call",
+      "then": "Original admission-period accounts retained; no reset-based cap bypass or automatic release."
+    },
+    {
+      "id": "CT-M1-021",
+      "issue": "AR-010",
+      "layer": "accounting",
+      "given": "Database unavailable before permit",
+      "when": "Attempt provider action",
+      "then": "Fail closed before network dispatch."
+    },
+    {
+      "id": "CT-M1-022",
+      "issue": "AR-011",
+      "layer": "observability",
+      "given": "Provider/storage exceptions include a sentinel secret and source text",
+      "when": "Log/respond/trace",
+      "then": "Safe code+IDs available; sentinel absent from all logs, responses and metric labels."
+    },
+    {
+      "id": "CT-M1-023",
+      "issue": "AR-011",
+      "layer": "observability",
+      "given": "Required database unavailable",
+      "when": "Probe liveness/readiness",
+      "then": "Liveness indicates process; readiness fails without echoing credentials; no paid call."
+    },
+    {
+      "id": "CT-M1-024",
+      "issue": "AR-012",
+      "layer": "contract",
+      "given": "Proposed API/data contracts and historical readers",
+      "when": "Required CI compatibility suite",
+      "then": "Unresolved refs/incompatible changes fail; deterministic unit+PostgreSQL+existing gVisor gates preserved."
+    }
+  ],
+  "exit_gates": {
+    "G0": [
+      "Assumptions and supported workload reviewed with product owner.",
+      "Architecture/contract decisions and first implementation slice explicitly approved.",
+      "Data rights and spending limits documented; production hiring or spend not presumed."
+    ],
+    "G1": [
+      "AR-005 through AR-012 acceptance cases implemented and passing at an identified commit.",
+      "Existing historical fixture preserves hashes, bytes and budget accounting.",
+      "Scoped legacy and v1 interfaces cannot leak across projects.",
+      "No duplicate submission or atomic budget-cap violation under concurrency.",
+      "Code review, safe diagnostics, migration/recovery notes and roadmap evidence updated."
+    ]
+  }
+}

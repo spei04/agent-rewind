@@ -65,11 +65,24 @@ Source inspected on 2026-10-19 at the baseline above. Historical test results be
 
 Use **Not started**, **In progress**, **Blocked**, **Implemented / verification pending**, and **Verified**. A checked box means its stated acceptance evidence exists. Historical implementation is not retroactively marked enterprise-ready. Milestone completion requires all exit gates, not just merged code. Each implementation change updates its task row, requirement row, and dated evidence log in this file. No fabricated overall percentage.
 
-Current planning work: repository/template inspection, blueprint, challenge review, document validation, and publication complete. Broad implementation awaits product-owner approval. M0 approval and every new implementation milestone remain open.
+Current planning work: repository/template inspection, blueprint, challenge review, document validation, and publication complete. Stage 2 M0/M1 engineering preparation is recorded in Section 10.1. Broad implementation awaits product-owner approval. M0 approval and every new implementation milestone remain open.
 
 ### 1.4 Decisions still requiring confirmation
 
 Planning can proceed with the assumptions above. Before M0 exits, confirm staffing and launch constraints, two target customer workflows, acceptable regions/data classes, and the production operating budget. Before any pilot, confirm who operates the installation, approved model processors, network egress policy, retention contract, and named incident contacts. These are release dependencies, not reasons to stop writing the blueprint.
+
+### 1.5 Staged delivery workflow
+
+The product is delivered through four stages. The existing broad blueprint remains a reference; subsequent work is prepared and reviewed for the next milestone instead of expanding every future artifact at once. Stage 2 preparation is authorized; it does not approve architecture assumptions, activate proposed contracts, or authorize Stage 3 implementation.
+
+| Stage | Required output and review | Current state / transition |
+| --- | --- | --- |
+| 1 — Plan and challenge | Inspect source, identify unknowns, compare architecture options, record assumptions/risks and challenge the roadmap. | Planning artifact published; product-owner review/approval still open. M0 decision issues track remaining assumptions. |
+| 2 — Engineer the next milestone | Detailed GitHub issues, native dependency links, versioned API/data contracts, failure-oriented acceptance cases and milestone exit gates. | M0/M1 packet prepared: 12 issues, two milestones, draft contracts and 24 planned cases. Contracts require review before being adopted. Later milestones receive this treatment when their prerequisites are stable. |
+| 3 — Implement approved slices | One coherent vertical slice at a time with relevant tests, code review, safe diagnostics/observability, recovery notes and updated documentation/progress. | Not started for the enterprise roadmap. Requires recorded product-owner approval and issue entry criteria. First proposed slice is AR-005: safe schema installation/upgrade preserving historical evidence. |
+| 4 — Verify production readiness | Audit actual requirements against commit-specific test, load, security, deployment and recovery evidence; record pass, fail, not tested, or accepted scoped risk. | Not started. Begin evidence collection with each slice; perform independent readiness review before pilot/GA. A roadmap, contract file, or closed issue is not production proof. |
+
+Do not rerun the entire planning exercise for each change. Maintain this file as the authority for stage/milestone status and link to the relevant issues and contracts. For a slice to advance, the engineer records behavior before/after, acceptance results, reviewer disposition, deployment/recovery impact and any gaps. An unreviewed change cannot be called reviewed; unavailable load/security/deployment evidence cannot be called passing.
 
 ## 2. Product requirements and user journeys
 
@@ -519,9 +532,9 @@ Use short-lived branches and pull requests in the personal repository. Independe
 
 ## 10. Prioritized engineering backlog
 
-This is issue-ready Markdown within the single roadmap file; no GitHub issues or milestones have been created by drafting it. After approval, use milestones M0–M7 and labels `priority:P0`, `priority:P1`, `priority:P2`, `area:api`, `area:execution`, `area:research`, `area:ui`, `area:platform`, `area:security`, `area:quality`, `type:feature`, `type:verification`, `blocked:external`.
+The roadmap retains all 50 work packages. Stage 2 has created detailed GitHub issues for AR-001–012 and milestones M0/M1; their bodies and native dependencies are linked in Section 10.1. Remaining milestones stay as roadmap packages until their contracts are ready for detailed planning. Use milestones M0–M7 and labels `priority:P0`, `priority:P1`, `priority:P2`, `area:api`, `area:execution`, `area:research`, `area:ui`, `area:platform`, `area:security`, `area:quality`, `type:feature`, `type:verification`, `blocked:external`.
 
-Each row provides an issue title/scope, dependencies to start, responsible role, effort and acceptance evidence. Milestone exit gates additionally join all required work; a readiness review is not an extra serial ten-day implementation package. Pilot measurements start after deployment and continue at least four calendar weeks; they cannot close the pilot without all customer/research results. **All new backlog work is Not started (NS)**. Existing code is the starting point, not a completed enterprise ticket. For a 10-day work package, create two independently reviewable child issues: **a = first five days / first deliverable; b = second five days / second deliverable and end-to-end verification**, with b depending on a. Subdivide further if a child cannot deliver a testable slice within five days. Estimates match milestone totals; contingency is outside the table. In every issue, Definition of Done also includes relevant Section 11 tests, documentation, migration/rollback impact and an evidence/progress update here.
+Each row provides an issue title/scope, dependencies to start, responsible role, effort and acceptance evidence. Milestone exit gates additionally join all required work; a readiness review is not an extra serial ten-day implementation package. Pilot measurements start after deployment and continue at least four calendar weeks; they cannot close the pilot without all customer/research results. **Implementation of every new backlog package remains Not started (NS)**; creating specifications/issues does not complete their acceptance criteria. Existing code is the starting point, not a completed enterprise ticket. For a 10-day work package, create two independently reviewable child issues: **a = first five days / first deliverable; b = second five days / second deliverable and end-to-end verification**, with b depending on a. Subdivide further if a child cannot deliver a testable slice within five days. Estimates match milestone totals; contingency is outside the table. In every issue, Definition of Done also includes relevant Section 11 tests, documentation, migration/rollback impact and an evidence/progress update here.
 
 Role abbreviations: TL technical lead, BE execution/backend, PL platform, FE frontend, RS research, QE quality, SEC security, PM product. Priority is the delivery gate, not permission to bypass dependencies.
 
@@ -532,10 +545,10 @@ Role abbreviations: TL technical lead, BE execution/backend, PL platform, FE fro
 | AR-003 | M0 / P0 | Threat/deployment/cost review; selected region, staffing and funding assumptions explicitly accepted or blocked. | AR-001 | PL+SEC / 2 | NS |
 | AR-004 | M0 / P0 | Freeze schemas/fixtures and approve roadmap; consumer review and decision log complete. | AR-002,003 | TL / 2 | NS |
 | AR-005 | M1 / P0 | Alembic baseline and migration guard; old fixture upgrades with original event/artifact identities intact. | AR-004 | TL / 5 | NS |
-| AR-006 | M1 / P0 | Typed run/query fields and cursor paging; historical and new rows coexist with indexed query plans. | AR-005 | TL / 5 | NS |
+| AR-006 | M1 / P0 | Typed run/query fields and cursor paging; historical and new rows coexist with indexed query plans. | AR-005,007 | TL / 5 | NS |
 | AR-007 | M1 / P0 | Project memberships and scoped repositories; every read/write route has deny tests for foreign project IDs. | AR-005 | TL+SEC / 5 | NS |
 | AR-008 | M1 / P0 | Idempotent job submission and safe errors; concurrent same-key requests create one operation, changed body returns conflict. | AR-005,007 | BE / 5 | NS |
-| AR-009 | M1 / P0 | Versioned object/ref interface; failed publication leaves collectable orphan, never a completed broken reference. | AR-005 | PL / 5 | NS |
+| AR-009 | M1 / P0 | Versioned object/ref interface; failed publication leaves collectable orphan, never a completed broken reference. | AR-005,007 | PL / 5 | NS |
 | AR-010 | M1 / P0 | Logical call ledger and hierarchical reservations; concurrent reservations cannot exceed study/project/org caps. | AR-005,008 | BE / 5 | NS |
 | AR-011 | M1 / P0 | Redacted error taxonomy and tracing IDs; fault fixtures give useful diagnostics without credential/payload leakage. | AR-004 | PL / 5 | NS |
 | AR-012 | M1 / P0 | Schema/contract CI and historical fixtures; incompatible contract changes fail required checks. | AR-006,008,009,010 | QE / 5 | NS |
@@ -579,6 +592,39 @@ Role abbreviations: TL technical lead, BE execution/backend, PL platform, FE fro
 | AR-050 | M7 / P1 | a: 30-day reliability/adoption review; b: G7 closure and evidence-driven next-quarter priorities. | AR-049 | TL+PM / 10 | NS |
 
 Post-GA candidate backlog, **uncommitted P2**: customer-operated remote worker protocol with scoped credentials; additional languages/frameworks selected by demand; brokered read-only network tools before any external writes; learned intervention ranking after held-out improvement; shared SaaS with tenant threat model/RLS/key/worker isolation; Kubernetes packaging for committed customers; analytical store for demonstrated reporting bottlenecks. Each needs an approved design, estimate, budget, migration/security tests and explicit exit gate before scheduling.
+
+### 10.1 Stage 2 packet — M0/M1
+
+**Review state:** Proposed; implementation approval not recorded. This packet defines the next work, with no runtime application change, applied migration, new cloud resource or paid inference. Role owners are specified; actual staff assignments remain unconfirmed.
+
+| Deliverable | Reviewable artifact | What it establishes |
+| --- | --- | --- |
+| M0 decision work | [Discovery and approval milestone](https://github.com/spei04/agent-rewind/milestone/1) | Workload, data rights, trust/budget assumptions and explicit contract/slice approval. |
+| M1 foundation work | [Versioned foundations milestone](https://github.com/spei04/agent-rewind/milestone/2) | Issue entry/exit criteria and integrated G1 acceptance. |
+| API contract | [m1.openapi.json](../contracts/proposals/m1.openapi.json) | Five proposed operations across four paths; scoped run admission/list/read and operation read/cancel; request/response/error, idempotency and authentication rules. This is a bounded subset, not the full enterprise API. |
+| Logical schema | [m1.data-model.json](../contracts/proposals/m1.data-model.json) | Twelve proposed entities, keys/invariants, legacy adoption/backfill and atomic publication/reservation contracts. This is a logical design, not executable DDL. |
+| Test and gate plan | [m1.acceptance.json](../contracts/proposals/m1.acceptance.json) | Twenty-four planned cases mapped to AR-005–012 plus G0/G1 gates. They are not implemented tests or passing results. |
+
+| Package | GitHub issue | Preparation state |
+| --- | --- | --- |
+| AR-001 | [Confirm customer workflows](https://github.com/spei04/agent-rewind/issues/1) | Needs decision review |
+| AR-002 | [Specify permitted corpus and evaluator protocol](https://github.com/spei04/agent-rewind/issues/2) | Needs decision review |
+| AR-003 | [Review trust, deployment and budget](https://github.com/spei04/agent-rewind/issues/3) | Needs decision review |
+| AR-004 | [Approve contracts and first slice](https://github.com/spei04/agent-rewind/issues/4) | Approval pending |
+| AR-005 | [Versioned schema upgrades](https://github.com/spei04/agent-rewind/issues/5) | Specification prepared; implementation blocked on approval |
+| AR-006 | [Run projections and pagination](https://github.com/spei04/agent-rewind/issues/6) | Specification prepared; implementation blocked on approval |
+| AR-007 | [Project authorization](https://github.com/spei04/agent-rewind/issues/7) | Specification prepared; implementation blocked on approval |
+| AR-008 | [Idempotent admission/cancellation](https://github.com/spei04/agent-rewind/issues/8) | Specification prepared; implementation blocked on approval |
+| AR-009 | [Artifact publication and references](https://github.com/spei04/agent-rewind/issues/9) | Specification prepared; implementation blocked on approval |
+| AR-010 | [Hierarchical budget reservations](https://github.com/spei04/agent-rewind/issues/10) | Specification prepared; implementation blocked on approval |
+| AR-011 | [Safe diagnostics and readiness](https://github.com/spei04/agent-rewind/issues/11) | Specification prepared; implementation blocked on approval |
+| AR-012 | [Contract and failure verification](https://github.com/spei04/agent-rewind/issues/12) | Specification prepared; implementation blocked on approval |
+
+Each issue includes problem/outcome, responsible role, bounded scope, dependencies, acceptance checkboxes, test/review plan, scope exclusions and contract links. Nineteen native GitHub blocked-by relationships were read back and verified against the first 12 roadmap rows. All issues remain open; none is evidence that a feature has been built.
+
+The first proposed vertical slice is deliberately bounded: install or upgrade the metadata schema safely through the CLI, have API/worker readiness reject incompatible revisions, and verify historical data preservation. It closes AR-005 only after migration/failure tests, code review and recovery documentation pass. Subsequent slices add scoped reads, admission and ledger behavior against reviewed contracts. Proposed endpoints remain unavailable until their implementation issues pass.
+
+**Contract review findings incorporated:** scoped run/artifact projections explicitly depend on the project ownership foundation; preserve default-materialized request identity without changing source text; store new retry keys as aliases of the same operation; authorize before replaying cached admission results; keep budget reservations tied to their original accounting period; preserve legacy ciphertext/history; keep project exposure disabled until old routes are scoped. Structural validation of the OpenAPI document and internal references is a preparation check, not behavioral verification.
 
 ## 11. Testing and release quality
 
@@ -738,7 +784,7 @@ The supplied brief lists separate repository artifacts. This document contains t
 | `docs/REQUIREMENTS_TRACEABILITY.md` | Section 13.1: requirement → design → task → evidence |
 | `docs/RISKS_AND_ASSUMPTIONS.md` | Sections 1.1/1.4 and 13.2 |
 | `docs/DEFINITION_OF_DONE.md` | Sections 11.2 and 14, plus milestone-specific gates |
-| Backlog, GitHub issues, labels and milestones | Section 10: ready for conversion after plan approval; none created yet |
+| Backlog, GitHub issues, labels and milestones | Section 10: full roadmap; Section 10.1: detailed M0/M1 issues, native dependencies and proposed machine-readable contracts |
 | CI/CD plan, launch checklist and progress report | Sections 12.1 and 14 |
 
 ## 14. Launch gates and progress log
@@ -766,6 +812,7 @@ The supplied brief lists separate repository artifacts. This document contains t
 - [x] Principal-engineering challenge review recorded and incorporated in Section 13.3.
 - [x] Cross-references, task dependencies, effort totals and document integrity validated.
 - [x] Roadmap committed and published to the personal repository.
+- [x] Staged delivery workflow and first M0/M1 engineering packet prepared; draft contracts structurally checked.
 - [ ] Product owner approves broad implementation under the stated scope and assumptions.
 
 ### 14.3 Dated progress ledger
@@ -777,7 +824,8 @@ The supplied brief lists separate repository artifacts. This document contains t
 | 2026-10-19 | Design challenge: draft → reviewed | Section 13.3 records revisions to isolation, recovery, staffing, costs, scope and research claims. This is an internal design review, not independent security/statistical certification. | Product owner reviews proposed decisions and provisional assumptions. |
 | 2026-10-19 | Document consistency: pending → verified | Local repository links/anchors, 50 unique work packages, acyclic dependency graph, 430-day effort reconciliation, 133-day serialized task path and clean diff checks. Schedule revised to match dependency/capacity assumptions. No application tests or paid inference rerun for this documentation-only change. | Commit and publish the single roadmap. |
 | 2026-10-19 | Roadmap: In progress → Verified (planning deliverable only) | [Published roadmap commit](https://github.com/spei04/agent-rewind/commit/a72380d28a4de9c50def2180bf43d1db1f9f4a03) in the public personal repository. Document checks passed; no broad implementation, paid inference or infrastructure provisioning performed. | Product-owner approval, then M0; maintain task/evidence status in this file. |
+| 2026-10-19 | Staged delivery / Stage 2: M0/M1 packet prepared | Four-stage workflow added; 12 detailed issues and two milestones created. Three draft contract artifacts define five API operations, twelve logical entities and 24 planned acceptance cases. OpenAPI structure/references validated and 19 native dependencies read back against the roadmap; runtime cases remain unexecuted. | Product owner reviews assumptions/contracts before Stage 3. |
 
 ### 14.4 Immediate next action
 
-Review and approve this plan, including the provisional team, workload, schedule, deployment and budget assumptions. The supplied brief explicitly requires: “Do not begin broad implementation until I approve the plan.” After approval, start **AR-001–004 / M0**, resolve the named assumptions and create only the first ready implementation issues. Subsequent work updates this file's task states, traceability and evidence ledger as it proceeds; no scheduled automation is implied.
+Review and approve this plan, including the provisional team, workload, schedule, deployment and budget assumptions. The supplied brief explicitly requires: “Do not begin broad implementation until I approve the plan.” The Stage 2 M0/M1 packet is prepared. Review **AR-001–004 / M0**, resolve the named assumptions, and record approval of the first slice before starting AR-005. Prepare later milestone issue packets as their prerequisites stabilize. Subsequent work updates this file's task states, traceability and evidence ledger as it proceeds; no scheduled automation is implied.

@@ -1,0 +1,226 @@
+{
+  "contract_version": 1,
+  "approval_status": "pending",
+  "scope": "Logical PostgreSQL M1 design; not executable DDL or an applied migration. Later milestones add trials, KMS rotation, retention and new checkpoint formats.",
+  "baseline": "8f1ae757005c95c50a789e4fa0a10aae9b3c4024",
+  "types": {
+    "id": "varchar(32), lowercase UUID hex, immutable",
+    "digest": "char(64), lowercase SHA-256 hex",
+    "time": "timestamptz UTC",
+    "money": "bigint micro-USD, never floating point",
+    "object": "JSONB for versioned bounded metadata only"
+  },
+  "entities": {
+    "organizations": {
+      "fields": {
+        "id": "id PK",
+        "installation_key": "varchar(64) NOT NULL UNIQUE",
+        "created_at": "time NOT NULL"
+      },
+      "constraints": [
+        "Exactly one organization enabled per deployment; no shared SaaS claim."
+      ],
+      "owner": "identity"
+    },
+    "projects": {
+      "fields": {
+        "id": "id PK",
+        "organization_id": "id FK organizations NOT NULL",
+        "name": "varchar(120) NOT NULL",
+        "created_at": "time NOT NULL"
+      },
+      "constraints": [
+        "UNIQUE(organization_id,id)"
+      ],
+      "owner": "identity"
+    },
+    "project_memberships": {
+      "fields": {
+        "project_id": "id FK projects NOT NULL",
+        "principal_id": "varchar(256) NOT NULL",
+        "role": "varchar(16): viewer|operator|maintainer",
+        "revoked_at": "time NULL"
+      },
+      "constraints": [
+        "PK(project_id,principal_id)",
+        "Organization administrator authority comes from validated identity mapping, not request body.",
+        "Revocation is checked on each operation, including idempotent replay."
+      ],
+      "owner": "identity"
+    },
+    "resource_scopes": {
+      "fields": {
+        "resource_kind": "varchar(20) NOT NULL",
+        "resource_id": "id NOT NULL",
+        "project_id": "id FK projects NOT NULL"
+      },
+      "constraints": [
+        "PK(resource_kind,resource_id)",
+        "UNIQUE(project_id,resource_kind,resource_id)",
+        "Cover legacy run,study,job,key ownership without rewriting encrypted payloads.",
+        "Every resource lookup requires scope before loading its body."
+      ],
+      "owner": "backend"
+    },
+    "run_index": {
+      "fields": {
+        "run_id": "id PK; FK records.id",
+        "project_id": "id FK projects NOT NULL",
+        "created_at": "time NOT NULL",
+        "status": "varchar(16): running|complete|failed|incomplete",
+        "branchable": "boolean NOT NULL",
+        "parent_id": "id NULL",
+        "event_head": "digest NULL"
+      },
+      "constraints": [
+        "UNIQUE(project_id,run_id)",
+        "Composite FK(project_id,parent_id) -> run_index(project_id,run_id)",
+        "INDEX(project_id,created_at DESC,run_id DESC)",
+        "Mutable query projection; immutable event bodies/digests remain unchanged."
+      ],
+      "owner": "execution"
+    },
+    "operations": {
+      "fields": {
+        "id": "id PK",
+        "project_id": "id FK projects NOT NULL",
+        "principal_id": "varchar(256) NOT NULL",
+        "kind": "varchar(20): run",
+        "client_operation_id": "id NOT NULL",
+        "request_digest": "digest NOT NULL",
+        "job_id": "id FK jobs UNIQUE NOT NULL",
+        "accepted_response": "object NOT NULL",
+        "created_at": "time NOT NULL",
+        "retain_until": "time NOT NULL"
+      },
+      "constraints": [
+        "UNIQUE(project_id,principal_id,kind,client_operation_id)",
+        "Publish operations+jobs+scope+audit atomically after confirmed artifact upload.",
+        "Same canonical request returns original IDs; changed request conflicts; recheck current access.",
+        "Retain through operation lifetime plus at least 90 days."
+      ],
+      "owner": "backend"
+    },
+    "artifact_objects": {
+      "fields": {
+        "id": "id PK",
+        "project_id": "id FK projects NOT NULL",
+        "digest": "digest NOT NULL",
+        "locator": "varchar(1024) NOT NULL",
+        "format_version": "integer NOT NULL",
+        "byte_count": "bigint NOT NULL",
+        "created_at": "time NOT NULL"
+      },
+      "constraints": [
+        "UNIQUE(project_id,digest,format_version)",
+        "byte_count >= 0; IDs are authorization-scoped locators, never public access tokens.",
+        "M1 retains existing encrypted format as version 1; no online re-encryption yet."
+      ],
+      "owner": "storage"
+    },
+    "artifact_refs": {
+      "fields": {
+        "project_id": "id FK projects NOT NULL",
+        "owner_kind": "varchar(20) NOT NULL",
+        "owner_id": "id NOT NULL",
+        "artifact_id": "id FK artifact_objects NOT NULL",
+        "role": "varchar(32) NOT NULL"
+      },
+      "constraints": [
+        "PK(project_id,owner_kind,owner_id,artifact_id,role)",
+        "Composite scope checks tie owner and artifact to the same project.",
+        "Publish reference only after confirmed object write/hash verification; no deletion API in M1."
+      ],
+      "owner": "storage"
+    },
+    "budget_accounts": {
+      "fields": {
+        "id": "id PK",
+        "organization_id": "id FK organizations NOT NULL",
+        "scope": "varchar(16): organization|project|job",
+        "scope_id": "id NOT NULL",
+        "period_start": "time NOT NULL",
+        "period_end": "time NOT NULL",
+        "limit_microusd": "money NOT NULL",
+        "held_microusd": "money NOT NULL",
+        "accounted_microusd": "money NOT NULL"
+      },
+      "constraints": [
+        "UNIQUE(organization_id,scope,scope_id,period_start)",
+        "All money nonnegative; held+accounted <= limit.",
+        "Period bounds UTC, nonoverlapping for a scope. Job accounts use fixed job-lifetime bounds; calls retain admission-period account IDs."
+      ],
+      "owner": "execution"
+    },
+    "provider_calls": {
+      "fields": {
+        "id": "id PK",
+        "project_id": "id FK projects NOT NULL",
+        "job_id": "id FK jobs NOT NULL",
+        "logical_call_id": "id NOT NULL",
+        "purpose": "varchar(20): continuation|discovery",
+        "request_digest": "digest NOT NULL",
+        "price_version": "varchar(128) NOT NULL",
+        "state": "varchar(20): reserved|dispatching|observed|uncertain|reconciled",
+        "reserved_microusd": "money NOT NULL",
+        "usage_estimate_microusd": "money NULL",
+        "provider_request_id": "varchar(256) NULL",
+        "created_at": "time NOT NULL"
+      },
+      "constraints": [
+        "UNIQUE(project_id,logical_call_id)",
+        "Amounts nonnegative; usage estimate separate from charge reconciliation.",
+        "M1 adds ledger primitives; discovery receipts and resume/reconciliation UI are completed in M3.",
+        "Unknown dispatch/response leaves reservation held; retry returns same logical call reservation."
+      ],
+      "owner": "execution"
+    },
+    "budget_entries": {
+      "fields": {
+        "call_id": "id FK provider_calls NOT NULL",
+        "account_id": "id FK budget_accounts NOT NULL",
+        "entry_kind": "varchar(16): reserve|settle|release",
+        "amount_microusd": "money NOT NULL",
+        "evidence_ref": "id NULL",
+        "created_at": "time NOT NULL"
+      },
+      "constraints": [
+        "PK(call_id,account_id,entry_kind)",
+        "Lock all scope accounts in deterministic ID order; reserve all or none in one transaction.",
+        "Settlement/release requires reconciliation evidence; never release solely for a timeout.",
+        "Existing jobs.reserved remains consistent during compatibility window; no double counting."
+      ],
+      "owner": "execution"
+    },
+    "operation_keys": {
+      "fields": {
+        "project_id": "id FK projects NOT NULL",
+        "principal_id": "varchar(256) NOT NULL",
+        "kind": "varchar(20) NOT NULL",
+        "key_hash": "digest NOT NULL",
+        "operation_id": "id FK operations NOT NULL",
+        "request_digest": "digest NOT NULL"
+      },
+      "constraints": [
+        "PK(project_id,principal_id,kind,key_hash)",
+        "Composite scope/owner/kind matches the referenced operation.",
+        "A retry with an existing client_operation_id and a new key records an alias atomically after comparing the canonical digest.",
+        "A key already bound to a different operation/request conflicts; all aliases live as long as their operation."
+      ],
+      "owner": "backend"
+    }
+  },
+  "migration_protocol": [
+    "Drain writers for legacy adoption; back up and verify source schema fingerprint before stamping the known baseline. Reject unknown/newer/incompatible schemas.",
+    "Install additive revisions; require explicit legacy project mapping before backfill; preserve original IDs, timestamps, hashes, encrypted objects and historical budget values.",
+    "Backfill scoped indexes in resumable bounded batches; report unmappable records, including parent lineage, instead of dropping them.",
+    "Verify counts, scope closure, event-chain heads and artifact digests. Switch all legacy/current reads through scoped repositories before admitting a second project.",
+    "API/worker runtime credentials have no DDL privilege. Runtime startup checks revision compatibility; migrations are an explicit operator command.",
+    "Document downgrade as unsupported where unsafe; application rollback only to compatible readers or a verified restore. Never rehash history during backfill."
+  ],
+  "transactions": {
+    "submit": "Authorize -> validate and materialize defaults -> canonical digest preserving exact source bytes/text -> confirm encrypted artifact write -> transaction: resolve both idempotency key and client operation ID, bind any new key alias, create at most one job/scope/operation/audit -> 202. Unique conflict rereads original authorized response; orphan uploads remain unreferenced.",
+    "reserve": "Check lease/cancel -> lock org/project/job accounts in sorted ID order -> idempotently resolve logical call -> validate all caps -> insert ledger entries/update held and legacy aggregate atomically -> return permit. No network call inside transaction.",
+    "cancel": "Authorize project/action -> atomically record intent and audit; queued job becomes cancelled, terminal status remains unchanged."
+  }
+}
