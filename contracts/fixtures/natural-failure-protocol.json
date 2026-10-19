@@ -9,7 +9,8 @@
     "task_family_id",
     "repository_family_id",
     "source_digest",
-    "task_evaluator_family_id"
+    "task_evaluator_family_id",
+    "evaluator_digest"
   ],
   "classification_cases": [
     {
@@ -253,6 +254,34 @@
         }
       ],
       "expected": "leakage"
+    },
+    {
+      "id": "leaked_evaluator_digest",
+      "tasks": [
+        {
+          "task_id": "synthetic-task-1",
+          "phase": "development",
+          "task_family_id": "synthetic-task-family-1",
+          "repository_family_id": "synthetic-repository-family-1",
+          "source_digest": "efd4bacf6a6e52990b2a8b4feea8db19424c0937807fb19dfd18a21dd98b9796",
+          "task_evaluator_family_id": "synthetic-evaluator-family-1",
+          "evaluator_digest": "ddb3bb001aa4c5c60d7279911e5fdba8d715ebfbcc4daeaa5c6291982d17c161",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        },
+        {
+          "task_id": "synthetic-task-2",
+          "phase": "held_out",
+          "task_family_id": "synthetic-task-family-2",
+          "repository_family_id": "synthetic-repository-family-2",
+          "source_digest": "5c3e292fd2b728f6564898ec55c6a100174cc63f17281f9a211f7b376b4faa88",
+          "task_evaluator_family_id": "synthetic-evaluator-family-2",
+          "evaluator_digest": "ddb3bb001aa4c5c60d7279911e5fdba8d715ebfbcc4daeaa5c6291982d17c161",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        }
+      ],
+      "expected": "leakage"
     }
   ],
   "stability_minimum_repeats": 3,
@@ -398,7 +427,17 @@
     "budget_policy_digest": "4fff19f1cc533940b6b3b3bbc997fcc81067ef9e8edf4073e9eab56609b6998c",
     "candidate_procedure_digest": "562ce79a745680e410d468fb3bc198816c87a3bac89952d5c13b11e47df21a33",
     "processor_profile_id": "synthetic-model-region-a-no-retention",
-    "provider_fingerprint": "synthetic-version-1"
+    "provider_fingerprint": "synthetic-version-1",
+    "protocol_revision": "natural-failure-v1",
+    "protocol_digest": "ccd5e95e095298376c52394a151dcd3089ce13cb1d8e5d722d59e4a9f2945eb8",
+    "corpus_digest": "26dbf81d9496cad847110a1036f1cb2e5726af57888e96c6fcc785752a04c483",
+    "split_manifest_digest": "02eb6528df48c615e90aaca3b8d902257e789a06fa76acd32ce9e14135243e18",
+    "task_digest": "022c879b935ac34467c66219b720b302f0992799dc2ee5b3e261ad54192a8954",
+    "source_revision": "0000000000000000000000000000000000000000",
+    "checkpoint_digest": "d6879a865607580dc06ab7f9e7ff218df6a1eb64dd5271dfb26c9878c1ed6215",
+    "event_chain_head": "7728d495ea5440a64198f957c9386c0dcb9f6303eaa4eb96f99a4409d29d42af",
+    "configuration_digest": "3560113464e9f5c796e6d1e754a09475639a63667770add09047be2b68761ac0",
+    "fingerprint_policy_digest": "88d40581d8cc085ee3b3fe0cc75a1f638676f69d5e04d87a76b42bd0d0492da6"
   },
   "identity_drift_fields": [
     "model_revision",
@@ -412,7 +451,17 @@
     "budget_policy_digest",
     "candidate_procedure_digest",
     "processor_profile_id",
-    "provider_fingerprint"
+    "provider_fingerprint",
+    "protocol_revision",
+    "protocol_digest",
+    "corpus_digest",
+    "split_manifest_digest",
+    "task_digest",
+    "source_revision",
+    "checkpoint_digest",
+    "event_chain_head",
+    "configuration_digest",
+    "fingerprint_policy_digest"
   ],
   "feasibility_cases": [
     {
@@ -561,5 +610,62 @@
     "independent_statistics": "pending",
     "human_corpus_permissions": "pending",
     "pilot_protocol_and_funding": "pending"
+  },
+  "identity_contract": {
+    "maximum_value_characters": 128,
+    "required_fields": [
+      "model_revision",
+      "adapter_digest",
+      "prompt_digest",
+      "image_digest",
+      "tool_policy_digest",
+      "evaluator_digest",
+      "evaluator_command_digest",
+      "eligibility_digest",
+      "budget_policy_digest",
+      "candidate_procedure_digest",
+      "processor_profile_id",
+      "provider_fingerprint",
+      "protocol_revision",
+      "protocol_digest",
+      "corpus_digest",
+      "split_manifest_digest",
+      "task_digest",
+      "source_revision",
+      "checkpoint_digest",
+      "event_chain_head",
+      "configuration_digest",
+      "fingerprint_policy_digest"
+    ],
+    "digest_fields": [
+      "adapter_digest",
+      "prompt_digest",
+      "image_digest",
+      "tool_policy_digest",
+      "evaluator_digest",
+      "evaluator_command_digest",
+      "eligibility_digest",
+      "budget_policy_digest",
+      "candidate_procedure_digest",
+      "protocol_digest",
+      "corpus_digest",
+      "split_manifest_digest",
+      "task_digest",
+      "checkpoint_digest",
+      "event_chain_head",
+      "configuration_digest",
+      "fingerprint_policy_digest"
+    ],
+    "revision_fields": [
+      "source_revision"
+    ],
+    "named_fields": [
+      "protocol_revision",
+      "model_revision",
+      "provider_fingerprint",
+      "processor_profile_id"
+    ],
+    "compatible_decision": "compatible",
+    "invalid_or_changed_decision": "quarantine"
   }
 }

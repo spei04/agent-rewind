@@ -63,6 +63,15 @@ adapter/prompt/configuration digest, pinned image/tool policy, evaluator source
 and command digests, budget/stopping policy and candidate-selection procedure.
 The fixture's model names, identities and review flags are fictional placeholders.
 
+The synthetic identity contract requires the complete frozen field set, validates
+digest/revision formats and bounded named identities, and returns compatible only
+when every required value agrees. Missing, unexpected, malformed or changed fields
+in either the frozen or observed identity quarantine the comparison. The frozen
+provider-fingerprint policy records any explicitly accepted lack of visibility;
+an omitted fingerprint is not an implicit exemption. Generic image and evaluator
+command identities can legitimately be shared across split groups; task-specific
+evaluator content cannot.
+
 Record actual returned model/fingerprint, tool/environment and grader identities
 for each attempt. An unexpected change quarantines the affected cohort pending
 review; do not silently pool it with the original condition. If a provider
@@ -100,10 +109,12 @@ Before splitting, join near-duplicate tasks, forks, shared patches/issues,
 repository lineage and task-specific evaluator copies into leakage groups.
 Shared generic runner/harness utilities alone do not imply identical tasks, but
 record their common dependencies. Assign whole groups with a recorded split
-seed and strata; no task ID, task family, repository family, source-content digest
-or task-specific evaluator family may span both sides. Exact digest checking is
-necessary but cannot detect semantically duplicated tasks by itself: independent
-corpus review must verify lineage and near-duplicate grouping.
+seed and strata; no task ID, task family, repository family, source-content digest,
+task-specific evaluator family, or task-specific evaluator artifact digest may
+span both sides. All these identities are required; missing evaluator provenance
+cannot bypass admission. Exact digest checking is necessary but cannot detect
+semantically duplicated tasks by itself: independent corpus review must verify
+lineage and near-duplicate grouping.
 
 Seal held-out source/results from procedure tuning, prompt editing and selection
 threshold decisions. An authorized evaluation runner may read the task context
@@ -241,8 +252,9 @@ is not an approved scientific minimum.
 ## Verification and release boundaries
 
 `tests/test_natural_failure_protocol.py` checks declared split leakage, provenance
-links, frozen identity changes, deterministic evaluator-control instability,
-insufficient independent groups, planned/missing-pair arithmetic and the cost
+links, exact task-specific evaluator-content leakage, complete identity admission
+and missing/changed/unexpected identity fields, deterministic evaluator-control
+instability, insufficient independent groups, planned/missing-pair arithmetic and the cost
 worksheet. It performs no model or grader sandbox experiment and no customer
 access. The fixtures' synthetic review flag cannot authorize real processing.
 

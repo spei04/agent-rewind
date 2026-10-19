@@ -3,6 +3,7 @@
 import copy
 import hashlib
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -48,6 +49,32 @@ def stability_status(repeats):
     if any(any(value != outcome for value in repeats[key]) for key, outcome in expected.items()):
         return "quarantine"
     return "eligible"
+
+
+def identity_status(frozen, observed):
+    """Bounded design oracle; runtime study admission is a later implementation."""
+    contract = CONTRACT["identity_contract"]
+    required = set(contract["required_fields"])
+    for identity in (frozen, observed):
+        if not isinstance(identity, dict) or len(identity) != len(required):
+            return "quarantine"
+        if set(identity) != required:
+            return "quarantine"
+        for key, value in identity.items():
+            if (
+                not isinstance(value, str)
+                or not 1 <= len(value) <= contract["maximum_value_characters"]
+            ):
+                return "quarantine"
+            if key in contract["digest_fields"]:
+                pattern = r"[0-9a-f]{64}"
+            elif key in contract["revision_fields"]:
+                pattern = r"(?:[0-9a-f]{40}|[0-9a-f]{64})"
+            else:
+                pattern = r"[A-Za-z0-9._:-]{1,128}"
+            if re.fullmatch(pattern, value) is None:
+                return "quarantine"
+    return "compatible" if frozen == observed else "quarantine"
 
 
 def feasibility_status(row):
@@ -110,14 +137,96 @@ def test_unstable_wrong_and_incomplete_evaluator_controls_block_study(row):
     assert stability_status(row["repeats"]) == row["expected"]
 
 
+def test_complete_identity_contract_covers_declared_frozen_boundary():
+    contract = CONTRACT["identity_contract"]
+    required = {
+        "protocol_revision",
+        "protocol_digest",
+        "eligibility_digest",
+        "corpus_digest",
+        "split_manifest_digest",
+        "task_digest",
+        "source_revision",
+        "checkpoint_digest",
+        "event_chain_head",
+        "model_revision",
+        "provider_fingerprint",
+        "fingerprint_policy_digest",
+        "processor_profile_id",
+        "adapter_digest",
+        "prompt_digest",
+        "configuration_digest",
+        "image_digest",
+        "tool_policy_digest",
+        "evaluator_digest",
+        "evaluator_command_digest",
+        "budget_policy_digest",
+        "candidate_procedure_digest",
+    }
+    assert set(contract["required_fields"]) == required
+    assert len(contract["required_fields"]) == len(required)
+    groups = [set(contract[name]) for name in ("digest_fields", "revision_fields", "named_fields")]
+    assert set.union(*groups) == required
+    assert sum(map(len, groups)) == len(required)
+    frozen = CONTRACT["frozen_identity_example"]
+    assert identity_status(frozen, copy.deepcopy(frozen)) == "compatible"
+
+
 @pytest.mark.parametrize("field", CONTRACT["identity_drift_fields"])
-def test_frozen_identity_drift_requires_new_cohort(field):
+def test_frozen_identity_drift_quarantines_comparison(field):
     frozen = CONTRACT["frozen_identity_example"]
     observed = copy.deepcopy(frozen)
-    observed[field] = "different-synthetic-identity"
-    changed = {key for key in frozen if observed.get(key) != frozen[key]}
-    assert changed == {field}
-    assert observed != frozen
+    if field in CONTRACT["identity_contract"]["digest_fields"]:
+        observed[field] = "f" * 64
+    elif field in CONTRACT["identity_contract"]["revision_fields"]:
+        observed[field] = "f" * 40
+    else:
+        observed[field] = "different-synthetic-identity"
+    assert identity_status(frozen, observed) == "quarantine"
+
+
+@pytest.mark.parametrize("field", CONTRACT["identity_contract"]["required_fields"])
+@pytest.mark.parametrize("side", ["frozen", "observed"])
+def test_missing_required_identity_field_quarantines_comparison(field, side):
+    identities = {
+        name: copy.deepcopy(CONTRACT["frozen_identity_example"]) for name in ("frozen", "observed")
+    }
+    del identities[side][field]
+    assert identity_status(**identities) == "quarantine"
+
+
+@pytest.mark.parametrize("side", ["frozen", "observed"])
+def test_unexpected_identity_field_quarantines_comparison(side):
+    identities = {
+        name: copy.deepcopy(CONTRACT["frozen_identity_example"]) for name in ("frozen", "observed")
+    }
+    identities[side]["unregistered_state"] = "synthetic"
+    assert identity_status(**identities) == "quarantine"
+
+
+@pytest.mark.parametrize("value", [None, 1, "", "not-a-digest", "f" * 129])
+def test_invalid_identity_values_are_quarantined_even_when_equal(value):
+    frozen = copy.deepcopy(CONTRACT["frozen_identity_example"])
+    frozen["evaluator_digest"] = value
+    assert identity_status(frozen, copy.deepcopy(frozen)) == "quarantine"
+
+
+def test_equal_missing_or_extra_identities_are_not_compatible():
+    frozen = copy.deepcopy(CONTRACT["frozen_identity_example"])
+    del frozen["checkpoint_digest"]
+    assert identity_status(frozen, copy.deepcopy(frozen)) == "quarantine"
+    frozen["unregistered_state"] = "synthetic"
+    assert identity_status(frozen, copy.deepcopy(frozen)) == "quarantine"
+
+
+def test_split_rejects_missing_evaluator_content_and_permits_generic_sharing():
+    tasks = copy.deepcopy(CONTRACT["split_cases"][0]["tasks"])
+    assert tasks[0]["image_digest"] == tasks[1]["image_digest"]
+    assert tasks[0]["evaluator_command_digest"] == tasks[1]["evaluator_command_digest"]
+    assert split_status(tasks) == "valid"
+    del tasks[1]["evaluator_digest"]
+    with pytest.raises(ValueError, match="Missing leakage"):
+        split_status(tasks)
 
 
 @pytest.mark.parametrize("row", CONTRACT["feasibility_cases"], ids=lambda row: row["id"])
