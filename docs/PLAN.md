@@ -818,6 +818,8 @@ The original brief is filled in this single roadmap. The later request explicitl
 | 2026-10-19 | Staged delivery / Stage 2: M0/M1 packet prepared | Four-stage workflow added; 12 detailed issues and two milestones created. Three draft contract artifacts define five API operations, twelve logical entities and 24 planned acceptance cases. OpenAPI structure/references validated and 19 native dependencies read back against the roadmap; runtime cases remain unexecuted. | Product owner reviews assumptions/contracts before Stage 3. |
 | 2026-10-19 | Execution backlog: draft → prepared and checked | 14 planning findings resolved; 145 bounded PR tasks, 26 gates, 18 contract entries, 427-day rollup, 511-edge acyclic dependency graph and conditional ten-day capacity/prerequisite checks. Draft scope FKs tightened. All execution tasks remain Not started; no runtime changes or paid work. | Product owner reviews E0 scope, staffing/funding/data decisions; runtime work waits for G0. |
 
+Execution checkpoint: AR-001-A verified via PR #13; AR-001-B assigned; AR-004-A/AR-005-A in review. [Assignment log and management checkpoint](ASSIGNMENTS.md) contain exact checks, storage constraint and unchanged budget.
+
 ### 14.4 Immediate next action
 
 Execute the approved backlog with three independent contributor slots and lead review. [ASSIGNMENTS.md](ASSIGNMENTS.md) records who owns each task and the integration/reassignment decisions. E0 approval was explicitly given on 2026-10-19; do not request it again. Preserve real contract, external funding, data, customer, security and release gates. Integrate tested work, update task/evidence status, and assign each available contributor the next task whose prerequisites are satisfied.
