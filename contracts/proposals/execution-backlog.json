@@ -23,7 +23,7 @@
         "AR-002-A",
         "AR-002-B"
       ],
-      "status": "In progress"
+      "status": "Verified"
     },
     "AR-003": {
       "milestone": "M0",
@@ -750,7 +750,7 @@
       "tests": "Synthetic split leakage, unstable grader and insufficient-sample fixtures",
       "security_reliability": "No screening on holdout; model changes invalidate affected comparison",
       "out_of_scope": "No claim that existing injected failure establishes generality",
-      "status": "Implemented / verification pending",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -764,9 +764,9 @@
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
       "assigned_to": "Engineer A \u2014 research protocol",
       "evidence": {
-        "commit": "820c0a9d04f78b46391e75924b7e6e4329e609f1",
+        "commit": "d90a1b9",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/21",
-        "checks": "166 scoped tests passed after evaluator-digest/identity corrections; independent recheck and CI pending."
+        "checks": "166 scoped tests plus independent RV-002 recheck of leakage/22-field identity cases; core and gVisor CI passed. Internal contract accepted; external statistical/human pilot review remains pending."
       }
     },
     {
@@ -913,7 +913,7 @@
       "tests": "Run contract structure, dependency and historical-fixture manifest checks",
       "security_reliability": "Approval evidence is required; silence is not acceptance",
       "out_of_scope": "No implementation sign-off or invented reviewers",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -924,7 +924,8 @@
         "QE"
       ],
       "pull_request_boundary": "Resolve API/schema/test disagreements, explicit composite scope constraints and deferred endpoint ownership. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "assigned_to": "Engineer B \u2014 backend/platform contract reconciliation"
     },
     {
       "id": "AR-004-C",
@@ -1599,9 +1600,9 @@
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
       "assigned_to": "Engineer C \u2014 quality/contract integration",
       "evidence": {
-        "commit": "de03351e41506c3d14bbe65410087caa08df6960",
+        "commit": "a5dcdcbe981d729b13e87f78719c3bc46b7b543b",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/22",
-        "checks": "51 scoped tests passed; RV-003 found TEMP SQL bypass of fixture bounds; correction required before merge."
+        "checks": "70 scoped tests; independent RV-003 exact reproductions reject, supported fixtures pass. Final-head hosted CI pending."
       }
     },
     {
@@ -6323,7 +6324,7 @@
       "producer": "AR-002-A",
       "title": "Corpus/evaluator protocol",
       "required_interface": "Rights/source/evaluator manifest; disjoint task families; failure taxonomy; immutable grader, split and private evidence policy.",
-      "status": "Partial: permission/provenance schema reviewed in AR-002-A; natural-failure and held-out protocol in AR-002-B is in progress."
+      "status": "Available: permission/provenance and natural-failure protocol reviewed; real rights and independent statistical approval remain external."
     },
     {
       "id": "C03",

@@ -142,7 +142,7 @@ C04 links the [M1 API](../contracts/proposals/m1.openapi.json), [logical data mo
 | C18 — Capacity workload/SLIs | [AR-040-A](#ar-040-a) | Plan Section 5 workload distributions and latency/error/resource bounds, queue fairness, five-minute burst, 24-hour soak and hardware/cost identity. |
 | C19 — Regional recovery manifest | [AR-042-A](#ar-042-a) | Coherent DB/object/key/deletion backups; approved region; RPO/RTO, restore ordering, integrity and off-device evidence. |
 
-Current availability: C01 workflow/metric contracts are reviewed. C02 permission/provenance and C03 trust boundaries are reviewed; their protocol/capacity supplements are in progress or review. C04 remains a draft with reviewed inventory and observability inputs, pending reconciliation and G0. The machine-readable register records each current status.
+Current availability: C01 workflows/metrics, C02 permission/provenance/protocol and C03 trust/capacity decision records are reviewed internally. Real partner, statistical, deployment and funding gates remain separate. C04 is being reconciled before G0. The machine-readable register records each current status.
 
 
 ## Gate register
@@ -305,7 +305,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Verified · [Tracking issue #1](https:
 
 ### AR-002 — Protect corpus rights and establish a credible natural-failure evaluation protocol
 
-M0 / P0 · 2 PRs · 2 engineering days · In progress · [Tracking issue #2](https://github.com/spei04/agent-rewind/issues/2)
+M0 / P0 · 2 PRs · 2 engineering days · Verified · [Tracking issue #2](https://github.com/spei04/agent-rewind/issues/2)
 
 <a id="ar-002-a"></a>
 
@@ -339,7 +339,7 @@ M0 / P0 · 2 PRs · 2 engineering days · In progress · [Tracking issue #2](htt
 - **Effort / confidence:** 1 engineering days; planning range 1–2; low confidence.
 - **Responsible role:** RS; required reviewers: QE, independent statistical reviewer. Assigned contributor: Engineer A — research protocol.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Implemented / verification pending; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
+- **Progress:** Verified; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-003"></a>
 
@@ -419,7 +419,7 @@ M0 / P0 · 3 PRs · 2.5 engineering days · In progress · [Tracking issue #4](h
 - **Effort / confidence:** 1 engineering days; planning range 1–1.5; medium confidence.
 - **Responsible role:** TL; required reviewers: BE, QE. Named assignee pending staffing.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** In progress; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-004-c"></a>
 
