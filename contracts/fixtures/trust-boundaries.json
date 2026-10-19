@@ -1,0 +1,471 @@
+{
+  "contract_id": "C03",
+  "schema_version": 1,
+  "status": "proposed_for_internal_security_review",
+  "source_baseline": "8f1ae757005c95c50a789e4fa0a10aae9b3c4024",
+  "scope": {
+    "installation": "self_hosted",
+    "organizations_per_installation": 1,
+    "customer_database_connection": false,
+    "sandbox_runtime": "runsc",
+    "insecure_fallback": false,
+    "dedicated_worker_hosts": true,
+    "region": null,
+    "provisioning_authorized": false,
+    "live_isolation_verified_by_fixture": false
+  },
+  "components": {
+    "browser": {
+      "trust": "user_endpoint",
+      "credentials": [
+        "session_cookie",
+        "service_api_key"
+      ]
+    },
+    "ingress": {
+      "trust": "trusted_control",
+      "credentials": [
+        "tls_identity"
+      ]
+    },
+    "api": {
+      "trust": "trusted_control",
+      "credentials": [
+        "metadata_dml",
+        "artifact_rw",
+        "artifact_decrypt",
+        "oidc_client"
+      ]
+    },
+    "worker": {
+      "trust": "trusted_execution",
+      "credentials": [
+        "metadata_dml",
+        "artifact_rw",
+        "artifact_decrypt",
+        "model_provider"
+      ]
+    },
+    "migration_operator": {
+      "trust": "trusted_operator",
+      "credentials": [
+        "metadata_ddl"
+      ]
+    },
+    "docker_daemon": {
+      "trust": "trusted_execution",
+      "credentials": [
+        "host_authority"
+      ]
+    },
+    "sandbox": {
+      "trust": "untrusted_code",
+      "credentials": []
+    },
+    "evaluator_sandbox": {
+      "trust": "untrusted_code",
+      "credentials": []
+    },
+    "metadata_db": {
+      "trust": "trusted_persistence",
+      "credentials": []
+    },
+    "artifact_store": {
+      "trust": "trusted_persistence",
+      "credentials": []
+    },
+    "identity_provider": {
+      "trust": "approved_external",
+      "credentials": []
+    },
+    "model_provider": {
+      "trust": "approved_external",
+      "credentials": []
+    },
+    "key_service": {
+      "trust": "trusted_key_authority",
+      "credentials": []
+    },
+    "cloud_metadata": {
+      "trust": "cloud_identity_endpoint",
+      "credentials": []
+    },
+    "customer_database": {
+      "trust": "out_of_scope",
+      "credentials": []
+    },
+    "internet": {
+      "trust": "unapproved_external",
+      "credentials": []
+    }
+  },
+  "network_policy": {
+    "default": "deny",
+    "allowed": [
+      {
+        "source": "browser",
+        "target": "ingress",
+        "channel": "https-authenticated-app"
+      },
+      {
+        "source": "ingress",
+        "target": "api",
+        "channel": "private-app-service"
+      },
+      {
+        "source": "api",
+        "target": "metadata_db",
+        "channel": "private-tls-dml"
+      },
+      {
+        "source": "api",
+        "target": "artifact_store",
+        "channel": "private-encrypted-object-io"
+      },
+      {
+        "source": "api",
+        "target": "identity_provider",
+        "channel": "https-oidc-discovery-token-jwks"
+      },
+      {
+        "source": "browser",
+        "target": "identity_provider",
+        "channel": "https-interactive-login"
+      },
+      {
+        "source": "api",
+        "target": "key_service",
+        "channel": "workload-identity-authorized-key-operation"
+      },
+      {
+        "source": "worker",
+        "target": "metadata_db",
+        "channel": "private-tls-dml"
+      },
+      {
+        "source": "worker",
+        "target": "artifact_store",
+        "channel": "private-encrypted-object-io"
+      },
+      {
+        "source": "worker",
+        "target": "model_provider",
+        "channel": "https-approved-endpoint"
+      },
+      {
+        "source": "worker",
+        "target": "key_service",
+        "channel": "workload-identity-authorized-key-operation"
+      },
+      {
+        "source": "worker",
+        "target": "docker_daemon",
+        "channel": "local-unix-socket"
+      },
+      {
+        "source": "migration_operator",
+        "target": "metadata_db",
+        "channel": "private-tls-explicit-ddl"
+      },
+      {
+        "source": "api",
+        "target": "cloud_metadata",
+        "channel": "approved-platform-workload-identity-bootstrap-only"
+      },
+      {
+        "source": "worker",
+        "target": "cloud_metadata",
+        "channel": "approved-platform-workload-identity-bootstrap-only"
+      }
+    ],
+    "explicit_denials": [
+      {
+        "source": "sandbox",
+        "target": "browser",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "ingress",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "api",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "worker",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "migration_operator",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "docker_daemon",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "evaluator_sandbox",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "metadata_db",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "artifact_store",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "identity_provider",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "model_provider",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "key_service",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "cloud_metadata",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "customer_database",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "sandbox",
+        "target": "internet",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "browser",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "ingress",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "api",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "worker",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "migration_operator",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "docker_daemon",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "sandbox",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "metadata_db",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "artifact_store",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "identity_provider",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "model_provider",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "key_service",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "cloud_metadata",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "customer_database",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "evaluator_sandbox",
+        "target": "internet",
+        "reason": "No outbound network or host control socket from untrusted execution."
+      },
+      {
+        "source": "api",
+        "target": "docker_daemon",
+        "reason": "API must not inherit Docker authority."
+      },
+      {
+        "source": "api",
+        "target": "model_provider",
+        "reason": "Paid inference belongs to trusted workers."
+      },
+      {
+        "source": "api",
+        "target": "customer_database",
+        "reason": "Dedicated metadata database only."
+      },
+      {
+        "source": "worker",
+        "target": "customer_database",
+        "reason": "No customer application database connector."
+      },
+      {
+        "source": "browser",
+        "target": "metadata_db",
+        "reason": "Browser uses authenticated API only."
+      },
+      {
+        "source": "browser",
+        "target": "artifact_store",
+        "reason": "No direct blob access in C03."
+      },
+      {
+        "source": "browser",
+        "target": "model_provider",
+        "reason": "Provider keys and invocation stay worker-side."
+      },
+      {
+        "source": "internet",
+        "target": "metadata_db",
+        "reason": "No public metadata listener."
+      },
+      {
+        "source": "internet",
+        "target": "docker_daemon",
+        "reason": "No remote Docker listener."
+      },
+      {
+        "source": "internet",
+        "target": "worker",
+        "reason": "No public worker listener."
+      }
+    ]
+  },
+  "sandbox_config": {
+    "network_mode": "none",
+    "user": "1000:1000",
+    "read_only": true,
+    "cap_drop": [
+      "ALL"
+    ],
+    "security_opt": [
+      "no-new-privileges"
+    ],
+    "privileged": false,
+    "host_bind_mounts": [],
+    "docker_socket_mount": false,
+    "credentials": [],
+    "model_key": false,
+    "workspace_mount": "private_tmpfs_volume",
+    "grader_mount": "absent_during_agent_steps_read_only_during_evaluation",
+    "resource_limits": [
+      "memory",
+      "cpu",
+      "pids",
+      "workspace_bytes",
+      "command_timeout",
+      "output_bytes"
+    ]
+  },
+  "secret_recipients": {
+    "model_provider": [
+      "worker"
+    ],
+    "metadata_ddl": [
+      "migration_operator"
+    ],
+    "host_authority": [
+      "docker_daemon"
+    ],
+    "artifact_decrypt": [
+      "api",
+      "worker"
+    ],
+    "oidc_client": [
+      "api"
+    ]
+  },
+  "mediated_data_flows": [
+    {
+      "source": "sandbox",
+      "target": "worker",
+      "channel": "docker-output-and-validated-workspace-archive",
+      "data": "untrusted output and source bytes; no direct network connection"
+    },
+    {
+      "source": "worker",
+      "target": "model_provider",
+      "channel": "policy-http",
+      "data": "task instruction, visible file paths and accumulated tool observations; approved processor required"
+    },
+    {
+      "source": "worker",
+      "target": "artifact_store",
+      "channel": "encrypted-capture",
+      "data": "task, checkpoint policy state, workspace, events, provider response and evaluator output"
+    },
+    {
+      "source": "api",
+      "target": "browser",
+      "channel": "authorized-app-response",
+      "data": "decrypted authorized traces and file previews"
+    },
+    {
+      "source": "worker",
+      "target": "evaluator_sandbox",
+      "channel": "docker-volume-copy",
+      "data": "candidate workspace plus trusted grader in separate read-only mount"
+    }
+  ],
+  "external_gates": [
+    "ARCH0",
+    "ENV0",
+    "PARTNER0"
+  ],
+  "limitations": [
+    "Target intent, not deployed firewall/IAM configuration.",
+    "Network denials do not block authorized mediated content reaching the model provider.",
+    "Private routing does not replace identity or project authorization.",
+    "No security certification, external review or live isolation result is asserted."
+  ]
+}
