@@ -1,9 +1,8 @@
 {
   "contract": "C01",
   "schema_version": 1,
-  "status": "engineering-review",
+  "status": "internally-accepted",
   "evidence_class": "synthetic-contract-examples",
-  "pm_review": "pending",
   "limits_source": "agent_rewind/models.py:TaskSpec",
   "workflows": [
     {
@@ -120,5 +119,7 @@
         "Would a null or harmful intervention result still save investigation time?"
       ]
     }
-  ]
+  ],
+  "internal_review": "project-lead-scope-accepted-automated-checks-passed",
+  "customer_validation": "pending-PARTNER0-PILOT"
 }

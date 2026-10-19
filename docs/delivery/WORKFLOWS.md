@@ -1,8 +1,10 @@
 # Supported investigation workflows
 
-AR-001-A · C01 · Engineering contract ready for review. Buyer interviews and PM
-acceptance remain pending; no customer validation is implied. Metrics and pilot
-acceptance belong to AR-001-B.
+AR-001-A · C01 · Internal workflow scope reviewed by the delegated project lead
+against the user-approved roadmap; the required six automated tests and scoped
+lint/format checks passed. Actual buyer interviews and customer validation remain pending
+at the PARTNER0/PILOT gates. No named PM approval or customer validation is
+implied. Metrics and pilot acceptance belong to AR-001-B.
 
 The initial buyer is the team responsible for a coding agent's reliability. The
 operator is an agent developer or evaluation engineer. Both workflows use the
@@ -164,8 +166,11 @@ smoke test can pass while the independent grader fails. No provider, Docker or
 cloud call is made by those tests.
 
 TL/BE review covers tool-boundary semantics; QE review covers model validation
-and executable fixtures. PM review must confirm that the two journeys reflect
-buyer/operator needs and accept their input/failure/intervention/success
-examples. That review and subsequent customer validation are pending, not
-inferred from an automated check or from backlog approval. AR-001-B consumes
-these workflow IDs when specifying measurement and interaction acceptance.
+and executable fixtures. The delegated project lead reviewed and accepted the
+internal workflow scope and examples against the user-approved roadmap. The six
+automated tests and scoped lint/format checks passed. This internal acceptance allows
+dependent engineering work; it does not establish customer usefulness. Actual
+buyer interviews and customer validation remain pending at PARTNER0/PILOT and
+are not inferred from backlog approval or automated checks. No named PM sign-off
+is recorded. AR-001-B consumes these workflow IDs when specifying measurement
+and interaction acceptance.

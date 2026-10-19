@@ -18,9 +18,7 @@ WORKFLOWS = CONTRACT["workflows"]
 def evaluate_fixture(workflow, tmp_path, repaired):
     workspace = tmp_path / ("repaired" if repaired else "original")
     workspace.mkdir()
-    files = workflow["task"]["files"] | (
-        workflow["successful_workspace"] if repaired else {}
-    )
+    files = workflow["task"]["files"] | (workflow["successful_workspace"] if repaired else {})
     for name, content in files.items():
         destination = workspace / name
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -43,8 +41,18 @@ def test_workflow_contract_fields():
     assert CONTRACT["evidence_class"] == "synthetic-contract-examples"
     assert len({flow["id"] for flow in WORKFLOWS}) == len(WORKFLOWS) == 2
     required = {
-        "id", "buyer", "operator", "objective", "input", "failure", "intervention",
-        "success", "task", "successful_workspace", "expected_checks", "interview_questions",
+        "id",
+        "buyer",
+        "operator",
+        "objective",
+        "input",
+        "failure",
+        "intervention",
+        "success",
+        "task",
+        "successful_workspace",
+        "expected_checks",
+        "interview_questions",
     }
     for workflow in WORKFLOWS:
         assert required <= workflow.keys()
