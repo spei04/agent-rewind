@@ -730,7 +730,7 @@ M1 / P0 · 3 PRs · 5 engineering days · Not started · [Tracking issue #11](ht
 - **Effort / confidence:** 1 engineering days; planning range 0.8–1.2; high confidence.
 - **Responsible role:** PL; required reviewers: SEC, QE. Assigned contributor: Engineer A — error and telemetry contracts.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Implemented / verification pending; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
+- **Progress:** Verified; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-011-b"></a>
 

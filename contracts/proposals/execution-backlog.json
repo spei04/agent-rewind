@@ -1406,7 +1406,7 @@
       "tests": "Validate success/error fixtures and reject high-cardinality secret labels",
       "security_reliability": "Redaction before logging; never emit source, tokens or raw provider bodies",
       "out_of_scope": "No runtime change; pre-G0 design only",
-      "status": "Implemented / verification pending",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         0.8,
@@ -1420,9 +1420,9 @@
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
       "assigned_to": "Engineer A \u2014 error and telemetry contracts",
       "evidence": {
-        "commit": "341d414c2e1d703d1181b0f594fa213723556727",
+        "commit": "ea85d2c",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/19",
-        "checks": "53 scoped tests, Ruff/format and links passed; lead reviewed safe errors, uncertainty and bounded readiness/telemetry; CI pending."
+        "checks": "53 scoped tests, lint/format and link checks; core and real gVisor CI passed. Lead reviewed error/uncertainty and readiness bounds; design contract only."
       }
     },
     {
@@ -6243,28 +6243,28 @@
       "producer": "AR-001-A",
       "title": "Workflow and metrics",
       "required_interface": "Two supported journeys, input/output examples, capture denominator, investigation timing, scope and pilot usefulness thresholds.",
-      "status": "To be specified/reviewed by producer task; not yet available"
+      "status": "Available: workflows and metrics reviewed in AR-001-A/B; partner validation remains pending."
     },
     {
       "id": "C02",
       "producer": "AR-002-A",
       "title": "Corpus/evaluator protocol",
       "required_interface": "Rights/source/evaluator manifest; disjoint task families; failure taxonomy; immutable grader, split and private evidence policy.",
-      "status": "To be specified/reviewed by producer task; not yet available"
+      "status": "Partial: permission/provenance schema reviewed in AR-002-A; natural-failure and held-out protocol in AR-002-B is in progress."
     },
     {
       "id": "C03",
       "producer": "AR-003-A",
       "title": "Trust/deployment decisions",
       "required_interface": "One-organization topology; deny-by-default sandbox network; API/worker identities; spending, data and region decisions.",
-      "status": "To be specified/reviewed by producer task; not yet available"
+      "status": "Partial: trust boundaries reviewed in AR-003-A; capacity/funding decision record in AR-003-B is in progress."
     },
     {
       "id": "C04",
       "producer": null,
       "title": "M1 API, schema and acceptance proposals",
       "required_interface": "Existing m1.openapi.json, m1.data-model.json and m1.acceptance.json; exact route/schema semantics remain pending until G0.",
-      "status": "Existing draft, not approved"
+      "status": "Existing draft plus reviewed inventory and observability design; reconciliation and G0 remain pending."
     },
     {
       "id": "C05",
