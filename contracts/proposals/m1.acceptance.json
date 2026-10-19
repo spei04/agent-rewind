@@ -9,7 +9,7 @@
       "layer": "migration",
       "given": "Empty SQLite development and PostgreSQL databases",
       "when": "Run explicit migration twice",
-      "then": "One expected revision head; idempotent second execution; no app startup DDL."
+      "then": "One expected revision head; idempotent second execution; no app startup DDL. First slice creates baseline/adoption metadata only; later ownership/artifact/ledger revisions have their own owners. Runtime role cannot CREATE/ALTER/stamp. Fresh install records fresh origin; identical installation-key replay at the same installed revision is a no-op. AR-007-A explicit initialization supplies real project/principal grants; changed key/intent or unknown nonempty DB refuses."
     },
     {
       "id": "CT-M1-002",
@@ -17,7 +17,7 @@
       "layer": "migration",
       "given": "Known v0.1 fixture with binary artifacts, parent branch and budget values",
       "when": "Adopt baseline then upgrade",
-      "then": "IDs, event hashes, content digests and reservations unchanged."
+      "then": "IDs, event hashes, content digests and reservations unchanged. After actual upgrade verify all 14 original rows, 18 ciphertexts and 245000 microUSD opening holds, inherited ancestor identity and separate event/artifact digests. No invented calls or billing."
     },
     {
       "id": "CT-M1-003",
@@ -25,7 +25,7 @@
       "layer": "migration",
       "given": "Unknown schema or newer revision",
       "when": "Attempt adoption/startup",
-      "then": "Refuse safely with schema_incompatible; no schema writes."
+      "then": "Refuse safely with schema_incompatible; no schema writes. Reject changed type/default/nullability/constraint/index or unexpected write-changing trigger/rule, partial schema and multiple heads before DDL. Matching schema plus corrupt history cannot activate."
     },
     {
       "id": "CT-M1-004",
@@ -33,7 +33,7 @@
       "layer": "migration",
       "given": "Backfill interrupted mid-batch",
       "when": "Resume migration and retry concurrent migrator",
-      "then": "No duplicated/lost rows; one migrator owns lock; compatibility state explicit."
+      "then": "No duplicated/lost rows; one migrator owns lock; compatibility state explicit. Writer exclusion spans fingerprint through stamp; active/expired running jobs, queued work and an old writer block adoption. Repeating identical mapping is idempotent; changed mapping conflicts. Test kill before/after commit, lock timeout and restore."
     },
     {
       "id": "CT-M1-005",
@@ -41,7 +41,7 @@
       "layer": "api",
       "given": "Runs with equal timestamps and inserts between pages",
       "when": "Page with limit=2",
-      "then": "Stable descending (created_at,id), no duplicates, initial watermark honored."
+      "then": "Stable descending (created_at,id), no duplicates, initial watermark honored. Cursor also binds principal/limit/expiry and maximum immutable published_seq, excluding later backfills with older creation time. No artifact reads for list. Commit-order allocation is serialized per project: a delayed insert transaction cannot publish a pre-watermark row after page one; test reversed transaction completion and rollback."
     },
     {
       "id": "CT-M1-006",
@@ -57,7 +57,7 @@
       "layer": "authorization",
       "given": "Viewer, operator and admin in two projects",
       "when": "Read/write/list legacy and v1 resources",
-      "then": "Viewer cannot mutate; unauthorized IDs return 404; admin action mapping explicit."
+      "then": "Viewer cannot mutate; unauthorized IDs return 404; admin action mapping explicit. No implicit default project; issuer+subject identities differ across issuers; old sessions reauthenticate, key role intersects membership, bootstrap cannot read customer data."
     },
     {
       "id": "CT-M1-008",
@@ -73,7 +73,7 @@
       "layer": "authorization",
       "given": "Foreign study/run/parent/file/key IDs including compare route",
       "when": "Try all existing object routes",
-      "then": "No authorization bypass through legacy endpoints or nested refs."
+      "then": "No authorization bypass through legacy endpoints or nested refs. Require full transitive run/study/job/key/artifact owner closure; second-project activation waits for all legacy routes and nested refs. Workbench keeps rich legacy shapes."
     },
     {
       "id": "CT-M1-010",
@@ -81,7 +81,7 @@
       "layer": "api",
       "given": "Eight concurrent identical requests",
       "when": "POST runs with one key/body",
-      "then": "One job+operation+audit creation; every accepted response returns original IDs."
+      "then": "One job+operation+audit creation; every accepted response returns original IDs. After response loss and native-v1 config/default/image change, resolve existing frozen operation before new upload; storage outage cannot require a different config or operation identity."
     },
     {
       "id": "CT-M1-011",
@@ -89,7 +89,7 @@
       "layer": "api",
       "given": "Same key or client_operation_id with changed request",
       "when": "POST runs",
-      "then": "409 idempotency_conflict; no extra job."
+      "then": "409 idempotency_conflict; no extra job. Changed request digest, principal or project cannot recover original operation; same-principal current authorization is required. Model config alone is not client-intent drift."
     },
     {
       "id": "CT-M1-012",
@@ -105,7 +105,7 @@
       "layer": "api",
       "given": "Oversized manifest, bad path or unknown adapter",
       "when": "POST runs",
-      "then": "413/422 and zero admitted jobs; no submitted private contents in error."
+      "then": "413/422 and zero admitted jobs; no submitted private contents in error. Reject duplicate keys/nonfinite/bool-as-integer/unknown fields, compressed input outside identity encoding, chunked >9MiB and canonical materialized TaskSpec >8MiB without leaking dynamic file paths."
     },
     {
       "id": "CT-M1-014",
@@ -121,7 +121,7 @@
       "layer": "storage",
       "given": "Object write succeeds and metadata transaction fails",
       "when": "Retry publication",
-      "then": "No broken committed reference; orphan identifiable; no plaintext object."
+      "then": "No broken committed reference; orphan identifiable; no plaintext object. Register complete task/config/envelope and transitive child references; no missing child silently publishes. Measure actual PUT requests and logical writes separately; do not assume cache savings."
     },
     {
       "id": "CT-M1-016",
@@ -129,7 +129,7 @@
       "layer": "storage",
       "given": "Corrupt ciphertext/hash or missing object",
       "when": "Resolve artifact through permitted resource",
-      "then": "Integrity/missing failure visible; no successful body or fabricated empty snapshot."
+      "then": "Integrity/missing failure visible; no successful body or fabricated empty snapshot. System namespace cannot expose customer objects; unclassified historical objects stay inaccessible and retained, with no GC or guessed owner."
     },
     {
       "id": "CT-M1-017",
@@ -145,7 +145,7 @@
       "layer": "accounting",
       "given": "Eight concurrent reservations that jointly exceed a shared cap",
       "when": "Reserve against org/project/job accounts",
-      "then": "Only cap-compliant reservations succeed; all account updates commit or none."
+      "then": "Only cap-compliant reservations succeed; all account updates commit or none. Reject foreign job/account/evidence even when IDs exist. Opening holds imported once; new reserves counted once per level, with gross jobs.reserved=L+sum(R). Reject project-scope account with NULL project_id (SQL UNKNOWN is not a scope grant), organization account with project/job IDs and job account missing either ID."
     },
     {
       "id": "CT-M1-019",
@@ -153,7 +153,7 @@
       "layer": "accounting",
       "given": "Expired owner, cancellation, timeout and repeated logical call ID",
       "when": "Reserve/dispatch boundary",
-      "then": "No new reservation after fence/cancel; timeout held; identical logical call not double counted."
+      "then": "No new reservation after fence/cancel; timeout held; identical logical call not double counted. Test stale owner and generation, cancellation, DB outage, changed logical-call request and crash after reserved->dispatching. Repeated permit lookup cannot dispatch twice; M1 does not promise atomic external HTTP."
     },
     {
       "id": "CT-M1-020",
@@ -161,7 +161,7 @@
       "layer": "accounting",
       "given": "Billing period changes while a call is uncertain",
       "when": "Reconcile call",
-      "then": "Original admission-period accounts retained; no reset-based cap bypass or automatic release."
+      "then": "Original admission-period accounts retained; no reset-based cap bypass or automatic release. Unresolved historic and prior-period holds constrain new admission; no rollover reset, automatic settlement, synthetic invoice or timeout release."
     },
     {
       "id": "CT-M1-021",
@@ -177,7 +177,7 @@
       "layer": "observability",
       "given": "Provider/storage exceptions include a sentinel secret and source text",
       "when": "Log/respond/trace",
-      "then": "Safe code+IDs available; sentinel absent from all logs, responses and metric labels."
+      "then": "Safe code+IDs available; sentinel absent from all logs, responses and metric labels. Nested stored failure correlation stays constant across 200 polls while each X-Request-ID is fresh. Legacy detail is fixed safe text; v1 uses four fields."
     },
     {
       "id": "CT-M1-023",
@@ -185,7 +185,7 @@
       "layer": "observability",
       "given": "Required database unavailable",
       "when": "Probe liveness/readiness",
-      "then": "Liveness indicates process; readiness fails without echoing credentials; no paid call."
+      "then": "Liveness indicates process; readiness fails without echoing credentials; no paid call. AR-005-C revision guard is prerequisite. Missing/future/multiple revision, incomplete required phase, oversize/corrupt/missing/slow sentinel, stale success and drain fail readiness. Read <=5561 ciphertext bytes before decrypt, <=4096 plaintext, no customer blob or probe write; total deadline1s/inflight1/cache<=5s."
     },
     {
       "id": "CT-M1-024",
@@ -209,5 +209,6 @@
       "No duplicate submission or atomic budget-cap violation under concurrency.",
       "Code review, safe diagnostics, migration/recovery notes and roadmap evidence updated."
     ]
-  }
+  },
+  "contract_revision": "m1-review-2"
 }

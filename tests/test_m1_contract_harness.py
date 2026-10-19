@@ -110,17 +110,15 @@ def test_new_logical_entity_requires_acceptance_mapping(contracts):
         check_links(contracts)
 
 
-def test_pending_gate_is_separate_from_general_inventory(contracts):
-    contracts["api"]["x-approval-status"] = "approved"
-    contracts["data"]["approval_status"] = "approved"
+def test_general_inventory_is_separate_from_review_gate(contracts):
+    contracts["api"]["x-approval-status"] = "reviewed"
+    contracts["data"]["approval_status"] = "reviewed"
     assert (
         CHECKER["check"](
             contracts["api"], contracts["data"], contracts["models"], contracts["database"]
         )["operations"]
         == 5
     )
-    with pytest.raises(ValueError, match="Pending-proposal gate.*review the freeze disposition"):
-        CHECKER["check_pending_proposal"](contracts["api"], contracts["data"], contracts["links"])
 
 
 @pytest.mark.parametrize(

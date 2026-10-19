@@ -107,7 +107,8 @@
       ],
       "fields": [
         "run_index.created_at",
-        "run_index.run_id"
+        "run_index.run_id",
+        "run_index.published_seq"
       ],
       "schemas": [
         "RunPage",
@@ -356,7 +357,12 @@
         "budget_accounts.held_microusd",
         "budget_accounts.accounted_microusd",
         "provider_calls.state",
-        "budget_entries.amount_microusd"
+        "budget_entries.amount_microusd",
+        "budget_accounts.opening_held_microusd",
+        "provider_calls.job_id",
+        "provider_calls.project_account_id",
+        "budget_entries.project_id",
+        "budget_entries.evidence_ref"
       ],
       "schemas": [],
       "legacy_fixtures": [
@@ -376,7 +382,8 @@
         "budget_accounts.held_microusd",
         "budget_accounts.accounted_microusd",
         "provider_calls.state",
-        "budget_entries.amount_microusd"
+        "budget_entries.amount_microusd",
+        "provider_calls.lease_generation"
       ],
       "schemas": [],
       "legacy_fixtures": []
@@ -471,5 +478,6 @@
         "known"
       ]
     }
-  ]
+  ],
+  "contract_revision": "m1-review-2"
 }

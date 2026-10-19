@@ -1,4 +1,4 @@
-"""Validate the pending M1 proposal, traceability and frozen synthetic fixtures.
+"""Validate M1 design contracts, review evidence and frozen synthetic fixtures.
 
 The default suite uses only the standard library; --openapi-model adds installed
 FastAPI structural validation. Neither mode executes planned runtime behaviors.
@@ -11,6 +11,7 @@ import ast
 import hashlib
 import json
 import re
+import runpy
 import sqlite3
 import sys
 from pathlib import Path
@@ -640,39 +641,30 @@ def check_fixture(root: Path, fixture: dict, baseline: str) -> dict[str, int]:
     }
 
 
-def check_pending_proposal(api: dict, data: dict, links: dict) -> None:
-    """Stage-specific gate; not a permanent rule for approved contracts.
-
-    A freeze revision must replace this gate with reviewed scope/approval-evidence
-    validation. Structural inventory and planned-behavior checks are independent.
-    """
-    require(
-        api.get("x-approval-status") == "pending",
-        "Pending-proposal gate: OpenAPI approval metadata changed; review the freeze disposition",
-    )
-    require(
-        data.get("approval_status") == "pending",
-        "Pending-proposal gate: data approval metadata changed; review the freeze disposition",
-    )
-    require(
-        links.get("approval_status") == "pending",
-        "Pending-proposal gate: link approval metadata changed; review the freeze disposition",
-    )
-
-
 def check_proposal_suite(root: Path = ROOT, *, openapi_model: bool = False) -> dict:
-    """Current proposal-only gate; passing does not approve or implement M1."""
+    """Design gate with explicit review state; no runtime acceptance is executed."""
     api, data, models, database = load(root)
     result = check(api, data, models, database)
     fixture_root = root / "tests/fixtures/legacy_v0"
     fixture = read_json(fixture_root / "manifest.json")
     links = read_json(root / "contracts/fixtures/m1-contract-links.json")
-    check_pending_proposal(api, data, links)
+    acceptance = read_json(root / "contracts/proposals/m1.acceptance.json")
+    review_check = runpy.run_path(str(Path(__file__).with_name("m1_contract_review.py")))[
+        "check_review"
+    ]
+    review_status = review_check(
+        api,
+        data,
+        acceptance,
+        links,
+        read_json(root / "contracts/proposals/observability.contract.json"),
+        read_json(root / "contracts/proposals/m1.freeze.json"),
+    )
     try:
         result["planned_acceptance_cases"] = check_planned_acceptance(
             api,
             data,
-            read_json(root / "contracts/proposals/m1.acceptance.json"),
+            acceptance,
             links,
             fixture,
         )
@@ -690,7 +682,7 @@ def check_proposal_suite(root: Path = ROOT, *, openapi_model: bool = False) -> d
         except ValidationError:
             raise ValueError("Installed FastAPI rejected the proposed OpenAPI structure") from None
     return result | {
-        "approval_status": "pending",
+        "approval_status": review_status,
         "behavior_status": "planned-not-executed",
         "openapi_model_checked": openapi_model,
     }

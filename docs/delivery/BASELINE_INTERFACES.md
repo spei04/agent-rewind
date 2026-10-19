@@ -4,7 +4,7 @@ AR-004-A · reviewed source snapshot 2026-10-19 · design artifact, not a runtim
 
 The application baseline is `8f1ae757005c95c50a789e4fa0a10aae9b3c4024`. This inventory was prepared from planning checkout `da96df48a185f6a444b6cfeb07e651c1af5fa30e`; `git diff` against the application baseline showed no changes in `agent_rewind/`, existing tests, `pyproject.toml` or `uv.lock`. The [M1 API](../../contracts/proposals/m1.openapi.json), [logical model](../../contracts/proposals/m1.data-model.json) and [acceptance cases](../../contracts/proposals/m1.acceptance.json) are pending proposals. The execution backlog approval permits this inventory; it does not activate those contracts.
 
-This document records source behavior, required migration disposition and unresolved decisions separately. No production database, private trajectory, secret or paid provider was inspected. Links below identify source files and named functions at that baseline. Backlog owners are task IDs in [the execution backlog](../EXECUTION_BACKLOG.md).
+This document records source behavior, required migration disposition and original unresolved decisions separately. The proposed dispositions are now in [M1_CONTRACT_FREEZE.md](M1_CONTRACT_FREEZE.md), revision m1-review-2, pending consumer review; historical observations below remain unchanged. No production database, private trajectory, secret or paid provider was inspected. Links below identify source files and named functions at that baseline. Backlog owners are task IDs in [the execution backlog](../EXECUTION_BACKLOG.md).
 
 ## Current HTTP producers and consumers
 
