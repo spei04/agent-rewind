@@ -1,0 +1,736 @@
+{
+  "fixture_version": 1,
+  "source_commit": "8f1ae757005c95c50a789e4fa0a10aae9b3c4024",
+  "source_files_sha256": {
+    "agent_rewind/database.py": "25e2d2630b4597144143a8c6a227b15f109fecdb952a2edf8acb64242935c96f",
+    "agent_rewind/artifacts.py": "103080a4019f2b5edd184a433c598fb3a9e8fa5279ea0df7adfe31141044a084",
+    "agent_rewind/engine.py": "3e7815741e3d4071a0874a217bdfd67875db50ffee46b738c49231369aaf8826",
+    "agent_rewind/models.py": "0459c8443a7333f37908472261efeb5277456ba7290108df7d82a2c00efeed55",
+    "agent_rewind/worker.py": "5c34986c4eacd037743c4f1a27ad5fa1c0a1b260163f76e5f222a7fb40309ce4"
+  },
+  "synthetic_only": true,
+  "synthetic_fernet_key": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+  "baseline_sql_sha256": "62cd159230e9f81336779658b706c161149c24115f6e0f54bdfe4f32c7bdb19a",
+  "canonicalization": "UTF-8 JSON; sort_keys=True, separators=(comma, colon), allow_nan=False",
+  "variants": {
+    "known": {
+      "classification": "known-baseline",
+      "sql": "",
+      "object_override": null,
+      "schema_sha256": "e326b0cbd9e116bb6ab24afabdb16ffff2a21638f056eb5563f9f476e1b959ab",
+      "tables": [
+        "api_keys",
+        "audit",
+        "events",
+        "jobs",
+        "records"
+      ]
+    },
+    "unknown_schema": {
+      "classification": "unknown-schema",
+      "sql": "ALTER TABLE jobs ADD COLUMN unexpected_revision INTEGER;\n",
+      "object_override": null,
+      "schema_sha256": "90685bfff4bbfc2f1e385a94a430c17abe71e58e7c3c6b9b9a80eb52f8c2fa01",
+      "tables": [
+        "api_keys",
+        "audit",
+        "events",
+        "jobs",
+        "records"
+      ]
+    },
+    "partial_schema": {
+      "classification": "partially-initialized",
+      "sql": "DROP TABLE audit;\nDROP TABLE api_keys;\n",
+      "object_override": null,
+      "schema_sha256": "c0d6586ce9e4e28772197b762c0cf6ed7049ac6013d1e5d8439e928c7a11b530",
+      "tables": [
+        "events",
+        "jobs",
+        "records"
+      ]
+    },
+    "corrupt_ciphertext": {
+      "classification": "corrupt-content-authentication",
+      "sql": "",
+      "object_override": {
+        "address": "edede0265d459e80b2535694a12e6772f803efe492285b27adfad56d10a58f3b",
+        "file": "invalid-token.bin",
+        "ciphertext_sha256": "54bf51565d9bf65607caa444580b2acbe17c23da864cc80b3cb6ad6a730161ac"
+      },
+      "schema_sha256": "e326b0cbd9e116bb6ab24afabdb16ffff2a21638f056eb5563f9f476e1b959ab",
+      "tables": [
+        "api_keys",
+        "audit",
+        "events",
+        "jobs",
+        "records"
+      ]
+    },
+    "corrupt_address": {
+      "classification": "corrupt-content-address",
+      "sql": "",
+      "object_override": {
+        "address": "edede0265d459e80b2535694a12e6772f803efe492285b27adfad56d10a58f3b",
+        "file": "wrong-address.token",
+        "ciphertext_sha256": "554f45537b01dc07f46dc0ff03289485b1a593edd016306440ae288ab2a1af75"
+      },
+      "schema_sha256": "e326b0cbd9e116bb6ab24afabdb16ffff2a21638f056eb5563f9f476e1b959ab",
+      "tables": [
+        "api_keys",
+        "audit",
+        "events",
+        "jobs",
+        "records"
+      ]
+    }
+  },
+  "objects": {
+    "task": {
+      "address": "5931e9f5a9cc4e02fd9d892383e2dac625146052d7a32a8ec5ee49b13eeb7798",
+      "plaintext_bytes": 410,
+      "ciphertext_sha256": "8837b20be610c42ee41227baae50c2549a73cabc045edd146484f1de9c07c81c",
+      "format": "json"
+    },
+    "broken_source": {
+      "address": "5d080563b57287276f589c2b2714ef499269efe7405a288b3c1474f5a92bf271",
+      "plaintext_bytes": 26,
+      "ciphertext_sha256": "17c1c71d9ba553fbb3dc21668cdf39bbece7d60737f53b81ffe5fd54ee9eaebe",
+      "format": "bytes"
+    },
+    "fixed_source": {
+      "address": "d3fe37235936f63ebabd6ba2bb8d3cf67404555d856dc63b0611fe9b6231ec13",
+      "plaintext_bytes": 26,
+      "ciphertext_sha256": "648ae06baa29da400394d1285c4e6259f4bc5bb061c6798ee093c4c9c5b91029",
+      "format": "bytes"
+    },
+    "empty_directory": {
+      "address": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "plaintext_bytes": 0,
+      "ciphertext_sha256": "aa0d9f99e21cecd7ede2a4adf98e19322c58daa98de53c1ee89115bce9d95042",
+      "format": "bytes"
+    },
+    "workspace_before": {
+      "address": "9a3f2d7e399068639af760b28002e44f482361e83b7ccaf2b9e15f410797fd90",
+      "plaintext_bytes": 287,
+      "ciphertext_sha256": "80e980ba3ee77d611a8bb9322e15ff7563e11cdc111d182db474de77f465e21c",
+      "format": "json"
+    },
+    "workspace_after": {
+      "address": "d47f886a8f044255bc1142690764ebfedf37abc166f17f93fe5a0a19c932a4a2",
+      "plaintext_bytes": 287,
+      "ciphertext_sha256": "9f0ff547a993c606c26ebaad5e6cf3158174706a6ddd2f8b1557e239429a8fad",
+      "format": "json"
+    },
+    "checkpoint_1": {
+      "address": "63bf8e7dd703d7c91a8be0966ad9d42a46a0efd32c81b316d9a0579061d7ccea",
+      "plaintext_bytes": 333,
+      "ciphertext_sha256": "c49d5ca8510dbab93cef88ee9272b259ca5865d42d8fd35c62441f06c0ca148b",
+      "format": "json"
+    },
+    "checkpoint_2": {
+      "address": "39379dab92d84855308163d1ab8889c2794ddf75b529c9f9dee63075921b11c4",
+      "plaintext_bytes": 332,
+      "ciphertext_sha256": "7eb513cfb687cbecf5f85ed23ea6050f67a2b30b39da8f0ea299a3c7c4ffde02",
+      "format": "json"
+    },
+    "checkpoint_branch_3": {
+      "address": "9d2f9de41652fe4d2737906715b97340b3c65b0bf2993425a41a546a233f6190",
+      "plaintext_bytes": 332,
+      "ciphertext_sha256": "e62f20691daae575e72136d103e7bdaf9e34323069ebb7c3e0dc5f8038913d5e",
+      "format": "json"
+    },
+    "parent_event_1": {
+      "address": "edede0265d459e80b2535694a12e6772f803efe492285b27adfad56d10a58f3b",
+      "plaintext_bytes": 678,
+      "ciphertext_sha256": "b36582a17a216e24eb0a983611b39a05b845375427b86d5078e303f10dce55b3",
+      "format": "json"
+    },
+    "parent_event_2": {
+      "address": "4adc27ab55fe7f55497ac438d4fa18a467e86ee8e95984204293c480b8b3701d",
+      "plaintext_bytes": 660,
+      "ciphertext_sha256": "657d60fc87997a568d60591018faa471e8d84d6c3b62fa9557098e5304a3b882",
+      "format": "json"
+    },
+    "branch_event_2": {
+      "address": "aaba626c4ba6924263b2c609e08fd412a46d710daddfc89d2a279b3ddf9ee4cf",
+      "plaintext_bytes": 783,
+      "ciphertext_sha256": "f8348fb755b0ec94cbfab5b2566e7cf626475ffd13c1e60fb11dca188c0d4c75",
+      "format": "json"
+    },
+    "branch_event_3": {
+      "address": "86b7d5f77f55c094b0b070db4159ff27fcb26b317c73bf88d233f387fa953f5d",
+      "plaintext_bytes": 660,
+      "ciphertext_sha256": "896ac09c8a6e0c332735aad4dc64eae6339f14b06e0477ef18c513e40ac642bc",
+      "format": "json"
+    },
+    "failed_evaluation": {
+      "address": "3dc8b45803b6813c89c7fc385c63c1b3d5fc8429d04e72a4c90f891c8fa3ace9",
+      "plaintext_bytes": 44,
+      "ciphertext_sha256": "02e60ae5867e1c6377fd4a238ddc78d6b40f0d4919bb65ccf1de2ca0ff5b7cdf",
+      "format": "json"
+    },
+    "passed_evaluation": {
+      "address": "03a1ae6f45ae9b977d5e384ee63ce724f2722ecd5420f422657fbfe0d65e9317",
+      "plaintext_bytes": 44,
+      "ciphertext_sha256": "47f8a3dad0e9c1e6d955224dbf8d9edab3fd89e9ddc863a164d3d70e1edbdbc3",
+      "format": "json"
+    },
+    "branch_payload": {
+      "address": "96ba396a87c3a90af0a4522e079f9288534631a1331b6730ab8234d7c5be6788",
+      "plaintext_bytes": 262,
+      "ciphertext_sha256": "9940228d03300ecad3900464ea8a8f58c2e97712315b70bac6c239cbd6ffc9a7",
+      "format": "json"
+    },
+    "job_result_0": {
+      "address": "a267ae7dbc7148acb58d0c3bf6cae6d36c8a1c867905daec7f32f7c21c2da364",
+      "plaintext_bytes": 45,
+      "ciphertext_sha256": "84ab2297a7c561e069d57d2450938afa6bee5dab0cbd378c415c0167ea956551",
+      "format": "json"
+    },
+    "job_result_1": {
+      "address": "57eb60562fe029943b1477697481df7474707ade097b26422e9d13e01aa04cb2",
+      "plaintext_bytes": 45,
+      "ciphertext_sha256": "28942f9d6d065ef9d04496b26f5d039b8d0bfb5c5be56ed0ed262cc8a980059c",
+      "format": "json"
+    }
+  },
+  "expected_rows": {
+    "records": [
+      {
+        "id": "11111111111111111111111111111111",
+        "kind": "run",
+        "created": 1700000000.125,
+        "data": {
+          "name": "Synthetic legacy repair",
+          "job_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "parent_id": null,
+          "fork_step": null,
+          "seed": 7,
+          "image": "synthetic.invalid/fixture@sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "policy": {
+            "adapter": "synthetic-fixture-v1",
+            "seed_supported": true
+          },
+          "task_digest": "5931e9f5a9cc4e02fd9d892383e2dac625146052d7a32a8ec5ee49b13eeb7798",
+          "task_ref": "5931e9f5a9cc4e02fd9d892383e2dac625146052d7a32a8ec5ee49b13eeb7798",
+          "status": "complete",
+          "branchable": true,
+          "head": "4ab082d2fb477caf41f19b982590f4a75bb6e9af3f13d32c3daf2f25660da80f",
+          "steps": 2,
+          "intervention": null,
+          "success": false,
+          "evaluation_ref": "3dc8b45803b6813c89c7fc385c63c1b3d5fc8429d04e72a4c90f891c8fa3ace9",
+          "final_workspace": "9a3f2d7e399068639af760b28002e44f482361e83b7ccaf2b9e15f410797fd90"
+        }
+      },
+      {
+        "id": "22222222222222222222222222222222",
+        "kind": "run",
+        "created": 1700000000.125,
+        "data": {
+          "name": "Synthetic legacy repair",
+          "job_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "parent_id": "11111111111111111111111111111111",
+          "fork_step": 2,
+          "seed": 7,
+          "image": "synthetic.invalid/fixture@sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "policy": {
+            "adapter": "synthetic-fixture-v1",
+            "seed_supported": true
+          },
+          "task_digest": "5931e9f5a9cc4e02fd9d892383e2dac625146052d7a32a8ec5ee49b13eeb7798",
+          "task_ref": "5931e9f5a9cc4e02fd9d892383e2dac625146052d7a32a8ec5ee49b13eeb7798",
+          "status": "complete",
+          "branchable": true,
+          "head": "621f83ebd9743c0ceb5a5e5d7241ac5105ff2fbed5b70112a03e8cd7548154ec",
+          "steps": 3,
+          "intervention": {
+            "step": 2,
+            "kind": "action",
+            "action": {
+              "tool": "write_file",
+              "command": "",
+              "path": "source.py",
+              "content": "def value():\n    return 2\n"
+            },
+            "result": null,
+            "label": "Synthetic repair"
+          },
+          "success": true,
+          "evaluation_ref": "03a1ae6f45ae9b977d5e384ee63ce724f2722ecd5420f422657fbfe0d65e9317",
+          "final_workspace": "d47f886a8f044255bc1142690764ebfedf37abc166f17f93fe5a0a19c932a4a2"
+        }
+      }
+    ],
+    "events": [
+      {
+        "run_id": "11111111111111111111111111111111",
+        "step": 1,
+        "artifact": "edede0265d459e80b2535694a12e6772f803efe492285b27adfad56d10a58f3b",
+        "hash": "2265b0946f34d290184411d70a9cd77112c6239d0ad29a73feab61d38707d17e"
+      },
+      {
+        "run_id": "11111111111111111111111111111111",
+        "step": 2,
+        "artifact": "4adc27ab55fe7f55497ac438d4fa18a467e86ee8e95984204293c480b8b3701d",
+        "hash": "4ab082d2fb477caf41f19b982590f4a75bb6e9af3f13d32c3daf2f25660da80f"
+      },
+      {
+        "run_id": "22222222222222222222222222222222",
+        "step": 2,
+        "artifact": "aaba626c4ba6924263b2c609e08fd412a46d710daddfc89d2a279b3ddf9ee4cf",
+        "hash": "4189495d2b6a96f613b24c736ab03d141291ac3c5ade7ac7b6b975652926da90"
+      },
+      {
+        "run_id": "22222222222222222222222222222222",
+        "step": 3,
+        "artifact": "86b7d5f77f55c094b0b070db4159ff27fcb26b317c73bf88d233f387fa953f5d",
+        "hash": "621f83ebd9743c0ceb5a5e5d7241ac5105ff2fbed5b70112a03e8cd7548154ec"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "kind": "run",
+        "created": 1699999999.5,
+        "payload": "5931e9f5a9cc4e02fd9d892383e2dac625146052d7a32a8ec5ee49b13eeb7798",
+        "status": "succeeded",
+        "owner": "synthetic-worker",
+        "lease_until": 1700000060.0,
+        "cancel": 0,
+        "budget": 10000000,
+        "reserved": 125000,
+        "result": "a267ae7dbc7148acb58d0c3bf6cae6d36c8a1c867905daec7f32f7c21c2da364",
+        "error": null,
+        "actor": "synthetic:operator"
+      },
+      {
+        "id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "kind": "branch",
+        "created": 1700000000.5,
+        "payload": "96ba396a87c3a90af0a4522e079f9288534631a1331b6730ab8234d7c5be6788",
+        "status": "succeeded",
+        "owner": "synthetic-worker",
+        "lease_until": 1700000060.0,
+        "cancel": 0,
+        "budget": 10000000,
+        "reserved": 85000,
+        "result": "57eb60562fe029943b1477697481df7474707ade097b26422e9d13e01aa04cb2",
+        "error": null,
+        "actor": "synthetic:operator"
+      },
+      {
+        "id": "cccccccccccccccccccccccccccccccc",
+        "kind": "run",
+        "created": 1700000001.5,
+        "payload": "5931e9f5a9cc4e02fd9d892383e2dac625146052d7a32a8ec5ee49b13eeb7798",
+        "status": "failed",
+        "owner": "synthetic-worker",
+        "lease_until": 1700000060.0,
+        "cancel": 0,
+        "budget": 5000000,
+        "reserved": 35000,
+        "result": null,
+        "error": "Synthetic pre-run failure.",
+        "actor": "synthetic:operator"
+      }
+    ],
+    "api_keys": [
+      {
+        "id": "33333333333333333333333333333333",
+        "hash": "658247c353d2c9686adaa2c9852a818ef0f6cc6b75addb443731a5afb76d2548",
+        "role": "viewer",
+        "name": "Synthetic expired fixture key",
+        "expires": 1699999900.0,
+        "revoked": 0
+      },
+      {
+        "id": "44444444444444444444444444444444",
+        "hash": "1ec11395cf01e78c7301e6887468b951f7f1e20f32fc9358a165e1ebca18ab8b",
+        "role": "operator",
+        "name": "Synthetic expired fixture key",
+        "expires": 1699999900.0,
+        "revoked": 1
+      }
+    ],
+    "audit": [
+      {
+        "id": "55555555555555555555555555555555",
+        "created": 1699999999.5,
+        "actor": "synthetic:operator",
+        "action": "job.create",
+        "target": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      {
+        "id": "66666666666666666666666666666666",
+        "created": 1700000000.5,
+        "actor": "synthetic:operator",
+        "action": "job.create",
+        "target": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      {
+        "id": "77777777777777777777777777777777",
+        "created": 1700000001.5,
+        "actor": "synthetic:operator",
+        "action": "job.create",
+        "target": "cccccccccccccccccccccccccccccccc"
+      }
+    ]
+  },
+  "row_sha256": {
+    "records": [
+      "1d4725f17f4bd18b679aa64d58183f66a8ee3d50836ffabe8e759b265ac4511c",
+      "018ffdf2300939788a0f3a5234ebd5be2307207ab17501d4a637cecf3a42700f"
+    ],
+    "events": [
+      "e984557fb35433537c6b10c4b3b36214c62fe7f744e1fb7f9ef35d13acb76b48",
+      "a7f4fa98e03f3df20ce642b8ad1900252715b1a062fb530a78980d076a14ee5e",
+      "a0517647403d3ae54817e56ebea8d983fe8ac2daa34f47a6e5e15def198ef49c",
+      "b7d7ce4eb686a2ea4e1142c95cf1cb8f432dc812c3e9725f52e34c35cd8c9401"
+    ],
+    "jobs": [
+      "98ca051d7c05a5ea1bf9a743157c8266a1e2870fa2b0d0676d51388d27974af0",
+      "2ff9ecf958b6f17d03dca96b5d1e53d158d31798cc2fa64d7ba06a8e47345095",
+      "37e31662655744fd4e4583bb96236c8d06bb01c238742ee882c3a9b3f30438cd"
+    ],
+    "api_keys": [
+      "402dde5b6f80d2f960bd8260887667921753666e8d505832d55a6d10be1da69f",
+      "81c2b6ff81e4f6654b3726ad520dd178b645ef1a14da0582f6ed38e4801af8c4"
+    ],
+    "audit": [
+      "7d52c83935319e0373084b6e4807b63156a339b9dc90cf3caaaf26385a52438b",
+      "11fc676cc9bddf451f351c05fda47f28e67fc32fce0078be94b97098e01fed80",
+      "990fccd3c49e29dea9be4db61df2ca793ce71c580adb5ca519800da8999775e8"
+    ]
+  },
+  "reservation_total_microusd": 245000,
+  "runs": {
+    "11111111111111111111111111111111": {
+      "created": 1700000000.125,
+      "head": "4ab082d2fb477caf41f19b982590f4a75bb6e9af3f13d32c3daf2f25660da80f",
+      "steps": 2,
+      "expanded_event_hashes": [
+        "2265b0946f34d290184411d70a9cd77112c6239d0ad29a73feab61d38707d17e",
+        "4ab082d2fb477caf41f19b982590f4a75bb6e9af3f13d32c3daf2f25660da80f"
+      ]
+    },
+    "22222222222222222222222222222222": {
+      "created": 1700000000.125,
+      "head": "621f83ebd9743c0ceb5a5e5d7241ac5105ff2fbed5b70112a03e8cd7548154ec",
+      "steps": 3,
+      "expanded_event_hashes": [
+        "2265b0946f34d290184411d70a9cd77112c6239d0ad29a73feab61d38707d17e",
+        "4189495d2b6a96f613b24c736ab03d141291ac3c5ade7ac7b6b975652926da90",
+        "621f83ebd9743c0ceb5a5e5d7241ac5105ff2fbed5b70112a03e8cd7548154ec"
+      ]
+    }
+  },
+  "schema": {
+    "api_keys": {
+      "columns": [
+        [
+          0,
+          "id",
+          "VARCHAR(32)",
+          1,
+          null,
+          1
+        ],
+        [
+          1,
+          "hash",
+          "VARCHAR(64)",
+          0,
+          null,
+          0
+        ],
+        [
+          2,
+          "role",
+          "VARCHAR(20)",
+          1,
+          null,
+          0
+        ],
+        [
+          3,
+          "name",
+          "VARCHAR(120)",
+          1,
+          null,
+          0
+        ],
+        [
+          4,
+          "expires",
+          "FLOAT",
+          1,
+          null,
+          0
+        ],
+        [
+          5,
+          "revoked",
+          "BOOLEAN",
+          0,
+          null,
+          0
+        ]
+      ],
+      "unique_indexes": [
+        [
+          "hash"
+        ],
+        [
+          "id"
+        ]
+      ]
+    },
+    "audit": {
+      "columns": [
+        [
+          0,
+          "id",
+          "VARCHAR(32)",
+          1,
+          null,
+          1
+        ],
+        [
+          1,
+          "created",
+          "FLOAT",
+          1,
+          null,
+          0
+        ],
+        [
+          2,
+          "actor",
+          "VARCHAR(256)",
+          1,
+          null,
+          0
+        ],
+        [
+          3,
+          "action",
+          "VARCHAR(80)",
+          1,
+          null,
+          0
+        ],
+        [
+          4,
+          "target",
+          "VARCHAR(64)",
+          1,
+          null,
+          0
+        ]
+      ],
+      "unique_indexes": [
+        [
+          "id"
+        ]
+      ]
+    },
+    "events": {
+      "columns": [
+        [
+          0,
+          "run_id",
+          "VARCHAR(32)",
+          1,
+          null,
+          1
+        ],
+        [
+          1,
+          "step",
+          "INTEGER",
+          1,
+          null,
+          2
+        ],
+        [
+          2,
+          "artifact",
+          "VARCHAR(64)",
+          1,
+          null,
+          0
+        ],
+        [
+          3,
+          "hash",
+          "VARCHAR(64)",
+          1,
+          null,
+          0
+        ]
+      ],
+      "unique_indexes": [
+        [
+          "run_id",
+          "step"
+        ]
+      ]
+    },
+    "jobs": {
+      "columns": [
+        [
+          0,
+          "id",
+          "VARCHAR(32)",
+          1,
+          null,
+          1
+        ],
+        [
+          1,
+          "kind",
+          "VARCHAR(20)",
+          1,
+          null,
+          0
+        ],
+        [
+          2,
+          "created",
+          "FLOAT",
+          1,
+          null,
+          0
+        ],
+        [
+          3,
+          "payload",
+          "VARCHAR(64)",
+          1,
+          null,
+          0
+        ],
+        [
+          4,
+          "status",
+          "VARCHAR(20)",
+          1,
+          null,
+          0
+        ],
+        [
+          5,
+          "owner",
+          "VARCHAR(64)",
+          0,
+          null,
+          0
+        ],
+        [
+          6,
+          "lease_until",
+          "FLOAT",
+          0,
+          null,
+          0
+        ],
+        [
+          7,
+          "cancel",
+          "BOOLEAN",
+          1,
+          null,
+          0
+        ],
+        [
+          8,
+          "budget",
+          "BIGINT",
+          1,
+          null,
+          0
+        ],
+        [
+          9,
+          "reserved",
+          "BIGINT",
+          1,
+          null,
+          0
+        ],
+        [
+          10,
+          "result",
+          "VARCHAR(64)",
+          0,
+          null,
+          0
+        ],
+        [
+          11,
+          "error",
+          "VARCHAR(300)",
+          0,
+          null,
+          0
+        ],
+        [
+          12,
+          "actor",
+          "VARCHAR(256)",
+          0,
+          null,
+          0
+        ]
+      ],
+      "unique_indexes": [
+        [
+          "id"
+        ]
+      ]
+    },
+    "records": {
+      "columns": [
+        [
+          0,
+          "id",
+          "VARCHAR(32)",
+          1,
+          null,
+          1
+        ],
+        [
+          1,
+          "kind",
+          "VARCHAR(20)",
+          1,
+          null,
+          0
+        ],
+        [
+          2,
+          "created",
+          "FLOAT",
+          1,
+          null,
+          0
+        ],
+        [
+          3,
+          "data",
+          "JSON",
+          1,
+          null,
+          0
+        ]
+      ],
+      "unique_indexes": [
+        [
+          "id"
+        ]
+      ]
+    }
+  }
+}
