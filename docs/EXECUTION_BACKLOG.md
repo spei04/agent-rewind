@@ -277,7 +277,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #1](htt
 - **Required automated tests:** Validate required workflow fields and examples against current TaskSpec limits.
 - **Security and reliability:** Exclude customer source and credentials from public examples.
 - **Effort / confidence:** 1 engineering days; planning range 1–1.5; medium confidence.
-- **Responsible role:** TL; required reviewers: BE, QE. Named assignee pending staffing.
+- **Responsible role:** TL; required reviewers: BE, QE. Assigned contributor: Engineer A — workflow/contracts.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
 - **Progress:** Verified; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
@@ -294,7 +294,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #1](htt
 - **Required automated tests:** Check metric formulas on complete, failed and abandoned investigation fixtures.
 - **Security and reliability:** Measure all attempted investigations; no success-only denominator.
 - **Effort / confidence:** 1 engineering days; planning range 1–1.5; medium confidence.
-- **Responsible role:** FE; required reviewers: TL, QE. Named assignee pending staffing.
+- **Responsible role:** FE; required reviewers: TL, QE. Assigned contributor: Engineer A — workflow/contracts.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
 - **Progress:** Verified; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
@@ -317,7 +317,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #2](htt
 - **Required automated tests:** Schema cases for missing rights, duplicate task IDs and disallowed processor.
 - **Security and reliability:** Never commit proprietary tasks; aggregate evidence only.
 - **Effort / confidence:** 1 engineering days; planning range 1–1.5; medium confidence.
-- **Responsible role:** RS; required reviewers: QE, independent statistical reviewer. Named assignee pending staffing.
+- **Responsible role:** RS; required reviewers: QE, independent statistical reviewer. Assigned contributor: Engineer C — corpus/quality.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
 - **Progress:** Verified; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
@@ -334,9 +334,9 @@ M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #2](htt
 - **Required automated tests:** Synthetic split leakage, unstable grader and insufficient-sample fixtures.
 - **Security and reliability:** No screening on holdout; model changes invalidate affected comparison.
 - **Effort / confidence:** 1 engineering days; planning range 1–2; low confidence.
-- **Responsible role:** RS; required reviewers: QE, independent statistical reviewer. Named assignee pending staffing.
+- **Responsible role:** RS; required reviewers: QE, independent statistical reviewer. Assigned contributor: Engineer A — research protocol.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** In progress; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-003"></a>
 
@@ -357,7 +357,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #3](htt
 - **Required automated tests:** Machine-check topology inventory and expected denied paths against configuration fixtures.
 - **Security and reliability:** No customer DB connection; secrets remain outside sandbox.
 - **Effort / confidence:** 1 engineering days; planning range 1–1.5; medium confidence.
-- **Responsible role:** PL; required reviewers: SEC, QE. Named assignee pending staffing.
+- **Responsible role:** PL; required reviewers: SEC, QE. Assigned contributor: Engineer B — platform/trust boundaries.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
 - **Progress:** Verified; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
@@ -374,7 +374,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #3](htt
 - **Required automated tests:** Check cost arithmetic, units and budget upper-bound examples.
 - **Security and reliability:** No implied authority for recurring cloud or customer data use.
 - **Effort / confidence:** 1 engineering days; planning range 1–2; low confidence.
-- **Responsible role:** PL; required reviewers: SEC, QE. Named assignee pending staffing.
+- **Responsible role:** PL; required reviewers: SEC, QE. Assigned contributor: Engineer B — platform/capacity.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
 - **Progress:** In progress; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
@@ -397,7 +397,7 @@ M0 / P0 · 3 PRs · 2.5 engineering days · Not started · [Tracking issue #4](h
 - **Required automated tests:** Validate proposed OpenAPI, internal references and logical schema field coverage.
 - **Security and reliability:** Inspect fixtures without publishing private traces.
 - **Effort / confidence:** 1 engineering days; planning range 0.8–1.2; high confidence.
-- **Responsible role:** BE; required reviewers: TL, QE. Named assignee pending staffing.
+- **Responsible role:** BE; required reviewers: TL, QE. Assigned contributor: Engineer B — backend/interfaces.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
 - **Progress:** Verified; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
@@ -454,7 +454,7 @@ M1 / P0 · 3 PRs · 6 engineering days · Not started · [Tracking issue #5](htt
 - **Required automated tests:** Fixture integrity and checksum tests; no production credentials in dumps.
 - **Security and reliability:** Public fixtures synthetic; private evidence remains owner-readable.
 - **Effort / confidence:** 1.5 engineering days; planning range 1.2–1.8; high confidence.
-- **Responsible role:** QE; required reviewers: TL, domain owner. Named assignee pending staffing.
+- **Responsible role:** QE; required reviewers: TL, domain owner. Assigned contributor: Engineer C — quality/migrations.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
 - **Progress:** Verified; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
@@ -728,9 +728,9 @@ M1 / P0 · 3 PRs · 5 engineering days · Not started · [Tracking issue #11](ht
 - **Required automated tests:** Validate success/error fixtures and reject high-cardinality secret labels.
 - **Security and reliability:** Redaction before logging; never emit source, tokens or raw provider bodies.
 - **Effort / confidence:** 1 engineering days; planning range 0.8–1.2; high confidence.
-- **Responsible role:** PL; required reviewers: SEC, QE. Named assignee pending staffing.
+- **Responsible role:** PL; required reviewers: SEC, QE. Assigned contributor: Engineer A — error and telemetry contracts.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** In progress; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
+- **Progress:** Implemented / verification pending; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-011-b"></a>
 
@@ -785,7 +785,7 @@ M1 / P0 · 2 PRs · 5 engineering days · Not started · [Tracking issue #12](ht
 - **Required automated tests:** Deliberately broken contract fixtures rejected; current proposed set accepted.
 - **Security and reliability:** Fixtures remain synthetic and approval status stays pending.
 - **Effort / confidence:** 2 engineering days; planning range 1.6–2.4; high confidence.
-- **Responsible role:** QE; required reviewers: TL, domain owner. Named assignee pending staffing.
+- **Responsible role:** QE; required reviewers: TL, domain owner. Assigned contributor: Engineer C — quality/contract integration.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
 - **Progress:** In progress; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 

@@ -692,7 +692,7 @@
       "tests": "Synthetic split leakage, unstable grader and insufficient-sample fixtures",
       "security_reliability": "No screening on holdout; model changes invalidate affected comparison",
       "out_of_scope": "No claim that existing injected failure establishes generality",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -703,7 +703,8 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Define failure taxonomy, task-level split, evaluator stability checks and effect-size feasibility worksheet. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "assigned_to": "Engineer A \u2014 research protocol"
     },
     {
       "id": "AR-003-A",
@@ -1405,7 +1406,7 @@
       "tests": "Validate success/error fixtures and reject high-cardinality secret labels",
       "security_reliability": "Redaction before logging; never emit source, tokens or raw provider bodies",
       "out_of_scope": "No runtime change; pre-G0 design only",
-      "status": "In progress",
+      "status": "Implemented / verification pending",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         0.8,
@@ -1417,7 +1418,12 @@
       ],
       "pull_request_boundary": "Specify stable error code/request ID envelope, readiness checks and bounded label vocabulary. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
-      "assigned_to": "Engineer A \u2014 error and telemetry contracts"
+      "assigned_to": "Engineer A \u2014 error and telemetry contracts",
+      "evidence": {
+        "commit": "341d414c2e1d703d1181b0f594fa213723556727",
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/19",
+        "checks": "53 scoped tests, Ruff/format and links passed; lead reviewed safe errors, uncertainty and bounded readiness/telemetry; CI pending."
+      }
     },
     {
       "id": "AR-011-B",
