@@ -1,0 +1,475 @@
+{
+  "contract_id": "C04",
+  "schema_version": 1,
+  "approval_status": "pending",
+  "acceptance_status": "planned-not-executed",
+  "description": "Structural traceability only. These links do not implement or execute any CT-M1 behavior case.",
+  "links": [
+    {
+      "case_id": "CT-M1-001",
+      "issue": "AR-005",
+      "operations": [],
+      "entities": [
+        "organizations",
+        "projects",
+        "project_memberships",
+        "resource_scopes",
+        "run_index",
+        "operations",
+        "artifact_objects",
+        "artifact_refs",
+        "budget_accounts",
+        "provider_calls",
+        "budget_entries",
+        "operation_keys"
+      ],
+      "fields": [],
+      "schemas": [],
+      "legacy_fixtures": [
+        "known"
+      ]
+    },
+    {
+      "case_id": "CT-M1-002",
+      "issue": "AR-005",
+      "operations": [],
+      "entities": [
+        "organizations",
+        "projects",
+        "project_memberships",
+        "resource_scopes",
+        "run_index",
+        "operations",
+        "artifact_objects",
+        "artifact_refs",
+        "budget_accounts",
+        "provider_calls",
+        "budget_entries",
+        "operation_keys"
+      ],
+      "fields": [
+        "run_index.run_id",
+        "run_index.event_head"
+      ],
+      "schemas": [],
+      "legacy_fixtures": [
+        "known"
+      ]
+    },
+    {
+      "case_id": "CT-M1-003",
+      "issue": "AR-005",
+      "operations": [],
+      "entities": [
+        "organizations",
+        "projects",
+        "project_memberships",
+        "resource_scopes",
+        "run_index",
+        "operations",
+        "artifact_objects",
+        "artifact_refs",
+        "budget_accounts",
+        "provider_calls",
+        "budget_entries",
+        "operation_keys"
+      ],
+      "fields": [],
+      "schemas": [],
+      "legacy_fixtures": [
+        "unknown_schema",
+        "partial_schema"
+      ]
+    },
+    {
+      "case_id": "CT-M1-004",
+      "issue": "AR-005",
+      "operations": [],
+      "entities": [
+        "resource_scopes",
+        "run_index"
+      ],
+      "fields": [],
+      "schemas": [],
+      "legacy_fixtures": [
+        "known",
+        "partial_schema"
+      ]
+    },
+    {
+      "case_id": "CT-M1-005",
+      "issue": "AR-006",
+      "operations": [
+        "listProjectRuns"
+      ],
+      "entities": [
+        "run_index"
+      ],
+      "fields": [
+        "run_index.created_at",
+        "run_index.run_id"
+      ],
+      "schemas": [
+        "RunPage",
+        "RunSummary"
+      ],
+      "legacy_fixtures": [
+        "known"
+      ]
+    },
+    {
+      "case_id": "CT-M1-006",
+      "issue": "AR-006",
+      "operations": [
+        "listProjectRuns"
+      ],
+      "entities": [
+        "project_memberships"
+      ],
+      "fields": [
+        "project_memberships.project_id"
+      ],
+      "schemas": [
+        "Error"
+      ],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-007",
+      "issue": "AR-007",
+      "operations": [
+        "listProjectRuns",
+        "submitProjectRun",
+        "getProjectRun",
+        "getProjectOperation",
+        "cancelProjectOperation"
+      ],
+      "entities": [
+        "organizations",
+        "projects",
+        "project_memberships",
+        "resource_scopes"
+      ],
+      "fields": [
+        "project_memberships.role"
+      ],
+      "schemas": [
+        "Error"
+      ],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-008",
+      "issue": "AR-007",
+      "operations": [
+        "submitProjectRun"
+      ],
+      "entities": [
+        "project_memberships",
+        "operation_keys"
+      ],
+      "fields": [
+        "project_memberships.revoked_at"
+      ],
+      "schemas": [
+        "Error"
+      ],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-009",
+      "issue": "AR-007",
+      "operations": [],
+      "entities": [
+        "resource_scopes",
+        "artifact_refs"
+      ],
+      "fields": [
+        "resource_scopes.project_id"
+      ],
+      "schemas": [
+        "Error"
+      ],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-010",
+      "issue": "AR-008",
+      "operations": [
+        "submitProjectRun"
+      ],
+      "entities": [
+        "operations",
+        "operation_keys"
+      ],
+      "fields": [
+        "operations.client_operation_id",
+        "operation_keys.operation_id",
+        "operation_keys.request_digest"
+      ],
+      "schemas": [
+        "Accepted",
+        "SubmitRun",
+        "Error"
+      ],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-011",
+      "issue": "AR-008",
+      "operations": [
+        "submitProjectRun"
+      ],
+      "entities": [
+        "operations",
+        "operation_keys"
+      ],
+      "fields": [
+        "operations.client_operation_id",
+        "operation_keys.operation_id",
+        "operation_keys.request_digest"
+      ],
+      "schemas": [
+        "Accepted",
+        "SubmitRun",
+        "Error"
+      ],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-012",
+      "issue": "AR-008",
+      "operations": [
+        "submitProjectRun"
+      ],
+      "entities": [
+        "operations",
+        "operation_keys"
+      ],
+      "fields": [
+        "operations.client_operation_id",
+        "operation_keys.operation_id",
+        "operation_keys.request_digest"
+      ],
+      "schemas": [
+        "Accepted",
+        "SubmitRun",
+        "Error"
+      ],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-013",
+      "issue": "AR-008",
+      "operations": [
+        "submitProjectRun"
+      ],
+      "entities": [
+        "operations"
+      ],
+      "fields": [],
+      "schemas": [
+        "TaskDefinition",
+        "SubmitRun",
+        "Error"
+      ],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-014",
+      "issue": "AR-008",
+      "operations": [
+        "getProjectOperation",
+        "cancelProjectOperation"
+      ],
+      "entities": [
+        "operations"
+      ],
+      "fields": [],
+      "schemas": [
+        "Operation",
+        "Cancellation"
+      ],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-015",
+      "issue": "AR-009",
+      "operations": [],
+      "entities": [
+        "artifact_objects",
+        "artifact_refs"
+      ],
+      "fields": [
+        "artifact_objects.digest",
+        "artifact_refs.artifact_id"
+      ],
+      "schemas": [],
+      "legacy_fixtures": [
+        "known"
+      ]
+    },
+    {
+      "case_id": "CT-M1-016",
+      "issue": "AR-009",
+      "operations": [],
+      "entities": [
+        "artifact_objects",
+        "artifact_refs"
+      ],
+      "fields": [],
+      "schemas": [
+        "Error"
+      ],
+      "legacy_fixtures": [
+        "corrupt_ciphertext",
+        "corrupt_address"
+      ]
+    },
+    {
+      "case_id": "CT-M1-017",
+      "issue": "AR-009",
+      "operations": [],
+      "entities": [
+        "artifact_objects",
+        "artifact_refs",
+        "resource_scopes"
+      ],
+      "fields": [
+        "artifact_refs.project_id",
+        "artifact_objects.project_id",
+        "resource_scopes.project_id"
+      ],
+      "schemas": [],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-018",
+      "issue": "AR-010",
+      "operations": [],
+      "entities": [
+        "budget_accounts",
+        "provider_calls",
+        "budget_entries"
+      ],
+      "fields": [
+        "budget_accounts.held_microusd",
+        "budget_accounts.accounted_microusd",
+        "provider_calls.state",
+        "budget_entries.amount_microusd"
+      ],
+      "schemas": [],
+      "legacy_fixtures": [
+        "known"
+      ]
+    },
+    {
+      "case_id": "CT-M1-019",
+      "issue": "AR-010",
+      "operations": [],
+      "entities": [
+        "budget_accounts",
+        "provider_calls",
+        "budget_entries"
+      ],
+      "fields": [
+        "budget_accounts.held_microusd",
+        "budget_accounts.accounted_microusd",
+        "provider_calls.state",
+        "budget_entries.amount_microusd"
+      ],
+      "schemas": [],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-020",
+      "issue": "AR-010",
+      "operations": [],
+      "entities": [
+        "budget_accounts",
+        "provider_calls",
+        "budget_entries"
+      ],
+      "fields": [
+        "budget_accounts.held_microusd",
+        "budget_accounts.accounted_microusd",
+        "provider_calls.state",
+        "budget_entries.amount_microusd"
+      ],
+      "schemas": [],
+      "legacy_fixtures": [
+        "known"
+      ]
+    },
+    {
+      "case_id": "CT-M1-021",
+      "issue": "AR-010",
+      "operations": [],
+      "entities": [
+        "budget_accounts",
+        "provider_calls",
+        "budget_entries"
+      ],
+      "fields": [
+        "budget_accounts.held_microusd",
+        "budget_accounts.accounted_microusd",
+        "provider_calls.state",
+        "budget_entries.amount_microusd"
+      ],
+      "schemas": [],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-022",
+      "issue": "AR-011",
+      "operations": [],
+      "entities": [],
+      "fields": [],
+      "schemas": [
+        "Error"
+      ],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-023",
+      "issue": "AR-011",
+      "operations": [],
+      "entities": [],
+      "fields": [],
+      "schemas": [
+        "Error"
+      ],
+      "legacy_fixtures": []
+    },
+    {
+      "case_id": "CT-M1-024",
+      "issue": "AR-012",
+      "operations": [
+        "listProjectRuns",
+        "submitProjectRun",
+        "getProjectRun",
+        "getProjectOperation",
+        "cancelProjectOperation"
+      ],
+      "entities": [
+        "organizations",
+        "projects",
+        "project_memberships",
+        "resource_scopes",
+        "run_index",
+        "operations",
+        "artifact_objects",
+        "artifact_refs",
+        "budget_accounts",
+        "provider_calls",
+        "budget_entries",
+        "operation_keys"
+      ],
+      "fields": [],
+      "schemas": [],
+      "legacy_fixtures": [
+        "known"
+      ]
+    }
+  ]
+}
