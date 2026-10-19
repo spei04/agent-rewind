@@ -103,17 +103,23 @@
           "type": "string"
         },
         "approved_at": {
+          "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
           "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
           "title": "Approved At",
           "type": "string"
         },
         "valid_from": {
+          "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
           "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
           "title": "Valid From",
           "type": "string"
         },
         "valid_until": {
+          "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
           "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
           "title": "Valid Until",
           "type": "string"
         },
@@ -216,12 +222,16 @@
           "type": "string"
         },
         "review_at": {
+          "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
           "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
           "title": "Review At",
           "type": "string"
         },
         "delete_after": {
+          "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
           "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
           "title": "Delete After",
           "type": "string"
         }
@@ -273,7 +283,9 @@
       "type": "string"
     },
     "created_at": {
+      "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
       "format": "date-time",
+      "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
       "title": "Created At",
       "type": "string"
     },
