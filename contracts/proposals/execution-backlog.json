@@ -1,6 +1,6 @@
 {
   "revision": "2026-10-19",
-  "approval_status": "pending execution backlog approval",
+  "approval_status": "Execution backlog approved; task-specific architecture, funding, data and release gates remain applicable.",
   "baseline": "8f1ae757005c95c50a789e4fa0a10aae9b3c4024",
   "parents": {
     "AR-001": {
@@ -571,7 +571,7 @@
       "tests": "Validate required workflow fields and examples against current TaskSpec limits",
       "security_reliability": "Exclude customer source and credentials from public examples",
       "out_of_scope": "No additional language or external write tools",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -582,7 +582,8 @@
         "QE"
       ],
       "pull_request_boundary": "Document two target workflows, tool-boundary replay guarantees, exclusions and customer interview questions. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "assigned_to": "Engineer A \u2014 workflow/contracts"
     },
     {
       "id": "AR-001-B",
@@ -776,7 +777,7 @@
       "tests": "Validate proposed OpenAPI, internal references and logical schema field coverage",
       "security_reliability": "Inspect fixtures without publishing private traces",
       "out_of_scope": "No runtime change or contract activation",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         0.8,
@@ -787,7 +788,8 @@
         "QE"
       ],
       "pull_request_boundary": "Map existing routes, SQL tables, event hashes, artifact formats and proposed M1 changes. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "assigned_to": "Engineer B \u2014 backend/interfaces"
     },
     {
       "id": "AR-004-B",
@@ -882,7 +884,7 @@
       "tests": "Fixture integrity and checksum tests; no production credentials in dumps",
       "security_reliability": "Public fixtures synthetic; private evidence remains owner-readable",
       "out_of_scope": "No migration implementation; pre-G0 preparation only",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.2,
@@ -893,7 +895,8 @@
         "domain owner"
       ],
       "pull_request_boundary": "Build synthetic legacy DB/object fixtures plus expected IDs, times, hashes and reservation totals from documented baseline. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "assigned_to": "Engineer C \u2014 quality/migrations"
     },
     {
       "id": "AR-005-B",
@@ -5731,8 +5734,9 @@
       "criteria": "Explicit approval of this execution backlog and which named staff/capacity can start. No implementation before this record.",
       "kind": "external",
       "minimum_elapsed_days": null,
-      "status": "Not satisfied",
-      "effort_days": 0
+      "status": "Satisfied",
+      "effort_days": 0,
+      "evidence": "2026-10-19: project owner explicitly approved execution backlog and authorized project lead to assign independent contributors and reassign completed slots."
     },
     {
       "id": "ARCH0",
@@ -6601,5 +6605,11 @@
     "read_back_verified": "2026-10-19",
     "removed_obsolete_parent_dependency_edges": 19,
     "dependency_authority": "Task-level ledger; coarse parent edges cannot represent preparatory and integration child handoffs."
+  },
+  "execution_capacity": {
+    "lead": "Project lead",
+    "concurrent_contributor_slots": 3,
+    "roles_are_logical_not_named_human_hires": true,
+    "six_FTE_schedule_not_confirmed": true
   }
 }

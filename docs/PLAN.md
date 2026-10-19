@@ -1,6 +1,6 @@
 # Agent Rewind — enterprise product and engineering roadmap
 
-**Document owner:** spei04 · **Revision:** 2026-10-19 · **State:** Execution backlog proposed; implementation approval pending
+**Document owner:** spei04 · **Revision:** 2026-10-19 · **State:** Execution backlog approved; staged delivery in progress
 **Implementation baseline:** `8f1ae757005c95c50a789e4fa0a10aae9b3c4024` · **Delivery clock:** Day 1 begins after execution-backlog approval (E0) and staffing confirmation; runtime implementation also requires G0.
 
 This is the authoritative product/architecture roadmap and milestone progress document; the requested [execution backlog](EXECUTION_BACKLOG.md) contains assignable task cards and the validated task-level schedule. It fills the product, architecture, delivery, security, operations, and governance brief in one file. Existing technical documents describe the current release; proposed behavior below is not implemented unless explicitly marked verified. No production deployment, enterprise certification, customer adoption, or capacity benchmark is implied by this plan.
@@ -65,7 +65,7 @@ Source inspected on 2026-10-19 at the baseline above. Historical test results be
 
 Use **Not started**, **In progress**, **Blocked**, **Implemented / verification pending**, and **Verified**. A checked box means its stated acceptance evidence exists. Historical implementation is not retroactively marked enterprise-ready. Milestone completion requires all exit gates, not just merged code. Each implementation change updates its task row, requirement row, and dated evidence log in this file. No fabricated overall percentage.
 
-Current planning work: blueprint and M0/M1 packet published; execution review now covers all 50 packages as 145 bounded tasks with dependencies, contracts, tests and conditional daily scheduling. Section 10 links the execution ledger. Every execution task remains Not started. E0 backlog approval, M0 approval and all implementation milestone gates remain open.
+Current planning work: blueprint and M0/M1 packet published; execution review now covers all 50 packages as 145 bounded tasks with dependencies, contracts, tests and conditional daily scheduling. Section 10 links the execution ledger. E0 is approved and initial independent assignments are in progress; see [ASSIGNMENTS.md](ASSIGNMENTS.md). M0 and later gates remain evidence-dependent.
 
 ### 1.4 Decisions still requiring confirmation
 
@@ -430,7 +430,7 @@ Paid research remains constrained by approved funds. Corpus collection, model dr
 
 ### 8.1 High-level roadmap
 
-All execution tasks are **Not started**. The [execution backlog](EXECUTION_BACKLOG.md) replaces the earlier coarse estimates and calendar windows. Effort is engineering work, not elapsed time. Every milestone below has explicit task-level start prerequisites and a gate that joins all its required tasks; early infrastructure from M4 may precede M2 acceptance without waiting for all M4 work.
+Execution has started with the E0-ready workflow, inventory and fixture tasks. The remaining task states are recorded in the execution ledger and assignment log. The [execution backlog](EXECUTION_BACKLOG.md) replaces the earlier coarse estimates and calendar windows. Effort is engineering work, not elapsed time. Every milestone below has explicit task-level start prerequisites and a gate that joins all its required tasks; early infrastructure from M4 may precede M2 acceptance without waiting for all M4 work.
 
 | Milestone | Objective and deliverable | Base effort | Dependency-ready scheduling | Exit gate |
 | --- | --- | ---: | --- | --- |
@@ -523,17 +523,17 @@ Use short-lived branches and pull requests in the personal repository. Independe
 
 The 50 stable work-package IDs now contain **145 specific PR-sized tasks** in [EXECUTION_BACKLOG.md](EXECUTION_BACKLOG.md). Every task includes objective, detailed scope, exclusions, prerequisites, required API/schema/interface, acceptance, automated tests, security/reliability, effort/confidence/range, responsible/reviewer roles and definition of done. Tasks are 0.5–4 engineering days. The [machine-readable ledger](../contracts/proposals/execution-backlog.json) mirrors task fields and contains gates, schedule and dependency audit. Generic first-five-days/last-five-days splits are retired.
 
-All tasks are **Not started**. Parent rows below are rollups, not assignable implementation PRs. Their entry dependencies point to exact child/gate prerequisites; they do not imply waiting for an entire parent package. This matters for early staging in AR-033 and independently testable contract producers. Full milestone gates still join all required tasks. No issue or specification is completion evidence. Unknown assessment findings or customer gaps receive new IDs with reviewable scope before their blocking gate can close.
+Initial E0-ready tasks are **In progress**; other tasks retain their ledger status. Parent rows below are rollups, not assignable implementation PRs. Their entry dependencies point to exact child/gate prerequisites; they do not imply waiting for an entire parent package. This matters for early staging in AR-033 and independently testable contract producers. Full milestone gates still join all required tasks. No issue or specification is completion evidence. Unknown assessment findings or customer gaps receive new IDs with reviewable scope before their blocking gate can close.
 
 Role abbreviations: TL technical lead/backend, BE execution/backend, PL platform, FE frontend, RS research, QE quality, SEC security, PM product. Named staffing is pending. Priority describes delivery order, not authority to bypass gates. Use the existing personal-repository issues as M0/M1 parent trackers; materialize child issues when their milestone is authorized, preserving these IDs and native dependency links.
 
 | Package | Milestone / priority | Assignable task cards / objective | Entry prerequisites from outside package | Primary roles / base effort | Status |
 | --- | --- | --- | --- | --- | --- |
-| AR-001 | M0 / P0 | [AR-001](EXECUTION_BACKLOG.md#ar-001): 2 PRs. Make supported investigations and their business value explicit. | [E0](EXECUTION_BACKLOG.md#e0) | FE/TL / 2 days | NS |
+| AR-001 | M0 / P0 | [AR-001](EXECUTION_BACKLOG.md#ar-001): 2 PRs. Make supported investigations and their business value explicit. | [E0](EXECUTION_BACKLOG.md#e0) | FE/TL / 2 days | In progress |
 | AR-002 | M0 / P0 | [AR-002](EXECUTION_BACKLOG.md#ar-002): 2 PRs. Protect corpus rights and establish a credible natural-failure evaluation protocol. | [AR-001-A](EXECUTION_BACKLOG.md#ar-001-a), [AR-001-B](EXECUTION_BACKLOG.md#ar-001-b) | RS / 2 days | NS |
 | AR-003 | M0 / P0 | [AR-003](EXECUTION_BACKLOG.md#ar-003): 2 PRs. Bound deployment trust, operating responsibility and financial exposure. | [AR-001-A](EXECUTION_BACKLOG.md#ar-001-a) | PL / 2 days | NS |
-| AR-004 | M0 / P0 | [AR-004](EXECUTION_BACKLOG.md#ar-004): 3 PRs. Resolve architecture and interface decisions before runtime changes. | [AR-002-B](EXECUTION_BACKLOG.md#ar-002-b), [AR-003-B](EXECUTION_BACKLOG.md#ar-003-b), [AR-005-A](EXECUTION_BACKLOG.md#ar-005-a), [ARCH0](EXECUTION_BACKLOG.md#arch0), [E0](EXECUTION_BACKLOG.md#e0) | BE/TL / 2.5 days | NS |
-| AR-005 | M1 / P0 | [AR-005](EXECUTION_BACKLOG.md#ar-005): 3 PRs. Upgrade stored history safely without changing evidence identity. | [E0](EXECUTION_BACKLOG.md#e0), [G0](EXECUTION_BACKLOG.md#g0) | BE/QE / 6 days | NS |
+| AR-004 | M0 / P0 | [AR-004](EXECUTION_BACKLOG.md#ar-004): 3 PRs. Resolve architecture and interface decisions before runtime changes. | [AR-002-B](EXECUTION_BACKLOG.md#ar-002-b), [AR-003-B](EXECUTION_BACKLOG.md#ar-003-b), [AR-005-A](EXECUTION_BACKLOG.md#ar-005-a), [ARCH0](EXECUTION_BACKLOG.md#arch0), [E0](EXECUTION_BACKLOG.md#e0) | BE/TL / 2.5 days | In progress |
+| AR-005 | M1 / P0 | [AR-005](EXECUTION_BACKLOG.md#ar-005): 3 PRs. Upgrade stored history safely without changing evidence identity. | [E0](EXECUTION_BACKLOG.md#e0), [G0](EXECUTION_BACKLOG.md#g0) | BE/QE / 6 days | In progress |
 | AR-006 | M1 / P0 | [AR-006](EXECUTION_BACKLOG.md#ar-006): 2 PRs. Make large run histories queryable through bounded authorized requests. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-007-A](EXECUTION_BACKLOG.md#ar-007-a), [AR-007-C](EXECUTION_BACKLOG.md#ar-007-c), [AR-011-B](EXECUTION_BACKLOG.md#ar-011-b) | TL / 5 days | NS |
 | AR-007 | M1 / P0 | [AR-007](EXECUTION_BACKLOG.md#ar-007): 3 PRs. Prevent cross-project access through both legacy and new paths. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-011-B](EXECUTION_BACKLOG.md#ar-011-b) | BE/TL / 5.5 days | NS |
 | AR-008 | M1 / P0 | [AR-008](EXECUTION_BACKLOG.md#ar-008): 2 PRs. Make retries safe and admission/cancellation behavior predictable. | [AR-007-C](EXECUTION_BACKLOG.md#ar-007-c), [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-011-B](EXECUTION_BACKLOG.md#ar-011-b) | BE / 4 days | NS |
@@ -803,7 +803,7 @@ The original brief is filled in this single roadmap. The later request explicitl
 - [x] Roadmap committed and published to the personal repository.
 - [x] Staged delivery workflow and first M0/M1 engineering packet prepared; draft contracts structurally checked.
 - [x] Execution backlog prepared: 145 independently reviewable tasks, contract producers, milestones, risks and conditional first-ten-day schedule; dependency/capacity audit passed.
-- [ ] E0: product owner approves execution backlog and named starting capacity.
+- [x] E0: project owner approved execution backlog and three delegated contributor slots; assignment/review log is [ASSIGNMENTS.md](ASSIGNMENTS.md).
 - [ ] G0 and later implementation/release gates accepted with actual evidence.
 
 ### 14.3 Dated progress ledger
@@ -820,4 +820,4 @@ The original brief is filled in this single roadmap. The later request explicitl
 
 ### 14.4 Immediate next action
 
-Review [the execution backlog and approval decisions](EXECUTION_BACKLOG.md#highest-risk-assumptions-and-decisions-requiring-approval). The latest instruction explicitly says: “Do not start implementation until I approve the execution backlog.” Record E0 approval and actual starting capacity before beginning the conditional Day 1 plan; retain G0 before runtime work. Do not treat this documentation delivery, an open issue, an elapsed date or a prior architecture preference as that approval. Subsequent authorized work updates the same roadmap, task ledger, evidence and GitHub tracker; no background automation is implied.
+Execute the approved backlog with three independent contributor slots and lead review. [ASSIGNMENTS.md](ASSIGNMENTS.md) records who owns each task and the integration/reassignment decisions. E0 approval was explicitly given on 2026-10-19; do not request it again. Preserve real contract, external funding, data, customer, security and release gates. Integrate tested work, update task/evidence status, and assign each available contributor the next task whose prerequisites are satisfied.

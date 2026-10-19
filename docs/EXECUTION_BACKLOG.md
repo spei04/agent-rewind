@@ -1,8 +1,8 @@
 # Agent Rewind — execution backlog
 
-**Revision:** 2026-10-19 · **Owner:** spei04 · **Status:** Proposed; awaiting execution-backlog approval.
+**Revision:** 2026-10-19 · **Owner:** spei04 · **Status:** Approved for staged execution; task-specific gates remain applicable.
 
-This is the assignable execution companion to [the roadmap](PLAN.md). It covers 50 work packages as 145 independently reviewable PR-sized tasks. No application implementation, production provisioning or paid inference was started in preparing this packet. All task statuses are **Not started**. Existing product code and historical test evidence are the starting point, not completion evidence for these tasks.
+This is the assignable execution companion to [the roadmap](PLAN.md). It covers 50 work packages as 145 independently reviewable PR-sized tasks. No application implementation, production provisioning or paid inference was started in preparing this packet. E0 is satisfied by explicit project-owner approval on 2026-10-19. Initial assignments and subsequent reviews are tracked in [ASSIGNMENTS.md](ASSIGNMENTS.md). Task cards and the machine-readable ledger record current status. Existing product code and historical test evidence are the starting point, not completion evidence for these tasks.
 
 The [machine-readable backlog](../contracts/proposals/execution-backlog.json) records the same task fields, contract producers, gates, first-fortnight allocations and dependency audit. Maintain the roadmap summary, this document, that ledger and affected GitHub issues together. IDs are permanent; never renumber completed evidence. The roadmap remains authoritative for product/architecture requirements; task-level edges here replace coarse package-level start assumptions. A future contract is a required producer deliverable, not an already implemented interface.
 
@@ -144,7 +144,7 @@ C04 links the [M1 API](../contracts/proposals/m1.openapi.json), [logical data mo
 
 ## Gate register
 
-Every gate below is currently **Not satisfied**. Integration gates join every listed required task; partial packages cannot close a milestone. External conditions require actual evidence from the responsible owner. Elapsed windows require both the minimum duration and valid measurements. No automated checker manufactures human approval.
+E0 is **Satisfied** by the project owner’s explicit execution approval on 2026-10-19. Other gates remain open until their evidence is recorded. Integration gates join every listed required task; partial packages cannot close a milestone. External conditions require actual evidence from the responsible owner. Elapsed windows require both the minimum duration and valid measurements. No automated checker manufactures human approval.
 
 <a id="e0"></a>
 
@@ -279,7 +279,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #1](htt
 - **Effort / confidence:** 1 engineering days; planning range 1–1.5; medium confidence.
 - **Responsible role:** TL; required reviewers: BE, QE. Named assignee pending staffing.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** In progress; assigned in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-001-b"></a>
 
@@ -399,7 +399,7 @@ M0 / P0 · 3 PRs · 2.5 engineering days · Not started · [Tracking issue #4](h
 - **Effort / confidence:** 1 engineering days; planning range 0.8–1.2; high confidence.
 - **Responsible role:** BE; required reviewers: TL, QE. Named assignee pending staffing.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** In progress; assigned in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-004-b"></a>
 
@@ -456,7 +456,7 @@ M1 / P0 · 3 PRs · 6 engineering days · Not started · [Tracking issue #5](htt
 - **Effort / confidence:** 1.5 engineering days; planning range 1.2–1.8; high confidence.
 - **Responsible role:** QE; required reviewers: TL, domain owner. Named assignee pending staffing.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** In progress; assigned in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-005-b"></a>
 
@@ -3047,3 +3047,5 @@ Update procedure for each completed PR: update task status and evidence in the m
 | Date | Planning progress | Implementation progress / next action |
 | --- | --- | --- |
 | 2026-10-19 | Review findings resolved into proposed backlog; 145 task cards, task-level dependencies, contracts/gates, conditional daily schedule and milestone rollups prepared and checked. | All execution tasks Not started. Product owner reviews E0 approval scope and unresolved decisions. |
+
+| 2026-10-19 | E0 approved by project owner; three independent contributor assignments started. | AR-001-A, AR-004-A and AR-005-A in progress; task-specific gates remain applicable. |
