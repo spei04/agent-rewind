@@ -5,7 +5,7 @@
     "version": "0.1.0-review.2",
     "description": "M1 consumer-reviewed freeze proposal, pending recorded review. Runtime unchanged; 24 behavioral cases remain planned. See docs/delivery/M1_CONTRACT_FREEZE.md. Five v1 operations only; scoped legacy workbench shapes remain supported."
   },
-  "x-approval-status": "pending",
+  "x-approval-status": "reviewed",
   "x-source-baseline": "8f1ae757005c95c50a789e4fa0a10aae9b3c4024",
   "security": [
     {

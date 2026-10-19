@@ -2,84 +2,84 @@
   "contract": "C04",
   "schema_version": 1,
   "contract_revision": "m1-review-2",
-  "approval_status": "pending",
+  "approval_status": "reviewed",
   "behavior_status": "planned-not-executed",
   "scope": "M1 development/testing contract and first AR-005-B/C slice; no production funding/data/release approval",
   "review_record_policy": "Record actual dated reviewer, disposition, scope and evidence. Pending is not approval; structural validation does not authenticate evidence.",
   "reviews": [
     {
       "role": "BE",
-      "reviewer": null,
-      "status": "pending",
-      "date": null,
-      "scope": null,
-      "evidence": null,
-      "reviewed_source_commit": null
+      "reviewer": "Engineer B",
+      "status": "accepted",
+      "date": "2026-10-19T23:55:36Z",
+      "scope": "Backend proposal authorship, compatibility and structural verification",
+      "evidence": "Authored corrected proposal; 147 targeted tests, checker and lint/format passed",
+      "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c"
     },
     {
       "role": "PL",
-      "reviewer": null,
-      "status": "pending",
-      "date": null,
-      "scope": null,
-      "evidence": null,
-      "reviewed_source_commit": null
+      "reviewer": "Engineer C",
+      "status": "accepted",
+      "date": "2026-10-19T23:53:46Z",
+      "scope": "Internal platform/quality/security design; no external security certification",
+      "evidence": "Exact-source acceptance after corrections; checker and missing-config negatives passed",
+      "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c"
     },
     {
       "role": "FE",
-      "reviewer": null,
-      "status": "pending",
-      "date": null,
-      "scope": null,
-      "evidence": null,
-      "reviewed_source_commit": null
+      "reviewer": "Engineer A",
+      "status": "accepted",
+      "date": "2026-10-19T23:53:52Z",
+      "scope": "Internal client/research consumer design; no external statistical certification",
+      "evidence": "Exact-source acceptance; 77 review/observability tests and full checker passed",
+      "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c"
     },
     {
       "role": "RS",
-      "reviewer": null,
-      "status": "pending",
-      "date": null,
-      "scope": null,
-      "evidence": null,
-      "reviewed_source_commit": null
+      "reviewer": "Engineer A",
+      "status": "accepted",
+      "date": "2026-10-19T23:53:52Z",
+      "scope": "Internal client/research consumer design; no external statistical certification",
+      "evidence": "Exact-source acceptance; 77 review/observability tests and full checker passed",
+      "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c"
     },
     {
       "role": "QE",
-      "reviewer": null,
-      "status": "pending",
-      "date": null,
-      "scope": null,
-      "evidence": null,
-      "reviewed_source_commit": null
+      "reviewer": "Engineer C",
+      "status": "accepted",
+      "date": "2026-10-19T23:53:46Z",
+      "scope": "Internal platform/quality/security design; no external security certification",
+      "evidence": "Exact-source acceptance after corrections; checker and missing-config negatives passed",
+      "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c"
     },
     {
       "role": "SEC",
-      "reviewer": null,
-      "status": "pending",
-      "date": null,
-      "scope": null,
-      "evidence": null,
-      "reviewed_source_commit": null
+      "reviewer": "Engineer C",
+      "status": "accepted",
+      "date": "2026-10-19T23:53:46Z",
+      "scope": "Internal platform/quality/security design; no external security certification",
+      "evidence": "Exact-source acceptance after corrections; checker and missing-config negatives passed",
+      "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c"
     },
     {
       "role": "TL",
-      "reviewer": null,
-      "status": "pending",
-      "date": null,
-      "scope": null,
-      "evidence": null,
-      "reviewed_source_commit": null
+      "reviewer": "Project lead",
+      "status": "accepted",
+      "date": "2026-10-19T23:55:36Z",
+      "scope": "Independent source review, integration tests, task dependencies and bounded development scope",
+      "evidence": "Independently reran 147 targeted tests and checker; exact-source reviews accepted; PR24 core/PostgreSQL and gVisor CI passed",
+      "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c"
     }
   ],
   "dispositions": {
-    "IF-01": "proposed-resolved; see M1_CONTRACT_FREEZE.md",
-    "IF-02": "proposed-resolved; see M1_CONTRACT_FREEZE.md",
-    "IF-03": "proposed-resolved; see M1_CONTRACT_FREEZE.md",
-    "IF-04": "proposed-resolved; see M1_CONTRACT_FREEZE.md",
-    "IF-05": "proposed-resolved; see M1_CONTRACT_FREEZE.md",
-    "IF-06": "proposed-resolved; see M1_CONTRACT_FREEZE.md",
-    "IF-07": "proposed-resolved; see M1_CONTRACT_FREEZE.md",
-    "IF-08": "proposed-resolved; see M1_CONTRACT_FREEZE.md"
+    "IF-01": "reviewed; see M1_CONTRACT_FREEZE.md and G0_DECISION.md",
+    "IF-02": "reviewed; see M1_CONTRACT_FREEZE.md and G0_DECISION.md",
+    "IF-03": "reviewed; see M1_CONTRACT_FREEZE.md and G0_DECISION.md",
+    "IF-04": "reviewed; see M1_CONTRACT_FREEZE.md and G0_DECISION.md",
+    "IF-05": "reviewed; see M1_CONTRACT_FREEZE.md and G0_DECISION.md",
+    "IF-06": "reviewed; see M1_CONTRACT_FREEZE.md and G0_DECISION.md",
+    "IF-07": "reviewed; see M1_CONTRACT_FREEZE.md and G0_DECISION.md",
+    "IF-08": "reviewed; see M1_CONTRACT_FREEZE.md and G0_DECISION.md"
   },
   "first_slice": [
     "AR-005-B",
@@ -100,5 +100,6 @@
     "admission-v1": "AR-008-A",
     "ledger-v1": "AR-010-A"
   },
-  "reviewed_source_commit": null
+  "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c",
+  "execution_decision": "docs/delivery/G0_DECISION.md"
 }

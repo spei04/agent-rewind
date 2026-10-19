@@ -1,6 +1,6 @@
 {
   "contract_version": 1,
-  "approval_status": "pending",
+  "approval_status": "reviewed",
   "scope": "Logical PostgreSQL M1 design; not executable DDL or an applied migration. Later milestones add trials, KMS rotation, retention and new checkpoint formats.",
   "baseline": "8f1ae757005c95c50a789e4fa0a10aae9b3c4024",
   "types": {

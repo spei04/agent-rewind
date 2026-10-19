@@ -1,7 +1,7 @@
 {
   "contract_id": "C04",
   "schema_version": 1,
-  "approval_status": "pending",
+  "approval_status": "reviewed",
   "acceptance_status": "planned-not-executed",
   "description": "Structural traceability only. These links do not implement or execute any CT-M1 behavior case.",
   "links": [
