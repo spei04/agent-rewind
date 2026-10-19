@@ -339,13 +339,13 @@ M0 / P0 · 2 PRs · 2 engineering days · In progress · [Tracking issue #2](htt
 - **Effort / confidence:** 1 engineering days; planning range 1–2; low confidence.
 - **Responsible role:** RS; required reviewers: QE, independent statistical reviewer. Assigned contributor: Engineer A — research protocol.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** In progress; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
+- **Progress:** Implemented / verification pending; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-003"></a>
 
 ### AR-003 — Bound deployment trust, operating responsibility and financial exposure
 
-M0 / P0 · 2 PRs · 2 engineering days · In progress · [Tracking issue #3](https://github.com/spei04/agent-rewind/issues/3)
+M0 / P0 · 2 PRs · 2 engineering days · Verified · [Tracking issue #3](https://github.com/spei04/agent-rewind/issues/3)
 
 <a id="ar-003-a"></a>
 
@@ -379,7 +379,7 @@ M0 / P0 · 2 PRs · 2 engineering days · In progress · [Tracking issue #3](htt
 - **Effort / confidence:** 1 engineering days; planning range 1–2; low confidence.
 - **Responsible role:** PL; required reviewers: SEC, QE. Assigned contributor: Engineer B — platform/capacity.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Implemented / verification pending; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
+- **Progress:** Verified; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-004"></a>
 
@@ -790,7 +790,7 @@ M1 / P0 · 2 PRs · 5 engineering days · In progress · [Tracking issue #12](ht
 - **Effort / confidence:** 2 engineering days; planning range 1.6–2.4; high confidence.
 - **Responsible role:** QE; required reviewers: TL, domain owner. Assigned contributor: Engineer C — quality/contract integration.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** In progress; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
+- **Progress:** Implemented / verification pending; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-012-b"></a>
 

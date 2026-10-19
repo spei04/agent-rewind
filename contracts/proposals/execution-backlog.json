@@ -34,7 +34,7 @@
         "AR-003-A",
         "AR-003-B"
       ],
-      "status": "In progress"
+      "status": "Verified"
     },
     "AR-004": {
       "milestone": "M0",
@@ -718,6 +718,11 @@
         "commit": "096b48f",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/18",
         "checks": "46 corpus/workflow tests, repository lint/format/type checks; core and real gVisor CI passed. Lead reviewed offline boundaries; real ingestion remains unavailable."
+      },
+      "follow_up_review": {
+        "review": "RV-001",
+        "finding": "Epoch timestamp strings accepted despite date-time schema; regression fix assigned to Engineer B. Contract freeze waits for correction.",
+        "status": "Correction in progress"
       }
     },
     {
@@ -742,7 +747,7 @@
       "tests": "Synthetic split leakage, unstable grader and insufficient-sample fixtures",
       "security_reliability": "No screening on holdout; model changes invalidate affected comparison",
       "out_of_scope": "No claim that existing injected failure establishes generality",
-      "status": "In progress",
+      "status": "Implemented / verification pending",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -754,7 +759,12 @@
       ],
       "pull_request_boundary": "Define failure taxonomy, task-level split, evaluator stability checks and effect-size feasibility worksheet. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
-      "assigned_to": "Engineer A \u2014 research protocol"
+      "assigned_to": "Engineer A \u2014 research protocol",
+      "evidence": {
+        "commit": "dc37db9acc9777978507f0d5e3e8ed1f7109b2a7",
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/21",
+        "checks": "101 scoped tests passed; RV-002 requires stronger identity admission and evaluator-digest leakage checks before merge."
+      }
     },
     {
       "id": "AR-003-A",
@@ -817,7 +827,7 @@
       "tests": "Check cost arithmetic, units and budget upper-bound examples",
       "security_reliability": "No implied authority for recurring cloud or customer data use",
       "out_of_scope": "No purchases or guaranteed launch date",
-      "status": "Implemented / verification pending",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -831,9 +841,9 @@
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
       "assigned_to": "Engineer B \u2014 platform/capacity",
       "evidence": {
-        "commit": "9ffa2fc4c60bbbefaaa80334c086e1582273b764",
+        "commit": "be2ce1f",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/20",
-        "checks": "9 Decimal arithmetic checks, Ruff/format and links passed. Lead reviewed rate/allowance separation, file-write amplification and unchanged authorization; CI pending."
+        "checks": "Nine arithmetic checks, core and gVisor CI passed; lead reviewed units, allowances and CAP-01. Production inputs remain external."
       }
     },
     {
@@ -1572,7 +1582,7 @@
       "tests": "Deliberately broken contract fixtures rejected; current proposed set accepted",
       "security_reliability": "Fixtures remain synthetic and approval status stays pending",
       "out_of_scope": "No claim that planned acceptance cases are implemented",
-      "status": "In progress",
+      "status": "Implemented / verification pending",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.6,
@@ -1584,7 +1594,12 @@
       ],
       "pull_request_boundary": "Add structural checks for OpenAPI/schema/acceptance links and baseline fixtures without runtime behavior claims. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
-      "assigned_to": "Engineer C \u2014 quality/contract integration"
+      "assigned_to": "Engineer C \u2014 quality/contract integration",
+      "evidence": {
+        "commit": "de03351e41506c3d14bbe65410087caa08df6960",
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/22",
+        "checks": "51 scoped tests passed; RV-003 found TEMP SQL bypass of fixture bounds; correction required before merge."
+      }
     },
     {
       "id": "AR-012-B",
@@ -6312,7 +6327,7 @@
       "producer": "AR-003-A",
       "title": "Trust/deployment decisions",
       "required_interface": "One-organization topology; deny-by-default sandbox network; API/worker identities; spending, data and region decisions.",
-      "status": "Partial: trust boundaries reviewed in AR-003-A; capacity/funding decision record in AR-003-B is in progress."
+      "status": "Available: trust and capacity decision records reviewed; production region/funding/IdP/human operations inputs remain external at ENV0."
     },
     {
       "id": "C04",
