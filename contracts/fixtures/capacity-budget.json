@@ -1,0 +1,193 @@
+{
+  "contract_id": "C03-capacity",
+  "schema_version": 1,
+  "status": "planning_not_provisioning_authority",
+  "reviewed_on": "2026-10-19",
+  "pricing_region": "us-central1",
+  "region_approved": false,
+  "currency": "USD",
+  "hours_per_month": 730,
+  "seconds_per_hour": 3600,
+  "rates": {
+    "worker": {
+      "value": "0.13402284",
+      "unit": "USD/worker-hour",
+      "source": "https://cloud.google.com/products/compute/pricing/general-purpose?hl=en",
+      "checked_on": "2026-10-19"
+    },
+    "sql_cpu": {
+      "value": "0.0826",
+      "unit": "USD/vCPU-hour",
+      "source": "https://cloud.google.com/sql/pricing?hl=en",
+      "checked_on": "2026-10-19"
+    },
+    "sql_memory": {
+      "value": "0.014",
+      "unit": "USD/GiB-hour",
+      "source": "https://cloud.google.com/sql/pricing?hl=en",
+      "checked_on": "2026-10-19"
+    },
+    "api_cpu": {
+      "value": "0.000018",
+      "unit": "USD/vCPU-second",
+      "source": "https://cloud.google.com/run/pricing?hl=en",
+      "checked_on": "2026-10-19"
+    },
+    "api_memory": {
+      "value": "0.000002",
+      "unit": "USD/GiB-second",
+      "source": "https://cloud.google.com/run/pricing?hl=en",
+      "checked_on": "2026-10-19"
+    },
+    "object_storage": {
+      "value": "0.000027397",
+      "unit": "USD/GiB-hour",
+      "source": "https://cloud.google.com/storage/pricing?hl=en",
+      "checked_on": "2026-10-19"
+    },
+    "object_write": {
+      "value": "0.005",
+      "unit": "USD/1000-class-A-operations",
+      "source": "https://cloud.google.com/storage/pricing?hl=en",
+      "checked_on": "2026-10-19"
+    },
+    "object_read": {
+      "value": "0.0004",
+      "unit": "USD/1000-class-B-operations",
+      "source": "https://cloud.google.com/storage/pricing?hl=en",
+      "checked_on": "2026-10-19"
+    }
+  },
+  "rate_scope": {
+    "worker": "e2-standard-4, 4 vCPU/16 GiB, on-demand Linux; boot disks excluded",
+    "sql": "Cloud SQL PostgreSQL Enterprise dedicated CPU/RAM HA; regional rates already include HA, do not double",
+    "api": "Cloud Run services instance-based billing; full allocated time, no free-tier/commitment discount",
+    "object_storage": "GCS Standard regional flat namespace; retained bytes and charged operations only"
+  },
+  "scenarios": [
+    {
+      "id": "pilot-50-files",
+      "measured": false,
+      "continuations_per_hour": 20,
+      "mean_minutes": 10,
+      "decisions": 20,
+      "files_per_capture": 50,
+      "get_ops_per_continuation": 1000,
+      "new_mib_per_continuation": 16,
+      "retention_days": 90,
+      "storage_safety_factor": 2,
+      "worker_hosts": 2,
+      "api_instances": 2,
+      "api_vcpu_each": 1,
+      "api_gib_each": 1,
+      "sql_vcpu": 2,
+      "sql_gib": 8,
+      "live_slots": 8,
+      "tool_permits": 4,
+      "other_services_low_usd": "250",
+      "other_services_high_usd": "1000"
+    },
+    {
+      "id": "pilot-2000-files",
+      "measured": false,
+      "continuations_per_hour": 20,
+      "mean_minutes": 10,
+      "decisions": 20,
+      "files_per_capture": 2000,
+      "get_ops_per_continuation": 40000,
+      "new_mib_per_continuation": 16,
+      "retention_days": 90,
+      "storage_safety_factor": 2,
+      "worker_hosts": 2,
+      "api_instances": 2,
+      "api_vcpu_each": 1,
+      "api_gib_each": 1,
+      "sql_vcpu": 2,
+      "sql_gib": 8,
+      "live_slots": 8,
+      "tool_permits": 4,
+      "other_services_low_usd": "250",
+      "other_services_high_usd": "1000"
+    },
+    {
+      "id": "forecast-50-files",
+      "measured": false,
+      "continuations_per_hour": 200,
+      "mean_minutes": 10,
+      "decisions": 20,
+      "files_per_capture": 50,
+      "get_ops_per_continuation": 1000,
+      "new_mib_per_continuation": 16,
+      "retention_days": 90,
+      "storage_safety_factor": 2,
+      "worker_hosts": 16,
+      "api_instances": 4,
+      "api_vcpu_each": 2,
+      "api_gib_each": 2,
+      "sql_vcpu": 8,
+      "sql_gib": 32,
+      "live_slots": 64,
+      "tool_permits": 32,
+      "other_services_low_usd": "1000",
+      "other_services_high_usd": "3000"
+    }
+  ],
+  "contingency_fraction": "0.25",
+  "missing_priced_lines": [
+    "SQL storage/backups/PITR",
+    "VM boot/image disks",
+    "load balancer/NAT/private networking/DNS",
+    "KMS/Secret Manager",
+    "telemetry/log retention",
+    "cross-zone/region and Internet transfer",
+    "support/taxes",
+    "regional recovery copies"
+  ],
+  "excluded_budgets": [
+    "paid model inference",
+    "engineering labor",
+    "external security/statistical review",
+    "customer support staffing"
+  ],
+  "model_validation": {
+    "total_cap_microusd": 200000000,
+    "historical_reservations_microusd": 36567974,
+    "reconciled_invoice_spend_microusd": null,
+    "ledger_current_verified": false,
+    "paid_dispatch_authorized_by_fixture": false,
+    "screened_candidates": 4,
+    "screening_pairs_each": 8,
+    "confirmation_pairs": 30,
+    "arms_per_pair": 2,
+    "decisions_per_continuation_upper": 20,
+    "discovery_calls_upper": 3,
+    "illustrative_call_upper_microusd": 100000
+  },
+  "engineering": {
+    "approved_contributor_slots": 3,
+    "human_full_time_staff_confirmed": false,
+    "base_days": "427",
+    "integration_allowance_fraction": "0.25",
+    "summed_task_upper_days": "720.6",
+    "day_rate_usd": null,
+    "external_review_fee_usd": null,
+    "named_oncall": null
+  },
+  "observations": [
+    {
+      "kind": "source_limit",
+      "source": "agent_rewind/config.py",
+      "fact": "32 MiB default workspace; 512 MiB default sandbox memory; runsc default"
+    },
+    {
+      "kind": "source_behavior",
+      "source": "agent_rewind/artifacts.py:Artifacts.put",
+      "fact": "S3 path calls put_object for every put, including an existing content hash"
+    },
+    {
+      "kind": "host_counter",
+      "observed_on": "2026-10-19",
+      "fact": "Development VM exposes 4 logical CPUs and 16369284 kB total memory; df reported about 98 MiB filesystem free. Not a production capacity benchmark."
+    }
+  ]
+}
