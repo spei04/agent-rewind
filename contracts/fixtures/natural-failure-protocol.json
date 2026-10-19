@@ -1,0 +1,671 @@
+{
+  "contract": "C02",
+  "schema_version": 1,
+  "status": "internal-review-statistical-review-pending",
+  "evidence_class": "synthetic-protocol-cases",
+  "source_corpus_sha256": "26dbf81d9496cad847110a1036f1cb2e5726af57888e96c6fcc785752a04c483",
+  "leakage_keys": [
+    "task_id",
+    "task_family_id",
+    "repository_family_id",
+    "source_digest",
+    "task_evaluator_family_id",
+    "evaluator_digest"
+  ],
+  "classification_cases": [
+    {
+      "id": "natural_task_failure",
+      "origin": "natural",
+      "execution": "complete",
+      "capture": "verified",
+      "evaluator": "valid",
+      "task_success": false,
+      "expected": "natural_task_failure"
+    },
+    {
+      "id": "natural_success",
+      "origin": "natural",
+      "execution": "complete",
+      "capture": "verified",
+      "evaluator": "valid",
+      "task_success": true,
+      "expected": "task_success"
+    },
+    {
+      "id": "injected",
+      "origin": "injected",
+      "execution": "complete",
+      "capture": "verified",
+      "evaluator": "valid",
+      "task_success": false,
+      "expected": "excluded_origin"
+    },
+    {
+      "id": "synthetic",
+      "origin": "synthetic",
+      "execution": "complete",
+      "capture": "verified",
+      "evaluator": "valid",
+      "task_success": false,
+      "expected": "excluded_origin"
+    },
+    {
+      "id": "execution_interruption",
+      "origin": "natural",
+      "execution": "interrupted",
+      "capture": "verified",
+      "evaluator": "valid",
+      "task_success": false,
+      "expected": "infrastructure_failure"
+    },
+    {
+      "id": "redacted_restore",
+      "origin": "natural",
+      "execution": "complete",
+      "capture": "unrestorable",
+      "evaluator": "valid",
+      "task_success": false,
+      "expected": "capture_failure"
+    },
+    {
+      "id": "grader_crash",
+      "origin": "natural",
+      "execution": "complete",
+      "capture": "verified",
+      "evaluator": "error",
+      "task_success": false,
+      "expected": "evaluator_failure"
+    },
+    {
+      "id": "missing_evaluator",
+      "origin": "natural",
+      "execution": "complete",
+      "capture": "verified",
+      "evaluator": "valid",
+      "task_success": null,
+      "expected": "unknown_outcome"
+    }
+  ],
+  "split_cases": [
+    {
+      "id": "disjoint",
+      "tasks": [
+        {
+          "task_id": "synthetic-task-1",
+          "phase": "development",
+          "task_family_id": "synthetic-task-family-1",
+          "repository_family_id": "synthetic-repository-family-1",
+          "source_digest": "efd4bacf6a6e52990b2a8b4feea8db19424c0937807fb19dfd18a21dd98b9796",
+          "task_evaluator_family_id": "synthetic-evaluator-family-1",
+          "evaluator_digest": "ddb3bb001aa4c5c60d7279911e5fdba8d715ebfbcc4daeaa5c6291982d17c161",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        },
+        {
+          "task_id": "synthetic-task-2",
+          "phase": "held_out",
+          "task_family_id": "synthetic-task-family-2",
+          "repository_family_id": "synthetic-repository-family-2",
+          "source_digest": "5c3e292fd2b728f6564898ec55c6a100174cc63f17281f9a211f7b376b4faa88",
+          "task_evaluator_family_id": "synthetic-evaluator-family-2",
+          "evaluator_digest": "a072a00f1e0ecaf49c2d2027d023fafa1e4ea830f16e14e28dd2258be42c3623",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        }
+      ],
+      "expected": "valid"
+    },
+    {
+      "id": "leaked_task_id",
+      "tasks": [
+        {
+          "task_id": "synthetic-task-1",
+          "phase": "development",
+          "task_family_id": "synthetic-task-family-1",
+          "repository_family_id": "synthetic-repository-family-1",
+          "source_digest": "efd4bacf6a6e52990b2a8b4feea8db19424c0937807fb19dfd18a21dd98b9796",
+          "task_evaluator_family_id": "synthetic-evaluator-family-1",
+          "evaluator_digest": "ddb3bb001aa4c5c60d7279911e5fdba8d715ebfbcc4daeaa5c6291982d17c161",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        },
+        {
+          "task_id": "synthetic-task-1",
+          "phase": "held_out",
+          "task_family_id": "synthetic-task-family-2",
+          "repository_family_id": "synthetic-repository-family-2",
+          "source_digest": "5c3e292fd2b728f6564898ec55c6a100174cc63f17281f9a211f7b376b4faa88",
+          "task_evaluator_family_id": "synthetic-evaluator-family-2",
+          "evaluator_digest": "a072a00f1e0ecaf49c2d2027d023fafa1e4ea830f16e14e28dd2258be42c3623",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        }
+      ],
+      "expected": "leakage"
+    },
+    {
+      "id": "leaked_task_family_id",
+      "tasks": [
+        {
+          "task_id": "synthetic-task-1",
+          "phase": "development",
+          "task_family_id": "synthetic-task-family-1",
+          "repository_family_id": "synthetic-repository-family-1",
+          "source_digest": "efd4bacf6a6e52990b2a8b4feea8db19424c0937807fb19dfd18a21dd98b9796",
+          "task_evaluator_family_id": "synthetic-evaluator-family-1",
+          "evaluator_digest": "ddb3bb001aa4c5c60d7279911e5fdba8d715ebfbcc4daeaa5c6291982d17c161",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        },
+        {
+          "task_id": "synthetic-task-2",
+          "phase": "held_out",
+          "task_family_id": "synthetic-task-family-1",
+          "repository_family_id": "synthetic-repository-family-2",
+          "source_digest": "5c3e292fd2b728f6564898ec55c6a100174cc63f17281f9a211f7b376b4faa88",
+          "task_evaluator_family_id": "synthetic-evaluator-family-2",
+          "evaluator_digest": "a072a00f1e0ecaf49c2d2027d023fafa1e4ea830f16e14e28dd2258be42c3623",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        }
+      ],
+      "expected": "leakage"
+    },
+    {
+      "id": "leaked_repository_family_id",
+      "tasks": [
+        {
+          "task_id": "synthetic-task-1",
+          "phase": "development",
+          "task_family_id": "synthetic-task-family-1",
+          "repository_family_id": "synthetic-repository-family-1",
+          "source_digest": "efd4bacf6a6e52990b2a8b4feea8db19424c0937807fb19dfd18a21dd98b9796",
+          "task_evaluator_family_id": "synthetic-evaluator-family-1",
+          "evaluator_digest": "ddb3bb001aa4c5c60d7279911e5fdba8d715ebfbcc4daeaa5c6291982d17c161",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        },
+        {
+          "task_id": "synthetic-task-2",
+          "phase": "held_out",
+          "task_family_id": "synthetic-task-family-2",
+          "repository_family_id": "synthetic-repository-family-1",
+          "source_digest": "5c3e292fd2b728f6564898ec55c6a100174cc63f17281f9a211f7b376b4faa88",
+          "task_evaluator_family_id": "synthetic-evaluator-family-2",
+          "evaluator_digest": "a072a00f1e0ecaf49c2d2027d023fafa1e4ea830f16e14e28dd2258be42c3623",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        }
+      ],
+      "expected": "leakage"
+    },
+    {
+      "id": "leaked_source_digest",
+      "tasks": [
+        {
+          "task_id": "synthetic-task-1",
+          "phase": "development",
+          "task_family_id": "synthetic-task-family-1",
+          "repository_family_id": "synthetic-repository-family-1",
+          "source_digest": "efd4bacf6a6e52990b2a8b4feea8db19424c0937807fb19dfd18a21dd98b9796",
+          "task_evaluator_family_id": "synthetic-evaluator-family-1",
+          "evaluator_digest": "ddb3bb001aa4c5c60d7279911e5fdba8d715ebfbcc4daeaa5c6291982d17c161",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        },
+        {
+          "task_id": "synthetic-task-2",
+          "phase": "held_out",
+          "task_family_id": "synthetic-task-family-2",
+          "repository_family_id": "synthetic-repository-family-2",
+          "source_digest": "efd4bacf6a6e52990b2a8b4feea8db19424c0937807fb19dfd18a21dd98b9796",
+          "task_evaluator_family_id": "synthetic-evaluator-family-2",
+          "evaluator_digest": "a072a00f1e0ecaf49c2d2027d023fafa1e4ea830f16e14e28dd2258be42c3623",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        }
+      ],
+      "expected": "leakage"
+    },
+    {
+      "id": "leaked_task_evaluator_family_id",
+      "tasks": [
+        {
+          "task_id": "synthetic-task-1",
+          "phase": "development",
+          "task_family_id": "synthetic-task-family-1",
+          "repository_family_id": "synthetic-repository-family-1",
+          "source_digest": "efd4bacf6a6e52990b2a8b4feea8db19424c0937807fb19dfd18a21dd98b9796",
+          "task_evaluator_family_id": "synthetic-evaluator-family-1",
+          "evaluator_digest": "ddb3bb001aa4c5c60d7279911e5fdba8d715ebfbcc4daeaa5c6291982d17c161",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        },
+        {
+          "task_id": "synthetic-task-2",
+          "phase": "held_out",
+          "task_family_id": "synthetic-task-family-2",
+          "repository_family_id": "synthetic-repository-family-2",
+          "source_digest": "5c3e292fd2b728f6564898ec55c6a100174cc63f17281f9a211f7b376b4faa88",
+          "task_evaluator_family_id": "synthetic-evaluator-family-1",
+          "evaluator_digest": "a072a00f1e0ecaf49c2d2027d023fafa1e4ea830f16e14e28dd2258be42c3623",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        }
+      ],
+      "expected": "leakage"
+    },
+    {
+      "id": "leaked_evaluator_digest",
+      "tasks": [
+        {
+          "task_id": "synthetic-task-1",
+          "phase": "development",
+          "task_family_id": "synthetic-task-family-1",
+          "repository_family_id": "synthetic-repository-family-1",
+          "source_digest": "efd4bacf6a6e52990b2a8b4feea8db19424c0937807fb19dfd18a21dd98b9796",
+          "task_evaluator_family_id": "synthetic-evaluator-family-1",
+          "evaluator_digest": "ddb3bb001aa4c5c60d7279911e5fdba8d715ebfbcc4daeaa5c6291982d17c161",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        },
+        {
+          "task_id": "synthetic-task-2",
+          "phase": "held_out",
+          "task_family_id": "synthetic-task-family-2",
+          "repository_family_id": "synthetic-repository-family-2",
+          "source_digest": "5c3e292fd2b728f6564898ec55c6a100174cc63f17281f9a211f7b376b4faa88",
+          "task_evaluator_family_id": "synthetic-evaluator-family-2",
+          "evaluator_digest": "ddb3bb001aa4c5c60d7279911e5fdba8d715ebfbcc4daeaa5c6291982d17c161",
+          "evaluator_command_digest": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+          "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+        }
+      ],
+      "expected": "leakage"
+    }
+  ],
+  "stability_minimum_repeats": 3,
+  "stability_cases": [
+    {
+      "id": "stable",
+      "repeats": {
+        "original": [
+          "fail",
+          "fail",
+          "fail"
+        ],
+        "known_pass": [
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "known_fail": [
+          "fail",
+          "fail",
+          "fail"
+        ],
+        "tampered": [
+          "fail",
+          "fail",
+          "fail"
+        ]
+      },
+      "expected": "eligible"
+    },
+    {
+      "id": "unstable",
+      "repeats": {
+        "original": [
+          "fail",
+          "fail",
+          "fail"
+        ],
+        "known_pass": [
+          "pass",
+          "fail",
+          "pass"
+        ],
+        "known_fail": [
+          "fail",
+          "fail",
+          "fail"
+        ],
+        "tampered": [
+          "fail",
+          "fail",
+          "fail"
+        ]
+      },
+      "expected": "quarantine"
+    },
+    {
+      "id": "always_pass",
+      "repeats": {
+        "original": [
+          "fail",
+          "fail",
+          "fail"
+        ],
+        "known_pass": [
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "known_fail": [
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "tampered": [
+          "fail",
+          "fail",
+          "fail"
+        ]
+      },
+      "expected": "quarantine"
+    },
+    {
+      "id": "insufficient_repeats",
+      "repeats": {
+        "original": [
+          "fail"
+        ],
+        "known_pass": [
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "known_fail": [
+          "fail",
+          "fail",
+          "fail"
+        ],
+        "tampered": [
+          "fail",
+          "fail",
+          "fail"
+        ]
+      },
+      "expected": "insufficient"
+    },
+    {
+      "id": "grader_error",
+      "repeats": {
+        "original": [
+          "fail",
+          "error",
+          "fail"
+        ],
+        "known_pass": [
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "known_fail": [
+          "fail",
+          "fail",
+          "fail"
+        ],
+        "tampered": [
+          "fail",
+          "fail",
+          "fail"
+        ]
+      },
+      "expected": "quarantine"
+    }
+  ],
+  "frozen_identity_example": {
+    "model_revision": "d8d6e0fb6b77018888d727e17665285ac64ab7562765246f60ab015ecb7e7ac3",
+    "adapter_digest": "aa32ae2a0711a89b62590db7d5f97aea641f922e3f5d9a973fef854285115bb2",
+    "prompt_digest": "709bd93c46441f0b39b8e705bd30250cdf905daae1c9e972758c1543c3e88fd2",
+    "image_digest": "046d94f97da1126587fc50af6867ad29874889a9750a2e8adb6dc39156ebd41b",
+    "tool_policy_digest": "131de4114068c336b996cc3c5287ce80d1b729162bc7a06105006656e51664b0",
+    "evaluator_digest": "04d3fa3fc1b2b405c095734f22be6f3b510be5f8e393adf619623a9d0e6b134e",
+    "evaluator_command_digest": "f88c614b80d353290e8da3c18da7a541ea985539d3b5b4a24dcbf6fd011f9bba",
+    "eligibility_digest": "4f913c4fc2273fdf3b906a3ac8ef5b362f78a450b2dcbdbc8075a540f2e593c1",
+    "budget_policy_digest": "4fff19f1cc533940b6b3b3bbc997fcc81067ef9e8edf4073e9eab56609b6998c",
+    "candidate_procedure_digest": "562ce79a745680e410d468fb3bc198816c87a3bac89952d5c13b11e47df21a33",
+    "processor_profile_id": "synthetic-model-region-a-no-retention",
+    "provider_fingerprint": "synthetic-version-1",
+    "protocol_revision": "natural-failure-v1",
+    "protocol_digest": "ccd5e95e095298376c52394a151dcd3089ce13cb1d8e5d722d59e4a9f2945eb8",
+    "corpus_digest": "26dbf81d9496cad847110a1036f1cb2e5726af57888e96c6fcc785752a04c483",
+    "split_manifest_digest": "02eb6528df48c615e90aaca3b8d902257e789a06fa76acd32ce9e14135243e18",
+    "task_digest": "022c879b935ac34467c66219b720b302f0992799dc2ee5b3e261ad54192a8954",
+    "source_revision": "0000000000000000000000000000000000000000",
+    "checkpoint_digest": "d6879a865607580dc06ab7f9e7ff218df6a1eb64dd5271dfb26c9878c1ed6215",
+    "event_chain_head": "7728d495ea5440a64198f957c9386c0dcb9f6303eaa4eb96f99a4409d29d42af",
+    "configuration_digest": "3560113464e9f5c796e6d1e754a09475639a63667770add09047be2b68761ac0",
+    "fingerprint_policy_digest": "88d40581d8cc085ee3b3fe0cc75a1f638676f69d5e04d87a76b42bd0d0492da6"
+  },
+  "identity_drift_fields": [
+    "model_revision",
+    "adapter_digest",
+    "prompt_digest",
+    "image_digest",
+    "tool_policy_digest",
+    "evaluator_digest",
+    "evaluator_command_digest",
+    "eligibility_digest",
+    "budget_policy_digest",
+    "candidate_procedure_digest",
+    "processor_profile_id",
+    "provider_fingerprint",
+    "protocol_revision",
+    "protocol_digest",
+    "corpus_digest",
+    "split_manifest_digest",
+    "task_digest",
+    "source_revision",
+    "checkpoint_digest",
+    "event_chain_head",
+    "configuration_digest",
+    "fingerprint_policy_digest"
+  ],
+  "feasibility_cases": [
+    {
+      "id": "many_trials_one_group",
+      "minimum_independent_groups": 4,
+      "observed_group_ids": [
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a",
+        "repo-a"
+      ],
+      "pairs_per_task": 200,
+      "power_reviewed": false,
+      "expected": "insufficient_groups"
+    },
+    {
+      "id": "enough_groups_no_power_review",
+      "minimum_independent_groups": 4,
+      "observed_group_ids": [
+        "repo-a",
+        "repo-b",
+        "repo-c",
+        "repo-d"
+      ],
+      "pairs_per_task": 30,
+      "power_reviewed": false,
+      "expected": "pending_power_review"
+    },
+    {
+      "id": "synthetic_reviewed_plan",
+      "minimum_independent_groups": 4,
+      "observed_group_ids": [
+        "repo-a",
+        "repo-b",
+        "repo-c",
+        "repo-d"
+      ],
+      "pairs_per_task": 30,
+      "power_reviewed": true,
+      "expected": "synthetic_design_check_only"
+    }
+  ],
+  "outcome_count_cases": [
+    {
+      "id": "balanced_null",
+      "planned": 10,
+      "wins": 2,
+      "harms": 2,
+      "ties": 6,
+      "missing": 0,
+      "expected_effect": 0,
+      "expected_bounds": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "missing_hides_harm",
+      "planned": 10,
+      "wins": 3,
+      "harms": 1,
+      "ties": 2,
+      "missing": 4,
+      "expected_effect": 0.3333333333333333,
+      "expected_bounds": [
+        -0.2,
+        0.6
+      ]
+    },
+    {
+      "id": "all_missing",
+      "planned": 10,
+      "wins": 0,
+      "harms": 0,
+      "ties": 0,
+      "missing": 10,
+      "expected_effect": null,
+      "expected_bounds": [
+        -1,
+        1
+      ]
+    }
+  ],
+  "within_task_cost_worksheet": {
+    "evidence_class": "hypothetical-arithmetic-only",
+    "tasks": 10,
+    "screened_candidates_including_negative_control": 4,
+    "screening_pairs_per_candidate": 4,
+    "confirmation_pairs": 20,
+    "expected_continuation_arms": 720,
+    "assumed_cost_per_continuation_usd": [
+      0.1,
+      0.5
+    ],
+    "continuation_cost_range_usd": [
+      72,
+      360
+    ],
+    "excludes": [
+      "baseline recordings",
+      "candidate-generation calls",
+      "grader and sandbox infrastructure",
+      "uncertain call reservations"
+    ],
+    "power_estimate": null,
+    "authorized_spend": null
+  },
+  "review_gates": {
+    "internal_engineering": "pending",
+    "independent_statistics": "pending",
+    "human_corpus_permissions": "pending",
+    "pilot_protocol_and_funding": "pending"
+  },
+  "identity_contract": {
+    "maximum_value_characters": 128,
+    "required_fields": [
+      "model_revision",
+      "adapter_digest",
+      "prompt_digest",
+      "image_digest",
+      "tool_policy_digest",
+      "evaluator_digest",
+      "evaluator_command_digest",
+      "eligibility_digest",
+      "budget_policy_digest",
+      "candidate_procedure_digest",
+      "processor_profile_id",
+      "provider_fingerprint",
+      "protocol_revision",
+      "protocol_digest",
+      "corpus_digest",
+      "split_manifest_digest",
+      "task_digest",
+      "source_revision",
+      "checkpoint_digest",
+      "event_chain_head",
+      "configuration_digest",
+      "fingerprint_policy_digest"
+    ],
+    "digest_fields": [
+      "adapter_digest",
+      "prompt_digest",
+      "image_digest",
+      "tool_policy_digest",
+      "evaluator_digest",
+      "evaluator_command_digest",
+      "eligibility_digest",
+      "budget_policy_digest",
+      "candidate_procedure_digest",
+      "protocol_digest",
+      "corpus_digest",
+      "split_manifest_digest",
+      "task_digest",
+      "checkpoint_digest",
+      "event_chain_head",
+      "configuration_digest",
+      "fingerprint_policy_digest"
+    ],
+    "revision_fields": [
+      "source_revision"
+    ],
+    "named_fields": [
+      "protocol_revision",
+      "model_revision",
+      "provider_fingerprint",
+      "processor_profile_id"
+    ],
+    "compatible_decision": "compatible",
+    "invalid_or_changed_decision": "quarantine"
+  }
+}
