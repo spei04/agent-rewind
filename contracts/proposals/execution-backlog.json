@@ -611,7 +611,7 @@
       "tests": "Check metric formulas on complete, failed and abandoned investigation fixtures",
       "security_reliability": "Measure all attempted investigations; no success-only denominator",
       "out_of_scope": "No application UI changes or claimed adoption",
-      "status": "Implemented / verification pending",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -625,9 +625,9 @@
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
       "assigned_to": "Engineer A \u2014 workflow/contracts",
       "evidence": {
-        "commit": "575f05e5683aee588892fe991fe36996e9409447",
+        "commit": "de05f0b",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/16",
-        "checks": "25 workflow/measurement tests and lint/format passed; lead accepted conservative measurement rules, CI pending."
+        "checks": "25 scoped tests; core and real gVisor CI passed. Lead accepted internal measurement targets; partner evidence remains pending."
       }
     },
     {
@@ -651,7 +651,7 @@
       "tests": "Schema cases for missing rights, duplicate task IDs and disallowed processor",
       "security_reliability": "Never commit proprietary tasks; aggregate evidence only",
       "out_of_scope": "No acquisition or paid model trials",
-      "status": "In progress",
+      "status": "Implemented / verification pending",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -663,7 +663,12 @@
       ],
       "pull_request_boundary": "Define private corpus manifest with rights, source revision, evaluator identity and allowed processors. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
-      "assigned_to": "Engineer C \u2014 corpus/quality"
+      "assigned_to": "Engineer C \u2014 corpus/quality",
+      "evidence": {
+        "commit": "7b1cd66a7074599954c8dfa9428964ae4215f6e5",
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/18",
+        "checks": "46 corpus/workflow tests, repository lint/format/type checks passed. Lead accepted offline validation boundaries; CI pending."
+      }
     },
     {
       "id": "AR-002-B",
@@ -721,7 +726,7 @@
       "tests": "Machine-check topology inventory and expected denied paths against configuration fixtures",
       "security_reliability": "No customer DB connection; secrets remain outside sandbox",
       "out_of_scope": "No cloud provisioning or security certification",
-      "status": "In progress",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -733,7 +738,12 @@
       ],
       "pull_request_boundary": "Map API, trusted worker, untrusted sandbox, IdP, DB, artifacts and model egress; retain one organization per installation. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
-      "assigned_to": "Engineer B \u2014 platform/trust boundaries"
+      "assigned_to": "Engineer B \u2014 platform/trust boundaries",
+      "evidence": {
+        "commit": "1e5158e63b3193e8605484f274338560b4f6207b",
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/17",
+        "checks": "9 static/mutation checks; core and real gVisor CI passed. Internal trust review accepted; no external certification."
+      }
     },
     {
       "id": "AR-003-B",
@@ -756,7 +766,7 @@
       "tests": "Check cost arithmetic, units and budget upper-bound examples",
       "security_reliability": "No implied authority for recurring cloud or customer data use",
       "out_of_scope": "No purchases or guaranteed launch date",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -767,7 +777,8 @@
         "QE"
       ],
       "pull_request_boundary": "Estimate reference cloud resources using measured workload assumptions; request named staffing, region, IdP and operating funding. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "assigned_to": "Engineer B \u2014 platform/capacity"
     },
     {
       "id": "AR-004-A",
@@ -1500,7 +1511,7 @@
       "tests": "Deliberately broken contract fixtures rejected; current proposed set accepted",
       "security_reliability": "Fixtures remain synthetic and approval status stays pending",
       "out_of_scope": "No claim that planned acceptance cases are implemented",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.6,
@@ -1511,7 +1522,8 @@
         "domain owner"
       ],
       "pull_request_boundary": "Add structural checks for OpenAPI/schema/acceptance links and baseline fixtures without runtime behavior claims. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "assigned_to": "Engineer C \u2014 quality/contract integration"
     },
     {
       "id": "AR-012-B",
