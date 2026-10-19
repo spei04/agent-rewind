@@ -77,9 +77,9 @@ The product is delivered through four stages. The broad blueprint remains the ro
 
 | Stage | Required output and review | Current state / transition |
 | --- | --- | --- |
-| 1 — Plan and challenge | Inspect source, identify unknowns, compare architecture options, record assumptions/risks and challenge the roadmap. | Planning artifact published; product-owner review/approval still open. M0 decision issues track remaining assumptions. |
+| 1 — Plan and challenge | Inspect source, identify unknowns, compare architecture options, record assumptions/risks and challenge the roadmap. | Planning artifact and execution backlog approved for staged development on 2026-10-19. M0 decision issues retain the unresolved external assumptions. |
 | 2 — Engineer the next milestone | Detailed GitHub issues, native dependency links, versioned API/data contracts, failure-oriented acceptance cases and milestone exit gates. | Execution packet prepared: 145 PR-sized tasks across M0–M7, 26 gates, 18 contract entries, conditional ten-day schedule and milestone rollups; 12 existing issues track M0/M1 parents. Future contracts and implementation still require their producer/approval gates. |
-| 3 — Implement approved slices | One coherent vertical slice at a time with relevant tests, code review, safe diagnostics/observability, recovery notes and updated documentation/progress. | Not started for the enterprise roadmap. Requires recorded product-owner approval and issue entry criteria. First runtime slice is AR-005-B/C, after G0 and AR-005-A fixtures: explicit migration followed by runtime revision guard and recovery verification. |
+| 3 — Implement approved slices | One coherent vertical slice at a time with relevant tests, code review, safe diagnostics/observability, recovery notes and updated documentation/progress. | Active: approved preparatory contracts and preservation fixtures are being delivered by three contributor slots with lead review. Runtime work retains issue entry criteria. First runtime slice is AR-005-B/C, after G0 and AR-005-A fixtures: explicit migration followed by runtime revision guard and recovery verification. |
 | 4 — Verify production readiness | Audit actual requirements against commit-specific test, load, security, deployment and recovery evidence; record pass, fail, not tested, or accepted scoped risk. | Not started. Begin evidence collection with each slice; perform independent readiness review before pilot/GA. A roadmap, contract file, or closed issue is not production proof. |
 
 Do not rerun the entire planning exercise for each change. Maintain this file as the authority for stage/milestone status and link to the relevant issues and contracts. For a slice to advance, the engineer records behavior before/after, acceptance results, reviewer disposition, deployment/recovery impact and any gaps. An unreviewed change cannot be called reviewed; unavailable load/security/deployment evidence cannot be called passing.
@@ -539,7 +539,7 @@ Role abbreviations: TL technical lead/backend, BE execution/backend, PL platform
 | AR-008 | M1 / P0 | [AR-008](EXECUTION_BACKLOG.md#ar-008): 2 PRs. Make retries safe and admission/cancellation behavior predictable. | [AR-007-C](EXECUTION_BACKLOG.md#ar-007-c), [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-011-B](EXECUTION_BACKLOG.md#ar-011-b) | BE / 4 days | NS |
 | AR-009 | M1 / P0 | [AR-009](EXECUTION_BACKLOG.md#ar-009): 2 PRs. Keep published evidence immutable, scoped and complete. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-007-A](EXECUTION_BACKLOG.md#ar-007-a), [AR-007-B](EXECUTION_BACKLOG.md#ar-007-b) | PL / 4 days | NS |
 | AR-010 | M1 / P0 | [AR-010](EXECUTION_BACKLOG.md#ar-010): 2 PRs. Enforce budget limits before every potentially paid action. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-008-B](EXECUTION_BACKLOG.md#ar-008-b) | BE / 5 days | NS |
-| AR-011 | M1 / P0 | [AR-011](EXECUTION_BACKLOG.md#ar-011): 3 PRs. Diagnose failures without exposing secrets or losing request context. | [AR-004-A](EXECUTION_BACKLOG.md#ar-004-a), [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [G0](EXECUTION_BACKLOG.md#g0) | PL / 5 days | NS |
+| AR-011 | M1 / P0 | [AR-011](EXECUTION_BACKLOG.md#ar-011): 3 PRs. Diagnose failures without exposing secrets or losing request context. | [AR-004-A](EXECUTION_BACKLOG.md#ar-004-a), [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [G0](EXECUTION_BACKLOG.md#g0) | PL / 5 days | In progress |
 | AR-012 | M1 / P0 | [AR-012](EXECUTION_BACKLOG.md#ar-012): 2 PRs. Detect incompatible or unsafe foundation changes before integration. | [AR-004-A](EXECUTION_BACKLOG.md#ar-004-a), [AR-005-A](EXECUTION_BACKLOG.md#ar-005-a), [AR-006-B](EXECUTION_BACKLOG.md#ar-006-b), [AR-008-B](EXECUTION_BACKLOG.md#ar-008-b), [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-010-B](EXECUTION_BACKLOG.md#ar-010-b), [AR-011-C](EXECUTION_BACKLOG.md#ar-011-c) | QE / 5 days | NS |
 | AR-013 | M2 / P0 | [AR-013](EXECUTION_BACKLOG.md#ar-013): 3 PRs. Execute untrusted code within an accountable Linux sandbox boundary. | [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-011-C](EXECUTION_BACKLOG.md#ar-011-c), [AR-033-A](EXECUTION_BACKLOG.md#ar-033-a), [AR-033-B](EXECUTION_BACKLOG.md#ar-033-b) | PL/QE / 10 days | NS |
 | AR-014 | M2 / P0 | [AR-014](EXECUTION_BACKLOG.md#ar-014): 3 PRs. Restore only supported state and explain why a checkpoint cannot branch. | [AR-006-B](EXECUTION_BACKLOG.md#ar-006-b), [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-012-B](EXECUTION_BACKLOG.md#ar-012-b), [AR-013-C](EXECUTION_BACKLOG.md#ar-013-c) | BE/QE / 10 days | NS |
@@ -584,7 +584,7 @@ Post-GA candidates remain **uncommitted P2**: remote customer workers, additiona
 
 ### 10.1 Stage 2 packet — M0/M1
 
-**Review state:** Proposed; implementation approval not recorded. This packet defines the next work, with no runtime application change, applied migration, new cloud resource or paid inference. Role owners are specified; actual staff assignments remain unconfirmed.
+**Review state:** Execution backlog approved on 2026-10-19; three contributor slots assigned and preparatory deliveries merged. Runtime migration remains behind G0. No new cloud resources or paid inference were authorized by this execution packet; human staffing and external funding/data decisions remain open.
 
 | Deliverable | Reviewable artifact | What it establishes |
 | --- | --- | --- |
@@ -600,14 +600,14 @@ Post-GA candidates remain **uncommitted P2**: remote customer workers, additiona
 | AR-002 | [Specify permitted corpus and evaluator protocol](https://github.com/spei04/agent-rewind/issues/2) | Needs decision review |
 | AR-003 | [Review trust, deployment and budget](https://github.com/spei04/agent-rewind/issues/3) | Needs decision review |
 | AR-004 | [Approve contracts and first slice](https://github.com/spei04/agent-rewind/issues/4) | Approval pending |
-| AR-005 | [Versioned schema upgrades](https://github.com/spei04/agent-rewind/issues/5) | Specification prepared; implementation blocked on approval |
-| AR-006 | [Run projections and pagination](https://github.com/spei04/agent-rewind/issues/6) | Specification prepared; implementation blocked on approval |
-| AR-007 | [Project authorization](https://github.com/spei04/agent-rewind/issues/7) | Specification prepared; implementation blocked on approval |
-| AR-008 | [Idempotent admission/cancellation](https://github.com/spei04/agent-rewind/issues/8) | Specification prepared; implementation blocked on approval |
-| AR-009 | [Artifact publication and references](https://github.com/spei04/agent-rewind/issues/9) | Specification prepared; implementation blocked on approval |
-| AR-010 | [Hierarchical budget reservations](https://github.com/spei04/agent-rewind/issues/10) | Specification prepared; implementation blocked on approval |
-| AR-011 | [Safe diagnostics and readiness](https://github.com/spei04/agent-rewind/issues/11) | Specification prepared; implementation blocked on approval |
-| AR-012 | [Contract and failure verification](https://github.com/spei04/agent-rewind/issues/12) | Specification prepared; implementation blocked on approval |
+| AR-005 | [Versioned schema upgrades](https://github.com/spei04/agent-rewind/issues/5) | Specification prepared; runtime prerequisites pending |
+| AR-006 | [Run projections and pagination](https://github.com/spei04/agent-rewind/issues/6) | Specification prepared; runtime prerequisites pending |
+| AR-007 | [Project authorization](https://github.com/spei04/agent-rewind/issues/7) | Specification prepared; runtime prerequisites pending |
+| AR-008 | [Idempotent admission/cancellation](https://github.com/spei04/agent-rewind/issues/8) | Specification prepared; runtime prerequisites pending |
+| AR-009 | [Artifact publication and references](https://github.com/spei04/agent-rewind/issues/9) | Specification prepared; runtime prerequisites pending |
+| AR-010 | [Hierarchical budget reservations](https://github.com/spei04/agent-rewind/issues/10) | Specification prepared; runtime prerequisites pending |
+| AR-011 | [Safe diagnostics and readiness](https://github.com/spei04/agent-rewind/issues/11) | Contract work assigned; runtime prerequisites pending |
+| AR-012 | [Contract and failure verification](https://github.com/spei04/agent-rewind/issues/12) | Fixture harness prerequisites now verified |
 
 Each issue includes problem/outcome, responsible role, bounded scope, dependencies, acceptance checkboxes, test/review plan, scope exclusions and contract links. The original 19 package-level GitHub relationships are historical preparation. The execution review replaces misleading package edges with links to exact child prerequisites; the current task DAG is authoritative. All 12 issue bodies now reference their child PR cards and updated effort/confidence, and were read back as open/blocked on approval; both milestone descriptions agree. All 19 obsolete coarse parent edges were removed; the validated task/gate ledger contains 511 exact edges. All issues remain open; none is evidence that a feature has been built.
 
@@ -818,7 +818,7 @@ The original brief is filled in this single roadmap. The later request explicitl
 | 2026-10-19 | Staged delivery / Stage 2: M0/M1 packet prepared | Four-stage workflow added; 12 detailed issues and two milestones created. Three draft contract artifacts define five API operations, twelve logical entities and 24 planned acceptance cases. OpenAPI structure/references validated and 19 native dependencies read back against the roadmap; runtime cases remain unexecuted. | Product owner reviews assumptions/contracts before Stage 3. |
 | 2026-10-19 | Execution backlog: draft → prepared and checked | 14 planning findings resolved; 145 bounded PR tasks, 26 gates, 18 contract entries, 427-day rollup, 511-edge acyclic dependency graph and conditional ten-day capacity/prerequisite checks. Draft scope FKs tightened. All execution tasks remain Not started; no runtime changes or paid work. | Product owner reviews E0 scope, staffing/funding/data decisions; runtime work waits for G0. |
 
-Execution checkpoint: AR-001-A verified via PR #13; AR-001-B assigned; AR-004-A/AR-005-A in review. [Assignment log and management checkpoint](ASSIGNMENTS.md) contain exact checks, storage constraint and unchanged budget.
+Execution checkpoint: AR-001-A, AR-004-A and AR-005-A verified via PRs #13–15; AR-001-B in review; AR-002-A, AR-003-A and AR-011-A assigned. [Assignment log and management checkpoint](ASSIGNMENTS.md) contain exact checks, storage constraint and unchanged budget.
 
 ### 14.4 Immediate next action
 
