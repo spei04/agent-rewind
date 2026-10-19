@@ -66,6 +66,30 @@ changing it requires updating the scoped check and tests during design review.
 This does not prevent later milestones from defining additional acceptance
 plans with their own scope.
 
+## Narrow M1 reference profile
+
+The checker accepts references only in recognized schema positions: named
+component schemas, parameter/header schemas, media schemas in parameter/header
+content or request/response bodies, and descendants under `properties`, `items`,
+`additionalProperties`, `anyOf`, `allOf` or `oneOf`. References in other OpenAPI
+object positions or arbitrary metadata are outside this profile.
+
+Every reference must target a direct named schema at
+`#/components/schemas/<name>`, where names use an ASCII letter/underscore followed
+by at most 79 letters, digits or underscores. The target must explicitly declare
+`type: object` and a `properties` object. Scalar metadata such as `#/info/title`,
+non-schema component categories, nested fragments, aliases and non-object target
+schemas fail. This matches the current eight named M1 schemas; it is a deliberately
+narrow contract profile rather than a full OpenAPI/JSON Schema resolver.
+
+JSON Schema permits boolean schemas, but both `true` and `false` **reference
+targets** are explicitly outside this direct-object M1 profile. Existing inline
+boolean keywords such as `additionalProperties: false` remain supported. Adding
+other legitimate schema or OpenAPI reference forms requires a reviewed profile
+extension and semantic regressions, not treating an arbitrary resolved value as
+a valid target. FastAPI model parsing alone accepts some references to unrelated
+metadata, so it supplements rather than replaces these target/context checks.
+
 ## Frozen preservation checks
 
 The suite reads the literal manifest from AR-005-A. It verifies the baseline
@@ -76,9 +100,14 @@ and the total historical reservations. Schema and corruption variants must
 retain their distinct classifications.
 
 Each SQL fixture is evaluated only in an in-memory SQLite database. Input size,
-SQL/value lengths, page count and VM work are bounded. File attachment, pragmas
-from fixture SQL, virtual tables, views, triggers and unapproved SQL functions
-are denied; extension loading is denied. The checked-in objects are read and
+SQL/value lengths, main-database page count and VM work are bounded. Fixture SQL
+cannot create TEMP tables, indexes, views or triggers, and cannot access any
+non-main database. SELECT-based statements are also outside the fixture input
+profile, preventing query-driven temporary materialization; all required frozen
+statements use direct DDL and literal rows. Temporary storage is configured in
+memory before validation, but that setting is not relied upon as a memory bound.
+File attachment, pragmas from fixture SQL, virtual tables, views, triggers and
+unapproved SQL functions are denied; extension loading is denied. The checked-in objects are read and
 hashed without rewriting them. Tests copy only synthetic fixtures before
 mutating them, so failure injection cannot corrupt the known-good corpus.
 

@@ -87,6 +87,43 @@ def legacy_tables(source: str) -> dict[str, set[str]]:
     return tables
 
 
+def schema_positions(api: dict) -> set[int]:
+    """Recognize only the schema slots used by the bounded M1 reference profile."""
+    positions: set[int] = set()
+
+    def add_schema(schema):
+        if not isinstance(schema, dict):
+            return
+        positions.add(id(schema))
+        for child in schema.get("properties", {}).values():
+            add_schema(child)
+        for keyword in ("items", "additionalProperties"):
+            add_schema(schema.get(keyword))
+        for keyword in ("anyOf", "allOf", "oneOf"):
+            for child in schema.get(keyword, []):
+                add_schema(child)
+
+    def add_content(owner):
+        for media in owner.get("content", {}).values():
+            add_schema(media.get("schema"))
+
+    for schema in api["components"]["schemas"].values():
+        add_schema(schema)
+    for item in api["paths"].values():
+        for method in METHODS & item.keys():
+            operation = item[method]
+            for parameter in item.get("parameters", []) + operation.get("parameters", []):
+                add_schema(parameter.get("schema"))
+                add_content(parameter)
+            add_content(operation.get("requestBody", {}))
+            for response in operation.get("responses", {}).values():
+                add_content(response)
+                for header in response.get("headers", {}).values():
+                    add_schema(header.get("schema"))
+                    add_content(header)
+    return positions
+
+
 def _check_inventory(api: dict, data: dict, models: str, database: str) -> dict[str, int]:
     def require(ok: bool, message: str) -> None:
         if not ok:
@@ -95,12 +132,22 @@ def _check_inventory(api: dict, data: dict, models: str, database: str) -> dict[
     require(api["openapi"] == "3.1.0", "Expected OpenAPI 3.1.0 proposal")
     require(api["x-source-baseline"] == data["baseline"], "Baseline identities disagree")
     refs = 0
+    schema_slots = schema_positions(api)
     for node, location in nodes(api):
         if "$ref" in node:
             ref = node["$ref"]
             require(
                 ref.startswith("#/"),
                 f"Unsupported external reference at {location}; use a local #/ target",
+            )
+            require(
+                id(node) in schema_slots,
+                f"Unsupported reference context at {location}; M1 references require a schema slot",
+            )
+            require(
+                re.fullmatch(r"#/components/schemas/[A-Za-z_][A-Za-z0-9_]{0,79}", ref) is not None,
+                f"Unsupported reference target at {location}; "
+                "M1 requires a named components/schemas object",
             )
             target: Any = api
             try:
@@ -110,6 +157,19 @@ def _check_inventory(api: dict, data: dict, models: str, database: str) -> dict[
                 raise ValueError(
                     f"Unresolved reference at {location}; declare its local target"
                 ) from exc
+            require(
+                not isinstance(target, bool),
+                f"Boolean schema target at {location} "
+                "is outside the direct-object M1 reference profile",
+            )
+            require(
+                isinstance(target, dict)
+                and target.get("type") == "object"
+                and isinstance(target.get("properties"), dict)
+                and "$ref" not in target,
+                f"Invalid schema reference target at {location}; "
+                "M1 requires a direct object with properties",
+            )
             refs += 1
         if "properties" in node:
             require(
@@ -396,6 +456,7 @@ def fixture_connection(sql: str) -> sqlite3.Connection:
     connection.setlimit(sqlite3.SQLITE_LIMIT_LENGTH, MAX_FILE_BYTES)
     connection.setlimit(sqlite3.SQLITE_LIMIT_SQL_LENGTH, MAX_FILE_BYTES)
     connection.execute("PRAGMA max_page_count=128")
+    connection.execute("PRAGMA temp_store=MEMORY")
     denied = {
         sqlite3.SQLITE_ATTACH,
         sqlite3.SQLITE_DETACH,
@@ -404,11 +465,22 @@ def fixture_connection(sql: str) -> sqlite3.Connection:
         sqlite3.SQLITE_CREATE_VIEW,
         sqlite3.SQLITE_CREATE_VTABLE,
         sqlite3.SQLITE_DROP_VTABLE,
+        sqlite3.SQLITE_CREATE_TEMP_TABLE,
+        sqlite3.SQLITE_CREATE_TEMP_INDEX,
+        sqlite3.SQLITE_CREATE_TEMP_VIEW,
+        sqlite3.SQLITE_CREATE_TEMP_TRIGGER,
+        sqlite3.SQLITE_DROP_TEMP_TABLE,
+        sqlite3.SQLITE_DROP_TEMP_INDEX,
+        sqlite3.SQLITE_DROP_TEMP_VIEW,
+        sqlite3.SQLITE_DROP_TEMP_TRIGGER,
+        sqlite3.SQLITE_SELECT,
     }
 
     def authorize(action, arg1, arg2, database, trigger):
-        if action in denied or (
-            action == sqlite3.SQLITE_FUNCTION and arg2 not in {"printf", "substr", "length"}
+        if (
+            action in denied
+            or database not in {None, "main"}
+            or (action == sqlite3.SQLITE_FUNCTION and arg2 not in {"printf", "substr", "length"})
         ):
             return sqlite3.SQLITE_DENY
         return sqlite3.SQLITE_OK

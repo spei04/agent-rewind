@@ -239,3 +239,80 @@ def test_cli_reports_proposal_scope_with_no_behavior_pass_count():
     assert report["approval_status"] == "pending"
     assert report["planned_acceptance_cases"] == 24
     assert not any("passed" in key for key in report)
+
+
+@pytest.mark.parametrize(
+    "sql",
+    [
+        "CREATE TEMP TABLE escape(value TEXT);",
+        "CREATE TEMPORARY TABLE escape(value TEXT);",
+        "CREATE TABLE temp.escape(value TEXT);",
+        "CREATE TEMP VIEW escape AS SELECT 1;",
+        "CREATE TABLE original(value); CREATE TEMP TRIGGER escape AFTER INSERT ON original "
+        "BEGIN DELETE FROM original; END;",
+        "CREATE TABLE escape AS SELECT 1 AS value;",
+        "CREATE TABLE original(value); INSERT INTO original SELECT 1;",
+        "SELECT * FROM temp.sqlite_schema;",
+        "WITH RECURSIVE sequence(x) AS (VALUES(1) UNION ALL SELECT x+1 FROM sequence) "
+        "SELECT x FROM sequence ORDER BY x DESC;",
+    ],
+)
+def test_fixture_sql_rejects_temp_objects_and_select_based_temp_work(sql):
+    # Refuse at statement authorization, without allocating large temporary data.
+    with pytest.raises(ValueError, match="forbidden I/O"):
+        CHECKER["fixture_connection"](sql)
+
+
+def test_schema_reference_cannot_target_openapi_metadata_string(contracts):
+    from fastapi.openapi.models import OpenAPI
+
+    target = contracts["api"]["components"]["schemas"]["RunPage"]["properties"]["items"]["items"]
+    target["$ref"] = "#/info/title"
+    # The installed structural model alone does not resolve this reference.
+    OpenAPI.model_validate(contracts["api"])
+    with pytest.raises(ValueError, match="Unsupported reference target.*RunPage"):
+        CHECKER["check"](
+            contracts["api"], contracts["data"], contracts["models"], contracts["database"]
+        )
+
+
+@pytest.mark.parametrize("value", ["not a schema", 42, None, [], {"type": "string"}])
+def test_m1_schema_targets_require_direct_object_schema_shape(contracts, value):
+    schemas = contracts["api"]["components"]["schemas"]
+    schemas["WrongShape"] = value
+    schemas["RunPage"]["properties"]["items"]["items"]["$ref"] = "#/components/schemas/WrongShape"
+    with pytest.raises(ValueError, match="Invalid schema reference target"):
+        CHECKER["check"](
+            contracts["api"], contracts["data"], contracts["models"], contracts["database"]
+        )
+
+
+@pytest.mark.parametrize("value", [True, False])
+def test_boolean_schema_reference_targets_are_explicitly_outside_m1_profile(contracts, value):
+    schemas = contracts["api"]["components"]["schemas"]
+    schemas["BooleanSchema"] = value
+    schemas["RunPage"]["properties"]["items"]["items"]["$ref"] = (
+        "#/components/schemas/BooleanSchema"
+    )
+    with pytest.raises(ValueError, match="Boolean schema target.*M1 reference profile"):
+        CHECKER["check"](
+            contracts["api"], contracts["data"], contracts["models"], contracts["database"]
+        )
+
+
+def test_schema_reference_in_non_schema_context_is_rejected(contracts):
+    contracts["api"]["info"]["x-reference"] = {"$ref": "#/components/schemas/Error"}
+    with pytest.raises(ValueError, match="Unsupported reference context.*schema slot"):
+        CHECKER["check"](
+            contracts["api"], contracts["data"], contracts["models"], contracts["database"]
+        )
+
+
+def test_reference_aliases_require_an_explicit_profile_extension(contracts):
+    schemas = contracts["api"]["components"]["schemas"]
+    schemas["Alias"] = {"$ref": "#/components/schemas/RunSummary"}
+    schemas["RunPage"]["properties"]["items"]["items"]["$ref"] = "#/components/schemas/Alias"
+    with pytest.raises(ValueError, match="direct object with properties"):
+        CHECKER["check"](
+            contracts["api"], contracts["data"], contracts["models"], contracts["database"]
+        )
