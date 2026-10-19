@@ -13,10 +13,12 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | 2026-10-19 | A — platform/contracts | AR-011-A: error, readiness and telemetry contract | work/error-contracts | Verified; [PR #19](https://github.com/spei04/agent-rewind/pull/19), merge ea85d2c. 53 scoped tests, core and gVisor CI passed; design only. |
 
-| 2026-10-19 | B — platform/capacity | AR-003-B: capacity, ownership and funding record | work/capacity-decision | Assigned after AR-003-A merge; fresh official pricing with explicit assumptions, no purchases. |
+| 2026-10-19 | B — platform/capacity | AR-003-B: capacity, ownership and funding record | work/capacity-decision | In review; [PR #20](https://github.com/spei04/agent-rewind/pull/20), 9ffa2fc. Nine arithmetic tests and lead review passed; CI pending. CAP-01 flags repeated object-write costs. |
 | 2026-10-19 | C — quality/contracts | AR-012-A: proposed contract and fixture validation harness | work/contract-harness | Assigned after AR-002-A delivery; AR-004-A and AR-005-A prerequisites verified. |
 
 | 2026-10-19 | A — research protocol | AR-002-B: natural failure and held-out split protocol | work/natural-failure-protocol | Assigned after AR-011-A delivery; corpus/metrics prerequisites verified. No paid experiment or real data ingestion. |
+
+| 2026-10-19 | B — independent reviewer | RV-001: peer review of merged corpus validator | work/capacity-decision (read only) | Assigned while research protocol finishes; inspect 096b48f, no implementation or new dependencies. |
 
 Each delivery records its commit, targeted checks, limitations and reviewer disposition here. A completed assignment frees its checkout for the next task after integration and consumer checks. Private evidence and credentials never belong in this log.
 
@@ -26,7 +28,8 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** seven PRs (#13–19) merged: workflows, inventory, frozen legacy fixtures, measurement criteria, trust boundaries and offline corpus permissions, and safe error/readiness contracts. All passed core and gVisor CI. Integrated core at de05f0b passed 96 tests (one environment-dependent skip), lint and formatting. No migration or new real-agent experiment has shipped.
-- **Active assignments:** A natural-failure research protocol, B capacity/operating estimates, C contract/fixture validation harness. All delivered PRs are merged; three next tasks remain active.
+- **Active assignments:** A natural-failure research protocol, B independent corpus-validator review, C contract/fixture validation harness. Capacity estimates are in CI (PR #20); AR-004-B waits for both protocol and capacity evidence.
+- **New capacity risk:** CAP-01 identifies repeated unchanged-file uploads; the same retained bytes can incur very different object-operation costs. AR-004-B must assign measurement/publication controls before accepting production sizing.
 - **Next evidence-producing milestone:** reviewed contracts plus the AR-005-B/C vertical slice: explicit schema adoption/upgrade and runtime revision guard, proving original rows/artifact/event identities survive and incompatible schemas refuse admission. The following native-run replay must use production-shaped gVisor and preserve controls; a single passing branch is not a reliable improvement claim.
 - **Blocker:** shared studio-agent root filesystem has about 100 MiB headroom and fluctuates with other active projects. Shared Physics Platform capacity work owns the cross-project storage recommendation. Our active paths are the primary agent-rewind checkout and three ordinary agent-rewind-worktrees/engineer-{a,b,c} checkouts; A and C own their pinned venvs, B has no installed environment. No new downloads/builds/venvs until safe capacity exists. Needed before broader runtime integration: at least 2 GiB sustained headroom for temporary DB/tests; use hosted CI for heavier checks meanwhile.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.

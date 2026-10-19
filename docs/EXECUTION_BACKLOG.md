@@ -376,7 +376,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Not started · [Tracking issue #3](htt
 - **Effort / confidence:** 1 engineering days; planning range 1–2; low confidence.
 - **Responsible role:** PL; required reviewers: SEC, QE. Assigned contributor: Engineer B — platform/capacity.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** In progress; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
+- **Progress:** Implemented / verification pending; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
 
 <a id="ar-004"></a>
 

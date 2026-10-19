@@ -818,7 +818,7 @@ The original brief is filled in this single roadmap. The later request explicitl
 | 2026-10-19 | Staged delivery / Stage 2: M0/M1 packet prepared | Four-stage workflow added; 12 detailed issues and two milestones created. Three draft contract artifacts define five API operations, twelve logical entities and 24 planned acceptance cases. OpenAPI structure/references validated and 19 native dependencies read back against the roadmap; runtime cases remain unexecuted. | Product owner reviews assumptions/contracts before Stage 3. |
 | 2026-10-19 | Execution backlog: draft → prepared and checked | 14 planning findings resolved; 145 bounded PR tasks, 26 gates, 18 contract entries, 427-day rollup, 511-edge acyclic dependency graph and conditional ten-day capacity/prerequisite checks. Draft scope FKs tightened. All execution tasks remain Not started; no runtime changes or paid work. | Product owner reviews E0 scope, staffing/funding/data decisions; runtime work waits for G0. |
 
-Execution checkpoint: AR-001-A/B, AR-003-A, AR-004-A and AR-005-A verified through PRs #13–17. AR-002-A verified through PR #18; AR-011-A verified through PR #19; AR-002-B, AR-003-B and AR-012-A are assigned. [Assignment log and management checkpoint](ASSIGNMENTS.md) contain exact evidence, storage constraint and unchanged budget.
+Execution checkpoint: AR-001-A/B, AR-003-A, AR-004-A and AR-005-A verified through PRs #13–17. AR-002-A verified through PR #18; AR-011-A verified through PR #19; AR-003-B is in review; AR-002-B and AR-012-A are assigned. [Assignment log and management checkpoint](ASSIGNMENTS.md) contain exact evidence, storage constraint and unchanged budget.
 
 ### 14.4 Immediate next action
 

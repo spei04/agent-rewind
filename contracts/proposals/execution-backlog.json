@@ -767,7 +767,7 @@
       "tests": "Check cost arithmetic, units and budget upper-bound examples",
       "security_reliability": "No implied authority for recurring cloud or customer data use",
       "out_of_scope": "No purchases or guaranteed launch date",
-      "status": "In progress",
+      "status": "Implemented / verification pending",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -779,7 +779,12 @@
       ],
       "pull_request_boundary": "Estimate reference cloud resources using measured workload assumptions; request named staffing, region, IdP and operating funding. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
-      "assigned_to": "Engineer B \u2014 platform/capacity"
+      "assigned_to": "Engineer B \u2014 platform/capacity",
+      "evidence": {
+        "commit": "9ffa2fc4c60bbbefaaa80334c086e1582273b764",
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/20",
+        "checks": "9 Decimal arithmetic checks, Ruff/format and links passed. Lead reviewed rate/allowance separation, file-write amplification and unchanged authorization; CI pending."
+      }
     },
     {
       "id": "AR-004-A",
