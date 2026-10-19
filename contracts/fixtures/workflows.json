@@ -1,0 +1,124 @@
+{
+  "contract": "C01",
+  "schema_version": 1,
+  "status": "engineering-review",
+  "evidence_class": "synthetic-contract-examples",
+  "pm_review": "pending",
+  "limits_source": "agent_rewind/models.py:TaskSpec",
+  "workflows": [
+    {
+      "id": "manual-action-recovery",
+      "buyer": "Coding-agent platform lead",
+      "operator": "Agent developer",
+      "objective": "Find a specific bad decision and inspect whether one replacement repairs the task.",
+      "input": "A complete, branchable native run whose independent evaluator reports success=false.",
+      "failure": "The agent finishes with a function that sorts values instead of retaining first-occurrence order.",
+      "intervention": {
+        "step": 1,
+        "kind": "action",
+        "action": {
+          "tool": "write_file",
+          "path": "solution.py",
+          "content": "def unique_in_order(items):\n    return list(dict.fromkeys(items))\n"
+        },
+        "label": "Preserve first occurrence order"
+      },
+      "original_action": {
+        "tool": "finish"
+      },
+      "original_result": {
+        "exit_code": 0,
+        "output": "Agent finished.",
+        "truncated": false
+      },
+      "success": "The frozen evaluator exits zero for the final branch workspace; this is one example, not an effect estimate.",
+      "task": {
+        "name": "Ordered deduplication contract example",
+        "instruction": "Implement unique_in_order(items) in solution.py. Inputs are lists of strings. Keep each distinct item once, in first-occurrence order, including empty input. Do not change the public function name.",
+        "image": "python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d",
+        "files": {
+          "solution.py": "def unique_in_order(items):\n    return sorted(set(items))\n"
+        },
+        "evaluator_files": {
+          "grade.py": "import runpy\nf = runpy.run_path(\"solution.py\")[\"unique_in_order\"]\nfor items, expected in [([], []), ([\"b\", \"a\", \"b\"], [\"b\", \"a\"]), ([\"x\", \"x\"], [\"x\"]), ([\"c\", \"a\", \"b\"], [\"c\", \"a\", \"b\"])]:\n    if f(items) != expected:\n        raise SystemExit(1)\nprint(\"PASS\")\n"
+        },
+        "evaluator_command": "python -I /evaluator/grade.py",
+        "max_steps": 30,
+        "command_timeout": 10,
+        "redact_patterns": [],
+        "budget_usd": 1.0,
+        "seed": 11
+      },
+      "successful_workspace": {
+        "solution.py": "def unique_in_order(items):\n    return list(dict.fromkeys(items))\n"
+      },
+      "expected_checks": {
+        "initial_evaluator_exit_code": 1,
+        "successful_evaluator_exit_code": 0
+      },
+      "interview_questions": [
+        "Which recent failed coding run could you legally share for an investigation?",
+        "How do you currently find the first decision worth changing, and how long does it take?",
+        "Would a passing alternative branch change a debugging or release decision?"
+      ]
+    },
+    {
+      "id": "automatic-intervention-evaluation",
+      "buyer": "Agent evaluation or research lead",
+      "operator": "Evaluation engineer",
+      "objective": "Find a useful intervention point and measure its effect on fresh continuations of the same failed run.",
+      "input": "A complete, branchable native run, fixed model/image/evaluator identities, and a bounded study budget.",
+      "failure": "A smoke test passes only full batches; the agent finishes with code that drops a partial final batch.",
+      "intervention": {
+        "step": 2,
+        "kind": "tool_result",
+        "result": {
+          "exit_code": 0,
+          "output": "Smoke checks passed for full batches. This does not check the stated requirement to keep a partial final batch. Inspect that case before finishing.",
+          "truncated": false
+        },
+        "label": "Expose missing partial-batch coverage"
+      },
+      "original_action": {
+        "tool": "shell",
+        "command": "python -B smoke.py"
+      },
+      "original_result": {
+        "exit_code": 0,
+        "output": "Smoke checks passed for full batches.\n",
+        "truncated": false
+      },
+      "success": "One branch passes only if its final workspace satisfies the independent evaluator. An improvement claim additionally needs the frozen candidate and complete independent confirmation with an effect interval excluding zero.",
+      "task": {
+        "name": "Partial batch contract example",
+        "instruction": "Implement batches(items, size) in solution.py. Inputs are lists of integers and a positive integer size. Return consecutive batches up to size items, preserving order and retaining the final partial batch. Empty input returns an empty list. Do not change the public function name.",
+        "image": "python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d",
+        "files": {
+          "solution.py": "def batches(items, size):\n    return [items[i:i + size] for i in range(0, len(items) - size + 1, size)]\n",
+          "smoke.py": "from solution import batches\nassert batches([1, 2, 3, 4], 2) == [[1, 2], [3, 4]]\nprint(\"Smoke checks passed for full batches.\")\n"
+        },
+        "evaluator_files": {
+          "grade.py": "import runpy\nf = runpy.run_path(\"solution.py\")[\"batches\"]\nfor items, size, expected in [([], 2, []), ([1], 3, [[1]]), ([1, 2, 3], 2, [[1, 2], [3]]), ([1, 2, 3, 4], 2, [[1, 2], [3, 4]]), ([1, 2], 1, [[1], [2]])]:\n    if f(items, size) != expected:\n        raise SystemExit(1)\nprint(\"PASS\")\n"
+        },
+        "evaluator_command": "python -I /evaluator/grade.py",
+        "max_steps": 30,
+        "command_timeout": 10,
+        "redact_patterns": [],
+        "budget_usd": 1.0,
+        "seed": 17
+      },
+      "successful_workspace": {
+        "solution.py": "def batches(items, size):\n    return [items[i:i + size] for i in range(0, len(items), size)]\n"
+      },
+      "expected_checks": {
+        "initial_evaluator_exit_code": 1,
+        "successful_evaluator_exit_code": 0
+      },
+      "interview_questions": [
+        "What minimum effect and uncertainty would justify changing your agent policy?",
+        "Can you provide independently graded natural failures with permission for the configured model processor?",
+        "Would a null or harmful intervention result still save investigation time?"
+      ]
+    }
+  ]
+}
