@@ -915,7 +915,7 @@
       "tests": "Run contract structure, dependency and historical-fixture manifest checks",
       "security_reliability": "Approval evidence is required; silence is not acceptance",
       "out_of_scope": "No implementation sign-off or invented reviewers",
-      "status": "In progress",
+      "status": "Implemented / verification pending",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -927,7 +927,12 @@
       ],
       "pull_request_boundary": "Resolve API/schema/test disagreements, explicit composite scope constraints and deferred endpoint ownership. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
-      "assigned_to": "Engineer B \u2014 backend/platform contract reconciliation"
+      "assigned_to": "Engineer B \u2014 backend/platform contract reconciliation",
+      "evidence": {
+        "commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c",
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/24",
+        "checks": "147 targeted tests independently rerun by lead; exact-source FE/RS and PL/QE/SEC reviews accepted; hosted CI pending."
+      }
     },
     {
       "id": "AR-004-C",
@@ -1021,7 +1026,7 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Add revision chain, baseline fingerprint, writer-drain adoption and explicit project mapping command",
+      "scope": "Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill.",
       "acceptance": "Empty install and known baseline upgrade preserve all manifest identities; unknown schema refuses safely",
       "tests": "M1-001 through M1-004: fresh/legacy/unknown, transactional interruption and concurrent migrators",
       "security_reliability": "Migration credential only; lock/timeouts; backup before adoption",
@@ -1036,7 +1041,7 @@
         "TL",
         "QE"
       ],
-      "pull_request_boundary": "Add revision chain, baseline fingerprint, writer-drain adoption and explicit project mapping command. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
+      "pull_request_boundary": "Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill. No online data rewrite, automatic downgrade or run projection.",
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
     },
     {
@@ -1055,7 +1060,7 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Replace legacy CLI create_all with explicit versioned migrations; add read-only compatible-revision guards to API/worker and document failed-upgrade recovery",
+      "scope": "Add read-only release-profile revision guards before API admission and worker claims; refuse unknown/partial/future or incomplete state without DDL, and document compatible application rollback versus required backup restore. Confirm all supported CLI initialization now uses AR-005-B versioned migrations.",
       "acceptance": "No runtime DDL; unsupported revision prevents admission and worker dispatch; compatible rollback demonstrated on fixture",
       "tests": "Least-privilege DB startup, future revision, upgrade failure and recovery tests",
       "security_reliability": "Fail closed when schema cannot be read; retain rollback evidence",
@@ -1070,7 +1075,7 @@
         "TL",
         "QE"
       ],
-      "pull_request_boundary": "Replace legacy CLI create_all with explicit versioned migrations; add read-only compatible-revision guards to API/worker and document failed-upgrade recovery. No HA rolling upgrade claim.",
+      "pull_request_boundary": "Add read-only release-profile revision guards before API admission and worker claims; refuse unknown/partial/future or incomplete state without DDL, and document compatible application rollback versus required backup restore. Confirm all supported CLI initialization now uses AR-005-B versioned migrations. No HA rolling upgrade claim.",
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
     },
     {
@@ -1329,7 +1334,8 @@
       "confidence": "medium",
       "dependencies": [
         "AR-007-A",
-        "AR-005-C"
+        "AR-005-C",
+        "AR-011-B"
       ],
       "contracts": [
         "C04"
@@ -1514,7 +1520,7 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Implement redacted boundary handlers and safe DB/store/schema readiness responses",
+      "scope": "Implement redacted boundary handlers and bounded DB/store/schema readiness. Own the installation-only sentinel provisioning command and bounded byte-read primitive: 4096-byte plaintext, capped ciphertext, one-second deadline, one in-flight check and five-second positive cache. AR-009-A consumes the primitive through a separate scoped interface.",
       "acceptance": "Known faults map to stable codes; unknown faults return safe message and correlated restricted diagnostic",
       "tests": "M1-022/023 secret canaries, malformed exceptions and dependency outage",
       "security_reliability": "Readiness prevents unsafe admission; liveness does not disclose dependency secrets",
@@ -1529,7 +1535,7 @@
         "SEC",
         "QE"
       ],
-      "pull_request_boundary": "Implement redacted boundary handlers and safe DB/store/schema readiness responses. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
+      "pull_request_boundary": "Implement redacted boundary handlers and bounded DB/store/schema readiness. Own the installation-only sentinel provisioning command and bounded byte-read primitive: 4096-byte plaintext, capped ciphertext, one-second deadline, one in-flight check and five-second positive cache. AR-009-A consumes the primitive through a separate scoped interface. No broad observability platform deployment.",
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
     },
     {
@@ -6538,7 +6544,7 @@
     "task_count": 145,
     "parent_count": 50,
     "gate_count": 26,
-    "edge_count": 514,
+    "edge_count": 515,
     "dag_acyclic": true,
     "contract_producers_available_before_consumers": true,
     "schedule_no_predecessor_violations_conditional_on_stated_approvals": true,
@@ -6563,7 +6569,7 @@
     },
     "base_effort_days": 427.0,
     "upper_range_days": 720.6,
-    "effort_only_critical_path_days": 146.0,
+    "effort_only_critical_path_days": 146.5,
     "effort_only_critical_path": [
       "E0",
       "AR-005-A",
@@ -6573,9 +6579,9 @@
       "G0",
       "AR-005-B",
       "AR-005-C",
-      "AR-007-A",
-      "AR-007-B",
-      "AR-007-C",
+      "AR-011-B",
+      "AR-009-A",
+      "AR-009-B",
       "AR-008-A",
       "AR-008-B",
       "AR-010-A",
@@ -6622,7 +6628,7 @@
       "G7"
     ],
     "critical_path_excludes_external_waits": true,
-    "revision_notes": "2026-10-19: added observability/harness before freeze and revision guard before readiness; DAG, producer ancestry and conditional schedule rechecked. Runtime start follows first fortnight.",
+    "revision_notes": "2026-10-19: freeze now consumes reviewed observability/harness; readiness consumes revision guard; scoped artifact reader consumes bounded byte primitive. DAG, producer ancestry, first-ten-day ordering/capacity and effort rollups rerun.",
     "independent_review": "Engineer C independently verified 145 task statuses/prerequisites, 514-edge DAG, producer ancestry, conditional schedule, 427-day rollup and 146-day path; four stale narrative references corrected before publication."
   },
   "review_findings": [

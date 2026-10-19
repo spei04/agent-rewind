@@ -24,10 +24,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 | 2026-10-19 | C — independent reviewer | RV-002: natural-failure protocol review | work/contract-harness (read only) | Completed; two findings fixed by A; B independently rechecked corrected 820c0a9 and accepted. |
 | 2026-10-19 | A — independent reviewer | RV-003: contract harness review | work/natural-failure-protocol (read only) | Completed; TEMP SQL and scalar-reference findings fixed by C; A rechecked corrected a5dcdcb and accepted. |
 
-| 2026-10-19 | B — backend/platform | AR-004-B: reconcile and propose M1 contract freeze | work/m1-contract-freeze | Assigned after all formal producers verified; include IF-01–08, safe diagnostics, CAP-01 and readiness sequencing. Consumer review follows before G0. |
+| 2026-10-19 | B — backend/platform | AR-004-B: reconcile and propose M1 contract freeze | work/m1-contract-freeze | In review: PR #24 at22c4376; 147 targeted tests independently rerun, A/C exact-source reviews accepted; CI pending. |
 
-| 2026-10-19 | A — consumer review | AR-004-B: workflow/client and research contract review | work/natural-failure-protocol (read only) | Input review completed at 8c3a7b9; retry identity and failure correlation clarifications sent to B. Exact-revision recheck next. |
-| 2026-10-19 | C — quality/security review | AR-004-B: preservation, authority and migration review | work/contract-harness (read only) | Input review completed at 8c3a7b9; writer drain, fingerprint, holds, scope closure and sentinel constraints sent to B. Exact-revision recheck next. |
+| 2026-10-19 | A — consumer review | AR-004-B: workflow/client and research contract review | work/natural-failure-protocol (read only) | Accepted exact22c4376 for FE/RS; 77 scoped tests plus full checker passed, legacy-config/recovery/correlation semantics verified. |
+| 2026-10-19 | C — quality/security review | AR-004-B: preservation, authority and migration review | work/contract-harness (read only) | Accepted exact22c4376 for PL/QE/SEC after nullability/fresh-state corrections; structural/negative checks passed. Runtime migration/security evidence remains required. |
 
 Each delivery records its commit, targeted checks, limitations and reviewer disposition here. A completed assignment frees its checkout for the next task after integration and consumer checks. Private evidence and credentials never belong in this log.
 
@@ -46,3 +46,5 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
 
 - 2026-10-19 C independently rechecked the lead dependency/status update: numerical checks passed; four stale timing/dependency references were corrected. GitHub parent issues #1–3 are closed only for verified internal specification scope; #4–12 remain open.
+
+- 2026-10-19 lead reconciled final C04 consumer dependency (AR-011-B before AR-009-A): 515-edge DAG and conditional schedule pass, 146.5-day effort path. No runtime work starts before the reviewed development-scope G0 record.
