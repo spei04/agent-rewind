@@ -722,7 +722,10 @@
       "follow_up_review": {
         "review": "RV-001",
         "finding": "Epoch timestamp strings accepted despite date-time schema; regression fix assigned to Engineer B. Contract freeze waits for correction.",
-        "status": "Correction in progress"
+        "status": "Verified",
+        "commit": "74ca0bb0de7fe8f12e17facccb666a329a8a99e1",
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/23",
+        "checks": "91 corpus tests independently rerun by lead; lint/type checks, core and gVisor CI passed. Epoch timestamp mismatch resolved; fixture bytes unchanged."
       }
     },
     {
@@ -761,9 +764,9 @@
       "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
       "assigned_to": "Engineer A \u2014 research protocol",
       "evidence": {
-        "commit": "dc37db9acc9777978507f0d5e3e8ed1f7109b2a7",
+        "commit": "820c0a9d04f78b46391e75924b7e6e4329e609f1",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/21",
-        "checks": "101 scoped tests passed; RV-002 requires stronger identity admission and evaluator-digest leakage checks before merge."
+        "checks": "166 scoped tests passed after evaluator-digest/identity corrections; independent recheck and CI pending."
       }
     },
     {
