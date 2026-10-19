@@ -4,7 +4,7 @@ import copy
 import hashlib
 import json
 from dataclasses import replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -203,3 +203,79 @@ def test_bounds_and_safe_errors_do_not_echo_private_values(manifest):
     assert error.value.__suppress_context__ is True
     with pytest.raises(CorpusManifestError, match="^invalid-validation-time$"):
         validate(manifest, now=NOW.replace(tzinfo=None))
+
+
+TIMESTAMP_PATHS = [
+    ("created_at",),
+    ("retention", "review_at"),
+    ("retention", "delete_after"),
+    *[
+        ("tasks", index, "permission", field)
+        for index in range(2)
+        for field in ("approved_at", "valid_from", "valid_until")
+    ],
+]
+
+
+def field_value(value, path):
+    for part in path:
+        value = value[part]
+    return value
+
+
+@pytest.mark.parametrize("path", TIMESTAMP_PATHS)
+@pytest.mark.parametrize("multiplier", [1, 1000])
+def test_epoch_strings_rejected_at_every_timestamp(manifest, path, multiplier):
+    instant = datetime.fromisoformat(field_value(manifest, path).replace("Z", "+00:00"))
+    set_field(manifest, path, str(int(instant.timestamp()) * multiplier))
+    with pytest.raises(CorpusManifestError, match="^invalid-manifest$"):
+        validate(manifest)
+
+
+@pytest.mark.parametrize("path", TIMESTAMP_PATHS)
+@pytest.mark.parametrize("offset", [timedelta(hours=5, minutes=45), timedelta(hours=-4)])
+def test_numeric_offsets_preserve_every_timestamp_instant(manifest, path, offset):
+    original = validate(manifest).model_dump(mode="json")
+    instant = datetime.fromisoformat(field_value(manifest, path).replace("Z", "+00:00"))
+    set_field(manifest, path, instant.astimezone(timezone(offset)).isoformat())
+    parsed = validate(manifest).model_dump(mode="json")
+    actual = datetime.fromisoformat(field_value(parsed, path).replace("Z", "+00:00"))
+    expected = datetime.fromisoformat(field_value(original, path).replace("Z", "+00:00"))
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "timestamp",
+    [
+        "2026-10-19 00:00:00Z",
+        "2026-10-19T00:00Z",
+        "2026-10-19T00:00:00+0000",
+        "2026-10-19T00:00:00Z\n",
+        "2026-10-19T00:00:00.1234567Z",
+        "2026-10-19T00:00:60Z",
+        "2026-10-19T24:00:00Z",
+        "2026-02-30T00:00:00Z",
+        "2026-10-19T00:00:00+24:00",
+    ],
+)
+def test_timestamp_profile_rejects_ambiguous_or_unrepresentable_values(manifest, timestamp):
+    manifest["created_at"] = timestamp
+    with pytest.raises(CorpusManifestError, match="^invalid-manifest$"):
+        validate(manifest)
+
+
+@pytest.mark.parametrize("suffix", ["Z", "z", "+00:00", "-00:00"])
+def test_fractional_seconds_and_case_variants_are_preserved(manifest, suffix):
+    manifest["created_at"] = "2026-10-19t00:00:00.123456" + suffix
+    assert validate(manifest).created_at == datetime(2026, 10, 19, microsecond=123456, tzinfo=UTC)
+
+
+def test_native_datetime_model_round_trip_remains_supported(manifest):
+    result = validate(manifest)
+    assert CorpusManifest.model_validate(result.model_dump()) == result
+
+
+def test_permission_expiry_with_offset_uses_exact_instant(manifest):
+    manifest["tasks"][0]["permission"]["valid_until"] = "2026-10-19T17:45:00+05:45"
+    with pytest.raises(CorpusManifestError, match="^permission-expired$"):
+        validate(manifest)

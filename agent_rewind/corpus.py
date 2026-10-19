@@ -12,7 +12,14 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Annotated, Any, Literal
 
-from pydantic import AwareDatetime, Field, ValidationError, field_validator, model_validator
+from pydantic import (
+    AwareDatetime,
+    BeforeValidator,
+    Field,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 
 from .models import StrictModel, valid_path
 
@@ -22,6 +29,39 @@ Sha256 = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 Revision = Annotated[str, Field(pattern=r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")]
 Purpose = Literal["debugging", "intervention-screening", "independent-confirmation"]
 MAX_MANIFEST_BYTES = 1024 * 1024
+
+# Match the published wire format before Pydantic can interpret an epoch string.
+# Microsecond precision preserves the exact instants used for permission expiry.
+TIMESTAMP_PATTERN = (
+    r"^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])"
+    r"[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]"
+    r"(?:\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+)
+
+
+def _parse_manifest_timestamp(value: Any) -> Any:
+    # Preserve Python callers with already parsed datetimes; AwareDatetime still
+    # rejects naive values. JSON cannot supply a native datetime instance.
+    if isinstance(value, datetime):
+        return value
+    if not isinstance(value, str) or re.fullmatch(TIMESTAMP_PATTERN, value) is None:
+        raise ValueError("Timestamp must use the timezone-aware date-time profile.")
+    return datetime.fromisoformat(value.replace("z", "+00:00").replace("Z", "+00:00"))
+
+
+ManifestTimestamp = Annotated[
+    AwareDatetime,
+    BeforeValidator(_parse_manifest_timestamp),
+    Field(
+        json_schema_extra={
+            "pattern": TIMESTAMP_PATTERN,
+            "description": (
+                "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional "
+                "1-6 fractional digits. Calendar years 0001-9999; no leap seconds."
+            ),
+        }
+    ),
+]
 
 
 class PrivateObject(StrictModel):
@@ -42,9 +82,9 @@ class Permission(StrictModel):
     status: Literal["approved"]
     rights_owner_id: Identifier
     approved_by: Identifier
-    approved_at: AwareDatetime
-    valid_from: AwareDatetime
-    valid_until: AwareDatetime
+    approved_at: ManifestTimestamp
+    valid_from: ManifestTimestamp
+    valid_until: ManifestTimestamp
     evidence: PrivateObject
     allowed_processors: list[Identifier] = Field(min_length=1, max_length=32)
     allowed_purposes: list[Purpose] = Field(min_length=1, max_length=3)
@@ -85,8 +125,8 @@ class CorpusTask(StrictModel):
 
 class Retention(StrictModel):
     owner_id: Identifier
-    review_at: AwareDatetime
-    delete_after: AwareDatetime
+    review_at: ManifestTimestamp
+    delete_after: ManifestTimestamp
 
     @model_validator(mode="after")
     def review_before_deletion(self) -> Retention:
@@ -104,7 +144,7 @@ class PublicationRules(StrictModel):
 class CorpusManifest(StrictModel):
     schema_version: Literal[1]
     corpus_id: Identifier
-    created_at: AwareDatetime
+    created_at: ManifestTimestamp
     evidence_class: Literal["synthetic", "customer-permitted"]
     storage_profile_id: Identifier
     storage_owner_id: Identifier

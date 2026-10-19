@@ -40,6 +40,25 @@ characters are rejected. Consumers must not reinterpret percent sequences or
 turn relative keys into URLs. Resolving a reference and checking the bytes
 against its digest is separate from validating the reference's syntax.
 
+All wire timestamps use an explicit RFC3339 profile:
+`YYYY-MM-DDTHH:MM:SS[.fraction](Z|+HH:MM|-HH:MM)`. Seconds and a timezone are
+required; lowercase `t`/`z` are accepted. Fractional seconds, when present, have
+1–6 digits so permission boundaries retain their exact microsecond precision.
+Calendar years are 0001–9999; invalid calendar dates and leap seconds are not
+supported by the datetime representation. Spaces instead of `T`, omitted
+seconds, compact offsets, epoch seconds/milliseconds strings and extra
+fractional precision are rejected as `invalid-manifest`, without silently
+coercing or rounding them. Numeric offsets preserve the represented instant;
+`Z`, `+00:00` and `-00:00` normalize to UTC, without preserving a distinct local
+offset-knowledge marker. Already constructed aware Python datetimes remain
+supported for internal model round trips; JSON admission uses the wire profile.
+
+This applies equally to `created_at`, retention `review_at`/`delete_after`, and
+every permission's `approved_at`/`valid_from`/`valid_until`. A shared validator
+checks the string syntax before datetime parsing. The generated schema includes
+the profile pattern as well as `format: date-time`; semantic calendar and
+permission-window checks remain mandatory in the admission validator.
+
 A processor identifier names the reviewed vendor **and** account, region and
 retention configuration. A vendor-wide name must not be reused to imply that
 all accounts or regions are approved. The private profile registry must hold
@@ -141,3 +160,10 @@ Internal review should check provenance completeness, caller-owned policy,
 refusal behavior and the distinction between declared and verified approvals.
 Actual customer/corpus admission stays pending until the corresponding private
 permission records and integration controls are available.
+
+The timestamp follow-up adds regressions for epoch seconds/milliseconds at all
+nine instantiated timestamp positions in the synthetic example, positive and
+negative numeric offsets, exact offset-based expiry, case/fraction variants,
+invalid calendar/profile forms and native datetime model round trips. The scoped
+suite passes **91 tests**. The synthetic fixture bytes and its provenance digests
+remain unchanged; no permission, current-time input or approval scope was altered.
