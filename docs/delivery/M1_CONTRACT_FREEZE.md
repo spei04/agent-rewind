@@ -97,8 +97,21 @@ legacy and nested-reference tests pass; one mapped project is the migration mode
 [`api.py`](../../agent_rewind/api.py) currently stores a bare TaskSpec and
 [`worker.py`](../../agent_rewind/worker.py) selects policy from current settings.
 Do not put a new envelope into an old TaskSpec reader. M1 jobs receive explicit
-`payload_version` metadata: 1 for retained historical payloads, 2 for new native
-admission envelopes. No old worker may claim new jobs. Drain legacy writers before
+`payload_version` metadata: 1 for existing legacy request shapes (historical or
+new scoped legacy admissions), 2 for new v1 native-run admission envelopes.
+Every **new** job, including legacy run/branch/study/investigate, also stores
+immutable execution_config_ref and execution_config_digest in additive job
+metadata, published with the same project/job artifact reference and role
+admission_config. The worker verifies that common configuration before dispatch.
+For version 2, envelope and job config references/digests must agree exactly;
+conflict or missing association refuses before paid execution. Legacy request
+bodies remain TaskSpec/BranchRequest/StudyRequest/investigation shapes read by
+the existing version-1 parsers. Newly submitted legacy branches/studies must match
+the source checkpoint's registered compatible policy/image; missing historical
+mapping is unsupported, not permission to freeze today's unrelated defaults.
+Legacy submissions have no automatic retry identity contract. Retained historical
+jobs have null configuration metadata and remain readable but non-dispatchable
+without explicit compatible mapping; no migration backfills guessed settings. No old worker may claim new jobs. Drain legacy writers before
 adoption; nonterminal legacy jobs block adoption until explicitly drained/cancelled
 using the old version. Historical jobs are not automatically redispatched.
 
@@ -424,13 +437,17 @@ history keeps activation blocked; prepared never reports healthy customer servic
 Fresh installation has an explicit path: `install` creates an adoption row with
 source_kind=fresh, the verified empty-source fingerprint, null organization/project
 intent, mapping `{schema:1,source_kind:"fresh"}` and null backup/drain evidence.
-CHECKs allow those nulls only for fresh prepared state. AR-007-A owns an explicit
+CHECKs permit null target organization/project IDs only while source_kind=fresh
+and state=prepared; both targets are required for ownership_complete. Legacy
+backup/drain evidence is always required for source_kind=legacy. Fresh backup/drain
+evidence remains NULL (explicitly inapplicable) through ownership_complete;
+initialization must not fabricate legacy evidence to satisfy a state transition. AR-007-A owns an explicit
 operator initialization command accepting installation/project IDs and canonical
 principal grants; it verifies the recorded fresh installation and empty legacy
 dataset, creates real ownership rows and records ownership_complete atomically.
 It never invokes legacy `adopt`, fabricates legacy mappings or infers a user from
 the process login. A legacy prepared row requires non-null mapping targets and
-backup/drain evidence. Fresh and legacy transitions cannot be switched by a retry.
+backup/drain evidence. Fresh and legacy transitions cannot be switched by a retry. Test the complete fresh prepared→ownership_complete transition with null inapplicable evidence, not only fresh row insertion.
 
 CLI contract: `rewind migrate status` reads state; `rewind migrate install --installation-key <key>` accepts
 only an empty recognized database for first installation. Repeating it with the
@@ -511,7 +528,7 @@ injection remain implementation gates with commit-addressed evidence.
 Validation of this proposal: the stdlib checker and installed FastAPI model check
 pass (5 operations, 50 local references, 12 logical entities, 24 planned cases,
 14 frozen rows, 18 ciphertext objects, five legacy variants). The targeted
-review/harness/inventory/legacy/observability suite passes 145 tests with bytecode
+review/harness/inventory/legacy/observability suite passes 147 tests with bytecode
 and pytest cache disabled. Ruff lint/format and local document links pass. These
 checks leave application code and frozen history bytes unchanged; no database,
 provider, sandbox or cloud resource was provisioned or called.

@@ -208,7 +208,13 @@ def _check_review(api, data, acceptance, links, obs, freeze):
         "Durable adoption metadata missing",
     )
     require(
-        {"payload_version", "lease_generation", "legacy_reserved_microusd"}
+        {
+            "payload_version",
+            "lease_generation",
+            "legacy_reserved_microusd",
+            "execution_config_ref",
+            "execution_config_digest",
+        }
         <= data["legacy_extensions"]["jobs"]["fields"].keys(),
         "Legacy job extension contract missing",
     )

@@ -9,7 +9,7 @@
       "layer": "migration",
       "given": "Empty SQLite development and PostgreSQL databases",
       "when": "Run explicit migration twice",
-      "then": "One expected revision head; idempotent second execution; no app startup DDL. First slice creates baseline/adoption metadata only; later ownership/artifact/ledger revisions have their own owners. Runtime role cannot CREATE/ALTER/stamp. Fresh install records fresh origin; identical installation-key replay at the same installed revision is a no-op. AR-007-A explicit initialization supplies real project/principal grants; changed key/intent or unknown nonempty DB refuses."
+      "then": "One expected revision head; idempotent second execution; no app startup DDL. First slice creates baseline/adoption metadata only; later ownership/artifact/ledger revisions have their own owners. Runtime role cannot CREATE/ALTER/stamp. Fresh install records fresh origin; identical installation-key replay at the same installed revision is a no-op. AR-007-A explicit initialization supplies real project/principal grants; changed key/intent or unknown nonempty DB refuses. Fresh initialization transitions prepared to ownership_complete with non-null targets and still-null inapplicable legacy backup/drain evidence."
     },
     {
       "id": "CT-M1-002",
@@ -73,7 +73,7 @@
       "layer": "authorization",
       "given": "Foreign study/run/parent/file/key IDs including compare route",
       "when": "Try all existing object routes",
-      "then": "No authorization bypass through legacy endpoints or nested refs. Require full transitive run/study/job/key/artifact owner closure; second-project activation waits for all legacy routes and nested refs. Workbench keeps rich legacy shapes."
+      "then": "No authorization bypass through legacy endpoints or nested refs. Require full transitive run/study/job/key/artifact owner closure; second-project activation waits for all legacy routes and nested refs. Workbench keeps rich legacy shapes. Every new legacy run/branch/study/investigate job freezes scoped common config metadata while preserving version1 bodies; missing/drifted config or v2 envelope mismatch blocks paid dispatch; old unmapped jobs never automatically redispatch."
     },
     {
       "id": "CT-M1-010",

@@ -162,3 +162,10 @@ def test_review_cannot_apply_to_a_different_source_commit(documents):
     documents[5]["reviews"][0]["reviewed_source_commit"] = "2" * 40
     with pytest.raises(ValueError, match="exact reviewed source commit"):
         CHECK(*documents)
+
+
+@pytest.mark.parametrize("field", ["execution_config_ref", "execution_config_digest"])
+def test_all_new_jobs_need_common_config_metadata(documents, field):
+    del documents[1]["legacy_extensions"]["jobs"]["fields"][field]
+    with pytest.raises(ValueError, match="Legacy job extension"):
+        CHECK(*documents)

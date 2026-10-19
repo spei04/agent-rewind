@@ -280,11 +280,18 @@
     "jobs": {
       "owner": "AR-008-A/AR-010-A",
       "fields": {
-        "payload_version": "integer NOT NULL DEFAULT 1; 2 only for newly admitted envelopes (AR-008-A)",
+        "payload_version": "integer NOT NULL DEFAULT 1; legacy body readers remain 1; new v1 native-run envelopes use 2 (AR-008-A)",
         "lease_generation": "bigint NOT NULL DEFAULT 0; increment successful claim (AR-010-A)",
-        "legacy_reserved_microusd": "money NOT NULL; immutable copied jobs.reserved at adoption, zero for new jobs (AR-010-A)"
+        "legacy_reserved_microusd": "money NOT NULL; immutable copied jobs.reserved at adoption, zero for new jobs (AR-010-A)",
+        "execution_config_ref": "digest NULL for retained historical jobs; required scoped admission_config artifact reference for every new job (AR-008-A)",
+        "execution_config_digest": "digest NULL for retained historical jobs; immutable required frozen config identity for every new job (AR-008-A)"
       },
-      "preservation": "Never alter original columns/rows to satisfy projection or fabricate historical dispatch; no mixed legacy writers."
+      "preservation": "Never alter original columns/rows to satisfy projection or fabricate historical dispatch; no mixed legacy writers.",
+      "constraints": [
+        "All new run/branch/study/investigate jobs atomically bind execution_config_ref/digest to the same project/job admission_config artifact ref; legacy bodies remain unchanged.",
+        "Retained null config jobs are read-only/non-redispatchable without explicit compatible mapping; do not infer current settings from payload_version=1.",
+        "Worker verifies common job config before paid dispatch; v2 envelope config must exactly agree with job config. Legacy source checkpoint policy/image must be explicitly compatible."
+      ]
     }
   },
   "migration_metadata": {
@@ -309,7 +316,9 @@
         "Prepared is schema adoption only; integrity/ownership/backfill readiness must pass before activation.",
         "Identical mapping/evidence re-entry is idempotent; changed mapping or source digest conflicts, requiring explicit reviewed recovery.",
         "Fresh install records source_kind=fresh, verified empty-source fingerprint, null target/evidence and fresh-only mapping; AR-007-A explicit operator initialization supplies ownership/grants atomically. Never run legacy adopt on a versioned fresh install.",
-        "Legacy source requires non-null target/evidence and bounded schema-1 mapping naming dataset digest, all-verified-legacy-resources selector, canonical grants/defaults and key dispositions. Unknown kinds/ambiguous closure block activation."
+        "Legacy source requires non-null target/evidence and bounded schema-1 mapping naming dataset digest, all-verified-legacy-resources selector, canonical grants/defaults and key dispositions. Unknown kinds/ambiguous closure block activation.",
+        "Target organization/project IDs may be NULL only for fresh/prepared state; ownership_complete always requires both targets.",
+        "Backup/drain evidence is required for legacy source in every state, and explicitly NULL/inapplicable for fresh source in both prepared and ownership_complete; never fabricate legacy evidence for initialization."
       ]
     },
     "migration_progress": {
