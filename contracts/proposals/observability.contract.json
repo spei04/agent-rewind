@@ -1,7 +1,7 @@
 {
   "contract": "C04",
   "schema_version": 1,
-  "status": "proposed-for-AR-004-B",
+  "status": "reconciled-proposal-pending-review",
   "runtime_implemented": false,
   "error_rules": {
     "invalid_request": {
@@ -515,7 +515,9 @@
       "schema",
       "artifacts",
       "encryption"
-    ]
+    ],
+    "sentinel_maximum_ciphertext_bytes": 5560,
+    "schema_guard_prerequisite": "AR-005-C"
   },
   "label_vocabulary": {
     "route": [
@@ -688,13 +690,11 @@
     }
   ],
   "reconciliation": {
-    "add_error_codes": [
-      "outcome_uncertain"
-    ],
-    "add_responses": [
-      "500"
-    ],
+    "add_error_codes": [],
+    "add_responses": [],
     "csrf_header": "X-Rewind-CSRF",
-    "legacy_healthz": "Preserve existing DB-check behavior during migration; deploy /livez and /readyz explicitly."
-  }
+    "legacy_healthz": "Preserve existing DB-check behavior during migration; deploy /livez and /readyz explicitly.",
+    "resolved_in": "m1-review-2; implementation and consumer approval remain pending"
+  },
+  "contract_revision": "m1-review-2"
 }

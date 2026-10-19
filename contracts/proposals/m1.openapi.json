@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Agent Rewind M1 proposed API",
-    "version": "0.1.0-draft",
-    "description": "Stage 2 design artifact; not implemented or approved. A bounded M1 subset, not the complete enterprise API. Legacy routes remain until an explicit compatibility migration. See docs/PLAN.md Sections 1.5 and 10.1."
+    "version": "0.1.0-review.2",
+    "description": "M1 consumer-reviewed freeze proposal, pending recorded review. Runtime unchanged; 24 behavioral cases remain planned. See docs/delivery/M1_CONTRACT_FREEZE.md. Five v1 operations only; scoped legacy workbench shapes remain supported."
   },
   "x-approval-status": "pending",
   "x-source-baseline": "8f1ae757005c95c50a789e4fa0a10aae9b3c4024",
@@ -42,6 +42,21 @@
                   "$ref": "#/components/schemas/RunPage"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "401": {
@@ -50,6 +65,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": "string",
+                  "const": "Bearer"
                 }
               }
             }
@@ -62,6 +98,21 @@
                   "$ref": "#/components/schemas/Error"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "404": {
@@ -72,6 +123,21 @@
                   "$ref": "#/components/schemas/Error"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "422": {
@@ -80,6 +146,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -97,18 +178,97 @@
               "Retry-After": {
                 "schema": {
                   "type": "integer",
-                  "minimum": 1
+                  "minimum": 1,
+                  "maximum": 60
                 },
                 "description": "Seconds until client should retry admission."
+              },
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
               }
             }
           },
           "503": {
-            "description": "Required authority unavailable; fail closed",
+            "description": "Known pre-admission dependency failure, schema incompatibility, or outcome_uncertain after ambiguous admission. Distinct stable codes determine recovery; no blind retry.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; fixed safe internal_error envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Received body exceeds 9 MiB or canonical materialized TaskSpec exceeds 8 MiB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -134,7 +294,7 @@
             }
           }
         ],
-        "description": "Cursor binds project, filters, upper watermark and (created_at,id) descending position; reject altered/cross-project cursor. Exclude inserts after the initial page watermark. Do not load event/workspace bodies to list runs."
+        "description": "Authorize project; signed cursor binds principal, project, limit, empty filters, initial maximum published_seq, descending (created_at,id) and 15-minute expiry. Reject altered, expired or foreign cursor with invalid_cursor. Watermark excludes later inserts/backfills; no snapshot of mutable status and no artifact reads."
       },
       "post": {
         "operationId": "submitProjectRun",
@@ -150,6 +310,21 @@
                   "$ref": "#/components/schemas/Accepted"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "401": {
@@ -158,6 +333,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": "string",
+                  "const": "Bearer"
                 }
               }
             }
@@ -170,6 +366,21 @@
                   "$ref": "#/components/schemas/Error"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "404": {
@@ -180,6 +391,21 @@
                   "$ref": "#/components/schemas/Error"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "422": {
@@ -188,6 +414,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -205,18 +446,47 @@
               "Retry-After": {
                 "schema": {
                   "type": "integer",
-                  "minimum": 1
+                  "minimum": 1,
+                  "maximum": 60
                 },
                 "description": "Seconds until client should retry admission."
+              },
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
               }
             }
           },
           "503": {
-            "description": "Required authority unavailable; fail closed",
+            "description": "Known pre-admission dependency failure, schema incompatibility, or outcome_uncertain after ambiguous admission. Distinct stable codes determine recovery; no blind retry.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -229,6 +499,21 @@
                   "$ref": "#/components/schemas/Error"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "413": {
@@ -237,6 +522,46 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; fixed safe internal_error envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -255,7 +580,7 @@
             }
           },
           {
-            "name": "X-CSRF-Token",
+            "name": "X-Rewind-CSRF",
             "in": "header",
             "required": false,
             "schema": {
@@ -276,7 +601,7 @@
             }
           }
         },
-        "description": "Scope operation uniqueness to principal+project+operation kind+key. Same key/body returns the original 202 IDs; changing body returns 409. client_operation_id additionally prevents retry under a different key from creating another job. Reserve actual paid calls separately in the hierarchical ledger; admission is not provider dispatch. Preserve the $200 job ceiling. Do not permit arbitrary adapter module paths."
+        "description": "Normalize client intent under this contract revision, then authorize and resolve principal+project+kind+client_operation_id/key before new uploads or mutable native-v1 config resolution. Same canonical request returns original IDs and frozen config even after alias changes. Bind new key alias atomically; changed input conflicts. Freeze separate config/envelope for a new operation. Ambiguous commit returns outcome_uncertain; retain original principal and identities. Admission is not provider dispatch; total validation budget authorization is separate from the 200000000 microUSD per-job schema ceiling."
       }
     },
     "/api/v1/projects/{project_id}/runs/{run_id}": {
@@ -314,6 +639,21 @@
                   "$ref": "#/components/schemas/RunSummary"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "401": {
@@ -322,6 +662,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": "string",
+                  "const": "Bearer"
                 }
               }
             }
@@ -334,6 +695,21 @@
                   "$ref": "#/components/schemas/Error"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "404": {
@@ -344,6 +720,21 @@
                   "$ref": "#/components/schemas/Error"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "422": {
@@ -352,6 +743,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -369,18 +775,97 @@
               "Retry-After": {
                 "schema": {
                   "type": "integer",
-                  "minimum": 1
+                  "minimum": 1,
+                  "maximum": 60
                 },
                 "description": "Seconds until client should retry admission."
+              },
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
               }
             }
           },
           "503": {
-            "description": "Required authority unavailable; fail closed",
+            "description": "Known pre-admission dependency failure, schema incompatibility, or outcome_uncertain after ambiguous admission. Distinct stable codes determine recovery; no blind retry.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; fixed safe internal_error envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Received body exceeds 9 MiB or canonical materialized TaskSpec exceeds 8 MiB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -423,6 +908,21 @@
                   "$ref": "#/components/schemas/Operation"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "401": {
@@ -431,6 +931,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": "string",
+                  "const": "Bearer"
                 }
               }
             }
@@ -443,6 +964,21 @@
                   "$ref": "#/components/schemas/Error"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "404": {
@@ -453,6 +989,21 @@
                   "$ref": "#/components/schemas/Error"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "422": {
@@ -461,6 +1012,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -478,18 +1044,97 @@
               "Retry-After": {
                 "schema": {
                   "type": "integer",
-                  "minimum": 1
+                  "minimum": 1,
+                  "maximum": 60
                 },
                 "description": "Seconds until client should retry admission."
+              },
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
               }
             }
           },
           "503": {
-            "description": "Required authority unavailable; fail closed",
+            "description": "Known pre-admission dependency failure, schema incompatibility, or outcome_uncertain after ambiguous admission. Distinct stable codes determine recovery; no blind retry.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; fixed safe internal_error envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Received body exceeds 9 MiB or canonical materialized TaskSpec exceeds 8 MiB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -532,6 +1177,21 @@
                   "$ref": "#/components/schemas/Cancellation"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "401": {
@@ -540,6 +1200,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "type": "string",
+                  "const": "Bearer"
                 }
               }
             }
@@ -552,6 +1233,21 @@
                   "$ref": "#/components/schemas/Error"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "404": {
@@ -562,6 +1258,21 @@
                   "$ref": "#/components/schemas/Error"
                 }
               }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
             }
           },
           "422": {
@@ -570,6 +1281,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -587,18 +1313,97 @@
               "Retry-After": {
                 "schema": {
                   "type": "integer",
-                  "minimum": 1
+                  "minimum": 1,
+                  "maximum": 60
                 },
                 "description": "Seconds until client should retry admission."
+              },
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
               }
             }
           },
           "503": {
-            "description": "Required authority unavailable; fail closed",
+            "description": "Known pre-admission dependency failure, schema incompatibility, or outcome_uncertain after ambiguous admission. Distinct stable codes determine recovery; no blind retry.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected fault; fixed safe internal_error envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Received body exceeds 9 MiB or canonical materialized TaskSpec exceeds 8 MiB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "X-Request-ID": {
+                "description": "Fresh server-generated correlation ID; never echo caller input. Stored Operation.error correlation can differ.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -606,7 +1411,7 @@
         },
         "parameters": [
           {
-            "name": "X-CSRF-Token",
+            "name": "X-Rewind-CSRF",
             "in": "header",
             "schema": {
               "type": "string",
@@ -727,7 +1532,8 @@
               "quota_exceeded",
               "dependency_unavailable",
               "schema_incompatible",
-              "internal_error"
+              "internal_error",
+              "outcome_uncertain"
             ]
           },
           "message": {
@@ -863,7 +1669,8 @@
           "branchable",
           "parent_id",
           "event_head"
-        ]
+        ],
+        "description": "Verified execution/restore projection only. Complete does not mean task success, valid grader, natural failure or research eligibility; branchable is not proof of corpus permission or capture success."
       },
       "RunPage": {
         "type": "object",
@@ -943,7 +1750,8 @@
           },
           "reserved_microusd": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Gross cumulative legacy-compatible reservations, including opening holds. Not invoice spend; may exceed current held plus accounted after evidenced release."
           },
           "error": {
             "anyOf": [
@@ -953,7 +1761,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Safe stored failure envelope with stable persisted originating correlation ID. A 200 poll has its own fresh X-Request-ID. Unknown historical correlation is a persisted migration marker, never a fabricated original request."
           }
         },
         "required": [
@@ -967,7 +1776,8 @@
           "budget_microusd",
           "reserved_microusd",
           "error"
-        ]
+        ],
+        "description": "Job execution status, not task grade. succeeded can include evaluator success=false. Result run linkage is nullable and authorized before loading; no artifact locator is exposed."
       },
       "Cancellation": {
         "type": "object",
@@ -998,5 +1808,6 @@
         ]
       }
     }
-  }
+  },
+  "x-contract-revision": "m1-review-2"
 }

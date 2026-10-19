@@ -31,7 +31,7 @@ upstream by a proxy before reaching the app may lack this envelope; deployment
 checks must identify that boundary rather than asserting application guarantees
 for arbitrary gateway failures. Authentication responses retain safe required
 headers; cookie mutations use `X-Rewind-CSRF` and Origin checks. This preserves
-the existing browser header; central proposal reconciliation is still needed.
+the existing browser header; central proposal revision m1-review-2 now carries this header; runtime enforcement remains planned.
 
 | Condition | HTTP/code | Client meaning |
 | --- | --- | --- |
@@ -180,7 +180,13 @@ best-effort diagnostics. Required transactional audit records and budget receipt
 are not best-effort telemetry; their persistence failure follows the owning
 admission/security contract and can require failing closed.
 
-## Reconciliation required before G0
+## Reconciliation disposition
+
+Revision m1-review-2 in [M1_CONTRACT_FREEZE.md](M1_CONTRACT_FREEZE.md) resolves
+these central proposal differences. Review remains pending and runtime remains
+unchanged; the list records the agreed implementation contract, not open JSON
+drift. AR-005-C is now required before AR-011-B; the system-sentinel bounded read
+belongs to AR-011-B and is reused by AR-009-A customer storage work.
 
 1. AR-004-B adds outcome_uncertain to the central Error enum and specifies safe
    HTTP/stored-operation use, receipt linkage and identity-preserving recovery.
@@ -192,7 +198,7 @@ admission/security contract and can require failing closed.
    do not implement a conflicting X-CSRF-Token header accidentally.
 4. Retain `/healthz` compatibility while defining /livez and /readyz deployment
    transitions, system sentinel ownership and explicit probe deadlines. Require
-   a bounded sentinel read in the AR-009 storage interface; the existing full-blob
+   a bounded sentinel read in AR-011-B, reused by the AR-009 storage interface; the existing full-blob
    get must not be called bounded merely because the expected object is small.
 5. Define versioned versus legacy error migration. Recommendation: v1 uses the
    four-field envelope; legacy keeps a safe `detail` shape plus request-ID header

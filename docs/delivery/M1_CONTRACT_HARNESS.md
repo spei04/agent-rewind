@@ -28,7 +28,7 @@ for this structural checker. Tests include existing fixture decryption and
 reader checks, but the checker itself uses only the standard library unless
 `--openapi-model` is requested.
 
-A successful report identifies 5 operations, 41 local references, 12 logical
+A successful report identifies 5 operations, 50 local references, 12 logical
 entities, 5 legacy tables, 20 direct and 2 derived projection mappings, 24
 **planned** cases, 14 frozen rows, 18 objects and 5 fixture variants. It reports
 approval and behavior status separately; it has no behavior-pass count. Failures
@@ -120,22 +120,27 @@ model's prose constraints and transaction descriptions are not executable DDL.
 
 ## Approval-state compatibility
 
-The general inventory function is approval-neutral. `check_pending_proposal`
-and `check_proposal_suite` are explicitly **proposal-only** entrypoints that
-require pending approval metadata for the current design artifacts. This is a
-stage-specific gate, not a rule that a contract can never be approved.
+The general inventory remains approval-neutral. The design suite now consumes
+[m1.freeze.json](../../contracts/proposals/m1.freeze.json) through the scoped
+[review checker](../../scripts/m1_contract_review.py). API/data/acceptance/links/
+observability/review records must share revision m1-review-2. All approval states
+must agree: pending, or reviewed with an accepted dated reviewer/scope/evidence
+record for each BE/PL/FE/RS/QE/SEC/TL consumer. A pending or changes-required review
+cannot activate reviewed status. These shape checks do not authenticate evidence;
+the lead must verify actual review and record existing user authorization in G0.
+The current record remains pending and contains no invented sign-offs.
 
-AR-004-B/C can replace that gate in a reviewed freeze revision with checks for
-the approved scope, contract revision and actual reviewer/disposition evidence.
-That revision must update the link registry, command/CI stage and associated
-tests together. It must not bypass the structural inventory or turn a contract
-approval into a claim that runtime acceptance cases passed. The separate planned
-acceptance checks continue rejecting invented execution status until actual
-AR-012-B evidence is implemented and reviewed under its own gate.
+The review gate supports a future explicit development-scope freeze while keeping
+all 24 behavior cases planned-not-executed and production_authorized=false.
+Contract review never proves runtime behavior or supplies production authority.
+The checker also verifies central observability vocabulary, CSRF, response headers,
+retry/sentinel bounds and required ownership/adoption declarations. Logical field
+presence is not proof that executable SQL constraints exist. All previous
+structural, frozen-fixture and negative checks remain in force.
 
-The original unresolved decisions in [the baseline inventory](BASELINE_INTERFACES.md)
-remain design-review inputs. This harness does not choose CSRF-header,
-legacy-project, principal-identity, artifact-ownership or accounting semantics.
+The reconciled dispositions are in [M1_CONTRACT_FREEZE.md](M1_CONTRACT_FREEZE.md).
+The original inventory remains the baseline source record. New PostgreSQL,
+storage, authentication and provider tests belong to their implementation owners.
 
 ## Negative evidence and limits
 

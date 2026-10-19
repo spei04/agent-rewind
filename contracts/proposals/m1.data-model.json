@@ -27,7 +27,8 @@
         "id": "id PK",
         "organization_id": "id FK organizations NOT NULL",
         "name": "varchar(120) NOT NULL",
-        "created_at": "time NOT NULL"
+        "created_at": "time NOT NULL",
+        "run_sequence": "bigint NOT NULL DEFAULT 0; AR-006-A adds per-project publication counter"
       },
       "constraints": [
         "UNIQUE(organization_id,id)"
@@ -39,18 +40,21 @@
         "project_id": "id FK projects NOT NULL",
         "principal_id": "varchar(256) NOT NULL",
         "role": "varchar(16): viewer|operator|maintainer",
-        "revoked_at": "time NULL"
+        "revoked_at": "time NULL",
+        "legacy_default": "boolean NOT NULL DEFAULT false"
       },
       "constraints": [
         "PK(project_id,principal_id)",
         "Organization administrator authority comes from validated identity mapping, not request body.",
-        "Revocation is checked on each operation, including idempotent replay."
+        "Revocation is checked on each operation, including idempotent replay.",
+        "Unique active legacy_default per principal in the single enabled organization; no implicit sole-membership fallback.",
+        "principal_id is oidc:<SHA256 canonical exact verified issuer+subject> or api-key:<id>; old issuer-less sessions must reauthenticate."
       ],
       "owner": "identity"
     },
     "resource_scopes": {
       "fields": {
-        "resource_kind": "varchar(20) NOT NULL",
+        "resource_kind": "varchar(20): run|study|job|key|provider_call",
         "resource_id": "id NOT NULL",
         "project_id": "id FK projects NOT NULL"
       },
@@ -58,7 +62,9 @@
         "PK(resource_kind,resource_id)",
         "UNIQUE(project_id,resource_kind,resource_id)",
         "Cover legacy run,study,job,key ownership without rewriting encrypted payloads.",
-        "Every resource lookup requires scope before loading its body."
+        "Every resource lookup requires scope before loading its body.",
+        "Resource kind/id existence and same-project run/study/job ancestry are validated in the publishing transaction; ambiguous legacy rows cannot activate.",
+        "Service-key scope is immutable; live key role intersects live project membership. Organization administration does not imply project data access."
       ],
       "owner": "backend"
     },
@@ -70,13 +76,19 @@
         "status": "varchar(16): running|complete|failed|incomplete",
         "branchable": "boolean NOT NULL",
         "parent_id": "id NULL",
-        "event_head": "digest NULL"
+        "event_head": "digest NULL",
+        "published_seq": "bigint NOT NULL; immutable per-project commit-ordered publication sequence",
+        "projection_reason": "varchar(32) NULL; fixed audited reconciliation code, never exception text"
       },
       "constraints": [
         "UNIQUE(project_id,run_id)",
         "Composite FK(project_id,parent_id) -> run_index(project_id,run_id)",
         "INDEX(project_id,created_at DESC,run_id DESC)",
-        "Mutable query projection; immutable event bodies/digests remain unchanged."
+        "Mutable query projection; immutable event bodies/digests remain unchanged.",
+        "Publish projection progress with event/ref metadata under the same job generation fence. Preserve records.data and historical event/artifact bytes.",
+        "Expired/lost/terminal job plus stale running manifest projects incomplete and non-branchable; complete task failure remains complete.",
+        "created_at is UTC nearest-microsecond ties-to-even projection; preserve original float in records.created. Cursor upper published_seq excludes later backfills.",
+        "UNIQUE(project_id,published_seq); allocate by locking and incrementing projects.run_sequence in the insert transaction, holding that project lock through commit. No preallocated sequence or I/O under this lock; database sequence allocation alone is not commit ordering."
       ],
       "owner": "execution"
     },
@@ -91,14 +103,20 @@
         "job_id": "id FK jobs UNIQUE NOT NULL",
         "accepted_response": "object NOT NULL",
         "created_at": "time NOT NULL",
-        "retain_until": "time NOT NULL"
+        "retain_until": "time NOT NULL",
+        "job_resource_kind": "varchar(20) NOT NULL CHECK = 'job'",
+        "execution_config_digest": "digest NOT NULL",
+        "payload_version": "integer NOT NULL CHECK = 2",
+        "failure_correlation_id": "id NULL; persisted trusted origin correlation, not each poll ID"
       },
       "constraints": [
         "UNIQUE(project_id,principal_id,kind,client_operation_id)",
         "UNIQUE(project_id,principal_id,kind,id)",
         "Publish operations+jobs+scope+audit atomically after confirmed artifact upload.",
         "Same canonical request returns original IDs; changed request conflicts; recheck current access.",
-        "Retain through operation lifetime plus at least 90 days."
+        "Retain through operation lifetime plus at least 90 days.",
+        "Composite FK(project_id,job_resource_kind,job_id) -> resource_scopes(project_id,resource_kind,resource_id); job_id also references actual jobs.",
+        "request_digest covers version-normalized client intent only; execution_config_digest freezes separately resolved config for first admission. Retry resolves existing identity before mutable config/storage writes."
       ],
       "owner": "backend"
     },
@@ -116,7 +134,9 @@
         "UNIQUE(project_id,digest,format_version)",
         "UNIQUE(project_id,id)",
         "byte_count >= 0; IDs are authorization-scoped locators, never public access tokens.",
-        "M1 retains existing encrypted format as version 1; no online re-encryption yet."
+        "M1 retains existing encrypted format as version 1; no online re-encryption yet.",
+        "New verified put-if-absent is scoped to project and format; retained format-1 locators stay readable without rewriting ciphertext.",
+        "Record backend request count separately from logical put count; existing S3 hash addressing does not deduplicate requests (CAP-01)."
       ],
       "owner": "storage"
     },
@@ -126,13 +146,16 @@
         "owner_kind": "varchar(20) NOT NULL",
         "owner_id": "id NOT NULL",
         "artifact_id": "id FK artifact_objects NOT NULL",
-        "role": "varchar(32) NOT NULL"
+        "role": "varchar(32): payload|admission_config|task|event|checkpoint|workspace|file_blob|evaluation|result|study_attachment|budget_evidence"
       },
       "constraints": [
         "PK(project_id,owner_kind,owner_id,artifact_id,role)",
         "Composite FK(project_id,artifact_id) -> artifact_objects(project_id,id)",
         "Composite FK(project_id,owner_kind,owner_id) -> resource_scopes(project_id,resource_kind,resource_id)",
-        "Publish reference only after confirmed object write/hash verification; no deletion API in M1."
+        "Publish reference only after confirmed object write/hash verification; no deletion API in M1.",
+        "Register every reachable schema-1 child hash under its scoped root owner before publication; authorize owner+role+digest before cache/storage access.",
+        "Provider-call budget_evidence references require owner_kind=provider_call, owner_id=call_id and matching project.",
+        "System sentinel is outside customer object/ref tables in a fixed installation namespace; never a generic unscoped read escape hatch."
       ],
       "owner": "storage"
     },
@@ -146,12 +169,19 @@
         "period_end": "time NOT NULL",
         "limit_microusd": "money NOT NULL",
         "held_microusd": "money NOT NULL",
-        "accounted_microusd": "money NOT NULL"
+        "accounted_microusd": "money NOT NULL",
+        "project_id": "id NULL",
+        "job_id": "id NULL",
+        "opening_held_microusd": "money NOT NULL DEFAULT 0; immutable imported exposure"
       },
       "constraints": [
         "UNIQUE(organization_id,scope,scope_id,period_start)",
         "All money nonnegative; held+accounted <= limit.",
-        "Period bounds UTC, nonoverlapping for a scope. Job accounts use fixed job-lifetime bounds; calls retain admission-period account IDs."
+        "Period bounds UTC, nonoverlapping for a scope. Job accounts use fixed job-lifetime bounds; calls retain admission-period account IDs.",
+        "Composite FK(organization_id,project_id) -> projects(organization_id,id) where project_id non-null.",
+        "CHECK explicit scope shape: organization requires scope_id=organization_id AND project_id IS NULL AND job_id IS NULL; project requires project_id IS NOT NULL AND scope_id=project_id AND job_id IS NULL; job requires project_id IS NOT NULL AND job_id IS NOT NULL AND scope_id=job_id. No nullable equality may satisfy a branch through SQL UNKNOWN.",
+        "Deferred ownership trigger verifies job scope project, exact account scope and nonoverlapping half-open periods; job account uses immutable job lifetime.",
+        "held includes opening_held once plus unresolved new call reserves. Outstanding prior-period holds constrain new-period admission until evidenced reconciliation/transfer; no cap reset shortcut."
       ],
       "owner": "execution"
     },
@@ -168,13 +198,24 @@
         "reserved_microusd": "money NOT NULL",
         "usage_estimate_microusd": "money NULL",
         "provider_request_id": "varchar(256) NULL",
-        "created_at": "time NOT NULL"
+        "created_at": "time NOT NULL",
+        "organization_id": "id FK organizations NOT NULL",
+        "job_resource_kind": "varchar(20) NOT NULL CHECK = 'job'",
+        "lease_generation": "bigint NOT NULL CHECK >= 1",
+        "organization_account_id": "id FK budget_accounts NOT NULL",
+        "project_account_id": "id FK budget_accounts NOT NULL",
+        "job_account_id": "id FK budget_accounts NOT NULL"
       },
       "constraints": [
         "UNIQUE(project_id,logical_call_id)",
         "Amounts nonnegative; usage estimate separate from charge reconciliation.",
         "M1 adds ledger primitives; discovery receipts and resume/reconciliation UI are completed in M3.",
-        "Unknown dispatch/response leaves reservation held; retry returns same logical call reservation."
+        "Unknown dispatch/response leaves reservation held; retry returns same logical call reservation.",
+        "UNIQUE(project_id,id); composite FK(project_id,job_resource_kind,job_id) -> resource_scopes(project_id,resource_kind,resource_id).",
+        "Deferred trigger validates exactly one organization/project/job account of the matching org/project/job and frozen admission period. IDs never change on reconciliation.",
+        "Publish same-project resource_scopes(provider_call,id) with call row. Logical-call reuse with changed request digest/amount/price/purpose conflicts, never grants new dispatch.",
+        "Compare current job owner+lease_generation+status+database-time lease+cancel before reserve/dispatch transition/publication. reserved->dispatching is one fenced compare-and-set; ambiguous outcome retains hold.",
+        "Composite FK(organization_id,project_id) -> projects(organization_id,id)."
       ],
       "owner": "execution"
     },
@@ -185,13 +226,20 @@
         "entry_kind": "varchar(16): reserve|settle|release",
         "amount_microusd": "money NOT NULL",
         "evidence_ref": "id NULL",
-        "created_at": "time NOT NULL"
+        "created_at": "time NOT NULL",
+        "project_id": "id FK projects NOT NULL",
+        "evidence_owner_kind": "varchar(20) NOT NULL DEFAULT 'provider_call' CHECK = 'provider_call'",
+        "evidence_role": "varchar(32) NOT NULL DEFAULT 'budget_evidence' CHECK = 'budget_evidence'"
       },
       "constraints": [
         "PK(call_id,account_id,entry_kind)",
         "Lock all scope accounts in deterministic ID order; reserve all or none in one transaction.",
         "Settlement/release requires reconciliation evidence; never release solely for a timeout.",
-        "Existing jobs.reserved remains consistent during compatibility window; no double counting."
+        "Existing jobs.reserved remains consistent during compatibility window; no double counting.",
+        "Composite FK(project_id,call_id) -> provider_calls(project_id,id). Deferred trigger permits account_id only among that call's three frozen account IDs.",
+        "Nullable composite FK(project_id,evidence_owner_kind,call_id,evidence_ref,evidence_role) -> artifact_refs(project_id,owner_kind,owner_id,artifact_id,role). Evidence required for settle/release; trusted reconciliation validates evidence authority/amount.",
+        "For bound R and evidenced charge C<=R, settle moves C held->accounted and evidenced release removes R-C; all levels update atomically, no timeout release.",
+        "Opening historical holds are separate account opening balances, not invented provider calls. jobs.reserved remains opening L_j + sum(new R), including later released reservations; enforce gross job ceiling conservatively."
       ],
       "owner": "execution"
     },
@@ -214,16 +262,78 @@
     }
   },
   "migration_protocol": [
-    "Drain writers for legacy adoption; back up and verify source schema fingerprint before stamping the known baseline. Reject unknown/newer/incompatible schemas.",
+    "Drain API/worker/CLI writers and require terminal legacy jobs. Verify backup/evidence plus DB writer exclusion; schema-qualified dialect catalog fingerprint under bounded lock through stamp. Reject unknown columns/types/defaults/constraints/indexes/write-changing triggers/rules and unknown/newer/multiple revision heads before DDL.",
     "Install additive revisions; require explicit legacy project mapping before backfill; preserve original IDs, timestamps, hashes, encrypted objects and historical budget values.",
     "Backfill scoped indexes in resumable bounded batches; report unmappable records, including parent lineage, instead of dropping them.",
     "Verify counts, scope closure, event-chain heads and artifact digests. Switch all legacy/current reads through scoped repositories before admitting a second project.",
     "API/worker runtime credentials have no DDL privilege. Runtime startup checks revision compatibility; migrations are an explicit operator command.",
-    "Document downgrade as unsupported where unsafe; application rollback only to compatible readers or a verified restore. Never rehash history during backfill."
+    "Document downgrade as unsupported where unsafe; application rollback only to compatible readers or a verified restore. Never rehash history during backfill.",
+    "AR-005-B owns explicit baseline/adoption metadata; AR-007-A owns all ownership tables/backfill; AR-006-A projection, AR-009-A artifacts, AR-008-A admission, AR-010-A ledger. One linear revision chain; incomplete prepared adoption is not customer readiness."
   ],
   "transactions": {
-    "submit": "Authorize -> validate and materialize defaults -> canonical digest preserving exact source bytes/text -> confirm encrypted artifact write -> transaction: resolve both idempotency key and client operation ID, bind any new key alias, create at most one job/scope/operation/audit -> 202. Unique conflict rereads original authorized response; orphan uploads remain unreferenced.",
-    "reserve": "Check lease/cancel -> lock org/project/job accounts in sorted ID order -> idempotently resolve logical call -> validate all caps -> insert ledger entries/update held and legacy aggregate atomically -> return permit. No network call inside transaction.",
+    "submit": "Authorize and normalize stable client intent -> resolve both identities and existing accepted response before mutable config/upload -> for new operation freeze admin config, upload/verify task+config+envelope -> transaction recheck authorization/uniqueness, publish refs+job+scope+operation+key aliases+audit atomically -> 202. Racing winner returns original identity; orphan uploads remain unpublished. Unknown commit acknowledgment uses outcome_uncertain.",
+    "reserve": "Check job owner/generation/cancel/DB-time lease -> lock frozen org/project/job accounts in sorted ID order -> idempotent logical call with exact request/price/amount/purpose -> enforce opening obligations, gross job cap and current shared caps -> insert call/scope/entries and balances atomically -> permit. Fenced reserved->dispatching transition is single-use; no network inside transaction or retry after ambiguous dispatch.",
     "cancel": "Authorize project/action -> atomically record intent and audit; queued job becomes cancelled, terminal status remains unchanged."
+  },
+  "contract_revision": "m1-review-2",
+  "legacy_extensions": {
+    "jobs": {
+      "owner": "AR-008-A/AR-010-A",
+      "fields": {
+        "payload_version": "integer NOT NULL DEFAULT 1; legacy body readers remain 1; new v1 native-run envelopes use 2 (AR-008-A)",
+        "lease_generation": "bigint NOT NULL DEFAULT 0; increment successful claim (AR-010-A)",
+        "legacy_reserved_microusd": "money NOT NULL; immutable copied jobs.reserved at adoption, zero for new jobs (AR-010-A)",
+        "execution_config_ref": "digest NULL for retained historical jobs; required scoped admission_config artifact reference for every new job (AR-008-A)",
+        "execution_config_digest": "digest NULL for retained historical jobs; immutable required frozen config identity for every new job (AR-008-A)"
+      },
+      "preservation": "Never alter original columns/rows to satisfy projection or fabricate historical dispatch; no mixed legacy writers.",
+      "constraints": [
+        "All new run/branch/study/investigate jobs atomically bind execution_config_ref/digest to the same project/job admission_config artifact ref; legacy bodies remain unchanged.",
+        "Retained null config jobs are read-only/non-redispatchable without explicit compatible mapping; do not infer current settings from payload_version=1.",
+        "Worker verifies common job config before paid dispatch; v2 envelope config must exactly agree with job config. Legacy source checkpoint policy/image must be explicitly compatible."
+      ]
+    }
+  },
+  "migration_metadata": {
+    "owner": "AR-005-B",
+    "installation_adoptions": {
+      "key": "installation_key varchar64 PK singleton",
+      "fields": [
+        "source_kind fresh|legacy",
+        "source_baseline char40",
+        "schema_fingerprint char64",
+        "organization_id nullable char32 intent",
+        "project_id nullable char32 intent",
+        "mapping_digest char64",
+        "mapping JSON <=1MiB",
+        "backup_evidence_digest nullable char64",
+        "drain_evidence_digest nullable char64",
+        "created_at timestamptz",
+        "state prepared|ownership_complete"
+      ],
+      "constraints": [
+        "No premature ownership FKs; AR-007-A creates real ownership rows and verifies exact mapping.",
+        "Prepared is schema adoption only; integrity/ownership/backfill readiness must pass before activation.",
+        "Identical mapping/evidence re-entry is idempotent; changed mapping or source digest conflicts, requiring explicit reviewed recovery.",
+        "Fresh install records source_kind=fresh, verified empty-source fingerprint, null target/evidence and fresh-only mapping; AR-007-A explicit operator initialization supplies ownership/grants atomically. Never run legacy adopt on a versioned fresh install.",
+        "Legacy source requires non-null target/evidence and bounded schema-1 mapping naming dataset digest, all-verified-legacy-resources selector, canonical grants/defaults and key dispositions. Unknown kinds/ambiguous closure block activation.",
+        "Target organization/project IDs may be NULL only for fresh/prepared state; ownership_complete always requires both targets.",
+        "Backup/drain evidence is required for legacy source in every state, and explicitly NULL/inapplicable for fresh source in both prepared and ownership_complete; never fabricate legacy evidence for initialization."
+      ]
+    },
+    "migration_progress": {
+      "key": "(revision,phase)",
+      "fields": [
+        "source_digest char64",
+        "cursor bounded JSON",
+        "rows_verified bigint >=0",
+        "status pending|running|complete|blocked",
+        "updated_at timestamptz"
+      ],
+      "constraints": [
+        "Cursor and completed batch commit atomically; changed source identity blocks resume.",
+        "Each feature owns its phases and backfill; AR-005-B provides metadata only."
+      ]
+    }
   }
 }
