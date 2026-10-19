@@ -1,0 +1,295 @@
+{
+  "contract": "C01",
+  "schema_version": 1,
+  "status": "internal-review",
+  "evidence_class": "synthetic-metric-examples",
+  "customer_validation": "pending-PARTNER0-PILOT",
+  "targets": {
+    "capture_rate": 0.8,
+    "timing_reduction": 0.5,
+    "minimum_timing_cases": 20,
+    "partner_organizations": 2,
+    "consecutive_weeks": 4
+  },
+  "capture_cases": [
+    {
+      "id": "capture_eighty",
+      "attempts": [
+        {"attempt_id": "capture_eighty-1", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_eighty-2", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_eighty-3", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_eighty-4", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_eighty-5", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_eighty-6", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_eighty-7", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_eighty-8", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_eighty-9", "eligible_at_registration": true, "outcome": "capture_failed"},
+        {"attempt_id": "capture_eighty-10", "eligible_at_registration": true, "outcome": "abandoned"},
+        {"attempt_id": "capture_eighty-outside-1", "eligible_at_registration": false, "outcome": "unsupported"},
+        {"attempt_id": "capture_eighty-outside-2", "eligible_at_registration": false, "outcome": "unsupported"}
+      ],
+      "expected": {
+        "eligible_count": 10,
+        "unsupported_count": 2,
+        "restored_count": 8,
+        "capture_rate": 0.8,
+        "target_state": "met"
+      }
+    },
+    {
+      "id": "capture_seventy",
+      "attempts": [
+        {"attempt_id": "capture_seventy-1", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_seventy-2", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_seventy-3", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_seventy-4", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_seventy-5", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_seventy-6", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_seventy-7", "eligible_at_registration": true, "outcome": "captured_and_restored"},
+        {"attempt_id": "capture_seventy-8", "eligible_at_registration": true, "outcome": "abandoned"},
+        {"attempt_id": "capture_seventy-9", "eligible_at_registration": true, "outcome": "capture_failed"},
+        {"attempt_id": "capture_seventy-10", "eligible_at_registration": true, "outcome": "abandoned"},
+        {"attempt_id": "capture_seventy-outside-1", "eligible_at_registration": false, "outcome": "unsupported"},
+        {"attempt_id": "capture_seventy-outside-2", "eligible_at_registration": false, "outcome": "unsupported"}
+      ],
+      "expected": {
+        "eligible_count": 10,
+        "unsupported_count": 2,
+        "restored_count": 7,
+        "capture_rate": 0.7,
+        "target_state": "not_met"
+      }
+    },
+    {
+      "id": "capture_empty",
+      "attempts": [
+        {"attempt_id": "capture_empty-outside-1", "eligible_at_registration": false, "outcome": "unsupported"},
+        {"attempt_id": "capture_empty-outside-2", "eligible_at_registration": false, "outcome": "unsupported"}
+      ],
+      "expected": {
+        "eligible_count": 0,
+        "unsupported_count": 2,
+        "restored_count": 0,
+        "capture_rate": null,
+        "target_state": "insufficient"
+      }
+    }
+  ],
+  "timing_cases": [
+    {
+      "id": "timing_complete",
+      "pairs": [
+        {"case_id": "timing_complete-01", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_complete-02", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_complete-03", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_complete-04", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_complete-05", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_complete-06", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_complete-07", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_complete-08", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_complete-09", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_complete-10", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_complete-11", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_complete-12", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_complete-13", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_complete-14", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_complete-15", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_complete-16", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_complete-17", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_complete-18", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_complete-19", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_complete-20", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}}
+      ],
+      "expected": {
+        "case_count": 20,
+        "attempt_count": 40,
+        "reviewed_pair_count": 20,
+        "descriptive_reduction": 0.5,
+        "target_state": "met"
+      }
+    },
+    {
+      "id": "timing_slower",
+      "pairs": [
+        {"case_id": "timing_slower-01", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "positive"}},
+        {"case_id": "timing_slower-02", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "no_effect"}},
+        {"case_id": "timing_slower-03", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "uncertain"}},
+        {"case_id": "timing_slower-04", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "harmful"}},
+        {"case_id": "timing_slower-05", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "positive"}},
+        {"case_id": "timing_slower-06", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "no_effect"}},
+        {"case_id": "timing_slower-07", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "uncertain"}},
+        {"case_id": "timing_slower-08", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "harmful"}},
+        {"case_id": "timing_slower-09", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "positive"}},
+        {"case_id": "timing_slower-10", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "no_effect"}},
+        {"case_id": "timing_slower-11", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "uncertain"}},
+        {"case_id": "timing_slower-12", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "harmful"}},
+        {"case_id": "timing_slower-13", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "positive"}},
+        {"case_id": "timing_slower-14", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "no_effect"}},
+        {"case_id": "timing_slower-15", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "uncertain"}},
+        {"case_id": "timing_slower-16", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "harmful"}},
+        {"case_id": "timing_slower-17", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "positive"}},
+        {"case_id": "timing_slower-18", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "no_effect"}},
+        {"case_id": "timing_slower-19", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "uncertain"}},
+        {"case_id": "timing_slower-20", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 40, "report_outcome": "harmful"}}
+      ],
+      "expected": {
+        "case_count": 20,
+        "attempt_count": 40,
+        "reviewed_pair_count": 20,
+        "descriptive_reduction": 0.33333333333333337,
+        "target_state": "not_met"
+      }
+    },
+    {
+      "id": "timing_abandoned",
+      "pairs": [
+        {"case_id": "timing_abandoned-01", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_abandoned-02", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_abandoned-03", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_abandoned-04", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_abandoned-05", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_abandoned-06", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_abandoned-07", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_abandoned-08", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_abandoned-09", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_abandoned-10", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_abandoned-11", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_abandoned-12", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_abandoned-13", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_abandoned-14", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_abandoned-15", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_abandoned-16", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_abandoned-17", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_abandoned-18", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_abandoned-19", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_abandoned-20", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_abandoned-21", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "abandoned", "active_minutes": 5, "report_outcome": null}}
+      ],
+      "expected": {
+        "case_count": 21,
+        "attempt_count": 42,
+        "reviewed_pair_count": 20,
+        "descriptive_reduction": 0.5,
+        "target_state": "inconclusive"
+      }
+    },
+    {
+      "id": "timing_failed",
+      "pairs": [
+        {"case_id": "timing_failed-01", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_failed-02", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_failed-03", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_failed-04", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_failed-05", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_failed-06", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_failed-07", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_failed-08", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_failed-09", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_failed-10", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_failed-11", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_failed-12", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_failed-13", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_failed-14", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_failed-15", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_failed-16", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_failed-17", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_failed-18", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_failed-19", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_failed-20", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_failed-21", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "failed", "active_minutes": 5, "report_outcome": null}}
+      ],
+      "expected": {
+        "case_count": 21,
+        "attempt_count": 42,
+        "reviewed_pair_count": 20,
+        "descriptive_reduction": 0.5,
+        "target_state": "inconclusive"
+      }
+    },
+    {
+      "id": "timing_small",
+      "pairs": [
+        {"case_id": "timing_small-01", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_small-02", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_small-03", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_small-04", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_small-05", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_small-06", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_small-07", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_small-08", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_small-09", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_small-10", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_small-11", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_small-12", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_small-13", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_small-14", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_small-15", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}},
+        {"case_id": "timing_small-16", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "harmful"}},
+        {"case_id": "timing_small-17", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "positive"}},
+        {"case_id": "timing_small-18", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "no_effect"}},
+        {"case_id": "timing_small-19", "baseline": {"state": "reviewed", "active_minutes": 60, "report_outcome": "no_effect"}, "rewind": {"state": "reviewed", "active_minutes": 30, "report_outcome": "uncertain"}}
+      ],
+      "expected": {
+        "case_count": 19,
+        "attempt_count": 38,
+        "reviewed_pair_count": 19,
+        "descriptive_reduction": 0.5,
+        "target_state": "insufficient"
+      }
+    }
+  ],
+  "pilot_cases": [
+    {
+      "id": "pilot_met",
+      "weekly_use": [
+        {"organization_id": "partner-a", "week": 1, "reviewed_reports": 1, "outcomes": ["uncertain"]},
+        {"organization_id": "partner-a", "week": 2, "reviewed_reports": 1, "outcomes": ["no_effect"]},
+        {"organization_id": "partner-a", "week": 3, "reviewed_reports": 1, "outcomes": ["uncertain"]},
+        {"organization_id": "partner-a", "week": 4, "reviewed_reports": 1, "outcomes": ["no_effect"]},
+        {"organization_id": "partner-b", "week": 1, "reviewed_reports": 1, "outcomes": ["uncertain"]},
+        {"organization_id": "partner-b", "week": 2, "reviewed_reports": 1, "outcomes": ["no_effect"]},
+        {"organization_id": "partner-b", "week": 3, "reviewed_reports": 1, "outcomes": ["uncertain"]},
+        {"organization_id": "partner-b", "week": 4, "reviewed_reports": 1, "outcomes": ["no_effect"]}
+      ],
+      "adoptions": [
+        {"organization_id": "partner-a", "change_kind": "regression", "source_report_id": "partner-a-review-4", "accepted_revision": "synthetic-partner-a-revision", "owner_reviewed": true},
+        {"organization_id": "partner-b", "change_kind": "regression", "source_report_id": "partner-b-review-4", "accepted_revision": "synthetic-partner-b-revision", "owner_reviewed": true}
+      ],
+      "expected": "met"
+    },
+    {
+      "id": "pilot_missing_week",
+      "weekly_use": [
+        {"organization_id": "partner-a", "week": 1, "reviewed_reports": 1, "outcomes": ["uncertain"]},
+        {"organization_id": "partner-a", "week": 2, "reviewed_reports": 1, "outcomes": ["no_effect"]},
+        {"organization_id": "partner-a", "week": 3, "reviewed_reports": 1, "outcomes": ["uncertain"]},
+        {"organization_id": "partner-a", "week": 4, "reviewed_reports": 1, "outcomes": ["no_effect"]},
+        {"organization_id": "partner-b", "week": 1, "reviewed_reports": 1, "outcomes": ["uncertain"]},
+        {"organization_id": "partner-b", "week": 2, "reviewed_reports": 1, "outcomes": ["no_effect"]},
+        {"organization_id": "partner-b", "week": 3, "reviewed_reports": 1, "outcomes": ["uncertain"]}
+      ],
+      "adoptions": [
+        {"organization_id": "partner-a", "change_kind": "regression", "source_report_id": "partner-a-review-4", "accepted_revision": "synthetic-partner-a-revision", "owner_reviewed": true},
+        {"organization_id": "partner-b", "change_kind": "regression", "source_report_id": "partner-b-review-4", "accepted_revision": "synthetic-partner-b-revision", "owner_reviewed": true}
+      ],
+      "expected": "not_met"
+    },
+    {
+      "id": "pilot_missing_adoption",
+      "weekly_use": [
+        {"organization_id": "partner-a", "week": 1, "reviewed_reports": 1, "outcomes": ["uncertain"]},
+        {"organization_id": "partner-a", "week": 2, "reviewed_reports": 1, "outcomes": ["no_effect"]},
+        {"organization_id": "partner-a", "week": 3, "reviewed_reports": 1, "outcomes": ["uncertain"]},
+        {"organization_id": "partner-a", "week": 4, "reviewed_reports": 1, "outcomes": ["no_effect"]},
+        {"organization_id": "partner-b", "week": 1, "reviewed_reports": 1, "outcomes": ["uncertain"]},
+        {"organization_id": "partner-b", "week": 2, "reviewed_reports": 1, "outcomes": ["no_effect"]},
+        {"organization_id": "partner-b", "week": 3, "reviewed_reports": 1, "outcomes": ["uncertain"]},
+        {"organization_id": "partner-b", "week": 4, "reviewed_reports": 1, "outcomes": ["no_effect"]}
+      ],
+      "adoptions": [
+        {"organization_id": "partner-a", "change_kind": "regression", "source_report_id": "partner-a-review-4", "accepted_revision": "synthetic-partner-a-revision", "owner_reviewed": true}
+      ],
+      "expected": "not_met"
+    }
+  ]
+}
