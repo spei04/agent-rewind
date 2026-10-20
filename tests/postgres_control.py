@@ -128,7 +128,8 @@ def _control_refusal_note(
         ).scalar_one()
         if type(refused_pid) is not int or refused_pid <= 0:
             raise ValueError("Invalid synthetic migration backend")
-        with control.connect().execution_options(isolation_level="AUTOCOMMIT") as observer:
+        with control.connect() as observer:
+            observer = observer.execution_options(isolation_level="AUTOCOMMIT")
             observer.exec_driver_sql("SET statement_timeout = '1s'")
             observer.exec_driver_sql("SELECT pg_catalog.pg_stat_clear_snapshot()").close()
             rows = observer.execute(

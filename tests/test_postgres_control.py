@@ -196,6 +196,8 @@ class PrivilegedObservation:
 
     def execution_options(self, **options):
         assert options == {"isolation_level": "AUTOCOMMIT"}
+        if self.fail_at == "options":
+            raise PermissionError("PRIVATE control options")
         return self
 
     def __enter__(self):
@@ -267,7 +269,9 @@ def test_control_observation_is_later_fresh_bounded_and_never_emits_identity():
     assert all(secret not in rendered for secret in ("PRIVATE", "12345", "target", "SELECT"))
 
 
-@pytest.mark.parametrize("failure", ["connect", "setup", "query", "malformed_row", "same_database"])
+@pytest.mark.parametrize(
+    "failure", ["connect", "options", "setup", "query", "malformed_row", "same_database"]
+)
 def test_control_diagnostic_failure_preserves_guard_and_safe_note(failure):
     connection = IdentifiedRefusalConnection()
     control = PrivilegedObservation([()] if failure == "malformed_row" else [], fail_at=failure)
@@ -282,6 +286,7 @@ def test_control_diagnostic_failure_preserves_guard_and_safe_note(failure):
     assert original.__notes__[-1] == "post_refusal_control_backend_observation=unavailable"
     assert "PRIVATE" not in "".join(traceback.format_exception(caught.value))
     assert control.connects == (0 if failure == "same_database" else 1)
+    assert control.closed is (failure not in {"connect", "same_database"})
 
 
 @pytest.mark.parametrize("refusal", [None, "writer_privileges_present"])
