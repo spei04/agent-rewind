@@ -52,6 +52,7 @@
     "agent_rewind/publication_source.py",
     "agent_rewind/readiness.py",
     "agent_rewind/readiness_worker.py",
+    "agent_rewind/run_projection.py",
     "agent_rewind/runner.py",
     "agent_rewind/scoped_artifacts.py",
     "agent_rewind/scoped_lineage.py",

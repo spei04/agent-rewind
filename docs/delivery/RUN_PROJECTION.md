@@ -4,8 +4,10 @@ AR-006-A is a preparatory implementation. This document records the proposed
 implementation contract; tests and runtime delivery remain pending. Customer
 admission and live worker publication remain disabled. AR-010-A/B supplies the
 missing generation/database-time fence, and AR-012-B owns integrated live-path
-acceptance. Initial backfill is distinct from later mutable repair and its
-restricted audit; this slice does not rewrite historical audit or source rows.
+acceptance. Initial backfill is distinct from AR-006-C mutable repair and its restricted
+audit, which depends on AR-006-A and AR-010-B before AR-012-B. AR-006-B owns
+conservative current-job read suppression. This slice does not rewrite historical
+audit or source rows.
 
 ## Schema and explicit transitions
 
@@ -70,7 +72,12 @@ partial prefix, synthesize completion or claim that missing bytes are valid.
 Retain compact projection/evidence metadata, discarding each graph's plaintext
 before verifying the next run. Revalidate the complete frozen SQL source/scope
 identity under migration writer exclusion before accepting any prepared evidence.
-A stale capture is refused; preparation alone never authorizes a write.
+A stale capture is refused; preparation alone never authorizes a write. The
+operator must supply a frozen, immutable byte source for the cohort. Evidence
+proves the bytes read during preparation, not continued filesystem availability
+at SQL commit: SQL revalidation cannot detect later external deletion or
+reencryption. This is not filesystem/SQL atomicity; subsequent consumers must
+still refuse unavailable or corrupt bytes.
 
 ## Bounds
 

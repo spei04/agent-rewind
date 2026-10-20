@@ -17,6 +17,7 @@ import agent_rewind.scoped_artifacts
 from agent_rewind.migrations.compatibility import runtime_schema_compatibility
 from agent_rewind.migrations.ownership_service import initialize_ownership
 from agent_rewind.migrations.service import install, schema_status
+from agent_rewind.run_projection import utc_created
 from agent_rewind.scoped_repositories import ProjectContext, ResourceNotFound, ScopedRepositories
 
 
@@ -152,6 +153,8 @@ def readiness_smoke(root: Path, database_url: str) -> None:
 package = Path(agent_rewind.__file__).resolve()
 if not package.is_relative_to(Path(sys.prefix).resolve()):
     raise RuntimeError("Smoke imported a source checkout instead of the installed wheel")
+if utc_created(1 / 128).microsecond != 7812:
+    raise RuntimeError("Installed projection timestamp rule changed")
 for development_tool in ("pytest", "ruff", "mypy", "pip-audit", "setuptools"):
     try:
         importlib.metadata.version(development_tool)
