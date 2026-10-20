@@ -33,7 +33,10 @@ requires an actual dated owner decision tied to the accepted C21 digest covering
   engineering design for the proposed replacement.
 - Recorded independent internal design review.
 
-A fixture boolean or delegated engineer's interpretation is not owner sign-off.
+The JSON gate is a synthetic pending-decision template, not the live approval
+ledger. Its all-pending values remain unchanged when source review is recorded
+in delivery evidence. Actual gate decisions belong to the execution ledger with
+dated evidence; a fixture boolean or delegated interpretation is not owner sign-off.
 Until these inputs are recorded, the gate is pending and consumer design readiness
 is false even if C21 is marked reviewed. The gate does **not** require completed
 AR-024-C/AR-026-A calibration before C08/C09 can be designed; that would create a
@@ -210,7 +213,11 @@ is a separate study, not a silently substituted checkpoint baseline.
 Recommend successive halving as the first standard calibration comparator against uniform
 allocation using identical proposals and reserves. Established allocation, cost
 awareness and feature sharing are not novel merely because their receipts are
-stored here. No superiority or new algorithm is claimed by this design.
+stored here. This common-pool ablation isolates allocation, whereas the end-to-end
+method benchmark permits different proposer pipelines or no proposal pool under
+matched model/information/resource limits and fully charged costs. A fresh retry
+does not purchase an unused intervention pool. No superiority or new algorithm
+is claimed by this design.
 
 A reusable repair/policy claim additionally needs a development-frozen repair,
 new repository/task families and a preregistered regression cohort including
@@ -314,8 +321,9 @@ funding and data gates; AR-038-C still independently reviews any claim.
 The offline checker validates only record completeness, proposed dependency
 ancestry, document/card parity and deterministic synthetic accounting/phase
 examples. It does not validate statistical coverage, owner approval or runtime
-implementation. Its method-comparison example requires the same model, information,
-proposal-pool identity and all resource caps; changing one method alone refuses.
+implementation. Its allocation-only common-pool example requires the same model, information,
+proposal-pool identity and all resource caps; changing one allocator alone refuses.
+That example does not impose identical proposer pipelines on the end-to-end benchmark.
 
 The following PR scopes are **outside the active 433-day DAG**. Each card names
 its effort relation: producer/existing-scope amendments estimate the proposed PR,
@@ -582,5 +590,6 @@ protocol disposition and expanded PR scope. Independent reviewers must still
 accept estimator/sample feasibility, artifact fidelity and eventual research
 claims. C20's unavailable artifacts, unproven feasibility of net-benefit/regression margins,
 few independent repositories and unknown real costs are the highest risks.
-Independent internal review of this draft is pending; no named external or
+Independent internal source-review dispositions are recorded with the delivery
+revision, separately from the synthetic gate template. No named external or
 customer approval is invented.

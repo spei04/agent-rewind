@@ -41,7 +41,8 @@
       "AR-026-A",
       "AR-038-C",
       "amended_C02_execution_approval"
-    ]
+    ],
+    "record_kind": "synthetic_pending_decision_template"
   },
   "policy": {
     "adaptation_scope": "within_task_only",
@@ -953,7 +954,8 @@
           "tokens": 1000,
           "cpu_seconds": 10,
           "wall_seconds": 60,
-          "concurrency": 1
+          "concurrency": 1,
+          "calls": 10
         }
       },
       {
@@ -967,9 +969,11 @@
           "tokens": 1000,
           "cpu_seconds": 10,
           "wall_seconds": 60,
-          "concurrency": 1
+          "concurrency": 1,
+          "calls": 10
         }
       }
-    ]
+    ],
+    "kind": "allocation_only_common_pool"
   }
 }
