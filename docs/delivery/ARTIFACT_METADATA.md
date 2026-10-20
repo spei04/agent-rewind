@@ -64,8 +64,12 @@ Reads detect an excess byte, handle short reads, reject symlinks/FIFOs/directori
 and use directory descriptors to reject symlink traversal within the object path.
 The readiness defaults remain exactly 4096 plaintext/5560 ciphertext bytes.
 
-A new local write uses a private temporary inode, flush/fsync and non-replacing
-hard-link publication. Concurrent losers verify the existing complete object;
+The configured artifact root must already exist and be durably provisioned by
+the operator; the adapter refuses a missing root and never creates its ancestors.
+For each object-path component, the adapter fsyncs the parent directory before
+proceeding, including a component concurrently created by another writer. A new
+local write uses a private temporary inode, flush/fsync and non-replacing
+hard-link publication, followed by fsync of the containing directory. Concurrent losers verify the existing complete object;
 a corrupt existing object is never overwritten. Failure can leave an unreferenced
 complete object but cannot create a completed SQL root. Temporary files are
 removed on handled failures; crash-orphan inventory and GC remain later work.
@@ -116,9 +120,13 @@ limits and all 18 frozen legacy ciphertexts. Migration tests preserve the litera
 14 historical rows and 245000 microUSD reservation total and reject partial
 ownership or catalog drift.
 
-PostgreSQL profile capture and acceptance use the existing pinned hosted
-PostgreSQL 16 service. The first capture is diagnostic only; the literal profile
-must be independently reviewed before the corresponding migration tests can pass.
+The PostgreSQL 16 literal was captured from both hosted Python jobs at source
+37c215c12462f773c9b84efc5990fbb117ebfdf6 and independently reviewed: all prior table
+shapes were unchanged; only the two intended artifact tables were added. Its
+SHA-256 is a9fab8d539d29cf5b7580575b39f359c44c70b88c581ac36d30720d7de796cea.
+Capture is diagnostic evidence; matching-head hosted constraint, concurrency and
+restore tests remain required. The directory-sync regression verifies operation
+ordering, not an actual host-power-loss drill.
 Hosted evidence and independent source review are required before acceptance.
 No provider calls, new infrastructure, customer data or broader admission are
 authorized by these tests.

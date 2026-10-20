@@ -8,8 +8,9 @@ from threading import Barrier
 import pytest
 import test_migration_recovery_postgres as recovery_tests
 import test_migrations_postgres as migration_tests
+from postgres_control import wait_for_database_drain
 from sqlalchemy.exc import IntegrityError
-from test_artifact_metadata import OTHER, object_value, owners, prepare, reference, resolve
+from test_artifact_metadata import FRESH, OTHER, object_value, owners, reference, resolve
 from test_migration_recovery_postgres import _dump, _restore_command, _run
 from test_migrations_postgres import POSTGRES, assert_original_rows, load_legacy, mapping_for
 
@@ -28,6 +29,21 @@ pytestmark = pytest.mark.skipif(
 PROFILE = Path(__file__).parents[1] / "agent_rewind/migrations/profiles/postgresql16_artifacts.json"
 
 
+def _drain(pg):
+    wait_for_database_drain(pg["control"], pg["owner"].url.database)
+
+
+def prepare_postgres(pg):
+    # Each exclusive migration follows observed server-side exit of the prior
+    # disposable client; this never retries the product's refusal.
+    _drain(pg)
+    service.install(pg["owner"], FRESH["installation_key"])
+    _drain(pg)
+    initialize_ownership(pg["owner"], FRESH)
+    _drain(pg)
+    initialize_artifacts(pg["owner"])
+
+
 @pytest.fixture
 def artifact_profile():
     if not PROFILE.is_file():
@@ -35,6 +51,7 @@ def artifact_profile():
 
 
 def test_postgres_artifact_profile_requires_independent_freeze(pg):
+    _drain(pg)
     with service.migration_transaction(pg["owner"]) as c:
         service._alembic(c, "upgrade", ARTIFACTS)
         shape = catalog(c)
@@ -49,7 +66,7 @@ def test_postgres_artifact_profile_requires_independent_freeze(pg):
 
 def test_postgres_scoped_refs_conflicts_and_migration_only(pg, artifact_profile):
     engine = pg["owner"]
-    prepare(engine)
+    prepare_postgres(pg)
     assert runtime_schema_compatibility(engine).code == "migration_only"
     with engine.begin() as c:
         owners(c)
@@ -65,7 +82,7 @@ def test_postgres_scoped_refs_conflicts_and_migration_only(pg, artifact_profile)
 
 def test_postgres_concurrent_metadata_reference_is_idempotent(pg, artifact_profile):
     engine = pg["owner"]
-    prepare(engine)
+    prepare_postgres(pg)
     with engine.begin() as c:
         owners(c)
     barrier = Barrier(2)
@@ -85,10 +102,14 @@ def test_postgres_concurrent_metadata_reference_is_idempotent(pg, artifact_profi
         assert c.exec_driver_sql("SELECT count(*) FROM artifact_refs").scalar_one() == 1
 
 
-def test_postgres_artifact_catalog_restores_without_admission(recovery, artifact_profile):
+def test_postgres_artifact_catalog_restores_without_admission(recovery, pg, artifact_profile):
     load_legacy(recovery["owner"])
-    service.adopt(recovery["owner"], mapping_for(recovery["owner"]), "b" * 64, "d" * 64)
+    mapping = mapping_for(recovery["owner"])
+    _drain(pg)
+    service.adopt(recovery["owner"], mapping, "b" * 64, "d" * 64)
+    _drain(pg)
     initialize_ownership(recovery["owner"])
+    _drain(pg)
     initialize_artifacts(recovery["owner"])
     archive = _dump(recovery)
     _run(_restore_command(recovery), archive=archive)

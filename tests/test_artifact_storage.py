@@ -3,6 +3,7 @@
 import hashlib
 import io
 import os
+import stat
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, replace
 from types import SimpleNamespace
@@ -195,11 +196,64 @@ def test_structural_descriptor_is_validated_before_storage(local):
 def test_failed_temporary_write_never_publishes_partial_ciphertext(local, monkeypatch):
     value = object_value()
 
+    sync = os.fsync
+
     def fail_sync(descriptor):
-        raise OSError("synthetic sync failure")
+        if stat.S_ISREG(os.fstat(descriptor).st_mode):
+            raise OSError("synthetic sync failure")
+        return sync(descriptor)
 
     monkeypatch.setattr(os, "fsync", fail_sync)
     with pytest.raises(ArtifactError, match="artifact_integrity"):
         local.put_verified(value, DATA)
     assert not (local.root / value.locator).exists()
     assert not list(local.root.rglob(".object-*"))
+
+
+def test_artifact_write_requires_an_existing_provisioned_root(local, tmp_path):
+    storage = LocalArtifactStorage(tmp_path / "missing-root", local.cipher, plaintext_limit=4096)
+    with pytest.raises(ArtifactError, match="artifact_missing"):
+        storage.put_verified(object_value(), DATA)
+    assert not storage.root.exists()
+
+
+def test_directory_entries_are_synced_before_object_publication(local, monkeypatch):
+    value = object_value()
+    operations = []
+    mkdir, sync, link = os.mkdir, os.fsync, os.link
+
+    def parent_name(descriptor):
+        return os.readlink(f"/proc/self/fd/{descriptor}")
+
+    def observed_mkdir(path, mode=0o777, *, dir_fd=None):
+        result = mkdir(path, mode, dir_fd=dir_fd)
+        operations.append(("mkdir", parent_name(dir_fd), path))
+        return result
+
+    def observed_sync(descriptor):
+        operations.append(("sync", parent_name(descriptor)))
+        return sync(descriptor)
+
+    def observed_link(source, target, *, src_dir_fd=None, dst_dir_fd=None, follow_symlinks=True):
+        operations.append(("link", parent_name(dst_dir_fd)))
+        return link(
+            source,
+            target,
+            src_dir_fd=src_dir_fd,
+            dst_dir_fd=dst_dir_fd,
+            follow_symlinks=follow_symlinks,
+        )
+
+    monkeypatch.setattr(os, "mkdir", observed_mkdir)
+    monkeypatch.setattr(os, "fsync", observed_sync)
+    monkeypatch.setattr(os, "link", observed_link)
+    result = local.put_verified(value, DATA)
+    assert not result.cache_hit
+    published = next(i for i, event in enumerate(operations) if event[0] == "link")
+    creates = [(i, event) for i, event in enumerate(operations) if event[0] == "mkdir"]
+    assert len(creates) == 3
+    for position, event in creates:
+        assert ("sync", event[1]) in operations[position + 1 : published]
+    final_parent = str((local.root / value.locator).parent)
+    assert ("sync", final_parent) in operations[published + 1 :]
+    assert local.read_verified(value) == DATA

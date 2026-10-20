@@ -78,8 +78,14 @@ def decrypt_checked(
 
 
 @contextmanager
-def directory(root: Path, parts: tuple[str, ...] = (), *, create: bool = False) -> Iterator[int]:
-    if create:
+def directory(
+    root: Path,
+    parts: tuple[str, ...] = (),
+    *,
+    create: bool = False,
+    create_root: bool = True,
+) -> Iterator[int]:
+    if create and create_root:
         root.mkdir(parents=True, exist_ok=True, mode=0o700)
     descriptor = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
     try:
@@ -87,6 +93,9 @@ def directory(root: Path, parts: tuple[str, ...] = (), *, create: bool = False) 
             if create:
                 with suppress(FileExistsError):
                     os.mkdir(part, mode=0o700, dir_fd=descriptor)
+                # Publish each directory entry before publishing a durable child.
+                # Also covers a concurrent creator whose fsync has not finished.
+                os.fsync(descriptor)
             child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=descriptor)
             os.close(descriptor)
             descriptor = child

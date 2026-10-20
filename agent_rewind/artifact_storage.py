@@ -108,7 +108,7 @@ class LocalArtifactStorage:
         ):
             raise ArtifactError("artifact_integrity")
         try:
-            with directory(self.root, parts[:-1], create=True) as parent:
+            with directory(self.root, parts[:-1], create=True, create_root=False) as parent:
                 try:
                     _, length = self._read(value, parent, parts[-1])
                 except FileNotFoundError:
