@@ -16,6 +16,7 @@ from uuid import uuid4
 
 import pytest
 from legacy_fixture import FIXTURE_ROOT, canonical_bytes, read_manifest
+from postgres_control import wait_for_database_drain
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.pool import NullPool
 
@@ -55,6 +56,7 @@ def pg():
             "owner": owner_engine,
             "app": app_engine,
             "admin": privileged,
+            "control": admin,
             "owner_role": owner,
             "app_role": app,
             "group_role": group,
@@ -310,11 +312,14 @@ def test_postgres_process_death_and_idempotent_retry(pg, frozen_profile, when):
     mapping = mapping_for(pg["owner"])
     code = """
 import json, os, signal, sys
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.pool import NullPool
 from agent_rewind.migrations import service
 spec=json.load(sys.stdin)
 engine=create_engine(spec["url"], poolclass=NullPool)
+def connected(connection, record):
+    print(json.dumps({"backend_pid":connection.info.backend_pid}), flush=True)
+event.listen(engine,"connect",connected)
 if spec["when"] == "before_commit":
     original=service._record
     def interrupted(*args, **kwargs):
@@ -338,11 +343,33 @@ os.kill(os.getpid(), signal.SIGKILL)
         check=False,
     )
     assert result.returncode == -signal.SIGKILL, "Child did not reach the transaction interruption"
+    identity = json.loads(result.stdout)
+    assert set(identity) == {"backend_pid"} and type(identity["backend_pid"]) is int
+    assert identity["backend_pid"] > 0
+    # Reaping the Python client does not prove PostgreSQL finished backend cleanup.
+    wait_for_database_drain(pg["control"], pg["owner"].url.database)
     if when == "before_commit":
         assert_unversioned(pg["owner"])
     else:
         assert service.schema_status(pg["owner"])["state"] == "prepared"
     assert_original_rows(pg["owner"])
+    # NullPool verification clients also close asynchronously on the server side.
+    wait_for_database_drain(pg["control"], pg["owner"].url.database)
+    assert service.adopt(pg["owner"], mapping, "b" * 64, "d" * 64)["state"] == "prepared"
+    assert_original_rows(pg["owner"])
+
+
+def test_postgres_drain_observes_live_backend_and_its_actual_exit(pg, frozen_profile):
+    load_legacy(pg["owner"])
+    mapping = mapping_for(pg["owner"])
+    with pg["app"].connect() as application:
+        backend = application.exec_driver_sql("SELECT pg_backend_pid()").scalar_one()
+        assert backend > 0
+        with pytest.raises(AssertionError, match="Synthetic database sessions did not drain"):
+            wait_for_database_drain(pg["control"], pg["owner"].url.database, timeout=0.1)
+        with pytest.raises(MigrationRefused, match="writers_not_drained"):
+            service.adopt(pg["owner"], mapping, "b" * 64, "d" * 64)
+    wait_for_database_drain(pg["control"], pg["owner"].url.database)
     assert service.adopt(pg["owner"], mapping, "b" * 64, "d" * 64)["state"] == "prepared"
     assert_original_rows(pg["owner"])
 
