@@ -243,19 +243,23 @@ def verify_run_capture(
     return; only the verified identities and conservative restore eligibility remain.
     """
     try:
-        source_size = len(canonical(capture))
+        encoded = canonical(capture)
+        source_size = len(encoded)
         if source_size > MAX_JSON_BYTES:
             raise ArtifactError("artifact_graph_limit")
-        graph, head = _verify_capture(capture, fetch, complete_only=False)
+        # Readers are external callbacks. Verify a detached bounded snapshot so
+        # callback mutation cannot alter the evidence or completion disposition.
+        frozen = decode(encoded)
+        graph, head = _verify_capture(frozen, fetch, complete_only=False)
         if graph.total + source_size > MAX_BYTES:
             raise ArtifactError("artifact_graph_limit")
-        manifest = capture["manifest"]
+        manifest = frozen["manifest"]
         return VerifiedCapture(
-            digest(capture),
+            digest(frozen),
             manifest["status"],
             manifest["status"] == "complete" and manifest["branchable"],
             head,
-            digest({"capture": capture, "refs": [asdict(ref) for ref in sorted(graph.refs)]}),
+            digest({"capture": frozen, "refs": [asdict(ref) for ref in sorted(graph.refs)]}),
         )
     except (KeyError, TypeError, ValueError, RecursionError) as error:
         if isinstance(error, ArtifactError):
@@ -344,6 +348,12 @@ def _verify_capture(
             manifest[k] != lineage[-1][k]
             for k in ("id", "parent_id", "fork_step", "seed", "image", "policy", "branchable")
         )
+    ):
+        fail()
+    # Engine persists an inherited prefix before a branch's first own event.
+    # A complete branch additionally executes at least its selected fork event.
+    if manifest["parent_id"] is not None and manifest["steps"] < manifest["fork_step"] - int(
+        not complete
     ):
         fail()
     if any(

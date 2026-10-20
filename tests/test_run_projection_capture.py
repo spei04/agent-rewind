@@ -125,3 +125,95 @@ def test_projection_capture_metadata_is_bounded_before_reader(graph, monkeypatch
     monkeypatch.setattr(module, "MAX_JSON_BYTES", 10)
     with pytest.raises(ArtifactError, match="artifact_graph_limit"):
         verify_run_capture(capture, lambda *_: pytest.fail("oversized metadata reached reader"))
+
+
+@pytest.mark.parametrize("mutation", ["completion", "created", "task", "lineage"])
+def test_reader_cannot_mutate_verified_capture(graph, mutation):
+    root, blobs = graph
+    capture = source(root)
+    capture["events"] = []
+    capture["manifest"].update(status="running", steps=0, head=None)
+    capture["lineage"][-1]["status"] = "running"
+    for key in ("success", "evaluation_ref", "final_workspace"):
+        del capture["manifest"][key]
+    before = deepcopy(capture)
+
+    def reader(ref, limit):
+        if mutation == "completion":
+            capture["manifest"].update(status="complete", branchable=True)
+            capture["lineage"][-1]["status"] = "complete"
+        elif mutation == "created":
+            capture["manifest"]["created"] += 1
+        elif mutation == "task":
+            capture["manifest"]["task_digest"] = "e" * 64
+        else:
+            capture["lineage"][-1]["seed"] += 1
+        return blobs[ref.digest]
+
+    evidence = verify_run_capture(capture, reader)
+    assert evidence.status == "running" and not evidence.branchable
+    assert evidence.event_head is None
+    assert classify_capture(PROJECT, before, evidence).status == "incomplete"
+    with pytest.raises(ArtifactError, match="projection_source_changed"):
+        classify_capture(PROJECT, capture, evidence)
+
+
+def test_actual_branch_before_first_own_event_keeps_inherited_prefix(settings, task, monkeypatch):
+    from publication_fixture import make_capture
+
+    from agent_rewind.models import Intervention
+
+    capture = make_capture(settings)
+    parent = capture.run(task)
+    stored = []
+    original_add = capture.db.add
+
+    class Stopped(BaseException):
+        pass
+
+    def stop_after_add(kind, data, record_id=None):
+        result = original_add(kind, data, record_id)
+        stored.append(result)
+        raise Stopped()
+
+    monkeypatch.setattr(capture.db, "add", stop_after_add)
+    try:
+        with pytest.raises(Stopped):
+            capture.run(
+                task,
+                parent,
+                Intervention(step=2, kind="tool_result", result={"output": "synthetic"}),
+            )
+        child = capture.db.get(stored[0], "run")
+        ancestor = capture.db.get(parent, "run")
+        names = [
+            "id",
+            "parent_id",
+            "fork_step",
+            "seed",
+            "image",
+            "policy",
+            "task_digest",
+            "branchable",
+            "status",
+        ]
+        evidence = {
+            "manifest": child,
+            "lineage": [{key: run[key] for key in names} for run in (ancestor, child)],
+            "events": capture.db.event_refs(parent)[:1],
+        }
+        assert capture.db.event_refs(child["id"]) == []
+        result = verify_run_capture(evidence, capture.source)
+        assert result.status == "running" and not result.branchable
+        assert result.event_head == evidence["events"][0]["hash"]
+        for status in ("running", "failed", "incomplete"):
+            truncated = deepcopy(evidence)
+            truncated["manifest"].update(status=status, steps=0, head=None)
+            truncated["lineage"][-1]["status"] = status
+            truncated["events"] = []
+            with pytest.raises(ArtifactError, match="artifact_graph_invalid"):
+                verify_run_capture(
+                    truncated, lambda *_: pytest.fail("invalid prefix reached reader")
+                )
+    finally:
+        capture.db.engine.dispose()
