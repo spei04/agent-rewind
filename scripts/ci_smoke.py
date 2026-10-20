@@ -65,6 +65,51 @@ def artifact_smoke(engine: Engine, root: Path) -> None:
         raise RuntimeError("Installed bounded artifact format did not round trip")
 
 
+def publication_smoke(engine: Engine, root: Path) -> None:
+    from cryptography.fernet import Fernet
+
+    from agent_rewind.artifact_graph import verify_run_graph
+    from agent_rewind.artifact_metadata import ArtifactError
+    from agent_rewind.artifact_publication import RunPublisher, UnavailableLiveWriter
+    from agent_rewind.artifact_storage import LocalArtifactStorage
+    from agent_rewind.publication_journal import PublicationJournal
+
+    journal_root = root / "publication-journal"
+    journal_root.mkdir(mode=0o700)
+    journal = PublicationJournal(journal_root)
+    # Synthetic packaging evidence only; a deployment provisions/fsyncs its root.
+    with journal.open("b" * 32) as session:
+        session.freeze({"synthetic_package": True})
+    with journal.open("b" * 32) as session:
+        if session.intent != {"synthetic_package": True}:
+            raise RuntimeError("Installed publication journal did not round trip")
+    publisher = RunPublisher(
+        engine,
+        LocalArtifactStorage(root, Fernet(Fernet.generate_key()), plaintext_limit=4096),
+        journal,
+        writer=UnavailableLiveWriter(),
+    )
+    try:
+        publisher.prepare(
+            ProjectContext("8" * 32, "9" * 32, "oidc:" + "a" * 64),
+            "c" * 32,
+            worker_id="synthetic",
+            generation=1,
+            source=lambda ref, limit: b"",
+        )
+    except ArtifactError as error:
+        if str(error) != "publication_live_fence_unavailable":
+            raise RuntimeError("Installed live publisher refused with unexpected code") from None
+    else:
+        raise RuntimeError("Installed publisher incorrectly enabled a legacy live writer")
+    try:
+        verify_run_graph(b'{"schema":1}', lambda ref, limit: b"")
+    except ArtifactError:
+        pass
+    else:
+        raise RuntimeError("Installed publication parser accepted a legacy root")
+
+
 def readiness_smoke(root: Path, database_url: str) -> None:
     import asyncio
     import time
@@ -172,6 +217,7 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
             raise RuntimeError("Installed ownership revision failed the explicit transition")
         repository_smoke(engine)
         artifact_smoke(engine, Path(temporary))
+        publication_smoke(engine, Path(temporary))
         compatibility = runtime_schema_compatibility(engine)
         if compatibility.status != "incompatible" or compatibility.code != "migration_only":
             raise RuntimeError(
