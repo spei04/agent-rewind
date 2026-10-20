@@ -276,3 +276,33 @@ def test_nul_cannot_bypass_new_hexadecimal_checks(projection_engine, field, valu
     assert error.value.orig.sqlite_errorname == "SQLITE_CONSTRAINT_CHECK"
     with projection_engine.connect() as connection:
         assert connection.exec_driver_sql("SELECT count(*) FROM run_index").scalar_one() == 0
+
+
+@pytest.mark.parametrize("modifiers", [("desc",), ("asc", "nulls_first")])
+def test_reflected_index_sorting_preserves_modifiers_through_json(
+    projection_engine, monkeypatch, modifiers
+):
+    from agent_rewind.migrations import schema
+
+    original_inspect = schema.inspect
+
+    def reflected(connection):
+        inspector = original_inspect(connection)
+        original_indexes = inspector.get_indexes
+
+        def indexes(table, **kwargs):
+            values = [dict(value) for value in original_indexes(table, **kwargs)]
+            if table == "run_index":
+                assert len(values) == 1
+                # Same tuple-valued reflection boundary observed in PostgreSQL CI.
+                values[0]["column_sorting"] = {"created_at": modifiers}
+            return values
+
+        monkeypatch.setattr(inspector, "get_indexes", indexes)
+        return inspector
+
+    monkeypatch.setattr(schema, "inspect", reflected)
+    with projection_engine.connect() as connection:
+        shape = schema.catalog(connection)
+    assert shape["run_index"]["indexes"][0]["column_sorting"] == {"created_at": list(modifiers)}
+    assert json.loads(json.dumps(shape)) == shape

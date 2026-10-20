@@ -449,7 +449,24 @@ def catalog(connection: Connection) -> dict[str, Any]:
             "uniques": uniques,
             "foreign_keys": inspector.get_foreign_keys(table, schema=schema),
             "checks": inspector.get_check_constraints(table, schema=schema),
-            "indexes": [i for i in indexes if not i.get("duplicates_constraint")],
+            # Reflection values retain their SQLAlchemy types; the persisted
+            # catalog uses JSON arrays without dropping sort/null-order modifiers.
+            "indexes": [
+                {
+                    **index,
+                    **(
+                        {
+                            "column_sorting": {
+                                key: list(value) for key, value in index["column_sorting"].items()
+                            }
+                        }
+                        if "column_sorting" in index
+                        else {}
+                    ),
+                }
+                for index in indexes
+                if not index.get("duplicates_constraint")
+            ],
         }
     if name == "postgresql":
         # Include physical index expressions, predicates, opclasses, sort options and typmods.
