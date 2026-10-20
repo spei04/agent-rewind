@@ -3,6 +3,7 @@
 import copy
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -173,13 +174,43 @@ def test_cross_resource_and_funding_invariants(variant):
         parse(value)
 
 
-def test_connection_envelope_uses_all_processes_and_seventy_percent_boundary():
+@pytest.mark.parametrize(
+    ("api_processes", "api_overflow", "worker_overflow", "minimum_capacity"),
+    [
+        (1, 0, 0, 52),  # 2*1*5 + 2*4*2 + 10 = 36 peak connections.
+        (2, 10, 10, 238),  # 2*2*15 + 2*4*12 + 10 = 166 peak connections.
+        (1, 3, 4, 106),  # 2*1*8 + 2*4*6 + 10 = 74 peak connections.
+    ],
+)
+def test_connection_envelope_counts_processes_and_overflow_at_seventy_percent_boundary(
+    api_processes, api_overflow, worker_overflow, minimum_capacity
+):
     value = sample()
-    # 2*5 API + 2*4*2 worker + 10 operator = 36; 52 allows36, 51 allows35.
-    value["database"]["connection_capacity"] = 52
+    value["capacity"]["api_processes_per_instance"] = api_processes
+    value["capacity"]["api_max_overflow"] = api_overflow
+    value["capacity"]["worker_max_overflow"] = worker_overflow
+    value["database"]["connection_capacity"] = minimum_capacity
     parse(value)
-    value["database"]["connection_capacity"] = 51
+    value["database"]["connection_capacity"] = minimum_capacity - 1
     with pytest.raises(ValidationError, match="70 percent"):
+        parse(value)
+
+
+@pytest.mark.parametrize(
+    "field", ["api_processes_per_instance", "api_max_overflow", "worker_max_overflow"]
+)
+def test_peak_pool_settings_must_be_explicit(field):
+    value = sample()
+    del value["capacity"][field]
+    with pytest.raises(ValidationError):
+        parse(value)
+
+
+@pytest.mark.parametrize("field", ["api_max_overflow", "worker_max_overflow"])
+def test_unlimited_overflow_is_rejected(field):
+    value = sample()
+    value["capacity"][field] = -1
+    with pytest.raises(ValidationError):
         parse(value)
 
 
@@ -221,11 +252,53 @@ def test_synthetic_prices_cannot_be_relabelled_as_a_real_request():
         parse(value)
 
 
-@pytest.mark.parametrize("body", ['{"region":"one","region":"two"}', " " * 65537])
-def test_loader_rejects_duplicate_fields_and_large_input(tmp_path, body):
+def test_loader_rejects_duplicate_fields(tmp_path):
     path = tmp_path / "config.json"
-    path.write_text(body)
-    with pytest.raises(ValueError):
+    path.write_text('{"region":"one","region":"two"}')
+    with pytest.raises(ValueError, match="Duplicate configuration field"):
+        MODULE.load_config(path)
+
+
+def test_oversized_regular_valid_json_is_refused_before_reading(tmp_path, monkeypatch):
+    path = tmp_path / "oversized.json"
+    body = json.dumps(sample()).encode()
+    body += b" " * (MODULE.MAX_CONFIG_BYTES + 1 - len(body))
+    # Without the size limit this document is syntactically and semantically valid.
+    parse(json.loads(body))
+    path.write_bytes(body)
+
+    def forbidden_read(*args, **kwargs):
+        pytest.fail("An already oversized file must be rejected before opening its read stream.")
+
+    monkeypatch.setattr(MODULE.os, "fdopen", forbidden_read)
+    with pytest.raises(ValueError, match="64 KiB"):
+        MODULE.load_config(path)
+
+
+def test_fifo_is_rejected_without_waiting_for_a_writer(tmp_path):
+    path = tmp_path / "config.fifo"
+    os.mkfifo(path)
+    # No writer or sleep: a blocking open is a regression and the subprocess timeout fails.
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/reference_config.py"), str(path)],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    assert result.returncode == 2
+    assert json.loads(result.stdout)["deployable"] is False
+    assert result.stderr == ""
+
+
+@pytest.mark.parametrize("variant", ["directory", "symlink"])
+def test_special_or_indirect_config_path_is_refused(tmp_path, variant):
+    path = tmp_path
+    if variant == "symlink":
+        target = tmp_path / "regular.json"
+        target.write_text(json.dumps(sample()))
+        path = tmp_path / "linked.json"
+        path.symlink_to(target)
+    with pytest.raises((OSError, ValueError)):
         MODULE.load_config(path)
 
 

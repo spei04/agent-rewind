@@ -80,7 +80,7 @@
     "vcpus": 2,
     "memory_mib": 8192,
     "disk_gib": 100,
-    "connection_capacity": 100,
+    "connection_capacity": 200,
     "backup_retained_count": 7,
     "pitr_days": 7
   },
@@ -116,7 +116,10 @@
     "worker_pool_size": 2,
     "operator_connection_reserve": 10,
     "monthly_class_a_operations": 31171000,
-    "monthly_class_b_operations": 14600000
+    "monthly_class_b_operations": 14600000,
+    "api_processes_per_instance": 1,
+    "api_max_overflow": 10,
+    "worker_max_overflow": 10
   },
   "budget": {
     "currency": "USD",

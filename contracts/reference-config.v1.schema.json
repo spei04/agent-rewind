@@ -142,10 +142,22 @@
           "title": "Api Memory Mib",
           "type": "integer"
         },
+        "api_processes_per_instance": {
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Api Processes Per Instance",
+          "type": "integer"
+        },
         "api_pool_size": {
           "maximum": 100,
           "minimum": 1,
           "title": "Api Pool Size",
+          "type": "integer"
+        },
+        "api_max_overflow": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Api Max Overflow",
           "type": "integer"
         },
         "worker_max_hosts": {
@@ -177,6 +189,12 @@
           "title": "Worker Pool Size",
           "type": "integer"
         },
+        "worker_max_overflow": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Worker Max Overflow",
+          "type": "integer"
+        },
         "operator_connection_reserve": {
           "maximum": 100,
           "minimum": 1,
@@ -200,12 +218,15 @@
         "api_max_instances",
         "api_vcpus",
         "api_memory_mib",
+        "api_processes_per_instance",
         "api_pool_size",
+        "api_max_overflow",
         "worker_max_hosts",
         "worker_machine_type",
         "worker_boot_disk_gib",
         "worker_processes_per_host",
         "worker_pool_size",
+        "worker_max_overflow",
         "operator_connection_reserve",
         "monthly_class_a_operations",
         "monthly_class_b_operations"

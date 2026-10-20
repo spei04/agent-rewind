@@ -6,6 +6,8 @@ import argparse
 import hashlib
 import ipaddress
 import json
+import os
+import stat
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -201,12 +203,15 @@ class Capacity(Strict):
     api_max_instances: Annotated[int, Field(ge=1, le=16)]
     api_vcpus: Annotated[int, Field(ge=1, le=8)]
     api_memory_mib: Annotated[int, Field(ge=512, le=32768)]
+    api_processes_per_instance: Annotated[int, Field(ge=1, le=8)]
     api_pool_size: Annotated[int, Field(ge=1, le=100)]
+    api_max_overflow: Annotated[int, Field(ge=0, le=100)]
     worker_max_hosts: Annotated[int, Field(ge=1, le=64)]
     worker_machine_type: Annotated[str, Field(pattern=r"^e2-standard-(?:4|8|16|32)$")]
     worker_boot_disk_gib: Annotated[int, Field(ge=20, le=1024)]
     worker_processes_per_host: Annotated[int, Field(ge=1, le=8)]
     worker_pool_size: Annotated[int, Field(ge=1, le=100)]
+    worker_max_overflow: Annotated[int, Field(ge=0, le=100)]
     operator_connection_reserve: Annotated[int, Field(ge=1, le=100)]
     monthly_class_a_operations: Annotated[int, Field(ge=1, le=10**12)]
     monthly_class_b_operations: Annotated[int, Field(ge=1, le=10**12)]
@@ -295,8 +300,12 @@ class ReferenceConfig(Strict):
             raise ValueError("API and provider secret resources must be distinct.")
         c = self.capacity
         connections = (
-            c.api_max_instances * c.api_pool_size
-            + c.worker_max_hosts * c.worker_processes_per_host * c.worker_pool_size
+            c.api_max_instances
+            * c.api_processes_per_instance
+            * (c.api_pool_size + c.api_max_overflow)
+            + c.worker_max_hosts
+            * c.worker_processes_per_host
+            * (c.worker_pool_size + c.worker_max_overflow)
             + c.operator_connection_reserve
         )
         if connections * 10 > self.database.connection_capacity * 7:
@@ -336,8 +345,19 @@ def _unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
 
 
 def load_config(path: Path) -> ReferenceConfig:
-    with path.open("rb") as stream:
-        body = stream.read(MAX_CONFIG_BYTES + 1)
+    # Nonblocking open prevents a FIFO from hanging before its file type can be checked.
+    # Check the opened descriptor, not a pathname stat that could race a replacement.
+    descriptor = os.open(path, os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW)
+    try:
+        metadata = os.fstat(descriptor)
+        if not stat.S_ISREG(metadata.st_mode):
+            raise ValueError("Configuration must be a regular file.")
+        if metadata.st_size > MAX_CONFIG_BYTES:
+            raise ValueError("Configuration exceeds the 64 KiB limit.")
+        with os.fdopen(descriptor, "rb", closefd=False) as stream:
+            body = stream.read(MAX_CONFIG_BYTES + 1)
+    finally:
+        os.close(descriptor)
     if len(body) > MAX_CONFIG_BYTES:
         raise ValueError("Configuration exceeds the 64 KiB limit.")
     value = json.loads(body, object_pairs_hook=_unique_object)

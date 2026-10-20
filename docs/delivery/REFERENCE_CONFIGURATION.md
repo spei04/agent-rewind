@@ -43,8 +43,9 @@ false or inventing an approval cannot grant authority. There is no apply command
 cloud client, credential lookup, provider request or IAM mutation here.
 
 The schema rejects unknown fields; identifiers are opaque references, never
-credentials or personally identifying label text. Parsing rejects duplicate JSON
-keys and inputs above 64 KiB. CLI errors expose bounded field/type codes and do not echo submitted values or unknown field names. Schema-only
+credentials or personally identifying label text. On POSIX hosts, parsing uses a nonblocking open that refuses a final-component
+symlink and checks the opened descriptor is a regular file before reading. FIFOs/devices/directories are refused; both file-size
+and bounded-read checks reject inputs above 64 KiB. Duplicate JSON keys are rejected. CLI errors expose bounded field/type codes and do not echo submitted values or unknown field names. Schema-only
 validation does not enforce cross-field policy; consumers must also run the typed
 validator. Syntax cannot prove a region/SKU exists, a bucket name is available,
 an estimate is current, a referenced human has approved it, or a firewall works.
@@ -67,7 +68,7 @@ before it can be added to the plan.
 | `database` | Dedicated regional HA PostgreSQL 16, private IP only, IAM authentication and connector enforcement, encrypted connector traffic, backup/PITR retention, deletion protection. Instance/location derive from this project/region. | sql-compute, sql-storage-backups |
 | `storage` | Distinct artifact and provisioning-state buckets, same region, enforced public-access prevention and uniform bucket IAM; state versioning. No automatic artifact lifecycle deletion before AR-032 reachability/retention. | artifact-bytes, artifact-operations, state-support-contingency |
 | `keys` | Regional artifact encryption key and separate API session, OIDC client and worker provider secret resources. No secret versions/values or downloaded service-account keys in configuration or IaC state. Native GCS/KMS artifact integration remains AR-016. | keys-secrets |
-| `capacity` | Explicit API CPU/memory/instance and worker machine/disk/host/process limits, per-process connection pools, operator reserve and object-operation envelopes. No autoscaling beyond these maxima. | api-compute, worker-compute-disks, artifact-operations |
+| `capacity` | Explicit API CPU/memory/instance and worker machine/disk/host/process limits, API/worker process counts, explicit per-process pool sizes and maximum overflow, operator reserve and object-operation envelopes. No autoscaling beyond these maxima. | api-compute, worker-compute-disks, artifact-operations |
 | `logging_retention_days` | Bounded service/control-plane telemetry retention; no task source, tool payload, tokens or credential material. Private evidence retention follows its own approved policy. | observability |
 | `staging_stop_at`, budget owners | Scheduled operator review/stop deadline; no claim the validator stops running resources. Teardown requires the labeled inventory and explicit retention disposition. | state-support-contingency |
 
@@ -147,10 +148,25 @@ paid inference and human staffing remain separate gates.
 
 The example prices are deliberately synthetic, not copied vendor quotes.
 CAP-01 remains material: byte retention and Class A/B operation counts are separate
-inputs, and file fanout must be measured before recurring funding. The connection
-check uses `API maxima × pool + worker hosts × processes × pool + operator reserve`
-and rejects totals over 70% of the declared DB capacity. The declared capacity is
-not inferred from a machine size; 033B must verify actual settings.
+inputs, and file fanout must be measured before recurring funding. The peak connection check uses:
+
+```text
+API max instances × API processes per instance × (API pool_size + API max_overflow)
++ worker max hosts × worker processes per host × (worker pool_size + worker max_overflow)
++ operator connection reserve
+≤ 70% of declared database connection capacity
+```
+
+Both overflow allowances are explicit nonnegative bounded inputs; unlimited
+overflow is rejected. The example declares one API process per instance and
+overflow 10 for each API/worker pool, giving 136 possible connections against
+a synthetic capacity of 200. Multiple API processes multiply independent pools.
+The current Database engine leaves [SQLAlchemy's default overflow](https://docs.sqlalchemy.org/en/20/core/pooling.html#sqlalchemy.pool.QueuePool.__init__) at 10; this
+contract changes no runtime pool behavior. AR-033-C must set and verify both
+`pool_size` and `max_overflow` for every process and verify the declared process
+counts before service activation. Additional coordinators or pools require a
+revised envelope, not an uncounted connection source. The DB capacity is not
+inferred from a machine size; 033B must verify the actual server limit.
 
 This profile specifies alerts at 50/80/100 percent, an alert channel, a budget
 owner and a stop owner. It uses **alerts-only** budgets, which do not cap spending;
@@ -160,6 +176,8 @@ availability. Use a current, region-specific estimate before ENV0 approval.
 
 AR-033-B consumes validated config version 1, its digest, privately verified ENV0,
 reviewed IaC/provider pins and an exact proposed resource/IAM/network/cost inventory.
+The consumer must preserve the peak connection settings through composition;
+a plan or manifest that drops process counts or overflow allowances is incomplete.
 Its output contract is an immutable installation manifest with:
 
 - config digest, source/plan/provider identities and authorized change record;
@@ -197,7 +215,7 @@ public/metadata/overlapping routes, privilege mixing, mismatched regions/resourc
 budget and connection arithmetic, digest drift, approval timing and safe CLI output.
 Synthetic test records are fabricated to test consistency and establish no sign-off.
 
-Local checks: 60 scoped tests, Ruff lint/format/security rules and strict mypy on the
+Local checks: 70 scoped tests, Ruff lint/format/security rules and strict mypy on the
 validator passed using the existing owned environment. No dependencies were installed.
 All local document links and 15/15 C03 allowed-flow mappings were checked. Final
 locked-environment evidence requires hosted CI; live IAM/network, actual approvals
