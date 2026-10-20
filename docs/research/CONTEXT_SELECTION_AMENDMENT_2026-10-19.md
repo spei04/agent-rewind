@@ -111,7 +111,7 @@ confirmation result enters the proposal context.
 
 | View / ablation | Information and comparison rule |
 | --- | --- |
-| V0 current baseline | Saved pre-action conversation plus current failure flag, original action and heuristic reason; record exactly what the current template exposes. Its heuristic reason is derived from the selected action's actual result and workspace changes, so legacy V0 already includes post-action-derived information. Remove that flag or explicitly declare and review equal access before using V0 in a prefix-only C21 comparison. |
+| V0 current baseline | Saved pre-action conversation plus current failure flag, original action and heuristic reason; record exactly what the current template exposes. Its heuristic reason is derived from the selected action's actual result and workspace changes, so legacy V0 already includes post-action-derived information. Remove post-action-derived ranking and prompt signals or explicitly declare and review equal access before using V0 in a prefix-only C21 comparison. |
 | V1 structured checkpoint | V0 plus permitted files/diffs and test errors already available at that checkpoint. Record missing fields rather than fabricating observations. Compare structure against the same evidence as raw excerpts. Token-matched irrelevant context comes from the same allowed checkpoint; it cannot contain hidden answers or future results. |
 | V2 factual diagnosis | Optional separately reviewed arm with the original action's later result or full failed factual suffix. Label this extra information explicitly and give equivalent baselines the same access. It is not authorized by the present prefix-only protocol. Never inject the diagnostic suffix into the replayed agent's saved history. |
 | V3 retrieved examples | V1 plus versioned development-only examples/memory. Exclude held-out repository/task families from memory, retriever training and tuning. Charge indexing and retrieval, report amortization and prevent near-duplicate leakage. |
@@ -261,3 +261,18 @@ baseline evidence. Model availability checks, real data and evaluation spending
 retain their existing gates. This document recommends staged ablations, not a
 large unvalidated replacement system. No production, research superiority or
 generalization claim is established.
+
+## Review record
+
+Engineer A verified the five audited modules, historical-model distinction,
+source hashes and five new primary-paper entries. Review required explicit
+method/phase identities and recognition that legacy checkpoint ranking itself
+uses post-action evidence; the lead applied both corrections, including ranking
+and prompt signals. Engineer B independently checked all external prerequisite
+IDs, the acyclic six-card dependency graph, 15–26-day arithmetic, accounting
+and execution-authority boundaries. The lead checked current official model
+documentation and SWE-Search, relative links and unchanged design records.
+
+These are internal planning reviews. They do not replace external statistical
+approval, runtime acceptance, source-license intake or paid evaluation gates.
+No method was executed or measured for this amendment.
