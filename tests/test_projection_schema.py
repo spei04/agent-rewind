@@ -249,3 +249,23 @@ def test_scope_does_not_replace_required_source_record(projection_engine):
         connection.execute(text("DELETE FROM records WHERE id=:id"), {"id": RUN})
     with pytest.raises(IntegrityError), projection_engine.begin() as connection:
         insert(connection)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("event_head", "a" * 64),
+        ("run_id", RUN),
+        ("project_id", PROJECT),
+        ("parent_id", PARENT),
+    ],
+)
+def test_nul_suffix_cannot_bypass_new_hexadecimal_checks(projection_engine, field, value):
+    with projection_engine.connect() as connection:
+        assert connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one() == 1
+    with pytest.raises(IntegrityError) as error, projection_engine.begin() as connection:
+        insert(connection, **{field: value + chr(0) + "not-hex"})
+    # The new CHECK itself refuses, rather than relying on a missing FK target.
+    assert error.value.orig.sqlite_errorname == "SQLITE_CONSTRAINT_CHECK"
+    with projection_engine.connect() as connection:
+        assert connection.exec_driver_sql("SELECT count(*) FROM run_index").scalar_one() == 0
