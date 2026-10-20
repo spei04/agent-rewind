@@ -61,6 +61,7 @@ def test_machine_record_refuses_invalid_planning_claims(packet, variant, message
         tasks["AR-020-A"]["dependencies"].remove("RA-01-B")
         tasks["AR-020-A"]["dependencies"].remove("RESEARCHSCOPE0")
     elif variant == "availability":
+        tasks["RA-01-B"]["status"] = "Not started"
         next(c for c in data["contracts"] if c["id"] == "C21")["status"] = "Available"
     elif variant == "active":
         tasks["RA-01-A"]["status"] = "Not started"

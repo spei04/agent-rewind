@@ -617,7 +617,7 @@
         "RA-01-A",
         "RA-01-B"
       ],
-      "status": "In progress"
+      "status": "Verified"
     }
   },
   "tasks": [
@@ -6029,7 +6029,7 @@
     {
       "id": "RA-01-B",
       "title": "Total-budget evaluation and selection-policy contract amendment",
-      "status": "Implemented / verification pending",
+      "status": "Verified",
       "objective": "Make a budget-constrained repair claim measurable without selection bias or unfair baseline resources.",
       "scope": "Using RA-01-A, specify both confirmed-intervention yield and end-to-end retry recovery; cost/resource accounting including offline amortization; immutable selection decisions and confirmation reserve; allowed policy information; repository/task-family holdout; multiple-testing, power and missingness rules; reusable-repair regression criteria. Map changes into C08/C09 producers and draft individually reviewable baseline, allocation-policy, exporter and evaluation tasks with estimates.",
       "out_of_scope": "No adaptive implementation, early-stopped confirmation, new spending, held-out access or automatic revision of accepted contracts/launch gates.",
@@ -6063,8 +6063,8 @@
       "priority": "P0",
       "assigned_to": "Engineer A — protocol author; Engineer C — scientific review; Engineer B — accounting/dependency review",
       "issue": "https://github.com/spei04/agent-rewind/issues/48",
-      "contracts_status": "C02/C04 and accepted C20 available. C21 is this task's pending design output; owner baseline/threshold/expanded-scope and external approvals remain separate.",
-      "verification": "Protocol and 14 proposed follow-up cards authored at b8b2cba; final independent checker review and matching-head hosted validation pending. Owner/external decisions remain separate."
+      "contracts_status": "C02/C04 and accepted C20 available. C21 internally reviewed design available; RESEARCHSCOPE0 remains Not satisfied. Baseline, calibration, expanded scope and external approvals remain separate.",
+      "verification": "PR #50: B/C accepted exact d84eb0e; lead combined 219 audit/backlog/design checks passed. Integrated 80098a87c360af326c098120cb6c09cafd36f5bb passed hosted run 39359376626, 1188 tests per Python version, three gVisor tests and security/package/CI gate. Final status-only head must pass matching hosted checks before merge. No runtime, statistical coverage or owner-choice approval is implied."
     }
   ],
   "gates": [
@@ -6719,7 +6719,7 @@
       "producer": "RA-01-B",
       "title": "Total-budget evaluation design amendment",
       "required_interface": "Reviewed design for confirmed-intervention yield versus retry recovery, offline/online costs, selection/confirmation separation, holdout, missingness/multiplicity and scoped follow-up estimates. Input to C08/C09 producers, not their runtime schemas.",
-      "status": "In progress; unavailable until RA-01-B internal review. Owner baseline/threshold/runtime and external statistical/funding/data decisions remain separate."
+      "status": "Available: internally accepted design in PR #50 after B/C review and hosted run 39359376626. Owner decisions #51 / RESEARCHSCOPE0 and external approvals remain pending; C08/C09 are not produced here."
     }
   ],
   "schedule": [
@@ -6983,7 +6983,7 @@
       "resolution": "Activate RA-01-A/B as two bounded M3 design tasks; C20/C21 stay unavailable until review, and AR-020-A/AR-024-A wait for RA-01-B. Preserve original runtime and external gates; follow-up implementations remain unestimated/unapproved."
     }
   ],
-  "planning_status": "Approved development execution: ownership/readiness verified; customer admission remains disabled. RA-01-A audit and C20 verified in PR #49; A authors RA-01-B, C reviews science, B reviews accounting/dependencies. No new runtime, research spending, partner data or production approval.",
+  "planning_status": "Approved development execution: ownership/readiness and RA-01 audit/protocol design verified for bounded internal scope. C20/C21 available; RESEARCHSCOPE0 Not satisfied, decision #51 pending. Approved M1 queue remains unscheduled; no runtime research expansion, spending, partner data or production authority.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -7025,9 +7025,7 @@
       11,
       12
     ],
-    "active_child_issues": {
-      "RA-01-B": 48
-    },
+    "active_child_issues": {},
     "closed_implementation_issues": [
       26,
       28,
@@ -7037,9 +7035,14 @@
       41
     ],
     "queued_child_issues": {},
-    "closed_design_issues": {
-      "RA-01-A": 47
-    }
+    "design_issues": {
+      "RA-01-A": 47,
+      "RA-01-B": 48
+    },
+    "owner_decision_issues": {
+      "RESEARCHSCOPE0": 51
+    },
+    "design_issue_disposition": "RA-01-A closed after PR #49; PR #50 closes only the RA-01-B design delivery in #48 upon integration. #51 records pending owner choices."
   },
   "execution_capacity": {
     "lead": "Project lead",
@@ -7061,7 +7064,7 @@
       "question": "Given fixed inference and execution budgets, can experiment selection find more independently confirmed repairs for real coding-agent failures than suitable baselines?",
       "baseline_task_count": 146,
       "baseline_effort_days": 429.0,
-      "implementation_effort_status": "Unestimated until accepted audit/protocol output scopes follow-up PRs; excluded from current 433-day active estimate and reserve.",
+      "implementation_effort_status": "Fourteen proposed follow-up scopes have overlap-classified ranges in C21; none is activated or automatically added to the 433-day ledger. Owner selection in #51 and remaining-work reconciliation are required before reforecast.",
       "affected_tasks": [
         "AR-020-A",
         "AR-024-A",

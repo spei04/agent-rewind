@@ -1,6 +1,6 @@
 # Total-budget evaluation protocol proposal
 
-RA-01-B / proposed C21 · 2026-10-20 · **design only; owner choices pending**
+RA-01-B / internally reviewed C21 · 2026-10-20 · **design only; owner choices pending**
 
 This proposal asks whether a frozen procedure produces more independently
 confirmed useful interventions and more recovered tasks within the same total
@@ -16,10 +16,10 @@ here. No new funding or data permission is granted. The existing $200 ceiling is
 not renewed or increased; PAID0 reconciles any use of the existing allowance; a new natural-failure study
 requires its own STUDYFUNDS0 funding decision and remaining-funds evidence.
 
-## Authority and proposed owner gate
+## Authority and pending owner decision
 
 Internal review may accept C21 as a **design artifact**. That alone must not
-unlock C08/C09 producers. Add a proposed zero-effort owner decision gate,
+unlock C08/C09 producers. The active ledger includes the zero-effort owner decision gate,
 **RESEARCHSCOPE0**, dependent on RA-01-B, before both AR-020-A and AR-024-A.
 The execution ledger records this pending gate separately. The gate
 requires an actual dated owner decision tied to the accepted C21 digest covering:
@@ -599,3 +599,5 @@ revision, separately from the synthetic gate template. No named external or
 customer approval is invented.
 
 2026-10-20 internal review: B accepted accounting/interfaces and C accepted scientific/design-example boundaries at exact source d84eb0e. Both independently reran 150 design tests; C added nine refusal probes. The lead verified the combined 219-case audit/backlog/design set after integration as 99ab2c6. Hosted acceptance is pending. These internal dispositions do not satisfy the owner decision, independent statistical, data or study-funding gates.
+
+2026-10-20 hosted acceptance: integrated 80098a8 passed [run 39359376626](https://github.com/spei04/agent-rewind/actions/runs/39359376626), including 1,188 tests on each supported Python version and the required isolation, package, security and CI gate checks. This accepts C21 internally; [owner decision #51](https://github.com/spei04/agent-rewind/issues/51) remains pending. Final status-only composition receives matching-head checks before integration. The synthetic gate template intentionally remains unapproved.
