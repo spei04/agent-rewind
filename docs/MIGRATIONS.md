@@ -48,8 +48,8 @@ or a drain/privilege diagnostic. Do not retry by disabling these checks.
 ## Read-only inspection
 
 Migration commands load only metadata connection settings; artifact decryption,
-model-provider and identity-provider secrets are neither required nor read by the
-migration configuration. An explicit DSN is required; with only the migration DSN,
+model-provider and identity-provider secrets are neither required nor used by
+migration commands. An explicit DSN is required; with only the migration DSN,
 status uses that connection read-only.
 
 Use `rewind migrate status`. `--source-digest` additionally streams known legacy

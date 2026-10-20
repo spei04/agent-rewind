@@ -16,7 +16,7 @@ from uuid import uuid4
 
 import pytest
 from legacy_fixture import FIXTURE_ROOT, canonical_bytes, read_manifest
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.pool import NullPool
 
 from agent_rewind.migrations import service
@@ -511,19 +511,27 @@ def test_postgres_connection_hook_retains_safe_options_once(pg):
             "options": "-capplication_name=synthetic-migration -csearch_path=public,pg_catalog"
         },
     )
+    observed_options = []
+
+    def observe(dialect, record, arguments, parameters):
+        observed_options.append(parameters["options"])
+
     try:
         service._secure_engine(engine)
         service._secure_engine(engine)
-        with engine.connect() as connection:
-            assert (
-                connection.exec_driver_sql("SHOW application_name").scalar_one()
-                == "synthetic-migration"
-            )
-            assert (
-                connection.exec_driver_sql("SELECT current_schemas(true)").scalar_one()[0]
-                == "pg_catalog"
-            )
+        event.listen(engine, "do_connect", observe)
+        for _ in range(4):
+            with engine.connect() as connection:
+                assert connection.exec_driver_sql("SHOW application_name").scalar_one() == (
+                    "synthetic-migration"
+                )
+                assert connection.exec_driver_sql("SELECT current_schemas(true)").scalar_one()[
+                    0
+                ] == ("pg_catalog")
         assert service.schema_status(engine)["state"] == "empty"
+        assert len(observed_options) == 5
+        assert len(set(observed_options)) == 1
+        assert observed_options[0].count(" -csearch_path=public,pg_temp") == 1
     finally:
         engine.dispose()
 

@@ -44,7 +44,9 @@ def _trusted_startup_path(
         raise MigrationRefused("invalid_database_options")
     # libpq processes options in order; the trusted final value supersedes an
     # unsafe DSN/role default before SQLAlchemy probes current_schema().
-    parameters["options"] = options + " -csearch_path=public,pg_temp"
+    trusted_suffix = " -csearch_path=public,pg_temp"
+    if not options.endswith(trusted_suffix):
+        parameters["options"] = options + trusted_suffix
 
 
 def _secure_engine(engine: Engine) -> None:
