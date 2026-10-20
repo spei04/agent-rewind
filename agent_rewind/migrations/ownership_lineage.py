@@ -166,8 +166,14 @@ def relational_closure(connection: Connection) -> Closure:
     for trial, (_study, source, job) in trial_claims.items():
         if trial not in parents or parents[trial] != source or run_jobs[trial] != job:
             raise MigrationRefused("ownership_lineage_invalid")
+    study_sources = {job: source for source, job in studies.values()}
     for run, job in run_jobs.items():
-        if jobs[job] in {"study", "investigate"} and run not in trial_claims:
+        if jobs[job] in {"study", "investigate"} and (
+            job not in study_sources or parents[run] != study_sources[job]
+        ):
+            # engine.run persists a child before it returns the arm ID. Failure
+            # can leave it unclaimed by a pair, but the unique study job and
+            # source parent still establish SQL ownership, not outcome evidence.
             raise MigrationRefused("ownership_ambiguous_trial")
     for row in rows("SELECT run_id,step FROM events ORDER BY run_id,step"):
         if row.run_id not in parents or type(row.step) is not int or row.step < 1:

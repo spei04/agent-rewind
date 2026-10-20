@@ -338,15 +338,20 @@ def test_synthetic_incomplete_study_missing_outcome_has_unambiguous_sql_closure(
 
 
 @pytest.mark.parametrize(
-    "variant", ["duplicate", "foreign", "request", "unclaimed", "orphan_event"]
+    "variant", ["duplicate", "foreign", "request", "missing_owner", "wrong_source", "orphan_event"]
 )
 def test_study_ambiguity_wrong_kind_or_orphan_events_refuse(legacy, variant):
     path, engine = legacy
     add_study(engine, duplicate=variant == "duplicate", foreign=variant == "foreign")
     if variant == "request":
         edit_record(engine, "7" * 32, lambda data: data.update(request={"run_id": "2" * 32}))
-    if variant == "unclaimed":
+    if variant in {"missing_owner", "wrong_source"}:
         edit_record(engine, "7" * 32, lambda data: data.update(candidates=[]))
+        if variant == "missing_owner":
+            with engine.begin() as connection:
+                connection.execute(text("DELETE FROM records WHERE id=:id"), {"id": "7" * 32})
+        else:
+            edit_record(engine, "6" * 32, lambda data: data.update(parent_id="2" * 32))
     if variant == "orphan_event":
         with engine.begin() as connection:
             connection.exec_driver_sql(
@@ -647,3 +652,63 @@ def test_owner_cli_needs_only_migration_metadata_configuration(
     main()
     result = json.loads(capsys.readouterr().out)
     assert result["revision"] == OWNERSHIP and result["customer_ready"] is False
+
+
+def test_interrupted_study_run_without_returned_arm_id_keeps_ownership_not_outcome(legacy):
+    _, engine = legacy
+    add_study(engine)
+    failed_pair = {
+        "seed": 1001,
+        "control_success": None,
+        "treatment_success": None,
+        "order": ["control", "treatment"],
+        "error": "JobStopped",
+    }
+    not_attempted = {
+        "seed": 1002,
+        "control_success": None,
+        "treatment_success": None,
+        "error": "not_attempted",
+    }
+    edit_record(
+        engine,
+        "7" * 32,
+        lambda data: data.update(
+            status="incomplete",
+            error="JobStopped",
+            candidates=[{"pairs": [failed_pair, not_attempted]}],
+        ),
+    )
+    edit_record(
+        engine,
+        "6" * 32,
+        lambda data: data.update(
+            status="failed",
+            branchable=False,
+            error="Execution interrupted; inspect job status.",
+        ),
+    )
+    before = original_digest(engine)
+    adopt(engine)
+    assert initialize_ownership(engine, batch_size=1)["state"] == "prepared"
+    result = initialize_ownership(engine)
+    assert result["state"] == "ownership_complete" and result["ownership_rows_total"] == 10
+    assert original_digest(engine) == before
+    with engine.connect() as connection:
+        report = json.loads(
+            connection.execute(
+                text("SELECT data FROM records WHERE id=:id"), {"id": "7" * 32}
+            ).scalar_one()
+        )
+        assert report["candidates"][0]["pairs"] == [failed_pair, not_attempted]
+        assert (
+            connection.execute(
+                text(
+                    "SELECT project_id FROM resource_scopes WHERE resource_kind='run' "
+                    "AND resource_id=:id"
+                ),
+                {"id": "6" * 32},
+            ).scalar_one()
+            == "9" * 32
+        )
+    assert runtime_schema_compatibility(engine).code == "migration_only"

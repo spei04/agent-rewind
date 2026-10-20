@@ -37,7 +37,9 @@ and request run IDs must agree; study job IDs must resolve. Present control and
 treatment run IDs in candidate and confirmation pairs must resolve, descend
 directly from that source and belong to the study job. A trial run cannot occur
 in two arms/pairs/studies. Missing outcomes are preserved, but ambiguous ownership
-does not complete. Unknown record/job kinds and malformed identifiers refuse.
+does not complete. A failed child persisted before its arm ID was returned can
+resolve through a unique study job and matching source parent; no arm ID or
+outcome is invented. Unknown record/job kinds and malformed identifiers refuse.
 Encrypted job payloads/results and artifact content are not decoded here; later
 artifact integrity and admission gates remain required.
 
