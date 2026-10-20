@@ -209,3 +209,80 @@ def test_missing_terminal_evidence_never_commits_branchability(legacy):
     with pytest.raises(MigrationRefused, match="projection_evidence_missing"):
         backfill_run_index(engine, source)
     assert rows(engine) == [] and (state(engine), counters(engine)) == before
+
+
+@pytest.mark.parametrize("field", ["updated_at", "source_digest", "rows_verified"])
+def test_progress_non_cursor_cells_bounded_before_materialization(legacy, field):
+    from sqlalchemy import event
+
+    from agent_rewind.migrations.projection_state import inspect_projection_state
+
+    _, engine, _ = legacy
+    initialize_projection(engine)
+    with engine.begin() as connection:
+        # Test-only corruption bypass, never a supported migration or runtime mode.
+        connection.exec_driver_sql("PRAGMA ignore_check_constraints=ON")
+        connection.execute(
+            text("UPDATE migration_progress SET " + field + "=:value WHERE revision=:revision"),
+            {"value": "a" * 64 + "\0" + "x" * 131072, "revision": PROJECTION},
+        )
+        connection.exec_driver_sql("PRAGMA ignore_check_constraints=OFF")
+
+    def before(connection, cursor, statement, parameters, context, executemany):
+        assert not " ".join(statement.lower().split()).startswith(
+            "select source_digest,cast(cursor"
+        )
+
+    event.listen(engine, "before_cursor_execute", before)
+    try:
+        with (
+            engine.connect() as connection,
+            pytest.raises(MigrationRefused, match="projection_progress_invalid"),
+        ):
+            inspect_projection_state(
+                connection, {"state": "ownership_complete", "_revision": PROJECTION}
+            )
+    finally:
+        event.remove(engine, "before_cursor_execute", before)
+
+
+@pytest.mark.parametrize("mode", ["isolation_none", "driver_true", "driver_false"])
+def test_projection_initializer_discards_unsupported_sqlite_mode_before_ddl(legacy, mode):
+    import sqlite3
+
+    from sqlalchemy import event
+
+    from agent_rewind.migrations.schema import ARTIFACTS
+
+    path, engine, _ = legacy
+    with engine.connect() as connection:
+        raw = connection.connection.driver_connection
+        if mode.startswith("driver"):
+            if not hasattr(raw, "autocommit"):
+                pytest.skip("sqlite3 driver autocommit is a Python3.12 boundary")
+            raw.autocommit = mode == "driver_true"
+        else:
+            raw.isolation_level = None
+
+    def no_sql(*args):
+        pytest.fail("unsupported transaction executed SQL before refusal")
+
+    event.listen(engine, "before_cursor_execute", no_sql)
+    try:
+        with pytest.raises(MigrationRefused, match="transactional_connection_required"):
+            initialize_projection(engine)
+    finally:
+        event.remove(engine, "before_cursor_execute", no_sql)
+    with pytest.raises(sqlite3.ProgrammingError):
+        raw.execute("SELECT 1")
+    assert service.schema_status(engine)["revision"] == ARTIFACTS
+    with engine.connect() as connection:
+        assert (
+            connection.execute(
+                text("SELECT count(*) FROM migration_progress WHERE revision=:revision"),
+                {"revision": PROJECTION},
+            ).scalar_one()
+            == 0
+        )
+        assert not connection.connection.driver_connection.in_transaction
+    preserved(path)

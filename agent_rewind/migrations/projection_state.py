@@ -6,13 +6,14 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
-from sqlalchemy import text
+from sqlalchemy import column, func, literal, select, table, text
 from sqlalchemy.engine import Connection
 
 from ..artifact_metadata import digest_value, identifier
 from ..models import canonical, digest
 from ..projection_source import MAX_PROJECTS
 from ..run_projection import MAX_RUNS
+from ..scoped_repositories import _byte_length
 from .inputs import _unique_object
 from .ownership_state import MAX_CURSOR_BYTES, timestamp
 from .schema import PROJECTION, MigrationRefused
@@ -32,17 +33,42 @@ def inspect_projection_state(connection: Connection, row: dict[str, Any]) -> Pro
     try:
         if row["state"] != "ownership_complete" or row["_revision"] != PROJECTION:
             raise ValueError
-        size_sql = (
-            "SELECT octet_length(CAST(cursor AS TEXT)) FROM migration_progress "
-            "WHERE revision=:revision AND phase=:phase"
-            if connection.dialect.name == "postgresql"
-            else "SELECT length(CAST(cursor AS BLOB)) FROM migration_progress "
-            "WHERE revision=:revision AND phase=:phase"
+        progress = table(
+            "migration_progress",
+            *(
+                column(name)
+                for name in (
+                    "revision",
+                    "phase",
+                    "cursor",
+                    "source_digest",
+                    "rows_verified",
+                    "status",
+                    "updated_at",
+                )
+            ),
         )
-        parameters = {"revision": PROJECTION, "phase": PHASE}
-        size: Any = connection.execute(text(size_sql), parameters).scalar_one_or_none()
-        if type(size) is not int or not 0 < size <= MAX_CURSOR_BYTES:
+        size = sum(
+            (
+                func.coalesce(_byte_length(connection, progress.c[name]), 0)
+                for name in ("source_digest", "rows_verified", "status", "updated_at")
+            ),
+            literal(0),
+        )
+        cursor_size = _byte_length(connection, progress.c.cursor)
+        sizes = connection.execute(
+            select(cursor_size, size)
+            .where(progress.c.revision == PROJECTION, progress.c.phase == PHASE)
+            .limit(2)
+        ).all()
+        if len(sizes) != 1 or not (
+            type(sizes[0][0]) is int
+            and 0 < sizes[0][0] <= MAX_CURSOR_BYTES
+            and type(sizes[0][1]) is int
+            and 0 < sizes[0][1] <= 1024
+        ):
             raise ValueError
+        parameters = {"revision": PROJECTION, "phase": PHASE}
         entries = (
             connection.execute(
                 text(

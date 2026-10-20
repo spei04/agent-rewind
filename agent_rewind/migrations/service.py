@@ -144,6 +144,16 @@ def migration_transaction(engine: Engine, timeout_seconds: int = 5) -> Iterator[
         with engine.connect() as connection:
             try:
                 if dialect(connection) == "sqlite":
+                    raw = connection.connection.driver_connection
+                    if (
+                        getattr(raw, "autocommit", -1) != -1
+                        or getattr(raw, "isolation_level", None) is None
+                    ):
+                        # Explicit BEGIN and DBAPI commit/rollback require sqlite3
+                        # legacy transaction control. Never return an unsupported
+                        # pooled connection with an uncommitted schema snapshot.
+                        connection.invalidate()
+                        raise MigrationRefused("transactional_connection_required")
                     connection.exec_driver_sql("PRAGMA foreign_keys=ON")
                     connection.exec_driver_sql(f"PRAGMA busy_timeout={timeout_seconds * 1000}")
                     connection.exec_driver_sql("BEGIN EXCLUSIVE")
