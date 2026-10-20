@@ -2,6 +2,7 @@
 
 import importlib.metadata
 import importlib.resources
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -26,6 +27,14 @@ for asset in ("index.html", "style.css", "app.js"):
     content = importlib.resources.files("agent_rewind").joinpath("web", asset).read_bytes()
     if not content:
         raise RuntimeError("Packaged web asset is empty")
+for profile in ("sqlite", "postgresql16"):
+    shape = json.loads(
+        importlib.resources.files("agent_rewind.migrations")
+        .joinpath("profiles", profile + ".json")
+        .read_text()
+    )
+    if not isinstance(shape, dict) or "installation_adoptions" not in shape:
+        raise RuntimeError("Packaged frozen migration profile is missing or invalid")
 if importlib.metadata.version("agent-rewind") != "0.1.0":
     raise RuntimeError("Unexpected installed package identity")
 with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporary:

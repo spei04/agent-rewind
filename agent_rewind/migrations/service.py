@@ -121,6 +121,9 @@ def migration_transaction(engine: Engine, timeout_seconds: int = 5) -> Iterator[
                     connection.exec_driver_sql("BEGIN EXCLUSIVE")
                 else:
                     connection.begin()
+                    # Omitting pg_catalog keeps built-ins implicitly first; explicitly
+                    # placing pg_temp last prevents temporary relation shadowing.
+                    connection.exec_driver_sql("SET LOCAL search_path TO public, pg_temp")
                     connection.execute(
                         text("SELECT set_config('lock_timeout',:value,true)"),
                         {"value": f"{timeout_seconds}s"},
@@ -129,9 +132,7 @@ def migration_transaction(engine: Engine, timeout_seconds: int = 5) -> Iterator[
                         text("SELECT set_config('statement_timeout',:value,true)"),
                         {"value": f"{timeout_seconds * 4}s"},
                     )
-                    # Omitting pg_catalog keeps built-ins implicitly first; explicitly
-                    # placing pg_temp last prevents temporary relation shadowing.
-                    connection.exec_driver_sql("SET LOCAL search_path TO public, pg_temp")
+
                     acquired: bool = connection.execute(
                         text("SELECT pg_try_advisory_xact_lock(:key)"), {"key": MIGRATOR_LOCK}
                     ).scalar_one()
@@ -264,6 +265,10 @@ def schema_status(engine: Engine, *, include_source_digest: bool = False) -> dic
         return {"revision": None, "state": "empty", "customer_ready": False}
     try:
         with engine.connect() as connection:
+            if dialect(connection) == "postgresql":
+                connection.begin()
+                connection.exec_driver_sql("SET TRANSACTION READ ONLY")
+                connection.exec_driver_sql("SET LOCAL search_path TO public, pg_temp")
             shape = catalog(connection)
             names = set(shape) - {"$postgres"}
             if not names:

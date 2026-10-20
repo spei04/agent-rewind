@@ -83,6 +83,7 @@ def load_legacy(engine):
     # Frozen baseline DDL is portable. Row insertion translates only SQLite boolean
     # representation and JSON binding; literal expected values/hashes stay independent.
     ddl = sql.decode().split("INSERT INTO records", 1)[0]
+    ddl = "\n".join(line for line in ddl.splitlines() if not line.lstrip().startswith("--"))
     with engine.begin() as connection:
         for statement in ddl.split(";"):
             if statement.strip():
@@ -431,3 +432,68 @@ def test_postgres_transaction_preserves_builtin_resolution_order(pg):
         schemas = connection.exec_driver_sql("SELECT current_schemas(true)").scalar_one()
         assert schemas[0] == "pg_catalog"
         assert schemas.index("public") > schemas.index("pg_catalog")
+
+
+@pytest.mark.parametrize(
+    "function,return_type",
+    [("set_config(text,text,boolean)", "text"), ("pg_my_temp_schema()", "oid")],
+)
+def test_postgres_hostile_initial_path_cannot_invoke_public_overload(pg, function, return_type):
+    load_legacy(pg["owner"])
+    mapping = mapping_for(pg["owner"])
+    with pg["owner"].begin() as connection:
+        connection.exec_driver_sql(
+            f"CREATE FUNCTION public.{function} "
+            f"RETURNS {return_type} LANGUAGE plpgsql AS $$ BEGIN "
+            "RAISE EXCEPTION 'synthetic-public-overload-invoked'; END $$"
+        )
+    hostile = create_engine(
+        pg["owner"].url,
+        poolclass=NullPool,
+        connect_args={"options": "-csearch_path=public,pg_catalog"},
+    )
+    try:
+        with pytest.raises(MigrationRefused, match="schema_incompatible"):
+            service.adopt(hostile, mapping, "b" * 64, "d" * 64)
+        with pytest.raises(MigrationRefused, match="schema_incompatible"):
+            service.schema_status(hostile)
+    finally:
+        hostile.dispose()
+    assert_unversioned(pg["owner"])
+
+
+def test_postgres_duplicate_source_json_members_refuse_before_stamp(pg):
+    load_legacy(pg["owner"])
+    mapping = mapping_for(pg["owner"])
+    with pg["owner"].begin() as connection:
+        connection.execute(
+            text("UPDATE records SET data=CAST(:value AS JSON)"),
+            {"value": '{"secret":"never-echo","secret":2}'},
+        )
+    with pytest.raises(MigrationRefused, match="invalid_source_data") as failure:
+        service.adopt(pg["owner"], mapping, "b" * 64, "d" * 64)
+    assert "never-echo" not in str(failure.value)
+    assert_unversioned(pg["owner"])
+
+
+def test_postgres_json_size_preflight_precedes_driver_decode(pg, monkeypatch):
+    from agent_rewind.migrations import inputs
+
+    load_legacy(pg["owner"])
+    with pg["owner"].begin() as connection:
+        connection.execute(
+            text("UPDATE records SET data=CAST(:value AS JSON)"),
+            {"value": json.dumps({"large": "x" * 5000})},
+        )
+    monkeypatch.setattr(inputs, "MAX_ROW_BYTES", 4096)
+
+    def unexpected_decode(*args, **kwargs):
+        raise AssertionError("Oversized JSON reached the decoder")
+
+    monkeypatch.setattr(inputs.json, "loads", unexpected_decode)
+    with (
+        pg["owner"].connect() as connection,
+        pytest.raises(MigrationRefused, match="source_limit_exceeded"),
+    ):
+        source_digest(connection)
+    assert_unversioned(pg["owner"])

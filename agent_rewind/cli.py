@@ -8,9 +8,69 @@ from pathlib import Path
 import httpx
 import uvicorn
 from cryptography.fernet import Fernet
+from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
+from sqlalchemy.exc import ArgumentError
 
-from .config import Settings
+from .config import MigrationSettings, Settings
 from .database import Database
+
+
+def _migrate(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    from .migrations.inputs import read_mapping
+    from .migrations.schema import HEAD, MigrationRefused
+    from .migrations.service import adopt, install, schema_status, upgrade
+
+    settings = MigrationSettings()
+    action = "install" if args.command == "init" else (args.migration_action or "upgrade")
+    selected = (
+        (settings.database_url or settings.migration_database_url)
+        if action == "status"
+        else (settings.migration_database_url or settings.database_url)
+    )
+    if selected is None:
+        parser.error("migration_database_url_required")
+    try:
+        url = make_url(selected.get_secret_value())
+        if (
+            url.get_backend_name() == "postgresql"
+            and action != "status"
+            and (settings.migration_database_url is None)
+        ):
+            parser.error("dedicated_migration_database_url_required")
+        if url.get_backend_name() not in {"sqlite", "postgresql"}:
+            parser.error("unsupported_database")
+        if (
+            url.get_backend_name() == "sqlite"
+            and url.database
+            and action == "install"
+            and url.database != ":memory:"
+        ):
+            Path(url.database).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        engine = create_engine(url, pool_pre_ping=True)
+    except (ArgumentError, ImportError, ValueError, OSError):
+        parser.error("invalid_migration_database_url")
+    try:
+        timeout = getattr(args, "lock_timeout", 5)
+        if action == "status":
+            result = schema_status(engine, include_source_digest=args.source_digest)
+        elif action == "install":
+            result = install(engine, args.installation_key, timeout_seconds=timeout)
+        elif action == "adopt":
+            result = adopt(
+                engine,
+                read_mapping(args.mapping),
+                args.backup_evidence,
+                args.drain_evidence,
+                timeout_seconds=timeout,
+            )
+        else:
+            result = upgrade(engine, getattr(args, "target", HEAD), timeout_seconds=timeout)
+        print(json.dumps(result, sort_keys=True))
+    except MigrationRefused as error:
+        parser.error(error.code)
+    finally:
+        engine.dispose()
 
 
 def main() -> None:
@@ -65,48 +125,14 @@ def main() -> None:
             Path(temporary).unlink(missing_ok=True)
         path.chmod(0o600)
         print("Local secrets saved in .env. Keep this file private and back up the encryption key.")
-    settings = Settings()
     if args.command == "init" and not args.installation_key:
         print("Run rewind migrate install --installation-key <key> to install metadata explicitly.")
-    elif args.command in {"init", "migrate"}:
-        from .migrations.inputs import read_mapping
-        from .migrations.schema import HEAD, MigrationRefused
-        from .migrations.service import adopt, install, schema_status, upgrade
-
-        action = "install" if args.command == "init" else (args.migration_action or "upgrade")
-        if action != "status":
-            migration_url = settings.migration_database_url
-            if settings.database_url.startswith("postgresql") and migration_url is None:
-                parser.error("Set REWIND_MIGRATION_DATABASE_URL to the dedicated migration role.")
-            if migration_url is not None:
-                settings = settings.model_copy(
-                    update={"database_url": migration_url.get_secret_value()}
-                )
-        database = Database(settings)
-        try:
-            timeout = getattr(args, "lock_timeout", 5)
-            if action == "status":
-                result = schema_status(database.engine, include_source_digest=args.source_digest)
-            elif action == "install":
-                result = install(database.engine, args.installation_key, timeout_seconds=timeout)
-            elif action == "adopt":
-                result = adopt(
-                    database.engine,
-                    read_mapping(args.mapping),
-                    args.backup_evidence,
-                    args.drain_evidence,
-                    timeout_seconds=timeout,
-                )
-            else:
-                result = upgrade(
-                    database.engine, getattr(args, "target", HEAD), timeout_seconds=timeout
-                )
-            print(json.dumps(result, sort_keys=True))
-        except MigrationRefused as error:
-            parser.error(error.code)
-        finally:
-            database.engine.dispose()
-    elif args.command == "serve":
+        return
+    if args.command in {"init", "migrate"}:
+        _migrate(parser, args)
+        return
+    settings = Settings()
+    if args.command == "serve":
         from .api import create_app
 
         uvicorn.run(create_app(settings), host=args.host, port=args.port, access_log=False)

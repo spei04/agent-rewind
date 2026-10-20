@@ -364,14 +364,15 @@ def test_invalid_source_json_has_safe_diagnostic_and_no_adoption(legacy, value):
     assert database.read_bytes() == before
 
 
-def test_cli_status_install_upgrade_and_safe_refusal(tmp_path, monkeypatch, capsys, settings):
+def test_cli_status_install_upgrade_and_safe_refusal(tmp_path, monkeypatch, capsys):
     from agent_rewind.cli import main
 
     monkeypatch.chdir(tmp_path)
     database = tmp_path / "cli.sqlite"
     monkeypatch.setenv("REWIND_DATABASE_URL", f"sqlite:///{database}")
     monkeypatch.delenv("REWIND_MIGRATION_DATABASE_URL", raising=False)
-    monkeypatch.setenv("REWIND_ENCRYPTION_KEY", settings.encryption_key.get_secret_value())
+    monkeypatch.delenv("REWIND_ENCRYPTION_KEY", raising=False)
+    monkeypatch.setenv("REWIND_MODE", "production")
     for args, expected in [
         (["status"], "empty"),
         (["install", "--installation-key", "synthetic"], "prepared"),
@@ -388,16 +389,15 @@ def test_cli_status_install_upgrade_and_safe_refusal(tmp_path, monkeypatch, caps
     assert "installation_conflict" in capsys.readouterr().err
 
 
-def test_cli_adoption_and_status_use_real_private_mapping(
-    legacy, monkeypatch, capsys, tmp_path, settings
-):
+def test_cli_adoption_and_status_use_real_private_mapping(legacy, monkeypatch, capsys, tmp_path):
     from agent_rewind.cli import main
 
     database, _, mapping = legacy
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("REWIND_DATABASE_URL", f"sqlite:///{database}")
     monkeypatch.delenv("REWIND_MIGRATION_DATABASE_URL", raising=False)
-    monkeypatch.setenv("REWIND_ENCRYPTION_KEY", settings.encryption_key.get_secret_value())
+    monkeypatch.delenv("REWIND_ENCRYPTION_KEY", raising=False)
+    monkeypatch.setenv("REWIND_MODE", "production")
     path = tmp_path / "private-mapping.json"
     path.write_text(json.dumps(mapping))
     path.chmod(0o600)
@@ -420,3 +420,62 @@ def test_cli_adoption_and_status_use_real_private_mapping(
     assert result["state"] == "prepared" and result["customer_ready"] is False
     assert "principal_grants" not in result
     assert_preserved_rows(database)
+
+
+@pytest.mark.parametrize("action", [["status"], ["install", "--installation-key", "synthetic"]])
+def test_cli_migration_requires_explicit_dsn_without_loading_application_secrets(
+    tmp_path, monkeypatch, capsys, action
+):
+    from agent_rewind.cli import main
+
+    monkeypatch.chdir(tmp_path)
+    for name in list(os.environ):
+        if name.startswith("REWIND_"):
+            monkeypatch.delenv(name)
+    monkeypatch.setattr("sys.argv", ["rewind", "migrate", *action])
+    with pytest.raises(SystemExit) as failure:
+        main()
+    assert failure.value.code == 2
+    assert "migration_database_url_required" in capsys.readouterr().err
+    assert list(tmp_path.iterdir()) == []
+    monkeypatch.setenv("REWIND_MIGRATION_DATABASE_URL", "bad-url-with-synthetic-secret")
+    with pytest.raises(SystemExit):
+        main()
+    error = capsys.readouterr().err
+    assert "invalid_migration_database_url" in error and "synthetic-secret" not in error
+
+
+def test_cli_only_migration_dsn_is_sufficient_for_install_and_status(tmp_path, monkeypatch, capsys):
+    from agent_rewind.cli import main
+
+    monkeypatch.chdir(tmp_path)
+    for name in list(os.environ):
+        if name.startswith("REWIND_"):
+            monkeypatch.delenv(name)
+    monkeypatch.setenv("REWIND_MIGRATION_DATABASE_URL", f"sqlite:///{tmp_path / 'metadata.sqlite'}")
+    monkeypatch.setenv("REWIND_MODE", "production")
+    for action in [["install", "--installation-key", "synthetic"], ["status"]]:
+        monkeypatch.setattr("sys.argv", ["rewind", "migrate", *action])
+        main()
+        assert json.loads(capsys.readouterr().out)["state"] == "prepared"
+
+
+def test_sqlite_json_size_preflight_precedes_decode(legacy, monkeypatch):
+    from agent_rewind.migrations import inputs
+
+    _, engine, _ = legacy
+    with engine.begin() as connection:
+        connection.execute(
+            text("UPDATE records SET data=:value"), {"value": json.dumps({"large": "x" * 5000})}
+        )
+    monkeypatch.setattr(inputs, "MAX_ROW_BYTES", 4096)
+
+    def unexpected_decode(*args, **kwargs):
+        raise AssertionError("Oversized JSON reached the decoder")
+
+    monkeypatch.setattr(inputs.json, "loads", unexpected_decode)
+    with (
+        engine.connect() as connection,
+        pytest.raises(MigrationRefused, match="source_limit_exceeded"),
+    ):
+        source_digest(connection)

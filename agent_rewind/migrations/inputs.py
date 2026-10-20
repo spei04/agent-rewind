@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
-from .schema import COLUMNS, TABLES, MigrationRefused, canonical
+from .schema import COLUMNS, TABLES, MigrationRefused, canonical, dialect
 
 Digest = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 Identifier = Annotated[str, Field(pattern=r"^[0-9a-f]{32}$")]
@@ -27,7 +27,7 @@ SOURCE_QUERIES = {
     "audit": "SELECT * FROM audit ORDER BY id",
     "events": "SELECT * FROM events ORDER BY run_id,step",
     "jobs": "SELECT * FROM jobs ORDER BY id",
-    "records": "SELECT * FROM records ORDER BY id",
+    "records": "SELECT id,kind,created,CAST(data AS TEXT) AS data FROM records ORDER BY id",
 }
 
 
@@ -112,13 +112,24 @@ def read_mapping(path: Path) -> AdoptionMapping:
 
 def source_digest(connection: Connection) -> str:
     """Hash all original values in stable row order, streaming with hard work bounds."""
+    # JSON must cross the driver as text: PostgreSQL's automatic JSON decoder
+    # otherwise collapses duplicate members before strict validation can inspect them.
+    size_query = (
+        "SELECT 1 FROM records WHERE octet_length(CAST(data AS TEXT)) > :limit LIMIT 1"
+        if dialect(connection) == "postgresql"
+        else "SELECT 1 FROM records WHERE length(CAST(data AS BLOB)) > :limit LIMIT 1"
+    )
+    if connection.execute(text(size_query), {"limit": MAX_ROW_BYTES}).first():
+        raise MigrationRefused("source_limit_exceeded")
     digest = hashlib.sha256()
     total = 0
     count = 0
     for table in TABLES:
         digest.update(canonical([table, [c[0] for c in COLUMNS[table]]]) + b"\n")
         rows = connection.execute(
-            text(SOURCE_QUERIES[table]).execution_options(stream_results=True)
+            text(SOURCE_QUERIES[table]).execution_options(
+                stream_results=True, yield_per=1, max_row_buffer=1
+            )
         )
         for row in rows:
             values = list(row)

@@ -17,6 +17,7 @@
     "agent_rewind/migrations/env.py",
     "agent_rewind/migrations/inputs.py",
     "agent_rewind/migrations/metadata.py",
+    "agent_rewind/migrations/profiles/postgresql16.json",
     "agent_rewind/migrations/profiles/sqlite.json",
     "agent_rewind/migrations/schema.py",
     "agent_rewind/migrations/service.py",

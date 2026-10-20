@@ -21,7 +21,7 @@ own stored fingerprint cannot authorize its shape.
 
 Use a dedicated migration identity that owns the database or public schema.
 Declare every former PostgreSQL application role in `legacy_writer_roles` (1–64
-distinct role names) within the private adoption mapping. Disable each role with
+distinct unquoted role names, lowercase letters/digits/underscores) within the private adoption mapping. Disable each role with
 NOLOGIN and NOSUPERUSER, drain its existing sessions, and remove application-role
 membership paths. The current migrator cannot be a declared legacy writer. This
 explicit operator inventory is bound into persisted intent; the database cannot
@@ -46,6 +46,11 @@ with the same bounded wait. Concurrent writers/migrators fail with `migration_bu
 or a drain/privilege diagnostic. Do not retry by disabling these checks.
 
 ## Read-only inspection
+
+Migration commands load only metadata connection settings; artifact decryption,
+model-provider and identity-provider secrets are neither required nor read by the
+migration configuration. An explicit DSN is required; with only the migration DSN,
+status uses that connection read-only.
 
 Use `rewind migrate status`. `--source-digest` additionally streams known legacy
 rows into a stable source digest, with one-million-row, one-GiB-total and
@@ -154,3 +159,17 @@ locks and actual process termination. A missing PostgreSQL catalog profile cause
 a bounded synthetic catalog review failure, not automatic acceptance or profile
 writing. The profile must be reviewed, committed and tested before this slice can
 pass its release gate. Tests and review do not constitute external certification.
+
+### Frozen PostgreSQL profile provenance
+
+The initial PostgreSQL 16 catalog was captured from synthetic, newly created
+schemas in hosted run `39346994753`, jobs `118381880748` (Python 3.11) and
+`118381880855` (Python 3.12), source `6d68117a2d8a449d5f32e19502511e05d4421612`.
+Both captures have identical compact sorted JSON SHA-256
+`0483e636e219af53d2ec28ad0c73b0b98bf217fd8948fc29ea912b529a6480ff`.
+Internal platform/quality review checked the static catalog against all baseline
+columns/constraints, physical columns/indexes and the additive revision DDL.
+The checked-in literal profile is reviewed against the explicit revision DDL;
+it is not regenerated from the target database during validation. These initial
+capture runs intentionally failed and do not establish migration acceptance.
+The PostgreSQL image is the digest pinned in `.github/workflows/ci.yml`.
