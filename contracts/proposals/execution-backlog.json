@@ -1096,7 +1096,8 @@
         "QE"
       ],
       "pull_request_boundary": "Add read-only release-profile revision guards before API admission and worker claims; refuse unknown/partial/future or incomplete state without DDL, and document compatible application rollback versus required backup restore. Confirm all supported CLI initialization now uses AR-005-B versioned migrations. No HA rolling upgrade claim.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/37"
     },
     {
       "id": "AR-006-A",
@@ -3873,7 +3874,7 @@
       "tests": "Config schema, topology/IAM policy lint and missing budget/region rejection",
       "security_reliability": "No public DB, shared credentials or sandbox access to cloud metadata",
       "out_of_scope": "No cloud provisioning or worker image build",
-      "status": "In progress",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         2.0,
@@ -3886,7 +3887,13 @@
       "pull_request_boundary": "Specify versioned deployment config, region, identities, private ingress, DB/store/KMS and resource labels. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer A \u2014 reference configuration",
-      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/30"
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/30",
+      "evidence": {
+        "commit": "4abc35280f2a7b9161585c5561c1c67ef1f5da29",
+        "reviewed_commit": "83aabb8031de7408406579176e56591818dbe31a",
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/36",
+        "checks": "Engineer B independently accepted exact source; 70 scoped tests, lint/format/security/type checks, C03 flow mappings and schema parity passed. Hosted locked run 39347427475 passed core on both Python versions, real gVisor, security, package and CI gate. Offline configuration only; no deployment authority or resources."
+      }
     },
     {
       "id": "AR-033-B",
@@ -6502,7 +6509,13 @@
       "producer": "AR-033-A",
       "title": "Reference installation",
       "required_interface": "Versioned IaC inputs/outputs for GCP API, Cloud SQL, GCS, KMS/secrets, gVisor workers, IAM/network, labels, health and teardown.",
-      "status": "To be specified/reviewed by producer task; not yet available"
+      "status": "Reviewed internal version-1 reference configuration at 83aabb8, merged 4abc352; schema, offline policy validator, synthetic fixture and downstream IaC handoff available. Actual ENV0 approval, resource execution and live IAM/network evidence remain gated.",
+      "artifacts": [
+        "contracts/reference-config.v1.schema.json",
+        "contracts/fixtures/reference-config.synthetic.json",
+        "scripts/reference_config.py",
+        "docs/delivery/REFERENCE_CONFIGURATION.md"
+      ]
     },
     {
       "id": "C15",
@@ -6837,12 +6850,15 @@
       12
     ],
     "active_child_issues": {
-      "AR-005-B": 28,
-      "AR-033-A": 30
+      "AR-005-B": 28
     },
     "closed_implementation_issues": [
-      26
-    ]
+      26,
+      30
+    ],
+    "queued_child_issues": {
+      "AR-005-C": 37
+    }
   },
   "execution_capacity": {
     "lead": "Project lead",

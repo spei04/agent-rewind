@@ -116,7 +116,7 @@ Working days, not dates; no weekend work assumed. Each allocation below is **0.5
 | W2 / Day 9 | TL: [AR-004-B](#ar-004-b) (0.5d) | Cross-role consumer review against completed producers; resolve compatibility and ownership. |
 | W2 / Day 10 | TL: [AR-004-B](#ar-004-b) (0.5d) | Complete freeze proposal and capacity reforecast. ARCH0/AR-004-C/G0 follow reviewed output; no runtime work in this conditional fortnight. |
 
-Days 9–10 consume the completed AR-011-A and AR-012-A outputs. ARCH0 and AR-004-C/G0 follow the reviewed freeze; decision latency is not assumed zero. After G0, migration AR-005-B and reference configuration AR-033-A may proceed in parallel. Current execution prioritizes AR-051-A secure CI with B implementing and A reviewing while C implements migration; reference configuration remains queued. This new priority consumes already verified prerequisites and does not alter the original conditional first-ten-day allocation. Readiness AR-011-B and project authorization AR-007-A wait for AR-005-C revision guards. No task is scheduled before a predecessor is complete; same-day finish/start assumptions are not used.
+Days 9–10 consume the completed AR-011-A and AR-012-A outputs. ARCH0 and AR-004-C/G0 follow the reviewed freeze; decision latency is not assumed zero. After G0, migration AR-005-B and reference configuration AR-033-A may proceed in parallel. AR-051-A secure CI and AR-033-A reference configuration are verified; C implements migration while A/B independently review it. This new priority consumes already verified prerequisites and does not alter the original conditional first-ten-day allocation. Readiness AR-011-B and project authorization AR-007-A wait for AR-005-C revision guards. No task is scheduled before a predecessor is complete; same-day finish/start assumptions are not used.
 
 ## Interface and schema contract register
 
@@ -143,7 +143,7 @@ C04 links the [M1 API](../contracts/proposals/m1.openapi.json), [logical data mo
 | C18 — Capacity workload/SLIs | [AR-040-A](#ar-040-a) | Plan Section 5 workload distributions and latency/error/resource bounds, queue fairness, five-minute burst, 24-hour soak and hardware/cost identity. |
 | C19 — Regional recovery manifest | [AR-042-A](#ar-042-a) | Coherent DB/object/key/deletion backups; approved region; RPO/RTO, restore ordering, integrity and off-device evidence. |
 
-Current availability: C01 workflows/metrics, C02 permission/provenance/protocol and C03 trust/capacity decision records are reviewed internally. Real partner, statistical, deployment and funding gates remain separate. C04 is reviewed and G0 is satisfied for development/testing; runtime cases remain planned. The machine-readable register records each current status.
+Current availability: C01 workflows/metrics, C02 permission/provenance/protocol and C03 trust/capacity decision records are reviewed internally. Real partner, statistical, deployment and funding gates remain separate. C04 is reviewed and G0 is satisfied for development/testing; runtime cases remain planned. C14 version-1 offline configuration is reviewed and available, while actual ENV0 approval and provisioning remain gated. The machine-readable register records each current status.
 
 
 ## Gate register
@@ -498,7 +498,7 @@ M1 / P0 · 3 PRs · 6 engineering days · In progress · [Tracking issue #5](htt
 - **Effort / confidence:** 1.5 engineering days; planning range 1.5–2.2; medium confidence.
 - **Responsible role:** BE; required reviewers: TL, QE. Named assignee pending staffing.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** Not started; [issue #37](https://github.com/spei04/agent-rewind/issues/37) is queued. Implementation waits for AR-005-B acceptance/integration; no early start.
 
 <a id="ar-006"></a>
 
@@ -1992,7 +1992,7 @@ M4 / P0 · 4 PRs · 10 engineering days · In progress
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
 - **Responsible role:** PL; required reviewers: SEC, QE. Assigned contributor: Engineer A — reference configuration.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** In progress; [issue #30](https://github.com/spei04/agent-rewind/issues/30). G0/AR-003-B verified; no provisioning.
+- **Progress:** Verified; [PR #36](https://github.com/spei04/agent-rewind/pull/36), merge 4abc352, B accepted exact 83aabb8. 70 scoped tests and hosted locked core/gVisor/security/package/CI gate passed. [C14 configuration](delivery/REFERENCE_CONFIGURATION.md) is available; ENV0 and actual provisioning remain gated.
 
 <a id="ar-033-b"></a>
 
@@ -3072,7 +3072,7 @@ No question above asks to reapprove the already selected core architecture. The 
 
 Current dependency validation, 2026-10-20: 146 unique tasks across 51 parents, 519 resolving acyclic edges, 26 gates and 18 contracts. Required fields, task bounds, E0 ancestry, producer ancestry, parent totals and conditional first-ten-day ordering/capacity pass. Effort is 429 days, M1 41.5, PL 88, upper ranges 723.6, alternate 25% allowance 536.25. Longest effort path remains 146.5 days; no calendar commitment. AR-051-A starts after its verified prerequisites; AR-005-B starts after verified G0. Runtime acceptance and production gates remain unproven.
 
-GitHub issues #1–4 are closed for verified internal specification/development-decision scope. Parent issues #5–12 remain open; #26 is closed for verified CI/candidates, #28 tracks migration and #30 reference configuration. The original 19 coarse package edges were removed; exact task/gate dependencies remain authoritative. Materialize future child issues when their scope is authorized. Closing a planning issue never establishes customer acceptance or production readiness.
+GitHub issues #1–4 are closed for verified internal specification/development-decision scope. Parent issues #5–12 remain open; #26 is closed for verified CI/candidates, #30 for reviewed offline reference configuration, and #28 tracks migration. The original 19 coarse package edges were removed; exact task/gate dependencies remain authoritative. Materialize future child issues when their scope is authorized. Closing a planning issue never establishes customer acceptance or production readiness.
 
 Update procedure for each completed PR: update task status and evidence in the machine-readable ledger and this card; recalculate parent/milestone effort/status and dependency changes; update PLAN Section 10/14 and the matching issue; rerun ID/required-field/DAG/contract-availability/first-fortnight allocation checks; verify local links and draft OpenAPI structure. Any added edge, new gate or changed estimate requires schedule revalidation. Do not mark a task Verified without applicable commit/environment evidence, reviewer disposition and explicit limitations.
 
@@ -3091,3 +3091,5 @@ G0 execution checkpoint, 2026-10-19: AR-004-B/C verified; ARCH0/G0 satisfied for
 2026-10-20 priority checkpoint: B owns AR-051-A secure CI/candidates, A reviews CI/dependencies, C implements AR-005-B in issue #28. PR #25 records explicit build/test authorization; PR #27 updates cryptography after independent compatibility/advisory review and exact-head core/gVisor success. No production, model spending or customer-data gate was opened.
 
 2026-10-20 delivery checkpoint: AR-051-A verified at merged 13465c1 with independent exact-head review, protected-main run 39346262029 and artifact 12230273836. A reassigned to AR-033-A (issue #30), B to independent AR-005-B review, C continues migration. Migration review exposed the legacy application-superuser assumption; the scoped C04 adoption erratum adds explicit retired writer roles and real exclusion tests. No production gate closes.
+
+2026-10-20 configuration checkpoint: AR-033-A verified in PR #36 at 4abc352 after independent B review and hosted locked checks. C14 now includes process/overflow connection bounds and safe regular-file loading. A reassigned to complementary migration CLI/input/package review; B owns catalog/transaction acceptance, C implements fixes. AR-005-C still waits for accepted AR-005-B; AR-033-B still waits for ENV0.
