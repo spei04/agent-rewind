@@ -207,7 +207,7 @@ answer-blind adaptation. REFLECT requires an author artifact or explicit
 paper-adaptation fidelity decision. DAAF's persistent-asset/fresh-start experiment
 is a separate study, not a silently substituted checkpoint baseline.
 
-Compare one owner-selected standard thresholding/halving policy against uniform
+Recommend successive halving as the first standard calibration comparator against uniform
 allocation using identical proposals and reserves. Established allocation, cost
 awareness and feature sharing are not novel merely because their receipts are
 stored here. No superiority or new algorithm is claimed by this design.
@@ -248,13 +248,17 @@ Freeze a finite family covering every planned method-by-task benefit claim, each
 selected reuse/regression claim, and every primary population contrast. A simple
 conservative proposal assigns alpha 0.025 to task/reuse confirmation and 0.025 to
 population contrasts, then divides each allocation across its full predeclared
-family. Unselected/failed tasks do not shrink that family. The general union-bound
+family. For example, four methods on ten assigned tasks plus two reuse claims
+reserve 42 confirmation claims even if only seven candidates are selected;
+three planned population contrasts retain a divisor of three. These are
+allocation examples, not implemented intervals or a power guarantee.
+Unselected/failed tasks do not shrink that family. The general union-bound
 rationale does not require independent tests, but individual interval validity
 still needs a justified sampling model. The estimator and precise allocation
 belong to C09 and external review; do not reuse an ANOVA formula for binary paired
 effects. [NIST's general Bonferroni inequality](https://www.itl.nist.gov/div898/handbook/prc/section4/prc473.htm)
 
-The familiar 100 failures,10 repositories,60/40 split and 30 pairs are **calibration
+The familiar 100 failures, 10 repositories, 60/40 split and 30 pairs are **calibration
 placeholders, not power guarantees or approved minima**. Split fractions apply to
 repository families before outcomes, not arbitrary task rows; six development
 and four test repositories give very few independent held-out groups. Repeating
@@ -306,6 +310,12 @@ in parallel after the owner gate; actual optional adapters await native restore,
 evaluator review and controls. Export and calibration-harness work can proceed in parallel
 once their inputs exist. Evaluation waits for both plus corpus, statistical,
 funding and data gates; AR-038-C still independently reviews any claim.
+
+The offline checker validates only record completeness, proposed dependency
+ancestry, document/card parity and deterministic synthetic accounting/phase
+examples. It does not validate statistical coverage, owner approval or runtime
+implementation. Its method-comparison example requires the same model, information,
+proposal-pool identity and all resource caps; changing one method alone refuses.
 
 The following PR scopes are **outside the active 433-day DAG**. Each card names
 its effort relation: producer/existing-scope amendments estimate the proposed PR,

@@ -929,5 +929,47 @@
       20,
       40
     ]
+  },
+  "family_case": {
+    "family_alpha_micros": 50000,
+    "confirmation_alpha_micros": 25000,
+    "population_alpha_micros": 25000,
+    "planned_confirmation_claims": 42,
+    "selected_confirmation_claims": 7,
+    "confirmation_divisor": 42,
+    "planned_population_contrasts": 3,
+    "population_divisor": 3
+  },
+  "comparison_case": {
+    "methods": [
+      {
+        "id": "uniform",
+        "model_revision": "synthetic-model-v1",
+        "information_stratum": "answer_blind",
+        "allowed_observation_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "proposal_pool_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "caps": {
+          "usd_micros": 100,
+          "tokens": 1000,
+          "cpu_seconds": 10,
+          "wall_seconds": 60,
+          "concurrency": 1
+        }
+      },
+      {
+        "id": "successive_halving",
+        "model_revision": "synthetic-model-v1",
+        "information_stratum": "answer_blind",
+        "allowed_observation_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "proposal_pool_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "caps": {
+          "usd_micros": 100,
+          "tokens": 1000,
+          "cpu_seconds": 10,
+          "wall_seconds": 60,
+          "concurrency": 1
+        }
+      }
+    ]
   }
 }
