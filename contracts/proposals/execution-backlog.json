@@ -7095,9 +7095,9 @@
     ],
     "critical_path_excludes_external_waits": true,
     "revision_notes": "2026-10-20 projection refinement adds the accepted AR-009-B producer edge to AR-006-A and assigns the existing C04 repair/audit requirement to AR-006-C (2 base, 2–3.5 range) after AR-010-B and before AR-012-B. Original issue #51 issuance metrics remain immutable historical evidence. The ten-day foundation/RA tables are historical scenarios; current capacity is C implementation with A/B review, not a new calendar promise.",
-    "independent_review": "Pending independent lead review of this AR-006 planning checkpoint; prior accepted activation/publication reviews remain in ASSIGNMENTS.md. Computed planning checks are not runtime verification.",
+    "independent_review": "Engineer A and lead independently accepted exact planning commit 4b0bee75a8ec040aa4a00ad45f36d269befe11db: metrics, original-edge preservation, cards/status/schedule, immutable C21/API/owner record and retained repair boundary verified. Draft PR #72 tracks integration; hosted checks and run-projection implementation evidence remain pending.",
     "contract_count": 20,
-    "verification": "Local execution/evaluation/M1 OpenAPI validators and 287 focused planning/contract tests passed; immutable owner/C21/API bytes unchanged and all original dependencies retained. No runtime projection acceptance. Independent lead review and hosted checks pending."
+    "verification": "Local execution/evaluation/M1 OpenAPI validators and 287 focused planning/contract tests passed; immutable owner/C21/API bytes unchanged and all original dependencies retained. A/lead exact planning review accepted at 4b0bee75. No runtime projection acceptance; hosted checks pending."
   },
   "review_findings": [
     {
