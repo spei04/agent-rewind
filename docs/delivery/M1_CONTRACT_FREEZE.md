@@ -526,6 +526,12 @@ No calendar date is promised until these new edges are applied and actual migrat
 results reduce uncertainty. Schema/profile surprises use the existing estimate
 contingency and block adoption, rather than relaxing preservation.
 
+## Publication implementation sequencing — 2026-10-20
+
+AR-009-B provides the preparatory run-graph publication coordinator and complete scoped manifest reference, with a required same-transaction fence/writer interface. AR-010-A owns the unavailable generation schema and database-time live fence; AR-006-A owns run-projection integration. The current live adapter must refuse rather than fall back to an owner-only check. Contract fixtures test atomic publication, but do not close live-worker or full M1 acceptance; AR-010-A/B and AR-012-B retain those integration gates. No historical adoption or unsupported job/study/provider graph production is added.
+
+This clarifies implementation order without weakening the required live fence or adding a cyclic prerequisite. Real SQL fixture evidence must include CT-M1-015/016/017 publication/corruption/scope cases, post-I/O authorization and fence loss, rollback, concurrent visibility and exact retry. Object and journal I/O stays outside SQL transactions. Private attempt evidence identifies unreferenced uploads and unknown work; it is never authority for SQL commit success. Current release compatibility remains migration-only.
+
 ## Review evidence and validation limits
 
 BE proposal author: Engineer B, revision m1-review-2. FE/RS review: Engineer A,

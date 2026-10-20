@@ -134,6 +134,45 @@ Priority **P0** blocks a private pilot; **P1** blocks enterprise GA; **P2** is c
 
 ## 3. Architecture and decision records
 
+### Architecture at a glance
+
+In the target system, each installation serves one organization. The boxes below are logical responsibilities; the API and trusted worker processes share a modular Python codebase, rather than requiring a separate service for every box. This is the intended architecture, not a statement that every component has passed production acceptance. The execution backlog tracks implementation and verification.
+
+```mermaid
+flowchart TB
+    User["Engineer: browser workbench or Python SDK"] <-->|"Open runs, branch, investigate, read evidence"| API["API: identity, project permissions and admission"]
+    IdP["Organization identity provider"] -->|"Authenticate users"| API
+    API <-->|"Run metadata, jobs and status"| DB[("PostgreSQL: metadata, queue, budgets and audit")]
+    API <-->|"Authorized trace and artifact reads"| Objects[("Encrypted object storage: files, snapshots and evidence")]
+    Workers["Trusted workers: replay engine, experiment coordinator and analysis"] <-->|"Claim jobs, reserve costs, record outcomes"| DB
+    Workers <-->|"Restore checkpoints and publish evidence"| Objects
+    Workers <-->|"Budgeted model requests and responses"| Model["Approved model provider"]
+    Workers <-->|"Execute agent tool calls"| Sandbox["gVisor sandbox: isolated coding workspace"]
+    Workers <-->|"Evaluate results separately"| Evaluator["Evaluator sandbox: protected grading inputs"]
+```
+
+| Core component | Plain-language responsibility |
+| --- | --- |
+| Workbench and SDK | Open a failed run, inspect decisions, change an action or tool observation, and compare branches and reports. |
+| API and identity | Check who is asking and which project they can access; validate and admit work; return bounded results and cancellation status. |
+| PostgreSQL | Own durable run/branch relationships, job leases, experiment phases, budget reservations, artifact references and audit records. The queue lives here initially. This is Agent Rewind's database; customer application databases are outside the system. |
+| Experiment coordinator and selection policy | Choose which checkpoint/intervention to investigate next within the permitted protocol and budget; schedule unchanged controls and candidate trials; freeze the selected intervention before independent confirmation. |
+| Replay worker and provider adapter | Restore the saved workspace and serialized agent state, apply the permitted intervention, request model decisions, dispatch validated tool calls and record outcomes and costs. Model credentials stay in the trusted execution boundary. |
+| gVisor runner | Execute untrusted agent code and tools with bounded CPU, memory and time. Sandboxes have no direct access to the model provider, platform database or secrets, and network access is disabled in the initial scope. |
+| Separate evaluator | Score a resulting workspace in a separate execution environment. It also executes candidate code and is treated as untrusted, with the same network and credential restrictions. The agent sandbox does not receive protected grading inputs; grader integrity and evaluator validity remain separate verification gates. |
+| Encrypted artifact storage | Keep immutable workspace contents, snapshot manifests, serialized policy state, event bodies and report artifacts. PostgreSQL stores their authorized references and integrity identities. A checkpoint covers supported files and serialized state, not arbitrary process memory or external services. |
+| Comparison and evidence analysis | Compare trajectories and outcomes, distinguish discovery from confirmation, and report uncertainty, incomplete trials and full costs. A completed job alone is not evidence of a successful repair. |
+
+**How one investigation moves through the system:**
+
+1. **Capture and inspect.** A supported adapter records the original run's tool calls, actual and observed results, and checkpoints. The worker stores encrypted bodies and publishes their metadata references. The engineer opens the resulting timeline through the API. An imported trace without sufficient restore state can be viewed but cannot be replayed.
+2. **Choose and admit.** The engineer selects an intervention, or the experiment coordinator proposes one. The API checks project access and admission rules; durable jobs, protocol identity and budget reservations are recorded in PostgreSQL before execution.
+3. **Restore and run.** A worker claims a job, restores the selected checkpoint into an isolated workspace and applies the intervention. It calls the model provider through the trusted adapter and runs the resulting tool actions inside gVisor. Each branch starts from its own restored state.
+4. **Evaluate and publish.** The separate evaluator scores the result. Workers upload immutable evidence before publishing its references, outcomes and cost receipts under the current job lease. A lost worker or ambiguous provider response leaves an explicit incomplete or uncertain attempt for reconciliation.
+5. **Confirm and compare.** Once discovery selects an intervention, the coordinator freezes it and schedules fresh confirmation trials under the reviewed protocol. Analysis reports repair effects separately from overall task recovery. The API serves the branch comparison, uncertainty and cost report back to the engineer.
+
+**Supporting target services and boundaries:** Secret Manager/KMS supplies trusted services with credentials and encryption keys; untrusted sandboxes receive neither. Redacted metrics, logs and traces observe the API and workers. Backup and recovery procedures cover the database, referenced objects, required key access and deletion records together. Private ingress and project authorization protect access; budgets, leases and cancellation constrain execution. The detailed deployment topology and component ownership follow below.
+
 ### 3.1 System boundaries and target topology
 
 Keep a modular Python application and independently scalable trusted workers. Separate the customer/browser trust boundary, privileged execution hosts, hostile sandbox processes, external model provider, and data stores. The platform stores its own metadata; customer application databases are outside this architecture.
@@ -902,3 +941,5 @@ G0 accepted for development/testing, 2026-10-19: AR-004-B/C verified and C04 rev
 2026-10-20 context and selection planning: the [bounded method amendment](research/CONTEXT_SELECTION_AMENDMENT_2026-10-19.md) records actual model/prompt facts, six proposed context/role/model/allocation tasks and recent primary-source comparison limits. RC-01–06 remain outside the active 150-task/440-day ledger; 15–26 incremental days are provisional and overlap must be reconciled before activation. Existing approved foundation work continues. No provider calls, paid execution, held-out permission or new runtime scope is added.
 
 2026-10-20 final approval reconciliation: [PR #56](https://github.com/spei04/agent-rewind/pull/56) merged at d408e5d1b10191dacbfe43a78f43df6de08b5950 after independent source/composition review and [run39365454903](https://github.com/spei04/agent-rewind/actions/runs/39365454903), with1350 passing tests per Python version, actual PostgreSQL, installed distributions, three gVisor tests and all required gates. Issue #51 is closed; its eleven mapped runtime issues remain blocked on their prerequisites. The separate [context planning amendment](research/CONTEXT_SELECTION_AMENDMENT_2026-10-19.md) is internally reviewed; RC-01–06 remain proposed and excluded from active totals. No new paid evaluation, held-out access or production scope.
+
+2026-10-20 next replay-path assignment: AR-009-B is In progress in [issue #69](https://github.com/spei04/agent-rewind/issues/69), after accepted AR-009-A/007-B on main 4e509a2. C owns complete graph verification and atomic scoped publication; A reviews failure/security behavior and B reviews contracts/transactions. The observable gate is all verified run/checkpoint children and the root becoming visible together, or no completed root on upload, corruption, scope, fence or SQL failure. The generation-aware live adapter and run projection remain later integration work, with no owner-only fallback. Existing C checkout is reused; primary retains the reviewed architecture explanation. No new paid calls, infrastructure or partner data; reconcile historical reservations against actual spend before paid validation.
