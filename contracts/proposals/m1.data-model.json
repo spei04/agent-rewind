@@ -72,7 +72,7 @@
       "fields": {
         "run_id": "id PK; FK records.id",
         "project_id": "id FK projects NOT NULL",
-        "resource_kind": "varchar(16) NOT NULL DEFAULT 'run'; CHECK(resource_kind = 'run')",
+        "resource_kind": "varchar(20) NOT NULL DEFAULT 'run'; CHECK(resource_kind = 'run')",
         "created_at": "time NOT NULL",
         "status": "varchar(16): running|complete|failed|incomplete",
         "branchable": "boolean NOT NULL",

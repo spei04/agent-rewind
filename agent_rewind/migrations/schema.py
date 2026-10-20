@@ -15,6 +15,8 @@ BASELINE = "ar_0001_baseline"
 HEAD = "ar_0002_adoption"  # Explicit install/adopt preparation target, retained for compatibility.
 OWNERSHIP = "ar_0003_ownership"
 ARTIFACTS = "ar_0004_artifacts"
+PROJECTION = "ar_0005_run_index"
+PROJECTION_TABLES = {"run_index"}
 ARTIFACT_TABLES = {"artifact_objects", "artifact_refs"}
 OWNERSHIP_TABLES = {"organizations", "projects", "project_memberships", "resource_scopes"}
 SOURCE_COMMIT = "8f1ae757005c95c50a789e4fa0a10aae9b3c4024"
@@ -162,7 +164,9 @@ def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None
         "DEFERRABLE",
         "DEFERRED",
     }
-    for table in set(tables) & (set(TABLES) | METADATA_TABLES | OWNERSHIP_TABLES | ARTIFACT_TABLES):
+    for table in set(tables) & (
+        set(TABLES) | METADATA_TABLES | OWNERSHIP_TABLES | ARTIFACT_TABLES | PROJECTION_TABLES
+    ):
         size: int | None = connection.execute(
             text(
                 "SELECT length(CAST(sql AS BLOB)) FROM sqlite_master "
@@ -178,7 +182,7 @@ def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None
         if not isinstance(sql, str):
             raise MigrationRefused("schema_incompatible")
         restricted = forbidden if table in TABLES else forbidden - {"CHECK", "AS"}
-        if table in OWNERSHIP_TABLES | ARTIFACT_TABLES:
+        if table in OWNERSHIP_TABLES | ARTIFACT_TABLES | PROJECTION_TABLES:
             restricted -= {"REFERENCES", "DEFAULT"}
         if restricted.intersection(_sqlite_ddl_tokens(sql)):
             raise MigrationRefused("schema_incompatible")
@@ -397,8 +401,30 @@ def catalog(connection: Connection) -> dict[str, Any]:
                     table == "project_memberships"
                     and index[1] == "membership_active_legacy_default"
                 )
-                if (index[4] and not allowed_partial) or any(
-                    part[3] or part[4] != "BINARY" for part in parts
+                projection_index = (
+                    table == "run_index" and index[1] == "run_index_project_created_run"
+                )
+                exact_projection_order = (
+                    index[2] == 0
+                    and index[3] == "c"
+                    and index[4] == 0
+                    and [[part[2], part[3], part[4]] for part in parts if part[5]]
+                    == [
+                        ["project_id", 0, "BINARY"],
+                        ["created_at", 1, "BINARY"],
+                        ["run_id", 1, "BINARY"],
+                    ]
+                    and all(part[4] == "BINARY" for part in parts)
+                )
+                # SQLite reflection omits sort direction. Admit exactly this
+                # named key order; an all-ASC replacement must also refuse.
+                if (
+                    (projection_index and not exact_projection_order)
+                    or (index[4] and not allowed_partial)
+                    or (
+                        not projection_index
+                        and any(part[3] or part[4] != "BINARY" for part in parts)
+                    )
                 ):
                     raise MigrationRefused("schema_incompatible")
                 if index[3] == "u":
@@ -480,13 +506,16 @@ def verify_baseline(
     versioned: bool = False,
     ownership: bool = False,
     artifacts: bool = False,
+    projection: bool = False,
 ) -> None:
     actual = set(shape) - {"$postgres"}
     expected = set(TABLES) | (METADATA_TABLES if versioned else set())
-    if ownership or artifacts:
+    if ownership or artifacts or projection:
         expected |= OWNERSHIP_TABLES
-    if artifacts:
+    if artifacts or projection:
         expected |= ARTIFACT_TABLES
+    if projection:
+        expected |= PROJECTION_TABLES
     if actual != expected:
         raise MigrationRefused("schema_incompatible")
     for table in TABLES:
@@ -564,13 +593,15 @@ def verify_baseline(
 
 def installed_profile(name: str, revision: str = HEAD) -> dict[str, Any]:
     """The checked-in literal profile is authority, never a value stored in the target DB."""
-    if revision not in {HEAD, OWNERSHIP, ARTIFACTS}:
+    if revision not in {HEAD, OWNERSHIP, ARTIFACTS, PROJECTION}:
         raise MigrationRefused("unsupported_target_revision")
     profile_name = "postgresql16" if name == "postgresql" else "sqlite"
     if revision == OWNERSHIP:
         profile_name += "_ownership"
     elif revision == ARTIFACTS:
         profile_name += "_artifacts"
+    elif revision == PROJECTION:
+        profile_name += "_projection"
     profile_path = Path(__file__).parent / "profiles" / (profile_name + ".json")
     if not profile_path.is_file():
         raise MigrationRefused("schema_profile_unavailable")

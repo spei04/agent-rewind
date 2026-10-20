@@ -23,6 +23,7 @@ from .schema import (
     HEAD,
     METADATA_TABLES,
     OWNERSHIP,
+    PROJECTION,
     SOURCE_COMMIT,
     MigrationRefused,
     canonical,
@@ -216,15 +217,16 @@ def _installed(connection: Connection, shape: dict[str, Any]) -> dict[str, Any]:
     revisions: list[str] = list(
         connection.execute(text("SELECT version_num FROM alembic_version LIMIT 2")).scalars()
     )
-    if len(revisions) != 1 or revisions[0] not in {HEAD, OWNERSHIP, ARTIFACTS}:
+    if len(revisions) != 1 or revisions[0] not in {HEAD, OWNERSHIP, ARTIFACTS, PROJECTION}:
         raise MigrationRefused("schema_incompatible")
     revision = revisions[0]
     verify_baseline(
         shape,
         dialect(connection),
         versioned=True,
-        ownership=revision in {OWNERSHIP, ARTIFACTS},
-        artifacts=revision == ARTIFACTS,
+        ownership=revision in {OWNERSHIP, ARTIFACTS, PROJECTION},
+        artifacts=revision in {ARTIFACTS, PROJECTION},
+        projection=revision == PROJECTION,
     )
     verify_installed_profile(shape, dialect(connection), revision)
     rows = connection.execute(text("SELECT * FROM installation_adoptions LIMIT 2")).mappings().all()
@@ -280,10 +282,14 @@ def _installed(connection: Connection, shape: dict[str, Any]) -> dict[str, Any]:
     except (ValueError, TypeError, RecursionError):
         raise MigrationRefused("adoption_metadata_drift") from None
     row["_revision"] = revision
-    if revision in {OWNERSHIP, ARTIFACTS}:
+    if revision in {OWNERSHIP, ARTIFACTS, PROJECTION}:
         from .ownership_state import inspect_ownership_state
 
         inspect_ownership_state(connection, row)
+    if revision == PROJECTION:
+        from .projection_state import inspect_projection_state
+
+        inspect_projection_state(connection, row)
     return row
 
 
@@ -463,6 +469,10 @@ def adopt(
 
 
 def upgrade(engine: Engine, target: str = HEAD, *, timeout_seconds: int = 5) -> dict[str, Any]:
+    if target == PROJECTION:
+        from .projection_service import initialize_projection
+
+        return initialize_projection(engine, timeout_seconds=timeout_seconds)
     if target == ARTIFACTS:
         from .artifact_service import initialize_artifacts
 
