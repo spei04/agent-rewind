@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "contract_id": "C14",
+  "purpose": "staging-foundation",
+  "synthetic": true,
+  "installation_id": "rewind-example",
+  "project_id": "rewind-synthetic",
+  "region": "us-central1",
+  "organization_count": 1,
+  "operator_id": "example-operator",
+  "labels": {
+    "application": "agent-rewind",
+    "installation": "rewind-example",
+    "environment": "staging",
+    "owner": "example-operator",
+    "cost_center": "example-budget"
+  },
+  "identities": {
+    "api": {
+      "account_id": "rewind-example-api",
+      "capabilities": [
+        "database-dml",
+        "artifact-create-read",
+        "artifact-crypt",
+        "api-secrets-read"
+      ]
+    },
+    "worker": {
+      "account_id": "rewind-example-worker",
+      "capabilities": [
+        "database-dml",
+        "artifact-create-read",
+        "artifact-crypt",
+        "provider-secret-read",
+        "local-docker"
+      ]
+    },
+    "migrator": {
+      "account_id": "rewind-example-migrator",
+      "capabilities": [
+        "database-ddl"
+      ]
+    },
+    "provisioner": {
+      "account_id": "rewind-example-deployer",
+      "capabilities": [
+        "foundation-manage",
+        "scoped-iam-manage",
+        "state-read-write"
+      ]
+    }
+  },
+  "network": {
+    "network_name": "rewind-example-network",
+    "api_subnet": "10.60.0.0/24",
+    "worker_subnet": "10.60.1.0/24",
+    "proxy_subnet": "10.60.2.0/24",
+    "sql_service_range": "10.60.4.0/24",
+    "operator_cidrs": [
+      "10.61.0.0/24"
+    ],
+    "ingress": "internal-https",
+    "private_google_access": true,
+    "external_egress": "blocked",
+    "worker_public_ip": false,
+    "sandbox_network": "none",
+    "sandbox_metadata_access": false
+  },
+  "database": {
+    "instance_name": "rewind-example-db",
+    "engine": "POSTGRES_16",
+    "availability": "REGIONAL",
+    "public_ip": false,
+    "iam_authentication": true,
+    "connector_enforcement": "REQUIRED",
+    "tls": "required",
+    "backup_enabled": true,
+    "pitr_enabled": true,
+    "deletion_protection": true,
+    "vcpus": 2,
+    "memory_mib": 8192,
+    "disk_gib": 100,
+    "connection_capacity": 200,
+    "backup_retained_count": 7,
+    "pitr_days": 7
+  },
+  "storage": {
+    "artifact_bucket": "rewind-example-artifacts",
+    "state_bucket": "rewind-example-state",
+    "location": "us-central1",
+    "public_access_prevention": "enforced",
+    "uniform_bucket_access": true,
+    "state_versioning": true,
+    "automatic_artifact_deletion": false,
+    "retained_gib_envelope": 1350
+  },
+  "keys": {
+    "key_ring": "rewind-example-ring",
+    "artifact_key": "rewind-example-key",
+    "location": "us-central1",
+    "api_session_secret": "rewind-example-session",
+    "oidc_client_secret": "rewind-example-oidc",
+    "provider_secret": "rewind-example-provider",
+    "service_account_keys": "forbidden",
+    "secret_values": "external-not-in-config"
+  },
+  "capacity": {
+    "api_max_instances": 2,
+    "api_vcpus": 1,
+    "api_memory_mib": 1024,
+    "api_pool_size": 5,
+    "worker_max_hosts": 2,
+    "worker_machine_type": "e2-standard-4",
+    "worker_boot_disk_gib": 40,
+    "worker_processes_per_host": 4,
+    "worker_pool_size": 2,
+    "operator_connection_reserve": 10,
+    "monthly_class_a_operations": 31171000,
+    "monthly_class_b_operations": 14600000,
+    "api_processes_per_instance": 1,
+    "api_max_overflow": 10,
+    "worker_max_overflow": 10
+  },
+  "budget": {
+    "currency": "USD",
+    "monthly_limit_microusd": 2000000000,
+    "bootstrap_limit_microusd": 100000000,
+    "bootstrap_estimate_microusd": 50000000,
+    "owner_id": "example-budget-owner",
+    "alert_channel_id": "example-alert-channel",
+    "stop_owner_id": "example-stop-owner",
+    "alert_percentages": [
+      50,
+      80,
+      100
+    ],
+    "lines": [
+      {
+        "line": "api-compute",
+        "monthly_microusd": 100000000,
+        "basis": "synthetic",
+        "evidence_id": "example-estimate",
+        "owner_id": "example-budget-owner"
+      },
+      {
+        "line": "worker-compute-disks",
+        "monthly_microusd": 100000000,
+        "basis": "synthetic",
+        "evidence_id": "example-estimate",
+        "owner_id": "example-budget-owner"
+      },
+      {
+        "line": "sql-compute",
+        "monthly_microusd": 100000000,
+        "basis": "synthetic",
+        "evidence_id": "example-estimate",
+        "owner_id": "example-budget-owner"
+      },
+      {
+        "line": "sql-storage-backups",
+        "monthly_microusd": 100000000,
+        "basis": "synthetic",
+        "evidence_id": "example-estimate",
+        "owner_id": "example-budget-owner"
+      },
+      {
+        "line": "artifact-bytes",
+        "monthly_microusd": 100000000,
+        "basis": "synthetic",
+        "evidence_id": "example-estimate",
+        "owner_id": "example-budget-owner"
+      },
+      {
+        "line": "artifact-operations",
+        "monthly_microusd": 100000000,
+        "basis": "synthetic",
+        "evidence_id": "example-estimate",
+        "owner_id": "example-budget-owner"
+      },
+      {
+        "line": "network",
+        "monthly_microusd": 100000000,
+        "basis": "synthetic",
+        "evidence_id": "example-estimate",
+        "owner_id": "example-budget-owner"
+      },
+      {
+        "line": "keys-secrets",
+        "monthly_microusd": 100000000,
+        "basis": "synthetic",
+        "evidence_id": "example-estimate",
+        "owner_id": "example-budget-owner"
+      },
+      {
+        "line": "observability",
+        "monthly_microusd": 100000000,
+        "basis": "synthetic",
+        "evidence_id": "example-estimate",
+        "owner_id": "example-budget-owner"
+      },
+      {
+        "line": "state-support-contingency",
+        "monthly_microusd": 100000000,
+        "basis": "synthetic",
+        "evidence_id": "example-estimate",
+        "owner_id": "example-budget-owner"
+      }
+    ]
+  },
+  "approval_record": null,
+  "staging_stop_at": "2026-11-20T00:00:00Z",
+  "logging_retention_days": 30
+}
