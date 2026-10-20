@@ -13,7 +13,7 @@ import test_migration_recovery_postgres as recovery_tests
 import test_migrations_postgres as migrations
 from cryptography.fernet import Fernet
 from legacy_fixture import FIXTURE_ROOT, read_manifest, sha256
-from postgres_control import wait_for_database_drain
+from postgres_control import child_refusal_summary, wait_for_database_drain
 from sqlalchemy import text
 from test_artifact_postgres import prepare_postgres
 from test_migration_recovery_postgres import _dump, _restore_command, _run
@@ -162,22 +162,75 @@ def test_postgres_projection_actual_process_death_resumes_exactly(projected_lega
     before = snapshot(pg["owner"])
     drain(pg)
     child = """
-import os,signal
+import importlib.util, json, os, signal
 from pathlib import Path
 from cryptography.fernet import Fernet
-from sqlalchemy import create_engine
-from agent_rewind.migrations import projection_service
+from sqlalchemy import create_engine, event
+from sqlalchemy.pool import NullPool
+from agent_rewind.migrations import projection_service, service
+from agent_rewind.migrations.schema import MigrationRefused
 from agent_rewind.projection_evidence import FrozenLegacySource
-engine=create_engine(os.environ["SYNTHETIC_PROJECTION_DSN"])
-reader=FrozenLegacySource(Path(os.environ["SYNTHETIC_OBJECT_ROOT"]),Fernet(os.environ["SYNTHETIC_OBJECT_KEY"].encode()))
-if os.environ["AFTER_COMMIT"]=="0":
-    original=projection_service._write_progress
-    def interrupted(*args,**kwargs):
-        original(*args,**kwargs)
-        os.kill(os.getpid(),signal.SIGKILL)
-    projection_service._write_progress=interrupted
-projection_service.backfill_run_index(engine,reader,batch_size=1)
-os.kill(os.getpid(),signal.SIGKILL)
+
+spec = importlib.util.spec_from_file_location(
+    "synthetic_observer", os.environ["SYNTHETIC_OBSERVER_PATH"]
+)
+observer = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(observer)
+engine = create_engine(os.environ["SYNTHETIC_PROJECTION_DSN"])
+control = create_engine(
+    os.environ["SYNTHETIC_PROJECTION_CONTROL_DSN"], isolation_level="AUTOCOMMIT", poolclass=NullPool
+)
+checkouts = []
+
+
+def checkout(raw, record, proxy):
+    if not checkouts:
+        checkouts.append(raw)
+    elif len(checkouts) == 1:
+        checkouts.append(raw is checkouts[0])
+    elif raw is not checkouts[0]:
+        checkouts[1] = False
+
+
+event.listen(engine, "checkout", checkout)
+original_exclusion = service._postgres_exclusion
+
+
+def observed_exclusion(connection, tables):
+    observer.observe_exclusion_failure(
+        original_exclusion, connection, tables, control=control, database=engine.url.database
+    )
+
+
+service._postgres_exclusion = observed_exclusion
+reader = FrozenLegacySource(
+    Path(os.environ["SYNTHETIC_OBJECT_ROOT"]), Fernet(os.environ["SYNTHETIC_OBJECT_KEY"].encode())
+)
+if os.environ["AFTER_COMMIT"] == "0":
+    original = projection_service._write_progress
+
+    def interrupted(*args, **kwargs):
+        original(*args, **kwargs)
+        os.kill(os.getpid(), signal.SIGKILL)
+
+    projection_service._write_progress = interrupted
+try:
+    projection_service.backfill_run_index(engine, reader, batch_size=1)
+except MigrationRefused as error:
+    print(
+        json.dumps(
+            {
+                "failure": error.code,
+                "notes": getattr(error, "__notes__", []),
+                "same_physical_connection": checkouts[1] if len(checkouts) > 1 else None,
+            }
+        ),
+        flush=True,
+    )
+    raise SystemExit(1) from None
+finally:
+    control.dispose()
+os.kill(os.getpid(), signal.SIGKILL)
 """
     result = subprocess.run(
         [sys.executable, "-c", child],
@@ -187,12 +240,24 @@ os.kill(os.getpid(),signal.SIGKILL)
             **os.environ,
             "PYTHONDONTWRITEBYTECODE": "1",
             "SYNTHETIC_PROJECTION_DSN": pg["owner"].url.render_as_string(hide_password=False),
+            "SYNTHETIC_PROJECTION_CONTROL_DSN": pg["control"].url.render_as_string(
+                hide_password=False
+            ),
+            "SYNTHETIC_OBSERVER_PATH": str(
+                Path(__file__).with_name("postgres_control.py").resolve()
+            ),
             "SYNTHETIC_OBJECT_ROOT": str(FIXTURE_ROOT),
             "SYNTHETIC_OBJECT_KEY": read_manifest()["synthetic_fernet_key"],
             "AFTER_COMMIT": str(int(after_commit)),
         },
     )
-    assert result.returncode == -signal.SIGKILL, "Child missed intended synthetic boundary"
+    if result.returncode != -signal.SIGKILL:
+        # Avoid assertion rewriting of CompletedProcess, whose repr contains raw
+        # stderr. Only the bounded parsed diagnostic may enter the failure report.
+        pytest.fail(
+            "Child missed intended synthetic boundary; " + child_refusal_summary(result.stdout),
+            pytrace=False,
+        )
     drain(pg)
     current = snapshot(pg["owner"])
     if after_commit:
@@ -294,6 +359,11 @@ def test_postgres_projection_checkpoint_restores_and_resumes(
     assert backfill_run_index(recovery["target"], source())["projection_status"] == "complete"
     guarded = runtime_schema_compatibility(recovery["target"])
     assert (guarded.status, guarded.code) == ("incompatible", "migration_only")
+    completed = snapshot(recovery["target"])
+    assert completed[0][:1] == before[0]
+    assert len(completed[0]) == 2 and [row["published_seq"] for row in completed[0]] == [1, 2]
+    assert completed[1][0]["status"] == "complete" and completed[1][0]["rows_verified"] == 2
+    assert len(completed[2]) == 1 and completed[2][0][1] == 2
     preserved(recovery["target"])
 
 

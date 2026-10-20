@@ -156,3 +156,71 @@ def _control_refusal_note(
     except Exception:
         # Never replace the original guard exception or expose diagnostic errors.
         return label + "unavailable"
+
+
+def child_refusal_summary(output: bytes) -> str:
+    """Render only bounded fixed child refusal fields; never forward stdout or stderr."""
+    unavailable = "child_refusal_observation=unavailable"
+    if not isinstance(output, bytes) or len(output) > 8192:
+        return unavailable
+    try:
+        value = json.loads(output)
+        if not isinstance(value, dict):
+            return unavailable
+        failure = (
+            "writers_not_drained" if value.get("failure") == "writers_not_drained" else "other"
+        )
+        reuse = value.get("same_physical_connection")
+        reuse = reuse if type(reuse) is bool else None
+        notes = value.get("notes")
+        if not isinstance(notes, list):
+            return unavailable
+        safe = []
+        allowed = {
+            "post_refusal_backend_observation",
+            "post_refusal_control_backend_observation",
+        }
+        for note in notes[:2]:
+            if not isinstance(note, str) or len(note) > 4096:
+                continue
+            label, separator, payload = note.partition("=")
+            if not separator or label not in allowed:
+                continue
+            if payload == "unavailable":
+                safe.append(label + "=unavailable")
+                continue
+            observed = json.loads(payload)
+            if (
+                not isinstance(observed, dict)
+                or not isinstance(observed.get("rows"), list)
+                or type(observed.get("more_than_eight")) is not bool
+            ):
+                return unavailable
+            rows = []
+            for row in observed["rows"][:8]:
+                if not isinstance(row, dict):
+                    return unavailable
+                rows.append(
+                    {
+                        "backend_type": _safe_backend_value(
+                            row.get("backend_type"), _BACKEND_TYPES
+                        ),
+                        "state": _safe_backend_value(row.get("state"), _BACKEND_STATES),
+                    }
+                )
+            safe.append(
+                label
+                + "="
+                + json.dumps(
+                    {"rows": rows, "more_than_eight": observed["more_than_eight"]},
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+            )
+        return "child_refusal_observation=" + json.dumps(
+            {"failure": failure, "same_physical_connection": reuse, "notes": safe},
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+    except (ValueError, TypeError, RecursionError):
+        return unavailable
