@@ -6,7 +6,7 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
-from sqlalchemy import column, func, literal, select, table, text
+from sqlalchemy import Text, cast, column, func, literal, select, table
 from sqlalchemy.engine import Connection
 
 from ..artifact_metadata import digest_value, identifier
@@ -68,15 +68,24 @@ def inspect_projection_state(connection: Connection, row: dict[str, Any]) -> Pro
             and 0 < sizes[0][1] <= 1024
         ):
             raise ValueError
-        parameters = {"revision": PROJECTION, "phase": PHASE}
         entries = (
             connection.execute(
-                text(
-                    "SELECT source_digest,CAST(cursor AS TEXT) AS cursor,"
-                    "rows_verified,status,updated_at "
-                    "FROM migration_progress WHERE revision=:revision AND phase=:phase LIMIT 2"
-                ),
-                parameters,
+                select(
+                    progress.c.source_digest,
+                    cast(progress.c.cursor, Text).label("cursor"),
+                    progress.c.rows_verified,
+                    progress.c.status,
+                    progress.c.updated_at,
+                )
+                .where(
+                    progress.c.revision == PROJECTION,
+                    progress.c.phase == PHASE,
+                    cursor_size > 0,
+                    cursor_size <= MAX_CURSOR_BYTES,
+                    size > 0,
+                    size <= 1024,
+                )
+                .limit(2)
             )
             .mappings()
             .all()

@@ -230,7 +230,7 @@ def test_progress_non_cursor_cells_bounded_before_materialization(legacy, field)
 
     def before(connection, cursor, statement, parameters, context, executemany):
         assert not " ".join(statement.lower().split()).startswith(
-            "select source_digest,cast(cursor"
+            "select migration_progress.source_digest,"
         )
 
     event.listen(engine, "before_cursor_execute", before)

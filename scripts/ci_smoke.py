@@ -87,6 +87,7 @@ def publication_smoke(engine: Engine, root: Path) -> None:
     from agent_rewind.artifact_metadata import ArtifactError
     from agent_rewind.artifact_publication import RunPublisher, UnavailableLiveWriter
     from agent_rewind.artifact_storage import LocalArtifactStorage
+    from agent_rewind.projection_publication import ProjectionPublicationWriter
     from agent_rewind.publication_journal import PublicationJournal
 
     journal_root = root / "publication-journal"
@@ -102,7 +103,7 @@ def publication_smoke(engine: Engine, root: Path) -> None:
         engine,
         LocalArtifactStorage(root, Fernet(Fernet.generate_key()), plaintext_limit=4096),
         journal,
-        writer=UnavailableLiveWriter(),
+        writer=ProjectionPublicationWriter(UnavailableLiveWriter()),
     )
     try:
         publisher.prepare(

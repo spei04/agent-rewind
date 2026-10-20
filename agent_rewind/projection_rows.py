@@ -107,20 +107,16 @@ def matching_projection(connection: Connection, value: RunProjection) -> int | N
     return int(rows[0]["published_seq"])
 
 
-def insert_projection(connection: Connection, value: RunProjection) -> int:
-    """Allocate under the project lock held through caller commit; never update existing rows.
-
-    This primitive neither verifies artifact bytes nor grants publication authority.
-    The offline migrator or required same-connection live fence must establish that.
-    """
-    validate_projection(value)
+def lock_project_sequence(connection: Connection, project_id: str) -> int:
+    """Take the project allocation lock before any project SHARE lock; hold through commit."""
+    identifier(project_id)
     raw, dialect = connection.connection.driver_connection, connection.dialect.name
     if not connection.in_transaction() or not (
         (dialect == "postgresql" and getattr(raw, "autocommit", None) is False)
         or (
             dialect == "sqlite"
             and getattr(raw, "isolation_level", None) is not None
-            and getattr(raw, "autocommit", False) is not True
+            and getattr(raw, "autocommit", -1) == -1
         )
     ):
         raise ArtifactError("projection_transaction_required")
@@ -129,14 +125,25 @@ def insert_projection(connection: Connection, value: RunProjection) -> int:
             raise ArtifactError("projection_constraints_required")
         connection.execute(
             text("UPDATE projects SET run_sequence=run_sequence WHERE id=:id"),
-            {"id": value.project_id},
+            {"id": project_id},
         )
     query = "SELECT run_sequence FROM projects WHERE id=:id"
     if dialect == "postgresql":
         query += " FOR UPDATE"
-    counter: Any = connection.execute(text(query), {"id": value.project_id}).scalar_one_or_none()
+    counter: Any = connection.execute(text(query), {"id": project_id}).scalar_one_or_none()
     if type(counter) is not int or not 0 <= counter <= MAX_SEQUENCE:
         raise ArtifactError("projection_sequence_invalid")
+    return counter
+
+
+def insert_projection(connection: Connection, value: RunProjection) -> int:
+    """Allocate under the project lock held through caller commit; never update existing rows.
+
+    This primitive neither verifies artifact bytes nor grants publication authority.
+    The offline migrator or required same-connection live fence must establish that.
+    """
+    validate_projection(value)
+    counter = lock_project_sequence(connection, value.project_id)
     if not connection.execute(
         text(
             "SELECT 1 FROM records r JOIN resource_scopes s "
@@ -162,7 +169,11 @@ def insert_projection(connection: Connection, value: RunProjection) -> int:
     if counter == MAX_SEQUENCE:
         raise ArtifactError("projection_sequence_invalid")
     sequence = counter + 1
-    parameters = {**projection_identity(value), "sequence": sequence}
+    parameters = {
+        **projection_identity(value),
+        "created_at": value.created_at.astimezone(UTC).isoformat(),
+        "sequence": sequence,
+    }
     statement = (
         "INSERT INTO run_index "
         "(run_id,project_id,resource_kind,created_at,status,branchable,parent_id,"
@@ -170,7 +181,7 @@ def insert_projection(connection: Connection, value: RunProjection) -> int:
         "(:run_id,:project_id,'run',:created_at,:status,:branchable,:parent_id,"
         ":event_head,:sequence,:projection_reason)"
     )
-    if dialect == "postgresql":
+    if connection.dialect.name == "postgresql":
         statement = statement.replace(
             ":created_at", "CAST(:created_at AS TIMESTAMP WITH TIME ZONE)"
         )
