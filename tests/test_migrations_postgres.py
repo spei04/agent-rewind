@@ -34,7 +34,7 @@ def pg(monkeypatch):
     exclusion = service._postgres_exclusion
 
     def observed_exclusion(connection, tables):
-        observe_exclusion_failure(exclusion, connection, tables)
+        observe_exclusion_failure(exclusion, connection, tables, control=admin, database=token)
 
     monkeypatch.setattr(service, "_postgres_exclusion", observed_exclusion)
     admin = create_engine(POSTGRES, isolation_level="AUTOCOMMIT", poolclass=NullPool)

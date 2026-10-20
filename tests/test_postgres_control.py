@@ -178,3 +178,127 @@ def test_success_and_other_refusals_do_not_observe_or_retry(refusal):
         assert not hasattr(original, "__notes__")
     assert calls == [(connection, tables)]
     assert connection.statements == []
+
+
+class PrivilegedObservation:
+    url = SimpleNamespace(database="control")
+
+    def __init__(self, rows=(), fail_at=None):
+        self.rows, self.fail_at = rows, fail_at
+        self.connects, self.statements, self.limits = 0, [], []
+        self.closed = False
+
+    def connect(self):
+        self.connects += 1
+        if self.fail_at == "connect":
+            raise PermissionError("PRIVATE control connection")
+        return self
+
+    def execution_options(self, **options):
+        assert options == {"isolation_level": "AUTOCOMMIT"}
+        return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.closed = True
+
+    def exec_driver_sql(self, statement):
+        self.statements.append(statement)
+        assert statement in {
+            "SET statement_timeout = '1s'",
+            "SELECT pg_catalog.pg_stat_clear_snapshot()",
+        }
+        if self.fail_at == "setup":
+            raise PermissionError("PRIVATE control permission")
+        return SimpleNamespace(close=lambda: None)
+
+    def execute(self, statement, parameters):
+        self.statements.append(str(statement))
+        assert str(statement) == (
+            "SELECT backend_type,state FROM pg_catalog.pg_stat_activity "
+            "WHERE datname=:database AND pid<>:refused_pid LIMIT 9"
+        )
+        assert parameters == {"database": "target", "refused_pid": 12345}
+        if self.fail_at == "query":
+            raise PermissionError("PRIVATE control query")
+        return SimpleNamespace(fetchmany=self.fetchmany)
+
+    def fetchmany(self, limit):
+        self.limits.append(limit)
+        return self.rows[:limit]
+
+
+class IdentifiedRefusalConnection(RefusalConnection):
+    def exec_driver_sql(self, statement):
+        if statement == "SELECT pg_catalog.pg_backend_pid()":
+            self.statements.append(statement)
+            return SimpleNamespace(scalar_one=lambda: 12345)
+        return super().exec_driver_sql(statement)
+
+
+def test_control_observation_is_later_fresh_bounded_and_never_emits_identity():
+    connection = IdentifiedRefusalConnection([(None, None)])
+    control = PrivilegedObservation(
+        [("autovacuum worker", "active"), (None, None), ("PRIVATE type", "PRIVATE state")]
+        + [("client backend", "idle")] * 7
+    )
+    original, calls = MigrationRefused("writers_not_drained"), []
+    with pytest.raises(MigrationRefused) as caught:
+        observe_exclusion_failure(
+            refusal_check(original, calls), connection, [], control=control, database="target"
+        )
+    assert caught.value is original and len(calls) == 1
+    assert control.connects == 1 and control.closed and control.limits == [9]
+    first, second = original.__notes__
+    assert json.loads(first.split("=", 1)[1])["rows"] == [{"backend_type": None, "state": None}]
+    label, payload = second.split("=", 1)
+    assert label == "post_refusal_control_backend_observation"
+    data = json.loads(payload)
+    assert data["more_than_eight"] and len(data["rows"]) == 8
+    assert data["rows"][:3] == [
+        {"backend_type": "autovacuum worker", "state": "active"},
+        {"backend_type": None, "state": None},
+        {"backend_type": "other", "state": "other"},
+    ]
+    assert all(set(row) == {"backend_type", "state"} for row in data["rows"])
+    rendered = "".join(traceback.format_exception(caught.value))
+    assert all(secret not in rendered for secret in ("PRIVATE", "12345", "target", "SELECT"))
+
+
+@pytest.mark.parametrize("failure", ["connect", "setup", "query", "malformed_row", "same_database"])
+def test_control_diagnostic_failure_preserves_guard_and_safe_note(failure):
+    connection = IdentifiedRefusalConnection()
+    control = PrivilegedObservation([()] if failure == "malformed_row" else [], fail_at=failure)
+    if failure == "same_database":
+        control.url = SimpleNamespace(database="target")
+    original, calls = MigrationRefused("writers_not_drained"), []
+    with pytest.raises(MigrationRefused) as caught:
+        observe_exclusion_failure(
+            refusal_check(original, calls), connection, [], control=control, database="target"
+        )
+    assert caught.value is original and len(calls) == 1
+    assert original.__notes__[-1] == "post_refusal_control_backend_observation=unavailable"
+    assert "PRIVATE" not in "".join(traceback.format_exception(caught.value))
+    assert control.connects == (0 if failure == "same_database" else 1)
+
+
+@pytest.mark.parametrize("refusal", [None, "writer_privileges_present"])
+def test_control_is_unused_on_success_or_other_refusal(refusal):
+    connection, control, calls = IdentifiedRefusalConnection(), PrivilegedObservation(), []
+    original = MigrationRefused(refusal) if refusal else None
+
+    def check(actual, tables):
+        calls.append(actual)
+        if original:
+            raise original
+
+    if original:
+        with pytest.raises(MigrationRefused) as caught:
+            observe_exclusion_failure(check, connection, [], control=control, database="target")
+        assert caught.value is original and not hasattr(original, "__notes__")
+    else:
+        observe_exclusion_failure(check, connection, [], control=control, database="target")
+    assert calls == [connection]
+    assert control.connects == 0 and connection.statements == []

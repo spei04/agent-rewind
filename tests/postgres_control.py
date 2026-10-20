@@ -60,7 +60,12 @@ def _safe_backend_value(value: object, allowed: frozenset[str]) -> str | None:
 
 
 def observe_exclusion_failure(
-    check: Callable[[Connection, list[str]], None], connection: Connection, tables: list[str]
+    check: Callable[[Connection, list[str]], None],
+    connection: Connection,
+    tables: list[str],
+    *,
+    control: Engine | None = None,
+    database: str | None = None,
 ) -> None:
     """Add bounded synthetic-test evidence without changing a migration decision.
 
@@ -100,4 +105,53 @@ def observe_exclusion_failure(
                 # the production refusal, including an interrupted transaction.
                 note = "post_refusal_backend_observation=unavailable"
             refused.add_note(note)
+            if control is not None:
+                refused.add_note(_control_refusal_note(control, database, connection))
         raise
+
+
+def _control_refusal_note(
+    control: Engine, database: str | None, refused_connection: Connection
+) -> str:
+    """A second, later test observation with control visibility, never the refusal snapshot."""
+    label = "post_refusal_control_backend_observation="
+    try:
+        if (
+            not isinstance(database, str)
+            or not 1 <= len(database) <= 63
+            or control.url.database == database
+        ):
+            raise ValueError("Invalid synthetic control observation")
+        # Used only to exclude the already-refused migration client, never emitted.
+        refused_pid = refused_connection.exec_driver_sql(
+            "SELECT pg_catalog.pg_backend_pid()"
+        ).scalar_one()
+        if type(refused_pid) is not int or refused_pid <= 0:
+            raise ValueError("Invalid synthetic migration backend")
+        with control.connect().execution_options(isolation_level="AUTOCOMMIT") as observer:
+            observer.exec_driver_sql("SET statement_timeout = '1s'")
+            observer.exec_driver_sql("SELECT pg_catalog.pg_stat_clear_snapshot()").close()
+            rows = observer.execute(
+                text(
+                    "SELECT backend_type,state FROM pg_catalog.pg_stat_activity "
+                    "WHERE datname=:database AND pid<>:refused_pid LIMIT 9"
+                ),
+                {"database": database, "refused_pid": refused_pid},
+            ).fetchmany(9)
+            return label + json.dumps(
+                {
+                    "rows": [
+                        {
+                            "backend_type": _safe_backend_value(row[0], _BACKEND_TYPES),
+                            "state": _safe_backend_value(row[1], _BACKEND_STATES),
+                        }
+                        for row in rows[:8]
+                    ],
+                    "more_than_eight": len(rows) > 8,
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+    except Exception:
+        # Never replace the original guard exception or expose diagnostic errors.
+        return label + "unavailable"
