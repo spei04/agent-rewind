@@ -20,7 +20,7 @@ FK, unique `(project_id,run_id)`, same-project parent FK and unique
 The descending `(project_id,created_at,run_id)` index supports the later listing
 slice; no cursor or route implementation is included here.
 
-Explicit `initialize_run_index(engine)` validates completed ownership/current
+Explicit `initialize_projection(engine)` validates completed ownership/current
 catalog and installs empty projection metadata. It does not read artifacts or
 require decryption/provider credentials. The existing install/adopt target stays
 ar_0002. All supported revisions remain `migration_only`; old release profiles
@@ -132,8 +132,10 @@ projection replay is supported; mutable repair is a later explicit integration.
 
 Source producers must acquire affected owning job/run locks in consistent order,
 then revalidate before any event/source/ancestry/by-job mutation. Complete source
-graphs remain immutable. After source locks, allocate a new sequence by locking
-and incrementing that project's counter in the insertion transaction and hold it
+graphs remain immutable. The projection publication wrapper acquires the target
+job/fence lock, then the project allocation UPDATE lock before the coordinator's
+grant/source SHARE locks, avoiding a same-project shared-lock upgrade. It
+increments that counter only with the initial row insert and holds the lock
 through commit. No artifact/journal/network I/O occurs under this lock. Do not use
 preallocated database sequences. The same-project writer that began later cannot
 commit a low pre-watermark sequence after a higher committed one; rollback leaves
@@ -181,3 +183,20 @@ decoded at a time; that representation and compact prepared metadata count towar
 the combined 32MiB canonical-metadata bound. This is not a measured Python RSS
 claim. Additive identity cells use dialect-aware SQL byte lengths before fetch,
 including SQLite text containing embedded NUL characters.
+
+## Explicit operator commands
+
+`rewind migrate upgrade --target ar_0005_run_index` installs metadata and freezes
+the scoped SQL cohort. It needs only the migration DSN. The following operation
+requires a separately frozen legacy byte view and its local encryption key:
+
+```sh
+rewind migrate projection-backfill --source-root /private/frozen-run-source --batch-size 1000
+```
+
+The source root contains the retained `objects/<digest>` files. The command reads
+`REWIND_ENCRYPTION_KEY`; PostgreSQL mutations require the separate
+`REWIND_MIGRATION_DATABASE_URL`. No model, provider or identity-provider credential
+is needed. Stop legacy writers and preserve the same immutable SQL/byte cohort
+through every batch. Missing or invalid evidence refuses the entire batch.
+Initialization and completion keep API/worker customer admission disabled.
