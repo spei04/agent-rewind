@@ -447,7 +447,7 @@ M0 / P0 · 3 PRs · 2.5 engineering days · Verified · [Tracking issue #4](http
 
 ### AR-005 — Upgrade stored history safely without changing evidence identity
 
-M1 / P0 · 3 PRs · 6 engineering days · In progress · [Tracking issue #5](https://github.com/spei04/agent-rewind/issues/5)
+M1 / P0 · 3 PRs · 6 engineering days · Verified · [Tracking issue #5](https://github.com/spei04/agent-rewind/issues/5)
 
 <a id="ar-005-a"></a>
 
@@ -498,7 +498,7 @@ M1 / P0 · 3 PRs · 6 engineering days · In progress · [Tracking issue #5](htt
 - **Effort / confidence:** 1.5 engineering days; planning range 1.5–2.2; medium confidence.
 - **Responsible role:** BE; required reviewers: TL, QE. Assigned contributors: C (guard), A (recovery), B (independent review).
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** In progress; [issue #37](https://github.com/spei04/agent-rewind/issues/37). AR-005-B integrated at 385e5ecf before assignment. C owns runtime guards; A owns independent synthetic PostgreSQL backup/restore work; B reviews the coherent integration.
+- **Progress:** Verified; [PR #39](https://github.com/spei04/agent-rewind/pull/39), merge 0737c7b, exact reviewed 94dd9cb and [run 39350413566](https://github.com/spei04/agent-rewind/actions/runs/39350413566) passed 758 tests per Python version, 58 PostgreSQL cases and 3 gVisor tests. [Evidence and limits](delivery/GUARD_RECOVERY_EVIDENCE_2026-10-20.md). Customer admission remains disabled.
 
 <a id="ar-006"></a>
 
@@ -544,7 +544,7 @@ M1 / P0 · 2 PRs · 5 engineering days · Not started · [Tracking issue #6](htt
 
 ### AR-007 — Prevent cross-project access through both legacy and new paths
 
-M1 / P0 · 3 PRs · 5.5 engineering days · Not started · [Tracking issue #7](https://github.com/spei04/agent-rewind/issues/7)
+M1 / P0 · 3 PRs · 5.5 engineering days · In progress · [Tracking issue #7](https://github.com/spei04/agent-rewind/issues/7)
 
 <a id="ar-007-a"></a>
 
@@ -559,9 +559,9 @@ M1 / P0 · 3 PRs · 5.5 engineering days · Not started · [Tracking issue #7](h
 - **Required automated tests:** Composite FK, ambiguous mapping, revoked membership and admin boundary tests.
 - **Security and reliability:** Organization admin derived from identity; never request role fields.
 - **Effort / confidence:** 1.5 engineering days; planning range 1.5–2.2; medium confidence.
-- **Responsible role:** TL; required reviewers: BE, QE. Named assignee pending staffing.
+- **Responsible role:** TL; required reviewers: BE, QE. Assigned contributor: Engineer C — ownership schema/backfill; Engineer B — independent review.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** In progress; [issue #40](https://github.com/spei04/agent-rewind/issues/40), assigned after AR-005-C merge 0737c7b. C owns ownership schema/backfill and C05; B reviews. No customer activation.
 
 <a id="ar-007-b"></a>
 
@@ -753,9 +753,9 @@ M1 / P0 · 3 PRs · 5 engineering days · In progress · [Tracking issue #11](ht
 - **Required automated tests:** M1-022/023 secret canaries, malformed exceptions and dependency outage.
 - **Security and reliability:** Readiness prevents unsafe admission; liveness does not disclose dependency secrets.
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
-- **Responsible role:** PL; required reviewers: SEC, QE. Named assignee pending staffing.
+- **Responsible role:** PL; required reviewers: SEC, QE. Assigned contributor: Engineer A — safe errors/readiness; Engineer B — independent review.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** In progress; [issue #41](https://github.com/spei04/agent-rewind/issues/41), assigned after AR-005-C merge 0737c7b. A owns safe errors/readiness; B reviews. C retains revision/profile ownership.
 
 <a id="ar-011-c"></a>
 
@@ -3097,3 +3097,5 @@ G0 execution checkpoint, 2026-10-19: AR-004-B/C verified; ARCH0/G0 satisfied for
 2026-10-20 migration integration: AR-005-B verified in PR #35 at 385e5ecf; AR-005-C starts only after that merge. C runtime guards and A recovery work own disjoint files in reused checkouts; B independently reviews both for one coherent integration. PostgreSQL backup/restore evidence remains pending, distinct from the already executed transaction/process-death rollback tests. Parent #5 remains open; G1 and customer admission are not accepted.
 
 AR-005-C acceptance clarification: the reviewed C04 adoption profile is migration-only. Demonstrate supported inspection-reader compatibility and real backup restoration; do not label an old unguarded application a customer-serving rollback target. A future active-release rollback pair needs its own approved compatibility profile and deployment evidence.
+
+2026-10-20 guard/recovery integration: AR-005-C and parent AR-005 verified in PR #39, merge 0737c7b, after exact 94dd9cb internal review and run 39350413566 (758 tests per Python version; 58 PostgreSQL and 3 gVisor cases). [Acceptance evidence](delivery/GUARD_RECOVERY_EVIDENCE_2026-10-20.md) distinguishes actual backup/restore from transactions, narrowly documented cast equivalence and customer-serving rollback refusal. C begins AR-007-A (#40); A begins AR-011-B (#41); B reviews both, using existing checkouts. Their exact prerequisites are now satisfied. No other gate or task status is promoted.

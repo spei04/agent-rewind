@@ -58,7 +58,7 @@
         "AR-005-B",
         "AR-005-C"
       ],
-      "status": "In progress"
+      "status": "Verified"
     },
     "AR-006": {
       "milestone": "M1",
@@ -81,7 +81,7 @@
         "AR-007-B",
         "AR-007-C"
       ],
-      "status": "Not started"
+      "status": "In progress"
     },
     "AR-008": {
       "milestone": "M1",
@@ -1092,7 +1092,7 @@
       "tests": "Least-privilege DB startup, future/multiple revisions, upgrade failure, inspection-only compatibility and actual PostgreSQL backup/restore refusal/recovery tests",
       "security_reliability": "Fail closed when schema cannot be read; retain rollback evidence",
       "out_of_scope": "No HA rolling upgrade claim",
-      "status": "In progress",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.5,
@@ -1105,7 +1105,14 @@
       "pull_request_boundary": "Add read-only release-profile revision guards before API admission and worker claims; refuse unknown/partial/future or incomplete state without DDL, and document compatible application rollback versus required backup restore. Confirm all supported CLI initialization now uses AR-005-B versioned migrations. No HA rolling upgrade claim.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/37",
-      "assigned_to": "Engineer C \u2014 runtime guard; Engineer A \u2014 independent recovery workstream; Engineer B \u2014 review"
+      "assigned_to": "Engineer C \u2014 runtime guard; Engineer A \u2014 independent recovery workstream; Engineer B \u2014 review",
+      "evidence": {
+        "commit": "0737c7bd236422577457e3dff52da02266d957cf",
+        "reviewed_commit": "94dd9cb339f1e68e35e70847ca0539ecb0fafb29",
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/39",
+        "checks": "Independent A/B/C scope review and B final integration acceptance; hosted run 39350413566 passed 758 tests per Python version, 58 real PostgreSQL cases including 4 actual backup/restore scenarios,3 gVisor tests, security/package/CI gate. Migration-only; no customer activation or hard network deadline claim.",
+        "record": "docs/delivery/GUARD_RECOVERY_EVIDENCE_2026-10-20.md"
+      }
     },
     {
       "id": "AR-006-A",
@@ -1199,7 +1206,7 @@
       "tests": "Composite FK, ambiguous mapping, revoked membership and admin boundary tests",
       "security_reliability": "Organization admin derived from identity; never request role fields",
       "out_of_scope": "No shared multi-tenant SaaS or SCIM",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.5,
@@ -1210,7 +1217,10 @@
         "QE"
       ],
       "pull_request_boundary": "Implement organization/project/membership/resource scope tables and explicit legacy ownership backfill. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/40",
+      "assigned_to": "Engineer C \u2014 ownership schema/backfill; Engineer B \u2014 review",
+      "entry_evidence": "Assigned only after accepted AR-005-C merge 0737c7bd236422577457e3dff52da02266d957cf"
     },
     {
       "id": "AR-007-B",
@@ -1554,7 +1564,7 @@
       "tests": "M1-022/023 secret canaries, malformed exceptions and dependency outage",
       "security_reliability": "Readiness prevents unsafe admission; liveness does not disclose dependency secrets",
       "out_of_scope": "No broad observability platform deployment",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         2.0,
@@ -1565,7 +1575,10 @@
         "QE"
       ],
       "pull_request_boundary": "Implement redacted boundary handlers and bounded DB/store/schema readiness. Own the installation-only sentinel provisioning command and bounded byte-read primitive: 4096-byte plaintext, capped ciphertext, one-second deadline, one in-flight check and five-second positive cache. AR-009-A consumes the primitive through a separate scoped interface. No broad observability platform deployment.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/41",
+      "assigned_to": "Engineer A \u2014 safe errors/readiness; Engineer B \u2014 review",
+      "entry_evidence": "Assigned only after accepted AR-005-C merge 0737c7bd236422577457e3dff52da02266d957cf"
     },
     {
       "id": "AR-011-C",
@@ -6740,7 +6753,7 @@
       "G7"
     ],
     "critical_path_excludes_external_waits": true,
-    "revision_notes": "2026-10-20: AR-051-A secure CI/candidates, AR-033-A offline reference configuration and AR-005-B explicit migration are verified. AR-005-C starts after integrated005B, with separate guard/recovery workstreams and independent review. Fields, card statuses, DAG, producer ancestry, active prerequisite ordering, conditional schedule and unchanged rollups checked.",
+    "revision_notes": "2026-10-20: AR-005-C and parent AR-005 verified after exact 94dd9cb review/run 39350413566 and merge 0737c7b. AR-007-A and AR-011-B start only after that prerequisite, with separate schema and transport ownership and independent review. No dependency/estimate changes; task/card/parent parity and 519-edge ordering rechecked.",
     "independent_review": "Engineer A independently recomputed the 146-task/51-parent/519-edge graph, E0/producer ancestry, parent totals, all task cards/dependencies, conditional schedule and 429-day/146.5-day rollups; bounded stale narrative figures corrected before publication."
   },
   "review_findings": [
@@ -6845,10 +6858,10 @@
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
     "open_parent_issues": [
-      5,
       6,
       7,
       8,
@@ -6858,12 +6871,14 @@
       12
     ],
     "active_child_issues": {
-      "AR-005-C": 37
+      "AR-007-A": 40,
+      "AR-011-B": 41
     },
     "closed_implementation_issues": [
       26,
       28,
-      30
+      30,
+      37
     ],
     "queued_child_issues": {}
   },
