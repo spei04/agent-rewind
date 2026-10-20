@@ -200,3 +200,11 @@ def validate_legacy_rows(connection: Connection, mapping: AdoptionMapping) -> No
             raise MigrationRefused("invalid_key_grant")
     if digest != mapping.source_dataset_digest:
         raise MigrationRefused("source_digest_mismatch")
+
+
+def empty_source_digest() -> str:
+    """Canonical empty original dataset identity, independent from target database rows."""
+    digest = hashlib.sha256()
+    for name in TABLES:
+        digest.update(canonical([name, [c[0] for c in COLUMNS[name]]]) + b"\n")
+    return digest.hexdigest()

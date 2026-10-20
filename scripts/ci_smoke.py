@@ -13,6 +13,7 @@ import agent_rewind
 import agent_rewind.api
 import agent_rewind.cli
 from agent_rewind.migrations.compatibility import runtime_schema_compatibility
+from agent_rewind.migrations.ownership_service import initialize_ownership
 from agent_rewind.migrations.service import install, schema_status
 
 
@@ -68,7 +69,7 @@ for asset in ("index.html", "style.css", "app.js"):
     content = importlib.resources.files("agent_rewind").joinpath("web", asset).read_bytes()
     if not content:
         raise RuntimeError("Packaged web asset is empty")
-for profile in ("sqlite", "postgresql16"):
+for profile in ("sqlite", "postgresql16", "sqlite_ownership", "postgresql16_ownership"):
     shape = json.loads(
         importlib.resources.files("agent_rewind.migrations")
         .joinpath("profiles", profile + ".json")
@@ -95,6 +96,28 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
         compatibility = runtime_schema_compatibility(engine)
         if compatibility.status != "incompatible" or compatibility.code != "migration_only":
             raise RuntimeError("Installed release manifest incorrectly permits customer admission")
+        ownership = initialize_ownership(
+            engine,
+            {
+                "schema_version": 1,
+                "installation_key": "synthetic-package-smoke",
+                "organization_id": "8" * 32,
+                "project_id": "9" * 32,
+                "project_name": "Synthetic installed package",
+                "principal_grants": [
+                    {
+                        "principal_id": "oidc:" + "a" * 64,
+                        "role": "maintainer",
+                        "legacy_default": False,
+                    }
+                ],
+            },
+        )
+        if ownership["state"] != "ownership_complete" or ownership["customer_ready"]:
+            raise RuntimeError("Installed ownership revision failed the explicit transition")
+        compatibility = runtime_schema_compatibility(engine)
+        if compatibility.status != "incompatible" or compatibility.code != "migration_only":
+            raise RuntimeError("Installed ownership revision incorrectly permits admission")
     finally:
         engine.dispose()
     readiness_smoke(Path(temporary), f"sqlite:///{database}")
