@@ -1,14 +1,28 @@
 name: checks
-on: [push, pull_request]
+"on":
+  push:
+    branches: [main]
+  pull_request:
 permissions:
   contents: read
+concurrency:
+  group: checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+env:
+  UV_PYTHON_DOWNLOADS: never
+  UV_LINK_MODE: copy
+  PYTHONDONTWRITEBYTECODE: '1'
 jobs:
   core:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
     services:
       postgres:
-        image: postgres:16-alpine
+        image: postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
         env:
           POSTGRES_PASSWORD: test-only
           POSTGRES_DB: rewind
@@ -17,45 +31,149 @@ jobs:
           --health-cmd pg_isready
           --health-interval 5s --health-timeout 3s --health-retries 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: '3.12'
-      - run: pip install uv==0.11.21
+          python-version: '${{ matrix.python }}'
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: '0.11.21'
+          checksum: '8c88519b0ef0af9801fcdee419bbb12116bd9e6b18e162ae093c932d8b264050'
+          enable-cache: false
+      - run: uv lock --check --offline
       - run: uv sync --frozen --group dev
-      - run: uv run ruff check . && uv run ruff format --check . && uv run mypy agent_rewind
+      - run: uv run --no-sync ruff check .
+      - run: uv run --no-sync ruff format --check .
+      - run: uv run --no-sync mypy agent_rewind
       - name: Validate M1 contracts and frozen fixtures
-        run: uv run python scripts/check_m1_contracts.py --openapi-model
-      - run: uv run pytest -q
+        run: uv run --no-sync python scripts/check_m1_contracts.py --openapi-model
+      - run: uv run --no-sync pytest -q -p no:cacheprovider
         env:
           REWIND_TEST_POSTGRES: postgresql+psycopg://postgres:test-only@127.0.0.1:5432/rewind
+          REWIND_TEST_POSTGRES_URL: postgresql+psycopg://postgres:test-only@127.0.0.1:5432/rewind
       - run: node --check agent_rewind/web/app.js
-      - run: uv build --no-sources
   isolation:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
-      - run: pip install uv==0.11.21
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: '0.11.21'
+          checksum: '8c88519b0ef0af9801fcdee419bbb12116bd9e6b18e162ae093c932d8b264050'
+          enable-cache: false
+      - run: uv lock --check --offline
       - run: uv sync --frozen --group dev
-      - name: Install the signed gVisor package
+      - name: Install pinned gVisor package after integrity verification
         run: |
-          curl -fsSL https://gvisor.dev/archive.key | sudo gpg --dearmor -o /usr/share/keyrings/gvisor-archive-keyring.gpg
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/gvisor-archive-keyring.gpg] https://storage.googleapis.com/gvisor/releases release main" | sudo tee /etc/apt/sources.list.d/gvisor.list
-          sudo apt-get update
-          sudo apt-get install -y runsc
+          curl --fail --silent --show-error --location --proto '=https' --max-time 180 --retry 2 https://storage.googleapis.com/gvisor/releases/pool/20261012.0/binary-amd64/runsc.deb -o "$RUNNER_TEMP/runsc.deb"
+          echo "7a440a035128a52f489b0bb76f60ac4df9cabe7cdf31dd5fd79a3e80f8a707ca  $RUNNER_TEMP/runsc.deb" | sha256sum --check --strict
+          test "$(dpkg-deb --field "$RUNNER_TEMP/runsc.deb" Version)" = '20261012.0'
+          sudo dpkg --install "$RUNNER_TEMP/runsc.deb"
           sudo runsc install
           sudo systemctl restart docker
           runsc --version
-      - run: docker pull python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d && docker tag python@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d python:3.12-slim
-      - run: uv run pytest tests/test_docker.py -q
+      - name: Load pinned sandbox image
+        run: |
+          docker pull python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d
+          docker tag python@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d python:3.12-slim
+      - run: uv run --no-sync pytest tests/test_docker.py -q -p no:cacheprovider
         env:
           REWIND_TEST_DOCKER: '1'
           REWIND_TEST_RUNTIME: runsc
+  security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: '0.11.21'
+          checksum: '8c88519b0ef0af9801fcdee419bbb12116bd9e6b18e162ae093c932d8b264050'
+          enable-cache: false
+      - run: uv lock --check --offline
+      - run: uv sync --frozen --group dev --group security
+      - name: Static security rules on runtime and delivery code
+        run: uv run --no-sync ruff check --select S agent_rewind scripts
+      - name: Audit exact locked dependency versions
+        run: |
+          uv export --frozen --all-groups --no-emit-project --format requirements.txt --output-file "$RUNNER_TEMP/audit-requirements.txt"
+          uv run --no-sync pip-audit --strict --disable-pip --no-deps --require-hashes --progress-spinner off -r "$RUNNER_TEMP/audit-requirements.txt"
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: '0.11.21'
+          checksum: '8c88519b0ef0af9801fcdee419bbb12116bd9e6b18e162ae093c932d8b264050'
+          enable-cache: false
+      - run: uv lock --check --offline
+      - run: uv sync --frozen --group build
+      - name: Inspect package allowlist and smoke isolated runtime
+        run: bash scripts/ci_package.sh
+  ci-gate:
+    name: CI gate
+    if: ${{ always() }}
+    needs: [core, isolation, security, package]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Require every check to succeed
+        env:
+          CI_JOB_RESULTS: ${{ toJSON(needs) }}
+        run: python3 scripts/ci_gate.py
+  delivery:
+    name: Main candidate delivery
+    needs: [ci-gate]
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.ref_protected && needs.ci-gate.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: '0.11.21'
+          checksum: '8c88519b0ef0af9801fcdee419bbb12116bd9e6b18e162ae093c932d8b264050'
+          enable-cache: false
+      - run: uv lock --check --offline
+      - run: uv sync --frozen --group build
+      - name: Rebuild and validate the candidate from the successful main commit
+        run: bash scripts/ci_package.sh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: candidate-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/rewind-candidate/agent_rewind-0.1.0-py3-none-any.whl
+            ${{ runner.temp }}/rewind-candidate/agent_rewind-0.1.0.tar.gz
+            ${{ runner.temp }}/rewind-candidate/candidate.json
+            ${{ runner.temp }}/rewind-candidate/SHA256SUMS
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 7

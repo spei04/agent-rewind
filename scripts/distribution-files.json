@@ -1,0 +1,52 @@
+{
+  "runtime": [
+    "agent_rewind/__init__.py",
+    "agent_rewind/__main__.py",
+    "agent_rewind/api.py",
+    "agent_rewind/artifacts.py",
+    "agent_rewind/auth.py",
+    "agent_rewind/cli.py",
+    "agent_rewind/compare.py",
+    "agent_rewind/config.py",
+    "agent_rewind/corpus.py",
+    "agent_rewind/database.py",
+    "agent_rewind/engine.py",
+    "agent_rewind/experiments.py",
+    "agent_rewind/middleware.py",
+    "agent_rewind/models.py",
+    "agent_rewind/policy.py",
+    "agent_rewind/runner.py",
+    "agent_rewind/sdk.py",
+    "agent_rewind/statistics.py",
+    "agent_rewind/web/app.js",
+    "agent_rewind/web/index.html",
+    "agent_rewind/web/style.css",
+    "agent_rewind/worker.py",
+    "agent_rewind/workspace.py"
+  ],
+  "sdist": [
+    "LICENSE",
+    "MANIFEST.in",
+    "PKG-INFO",
+    "README.md",
+    "pyproject.toml",
+    "setup.cfg",
+    "uv.lock"
+  ],
+  "egg_info": [
+    "PKG-INFO",
+    "SOURCES.txt",
+    "dependency_links.txt",
+    "entry_points.txt",
+    "requires.txt",
+    "top_level.txt"
+  ],
+  "dist_info": [
+    "METADATA",
+    "RECORD",
+    "WHEEL",
+    "entry_points.txt",
+    "licenses/LICENSE",
+    "top_level.txt"
+  ]
+}

@@ -184,9 +184,10 @@ class DockerRunner:
                 memswap_limit=f"{self.settings.sandbox_memory_mb}m",
                 nano_cpus=1_000_000_000,
                 pids_limit=128,
-                tmpfs={"/tmp": "rw,noexec,nosuid,size=64m,mode=1777"},
+                # Container-private bounded tmpfs; no host temporary directory is used.
+                tmpfs={"/tmp": "rw,noexec,nosuid,size=64m,mode=1777"},  # noqa: S108
                 volumes=mounts,
-                environment={"HOME": "/tmp", "PYTHONDONTWRITEBYTECODE": "1"},
+                environment={"HOME": "/tmp", "PYTHONDONTWRITEBYTECODE": "1"},  # noqa: S108
                 labels={"agent-rewind.managed": "true", "agent-rewind.created": str(time.time())},
             )
             container.start()
