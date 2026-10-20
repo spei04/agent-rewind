@@ -102,6 +102,14 @@ content addresses. The object backup is a separate file copy; this is not a live
 object-service backup or a key recovery rehearsal. The restored prepared profile
 must still refuse runtime admission.
 
+PostgreSQL 16 renders three enum constraints differently after a dump/restore:
+whole-array text casts become per-element text casts. The schema classifier maps
+only the six observed native/reflected spellings, bound to their original tables
+and constraint identities, back to the frozen original representation. The release
+profile and stored schema fingerprint are unchanged. Different enum members,
+operators, types, constraint names, validation state or cardinality still refuse.
+This bounded equivalence comes from [synthetic run 39349792047](https://github.com/spei04/agent-rewind/actions/runs/39349792047); that failing diagnostic run is not restore acceptance.
+
 A truncated archive must fail without committed target tables, after which the
 unchanged valid archive must restore successfully. A second test first restores
 schema only, then deliberately holds an exclusive lock on the target `jobs` table.
