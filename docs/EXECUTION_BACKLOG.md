@@ -629,7 +629,7 @@ M1 / P0 · 3 PRs · 5.5 engineering days · In progress
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
 - **Responsible role:** TL; required reviewers: BE, QE. Engineer C — scoped repositories; independent review assigned by lead
 - **Definition of done:** Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.
-- **Progress:** In progress; [issue #52](https://github.com/spei04/agent-rewind/issues/52), entered after verified direct prerequisites.
+- **Progress:** Verified; [issue #52](https://github.com/spei04/agent-rewind/issues/52), entered after verified direct prerequisites.
 
 <a id="ar-007-c"></a>
 
@@ -3267,3 +3267,5 @@ Remaining owner decisions concern deferred adapters/reuse/held-out execution and
 2026-10-20 protocol proposal: [C21 design and 14 follow-up cards](research/TOTAL_BUDGET_PROTOCOL.md) specify fair recovery/intervention endpoints, complete physical and comparison costs, sealed fresh confirmation and proposed thresholds. Source b8b2cba is under final checker review. Follow-up effort is classified by overlap with existing tasks; no automatic addition to the 433-day ledger. RESEARCHSCOPE0 remains Not satisfied.
 
 2026-10-20 approved implementation reconciliation: [actual decision and mapping](research/OWNER_DECISION_2026-10-20.md) activates only the nine approved scopes; C21 proposal bytes remain historical and unchanged. New AR-025-D is the standard comparator; AR-024-D makes the selected-policy harness independently reviewable after the unchanged baseline simulator. No original work or prerequisite was removed. A/009-A and C/007-B are In progress after verified dependencies; B owns reconciliation and independent review.
+
+2026-10-20 scoped repositories accepted: AR-007-B Verified in PR #54, main 9b33ddd, after A/B review through 2a3c52d and hosted run 39364339490 (1,281 tests per Python version, actual PostgreSQL cases, three gVisor cases and security/package/CI gate). Review corrected SQL revocation/finite metadata boundaries and post-storage authorization. AR-009-A remains under integration; C reuses its checkout to combine its accepted fixture drain fix with A storage. No new provider calls or resources. Full route isolation and customer admission remain gated.
