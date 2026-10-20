@@ -501,7 +501,7 @@ The owner approved issue #51's answer-blind/core-control comparison, uniform ver
 
 C20/C21 are internally available; RESEARCHSCOPE0 alone is now satisfied by the explicit owner decision. C08/C09 producers retain their original runtime prerequisites. Fixed independent confirmation, G2/G3, current C02 execution restrictions, DATA0, STUDYFUNDS0 and independent statistical review remain.
 
-Ownership/readiness, scoped repositories and artifact metadata/storage are verified with customer admission still disabled. B records final reconciliation; the lead assigns the next dependency-ready work. AR-006-A/011-C/007-C/009-B remain ready but unassigned. The [conditional ten-day scenario](EXECUTION_BACKLOG.md#first-two-weeks--day-by-day) is retained as history and uses three contributors, not six human FTEs.
+Ownership/readiness, scoped repositories and artifact metadata/storage are verified with customer admission still disabled. C implements AR-009-B (#69), A/B review, and the lead integrates. AR-006-A/011-C/007-C remain ready but unassigned. The [conditional ten-day scenario](EXECUTION_BACKLOG.md#first-two-weeks--day-by-day) is retained as history and uses three contributors, not six human FTEs.
 
 M3 is 81 base days after approved scope reconciliation. M5 stays 50 pending measured calibration, permitted corpus, independent statistics and funded execution. The 152.5-day effort-only path is a lower bound without staffing or external waits. Deferred adaptations and study execution require their own decisions; approved core engineering choices need no repeat approval.
 
@@ -685,7 +685,7 @@ Post-GA candidates remain **uncommitted P2**: remote customer workers, additiona
 | AR-006 | [Run projections and pagination](https://github.com/spei04/agent-rewind/issues/6) | Projection foundation AR-006-A ready but unassigned; later pagination work waits for its producers |
 | AR-007 | [Project authorization](https://github.com/spei04/agent-rewind/issues/7) | Ownership/backfill verified in closed [#40](https://github.com/spei04/agent-rewind/issues/40); scoped repositories Verified in closed [#52](https://github.com/spei04/agent-rewind/issues/52); route enforcement remains unassigned after accepted repository primitives. |
 | AR-008 | [Idempotent admission/cancellation](https://github.com/spei04/agent-rewind/issues/8) | Specification prepared; runtime prerequisites pending |
-| AR-009 | [Artifact publication and references](https://github.com/spei04/agent-rewind/issues/9) | Metadata/storage Verified in closed [#53](https://github.com/spei04/agent-rewind/issues/53); publication remains unassigned after accepted primitives |
+| AR-009 | [Artifact publication and references](https://github.com/spei04/agent-rewind/issues/9) | Metadata/storage Verified in closed [#53](https://github.com/spei04/agent-rewind/issues/53); publication In progress with C in [#69](https://github.com/spei04/agent-rewind/issues/69), A/B review |
 | AR-010 | [Hierarchical budget reservations](https://github.com/spei04/agent-rewind/issues/10) | Specification prepared; runtime prerequisites pending |
 | AR-011 | [Safe errors and readiness](https://github.com/spei04/agent-rewind/issues/11) | Safe errors/readiness verified in closed [#41](https://github.com/spei04/agent-rewind/issues/41); trace/counter work remains pending. |
 | AR-012 | [Contract and failure verification](https://github.com/spei04/agent-rewind/issues/12) | Fixture harness verified; runtime acceptance remains pending |
