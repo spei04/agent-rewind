@@ -20,7 +20,7 @@ dependencies = [
 rewind = "agent_rewind.cli:main"
 
 [dependency-groups]
-dev = ["ruff==0.11.13", "mypy==1.19.1", "pytest>=8.3,<10", "types-boto3[s3]>=1.37", "types-docker>=7", "PyYAML==6.0.3"]
+dev = ["ruff==0.17.1", "mypy==1.19.1", "pytest>=8.3,<10", "types-boto3[s3]>=1.37", "types-docker>=7", "PyYAML==6.0.3"]
 build = ["setuptools==83.0.0"]
 security = ["pip-audit==2.10.1"]
 
