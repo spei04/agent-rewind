@@ -1,3 +1,4 @@
+import io
 import json
 import re
 
@@ -7,6 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import OperationalError
 
+from agent_rewind import errors
 from agent_rewind.api import create_app
 from agent_rewind.database import Database
 from agent_rewind.errors import RULES, Fault
@@ -14,6 +16,13 @@ from agent_rewind.migrations.compatibility import CompatibilityResult
 from agent_rewind.readiness import Readiness
 
 CANARY = "private-source-token-sql-provider-body-DO-NOT-EMIT"
+
+
+@pytest.fixture(autouse=True)
+def diagnostic_output(monkeypatch):
+    output = io.StringIO()
+    monkeypatch.setattr(errors._diagnostic_handler, "stream", output)
+    return output
 
 
 @pytest.fixture
@@ -32,7 +41,7 @@ def boundary_app(settings, monkeypatch):
 
 @pytest.mark.parametrize("kind", ["value", "key", "nested", "malformed", "validation", "http"])
 @pytest.mark.parametrize("prefix", ["/api/v1/", "/api/"])
-def test_secret_exceptions_never_echo_or_log(boundary_app, caplog, kind, prefix):
+def test_secret_exceptions_never_echo_or_log(boundary_app, caplog, diagnostic_output, kind, prefix):
     class Malformed(Exception):
         def __str__(self):
             raise AssertionError("exception string must never be evaluated")
@@ -70,11 +79,11 @@ def test_secret_exceptions_never_echo_or_log(boundary_app, caplog, kind, prefix)
         if kind == "http":
             assert response.headers["WWW-Authenticate"] == "Bearer"
         else:
-            records = [record for record in caplog.records if record.name == "agent_rewind.safe"]
+            records = [json.loads(line) for line in diagnostic_output.getvalue().splitlines()]
             if response.status_code == 500:
-                assert records and records[-1].request_id == request_id
-                assert records[-1].exc_info is None
-        assert CANARY not in caplog.text
+                assert records and records[-1]["request_id"] == request_id
+                assert set(records[-1]) == {"event", "request_id", "error_code"}
+        assert CANARY not in caplog.text + diagnostic_output.getvalue()
         assert client.get("/livez").headers["X-Request-ID"] != request_id
 
 
@@ -218,7 +227,10 @@ def test_invalid_workspace_path_is_safe_client_error_before_reads(
 
 
 @pytest.mark.parametrize("started", [False, True])
-def test_logging_sink_failure_cannot_escape_before_or_after_headers(monkeypatch, capsys, started):
+@pytest.mark.parametrize("failure", ["logger", "stream"])
+def test_logging_sink_failure_cannot_escape_before_or_after_headers(
+    monkeypatch, capsys, started, failure
+):
     import asyncio
     import logging
 
@@ -227,7 +239,19 @@ def test_logging_sink_failure_cannot_escape_before_or_after_headers(monkeypatch,
     def broken_sink(*args, **kwargs):
         raise RuntimeError(CANARY)
 
-    monkeypatch.setattr(logging.getLogger("agent_rewind.safe"), "error", broken_sink)
+    monkeypatch.setattr(logging, "raiseExceptions", True)
+    if failure == "logger":
+        monkeypatch.setattr(errors._diagnostic_logger, "error", broken_sink)
+    else:
+
+        class BrokenStream:
+            def write(self, value):
+                raise RuntimeError(CANARY)
+
+            def flush(self):
+                raise RuntimeError(CANARY)
+
+        monkeypatch.setattr(errors._diagnostic_handler, "stream", BrokenStream())
 
     async def exercise():
         messages = []
@@ -256,19 +280,18 @@ def test_logging_sink_failure_cannot_escape_before_or_after_headers(monkeypatch,
     asyncio.run(exercise())
     captured = capsys.readouterr()
     assert CANARY not in captured.out + captured.err
+    assert "--- Logging error ---" not in captured.err
 
 
-def test_default_log_message_contains_safe_correlation(boundary_app, caplog):
-    import logging
-
+def test_default_log_message_contains_safe_correlation(boundary_app, caplog, diagnostic_output):
     @boundary_app.get("/api/v1/log-fault")
     def fault():
         raise ValueError(CANARY)
 
     with TestClient(boundary_app) as client:
         response = client.get("/api/v1/log-fault")
-    record = next(record for record in caplog.records if record.name == "agent_rewind.safe")
-    emitted = logging.Formatter().format(record)
+    emitted = diagnostic_output.getvalue().strip()
+    assert not any(record.name == "agent_rewind.safe" for record in caplog.records)
     assert json.loads(emitted) == {
         "event": "request_failed",
         "error_code": "internal_error",
@@ -303,3 +326,28 @@ def test_internal_missing_evidence_field_remains_500(boundary_app, settings, mon
         )
     assert response.status_code == 500
     assert response.json() == {"detail": "The request could not be completed."}
+
+
+def test_global_logger_handlers_cannot_receive_or_reformat_diagnostic(
+    boundary_app, monkeypatch, diagnostic_output
+):
+    import logging
+
+    class ForbiddenHandler(logging.Handler):
+        def emit(self, record):
+            pytest.fail("Safe diagnostic reached global handlers")
+
+    handler = ForbiddenHandler()
+    monkeypatch.setattr(logging.getLogger(), "handlers", [handler])
+    monkeypatch.setattr(logging.getLogger("agent_rewind.safe"), "handlers", [handler])
+
+    @boundary_app.get("/api/v1/isolated-log")
+    def fault():
+        raise ValueError(CANARY)
+
+    with TestClient(boundary_app) as client:
+        response = client.get("/api/v1/isolated-log")
+    assert response.status_code == 500
+    assert (
+        json.loads(diagnostic_output.getvalue())["request_id"] == response.headers["X-Request-ID"]
+    )

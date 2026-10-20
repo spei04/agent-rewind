@@ -24,9 +24,14 @@ so clients must reconcile its original identity rather than assume failure.
 Unexpected errors emit a restricted request_failed record containing only a
 fixed error code and generated request ID. The logger never receives the
 exception, its traceback, locals, class name or request contents. The bounded JSON
-message includes correlation even under the default log formatter. If a logging
-sink raises, that diagnostic is lost; its exception is never re-logged or allowed
-to replace the safe response, including after streamed headers. No tracing or
+message includes correlation in a fixed message-only formatter. A dedicated,
+non-propagating logger outside the global logger registry writes this JSON to
+stderr; operator aggregation consumes that stream. Global/ancestor handlers
+cannot receive or reformat it. The owned stream handler discards sink failures
+without Python's default handleError traceback, including when
+logging.raiseExceptions is true. If the sink fails, that diagnostic is lost; its
+exception is never re-logged or allowed to replace the safe response, including
+after streamed headers. No tracing or
 metric exporter is enabled by this change. The serve command keeps access logs
 disabled; deployments must not enable raw proxy/access/debug-body capture.
 

@@ -6,7 +6,7 @@ import json
 import logging
 import secrets
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, TextIO
 
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
@@ -103,6 +103,22 @@ def classified(scope: Scope, error: Exception) -> ErrorCode:
     return "internal_error"
 
 
+class _DiagnosticHandler(logging.StreamHandler[TextIO]):
+    def handleError(self, record: logging.LogRecord) -> None:
+        # StreamHandler catches write/format failures itself. Its default handler
+        # prints a traceback under logging.raiseExceptions; never use that path.
+        return
+
+
+_diagnostic_handler = _DiagnosticHandler()
+_diagnostic_handler.setFormatter(logging.Formatter("%(message)s"))
+# Keep diagnostics outside the global logger hierarchy and its arbitrary handlers.
+# Operators aggregate the bounded stderr stream; no ancestor receives these events.
+_diagnostic_logger = logging.Logger("agent_rewind.safe", level=logging.ERROR)
+_diagnostic_logger.propagate = False
+_diagnostic_logger.addHandler(_diagnostic_handler)
+
+
 def diagnostic(scope: Scope, code: ErrorCode) -> None:
     # The complete record is built from finite/generated values, never exc_info,
     # exception type names, request paths/headers/bodies or exception attributes.
@@ -111,7 +127,7 @@ def diagnostic(scope: Scope, code: ErrorCode) -> None:
     try:
         # The default formatter emits message text: correlation must live in it,
         # not only in optional structured-handler attributes.
-        logging.getLogger("agent_rewind.safe").error(
+        _diagnostic_logger.error(
             json.dumps(record, separators=(",", ":")),
             extra={"request_id": identifier, "error_code": code},
         )

@@ -311,6 +311,36 @@ def test_raw_child_stderr_traceback_and_stdout_canary_are_discarded(settings, mo
     assert canary not in captured.out + captured.err
 
 
+def process_exited(pid):
+    try:
+        with open(f"/proc/{pid}/stat") as source:
+            status = source.read().split()[2]
+    except (FileNotFoundError, ProcessLookupError):
+        return True
+    # PID1 owns orphan reaping after parent death; a zombie cannot run/I/O.
+    return status == "Z"
+
+
+@pytest.mark.parametrize("error", [FileNotFoundError, ProcessLookupError, PermissionError])
+def test_process_exit_observer_handles_only_disappearance_during_read(monkeypatch, error):
+    class Disappearing:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            raise error("synthetic proc observation")
+
+    monkeypatch.setattr("builtins.open", lambda *args: Disappearing())
+    if error is PermissionError:
+        with pytest.raises(PermissionError):
+            process_exited(123)
+    else:
+        assert process_exited(123)
+
+
 def test_parent_death_kills_guarded_worker(tmp_path):
     import subprocess
 
@@ -342,16 +372,7 @@ def test_parent_death_kills_guarded_worker(tmp_path):
         process.kill()
         process.wait(timeout=2)
 
-        def dead():
-            try:
-                with open(f"/proc/{child_pid}/stat") as source:
-                    status = source.read().split()[2]
-            except FileNotFoundError:
-                return True
-            # PID1 owns orphan reaping after parent death; a zombie cannot run/I/O.
-            return status == "Z"
-
-        await wait_until(dead)
+        await wait_until(lambda: process_exited(child_pid))
 
     try:
         asyncio.run(exercise())
