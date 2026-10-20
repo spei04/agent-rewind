@@ -319,7 +319,16 @@ readiness while never treating current full-object reads as bounded.
 ## Run projection and pagination
 
 AR-006-A writes `run_index` and event/ref publication coherently in the same
-fenced transaction. Historical `records.data`, events.hash, ciphertext and original
+fenced transaction. Its integration with AR-010-A/B must require every graph-source
+producer to lock all affected owning job/run rows in a consistent order before
+mutation, then revalidate while holding those locks. This includes event
+insertion/reassignment/deletion, run/ancestry/source identity changes and by-job
+membership; reassignment covers both old and new owners. Complete source graphs
+remain immutable. AR-009-B's existing-row locks cannot protect absent-row phantoms
+under READ COMMITTED; current legacy writers do not establish this discipline and
+the preparatory live adapter remains unavailable.
+
+Historical `records.data`, events.hash, ciphertext and original
 floating created timestamps are never rewritten by backfill. `created_at` is a
 deterministic UTC projection rounded to nearest microsecond with ties-to-even;
 retain original float separately in the preserved record. `(created_at,run_id)`
@@ -525,6 +534,12 @@ backlog (3 days AR-005-B, 1.5 days AR-005-C); integration and review consume cap
 No calendar date is promised until these new edges are applied and actual migration
 results reduce uncertainty. Schema/profile surprises use the existing estimate
 contingency and block adoption, rather than relaxing preservation.
+
+## Publication implementation sequencing — 2026-10-20
+
+AR-009-B provides the preparatory run-graph publication coordinator and complete scoped manifest reference, with a required same-transaction fence/writer interface. AR-010-A owns the unavailable generation schema and database-time live fence; AR-006-A owns run-projection integration. The current live adapter must refuse rather than fall back to an owner-only check. Contract fixtures test atomic publication, but do not close live-worker or full M1 acceptance; AR-010-A/B and AR-012-B retain those integration gates. No historical adoption or unsupported job/study/provider graph production is added.
+
+This clarifies implementation order without weakening the required live fence or adding a cyclic prerequisite. Real SQL fixture evidence must include CT-M1-015/016/017 publication/corruption/scope cases, post-I/O authorization and fence loss, rollback, concurrent visibility and exact retry. Object and journal I/O stays outside SQL transactions. Private attempt evidence identifies unreferenced uploads and unknown work; it is never authority for SQL commit success. Current release compatibility remains migration-only.
 
 ## Review evidence and validation limits
 

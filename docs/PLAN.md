@@ -134,6 +134,45 @@ Priority **P0** blocks a private pilot; **P1** blocks enterprise GA; **P2** is c
 
 ## 3. Architecture and decision records
 
+### Architecture at a glance
+
+In the target system, each installation serves one organization. The boxes below are logical responsibilities; the API and trusted worker processes share a modular Python codebase, rather than requiring a separate service for every box. This is the intended architecture, not a statement that every component has passed production acceptance. The execution backlog tracks implementation and verification.
+
+```mermaid
+flowchart TB
+    User["Engineer: browser workbench or Python SDK"] <-->|"Open runs, branch, investigate, read evidence"| API["API: identity, project permissions and admission"]
+    IdP["Organization identity provider"] -->|"Authenticate users"| API
+    API <-->|"Run metadata, jobs and status"| DB[("PostgreSQL: metadata, queue, budgets and audit")]
+    API <-->|"Authorized trace and artifact reads"| Objects[("Encrypted object storage: files, snapshots and evidence")]
+    Workers["Trusted workers: replay engine, experiment coordinator and analysis"] <-->|"Claim jobs, reserve costs, record outcomes"| DB
+    Workers <-->|"Restore checkpoints and publish evidence"| Objects
+    Workers <-->|"Budgeted model requests and responses"| Model["Approved model provider"]
+    Workers <-->|"Execute agent tool calls"| Sandbox["gVisor sandbox: isolated coding workspace"]
+    Workers <-->|"Evaluate results separately"| Evaluator["Evaluator sandbox: protected grading inputs"]
+```
+
+| Core component | Plain-language responsibility |
+| --- | --- |
+| Workbench and SDK | Open a failed run, inspect decisions, change an action or tool observation, and compare branches and reports. |
+| API and identity | Check who is asking and which project they can access; validate and admit work; return bounded results and cancellation status. |
+| PostgreSQL | Own durable run/branch relationships, job leases, experiment phases, budget reservations, artifact references and audit records. The queue lives here initially. This is Agent Rewind's database; customer application databases are outside the system. |
+| Experiment coordinator and selection policy | Choose which checkpoint/intervention to investigate next within the permitted protocol and budget; schedule unchanged controls and candidate trials; freeze the selected intervention before independent confirmation. |
+| Replay worker and provider adapter | Restore the saved workspace and serialized agent state, apply the permitted intervention, request model decisions, dispatch validated tool calls and record outcomes and costs. Model credentials stay in the trusted execution boundary. |
+| gVisor runner | Execute untrusted agent code and tools with bounded CPU, memory and time. Sandboxes have no direct access to the model provider, platform database or secrets, and network access is disabled in the initial scope. |
+| Separate evaluator | Score a resulting workspace in a separate execution environment. It also executes candidate code and is treated as untrusted, with the same network and credential restrictions. The agent sandbox does not receive protected grading inputs; grader integrity and evaluator validity remain separate verification gates. |
+| Encrypted artifact storage | Keep immutable workspace contents, snapshot manifests, serialized policy state, event bodies and report artifacts. PostgreSQL stores their authorized references and integrity identities. A checkpoint covers supported files and serialized state, not arbitrary process memory or external services. |
+| Comparison and evidence analysis | Compare trajectories and outcomes, distinguish discovery from confirmation, and report uncertainty, incomplete trials and full costs. A completed job alone is not evidence of a successful repair. |
+
+**How one investigation moves through the system:**
+
+1. **Capture and inspect.** A supported adapter records the original run's tool calls, actual and observed results, and checkpoints. The worker stores encrypted bodies and publishes their metadata references. The engineer opens the resulting timeline through the API. An imported trace without sufficient restore state can be viewed but cannot be replayed.
+2. **Choose and admit.** The engineer selects an intervention, or the experiment coordinator proposes one. The API checks project access and admission rules; durable jobs, protocol identity and budget reservations are recorded in PostgreSQL before execution.
+3. **Restore and run.** A worker claims a job, restores the selected checkpoint into an isolated workspace and applies the intervention. It calls the model provider through the trusted adapter and runs the resulting tool actions inside gVisor. Each branch starts from its own restored state.
+4. **Evaluate and publish.** The separate evaluator scores the result. Workers upload immutable evidence before publishing its references, outcomes and cost receipts under the current job lease. A lost worker or ambiguous provider response leaves an explicit incomplete or uncertain attempt for reconciliation.
+5. **Confirm and compare.** Once discovery selects an intervention, the coordinator freezes it and schedules fresh confirmation trials under the reviewed protocol. Analysis reports repair effects separately from overall task recovery. The API serves the branch comparison, uncertainty and cost report back to the engineer.
+
+**Supporting target services and boundaries:** Secret Manager/KMS supplies trusted services with credentials and encryption keys; untrusted sandboxes receive neither. Redacted metrics, logs and traces observe the API and workers. Backup and recovery procedures cover the database, referenced objects, required key access and deletion records together. Private ingress and project authorization protect access; budgets, leases and cancellation constrain execution. The detailed deployment topology and component ownership follow below.
+
 ### 3.1 System boundaries and target topology
 
 Keep a modular Python application and independently scalable trusted workers. Separate the customer/browser trust boundary, privileged execution hosts, hostile sandbox processes, external model provider, and data stores. The platform stores its own metadata; customer application databases are outside this architecture.
@@ -462,7 +501,7 @@ The owner approved issue #51's answer-blind/core-control comparison, uniform ver
 
 C20/C21 are internally available; RESEARCHSCOPE0 alone is now satisfied by the explicit owner decision. C08/C09 producers retain their original runtime prerequisites. Fixed independent confirmation, G2/G3, current C02 execution restrictions, DATA0, STUDYFUNDS0 and independent statistical review remain.
 
-Ownership/readiness, scoped repositories and artifact metadata/storage are verified with customer admission still disabled. B records final reconciliation; the lead assigns the next dependency-ready work. AR-006-A/011-C/007-C/009-B remain ready but unassigned. The [conditional ten-day scenario](EXECUTION_BACKLOG.md#first-two-weeks--day-by-day) is retained as history and uses three contributors, not six human FTEs.
+Ownership/readiness, scoped repositories, artifact metadata/storage and preparatory AR-009-B publication are verified with customer admission still disabled. C completed publication with independent A/B review in PR #70. AR-006-A/011-C/007-C remain ready but unassigned. The [conditional ten-day scenario](EXECUTION_BACKLOG.md#first-two-weeks--day-by-day) is retained as history and uses three contributors, not six human FTEs.
 
 M3 is 81 base days after approved scope reconciliation. M5 stays 50 pending measured calibration, permitted corpus, independent statistics and funded execution. The 152.5-day effort-only path is a lower bound without staffing or external waits. Deferred adaptations and study execution require their own decisions; approved core engineering choices need no repeat approval.
 
@@ -577,7 +616,7 @@ Role abbreviations: TL technical lead/backend, BE execution/backend, PL platform
 | AR-006 | M1 / P0 | [AR-006](EXECUTION_BACKLOG.md#ar-006): 2 PRs. Make large run histories queryable through bounded authorized requests. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-007-A](EXECUTION_BACKLOG.md#ar-007-a), [AR-007-C](EXECUTION_BACKLOG.md#ar-007-c), [AR-011-B](EXECUTION_BACKLOG.md#ar-011-b) | TL / 5 days | NS |
 | AR-007 | M1 / P0 | [AR-007](EXECUTION_BACKLOG.md#ar-007): 3 PRs. Prevent cross-project access through both legacy and new paths. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-011-B](EXECUTION_BACKLOG.md#ar-011-b) | TL/BE / 5.5 days | In progress |
 | AR-008 | M1 / P0 | [AR-008](EXECUTION_BACKLOG.md#ar-008): 2 PRs. Make retries safe and admission/cancellation behavior predictable. | [AR-007-C](EXECUTION_BACKLOG.md#ar-007-c), [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-011-B](EXECUTION_BACKLOG.md#ar-011-b) | BE / 4 days | NS |
-| AR-009 | M1 / P0 | [AR-009](EXECUTION_BACKLOG.md#ar-009): 2 PRs. Keep published evidence immutable, scoped and complete. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-007-A](EXECUTION_BACKLOG.md#ar-007-a), [AR-007-B](EXECUTION_BACKLOG.md#ar-007-b), [AR-011-B](EXECUTION_BACKLOG.md#ar-011-b) | PL / 4 days | In progress |
+| AR-009 | M1 / P0 | [AR-009](EXECUTION_BACKLOG.md#ar-009): 2 PRs. Keep published evidence immutable, scoped and complete. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-007-A](EXECUTION_BACKLOG.md#ar-007-a), [AR-007-B](EXECUTION_BACKLOG.md#ar-007-b), [AR-011-B](EXECUTION_BACKLOG.md#ar-011-b) | PL / 4 days | Verified |
 | AR-010 | M1 / P0 | [AR-010](EXECUTION_BACKLOG.md#ar-010): 2 PRs. Enforce budget limits before every potentially paid action. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-008-B](EXECUTION_BACKLOG.md#ar-008-b) | BE / 5 days | NS |
 | AR-011 | M1 / P0 | [AR-011](EXECUTION_BACKLOG.md#ar-011): 3 PRs. Diagnose failures without exposing secrets or losing request context. | [AR-004-A](EXECUTION_BACKLOG.md#ar-004-a), [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [G0](EXECUTION_BACKLOG.md#g0) | PL / 5 days | In progress |
 | AR-012 | M1 / P0 | [AR-012](EXECUTION_BACKLOG.md#ar-012): 2 PRs. Detect incompatible or unsafe foundation changes before integration. | [AR-004-A](EXECUTION_BACKLOG.md#ar-004-a), [AR-005-A](EXECUTION_BACKLOG.md#ar-005-a), [AR-006-B](EXECUTION_BACKLOG.md#ar-006-b), [AR-008-B](EXECUTION_BACKLOG.md#ar-008-b), [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-010-B](EXECUTION_BACKLOG.md#ar-010-b), [AR-011-C](EXECUTION_BACKLOG.md#ar-011-c) | QE / 5 days | In progress |
@@ -646,7 +685,7 @@ Post-GA candidates remain **uncommitted P2**: remote customer workers, additiona
 | AR-006 | [Run projections and pagination](https://github.com/spei04/agent-rewind/issues/6) | Projection foundation AR-006-A ready but unassigned; later pagination work waits for its producers |
 | AR-007 | [Project authorization](https://github.com/spei04/agent-rewind/issues/7) | Ownership/backfill verified in closed [#40](https://github.com/spei04/agent-rewind/issues/40); scoped repositories Verified in closed [#52](https://github.com/spei04/agent-rewind/issues/52); route enforcement remains unassigned after accepted repository primitives. |
 | AR-008 | [Idempotent admission/cancellation](https://github.com/spei04/agent-rewind/issues/8) | Specification prepared; runtime prerequisites pending |
-| AR-009 | [Artifact publication and references](https://github.com/spei04/agent-rewind/issues/9) | Metadata/storage Verified in closed [#53](https://github.com/spei04/agent-rewind/issues/53); publication remains unassigned after accepted primitives |
+| AR-009 | [Artifact publication and references](https://github.com/spei04/agent-rewind/issues/9) | Metadata/storage Verified in [#53](https://github.com/spei04/agent-rewind/issues/53); preparatory publication Verified in [PR #70](https://github.com/spei04/agent-rewind/pull/70) after C implementation and A/B review; live integration gates remain open |
 | AR-010 | [Hierarchical budget reservations](https://github.com/spei04/agent-rewind/issues/10) | Specification prepared; runtime prerequisites pending |
 | AR-011 | [Safe errors and readiness](https://github.com/spei04/agent-rewind/issues/11) | Safe errors/readiness verified in closed [#41](https://github.com/spei04/agent-rewind/issues/41); trace/counter work remains pending. |
 | AR-012 | [Contract and failure verification](https://github.com/spei04/agent-rewind/issues/12) | Fixture harness verified; runtime acceptance remains pending |
@@ -902,3 +941,7 @@ G0 accepted for development/testing, 2026-10-19: AR-004-B/C verified and C04 rev
 2026-10-20 context and selection planning: the [bounded method amendment](research/CONTEXT_SELECTION_AMENDMENT_2026-10-19.md) records actual model/prompt facts, six proposed context/role/model/allocation tasks and recent primary-source comparison limits. RC-01–06 remain outside the active 150-task/440-day ledger; 15–26 incremental days are provisional and overlap must be reconciled before activation. Existing approved foundation work continues. No provider calls, paid execution, held-out permission or new runtime scope is added.
 
 2026-10-20 final approval reconciliation: [PR #56](https://github.com/spei04/agent-rewind/pull/56) merged at d408e5d1b10191dacbfe43a78f43df6de08b5950 after independent source/composition review and [run39365454903](https://github.com/spei04/agent-rewind/actions/runs/39365454903), with1350 passing tests per Python version, actual PostgreSQL, installed distributions, three gVisor tests and all required gates. Issue #51 is closed; its eleven mapped runtime issues remain blocked on their prerequisites. The separate [context planning amendment](research/CONTEXT_SELECTION_AMENDMENT_2026-10-19.md) is internally reviewed; RC-01–06 remain proposed and excluded from active totals. No new paid evaluation, held-out access or production scope.
+
+2026-10-20 next replay-path assignment: AR-009-B is In progress in [issue #69](https://github.com/spei04/agent-rewind/issues/69), after accepted AR-009-A/007-B on main 4e509a2. C owns complete graph verification and atomic scoped publication; A reviews failure/security behavior and B reviews contracts/transactions. The observable gate is all verified run/checkpoint children and the root becoming visible together, or no completed root on upload, corruption, scope, fence or SQL failure. The generation-aware live adapter and run projection remain later integration work, with no owner-only fallback. Existing C checkout is reused; primary retains the reviewed architecture explanation. No new paid calls, infrastructure or partner data; reconcile historical reservations against actual spend before paid validation.
+
+2026-10-20 publication acceptance: AR-009-B preparatory publication is Verified in [PR #70](https://github.com/spei04/agent-rewind/pull/70): reviewed integration 5923bbe passed hosted run [39461271604](https://github.com/spei04/agent-rewind/actions/runs/39461271604) with 1431 tests on each supported Python version, all eleven actual PostgreSQL publication cases, three gVisor cases, security, isolated package smoke and the required CI gate. A accepted graph/fidelity and diagnostic behavior; B accepted transaction/ownership and full source-writer contracts. Live worker publication stays unavailable until AR-006-A and AR-010-A/B are integrated and AR-012-B verifies the complete path. Customer admission, historical adoption and production gates remain open. The earlier Python 3.11 migration-drain refusal remains an unproven-cause observation; its strict guard is unchanged and bounded synthetic-test diagnostics were added. No paid calls or new resources.
