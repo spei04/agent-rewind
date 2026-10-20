@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import secrets
 from dataclasses import dataclass
@@ -105,10 +106,19 @@ def classified(scope: Scope, error: Exception) -> ErrorCode:
 def diagnostic(scope: Scope, code: ErrorCode) -> None:
     # The complete record is built from finite/generated values, never exc_info,
     # exception type names, request paths/headers/bodies or exception attributes.
-    logging.getLogger("agent_rewind.safe").error(
-        "request_failed",
-        extra={"request_id": scope["state"]["request_id"], "error_code": code},
-    )
+    identifier = scope["state"]["request_id"]
+    record = {"event": "request_failed", "request_id": identifier, "error_code": code}
+    try:
+        # The default formatter emits message text: correlation must live in it,
+        # not only in optional structured-handler attributes.
+        logging.getLogger("agent_rewind.safe").error(
+            json.dumps(record, separators=(",", ":")),
+            extra={"request_id": identifier, "error_code": code},
+        )
+    except Exception:
+        # A failed sink loses this bounded diagnostic. Never log its exception or
+        # replace the safe HTTP result with a second, potentially private failure.
+        return
 
 
 def exception_response(scope: Scope, error: Exception) -> JSONResponse:

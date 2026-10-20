@@ -21,6 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .bounded_bytes import decrypt_checked, read_ciphertext, regular_reader
+from .migrations.inputs import InstallationKey
 
 CONFIG_NAME = "readiness.json"
 
@@ -35,7 +36,7 @@ def canonical_payload(installation_key: str) -> bytes:
 
 class SentinelConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
-    installation_key: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,128}$")
+    installation_key: InstallationKey
     locator: str
     digest: str = Field(pattern=r"^[0-9a-f]{64}$")
 

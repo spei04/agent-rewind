@@ -219,3 +219,21 @@ def test_interrupted_local_publication_never_installs_partial_object(sentinel, m
     monkeypatch.setattr("agent_rewind.sentinel.os.link", original)
     provision(sentinel)
     assert load_config(sentinel.data_dir).installation_key == "synthetic-install"
+
+
+@pytest.mark.parametrize("key", ["", "_installation", "-installation", "x" * 65, "x/y", "é"])
+def test_installation_key_matches_metadata_before_any_publication(sentinel, monkeypatch, key):
+    sentinel.installation_key = SecretStr(key)
+    monkeypatch.setattr(
+        _Store, "write_once", lambda *args: pytest.fail("Invalid identity reached publication")
+    )
+    with pytest.raises(ValidationError):
+        provision(sentinel)
+    assert not list(sentinel.data_dir.iterdir())
+
+
+@pytest.mark.parametrize("key", ["0", "A" + "_-" * 31 + "z"])
+def test_supported_metadata_identity_boundaries_can_provision(sentinel, key):
+    sentinel.installation_key = SecretStr(key)
+    provision(sentinel)
+    assert load_config(sentinel.data_dir).installation_key == key

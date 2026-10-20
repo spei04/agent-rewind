@@ -575,3 +575,71 @@ def test_cancelled_spawn_is_owned_until_pid_return_and_reap(settings, monkeypatc
         assert manager._process is None
 
     asyncio.run(exercise())
+
+
+def test_startup_timeout_then_repeated_shutdown_cancellation_retains_spawn(settings, monkeypatch):
+    original = asyncio.create_subprocess_exec
+    monkeypatch.setattr("agent_rewind.readiness.STARTUP_SECONDS", 0.03)
+
+    async def exercise():
+        spawned, release = asyncio.Event(), asyncio.Event()
+        processes = []
+
+        async def delayed_spawn(*args, **kwargs):
+            process = await original(*args, **kwargs)
+            processes.append(process)
+            spawned.set()
+            await release.wait()
+            return process
+
+        monkeypatch.setattr("agent_rewind.readiness.asyncio.create_subprocess_exec", delayed_spawn)
+        manager = Readiness(settings)
+        manager.start()
+        try:
+            await asyncio.wait_for(spawned.wait(), 2)
+            await wait_until(lambda: manager._starting is None and manager._cleanup is not None)
+            owner = manager._cleanup
+            assert processes[0].returncode is None
+            for _ in range(2):
+                closing = asyncio.create_task(manager.close())
+                await wait_until(lambda: manager._closing is not None)
+                closing.cancel()
+                with pytest.raises(asyncio.CancelledError):
+                    await closing
+                assert not manager._closing.done()
+                assert manager._cleanup is owner and not owner.done()
+                manager.start()
+                assert len(processes) == 1
+                assert await manager.check() == "dependency_unavailable"
+            release.set()
+            await asyncio.wait_for(manager.close(), 2)
+            assert processes[0].returncode == -signal.SIGKILL
+            assert manager._process is None and manager._cleanup is None
+            await manager.close()
+        finally:
+            release.set()
+            for process in processes:
+                if process.returncode is None:
+                    process.kill()
+                await process.wait()
+            await manager.close()
+
+    asyncio.run(exercise())
+
+
+def test_legacy_boto_provider_cannot_load_host_credentials(monkeypatch):
+    from botocore.credentials import BotoProvider
+
+    monkeypatch.setenv("BOTO_CONFIG", "/synthetic/host-credentials")
+    inspected = []
+
+    def synthetic_parser(path):
+        inspected.append(path)
+        if path == os.devnull:
+            return {}
+        return {
+            "Credentials": {"aws_access_key_id": "private-key", "aws_secret_access_key": "secret"}
+        }
+
+    assert BotoProvider(environ=_environment(), ini_parser=synthetic_parser).load() is None
+    assert inspected == [os.devnull]

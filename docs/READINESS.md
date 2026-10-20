@@ -23,7 +23,10 @@ fault during a mutation is outcome_uncertain: the request may have committed,
 so clients must reconcile its original identity rather than assume failure.
 Unexpected errors emit a restricted request_failed record containing only a
 fixed error code and generated request ID. The logger never receives the
-exception, its traceback, locals, class name or request contents. No tracing or
+exception, its traceback, locals, class name or request contents. The bounded JSON
+message includes correlation even under the default log formatter. If a logging
+sink raises, that diagnostic is lost; its exception is never re-logged or allowed
+to replace the safe response, including after streamed headers. No tracing or
 metric exporter is enabled by this change. The serve command keeps access logs
 disabled; deployments must not enable raw proxy/access/debug-body capture.
 
@@ -55,7 +58,8 @@ capacity.
 Configuration travels through a private bounded pipe, never command-line
 arguments or logs. The child receives only its database/store/encryption
 configuration and an allowlisted storage environment. Provider and IdP secrets
-are excluded. AWS profile files and credential_process are disabled; supported
+are excluded. Modern AWS profile files, legacy Boto files and credential_process
+are disabled; supported
 storage identity comes from explicit AWS environment credentials, web identity,
 container credentials or instance identity. No subprocess credential helper is
 supported. Standard error is discarded and stdout is a finite three-result
@@ -74,7 +78,10 @@ cancellation kills the process group. The response need not wait for process
 reaping: the slot remains unavailable until actual cleanup completes, and no
 replacement is spawned before that. Restart initialization is lifecycle work
 with a five-second delay, not work started by an incoming request. Application
-shutdown marks drain, invalidates cache, terminates and reaps the worker.
+shutdown marks drain, invalidates cache, terminates and reaps the worker. Pending
+spawn ownership transfers to retained cleanup before a timeout/cancellation path
+returns; repeated shutdown-caller cancellation cannot cancel that owner or permit
+a replacement before the original child handle is delivered and reaped.
 Parent-death containment prevents a crashed application leaving a live probe;
 the operating system owns orphan reaping after parent death.
 
@@ -88,7 +95,9 @@ uninterruptible kernel. Cleanup ownership remains retained in those cases.
 
 Set the private REWIND_INSTALLATION_KEY to the installation identity already
 established by metadata migration, together with the artifact encryption and
-local/S3 configuration. Run:
+local/S3 configuration. The identity uses the shared metadata grammar: 1–64 ASCII
+letters, digits, underscores or hyphens, starting with a letter or digit. Invalid
+identities are rejected before publishing bytes. Run:
 
     rewind doctor --provision-sentinel
 
@@ -144,12 +153,15 @@ Tests exercise first-excess-byte detection, short reads, regular-file/FIFO/symli
 refusal, corrupt keys/ciphertext/config, S3 length/range mismatches, exact identity
 binding, atomic publication, safe CLI errors and installed package resources.
 Real subprocess tests cover no-output and partial-frame stalls, timeout/cancel
-with actual SIGKILL/reaping, held cleanup capacity, cache expiry, parent death,
+with actual SIGKILL/reaping, startup timeout followed by repeated shutdown
+cancellation, held cleanup capacity, cache expiry, parent death,
 finite IPC, child stderr/traceback canaries, and DB/DNS/store/body/decrypt stalls.
 Synthetic ready workers are test-only; there is no runtime profile override.
 
 API tests cover fixed error templates, hostile exception formatting, nested
-exceptions, private validation paths/inputs, generated correlation, ambiguous
+exceptions, failing log sinks before/after headers, default-format correlation,
+missing requested records versus corrupt internal evidence, private validation
+paths/inputs, generated correlation, ambiguous
 mutation outcomes, auth-before-probe and readiness-before-upload, as well as
 cancellation/revocation/logout during storage failure. Legacy guard tests retain
 their actual refusal cases with safe public responses.

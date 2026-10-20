@@ -4,6 +4,7 @@ import asyncio
 
 import pytest
 import test_migrations_postgres as migration_cases
+from postgres_control import wait_for_database_drain
 from pydantic import SecretStr
 from sqlalchemy import text
 
@@ -57,6 +58,9 @@ def test_real_postgres_readiness_refuses_migration_only_and_owns_one_connection(
             assert connections() == 1
         finally:
             await manager.close()
+        # Client reaping precedes PostgreSQL backend cleanup. Observe server exit
+        # from the separate control database instead of asserting immediate absence.
+        wait_for_database_drain(pg["control"], pg["owner"].url.database)
         assert connections() == 0
 
     asyncio.run(exercise())

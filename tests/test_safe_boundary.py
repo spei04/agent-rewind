@@ -215,3 +215,91 @@ def test_invalid_workspace_path_is_safe_client_error_before_reads(
         )
     assert response.status_code == 422
     assert "private-source" not in response.text
+
+
+@pytest.mark.parametrize("started", [False, True])
+def test_logging_sink_failure_cannot_escape_before_or_after_headers(monkeypatch, capsys, started):
+    import asyncio
+    import logging
+
+    from agent_rewind.errors import SafeBoundary
+
+    def broken_sink(*args, **kwargs):
+        raise RuntimeError(CANARY)
+
+    monkeypatch.setattr(logging.getLogger("agent_rewind.safe"), "error", broken_sink)
+
+    async def exercise():
+        messages = []
+
+        async def app(scope, receive, send):
+            if started:
+                await send({"type": "http.response.start", "status": 200, "headers": []})
+            raise ValueError(CANARY)
+
+        async def receive():
+            return {"type": "http.request", "body": b""}
+
+        async def send(message):
+            messages.append(message)
+
+        await SafeBoundary(app)(
+            {"type": "http", "path": "/api/v1/fault", "method": "GET"}, receive, send
+        )
+        assert messages[0]["status"] == (200 if started else 500)
+        headers = dict(messages[0]["headers"])
+        assert re.fullmatch(b"[0-9a-f]{32}", headers[b"x-request-id"])
+        if not started:
+            assert json.loads(messages[-1]["body"])["code"] == "internal_error"
+        assert CANARY not in repr(messages)
+
+    asyncio.run(exercise())
+    captured = capsys.readouterr()
+    assert CANARY not in captured.out + captured.err
+
+
+def test_default_log_message_contains_safe_correlation(boundary_app, caplog):
+    import logging
+
+    @boundary_app.get("/api/v1/log-fault")
+    def fault():
+        raise ValueError(CANARY)
+
+    with TestClient(boundary_app) as client:
+        response = client.get("/api/v1/log-fault")
+    record = next(record for record in caplog.records if record.name == "agent_rewind.safe")
+    emitted = logging.Formatter().format(record)
+    assert json.loads(emitted) == {
+        "event": "request_failed",
+        "error_code": "internal_error",
+        "request_id": response.headers["X-Request-ID"],
+    }
+    assert len(emitted) < 160 and CANARY not in emitted
+
+
+@pytest.mark.parametrize(
+    "path", ["/api/runs/missing/files/1", "/api/compare?left=missing&right=missing"]
+)
+def test_requested_missing_run_is_404(boundary_app, settings, path):
+    with TestClient(boundary_app) as client:
+        response = client.get(
+            path, headers={"Authorization": "Bearer " + settings.bootstrap_key.get_secret_value()}
+        )
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Resource not found."}
+
+
+@pytest.mark.parametrize(
+    "path", ["/api/runs/present/files/1", "/api/compare?left=present&right=present"]
+)
+def test_internal_missing_evidence_field_remains_500(boundary_app, settings, monkeypatch, path):
+    # Requested records exist; a malformed nested event is an internal data error.
+    monkeypatch.setattr(boundary_app.state.db, "get", lambda *args: {})
+    monkeypatch.setattr("agent_rewind.api.read_events", lambda *args: [{}])
+    monkeypatch.setattr("agent_rewind.compare.read_events", lambda *args: [{}])
+    with TestClient(boundary_app) as client:
+        response = client.get(
+            path, headers={"Authorization": "Bearer " + settings.bootstrap_key.get_secret_value()}
+        )
+    assert response.status_code == 500
+    assert response.json() == {"detail": "The request could not be completed."}

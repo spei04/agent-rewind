@@ -231,6 +231,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 valid_path(path)
             except ValueError:
                 raise Fault("invalid_request") from None
+        record(run_id, "run")
         history = read_events(db, artifacts, run_id)
         if not 1 <= step <= len(history):
             raise HTTPException(404, "Decision not found.")
@@ -298,6 +299,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/compare")
     def compare_runs(request: Request, left: str, right: str) -> dict[str, Any]:
         auth.principal(request)
+        record(left, "run")
+        record(right, "run")
         return compare(db, artifacts, left, right, settings.workspace_mb * 1024 * 1024)
 
     @app.get("/api/studies")

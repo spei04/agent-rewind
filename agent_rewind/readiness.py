@@ -53,6 +53,7 @@ def _environment() -> dict[str, str]:
             "PYTHONDONTWRITEBYTECODE": "1",
             "AWS_CONFIG_FILE": os.devnull,
             "AWS_SHARED_CREDENTIALS_FILE": os.devnull,
+            "BOTO_CONFIG": os.devnull,
             "PYTHONUNBUFFERED": "1",
         }
     )
@@ -73,6 +74,7 @@ class Readiness:
         self._cleanup: asyncio.Task[None] | None = None
         self._probe: asyncio.Task[ProbeResult] | None = None
         self._restart: asyncio.Task[None] | None = None
+        self._closing: asyncio.Task[None] | None = None
         self._warm = False
         self._draining = False
         self._positive_at: float | None = None
@@ -117,13 +119,31 @@ class Readiness:
                     raise ValueError("invalid_probe_handshake")
                 self._warm = True
         except (Exception, asyncio.CancelledError):
-            # A cancelled spawn must still be accounted for before another worker.
+            # Transfer pending spawn ownership without another cancellable await.
+            # Timeout followed by shutdown must not lose a child before PID delivery.
             if self._process is None and spawning is not None:
-                with contextlib.suppress(Exception):
-                    self._process = await asyncio.shield(spawning)
-            self._retire()
+                self._cleanup = asyncio.create_task(self._finish_spawn(spawning))
+            else:
+                self._retire()
         finally:
             self._starting = None
+
+    async def _finish_spawn(self, spawning: asyncio.Task[asyncio.subprocess.Process]) -> None:
+        try:
+            process = await spawning
+        except Exception:
+            self._cleanup = None
+            self._schedule_restart()
+            return
+        self._process = process
+        self._kill(process)
+        await self._reap(process)
+
+    @staticmethod
+    def _kill(process: asyncio.subprocess.Process) -> None:
+        if process.returncode is None:
+            with contextlib.suppress(ProcessLookupError):
+                os.killpg(process.pid, signal.SIGKILL)
 
     def _retire(self) -> None:
         self._warm = False
@@ -131,9 +151,7 @@ class Readiness:
         process = self._process
         if process is None or self._cleanup is not None:
             return
-        if process.returncode is None:
-            with contextlib.suppress(ProcessLookupError):
-                os.killpg(process.pid, signal.SIGKILL)
+        self._kill(process)
         # Physical ownership ends only after wait/reap, never at response timeout.
         self._cleanup = asyncio.create_task(self._reap(process))
 
@@ -144,6 +162,9 @@ class Readiness:
         if self._process is process:
             self._process = None
         self._cleanup = None
+        self._schedule_restart()
+
+    def _schedule_restart(self) -> None:
         # Restart initialization is lifecycle work, never a request's I/O.
         if not self._draining and self._restart is None:
             self._restart = asyncio.create_task(self._restart_later())
@@ -205,6 +226,12 @@ class Readiness:
     async def close(self) -> None:
         self._draining = True
         self._positive_at = None
+        if self._closing is None:
+            self._closing = asyncio.create_task(self._close())
+        # Repeated cancellation of callers must not cancel physical cleanup.
+        await asyncio.shield(self._closing)
+
+    async def _close(self) -> None:
         if self._restart is not None:
             self._restart.cancel()
             with contextlib.suppress(asyncio.CancelledError):
