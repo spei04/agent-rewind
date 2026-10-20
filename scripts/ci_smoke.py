@@ -13,9 +13,26 @@ from sqlalchemy.engine import Engine
 import agent_rewind
 import agent_rewind.api
 import agent_rewind.cli
+import agent_rewind.scoped_artifacts
 from agent_rewind.migrations.compatibility import runtime_schema_compatibility
 from agent_rewind.migrations.ownership_service import initialize_ownership
 from agent_rewind.migrations.service import install, schema_status
+from agent_rewind.scoped_repositories import ProjectContext, ResourceNotFound, ScopedRepositories
+
+
+def repository_smoke(engine: Engine) -> None:
+    repository = ScopedRepositories(engine)
+    # Synthetic trusted identity matches only the explicit smoke initialization.
+    context = ProjectContext("8" * 32, "9" * 32, "oidc:" + "a" * 64)
+    if repository.list_resources(context, "run") != []:
+        raise RuntimeError("Installed scoped repository did not preserve the empty project")
+    try:
+        repository.list_resources(ProjectContext("8" * 32, "7" * 32, context.principal_id), "run")
+    except ResourceNotFound as error:
+        if str(error) != "Resource not found.":
+            raise RuntimeError("Installed scoped denial changed its public message") from None
+    else:
+        raise RuntimeError("Installed scoped repository admitted a foreign project")
 
 
 def artifact_smoke(engine: Engine, root: Path) -> None:
@@ -153,6 +170,7 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
         )
         if ownership["state"] != "ownership_complete" or ownership["customer_ready"]:
             raise RuntimeError("Installed ownership revision failed the explicit transition")
+        repository_smoke(engine)
         artifact_smoke(engine, Path(temporary))
         compatibility = runtime_schema_compatibility(engine)
         if compatibility.status != "incompatible" or compatibility.code != "migration_only":
