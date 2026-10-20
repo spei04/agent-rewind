@@ -111,7 +111,10 @@ def main() -> None:
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8080)
     commands.add_parser("worker", help="Execute queued jobs")
-    commands.add_parser("doctor", help="Check the database, artifact store, and sandbox runtime")
+    doctor = commands.add_parser(
+        "doctor", help="Check the database, artifact store, and sandbox runtime"
+    )
+    doctor.add_argument("--provision-sentinel", action="store_true")
     submit = commands.add_parser("submit", help="Submit a task manifest")
     submit.add_argument("path", type=Path)
     submit.add_argument("--url", default="http://127.0.0.1:8080")
@@ -145,6 +148,11 @@ def main() -> None:
         return
     if args.command in {"init", "migrate"}:
         _migrate(parser, args)
+        return
+    if args.command == "doctor" and args.provision_sentinel:
+        from .sentinel_cli import provision_sentinel
+
+        provision_sentinel()
         return
     settings = Settings()
     if args.command == "serve":

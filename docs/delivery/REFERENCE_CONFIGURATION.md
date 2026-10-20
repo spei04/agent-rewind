@@ -151,7 +151,7 @@ CAP-01 remains material: byte retention and Class A/B operation counts are separ
 inputs, and file fanout must be measured before recurring funding. The peak connection check uses:
 
 ```text
-API max instances × API processes per instance × (API pool_size + API max_overflow)
+API max instances × API processes per instance × (API pool_size + API max_overflow + 1 readiness connection)
 + worker max hosts × worker processes per host × (worker pool_size + worker max_overflow)
 + operator connection reserve
 ≤ 70% of declared database connection capacity
@@ -159,8 +159,11 @@ API max instances × API processes per instance × (API pool_size + API max_over
 
 Both overflow allowances are explicit nonnegative bounded inputs; unlimited
 overflow is rejected. The example declares one API process per instance and
-overflow 10 for each API/worker pool, giving 136 possible connections against
-a synthetic capacity of 200. Multiple API processes multiply independent pools.
+overflow 10 for each API/worker pool, giving 138 possible connections against
+a synthetic capacity of 200. Multiple API processes multiply independent pools and supervised readiness connections.
+The readiness child has a fixed pool size of one and zero overflow; there is no
+configuration knob that can exclude it from this bound. This corrects the
+pre-readiness envelope without changing the version 1 input shape or fixture identities.
 The current Database engine leaves [SQLAlchemy's default overflow](https://docs.sqlalchemy.org/en/20/core/pooling.html#sqlalchemy.pool.QueuePool.__init__) at 10; this
 contract changes no runtime pool behavior. AR-033-C must set and verify both
 `pool_size` and `max_overflow` for every process and verify the declared process

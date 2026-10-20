@@ -302,7 +302,7 @@ class ReferenceConfig(Strict):
         connections = (
             c.api_max_instances
             * c.api_processes_per_instance
-            * (c.api_pool_size + c.api_max_overflow)
+            * (c.api_pool_size + c.api_max_overflow + 1)
             + c.worker_max_hosts
             * c.worker_processes_per_host
             * (c.worker_pool_size + c.worker_max_overflow)

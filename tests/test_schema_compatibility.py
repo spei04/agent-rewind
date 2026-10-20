@@ -209,7 +209,7 @@ def test_all_customer_routes_refuse_before_auth_or_artifacts(settings, path, met
     with TestClient(app) as client:
         response = getattr(client, method)(path)
     assert response.status_code == 503
-    assert response.json()["code"] == "migration_only"
+    assert response.json()["detail"] == "Service schema is not compatible with this release."
     assert response.headers["cache-control"] == "no-store"
     app.state.db.engine.dispose()
 
@@ -309,7 +309,7 @@ def test_unavailable_api_guard_does_not_leak_database_error(settings, monkeypatc
     with TestClient(app) as client:
         response = client.get("/api/runs")
         assert response.status_code == 503
-        assert response.json()["code"] == "schema_unavailable"
+        assert response.json()["detail"] == "A required service is temporarily unavailable."
         assert "private" not in response.text
         assert client.get("/livez").status_code == 200
     app.state.db.engine.dispose()
@@ -372,7 +372,7 @@ def test_stalled_probes_are_capped_while_liveness_and_static_respond(settings, m
             assert entered.wait(timeout=2)
             full = client.get("/api/runs")
             assert full.status_code == 503
-            assert full.json()["code"] == "schema_probe_capacity"
+            assert full.json()["detail"] == "A required service is temporarily unavailable."
             assert calls == 4
             assert client.get("/healthz").status_code == 503
             assert client.get("/livez").status_code == 200
@@ -380,7 +380,10 @@ def test_stalled_probes_are_capped_while_liveness_and_static_respond(settings, m
         finally:
             release.set()
         assert all(future.result(timeout=2).status_code == 503 for future in futures)
-        assert client.get("/api/runs").json()["code"] == "schema_unavailable"
+        assert (
+            client.get("/api/runs").json()["detail"]
+            == "A required service is temporarily unavailable."
+        )
     assert calls == 5
     app.state.db.engine.dispose()
 
@@ -420,7 +423,7 @@ def test_cancelled_request_retains_capacity_until_its_sync_probe_exits(settings,
                 # Allow actual task cancellation to propagate through the ASGI boundary.
                 await asyncio.wait({tasks[0]}, timeout=0.05)
                 full = await asyncio.wait_for(client.get("/api/runs"), timeout=1)
-                assert full.json()["code"] == "schema_probe_capacity"
+                assert full.json()["detail"] == "A required service is temporarily unavailable."
                 assert calls == 4
                 health = await asyncio.wait_for(client.get("/livez"), timeout=1)
                 assert health.status_code == 200
@@ -503,7 +506,10 @@ def test_legacy_health_checks_connectivity_without_claiming_schema_readiness(set
         app.state.db.migrate(installation_key="synthetic-health")
         assert client.get("/healthz").json() == {"status": "ok"}
         assert client.head("/healthz").status_code == 200
-        assert client.get("/api/runs").json()["code"] == "migration_only"
+        assert (
+            client.get("/api/runs").json()["detail"]
+            == "Service schema is not compatible with this release."
+        )
         with app.state.db.engine.begin() as connection:
             connection.exec_driver_sql("UPDATE alembic_version SET version_num='ar_future'")
         # Legacy health is connectivity only, even when admission is incompatible.

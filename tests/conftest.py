@@ -92,12 +92,20 @@ def legacy_behavior_schema(monkeypatch):
     no product flag, environment variable or injectable application profile.
     """
     from agent_rewind.migrations.compatibility import CompatibilityResult
+    from agent_rewind.readiness import Readiness
 
     monkeypatch.setattr(
         Database,
         "schema_compatibility",
         lambda self: CompatibilityResult("ready", "synthetic_legacy_unit_behavior"),
     )
+
+    async def synthetic_ready(self):
+        return "ready"
+
+    # Existing legacy behavior tests have no process/storage readiness claim.
+    monkeypatch.setattr(Readiness, "start", lambda self: None)
+    monkeypatch.setattr(Readiness, "check", synthetic_ready)
 
 
 @pytest.fixture
