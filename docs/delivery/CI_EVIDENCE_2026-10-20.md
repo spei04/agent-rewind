@@ -9,7 +9,7 @@ This record does not authorize package publication, deployment or customer data.
 | Merged source | `13465c10add08020b1be67b20ed081c0bc27f3e4` |
 | PR validation | [Run 39346080653](https://github.com/spei04/agent-rewind/actions/runs/39346080653): core 3.11/3.12, PostgreSQL, gVisor, security, package and CI gate passed; delivery skipped; zero artifacts |
 | Protected-main delivery | [Run 39346262029](https://github.com/spei04/agent-rewind/actions/runs/39346262029): every required job and Main candidate delivery passed |
-| Test evidence | 495 tests passed on each Python version; three core skips remain environment/collection dependent. Separate real gVisor job passed three tests. Ruff/format/types/contracts, strict dependency audit and isolated package smoke passed |
+| Test evidence | 495 tests passed on each Python version; the three Docker tests skip in the core environment and pass in the separate real gVisor job. Ruff/format/types/contracts, strict dependency audit and isolated package smoke passed |
 | Candidate | Artifact `12230273836`, `candidate-13465c10add08020b1be67b20ed081c0bc27f3e4-1`, 219,290 bytes |
 | Retention | Expires 2026-10-27 00:13:52 UTC; seven-day candidate retention, not a durable release store |
 | Runtime inputs | Frozen lock with cryptography 50.0.2, Alembic 1.20.0 and build backend setuptools 83.0.0; manifest/lock agreement checked before consumption |

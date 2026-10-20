@@ -1975,7 +1975,7 @@ M4 / P0 · 3 PRs · 10 engineering days · Not started
 
 ### AR-033 — Make the reference installation reproducible and its trust boundaries testable
 
-M4 / P0 · 4 PRs · 10 engineering days · Not started
+M4 / P0 · 4 PRs · 10 engineering days · In progress
 
 <a id="ar-033-a"></a>
 
