@@ -2,9 +2,9 @@
 
 **Revision:** 2026-10-20 · **Owner:** spei04 · **Status:** Approved for staged execution; task-specific gates remain applicable.
 
-This is the assignable execution companion to [the roadmap](PLAN.md). It covers 51 work packages as 146 independently reviewable PR-sized tasks. No application implementation, production provisioning or paid inference was started in preparing this packet. E0 is satisfied by explicit project-owner approval on 2026-10-19. Initial assignments and subsequent reviews are tracked in [ASSIGNMENTS.md](ASSIGNMENTS.md). Task cards and the machine-readable ledger record current status. Existing product code and historical test evidence are the starting point, not completion evidence for these tasks.
+This is the assignable execution companion to [the roadmap](PLAN.md). It covers 52 work packages as 148 independently reviewable PR-sized tasks. No application implementation, production provisioning or paid inference was started in preparing this packet. E0 is satisfied by explicit project-owner approval on 2026-10-19. Initial assignments and subsequent reviews are tracked in [ASSIGNMENTS.md](ASSIGNMENTS.md). Task cards and the machine-readable ledger record current status. Existing product code and historical test evidence are the starting point, not completion evidence for these tasks.
 
-The [machine-readable backlog](../contracts/proposals/execution-backlog.json) records the same task fields, contract producers, gates, first-fortnight allocations and dependency audit. Maintain the roadmap summary, this document, that ledger and affected GitHub issues together. IDs are permanent; never renumber completed evidence. The roadmap remains authoritative for product/architecture requirements; task-level edges here replace coarse package-level start assumptions. A future contract is a required producer deliverable, not an already implemented interface.
+The [machine-readable backlog](../contracts/proposals/execution-backlog.json) records the same task fields, contract producers, gates, first-fortnight allocations and dependency audit. Recompute metrics and validate task/gate dependencies, contract-producer ancestry, card/roadmap parity and conditional schedule with `python scripts/check_execution_backlog.py` from the repository root; `python -m pytest -q -p no:cacheprovider tests/test_execution_backlog.py` exercises refusal of planning drift. Maintain the roadmap summary, this document, that ledger and affected GitHub issues together. IDs are permanent; never renumber completed evidence. The roadmap remains authoritative for product/architecture requirements; task-level edges here replace coarse package-level start assumptions. A future contract is a required producer deliverable, not an already implemented interface.
 
 ## Approval boundary and readiness
 
@@ -18,10 +18,10 @@ Reviewed PLAN, README and the current-release architecture, deployment, security
 
 | ID | Finding | Correction |
 | --- | --- | --- |
-| REV-01 | Five/ten-day packages had generic a/b splits with no assignable PR boundary. | 146 specific tasks, 0.5–4 engineering days each, with scope, exclusions, contracts, tests, review and acceptance. Parent IDs retained for traceability. |
+| REV-01 | Five/ten-day packages had generic a/b splits with no assignable PR boundary. | 148 specific tasks, 0.5–4 engineering days each, with scope, exclusions, contracts, tests, review and acceptance. Parent IDs retained for traceability. |
 | REV-02 | Real storage/KMS/runtime verification depended on IaC scheduled after runtime, creating a coarse milestone loop. | AR-033-A/B are early M4 foundation tasks after G0/ENV0; AR-033-C/D integrate and independently reinstall later. Task graph, not package-level all-to-all edges, governs starts. |
 | REV-03 | Reference cloud uses GCS but current artifact implementation only provides local/S3 paths. | AR-016-C explicitly implements native GCS and real-store conformance. No assumption that S3 support proves GCS compatibility. |
-| REV-04 | 42–50 week GA and 28–34 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff. | Retire dated windows. 429 base engineering days; 146.5-day effort-only longest path excludes role contention and external waits. Reforecast after Day 10 and each gate using actual throughput; no committed launch date. |
+| REV-04 | 42–50 week GA and 28–34 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff. | Retire dated windows. 433 base engineering days; 146.5-day effort-only longest path excludes role contention and external waits. Reforecast after Day 10 and each gate using actual throughput; no committed launch date. |
 | REV-05 | Uniform effort estimates concealed research, independent review and customer integration uncertainty. | Each task has confidence/range. 25% portfolio reserve is separate; audit fixes, procurement gaps, customer remediation and staffing/vendor waits remain explicitly unestimated gates. |
 | REV-06 | Five M1 operations cannot support all branch, study, admin, export and SDK consumers. | Contract producer PRs AR-027-A/029-A/032-A/034-A precede their services/consumers; runtime consumers cannot start on an absent future schema. |
 | REV-07 | Logical artifact and idempotency scope references lacked explicit matching composite unique/FK constraints. | Tighten m1.data-model.json artifact/project/owner and operation/principal/kind constraints; add corresponding scope-negative assertions to existing planned acceptance cases. |
@@ -30,20 +30,21 @@ Reviewed PLAN, README and the current-release architecture, deployment, security
 | REV-10 | The $200 historical validation cap was not a budget for a statistically powered natural-failure study or recurring production infrastructure. | PAID0 reconciles the existing authorization; STUDYFUNDS0, ENV0 and SCALEFUNDS0 require concrete funded scopes. No spending occurred in backlog preparation. |
 | REV-11 | Aggregate six-engineer capacity hid heavy verification and platform ownership. | Role rollups expose QE 111.5 days and PL 88 days; two-week allocation stays <=0.5 delivery day/role/day. Independent reviewers and support coverage are external capacity dependencies. |
 | REV-12 | A ten-day security package implied arbitrary unknown remediation could be scheduled and completed in advance. | AR-044 splits scope/triage/retest. SECFIX0 requires finding-specific fix PRs estimated after the assessment; prohibited blockers cannot be risk-accepted away. |
-| REV-13 | Planning artifacts, existing tests and live validation risked being read as enterprise implementation evidence. | Internal M0 specifications and development G0 are reviewed; migration and CI work are active. All 24 M1 runtime cases remain planned, and production/customer evidence remains pending. Historical tests do not close future readiness gates. |
+| REV-13 | Planning artifacts, existing tests and live validation risked being read as enterprise implementation evidence. | Internal M0 specifications and development G0 are reviewed; migration, ownership, readiness and CI have scoped evidence. All 24 M1 runtime cases remain planned, and production/customer evidence remains pending. Historical tests do not close future readiness gates. |
 | REV-14 | M1 org/project/job caps do not by themselves cap a fan-out study spanning many child jobs. | AR-020-A/B explicitly introduce study-scoped ledger accounts and project/study/call closure; AR-022-A tests atomic study-wide caps under parallel child dispatch. |
+| REV-15 | Approved research design could be bypassed by future experiment/report producers if kept only in prose. | Activate RA-01-A/B and unavailable design outputs C20/C21; add RA-01-B prerequisites to AR-020-A and AR-024-A so affected research consumers inherit accepted design before implementation. |
 
 ## Estimates, staffing and uncertainty
 
-Engineering effort includes implementation, task tests, ordinary review/rework and task documentation. Core capacity scenario is six roles at 3.5 delivery days/week each; 30% reserved for coordination/support. High range 0.8–1.2x, medium 1–1.5x, low 1–2x; ranges are planning bounds, not calibrated probabilities. 25% program integration reserve is an alternate portfolio allowance, not additive to summed upper ranges. External assessment fees/waits, unbounded finding remediation, hiring, unknown customer gaps and ongoing operations are excluded and require re-estimate.
+Engineering effort includes implementation or design, task tests, ordinary review/rework and documentation. Six logical role totals are demand estimates, not six funded human FTEs. Three contributor slots are active; no measured conversion from those slots to engineering days or a launch calendar is assumed. A hypothetical human role at 3.5 delivery days/week is shown only as a capacity lower bound. Ranges are planning bounds, not probabilities; RA-01 uses approved 2–3 and 2–4 day design ranges. The 25% integration reserve is alternative to summed upper ranges, not additive. External review/operations/funding waits and unestimated follow-up implementation remain excluded.
 
-Base effort: **429 engineering days**. A 25% integration/rework allowance gives **536.25 days**; summing task upper planning bounds gives **723.6 days**. These are alternative views of uncertainty, not budgets to add together and not calendar commitments. Earlier 430-day/538-day totals are superseded. Research execution time and model charges, external assessment lead time/fees, unknown security fixes, customer-required gaps and ongoing support are not disguised inside a fixed ten-day task. An unknown required fix becomes a new ID/PR with scope and tests before its gate can close.
+Base effort: **433 engineering days**. A 25% integration/rework allowance gives **541.25 days**; summing task upper planning bounds gives **730.6 days**. These are alternative views of uncertainty, not budgets to add together and not calendar commitments. Earlier 430-day/538-day totals are superseded. Research execution time and model charges, external assessment lead time/fees, unknown security fixes, customer-required gaps and ongoing support are not disguised inside a fixed ten-day task. An unknown required fix becomes a new ID/PR with scope and tests before its gate can close.
 
 | Primary role | Base delivery days | Single-role capacity lower bound at 3.5 days/week |
 | --- | ---: | ---: |
 | TL | 73 | 20.9 weeks |
 | FE | 23 | 6.6 weeks |
-| RS | 57 | 16.3 weeks |
+| RS | 61 | 17.4 weeks |
 | PL | 88 | 25.1 weeks |
 | BE | 76.5 | 21.9 weeks |
 | QE | 111.5 | 31.9 weeks |
@@ -54,7 +55,7 @@ QE and PL are material resource constraints. At the Day 10 review, redistribute 
 
 ## Critical path, parallel tracks and contingencies
 
-The task DAG has **519 edges**, **26 explicit gates**, no cycles and a **146.5-engineering-day longest effort path**. At 70% delivery availability this alone is about 41.9 workweeks before role contention, mandatory elapsed windows and external waits. It is a lower bound, not a launch forecast. Zero effort on an external gate means engineering effort is not estimated; it never means the gate is already satisfied or has zero lead time.
+The task DAG has **524 edges**, **26 explicit gates**, no cycles and a **146.5-engineering-day longest effort path**. Under a hypothetical human role at 3.5 delivery days/week this is about 41.9 workweeks before contention and external waits; the three contributor slots have no validated conversion to that staffing scenario. It is a lower bound, not a launch forecast. Zero effort on an external gate means engineering effort is not estimated; it never means the gate is already satisfied or has zero lead time.
 
 The computed effort path, including integration joins, is:
 
@@ -88,18 +89,39 @@ After the first two weeks, use dependency-ready milestone scheduling. The former
 
 | Milestone | Base effort | Scheduling after Day 10 | Explicit exit / integration checkpoint |
 | --- | ---: | --- | --- |
-| M0 | 8.5 days | Preparatory work and freeze in Days 1–10; ARCH0/AR-004-C/G0 follow reviewed output | [G0](#g0): M0 accepted; schemas and initial migration scope reviewed. |
+| M0 | 8.5 days | Internal development freeze verified; external production conditions remain separate | [G0](#g0): M0 accepted; schemas and initial migration scope reviewed. |
 | M1 | 41.5 days | Continue foundation work after G0; migration and secure CI run in parallel | [G1](#g1): Historical identities, 24 behavioral cases, scope/lease/budget compatibility, required CI and installable main candidate evidence pass. |
 | M2 | 69 days | Start each task after its foundation inputs; joins G1 plus early staging | [G2](#g2): Real gVisor isolation/restore/cleanup, cloud store/key rotation, fail-closed lease and accounted live smoke verified. |
-| M3 | 70 days | Trial/statistics work may overlap M2 after its contracts; joins G2 | [G3](#g3): Resumable distributed studies preserve frozen protocol, missingness and all call accounting; reports independently recompute. |
+| M3 | 74 days | Includes 4 base days of RA-01 design before C08/C09 producers; runtime follows its original prerequisites and G2 | [G3](#g3): Resumable distributed studies preserve frozen protocol, missingness and all call accounting; reports independently recompute. |
 | M4 | 82 days | Early IaC after G0; UI/SDK after producer APIs; complete after G3 | [G4](#g4): Independent full browser/SDK workflow and fresh install pass with real IdP/GCS/KMS/gVisor and selected adapter. |
 | M5 | 50 days | Only after G4 and funded customer/data/recovery gates; >=28-day measurement | [G5](#g5): Two partners, four calendar weeks, supported denominator/product metrics and natural-failure claim review accepted; no pilot blockers. |
 | M6 | 78 days | Hardening overlaps stable M3–M5; readiness closure only after G5 | [G6](#g6): Forecast load/24h soak, zone/regional recovery, independent security retest, procurement, support and upgrade evidence pass with no prohibited blocker. |
 | M7 | 30 days | Only after G6 and launch approval; >=30-day operating review | [G7](#g7): Controlled launch accepted and 30-day operating review complete; next scope separately approved. |
 
-Integration checkpoints: Day 5 fixture/workflow review; Day 8 producer handoff; Day 10 freeze packet and scope/capacity reforecast; ARCH0/G0 after reviewed output; AR-005-C historical upgrade and runtime guard; AR-012-B all M1 cases; AR-019-C real runtime/store/key/fault evidence; AR-026-C distributed study integrity; AR-034-D independent browser/SDK flow; AR-035-C pre-ingestion recovery; AR-039-C two-partner pilot review; AR-047-C readiness audit; AR-048-C release decision; AR-049-C accepted rollout; AR-050-C 30-day closure. During active M1–M4 work, merge small reviewed PRs, run daily shared synthetic integration and twice-weekly cross-role reviews. A review meeting is not a passing gate.
+Current RA checkpoints: accepted audit before protocol, followed by reviewed design and scope/capacity reforecast. Historical initial checkpoints were Day 5 fixture/workflow review, Day 8 producer handoff and Day 10 freeze packet; ARCH0/G0 are now satisfied for development. Subsequent integration checkpoints: AR-005-C historical upgrade and runtime guard; AR-012-B all M1 cases; AR-019-C real runtime/store/key/fault evidence; AR-026-C distributed study integrity; AR-034-D independent browser/SDK flow; AR-035-C pre-ingestion recovery; AR-039-C two-partner pilot review; AR-047-C readiness audit; AR-048-C release decision; AR-049-C accepted rollout; AR-050-C 30-day closure. During active M1–M4 work, merge small reviewed PRs, run daily shared synthetic integration and twice-weekly cross-role reviews. A review meeting is not a passing gate.
 
 ## First two weeks — day-by-day
+
+The live table is the **conditional RA-01 review schedule**, anchored to the first staffed working day after the owner's design approval and contributor availability. It is not a reset of the whole program or a promise of ten elapsed days. Three contributor slots remain: A authors the audit/protocol, C independently reviews research, B checks dependency/integration records. The two tasks total 4 base engineering days; ordinary review is included in task estimates, with unallocated capacity reserved for review and contingency. Contributor slots are not six human FTEs and have no measured conversion to human delivery days.
+
+| Conditional day | Primary delivery allocation | Required checkpoint |
+| --- | --- | --- |
+| RA Day 1 | Engineer A: [RA-01-A](#ra-01-a) (0.5d) | Audit primary sources, available code/licenses and comparison feasibility; public inputs only. |
+| RA Day 2 | Engineer A: [RA-01-A](#ra-01-a) (0.5d) | Audit primary sources, available code/licenses and comparison feasibility; public inputs only. |
+| RA Day 3 | Engineer A: [RA-01-A](#ra-01-a) (0.5d) | Audit primary sources, available code/licenses and comparison feasibility; public inputs only. |
+| RA Day 4 | Engineer A: [RA-01-A](#ra-01-a) (0.5d) | Audit primary sources, available code/licenses and comparison feasibility; public inputs only. |
+| RA Day 5 | No new primary delivery allocation; review checkpoint | Independent C/lead audit acceptance required before RA-01-B; elapsed time is not acceptance. |
+| RA Day 6 | Engineer A: [RA-01-B](#ra-01-b) (0.5d) | Protocol design consumes accepted C20; freeze no runtime or paid-study authority. |
+| RA Day 7 | Engineer A: [RA-01-B](#ra-01-b) (0.5d) | Protocol design consumes accepted C20; freeze no runtime or paid-study authority. |
+| RA Day 8 | Engineer A: [RA-01-B](#ra-01-b) (0.5d) | Protocol design consumes accepted C20; freeze no runtime or paid-study authority. |
+| RA Day 9 | Engineer A: [RA-01-B](#ra-01-b) (0.5d) | Protocol design consumes accepted C20; freeze no runtime or paid-study authority. |
+| RA Day 10 | No new primary delivery allocation; review checkpoint | Review C21 and owner decision list; reforecast M3/M5 and remaining M1 capacity before follow-up assignment. |
+
+RA-01-A's upper estimate needs two additional half-day allocations; RA-01-B's upper estimate needs four more. Shift dependent days until the actual audit review passes; Day 5/10 are scenario acceptance conditions, never automatic approvals. The approved total range is 4–7 engineering days. Unknown reproduction/algorithm/evaluation work is a separately estimated follow-up, not spare capacity inside this design budget.
+
+AR-006-A, AR-007-B, AR-009-A and AR-011-C now have verified direct prerequisites and remain in the approved M1 queue. They are **unscheduled here**, not cancelled or newly assigned. The lead must allocate their implementation and independent review against the same three slots, and reforecast M3/M5 after the audit/protocol choices and measured throughput. Existing M3 runtime estimates and M5's 50-day base are unchanged; neither includes unknown new baseline reproductions, adaptive algorithms, evaluation costs or external statistical review waits.
+
+### Historical initial conditional schedule — 2026-10-19
 
 Working days, not dates; no weekend work assumed. Each allocation below is **0.5 engineering day** unless stated otherwise, leaving at least 0.5 day for peer review, decisions, maintenance and contingency. Roles absent from a day perform reviews or remain unallocated; do not invent blocked feature work to fill a calendar. PM/SEC participate in relevant decision reviews, with availability confirmed at E0. This is intentionally conservative while the contracts and staffing are uncertain.
 
@@ -116,7 +138,7 @@ Working days, not dates; no weekend work assumed. Each allocation below is **0.5
 | W2 / Day 9 | TL: [AR-004-B](#ar-004-b) (0.5d) | Cross-role consumer review against completed producers; resolve compatibility and ownership. |
 | W2 / Day 10 | TL: [AR-004-B](#ar-004-b) (0.5d) | Complete freeze proposal and capacity reforecast. ARCH0/AR-004-C/G0 follow reviewed output; no runtime work in this conditional fortnight. |
 
-Days 9–10 consume the completed AR-011-A and AR-012-A outputs. ARCH0 and AR-004-C/G0 follow the reviewed freeze; decision latency is not assumed zero. After G0, migration AR-005-B and reference configuration AR-033-A may proceed in parallel. AR-051-A secure CI, AR-033-A reference configuration and AR-005-B explicit migration are verified; C implements runtime guards, A implements independent recovery tests, and B reviews their integration. This new priority consumes already verified prerequisites and does not alter the original conditional first-ten-day allocation. Readiness AR-011-B and project authorization AR-007-A wait for AR-005-C revision guards. No task is scheduled before a predecessor is complete; same-day finish/start assumptions are not used.
+This original scenario is retained as history, not a record of staffed dates or the current three-contributor allocation. Its dependency ordering remains auditable in historical_schedules; it does not schedule new work.
 
 ## Interface and schema contract register
 
@@ -142,13 +164,15 @@ C04 links the [M1 API](../contracts/proposals/m1.openapi.json), [logical data mo
 | C17 — Pilot/operating acceptance | [AR-035-A](#ar-035-a) | Per-customer permitted data/processors, residency, budgets, retention, operator/incident ownership and actual agreement/sign-off references. |
 | C18 — Capacity workload/SLIs | [AR-040-A](#ar-040-a) | Plan Section 5 workload distributions and latency/error/resource bounds, queue fairness, five-minute burst, 24-hour soak and hardware/cost identity. |
 | C19 — Regional recovery manifest | [AR-042-A](#ar-042-a) | Coherent DB/object/key/deletion backups; approved region; RPO/RTO, restore ordering, integrity and off-device evidence. |
+| C20 — Prior-method audit design record | [RA-01-A](#ra-01-a); unavailable until review | Versioned primary-source and implementation/license matrix, intervention/observation/verification semantics, cost coverage and reproducible/adaptable/incompatible/unavailable dispositions; bounded comparison recommendation. Design only. |
+| C21 — Total-budget evaluation design amendment | [RA-01-B](#ra-01-b); unavailable until review | Reviewed design for confirmed-intervention yield versus retry recovery, offline/online costs, selection/confirmation separation, holdout, missingness/multiplicity and scoped follow-up estimates. Input to C08/C09 producers, not their runtime schemas. |
 
-Current availability: C01 workflows/metrics, C02 permission/provenance/protocol and C03 trust/capacity decision records are reviewed internally. Real partner, statistical, deployment and funding gates remain separate. C04 is reviewed and G0 is satisfied for development/testing; runtime cases remain planned. C14 version-1 offline configuration is reviewed and available, while actual ENV0 approval and provisioning remain gated. The machine-readable register records each current status.
+Current availability: C01 workflows/metrics, C02 permission/provenance/protocol and C03 trust/capacity decision records are reviewed internally. C05 ownership/role contracts and AR-011-B bounded readiness are verified for their internal scope; customer admission remains disabled. C20/C21 are approved design work, not yet reviewed outputs. C08/C09 remain unavailable until their original producers consume C21 and complete review. Real partner, statistical, deployment and funding gates remain separate. C04 is reviewed and G0 is satisfied for development/testing; runtime cases remain planned. C14 version-1 offline configuration is reviewed and available, while actual ENV0 approval and provisioning remain gated. The machine-readable register records each current status.
 
 
 ## Gate register
 
-E0 is **Satisfied** by the project owner’s explicit execution approval on 2026-10-19. Other gates remain open until their evidence is recorded. Integration gates join every listed required task; partial packages cannot close a milestone. External conditions require actual evidence from the responsible owner. Elapsed windows require both the minimum duration and valid measurements. No automated checker manufactures human approval.
+E0 is **Satisfied** by the project owner’s explicit execution approval on 2026-10-19. ARCH0/G0 are satisfied for the recorded development scope; remaining gates stay open until their evidence is recorded. Integration gates join every listed required task; partial packages cannot close a milestone. External conditions require actual evidence from the responsible owner. Elapsed windows require both the minimum duration and valid measurements. No automated checker manufactures human approval.
 
 <a id="e0"></a>
 
@@ -561,7 +585,7 @@ M1 / P0 · 3 PRs · 5.5 engineering days · In progress · [Tracking issue #7](h
 - **Effort / confidence:** 1.5 engineering days; planning range 1.5–2.2; medium confidence.
 - **Responsible role:** TL; required reviewers: BE, QE. Assigned contributor: Engineer C — ownership schema/backfill; Engineer B — independent review.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** In progress; [issue #40](https://github.com/spei04/agent-rewind/issues/40), assigned after AR-005-C merge 0737c7b. C owns ownership schema/backfill and C05; B reviews. No customer activation.
+- **Progress:** Verified; [PR #43](https://github.com/spei04/agent-rewind/pull/43) and exact-source internal review/hosted validation accepted. [Evidence and limits](delivery/OWNERSHIP_READINESS_EVIDENCE_2026-10-20.md). Customer admission remains disabled; full M1 is not complete.
 
 <a id="ar-007-b"></a>
 
@@ -755,7 +779,7 @@ M1 / P0 · 3 PRs · 5 engineering days · In progress · [Tracking issue #11](ht
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
 - **Responsible role:** PL; required reviewers: SEC, QE. Assigned contributor: Engineer A — safe errors/readiness; Engineer B — independent review.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** In progress; [issue #41](https://github.com/spei04/agent-rewind/issues/41), assigned after AR-005-C merge 0737c7b. A owns safe errors/readiness; B reviews. C retains revision/profile ownership.
+- **Progress:** Verified; [PR #46](https://github.com/spei04/agent-rewind/pull/46) and exact-source internal review/hosted validation accepted. [Evidence and limits](delivery/OWNERSHIP_READINESS_EVIDENCE_2026-10-20.md). Customer admission remains disabled; full M1 is not complete.
 
 <a id="ar-011-c"></a>
 
@@ -1243,8 +1267,8 @@ M3 / P0 · 3 PRs · 10 engineering days · Not started
 - **Objective:** Give every study, logical trial and attempt a durable scoped identity. This task delivers study, pair, trial and attempt contract.
 - **Implementation scope / PR boundary:** Freeze logical identities, protocol digests, immutable freeze and attempt/uncertain states; specify study API needs; extend the M1 org/project/job ledger with study-scoped accounts and bind every child attempt/call to its study cap.
 - **Out of scope:** No coordinator or estimators.
-- **Prerequisites:** [AR-012-B](#ar-012-b), [AR-010-B](#ar-010-b), [AR-002-B](#ar-002-b). E0 applies transitively; required producer contracts must be reviewed.
-- **Required contracts:** C08; definitions and producer availability in the contract register.
+- **Prerequisites:** [AR-012-B](#ar-012-b), [AR-010-B](#ar-010-b), [AR-002-B](#ar-002-b), [RA-01-B](#ra-01-b). E0 applies transitively; required producer contracts must be reviewed.
+- **Required contracts:** C08, C21; C21 is the reviewed design input to this future producer, not an available runtime contract.
 - **Acceptance criteria:** RS/QE approve unique outcome rules, missingness and coordinator transition table.
 - **Required automated tests:** Schema/transition fixtures reject duplicate logical arm and changed frozen candidate.
 - **Security and reliability:** Separate attempt diagnostics from immutable analytical outcomes.
@@ -1471,8 +1495,8 @@ M3 / P0 · 3 PRs · 10 engineering days · Not started
 - **Objective:** Report intervention effects with correct denominators and uncertainty. This task delivers estimator, missingness and experiment report contract.
 - **Implementation scope / PR boundary:** Specify task-conditional estimand, paired design, intervals, missing data and invalidation/version fields.
 - **Out of scope:** No adaptive stopping or learned estimator.
-- **Prerequisites:** [AR-020-A](#ar-020-a), [AR-002-B](#ar-002-b). E0 applies transitively; required producer contracts must be reviewed.
-- **Required contracts:** C09; definitions and producer availability in the contract register.
+- **Prerequisites:** [AR-020-A](#ar-020-a), [AR-002-B](#ar-002-b), [RA-01-B](#ra-01-b). E0 applies transitively; required producer contracts must be reviewed.
+- **Required contracts:** C09, C21; C21 is the reviewed design input to this future producer, not an available runtime contract.
 - **Acceptance criteria:** No generalization claim from one run; report includes all assigned trials and uncertain calls.
 - **Required automated tests:** Golden tiny samples, ties, all-failed, all-missing and imbalanced fixtures.
 - **Security and reliability:** Protocol fixed before outcomes; distinguish exploratory selection and confirmation.
@@ -3060,19 +3084,19 @@ M1 / P0 · 1 PR · 2 engineering days · Verified · [Tracking issue #26](https:
 | Decision / risk | Recommendation | Needed before / owner |
 | --- | --- | --- |
 | Execution authority | E0 and development-only ARCH0/G0 accepted. Continue approved migration and CI slices; future milestone/external gates remain applicable. | Recorded in G0_DECISION.md; no repeat approval required |
-| Actual staffing and delivery rate | Confirm six named core roles or provide real capacity. Replan if fewer people; verification/platform ownership is a bottleneck. No launch date commitment now. | E0 staffing; Day 10/G1 reforecast — product owner/TL |
+| Actual staffing and delivery rate | Use the three active contributor slots and measured review throughput; six logical role totals do not imply six human hires. Reforecast unscheduled M1 and research consumers when capacity is assigned; no launch date commitment. | E0 staffing; Day 10/G1 reforecast — product owner/TL |
 | Recurring cloud/identity operations | Retain accepted single-organization self-hosted GCP/gVisor direction. Choose region, cloud budget owner/cap, test IdP and funded support hours. Development VM access does not supply these. | ENV0/IDP0/SUPPORT0 — product owner/PL/customer admin |
 | Affordable valid research | Retain the existing $200 validation cap; reconcile before smoke. Approve the natural-failure study budget only after sample/power/permission review; narrow the claim if unaffordable or underpowered. | PAID0, DATA0, STUDYFUNDS0 — RS/data owner/product owner |
 | Customer availability and scope | Use two design partners for the first pilot, each with permitted restorable workflows; both weekly users and both adopting a regression/policy fix is the proposed exit target. Recruit a third only as separately funded expansion. | PARTNER0/PILOT0/G5 — PM/customers |
 | Independent review and unknown fixes | Fund an assessor and independent statistical reviewer; book early. Do not accept unresolved critical/high exploitable defects or missing restoration evidence to meet a date. New findings receive scoped fix tasks and revised estimates. | AUDIT0/SECFIX0/G6 — product owner/SEC/RS |
 
-No question above asks to reapprove the already selected core architecture. The unresolved choices are execution scope, real capacity, specific funding/access, customer evidence and independent review. Future release approval LAUNCH0 remains separate from backlog approval.
+No question above asks to reapprove the already selected core architecture. The RA-01 objective and 4–7-day design scope are approved. Unresolved choices are the resulting baseline/adaptation set, threshold/power, any new runtime expansion, real capacity, funding/access, customer evidence and independent review. Future release approval LAUNCH0 remains separate from backlog approval.
 
 ## Dependency review, progress and maintenance
 
-Current dependency validation, 2026-10-20: 146 unique tasks across 51 parents, 519 resolving acyclic edges, 26 gates and 18 contracts. Required fields, task bounds, E0 ancestry, producer ancestry, parent totals and conditional first-ten-day ordering/capacity pass. Effort is 429 days, M1 41.5, PL 88, upper ranges 723.6, alternate 25% allowance 536.25. Longest effort path remains 146.5 days; no calendar commitment. AR-051-A starts after its verified prerequisites; AR-005-B starts after verified G0. Runtime acceptance and production gates remain unproven.
+Current dependency validation, 2026-10-20: **148 tasks, 52 parents, 524 acyclic edges, 26 gates and 20 contracts**. Base effort is **433 days**, upper ranges **730.6 days**, alternate 25% allowance **541.25 days**; M3 is 74 days and RS demand 61 days. Other milestone/role totals and the **146.5-day effort-only path** are unchanged. The stdlib command `python scripts/check_execution_backlog.py` recomputes metrics, required fields, E0/producer ancestry, task/card/parent parity and the conditional RA schedule from source. It does not prove runtime behavior or human/external approval.
 
-GitHub issues #1–4 are closed for verified internal specification/development-decision scope. Parent issues #5–12 remain open; #26 is closed for verified CI/candidates, #30 for reviewed offline reference configuration and #28 for verified explicit migration. #37 tracks runtime guards/recovery. The original 19 coarse package edges were removed; exact task/gate dependencies remain authoritative. Materialize future child issues when their scope is authorized. Closing a planning issue never establishes customer acceptance or production readiness.
+Issues #1–5 are closed for their recorded internal scope; parent #6–12 remain open. Implementation issues #26/#28/#30/#37/#40/#41 are closed. RA-01-A is active in [#47](https://github.com/spei04/agent-rewind/issues/47); RA-01-B is queued in [#48](https://github.com/spei04/agent-rewind/issues/48) until the audit is accepted. Ownership/readiness are Verified, but scoped route enforcement and the rest of M1 remain pending. The original 19 coarse package edges were removed; exact task/gate dependencies remain authoritative.
 
 Update procedure for each completed PR: update task status and evidence in the machine-readable ledger and this card; recalculate parent/milestone effort/status and dependency changes; update PLAN Section 10/14 and the matching issue; rerun ID/required-field/DAG/contract-availability/first-fortnight allocation checks; verify local links and draft OpenAPI structure. Any added edge, new gate or changed estimate requires schedule revalidation. Do not mark a task Verified without applicable commit/environment evidence, reviewer disposition and explicit limitations.
 
@@ -3100,53 +3124,53 @@ AR-005-C acceptance clarification: the reviewed C04 adoption profile is migratio
 
 2026-10-20 guard/recovery integration: AR-005-C and parent AR-005 verified in PR #39, merge 0737c7b, after exact 94dd9cb internal review and run 39350413566 (758 tests per Python version; 58 PostgreSQL and 3 gVisor cases). [Acceptance evidence](delivery/GUARD_RECOVERY_EVIDENCE_2026-10-20.md) distinguishes actual backup/restore from transactions, narrowly documented cast equivalence and customer-serving rollback refusal. C begins AR-007-A (#40); A begins AR-011-B (#41); B reviews both, using existing checkouts. Their exact prerequisites are now satisfied. No other gate or task status is promoted.
 
+<a id="ra-01"></a>
+
 ## Research amendment RA-01
 
-2026-10-20: the [authoritative research roadmap](PLAN.md#7-research-and-evaluation-program) now records verified overlap with DoVer, Causal Agent Replay, REFLECT and DAAF. Automatic interventions, repeated replay and confidence intervals do not establish novelty. Fixed-budget confirmed repair discovery is a hypothesis requiring comparative evidence. The current fixed-confirmation product remains an engineering baseline.
+2026-10-20: the owner approved the fixed total-budget confirmed-repair objective and **4–7 engineering days of audit/protocol design**. The original claim correction and four primary-source references remain in [PLAN Section 7](PLAN.md#7-research-and-evaluation-program). RA-01-A/B now belong to the active ledger; they add 4 base days and 7 upper-range days to the historical 146-task/429-day baseline. No method is treated as reproduced from reading its paper. No runtime/adapters/algorithm expansion, threshold/power choice, new spending or partner data is approved by this activation.
 
-Claim corrections apply now; the following two design/review packages are **proposed and unassigned**. They are outside the approved 146-task / 519-edge / 429-day baseline and its first-fortnight schedule. Their combined 4–7 day estimate covers review/design only; adapters, adaptive search and funded experiments are not included and need separate estimates/approval. Existing AR-025-B's four-day simple-baseline task cannot be represented as funding four published-method reproductions.
-
-| Existing work | Amendment impact before expanded implementation |
+| Producer / consumer | Required handoff |
 | --- | --- |
-| AR-020-A / C08 | Consider selection-decision identity, policy version, allowed observations, remaining/reserved budgets and replay provenance in the producer review. No ad hoc changes to reviewed M1 C04. |
-| AR-024-A/C / C09 | Preserve fixed independent confirmation; specify portfolio multiplicity, effect threshold, clustered evaluation and the distinct retry-recovery estimand. |
-| AR-025-A/B/C | Add reviewed prior-method comparisons and allocation ablations only after RA-01; scope each adapter/policy as its own PR rather than hiding expansion in existing estimates. |
-| AR-026-A | Freeze total-budget accounting, baseline implementation fidelity, repository holdout, sample/power and stopping/invalidation rules before outcomes. |
-| AR-038-A/B/C | Use permitted natural failures from unseen repositories; report confirmed yield and recovery separately, missing/negative cases, offline/online costs and transfer regressions. No comparative claim before independent review. |
-| AR-007-A / AR-011-B | Continue existing ownership/readiness assignments; no runtime or deployment changes from the research amendment. |
+| RA-01-A → C20 → RA-01-B | Accepted primary-source/implementation/license/semantics audit; unavailable until review. |
+| RA-01-B → C21 → AR-020-A/C08 and AR-024-A/C09 | Accepted evaluation-design amendment before original schema/statistical producers start. C21 is not those runtime interfaces. |
+| AR-024-C, AR-025-A/B/C, AR-026-A, AR-038-A/B/C | Existing producer paths now include RA-01-B transitively. Original runtime, holdout, DATA0/STUDYFUNDS0 and independent statistical gates remain. |
+| Remaining M1 | Ownership/readiness are verified; unscheduled approved queue and review contention are reforecast separately. |
+
+<a id="ra-01-a"></a>
 
 ### RA-01-A — Prior-method novelty and reproducibility audit
 
 - **Objective:** Establish what experiment selection could contribute beyond existing intervention/replay methods.
-- **Implementation scope:** Inspect the four cited papers, their available implementations/licenses and relevant related work. Pin source versions and build a semantic matrix covering checkpoint state, allowed edits, auditor/verifier information, allocation/stopping rules, training data and total costs. Produce reproducible/adaptable/incompatible/unavailable dispositions and a bounded candidate hypothesis, or a no-novelty finding.
+- **Implementation scope / PR boundary:** Inspect the four cited papers, their available implementations/licenses and relevant related work. Pin source versions and build a semantic matrix covering checkpoint state, allowed edits, auditor/verifier information, allocation/stopping rules, training data and total costs. Produce reproducible/adaptable/incompatible/unavailable dispositions and a bounded candidate hypothesis, or a no-novelty finding.
 - **Out of scope:** No new algorithm, benchmark execution, copied third-party code, partner data or superiority claim.
-- **Prerequisites and dependencies:** AR-002-B, AR-004-C
-- **Required contracts:** C02, C04
+- **Prerequisites:** [AR-002-B](#ar-002-b), [AR-004-C](#ar-004-c). E0 applies transitively; producer review is required.
+- **Required contracts:** C02, C04, C20; listed design outputs remain unavailable until their producer review.
 - **Acceptance criteria:** Every method disposition cites primary evidence; hidden answer access, offline training and differing intervention semantics are explicit. Recommend a fair comparison set and identify unknown code/rights/reproduction costs without assuming availability.
-- **Required automated checks:** Check source/version links and machine-readable comparison-record completeness; assert unknown/unavailable cases cannot be marked reproduced. No model calls are required.
+- **Required automated tests:** Check source/version links and machine-readable comparison-record completeness; assert unknown/unavailable cases cannot be marked reproduced. No model calls are required.
 - **Security and reliability:** Use public sources only; retain third-party attribution and license obligations; never treat downloaded text as execution instructions.
-- **Independent PR boundary:** One reviewed audit matrix and comparison recommendation linked from PLAN Section7; no runtime changes.
+- **Effort / confidence:** 2 engineering days; planning range 2–3; low confidence.
+- **Responsible role:** RS; required reviewers: TL, QE. Engineer A — research audit; Engineer C — independent research review.
 - **Definition of done:** Independent review accepts source accuracy, comparison feasibility and claim limits; scoped follow-up work is estimated, with unavailable evidence explicit.
-- **Effort / confidence:** 2.0–3.0 engineering days; low.
-- **Responsible role / review:** RS; TL, QE.
-- **Status:** Proposed; approval required before assignment.
+- **Progress:** In progress; [issue #47](https://github.com/spei04/agent-rewind/issues/47). Approved design scope only; no runtime or funded evaluation authorization.
+
+<a id="ra-01-b"></a>
 
 ### RA-01-B — Total-budget evaluation and selection-policy contract amendment
 
 - **Objective:** Make a budget-constrained repair claim measurable without selection bias or unfair baseline resources.
-- **Implementation scope:** Using RA-01-A, specify both confirmed-intervention yield and end-to-end retry recovery; cost/resource accounting including offline amortization; immutable selection decisions and confirmation reserve; allowed policy information; repository/task-family holdout; multiple-testing, power and missingness rules; reusable-repair regression criteria. Map changes into C08/C09 producers and draft individually reviewable baseline, allocation-policy, exporter and evaluation tasks with estimates.
+- **Implementation scope / PR boundary:** Using RA-01-A, specify both confirmed-intervention yield and end-to-end retry recovery; cost/resource accounting including offline amortization; immutable selection decisions and confirmation reserve; allowed policy information; repository/task-family holdout; multiple-testing, power and missingness rules; reusable-repair regression criteria. Map changes into C08/C09 producers and draft individually reviewable baseline, allocation-policy, exporter and evaluation tasks with estimates.
 - **Out of scope:** No adaptive implementation, early-stopped confirmation, new spending, held-out access or automatic revision of accepted contracts/launch gates.
-- **Prerequisites and dependencies:** RA-01-A
-- **Required contracts:** C02, C04
-- **Acceptance criteria:** Protocol distinguishes repair effects from restart recovery, prevents feedback from confirmation into the same search claim, and makes missing/failed/budget-exhausted tasks visible. Every added runtime task has produced-contract and infrastructure prerequisites, review/exit tests and a realistic estimate. Owner approves baseline/threshold/scope; independent statistical review remains required before funded evaluation.
-- **Required automated checks:** Static dependency/contract consistency checks; specification examples for zero confirmation reserve, offline-cost omission, duplicate task credit, hidden-answer asymmetry, uncertain charges and post-confirmation adaptation. Runtime simulations remain assigned to reviewed follow-up implementation tasks.
+- **Prerequisites:** [RA-01-A](#ra-01-a). E0 applies transitively; producer review is required.
+- **Required contracts:** C02, C04, C20, C21; listed design outputs remain unavailable until their producer review.
+- **Acceptance criteria:** Protocol distinguishes repair effects from restart recovery, prevents feedback from confirmation into the same search claim, and makes missing/failed/budget-exhausted tasks visible. Every added runtime task has produced-contract and infrastructure prerequisites, review/exit tests and a realistic estimate. Owner baseline, threshold and follow-up scope decisions are recorded or explicitly pending; expanded implementation cannot start without scope approval, and independent statistical and funding approvals remain required before evaluation.
+- **Required automated tests:** Static dependency/contract consistency checks; specification examples for zero confirmation reserve, offline-cost omission, duplicate task credit, hidden-answer asymmetry, uncertain charges and post-confirmation adaptation. Runtime simulations remain assigned to reviewed follow-up implementation tasks.
 - **Security and reliability:** No hidden grader/held-out leakage; immutable provenance and full charge ledger; existing DATA0/STUDYFUNDS0 and confirmation invariants retained.
-- **Independent PR boundary:** One protocol/design and execution-backlog amendment; baseline implementations and adaptive policy remain separate follow-up PRs.
-- **Definition of done:** Reviewed protocol and owner scope decision recorded; active DAG, effort totals and milestone forecast updated only after approval, with no consumer scheduled before its required producer.
-- **Effort / confidence:** 2.0–4.0 engineering days; low.
-- **Responsible role / review:** RS; TL, QE, independent statistical reviewer.
-- **Status:** Proposed; approval required before assignment.
+- **Effort / confidence:** 2 engineering days; planning range 2–4; low confidence.
+- **Responsible role:** RS; required reviewers: TL, QE. Queued after accepted RA-01-A; assignee confirmed at handoff.
+- **Definition of done:** Independent internal review accepts the protocol/design; owner baseline, threshold and follow-up scope decisions are recorded or explicitly left pending. Active DAG and estimates reflect only approved work; no consumer starts before its producer. Independent statistical approval remains required before funded evaluation.
+- **Progress:** Not started; [issue #48](https://github.com/spei04/agent-rewind/issues/48). Approved design scope only; no runtime or funded evaluation authorization.
 
-Dependency review: AR-002-B and AR-004-C are verified prerequisites for RA-01-A; RA-01-B follows that audit. Both use public/synthetic design inputs without paid inference or partner data. Expanded AR-025/026 work must consume their accepted output and retain original implementation prerequisites. No task is scheduled early. After approval, reconcile the active task graph, producer relationships, totals, critical path and M3/M5 forecast; until then, the existing dates/effort do not estimate this expansion.
+Dependency audit: the two new tasks add three prerequisite edges; the two C08/C09 producer links add two more, for 524 total. Every affected research consumer has RA-01-B ancestry. The longest effort path is unchanged because earlier execution prerequisites remain longer; this does not show zero delivery impact. M3 rises from 70 to 74 base days; M5 remains 50 base days pending re-estimation after selected comparisons, power, permitted corpus and costs are known. Unknown follow-up runtime work is outside both figures.
 
-Decisions requiring owner review are the new primary research objective, the bounded review packages, then the selected baseline/adaptation set, any adaptive-policy interface, practical threshold/power and evaluation funding. Do not weaken current confirmation or enterprise release gates implicitly. A no-novelty or null-result finding permits a narrower engineering-product claim after explicit scope review.
+Owner decisions still required after design: actual baseline/adaptation set, any adaptive-policy runtime scope, practical effect threshold/power and evaluation funding. Independent statistical approval is not replaced by internal contributor review. A no-novelty or null-result finding is valid and requires an explicit narrower claim or redesign decision.

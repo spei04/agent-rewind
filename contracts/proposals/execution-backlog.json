@@ -607,6 +607,17 @@
         "AR-051-A"
       ],
       "status": "Verified"
+    },
+    "RA-01": {
+      "milestone": "M3",
+      "priority": "P0",
+      "objective": "Audit prior methods and specify a fair total-budget evaluation before expanding research implementation.",
+      "base_effort_days": 4.0,
+      "children": [
+        "RA-01-A",
+        "RA-01-B"
+      ],
+      "status": "In progress"
     }
   },
   "tasks": [
@@ -1206,7 +1217,7 @@
       "tests": "Composite FK, ambiguous mapping, revoked membership and admin boundary tests",
       "security_reliability": "Organization admin derived from identity; never request role fields",
       "out_of_scope": "No shared multi-tenant SaaS or SCIM",
-      "status": "In progress",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.5,
@@ -1220,7 +1231,17 @@
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/40",
       "assigned_to": "Engineer C \u2014 ownership schema/backfill; Engineer B \u2014 review",
-      "entry_evidence": "Assigned only after accepted AR-005-C merge 0737c7bd236422577457e3dff52da02266d957cf"
+      "entry_evidence": "Assigned only after accepted AR-005-C merge 0737c7bd236422577457e3dff52da02266d957cf",
+      "evidence": {
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/43",
+        "commit": "5172c7e",
+        "reviewed_source_commit": "5f450b3193c5434bd0646e65eacbf0a215a24be5",
+        "run": "https://github.com/spei04/agent-rewind/actions/runs/39354218945",
+        "checks": "865 passed, 3 Docker skips and 1 existing warning per Python 3.11/3.12 job; 9 real PostgreSQL ownership cases including checkpoint dump/restore/resume; 3 gVisor tests; security/package/CI gate passed.",
+        "review": "Engineer B independently accepted final source and matching hosted evidence; lead reviewed integration.",
+        "record": "docs/delivery/OWNERSHIP_READINESS_EVIDENCE_2026-10-20.md",
+        "limits": "Migration-only release; customer admission remains disabled. No full M1, production, funding, data or external certification approval."
+      }
     },
     {
       "id": "AR-007-B",
@@ -1564,7 +1585,7 @@
       "tests": "M1-022/023 secret canaries, malformed exceptions and dependency outage",
       "security_reliability": "Readiness prevents unsafe admission; liveness does not disclose dependency secrets",
       "out_of_scope": "No broad observability platform deployment",
-      "status": "In progress",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         2.0,
@@ -1578,7 +1599,17 @@
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/41",
       "assigned_to": "Engineer A \u2014 safe errors/readiness; Engineer B \u2014 review",
-      "entry_evidence": "Assigned only after accepted AR-005-C merge 0737c7bd236422577457e3dff52da02266d957cf"
+      "entry_evidence": "Assigned only after accepted AR-005-C merge 0737c7bd236422577457e3dff52da02266d957cf",
+      "evidence": {
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/46",
+        "commit": "3098589ea07d2a5d4341319206e718092a05d422",
+        "reviewed_source_commit": "aafc08d33e599f09b84329735dadacbeaca639bd",
+        "run": "https://github.com/spei04/agent-rewind/actions/runs/39354594971",
+        "checks": "969 passed, 3 Docker skips and 1 existing warning per Python 3.11/3.12 job with real PostgreSQL; 3 gVisor tests; security/package/CI gate passed; PR artifacts zero.",
+        "review": "Engineer B accepted safe-boundary/sentinel/source union and hosted evidence; Engineer C accepted lifecycle/ownership integration; lead reviewed.",
+        "record": "docs/delivery/OWNERSHIP_READINESS_EVIDENCE_2026-10-20.md",
+        "limits": "Migration-only release; customer admission remains disabled. No full M1, production, funding, data or external certification approval."
+      }
     },
     {
       "id": "AR-011-C",
@@ -2498,10 +2529,12 @@
       "dependencies": [
         "AR-012-B",
         "AR-010-B",
-        "AR-002-B"
+        "AR-002-B",
+        "RA-01-B"
       ],
       "contracts": [
-        "C08"
+        "C08",
+        "C21"
       ],
       "scope": "Freeze logical identities, protocol digests, immutable freeze and attempt/uncertain states; specify study API needs; extend the M1 org/project/job ledger with study-scoped accounts and bind every child attempt/call to its study cap",
       "acceptance": "RS/QE approve unique outcome rules, missingness and coordinator transition table",
@@ -2519,7 +2552,7 @@
         "QE"
       ],
       "pull_request_boundary": "Freeze logical identities, protocol digests, immutable freeze and attempt/uncertain states; specify study API needs. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied. C21 is an approved-scope design dependency, not yet produced; RA-01-B must be reviewed before this producer starts. Any new runtime expansion still needs separately scoped approval."
     },
     {
       "id": "AR-020-B",
@@ -2920,10 +2953,12 @@
       "confidence": "medium",
       "dependencies": [
         "AR-020-A",
-        "AR-002-B"
+        "AR-002-B",
+        "RA-01-B"
       ],
       "contracts": [
-        "C09"
+        "C09",
+        "C21"
       ],
       "scope": "Specify task-conditional estimand, paired design, intervals, missing data and invalidation/version fields",
       "acceptance": "No generalization claim from one run; report includes all assigned trials and uncertain calls",
@@ -2941,7 +2976,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Specify task-conditional estimand, paired design, intervals, missing data and invalidation/version fields. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied. C21 is an approved-scope design dependency, not yet produced; RA-01-B must be reviewed before this producer starts. Any new runtime expansion still needs separately scoped approval."
     },
     {
       "id": "AR-024-B",
@@ -5948,6 +5983,84 @@
         "checks": "Both Python core/PostgreSQL jobs, real gVisor, security, package, CI gate and protected-main delivery passed; artifact checksums/source identities verified independently.",
         "reviewer": "Engineer A; lead integration review"
       }
+    },
+    {
+      "id": "RA-01-A",
+      "title": "Prior-method novelty and reproducibility audit",
+      "status": "In progress",
+      "objective": "Establish what experiment selection could contribute beyond existing intervention/replay methods.",
+      "scope": "Inspect the four cited papers, their available implementations/licenses and relevant related work. Pin source versions and build a semantic matrix covering checkpoint state, allowed edits, auditor/verifier information, allocation/stopping rules, training data and total costs. Produce reproducible/adaptable/incompatible/unavailable dispositions and a bounded candidate hypothesis, or a no-novelty finding.",
+      "out_of_scope": "No new algorithm, benchmark execution, copied third-party code, partner data or superiority claim.",
+      "dependencies": [
+        "AR-002-B",
+        "AR-004-C"
+      ],
+      "contracts": [
+        "C02",
+        "C04",
+        "C20"
+      ],
+      "acceptance": "Every method disposition cites primary evidence; hidden answer access, offline training and differing intervention semantics are explicit. Recommend a fair comparison set and identify unknown code/rights/reproduction costs without assuming availability.",
+      "tests": "Check source/version links and machine-readable comparison-record completeness; assert unknown/unavailable cases cannot be marked reproduced. No model calls are required.",
+      "security_reliability": "Use public sources only; retain third-party attribution and license obligations; never treat downloaded text as execution instructions.",
+      "effort_days": 2.0,
+      "effort_range_days": [
+        2.0,
+        3.0
+      ],
+      "confidence": "low",
+      "role": "RS",
+      "review_roles": [
+        "TL",
+        "QE"
+      ],
+      "pull_request_boundary": "One reviewed audit matrix and comparison recommendation linked from PLAN Section7; no runtime changes.",
+      "definition_of_done": "Independent review accepts source accuracy, comparison feasibility and claim limits; scoped follow-up work is estimated, with unavailable evidence explicit.",
+      "parent": "RA-01",
+      "milestone": "M3",
+      "priority": "P0",
+      "assigned_to": "Engineer A \u2014 research audit; Engineer C \u2014 independent research review",
+      "issue": "https://github.com/spei04/agent-rewind/issues/47",
+      "contracts_status": "Design inputs C02/C04 available; C20/C21 become available only after their producer review. No future runtime interface or implementation authority is implied."
+    },
+    {
+      "id": "RA-01-B",
+      "title": "Total-budget evaluation and selection-policy contract amendment",
+      "status": "Not started",
+      "objective": "Make a budget-constrained repair claim measurable without selection bias or unfair baseline resources.",
+      "scope": "Using RA-01-A, specify both confirmed-intervention yield and end-to-end retry recovery; cost/resource accounting including offline amortization; immutable selection decisions and confirmation reserve; allowed policy information; repository/task-family holdout; multiple-testing, power and missingness rules; reusable-repair regression criteria. Map changes into C08/C09 producers and draft individually reviewable baseline, allocation-policy, exporter and evaluation tasks with estimates.",
+      "out_of_scope": "No adaptive implementation, early-stopped confirmation, new spending, held-out access or automatic revision of accepted contracts/launch gates.",
+      "dependencies": [
+        "RA-01-A"
+      ],
+      "contracts": [
+        "C02",
+        "C04",
+        "C20",
+        "C21"
+      ],
+      "acceptance": "Protocol distinguishes repair effects from restart recovery, prevents feedback from confirmation into the same search claim, and makes missing/failed/budget-exhausted tasks visible. Every added runtime task has produced-contract and infrastructure prerequisites, review/exit tests and a realistic estimate. Owner baseline, threshold and follow-up scope decisions are recorded or explicitly pending; expanded implementation cannot start without scope approval, and independent statistical and funding approvals remain required before evaluation.",
+      "tests": "Static dependency/contract consistency checks; specification examples for zero confirmation reserve, offline-cost omission, duplicate task credit, hidden-answer asymmetry, uncertain charges and post-confirmation adaptation. Runtime simulations remain assigned to reviewed follow-up implementation tasks.",
+      "security_reliability": "No hidden grader/held-out leakage; immutable provenance and full charge ledger; existing DATA0/STUDYFUNDS0 and confirmation invariants retained.",
+      "effort_days": 2.0,
+      "effort_range_days": [
+        2.0,
+        4.0
+      ],
+      "confidence": "low",
+      "role": "RS",
+      "review_roles": [
+        "TL",
+        "QE"
+      ],
+      "pull_request_boundary": "One protocol/design and execution-backlog amendment; baseline implementations and adaptive policy remain separate follow-up PRs.",
+      "definition_of_done": "Independent internal review accepts the protocol/design; owner baseline, threshold and follow-up scope decisions are recorded or explicitly left pending. Active DAG and estimates reflect only approved work; no consumer starts before its producer. Independent statistical approval remains required before funded evaluation.",
+      "parent": "RA-01",
+      "milestone": "M3",
+      "priority": "P0",
+      "assigned_to": "Queued after accepted RA-01-A; assignee confirmed at handoff",
+      "issue": "https://github.com/spei04/agent-rewind/issues/48",
+      "contracts_status": "Design inputs C02/C04 available; C20/C21 become available only after their producer review. No future runtime interface or implementation authority is implied."
     }
   ],
   "gates": [
@@ -6474,7 +6587,12 @@
       "producer": "AR-007-A",
       "title": "Project ownership and roles",
       "required_interface": "Organization/projects/memberships/resource_scopes; project-parent closure; viewer/operator/maintainer/admin actions and deny matrix.",
-      "status": "To be specified/reviewed by producer task; not yet available"
+      "status": "Available: ownership schema, bounded offline relational backfill and role decision matrix reviewed in PR #43 / source 5f450b3, merged 5172c7e. Route enforcement and customer activation remain gated.",
+      "artifacts": [
+        "docs/delivery/OWNERSHIP_CONTRACT.md",
+        "agent_rewind/ownership.py",
+        "agent_rewind/migrations/ownership_schema.py"
+      ]
     },
     {
       "id": "C06",
@@ -6495,14 +6613,14 @@
       "producer": "AR-020-A",
       "title": "Durable experiment and receipt",
       "required_interface": "Study/pair/trial/attempt IDs; protocol digest; frozen phases; fencing; missing/invalid/uncertain states; logical call/usage/price/receipt links. Extend budget accounts with study scope; every trial/job/provider call belongs to the same project/study and reserves against all applicable caps atomically.",
-      "status": "To be specified/reviewed by producer task; not yet available"
+      "status": "Not yet available. Original producer must first consume accepted RA-01-B/C21 design output; its own schema/fixture review remains required. No implementation expansion is approved implicitly."
     },
     {
       "id": "C09",
       "producer": "AR-024-A",
       "title": "Statistical report",
       "required_interface": "Estimand, estimator version, paired assignment, outcomes/missingness/intervals/invalidation; independent confirmation; fixed sample and null calibration.",
-      "status": "To be specified/reviewed by producer task; not yet available"
+      "status": "Not yet available. Original producer must first consume accepted RA-01-B/C21 design output; its own schema/fixture review remains required. No implementation expansion is approved implicitly."
     },
     {
       "id": "C11",
@@ -6572,104 +6690,119 @@
       "title": "Regional recovery manifest",
       "required_interface": "Coherent DB/object/key/deletion backups; approved region; RPO/RTO, restore ordering, integrity and off-device evidence.",
       "status": "To be specified/reviewed by producer task; not yet available"
+    },
+    {
+      "id": "C20",
+      "producer": "RA-01-A",
+      "title": "Prior-method audit design record",
+      "required_interface": "Versioned primary-source and implementation/license matrix, intervention/observation/verification semantics, cost coverage and reproducible/adaptable/incompatible/unavailable dispositions; bounded comparison recommendation. Design only.",
+      "status": "In progress; unavailable until independent internal review accepts RA-01-A. No method reproduction is claimed."
+    },
+    {
+      "id": "C21",
+      "producer": "RA-01-B",
+      "title": "Total-budget evaluation design amendment",
+      "required_interface": "Reviewed design for confirmed-intervention yield versus retry recovery, offline/online costs, selection/confirmation separation, holdout, missingness/multiplicity and scoped follow-up estimates. Input to C08/C09 producers, not their runtime schemas.",
+      "status": "Not yet available; queued after accepted RA-01-A/C20 and then its own design review. Baseline/threshold/runtime decisions and external statistical/funding/data approval remain separate."
     }
   ],
   "schedule": [
     {
       "day": 1,
       "work": {
-        "AR-001-A": 0.5,
-        "AR-004-A": 0.5,
-        "AR-005-A": 0.5
+        "RA-01-A": 0.5
       },
-      "checkpoint": "E0 approval and staffing recorded before any scheduled task starts; TL/PM select interview evidence. Others review existing baseline."
+      "checkpoint": "Audit primary sources, available code/licenses and comparison feasibility; public inputs only."
     },
     {
       "day": 2,
       "work": {
-        "AR-001-A": 0.5,
-        "AR-004-A": 0.5,
-        "AR-005-A": 0.5
+        "RA-01-A": 0.5
       },
-      "checkpoint": "Workflow and interface inventory PR review; no runtime feature work."
+      "checkpoint": "Audit primary sources, available code/licenses and comparison feasibility; public inputs only."
     },
     {
       "day": 3,
       "work": {
-        "AR-001-B": 0.5,
-        "AR-002-A": 0.5,
-        "AR-003-A": 0.5,
-        "AR-005-A": 0.5
+        "RA-01-A": 0.5
       },
-      "checkpoint": "Historical fixture manifest finishes; product/privacy/security review uses synthetic examples."
+      "checkpoint": "Audit primary sources, available code/licenses and comparison feasibility; public inputs only."
     },
     {
       "day": 4,
       "work": {
-        "AR-001-B": 0.5,
-        "AR-002-A": 0.5,
-        "AR-003-A": 0.5,
-        "AR-012-A": 0.5
+        "RA-01-A": 0.5
       },
-      "checkpoint": "Review metric denominators, corpus rights shape and denied network paths."
+      "checkpoint": "Audit primary sources, available code/licenses and comparison feasibility; public inputs only."
     },
     {
       "day": 5,
-      "work": {
-        "AR-002-B": 0.5,
-        "AR-003-B": 0.5,
-        "AR-012-A": 0.5
-      },
-      "checkpoint": "Week 1 integration: reconcile workflow/contract/fixture inventory; unresolved access or staffing gets owner and date."
+      "work": {},
+      "checkpoint": "Independent C/lead audit acceptance required before RA-01-B; elapsed time is not acceptance."
     },
     {
       "day": 6,
       "work": {
-        "AR-002-B": 0.5,
-        "AR-003-B": 0.5,
-        "AR-012-A": 0.5
+        "RA-01-B": 0.5
       },
-      "checkpoint": "Freeze proposed split/evaluator assumptions; actual funding and customer rights remain pending conditions."
+      "checkpoint": "Protocol design consumes accepted C20; freeze no runtime or paid-study authority."
     },
     {
       "day": 7,
       "work": {
-        "AR-011-A": 0.5,
-        "AR-012-A": 0.5
+        "RA-01-B": 0.5
       },
-      "checkpoint": "Cross-role contract review and negative fixture checks. No behavioral acceptance claimed."
+      "checkpoint": "Protocol design consumes accepted C20; freeze no runtime or paid-study authority."
     },
     {
       "day": 8,
       "work": {
-        "AR-011-A": 0.5
+        "RA-01-B": 0.5
       },
-      "checkpoint": "Finish observability producer review; freeze waits for AR-011-A and AR-012-A."
+      "checkpoint": "Protocol design consumes accepted C20; freeze no runtime or paid-study authority."
     },
     {
       "day": 9,
       "work": {
-        "AR-004-B": 0.5
+        "RA-01-B": 0.5
       },
-      "checkpoint": "Cross-role consumer review against completed producers; resolve compatibility and ownership decisions."
+      "checkpoint": "Protocol design consumes accepted C20; freeze no runtime or paid-study authority."
     },
     {
       "day": 10,
-      "work": {
-        "AR-004-B": 0.5
-      },
-      "checkpoint": "Complete freeze proposal and capacity reforecast. ARCH0/AR-004-C/G0 follow reviewed output; migration then starts, readiness follows AR-005-C."
+      "work": {},
+      "checkpoint": "Review C21 and owner decision list; reforecast M3/M5 and remaining M1 capacity before follow-up assignment."
     }
   ],
   "first_two_weeks_conditions": {
-    "E0": 0
+    "AR-001-A": 0,
+    "AR-001-B": 0,
+    "AR-002-A": 0,
+    "AR-002-B": 0,
+    "AR-003-A": 0,
+    "AR-003-B": 0,
+    "AR-004-A": 0,
+    "AR-004-B": 0,
+    "AR-004-C": 0,
+    "AR-005-A": 0,
+    "AR-005-B": 0,
+    "AR-005-C": 0,
+    "AR-007-A": 0,
+    "AR-011-A": 0,
+    "AR-011-B": 0,
+    "AR-012-A": 0,
+    "AR-033-A": 0,
+    "AR-051-A": 0,
+    "E0": 0,
+    "ARCH0": 0,
+    "G0": 0
   },
-  "estimate_policy": "Engineering effort includes implementation, task tests, ordinary review/rework and task documentation. Core capacity scenario is six roles at 3.5 delivery days/week each; 30% reserved for coordination/support. High range 0.8\u20131.2x, medium 1\u20131.5x, low 1\u20132x; ranges are planning bounds, not calibrated probabilities. 25% program integration reserve is an alternate portfolio allowance, not additive to summed upper ranges. External assessment fees/waits, unbounded finding remediation, hiring, unknown customer gaps and ongoing operations are excluded and require re-estimate.",
+  "estimate_policy": "Engineering effort includes implementation or design, task tests, ordinary review/rework and documentation. Six logical role totals are demand estimates, not six funded human FTEs. Three contributor slots are active; no measured conversion from those slots to engineering days or a launch calendar is assumed. A hypothetical human role at 3.5 delivery days/week is shown only as a capacity lower bound. Ranges are planning bounds, not probabilities; RA-01 uses approved 2\u20133 and 2\u20134 day design ranges. The 25% integration reserve is alternative to summed upper ranges, not additive. External review/operations/funding waits and unestimated follow-up implementation remain excluded.",
   "validation": {
-    "task_count": 146,
-    "parent_count": 51,
+    "task_count": 148,
+    "parent_count": 52,
     "gate_count": 26,
-    "edge_count": 519,
+    "edge_count": 524,
     "dag_acyclic": true,
     "contract_producers_available_before_consumers": true,
     "schedule_no_predecessor_violations_conditional_on_stated_approvals": true,
@@ -6678,7 +6811,7 @@
       "M0": 8.5,
       "M1": 41.5,
       "M2": 69.0,
-      "M3": 70.0,
+      "M3": 74.0,
       "M4": 82.0,
       "M5": 50.0,
       "M6": 78.0,
@@ -6687,13 +6820,13 @@
     "role_effort_days": {
       "TL": 73.0,
       "FE": 23.0,
-      "RS": 57.0,
+      "RS": 61.0,
       "PL": 88.0,
       "BE": 76.5,
       "QE": 111.5
     },
-    "base_effort_days": 429.0,
-    "upper_range_days": 723.6,
+    "base_effort_days": 433.0,
+    "upper_range_days": 730.6,
     "effort_only_critical_path_days": 146.5,
     "effort_only_critical_path": [
       "E0",
@@ -6753,8 +6886,9 @@
       "G7"
     ],
     "critical_path_excludes_external_waits": true,
-    "revision_notes": "2026-10-20: AR-005-C and parent AR-005 verified after exact 94dd9cb review/run 39350413566 and merge 0737c7b. AR-007-A and AR-011-B start only after that prerequisite, with separate schema and transport ownership and independent review. No dependency/estimate changes; task/card/parent parity and 519-edge ordering rechecked.",
-    "independent_review": "Engineer A independently recomputed the 146-task/51-parent/519-edge graph, E0/producer ancestry, parent totals, all task cards/dependencies, conditional schedule and 429-day/146.5-day rollups; bounded stale narrative figures corrected before publication."
+    "revision_notes": "2026-10-20 RA-01 approval activates two design tasks and two producer prerequisites; original external gates remain unchanged. AR-007-A/AR-011-B verified from exact hosted evidence. Live ten-day scenario is RA review only; prior schedule retained as historical. Independent checker recomputes all metrics and card/dependency/schedule parity.",
+    "independent_review": "Pending independent lead review of this activation commit; prior dated reviews remain in ASSIGNMENTS.md.",
+    "contract_count": 20
   },
   "review_findings": [
     {
@@ -6826,9 +6960,14 @@
       "id": "REV-14",
       "finding": "M1 org/project/job caps do not by themselves cap a fan-out study spanning many child jobs.",
       "resolution": "AR-020-A/B explicitly introduce study-scoped ledger accounts and project/study/call closure; AR-022-A tests atomic study-wide caps under parallel child dispatch."
+    },
+    {
+      "id": "REV-15",
+      "finding": "Approved research design was outside the active graph while later C08/C09 producers could start without consuming its result.",
+      "resolution": "Activate RA-01-A/B as two bounded M3 design tasks; C20/C21 stay unavailable until review, and AR-020-A/AR-024-A wait for RA-01-B. Preserve original runtime and external gates; follow-up implementations remain unestimated/unapproved."
     }
   ],
-  "planning_status": "Approved execution underway: internal M0, development G0 and secure CI/candidate delivery verified; migration and reference configuration active. No enterprise-readiness claim.",
+  "planning_status": "Approved development execution: ownership and safe readiness verified, migration-only customer admission remains denied. RA-01 objective and audit/protocol design activated; A audits, C reviews, B reconciles execution. No new runtime/research spending/partner data/production approval.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -6871,16 +7010,19 @@
       12
     ],
     "active_child_issues": {
-      "AR-007-A": 40,
-      "AR-011-B": 41
+      "RA-01-A": 47
     },
     "closed_implementation_issues": [
       26,
       28,
       30,
-      37
+      37,
+      40,
+      41
     ],
-    "queued_child_issues": {}
+    "queued_child_issues": {
+      "RA-01-B": 48
+    }
   },
   "execution_capacity": {
     "lead": "Project lead",
@@ -6892,7 +7034,7 @@
     {
       "id": "RA-01",
       "date": "2026-10-20",
-      "status": "Claim correction recorded; additional design/implementation scope proposed, not approved or scheduled",
+      "status": "Approved objective and bounded 4\u20137-day audit/protocol design scope; runtime expansion and external gates remain unapproved",
       "sources": [
         "https://arxiv.org/html/2512.06749v3",
         "https://arxiv.org/html/2606.08275v1",
@@ -6902,11 +7044,7 @@
       "question": "Given fixed inference and execution budgets, can experiment selection find more independently confirmed repairs for real coding-agent failures than suitable baselines?",
       "baseline_task_count": 146,
       "baseline_effort_days": 429.0,
-      "proposed_design_effort_range_days": [
-        4.0,
-        7.0
-      ],
-      "implementation_effort_status": "Unestimated until the audit/protocol chooses methods and produces bounded follow-up tasks; not included in the accepted baseline or reserve.",
+      "implementation_effort_status": "Unestimated until accepted audit/protocol output scopes follow-up PRs; excluded from current 433-day active estimate and reserve.",
       "affected_tasks": [
         "AR-020-A",
         "AR-024-A",
@@ -6919,77 +7057,145 @@
         "AR-038-B",
         "AR-038-C"
       ],
-      "unaffected_current_assignments": [
+      "dependency_review": "RA-01-A consumes verified AR-002-B/AR-004-C and produces C20; RA-01-B consumes reviewed C20 and produces C21. AR-020-A/C08 and AR-024-A/C09 wait for accepted RA-01-B/C21; every affected AR-024/025/026/038 consumer inherits that prerequisite. Design outputs are unavailable until reviewed; runtime, DATA0, STUDYFUNDS0 and independent statistical review remain mandatory.",
+      "approval": {
+        "date": "2026-10-20",
+        "authority": "Project owner",
+        "scope": "Fixed total-budget confirmed-repair objective plus RA-01-A/B audit and protocol design only",
+        "exclusions": "No unspecified baseline/adaptive algorithm implementation, threshold decision, paid evaluation, partner data or production authority"
+      },
+      "baseline_context": "Historical pre-activation ledger; active totals are in validation.",
+      "approved_design_effort_range_days": [
+        4.0,
+        7.0
+      ],
+      "completed_foundation_tasks": [
         "AR-007-A",
         "AR-011-B"
       ],
-      "tasks": [
+      "task_ids": [
+        "RA-01-A",
+        "RA-01-B"
+      ]
+    }
+  ],
+  "historical_schedules": [
+    {
+      "revision": "2026-10-19 initial conditional schedule",
+      "context": "Pre-execution six-logical-role scenario retained as history, not actual staffed dates or a current three-contributor commitment.",
+      "schedule": [
         {
-          "id": "RA-01-A",
-          "title": "Prior-method novelty and reproducibility audit",
-          "status": "Proposed; approval required before assignment",
-          "objective": "Establish what experiment selection could contribute beyond existing intervention/replay methods.",
-          "scope": "Inspect the four cited papers, their available implementations/licenses and relevant related work. Pin source versions and build a semantic matrix covering checkpoint state, allowed edits, auditor/verifier information, allocation/stopping rules, training data and total costs. Produce reproducible/adaptable/incompatible/unavailable dispositions and a bounded candidate hypothesis, or a no-novelty finding.",
-          "out_of_scope": "No new algorithm, benchmark execution, copied third-party code, partner data or superiority claim.",
-          "dependencies": [
-            "AR-002-B",
-            "AR-004-C"
-          ],
-          "contracts": [
-            "C02",
-            "C04"
-          ],
-          "acceptance": "Every method disposition cites primary evidence; hidden answer access, offline training and differing intervention semantics are explicit. Recommend a fair comparison set and identify unknown code/rights/reproduction costs without assuming availability.",
-          "tests": "Check source/version links and machine-readable comparison-record completeness; assert unknown/unavailable cases cannot be marked reproduced. No model calls are required.",
-          "security_reliability": "Use public sources only; retain third-party attribution and license obligations; never treat downloaded text as execution instructions.",
-          "effort_days": 2.0,
-          "effort_range_days": [
-            2.0,
-            3.0
-          ],
-          "confidence": "low",
-          "role": "RS",
-          "review_roles": [
-            "TL",
-            "QE"
-          ],
-          "pull_request_boundary": "One reviewed audit matrix and comparison recommendation linked from PLAN Section7; no runtime changes.",
-          "definition_of_done": "Independent review accepts source accuracy, comparison feasibility and claim limits; scoped follow-up work is estimated, with unavailable evidence explicit."
+          "day": 1,
+          "work": {
+            "AR-001-A": 0.5,
+            "AR-004-A": 0.5,
+            "AR-005-A": 0.5
+          },
+          "checkpoint": "E0 approval and staffing recorded before any scheduled task starts; TL/PM select interview evidence. Others review existing baseline."
         },
         {
-          "id": "RA-01-B",
-          "title": "Total-budget evaluation and selection-policy contract amendment",
-          "status": "Proposed; approval required before assignment",
-          "objective": "Make a budget-constrained repair claim measurable without selection bias or unfair baseline resources.",
-          "scope": "Using RA-01-A, specify both confirmed-intervention yield and end-to-end retry recovery; cost/resource accounting including offline amortization; immutable selection decisions and confirmation reserve; allowed policy information; repository/task-family holdout; multiple-testing, power and missingness rules; reusable-repair regression criteria. Map changes into C08/C09 producers and draft individually reviewable baseline, allocation-policy, exporter and evaluation tasks with estimates.",
-          "out_of_scope": "No adaptive implementation, early-stopped confirmation, new spending, held-out access or automatic revision of accepted contracts/launch gates.",
-          "dependencies": [
-            "RA-01-A"
-          ],
-          "contracts": [
-            "C02",
-            "C04"
-          ],
-          "acceptance": "Protocol distinguishes repair effects from restart recovery, prevents feedback from confirmation into the same search claim, and makes missing/failed/budget-exhausted tasks visible. Every added runtime task has produced-contract and infrastructure prerequisites, review/exit tests and a realistic estimate. Owner approves baseline/threshold/scope; independent statistical review remains required before funded evaluation.",
-          "tests": "Static dependency/contract consistency checks; specification examples for zero confirmation reserve, offline-cost omission, duplicate task credit, hidden-answer asymmetry, uncertain charges and post-confirmation adaptation. Runtime simulations remain assigned to reviewed follow-up implementation tasks.",
-          "security_reliability": "No hidden grader/held-out leakage; immutable provenance and full charge ledger; existing DATA0/STUDYFUNDS0 and confirmation invariants retained.",
-          "effort_days": 2.0,
-          "effort_range_days": [
-            2.0,
-            4.0
-          ],
-          "confidence": "low",
-          "role": "RS",
-          "review_roles": [
-            "TL",
-            "QE",
-            "independent statistical reviewer"
-          ],
-          "pull_request_boundary": "One protocol/design and execution-backlog amendment; baseline implementations and adaptive policy remain separate follow-up PRs.",
-          "definition_of_done": "Reviewed protocol and owner scope decision recorded; active DAG, effort totals and milestone forecast updated only after approval, with no consumer scheduled before its required producer."
+          "day": 2,
+          "work": {
+            "AR-001-A": 0.5,
+            "AR-004-A": 0.5,
+            "AR-005-A": 0.5
+          },
+          "checkpoint": "Workflow and interface inventory PR review; no runtime feature work."
+        },
+        {
+          "day": 3,
+          "work": {
+            "AR-001-B": 0.5,
+            "AR-002-A": 0.5,
+            "AR-003-A": 0.5,
+            "AR-005-A": 0.5
+          },
+          "checkpoint": "Historical fixture manifest finishes; product/privacy/security review uses synthetic examples."
+        },
+        {
+          "day": 4,
+          "work": {
+            "AR-001-B": 0.5,
+            "AR-002-A": 0.5,
+            "AR-003-A": 0.5,
+            "AR-012-A": 0.5
+          },
+          "checkpoint": "Review metric denominators, corpus rights shape and denied network paths."
+        },
+        {
+          "day": 5,
+          "work": {
+            "AR-002-B": 0.5,
+            "AR-003-B": 0.5,
+            "AR-012-A": 0.5
+          },
+          "checkpoint": "Week 1 integration: reconcile workflow/contract/fixture inventory; unresolved access or staffing gets owner and date."
+        },
+        {
+          "day": 6,
+          "work": {
+            "AR-002-B": 0.5,
+            "AR-003-B": 0.5,
+            "AR-012-A": 0.5
+          },
+          "checkpoint": "Freeze proposed split/evaluator assumptions; actual funding and customer rights remain pending conditions."
+        },
+        {
+          "day": 7,
+          "work": {
+            "AR-011-A": 0.5,
+            "AR-012-A": 0.5
+          },
+          "checkpoint": "Cross-role contract review and negative fixture checks. No behavioral acceptance claimed."
+        },
+        {
+          "day": 8,
+          "work": {
+            "AR-011-A": 0.5
+          },
+          "checkpoint": "Finish observability producer review; freeze waits for AR-011-A and AR-012-A."
+        },
+        {
+          "day": 9,
+          "work": {
+            "AR-004-B": 0.5
+          },
+          "checkpoint": "Cross-role consumer review against completed producers; resolve compatibility and ownership decisions."
+        },
+        {
+          "day": 10,
+          "work": {
+            "AR-004-B": 0.5
+          },
+          "checkpoint": "Complete freeze proposal and capacity reforecast. ARCH0/AR-004-C/G0 follow reviewed output; migration then starts, readiness follows AR-005-C."
         }
       ],
-      "dependency_review": "RA-01-A prerequisites are verified; RA-01-B follows RA-01-A. Proposed outputs precede expanded AR-025/026 consumers through their original contract producers. No added task enters the active DAG or schedule until approval; existing runtime, DATA0, STUDYFUNDS0 and independent-review gates remain."
+      "conditions": {
+        "E0": 0
+      }
     }
-  ]
+  ],
+  "schedule_context": {
+    "name": "Conditional RA-01 review schedule",
+    "anchor": "First staffed working day after RA-01 approval and contributor availability; not a program-wide calendar reset",
+    "concurrent_contributor_slots": 3,
+    "task_contributors": {
+      "RA-01-A": "Engineer A",
+      "RA-01-B": "Engineer A"
+    },
+    "review_acceptance_days": {
+      "RA-01-A": 5,
+      "RA-01-B": 10
+    },
+    "max_delivery_days_per_contributor_per_day": 0.5,
+    "conditions": "Review acceptance days are scenario conditions, not recorded approvals. Shift RA-01-B if A is not accepted. C supplies independent review; B audits integration/backlog. No six-human-FTE assumption.",
+    "contingency": "RA-01-A upper range of 3 days may require 2 extra half-day allocations; RA-01-B upper range of 4 days may require 4 extra half-day allocations. Shift acceptance/handoff by actual completion; no automatic start on Day 6. Stop at the approved 4\u20137 day total design scope and rescope unknown follow-up work.",
+    "unscheduled_approved_queue": [
+      "AR-006-A",
+      "AR-007-B",
+      "AR-009-A",
+      "AR-011-C"
+    ],
+    "unscheduled_queue_policy": "Existing development scope is not cancelled. These tasks have verified direct prerequisites but no new assignment or dates in this RA schedule; lead reforecasts against research review contention and the same 3 slots."
+  }
 }
