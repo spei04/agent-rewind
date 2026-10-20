@@ -1,7 +1,7 @@
 # Scoped run projection and resumable backfill
 
-AR-006-A is a preparatory implementation. This document records the proposed
-implementation contract; tests and runtime delivery remain pending. Customer
+AR-006-A is a verified preparatory implementation. This document records its
+implementation contract and the bounded acceptance evidence below. Customer
 admission and live worker publication remain disabled. AR-010-A/B supplies the
 missing generation/database-time fence, and AR-012-B owns integrated live-path
 acceptance. Initial backfill is distinct from AR-006-C mutable repair and its restricted
@@ -38,8 +38,8 @@ an artifact reader. Nonempty cohorts remain pending until evidence is verified.
 `backfill_run_index(engine, source, batch_size=1000)` is an explicit offline
 operator operation. The reader interface is
 `source(project_id, owner_run_id, role, digest, max_bytes) -> bytes`.
-It is internal operator evidence access, not a customer hash API. An explicit
-local legacy reader will use the existing bounded ciphertext/decrypt utilities;
+It is internal operator evidence access, not a customer hash API. The explicit
+local legacy reader uses the existing bounded ciphertext/decrypt utilities;
 it never registers artifact objects/references or supplies a live adapter.
 
 Before invoking that reader, validate every SQL run/job/study dependency and
@@ -204,3 +204,15 @@ The source root contains the retained `objects/<digest>` files. The command read
 is needed. Stop legacy writers and preserve the same immutable SQL/byte cohort
 through every batch. Missing or invalid evidence refuses the entire batch.
 Initialization and completion keep API/worker customer admission disabled.
+
+## Acceptance evidence — 2026-10-20
+
+AR-006-A preparatory run projection is Verified in PR #72 at reviewed source 46639c49502995870eb19faaea218b84a02a95ec. Hosted run 39497717028 passed 1596 tests on Python 3.11 and 1600 on Python 3.12, including all 21 new actual PostgreSQL backfill/publication cases. Three core Docker skips are covered by three passing gVisor cases; four sqlite3 transaction-mode cases are Python-3.12-only. Lint, formatting, strict types, contract/planning validation, dependency security audit, isolated package smoke and CI gate passed. A/B accepted the scoped runtime, transaction, catalog, test and diagnostic corrections. Frozen history, interrupted process recovery, backup/restore/resume, project serialization and publication rollback/retry have synthetic execution evidence. Live generation-aware publication, API listing, mutable repair/audit, customer admission and production acceptance remain gated. No model calls, new paid resources or partner data were used.
+
+[Reviewed source 46639c4](https://github.com/spei04/agent-rewind/commit/46639c49502995870eb19faaea218b84a02a95ec) · [Hosted run 39497717028](https://github.com/spei04/agent-rewind/actions/runs/39497717028) · [PR #72](https://github.com/spei04/agent-rewind/pull/72).
+
+The PostgreSQL recovery test restores a one-row projection checkpoint into a distinct clean database, compares projection rows/counters/progress and the frozen catalog, then resumes the original cohort. It preserves the 14 historical rows, 18 ciphertext objects and 245000 microUSD reservation total. Database roles and object bytes use the existing synthetic fixture in the same disposable cluster; this does not prove cross-region, key, role or customer recovery.
+
+Incomplete backfill reports incompatible/backfill_incomplete; completion reports incompatible/migration_only. Review corrected SQLite transaction cleanup, byte-bounded progress/source reads, immutable capture binding, project-before-job lock order, allocator consistency and JSON catalog sort representation. Catalog literals retain their independently reviewed identities. The Python 3.11 crash-test pre-boundary writers_not_drained refusal in run 39496159334 has no proven cause; bounded child diagnostics were added, without retrying or weakening the production guard. Earlier restore-fixture/control-database and compatibility-assertion errors were corrected before acceptance.
+
+Installed-package and synthetic fence tests do not supply the unavailable production generation fence. Final composition and protected-main delivery identities are recorded in the assignment log and owner-readable release records outside disposable checkouts. A candidate package does not authorize deployment.
