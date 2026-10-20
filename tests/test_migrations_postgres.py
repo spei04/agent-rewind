@@ -52,6 +52,9 @@ def pg():
                 text("SELECT rolsuper,rolcreaterole FROM pg_roles WHERE rolname=current_user")
             ).one()
             assert tuple(identity) == (False, False)
+        # NullPool closes the client before PostgreSQL necessarily reports backend
+        # exit. Observe that setup session leaving before the first migration.
+        wait_for_database_drain(admin, token)
         yield {
             "owner": owner_engine,
             "app": app_engine,
