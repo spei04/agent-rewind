@@ -94,7 +94,8 @@ def test_postgres_api_and_worker_cannot_touch_customer_data(pg, settings, monkey
         assert client.get("/healthz").status_code == 200
     with pytest.raises(guard.SchemaNotReady, match="migration_only"):
         db.claim("synthetic-worker")
-    assert work_once(settings, db, app.state.artifacts) is False
+    with pytest.raises(guard.SchemaNotReady, match="migration_only"):
+        work_once(settings, db, app.state.artifacts)
     with pg["owner"].connect() as connection:
         assert connection.exec_driver_sql("SELECT status,owner,reserved FROM jobs").one() == (
             "queued",

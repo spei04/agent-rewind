@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from threading import Lock
 from typing import Any, Literal
 
 from anyio.to_thread import current_default_thread_limiter
@@ -48,21 +49,42 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.db, app.state.artifacts, app.state.auth = db, artifacts, auth
     app.add_middleware(BodyLimit)
     guard_inflight = 0
+    guard_lock = Lock()
 
     async def admission_status() -> CompatibilityResult:
         nonlocal guard_inflight
-        # Keep capacity for sync liveness/static handlers. This counter is touched
-        # only on the app event loop, with no await between admission and increment.
+        # Keep capacity for sync liveness/static handlers. The lock also protects
+        # completion in a worker after its requesting ASGI task was cancelled.
         limit = min(4, max(0, int(current_default_thread_limiter().total_tokens) - 1))
-        if guard_inflight >= limit:
-            return CompatibilityResult("unavailable", "schema_probe_capacity")
-        guard_inflight += 1
+        with guard_lock:
+            if guard_inflight >= limit:
+                return CompatibilityResult("unavailable", "schema_probe_capacity")
+            guard_inflight += 1
+        started = False
+        cancelled = False
+
+        def probe() -> CompatibilityResult:
+            nonlocal guard_inflight, started
+            with guard_lock:
+                if cancelled:
+                    # A request cancelled while queued must not start database I/O.
+                    return CompatibilityResult("unavailable", "schema_unavailable")
+                started = True
+            try:
+                return db.schema_compatibility()
+            finally:
+                with guard_lock:
+                    guard_inflight -= 1
+
         try:
-            # The framework shields this bounded worker slot until its call returns;
-            # cancellation must not abandon a probe and free its admission slot early.
-            return await run_in_threadpool(db.schema_compatibility)
+            return await run_in_threadpool(probe)
         finally:
-            guard_inflight -= 1
+            with guard_lock:
+                if not started:
+                    cancelled = True
+                    guard_inflight -= 1
+                # Once started, only the synchronous probe can release its slot.
+                # Direct asyncio task cancellation can bypass AnyIO scope shielding.
 
     @app.middleware("http")
     async def security(request: Request, call_next: RequestResponseEndpoint) -> Response:

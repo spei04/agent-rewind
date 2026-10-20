@@ -241,7 +241,8 @@ def test_claim_and_worker_leave_queued_and_expired_jobs_unchanged(storage, setti
     monkeypatch.setattr("agent_rewind.worker.ChatPolicy", forbidden)
     with pytest.raises(guard.SchemaNotReady, match="migration_only"):
         db.claim("new-worker")
-    assert work_once(settings, db, artifacts) is False
+    with pytest.raises(guard.SchemaNotReady, match="migration_only"):
+        work_once(settings, db, artifacts)
     assert [db.job(queued), db.job(expired)] == before
 
 
@@ -376,3 +377,113 @@ def test_stalled_probes_are_capped_while_liveness_and_static_respond(settings, m
         assert client.get("/api/runs").json()["code"] == "schema_unavailable"
     assert calls == 5
     app.state.db.engine.dispose()
+
+
+def test_cancelled_request_retains_capacity_until_its_sync_probe_exits(settings, monkeypatch):
+    import asyncio
+    import threading
+
+    import httpx
+
+    async def scenario():
+        app = create_app(settings)
+        entered = asyncio.Event()
+        release = threading.Event()
+        lock = threading.Lock()
+        loop = asyncio.get_running_loop()
+        calls = 0
+
+        def blocked_guard():
+            nonlocal calls
+            with lock:
+                calls += 1
+                if calls == 4:
+                    loop.call_soon_threadsafe(entered.set)
+            if not release.wait(timeout=5):
+                raise AssertionError("Synthetic blocked probe was not released")
+            return guard.CompatibilityResult("unavailable", "schema_unavailable")
+
+        monkeypatch.setattr(app.state.db, "schema_compatibility", blocked_guard)
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://testserver"
+        ) as client:
+            tasks = [asyncio.create_task(client.get("/api/runs")) for _ in range(4)]
+            try:
+                await asyncio.wait_for(entered.wait(), timeout=2)
+                tasks[0].cancel()
+                # Allow actual task cancellation to propagate through the ASGI boundary.
+                await asyncio.wait({tasks[0]}, timeout=0.05)
+                full = await asyncio.wait_for(client.get("/api/runs"), timeout=1)
+                assert full.json()["code"] == "schema_probe_capacity"
+                assert calls == 4
+                health = await asyncio.wait_for(client.get("/healthz"), timeout=1)
+                assert health.status_code == 200
+            finally:
+                release.set()
+                await asyncio.gather(*tasks, return_exceptions=True)
+        app.state.db.engine.dispose()
+
+    asyncio.run(scenario())
+
+
+def test_closed_sqlite_probe_connection_is_invalidated_and_safely_replaced(prepared, monkeypatch):
+    original_catalog = guard.catalog
+
+    def closed_connection(connection):
+        connection.connection.driver_connection.close()
+        raise OperationalError("private SQL", {}, Exception("private transport failure"))
+
+    monkeypatch.setattr(guard, "catalog", closed_connection)
+    result = prepared.schema_compatibility()
+    assert result == guard.CompatibilityResult("unavailable", "schema_unavailable")
+    monkeypatch.setattr(guard, "catalog", original_catalog)
+    assert prepared.schema_compatibility().code == "migration_only"
+
+
+def test_worker_command_reports_schema_refusal_instead_of_empty_queue(prepared, settings):
+    from agent_rewind.worker import serve_worker
+
+    with pytest.raises(SystemExit, match="^worker_schema_refused:migration_only$"):
+        serve_worker(settings)
+
+
+@pytest.mark.parametrize(
+    "name,value",
+    [
+        ("PGSERVICE", "synthetic-hidden"),
+        ("PGSERVICEFILE", "/synthetic-service-file"),
+        ("PGHOSTADDR", "203.0.113.9"),
+        ("PGHOST", "hidden.example"),
+        ("PGPORT", "6543"),
+    ],
+)
+def test_hidden_libpq_environment_routing_refuses_before_dbapi(name, value, monkeypatch):
+    monkeypatch.setenv(name, value)
+    parameters = {"host": "127.0.0.1"}
+    if name == "PGHOST":
+        parameters = {"hostaddr": "127.0.0.1"}
+    with pytest.raises(service.MigrationRefused, match="explicit_runtime_endpoint_required"):
+        guard._bounded_connect(None, None, [], parameters, production=True)
+
+
+@pytest.mark.parametrize(
+    "connect_args",
+    [
+        {"host": "hidden.example"},
+        {"hostaddr": "127.0.0.1,127.0.0.2"},
+        {"service": "synthetic-hidden"},
+        {"port": "5432,5433"},
+    ],
+)
+def test_final_connect_args_are_validated_even_after_url_validation(connect_args, monkeypatch):
+    engine = create_engine("postgresql+psycopg://u:p@127.0.0.1/db", connect_args=connect_args)
+    guard.configure_runtime_engine(engine, production=True)
+    guard.configure_runtime_engine(engine)  # The runtime wrapper cannot downgrade production.
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Invalid effective routing reached DBAPI connect")
+
+    monkeypatch.setattr(engine.dialect, "connect", forbidden)
+    with pytest.raises(service.MigrationRefused):
+        engine.connect()
+    engine.dispose()

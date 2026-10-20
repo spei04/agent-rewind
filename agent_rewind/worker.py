@@ -16,10 +16,7 @@ from .runner import DockerRunner
 
 def work_once(settings: Settings, db: Database, artifacts: Artifacts) -> bool:
     owner = identifier()
-    try:
-        job = db.claim(owner)
-    except SchemaNotReady:
-        return False
+    job = db.claim(owner)
     if job is None:
         return False
     done = threading.Event()
@@ -78,6 +75,13 @@ def work_once(settings: Settings, db: Database, artifacts: Artifacts) -> bool:
 
 def serve_worker(settings: Settings) -> None:
     db, artifacts = Database(settings), Artifacts(settings)
-    while True:
-        if not work_once(settings, db, artifacts):
-            time.sleep(1)
+    try:
+        while True:
+            if not work_once(settings, db, artifacts):
+                time.sleep(1)
+    except SchemaNotReady as error:
+        # Refusal is an operator-visible failure, not an empty queue. Exception
+        # bodies never contain a DSN, SQL statement or provider/customer payload.
+        raise SystemExit(f"worker_schema_refused:{error.result.code}") from None
+    finally:
+        db.engine.dispose()
