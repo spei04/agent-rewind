@@ -12,7 +12,9 @@ from sqlalchemy import inspect, text
 from sqlalchemy.engine import Connection
 
 BASELINE = "ar_0001_baseline"
-HEAD = "ar_0002_adoption"
+HEAD = "ar_0002_adoption"  # Explicit install/adopt preparation target, retained for compatibility.
+OWNERSHIP = "ar_0003_ownership"
+OWNERSHIP_TABLES = {"organizations", "projects", "project_memberships", "resource_scopes"}
 SOURCE_COMMIT = "8f1ae757005c95c50a789e4fa0a10aae9b3c4024"
 TABLES = ("api_keys", "audit", "events", "jobs", "records")
 COLUMNS = {
@@ -158,7 +160,7 @@ def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None
         "DEFERRABLE",
         "DEFERRED",
     }
-    for table in set(tables) & (set(TABLES) | METADATA_TABLES):
+    for table in set(tables) & (set(TABLES) | METADATA_TABLES | OWNERSHIP_TABLES):
         size: int | None = connection.execute(
             text(
                 "SELECT length(CAST(sql AS BLOB)) FROM sqlite_master "
@@ -174,13 +176,16 @@ def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None
         if not isinstance(sql, str):
             raise MigrationRefused("schema_incompatible")
         restricted = forbidden if table in TABLES else forbidden - {"CHECK", "AS"}
+        if table in OWNERSHIP_TABLES:
+            restricted -= {"REFERENCES", "DEFAULT"}
         if restricted.intersection(_sqlite_ddl_tokens(sql)):
             raise MigrationRefused("schema_incompatible")
 
 
-# PostgreSQL 16 pg_dump/pg_restore round trips these three frozen enum checks
+# PostgreSQL 16 pg_dump/pg_restore round trips these frozen enum checks
 # from a whole-array text cast to per-element text casts. These are the exact
-# observed expressions from synthetic run 39349792047, not generic SQL rewriting.
+# observed expressions from synthetic runs 39349792047 (adoption) and
+# 39353816614 (ownership), not generic SQL rewriting.
 # Keep the original catalog/fingerprint authoritative; all other forms refuse.
 _POSTGRES_ENUM_ROUNDTRIPS = (
     (
@@ -245,6 +250,50 @@ _POSTGRES_ENUM_ROUNDTRIPS = (
             "CHECK (((status)::text = ANY (ARRAY[('pending'::character varying)::text, "
             "('running'::character varying)::text, ('complete'::character varying)::text,"
             " ('blocked'::character varying)::text])))"
+        ),
+    ),
+    (
+        "project_memberships",
+        "project_memberships_role_check",
+        (
+            "role::text = ANY (ARRAY['viewer'::character varying, "
+            "'operator'::character varying, 'maintainer'::character varying]::text[])"
+        ),
+        (
+            "role::text = ANY (ARRAY['viewer'::character varying::text, "
+            "'operator'::character varying::text, 'maintainer'::character varying::text])"
+        ),
+        (
+            "CHECK (((role)::text = ANY ((ARRAY['viewer'::character varying, "
+            "'operator'::character varying, 'maintainer'::character varying])::text[])))"
+        ),
+        (
+            "CHECK (((role)::text = ANY (ARRAY[('viewer'::character varying)::text, "
+            "('operator'::character varying)::text, ('maintainer'::character varying)::text])))"
+        ),
+    ),
+    (
+        "resource_scopes",
+        "resource_scopes_resource_kind_check",
+        (
+            "resource_kind::text = ANY (ARRAY['run'::character varying, "
+            "'study'::character varying, 'job'::character varying, "
+            "'key'::character varying, 'provider_call'::character varying]::text[])"
+        ),
+        (
+            "resource_kind::text = ANY (ARRAY['run'::character varying::text, "
+            "'study'::character varying::text, 'job'::character varying::text, "
+            "'key'::character varying::text, 'provider_call'::character varying::text])"
+        ),
+        (
+            "CHECK (((resource_kind)::text = ANY ((ARRAY['run'::character varying, "
+            "'study'::character varying, 'job'::character varying, 'key'::character varying, "
+            "'provider_call'::character varying])::text[])))"
+        ),
+        (
+            "CHECK (((resource_kind)::text = ANY (ARRAY[('run'::character varying)::text, "
+            "('study'::character varying)::text, ('job'::character varying)::text, "
+            "('key'::character varying)::text, ('provider_call'::character varying)::text])))"
         ),
     ),
 )
@@ -325,6 +374,12 @@ def catalog(connection: Connection) -> dict[str, Any]:
         if len(columns) > 32:
             raise MigrationRefused("schema_incompatible")
         indexes = inspector.get_indexes(table, schema=schema)
+        for reflected_index in indexes:
+            if "dialect_options" in reflected_index:
+                reflected_index["dialect_options"] = {
+                    key: str(value) if key.endswith("_where") else value
+                    for key, value in reflected_index["dialect_options"].items()
+                }
         uniques = sorted(
             [c["column_names"] for c in inspector.get_unique_constraints(table, schema=schema)]
         )
@@ -336,7 +391,13 @@ def catalog(connection: Connection) -> dict[str, Any]:
             for index in connection.exec_driver_sql(f"PRAGMA index_list({quoted})"):
                 index_name = connection.dialect.identifier_preparer.quote_identifier(index[1])
                 parts = list(connection.exec_driver_sql(f"PRAGMA index_xinfo({index_name})"))
-                if index[4] or any(part[3] or part[4] != "BINARY" for part in parts):
+                allowed_partial = (
+                    table == "project_memberships"
+                    and index[1] == "membership_active_legacy_default"
+                )
+                if (index[4] and not allowed_partial) or any(
+                    part[3] or part[4] != "BINARY" for part in parts
+                ):
                     raise MigrationRefused("schema_incompatible")
                 if index[3] == "u":
                     uniques.append([part[2] for part in parts if part[5]])
@@ -410,9 +471,13 @@ def catalog(connection: Connection) -> dict[str, Any]:
     return result
 
 
-def verify_baseline(shape: dict[str, Any], name: str, *, versioned: bool = False) -> None:
+def verify_baseline(
+    shape: dict[str, Any], name: str, *, versioned: bool = False, ownership: bool = False
+) -> None:
     actual = set(shape) - {"$postgres"}
     expected = set(TABLES) | (METADATA_TABLES if versioned else set())
+    if ownership:
+        expected |= OWNERSHIP_TABLES
     if actual != expected:
         raise MigrationRefused("schema_incompatible")
     for table in TABLES:
@@ -488,9 +553,13 @@ def verify_baseline(shape: dict[str, Any], name: str, *, versioned: bool = False
             raise MigrationRefused("schema_incompatible")
 
 
-def installed_profile(name: str) -> dict[str, Any]:
+def installed_profile(name: str, revision: str = HEAD) -> dict[str, Any]:
     """The checked-in literal profile is authority, never a value stored in the target DB."""
+    if revision not in {HEAD, OWNERSHIP}:
+        raise MigrationRefused("unsupported_target_revision")
     profile_name = "postgresql16" if name == "postgresql" else "sqlite"
+    if revision == OWNERSHIP:
+        profile_name += "_ownership"
     profile_path = Path(__file__).parent / "profiles" / (profile_name + ".json")
     if not profile_path.is_file():
         raise MigrationRefused("schema_profile_unavailable")
@@ -511,6 +580,6 @@ def source_profile_checksum(name: str, origin: str) -> str:
     return checksum(source)
 
 
-def verify_installed_profile(shape: dict[str, Any], name: str) -> None:
-    if shape != installed_profile(name):
+def verify_installed_profile(shape: dict[str, Any], name: str, revision: str = HEAD) -> None:
+    if shape != installed_profile(name, revision):
         raise MigrationRefused("schema_incompatible")

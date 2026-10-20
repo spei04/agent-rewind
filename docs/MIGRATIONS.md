@@ -255,3 +255,62 @@ For supported backup restoration and application rollback decisions, see
 [the synthetic recovery rehearsal and limits](RECOVERY.md). No older binary is
 approved for customer-serving rollback at this stage; reverting to an unguarded
 binary is not a compatibility mechanism.
+
+
+## Explicit ownership initialization
+
+Revision `ar_0003_ownership` adds only organization/project/membership/resource
+scope storage. `install` and `adopt` retain their `ar_0002_adoption` preparation
+target; a bare `migrate` does not invent ownership input or skip a backfill.
+A known ownership revision can be inspected or verified with
+`rewind migrate upgrade --target ar_0003_ownership`.
+
+For a fresh prepared installation, create an owner-readable JSON file:
+
+```json
+{
+  "schema_version": 1,
+  "installation_key": "your-explicit-installation",
+  "organization_id": "88888888888888888888888888888888",
+  "project_id": "99999999999999999999999999999999",
+  "project_name": "Your project",
+  "principal_grants": [
+    {
+      "principal_id": "oidc:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "role": "maintainer",
+      "legacy_default": true
+    }
+  ]
+}
+```
+
+The example IDs/principal are synthetic placeholders; use deliberate operator
+IDs and the hash of the exact verified OIDC issuer/subject, never a login name.
+Run `chmod 600 fresh-ownership.json`, then
+`rewind migrate ownership --input fresh-ownership.json`. It verifies all five
+original source tables are empty and completes the fresh transition atomically.
+Original empty-source mapping and NULL backup/drain evidence remain unchanged.
+
+For an adopted legacy database run `rewind migrate ownership --batch-size 1000`
+without a fresh file. It consumes the immutable original adoption mapping.
+Each call writes at most one scope batch; repeat the same command until status
+reports ownership_complete. The migration credential and original writer-drain
+requirements apply to every call. Different intent, changed source, malformed
+ancestry or a conflicting existing prefix refuses without repair. Preserve the
+checkpoint and obtain operator review before restoring; do not delete progress
+rows to force a retry.
+
+The capped offline profile streams source hashing but repeats a full bounded
+scan on every write batch. Limits are one million original rows, 1 GiB original
+source, 16 MiB per source row, 100,000 resources, 200,000 relational edges, 64
+parent edges and 32 MiB canonical retained ID/edge bytes (not Python RSS).
+Exceeding a limit leaves completion blocked. It does not claim throughput for
+arbitrary enterprise datasets.
+
+The [C05 ownership contract](delivery/OWNERSHIP_CONTRACT.md) defines exact input,
+role, ancestry and progress rules. SQL relationship validation does not decrypt
+job payloads/results or verify encrypted artifact closure. Both ar2 and ar3 remain
+migration-only: ownership_complete cannot enable customer API reads, admission,
+worker claims or readiness. Authorization, artifacts and later release activation
+remain separate gates. Follow the [recovery procedure](RECOVERY.md) with the exact
+application/schema pair; do not roll back to an unguarded binary.

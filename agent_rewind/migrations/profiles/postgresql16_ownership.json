@@ -1,0 +1,2112 @@
+{
+  "$postgres": {
+    "columns": [
+      [
+        "alembic_version",
+        "version_num",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "api_keys",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "api_keys",
+        "hash",
+        68,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "api_keys",
+        "role",
+        24,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "api_keys",
+        "name",
+        124,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "api_keys",
+        "expires",
+        -1,
+        "",
+        "",
+        5,
+        false,
+        null
+      ],
+      [
+        "api_keys",
+        "revoked",
+        -1,
+        "",
+        "",
+        6,
+        false,
+        null
+      ],
+      [
+        "audit",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "audit",
+        "created",
+        -1,
+        "",
+        "",
+        2,
+        false,
+        null
+      ],
+      [
+        "audit",
+        "actor",
+        260,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "audit",
+        "action",
+        84,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "audit",
+        "target",
+        68,
+        "",
+        "",
+        5,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "events",
+        "run_id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "events",
+        "step",
+        -1,
+        "",
+        "",
+        2,
+        false,
+        null
+      ],
+      [
+        "events",
+        "artifact",
+        68,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "events",
+        "hash",
+        68,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "installation_key",
+        68,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "singleton",
+        -1,
+        "",
+        "",
+        2,
+        false,
+        null
+      ],
+      [
+        "installation_adoptions",
+        "source_kind",
+        20,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "source_baseline",
+        44,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "schema_fingerprint",
+        68,
+        "",
+        "",
+        5,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "installed_schema_fingerprint",
+        68,
+        "",
+        "",
+        6,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "organization_id",
+        36,
+        "",
+        "",
+        7,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "project_id",
+        36,
+        "",
+        "",
+        8,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "mapping_digest",
+        68,
+        "",
+        "",
+        9,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "mapping",
+        -1,
+        "",
+        "",
+        10,
+        false,
+        null
+      ],
+      [
+        "installation_adoptions",
+        "backup_evidence_digest",
+        68,
+        "",
+        "",
+        11,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "drain_evidence_digest",
+        68,
+        "",
+        "",
+        12,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "created_at",
+        -1,
+        "",
+        "",
+        13,
+        false,
+        null
+      ],
+      [
+        "installation_adoptions",
+        "state",
+        36,
+        "",
+        "",
+        14,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "kind",
+        24,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "created",
+        -1,
+        "",
+        "",
+        3,
+        false,
+        null
+      ],
+      [
+        "jobs",
+        "payload",
+        68,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "status",
+        24,
+        "",
+        "",
+        5,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "owner",
+        68,
+        "",
+        "",
+        6,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "lease_until",
+        -1,
+        "",
+        "",
+        7,
+        false,
+        null
+      ],
+      [
+        "jobs",
+        "cancel",
+        -1,
+        "",
+        "",
+        8,
+        false,
+        null
+      ],
+      [
+        "jobs",
+        "budget",
+        -1,
+        "",
+        "",
+        9,
+        false,
+        null
+      ],
+      [
+        "jobs",
+        "reserved",
+        -1,
+        "",
+        "",
+        10,
+        false,
+        null
+      ],
+      [
+        "jobs",
+        "result",
+        68,
+        "",
+        "",
+        11,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "error",
+        304,
+        "",
+        "",
+        12,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "actor",
+        260,
+        "",
+        "",
+        13,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "migration_progress",
+        "revision",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "migration_progress",
+        "phase",
+        68,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "migration_progress",
+        "source_digest",
+        68,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "migration_progress",
+        "cursor",
+        -1,
+        "",
+        "",
+        4,
+        false,
+        null
+      ],
+      [
+        "migration_progress",
+        "rows_verified",
+        -1,
+        "",
+        "",
+        5,
+        false,
+        null
+      ],
+      [
+        "migration_progress",
+        "status",
+        20,
+        "",
+        "",
+        6,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "migration_progress",
+        "updated_at",
+        -1,
+        "",
+        "",
+        7,
+        false,
+        null
+      ],
+      [
+        "organizations",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "organizations",
+        "installation_key",
+        68,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "organizations",
+        "created_at",
+        -1,
+        "",
+        "",
+        3,
+        false,
+        null
+      ],
+      [
+        "project_memberships",
+        "project_id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "project_memberships",
+        "principal_id",
+        260,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "project_memberships",
+        "role",
+        20,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "project_memberships",
+        "revoked_at",
+        -1,
+        "",
+        "",
+        4,
+        false,
+        null
+      ],
+      [
+        "project_memberships",
+        "legacy_default",
+        -1,
+        "",
+        "",
+        5,
+        false,
+        null
+      ],
+      [
+        "projects",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "projects",
+        "organization_id",
+        36,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "projects",
+        "name",
+        124,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "projects",
+        "created_at",
+        -1,
+        "",
+        "",
+        4,
+        false,
+        null
+      ],
+      [
+        "records",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "records",
+        "kind",
+        24,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "records",
+        "created",
+        -1,
+        "",
+        "",
+        3,
+        false,
+        null
+      ],
+      [
+        "records",
+        "data",
+        -1,
+        "",
+        "",
+        4,
+        false,
+        null
+      ],
+      [
+        "resource_scopes",
+        "resource_kind",
+        24,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "resource_scopes",
+        "resource_id",
+        36,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "resource_scopes",
+        "project_id",
+        36,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ]
+    ],
+    "constraints": [
+      [
+        "alembic_version",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (version_num)"
+      ],
+      [
+        "api_keys",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "api_keys",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (hash)"
+      ],
+      [
+        "audit",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "events",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (run_id, step)"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((((source_kind)::text = 'fresh'::text) AND ((state)::text = 'prepared'::text) AND (organization_id IS NULL) AND (project_id IS NULL)) OR ((organization_id IS NOT NULL) AND (project_id IS NOT NULL))))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((((source_kind)::text = 'fresh'::text) AND (backup_evidence_digest IS NULL) AND (drain_evidence_digest IS NULL)) OR (((source_kind)::text = 'legacy'::text) AND (backup_evidence_digest IS NOT NULL) AND (drain_evidence_digest IS NOT NULL))))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((backup_evidence_digest)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((drain_evidence_digest)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((installed_schema_fingerprint)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((length((installation_key)::text) >= 1) AND (length((installation_key)::text) <= 64)))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((mapping_digest)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((organization_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((project_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((schema_fingerprint)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((source_baseline)::text ~ '^[0-9a-f]{40}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((source_kind)::text = ANY ((ARRAY['fresh'::character varying, 'legacy'::character varying])::text[])))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((state)::text = ANY ((ARRAY['prepared'::character varying, 'ownership_complete'::character varying])::text[])))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((octet_length((mapping)::text) <= 1048576))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((singleton = 1))"
+      ],
+      [
+        "installation_adoptions",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (installation_key)"
+      ],
+      [
+        "installation_adoptions",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (singleton)"
+      ],
+      [
+        "jobs",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "migration_progress",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((source_digest)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "migration_progress",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'running'::character varying, 'complete'::character varying, 'blocked'::character varying])::text[])))"
+      ],
+      [
+        "migration_progress",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((octet_length((cursor)::text) <= 65536))"
+      ],
+      [
+        "migration_progress",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((rows_verified >= 0))"
+      ],
+      [
+        "migration_progress",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (revision, phase)"
+      ],
+      [
+        "organizations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "organizations",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (installation_key) REFERENCES installation_adoptions(installation_key)"
+      ],
+      [
+        "organizations",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "organizations",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (installation_key)"
+      ],
+      [
+        "project_memberships",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((principal_id)::text ~ '^(oidc:[0-9a-f]{64}|api-key:[0-9a-f]{32})$'::text))"
+      ],
+      [
+        "project_memberships",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((role)::text = ANY ((ARRAY['viewer'::character varying, 'operator'::character varying, 'maintainer'::character varying])::text[])))"
+      ],
+      [
+        "project_memberships",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((legacy_default = ANY (ARRAY[false, true])))"
+      ],
+      [
+        "project_memberships",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id) REFERENCES projects(id)"
+      ],
+      [
+        "project_memberships",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (project_id, principal_id)"
+      ],
+      [
+        "projects",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "projects",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((length((name)::text) >= 1) AND (length((name)::text) <= 120)))"
+      ],
+      [
+        "projects",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (organization_id) REFERENCES organizations(id)"
+      ],
+      [
+        "projects",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "projects",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (organization_id, id)"
+      ],
+      [
+        "records",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "resource_scopes",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((resource_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "resource_scopes",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((resource_kind)::text = ANY ((ARRAY['run'::character varying, 'study'::character varying, 'job'::character varying, 'key'::character varying, 'provider_call'::character varying])::text[])))"
+      ],
+      [
+        "resource_scopes",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id) REFERENCES projects(id)"
+      ],
+      [
+        "resource_scopes",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (resource_kind, resource_id)"
+      ],
+      [
+        "resource_scopes",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (project_id, resource_kind, resource_id)"
+      ]
+    ],
+    "indexes": [
+      [
+        "alembic_version",
+        "CREATE UNIQUE INDEX alembic_version_pkc ON public.alembic_version USING btree (version_num)",
+        true,
+        true
+      ],
+      [
+        "api_keys",
+        "CREATE UNIQUE INDEX api_keys_hash_key ON public.api_keys USING btree (hash)",
+        true,
+        true
+      ],
+      [
+        "api_keys",
+        "CREATE UNIQUE INDEX api_keys_pkey ON public.api_keys USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "audit",
+        "CREATE UNIQUE INDEX audit_pkey ON public.audit USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "events",
+        "CREATE UNIQUE INDEX events_pkey ON public.events USING btree (run_id, step)",
+        true,
+        true
+      ],
+      [
+        "installation_adoptions",
+        "CREATE UNIQUE INDEX installation_adoptions_pkey ON public.installation_adoptions USING btree (installation_key)",
+        true,
+        true
+      ],
+      [
+        "installation_adoptions",
+        "CREATE UNIQUE INDEX installation_adoptions_singleton_key ON public.installation_adoptions USING btree (singleton)",
+        true,
+        true
+      ],
+      [
+        "jobs",
+        "CREATE UNIQUE INDEX jobs_pkey ON public.jobs USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "migration_progress",
+        "CREATE UNIQUE INDEX migration_progress_pkey ON public.migration_progress USING btree (revision, phase)",
+        true,
+        true
+      ],
+      [
+        "organizations",
+        "CREATE UNIQUE INDEX organizations_installation_key_key ON public.organizations USING btree (installation_key)",
+        true,
+        true
+      ],
+      [
+        "organizations",
+        "CREATE UNIQUE INDEX organizations_pkey ON public.organizations USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "project_memberships",
+        "CREATE UNIQUE INDEX membership_active_legacy_default ON public.project_memberships USING btree (principal_id) WHERE ((legacy_default = true) AND (revoked_at IS NULL))",
+        true,
+        true
+      ],
+      [
+        "project_memberships",
+        "CREATE UNIQUE INDEX project_memberships_pkey ON public.project_memberships USING btree (project_id, principal_id)",
+        true,
+        true
+      ],
+      [
+        "projects",
+        "CREATE UNIQUE INDEX projects_organization_id_id_key ON public.projects USING btree (organization_id, id)",
+        true,
+        true
+      ],
+      [
+        "projects",
+        "CREATE UNIQUE INDEX projects_pkey ON public.projects USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "records",
+        "CREATE UNIQUE INDEX records_pkey ON public.records USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "resource_scopes",
+        "CREATE UNIQUE INDEX resource_scopes_pkey ON public.resource_scopes USING btree (resource_kind, resource_id)",
+        true,
+        true
+      ],
+      [
+        "resource_scopes",
+        "CREATE UNIQUE INDEX resource_scopes_project_id_resource_kind_resource_id_key ON public.resource_scopes USING btree (project_id, resource_kind, resource_id)",
+        true,
+        true
+      ]
+    ]
+  },
+  "alembic_version": {
+    "checks": [],
+    "columns": [
+      [
+        "version_num",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "version_num"
+    ],
+    "uniques": []
+  },
+  "api_keys": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "hash",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "role",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "name",
+        "VARCHAR(120)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "expires",
+        "DOUBLE PRECISION",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "revoked",
+        "BOOLEAN",
+        true,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "hash"
+      ]
+    ]
+  },
+  "audit": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created",
+        "DOUBLE PRECISION",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "actor",
+        "VARCHAR(256)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "action",
+        "VARCHAR(80)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "target",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": []
+  },
+  "events": {
+    "checks": [],
+    "columns": [
+      [
+        "run_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "step",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "artifact",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "hash",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "run_id",
+      "step"
+    ],
+    "uniques": []
+  },
+  "installation_adoptions": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "installation_adoptions_backup_evidence_digest_check",
+        "sqltext": "backup_evidence_digest::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_check",
+        "sqltext": "source_kind::text = 'fresh'::text AND state::text = 'prepared'::text AND organization_id IS NULL AND project_id IS NULL OR organization_id IS NOT NULL AND project_id IS NOT NULL"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_check1",
+        "sqltext": "source_kind::text = 'fresh'::text AND backup_evidence_digest IS NULL AND drain_evidence_digest IS NULL OR source_kind::text = 'legacy'::text AND backup_evidence_digest IS NOT NULL AND drain_evidence_digest IS NOT NULL"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_drain_evidence_digest_check",
+        "sqltext": "drain_evidence_digest::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_installation_key_check",
+        "sqltext": "length(installation_key::text) >= 1 AND length(installation_key::text) <= 64"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_installed_schema_fingerprint_check",
+        "sqltext": "installed_schema_fingerprint::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_mapping_check",
+        "sqltext": "octet_length(mapping::text) <= 1048576"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_mapping_digest_check",
+        "sqltext": "mapping_digest::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_organization_id_check",
+        "sqltext": "organization_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_project_id_check",
+        "sqltext": "project_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_schema_fingerprint_check",
+        "sqltext": "schema_fingerprint::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_singleton_check",
+        "sqltext": "singleton = 1"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_source_baseline_check",
+        "sqltext": "source_baseline::text ~ '^[0-9a-f]{40}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_source_kind_check",
+        "sqltext": "source_kind::text = ANY (ARRAY['fresh'::character varying, 'legacy'::character varying]::text[])"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_state_check",
+        "sqltext": "state::text = ANY (ARRAY['prepared'::character varying, 'ownership_complete'::character varying]::text[])"
+      }
+    ],
+    "columns": [
+      [
+        "installation_key",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "singleton",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_kind",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_baseline",
+        "VARCHAR(40)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "schema_fingerprint",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "installed_schema_fingerprint",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "mapping_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "mapping",
+        "JSON",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "backup_evidence_digest",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "drain_evidence_digest",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "state",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "installation_key"
+    ],
+    "uniques": [
+      [
+        "singleton"
+      ]
+    ]
+  },
+  "jobs": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created",
+        "DOUBLE PRECISION",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "payload",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "status",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "owner",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "lease_until",
+        "DOUBLE PRECISION",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "cancel",
+        "BOOLEAN",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "budget",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "reserved",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "result",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "error",
+        "VARCHAR(300)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "actor",
+        "VARCHAR(256)",
+        true,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": []
+  },
+  "migration_progress": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "migration_progress_cursor_check",
+        "sqltext": "octet_length(cursor::text) <= 65536"
+      },
+      {
+        "comment": null,
+        "name": "migration_progress_rows_verified_check",
+        "sqltext": "rows_verified >= 0"
+      },
+      {
+        "comment": null,
+        "name": "migration_progress_source_digest_check",
+        "sqltext": "source_digest::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "migration_progress_status_check",
+        "sqltext": "status::text = ANY (ARRAY['pending'::character varying, 'running'::character varying, 'complete'::character varying, 'blocked'::character varying]::text[])"
+      }
+    ],
+    "columns": [
+      [
+        "revision",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "phase",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "cursor",
+        "JSON",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "rows_verified",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "status",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "updated_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "revision",
+      "phase"
+    ],
+    "uniques": []
+  },
+  "organizations": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "organizations_id_check",
+        "sqltext": "id::text ~ '^[0-9a-f]{32}$'::text"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "installation_key",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "installation_key"
+        ],
+        "name": "organizations_installation_key_fkey",
+        "options": {},
+        "referred_columns": [
+          "installation_key"
+        ],
+        "referred_schema": "public",
+        "referred_table": "installation_adoptions"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "installation_key"
+      ]
+    ]
+  },
+  "project_memberships": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "project_memberships_legacy_default_check",
+        "sqltext": "legacy_default = ANY (ARRAY[false, true])"
+      },
+      {
+        "comment": null,
+        "name": "project_memberships_principal_id_check",
+        "sqltext": "principal_id::text ~ '^(oidc:[0-9a-f]{64}|api-key:[0-9a-f]{32})$'::text"
+      },
+      {
+        "comment": null,
+        "name": "project_memberships_role_check",
+        "sqltext": "role::text = ANY (ARRAY['viewer'::character varying, 'operator'::character varying, 'maintainer'::character varying]::text[])"
+      }
+    ],
+    "columns": [
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "principal_id",
+        "VARCHAR(256)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "role",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "revoked_at",
+        "TIMESTAMP WITH TIME ZONE",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "legacy_default",
+        "BOOLEAN",
+        false,
+        "false",
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": "project_memberships_project_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [
+      {
+        "column_names": [
+          "principal_id"
+        ],
+        "dialect_options": {
+          "postgresql_include": [],
+          "postgresql_where": "((legacy_default = true) AND (revoked_at IS NULL))"
+        },
+        "name": "membership_active_legacy_default",
+        "unique": true
+      }
+    ],
+    "pk": [
+      "project_id",
+      "principal_id"
+    ],
+    "uniques": []
+  },
+  "projects": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "projects_id_check",
+        "sqltext": "id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "projects_name_check",
+        "sqltext": "length(name::text) >= 1 AND length(name::text) <= 120"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "name",
+        "VARCHAR(120)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "organization_id"
+        ],
+        "name": "projects_organization_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "organizations"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "organization_id",
+        "id"
+      ]
+    ]
+  },
+  "records": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created",
+        "DOUBLE PRECISION",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "data",
+        "JSON",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": []
+  },
+  "resource_scopes": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "resource_scopes_resource_id_check",
+        "sqltext": "resource_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "resource_scopes_resource_kind_check",
+        "sqltext": "resource_kind::text = ANY (ARRAY['run'::character varying, 'study'::character varying, 'job'::character varying, 'key'::character varying, 'provider_call'::character varying]::text[])"
+      }
+    ],
+    "columns": [
+      [
+        "resource_kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "resource_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": "resource_scopes_project_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "resource_kind",
+      "resource_id"
+    ],
+    "uniques": [
+      [
+        "project_id",
+        "resource_kind",
+        "resource_id"
+      ]
+    ]
+  }
+}

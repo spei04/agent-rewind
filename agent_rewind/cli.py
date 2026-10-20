@@ -56,6 +56,16 @@ def _migrate(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
             result = schema_status(engine, include_source_digest=args.source_digest)
         elif action == "install":
             result = install(engine, args.installation_key, timeout_seconds=timeout)
+        elif action == "ownership":
+            from .migrations.ownership_inputs import read_fresh
+            from .migrations.ownership_service import initialize_ownership
+
+            result = initialize_ownership(
+                engine,
+                read_fresh(args.input) if args.input else None,
+                batch_size=args.batch_size,
+                timeout_seconds=timeout,
+            )
         elif action == "adopt":
             result = adopt(
                 engine,
@@ -90,7 +100,12 @@ def main() -> None:
     adopt_parser.add_argument("--drain-evidence", required=True)
     upgrade_parser = migration_commands.add_parser("upgrade", help="Upgrade known versioned state")
     upgrade_parser.add_argument("--target", default="ar_0002_adoption")
-    for migration_parser in (install_parser, adopt_parser, upgrade_parser):
+    ownership_parser = migration_commands.add_parser(
+        "ownership", help="Initialize explicit ownership and process one bounded scope batch"
+    )
+    ownership_parser.add_argument("--input", type=Path, help="Private fresh initialization JSON")
+    ownership_parser.add_argument("--batch-size", type=int, default=1000)
+    for migration_parser in (install_parser, adopt_parser, upgrade_parser, ownership_parser):
         migration_parser.add_argument("--lock-timeout", type=int, default=5)
     serve = commands.add_parser("serve", help="Start the API and debugger")
     serve.add_argument("--host", default="127.0.0.1")
