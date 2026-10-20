@@ -2530,7 +2530,8 @@
         "AR-012-B",
         "AR-010-B",
         "AR-002-B",
-        "RA-01-B"
+        "RA-01-B",
+        "RESEARCHSCOPE0"
       ],
       "contracts": [
         "C08",
@@ -2954,7 +2955,8 @@
       "dependencies": [
         "AR-020-A",
         "AR-002-B",
-        "RA-01-B"
+        "RA-01-B",
+        "RESEARCHSCOPE0"
       ],
       "contracts": [
         "C09",
@@ -6552,6 +6554,18 @@
       "minimum_elapsed_days": null,
       "status": "Not satisfied",
       "effort_days": 0
+    },
+    {
+      "id": "RESEARCHSCOPE0",
+      "dependencies": [
+        "RA-01-B"
+      ],
+      "owner": "Product owner with TL/RS",
+      "criteria": "Record internal C21 acceptance and explicit owner decisions on baseline/information set, practical thresholds for calibration, selected follow-up scope and nested-protocol disposition. Existing C02 remains authoritative until reviewed amendment execution approval; statistical, data and study-funding gates remain separate.",
+      "kind": "external",
+      "minimum_elapsed_days": null,
+      "status": "Not satisfied",
+      "effort_days": 0
     }
   ],
   "contracts": [
@@ -6802,8 +6816,8 @@
   "validation": {
     "task_count": 148,
     "parent_count": 52,
-    "gate_count": 26,
-    "edge_count": 524,
+    "gate_count": 27,
+    "edge_count": 527,
     "dag_acyclic": true,
     "contract_producers_available_before_consumers": true,
     "schedule_no_predecessor_violations_conditional_on_stated_approvals": true,
@@ -7059,7 +7073,7 @@
         "AR-038-B",
         "AR-038-C"
       ],
-      "dependency_review": "RA-01-A consumes verified AR-002-B/AR-004-C and produces C20; RA-01-B consumes reviewed C20 and produces C21. AR-020-A/C08 and AR-024-A/C09 wait for accepted RA-01-B/C21; every affected AR-024/025/026/038 consumer inherits that prerequisite. Design outputs are unavailable until reviewed; runtime, DATA0, STUDYFUNDS0 and independent statistical review remain mandatory.",
+      "dependency_review": "RA-01-A consumes verified AR-002-B/AR-004-C and produces C20; RA-01-B consumes reviewed C20 and produces C21. AR-020-A/C08 and AR-024-A/C09 wait for accepted RA-01-B/C21; every affected AR-024/025/026/038 consumer inherits that prerequisite. Design outputs are unavailable until reviewed; runtime, DATA0, STUDYFUNDS0 and independent statistical review remain mandatory. RESEARCHSCOPE0 explicitly blocks C08/C09 producers until owner choices are recorded; internal design acceptance alone cannot unlock them.",
       "approval": {
         "date": "2026-10-20",
         "authority": "Project owner",
@@ -7078,7 +7092,8 @@
       "task_ids": [
         "RA-01-A",
         "RA-01-B"
-      ]
+      ],
+      "decision_gate": "RESEARCHSCOPE0"
     }
   ],
   "historical_schedules": [

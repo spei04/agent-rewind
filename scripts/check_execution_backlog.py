@@ -203,6 +203,15 @@ def validate(data: dict[str, Any], markdown: str, plan: str) -> dict[str, Any]:
                     and contracts[contract_id]["status"].startswith("Reviewed"),
                     f"Unowned contract is not an accepted freeze: {contract_id}",
                 )
+    for key in ("AR-020-A", "AR-024-A"):
+        require(
+            "RESEARCHSCOPE0" in graph[key],
+            f"Research producer lacks owner decision gate: {key}",
+        )
+    require(
+        graph.get("RESEARCHSCOPE0") == ["RA-01-B"],
+        "Research decision gate lacks accepted design prerequisite",
+    )
     children = []
     for key, parent in data["parents"].items():
         group = [tasks[identifier] for identifier in parent["children"]]

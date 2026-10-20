@@ -59,6 +59,7 @@ def test_machine_record_refuses_invalid_planning_claims(packet, variant, message
         tasks["RA-01-A"]["dependencies"].append("RA-01-B")
     elif variant == "producer":
         tasks["AR-020-A"]["dependencies"].remove("RA-01-B")
+        tasks["AR-020-A"]["dependencies"].remove("RESEARCHSCOPE0")
     elif variant == "availability":
         next(c for c in data["contracts"] if c["id"] == "C21")["status"] = "Available"
     elif variant == "active":
@@ -132,3 +133,13 @@ def test_cli_refuses_duplicate_json_members_before_validation(tmp_path, monkeypa
     monkeypatch.setattr(CHECK, "ROOT", tmp_path)
     with pytest.raises(ValueError, match="Duplicate JSON member"):
         CHECK.main()
+
+
+@pytest.mark.parametrize("task_id", ["AR-020-A", "AR-024-A"])
+def test_research_producers_cannot_bypass_owner_decision_gate(packet, task_id):
+    data, markdown, plan = packet
+    data = deepcopy(data)
+    task = next(t for t in data["tasks"] if t["id"] == task_id)
+    task["dependencies"].remove("RESEARCHSCOPE0")
+    with pytest.raises(ValueError, match="Research producer lacks owner decision gate"):
+        CHECK.validate(data, markdown, plan)
