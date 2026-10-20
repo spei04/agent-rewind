@@ -18,7 +18,8 @@ from sqlalchemy.sql.elements import ColumnElement
 from .database import events, jobs, keys, records
 from .ownership import allows_project_action
 from .scoped_artifacts import ArtifactLoader, ArtifactObject, ArtifactResolver
-from .scoped_lineage import MAX_NODES, Lineage, ResourceNotFound, identifier
+from .scoped_lineage import MAX_NODES, Lineage, identifier
+from .scoped_lineage import ResourceNotFound as ResourceNotFound
 
 MAX_RECORD_BYTES = 2 * 1024 * 1024
 MAX_LIST_BYTES = 8 * 1024 * 1024
