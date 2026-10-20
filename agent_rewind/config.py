@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="REWIND_", env_file=".env", extra="ignore")
     mode: Literal["development", "production"] = "development"
     database_url: str = "sqlite:///.rewind/metadata.sqlite"
+    migration_database_url: SecretStr | None = None
     data_dir: Path = Path(".rewind")
     encryption_key: SecretStr
     bootstrap_key: SecretStr | None = None

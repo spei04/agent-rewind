@@ -23,7 +23,7 @@ def settings(tmp_path):
 @pytest.fixture
 def storage(settings):
     db = Database(settings)
-    db.migrate()
+    db.migrate(installation_key="synthetic-test")
     yield db, Artifacts(settings)
     db.engine.dispose()
 
