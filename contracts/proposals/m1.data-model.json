@@ -72,6 +72,7 @@
       "fields": {
         "run_id": "id PK; FK records.id",
         "project_id": "id FK projects NOT NULL",
+        "resource_kind": "varchar(16) NOT NULL DEFAULT 'run'; CHECK(resource_kind = 'run')",
         "created_at": "time NOT NULL",
         "status": "varchar(16): running|complete|failed|incomplete",
         "branchable": "boolean NOT NULL",
@@ -82,13 +83,15 @@
       },
       "constraints": [
         "UNIQUE(project_id,run_id)",
+        "Composite FK(project_id,resource_kind,run_id) -> resource_scopes(project_id,resource_kind,resource_id); resource_kind is NOT NULL and CHECK equals run",
         "Composite FK(project_id,parent_id) -> run_index(project_id,run_id)",
         "INDEX(project_id,created_at DESC,run_id DESC)",
         "Mutable query projection; immutable event bodies/digests remain unchanged.",
         "Publish projection progress with event/ref metadata under the same job generation fence. Preserve records.data and historical event/artifact bytes.",
         "Expired/lost/terminal job plus stale running manifest projects incomplete and non-branchable; complete task failure remains complete.",
         "created_at is UTC nearest-microsecond ties-to-even projection; preserve original float in records.created. Cursor upper published_seq excludes later backfills.",
-        "UNIQUE(project_id,published_seq); allocate by locking and incrementing projects.run_sequence in the insert transaction, holding that project lock through commit. No preallocated sequence or I/O under this lock; database sequence allocation alone is not commit ordering."
+        "UNIQUE(project_id,published_seq); allocate by locking and incrementing projects.run_sequence in the insert transaction, holding that project lock through commit. No preallocated sequence or I/O under this lock; database sequence allocation alone is not commit ordering.",
+        "AR-006-A owns initial projection/backfill and reusable classification/verification rules; AR-006-B applies bounded conservative current-job read suppression without writes. AR-006-C owns bounded stale/lost-job reconciliation with atomic restricted additive audit after AR-010-B; AR-012-B verifies that integrated path. Preserve created_at, published_seq and all original source/legacy audit rows."
       ],
       "owner": "execution"
     },

@@ -318,7 +318,17 @@ readiness while never treating current full-object reads as bounded.
 
 ## Run projection and pagination
 
-AR-006-A writes `run_index` and event/ref publication coherently in the same
+AR-006-A owns the initial projection schema, frozen-cohort resumable backfill,
+reusable classification/expected-state verification rules and the required
+same-Connection publication adapter. It consumes accepted AR-009-B directly;
+historical backfill preserves source/audit bytes and does not adopt artifact refs
+or invent a generation-compatible live job. Its current release stays migration-only.
+`run_index.resource_kind` is NOT NULL with a CHECK restricting it to `run`, and
+`(project_id,resource_kind,run_id)` has an actual composite FK to
+`resource_scopes(project_id,resource_kind,resource_id)`. The separate same-project
+parent FK and run-to-record/project-to-project FKs remain required.
+
+The publication adapter writes `run_index` and event/ref publication coherently in the same
 fenced transaction. Its integration with AR-010-A/B must require every graph-source
 producer to lock all affected owning job/run rows in a consistent order before
 mutation, then revalidate while holding those locks. This includes event
@@ -354,8 +364,18 @@ terminal evidence also blocks branchability. A lagging running manifest may trai
 a verified published event by one step; use the last verified committed event head
 and do not fabricate completion. Projection repair records fixed reason, old/new
 status and source identity in restricted audit, is idempotent, and never rewrites
-hashed bodies. API reads may conservatively suppress branchability using current
-job state while bounded reconciliation persists the repair; no list-time blob scan.
+hashed bodies. AR-006-B owns bounded conservative current-job read suppression
+without persisting a repair or scanning blobs. AR-006-C owns explicit bounded
+stale/lost-job reconciliation and restricted additive audit after AR-006-A rules
+and AR-010-B live fence integration are available. Lock scoped run/job state,
+compare expected source/projection identity and current database-time
+lease/generation/cancellation, then commit the correction and audit together.
+Preserve created_at, published_seq and every original source/legacy audit row;
+new restricted audit storage must not repurpose preserved legacy audit. Repeated
+repair adds no duplicate audit; unverified partial evidence never becomes complete
+or branchable. AR-012-B verifies this actual integrated behavior before G1.
+This allocation retains the reviewed C04 repair requirement and makes its estimate
+explicit; initial AR-006-A acceptance is not mutable repair or live-worker acceptance.
 
 Signed cursors (server-held HMAC key distinct from artifact encryption) contain
 version, project, principal, fixed empty filter set, limit, initial maximum
