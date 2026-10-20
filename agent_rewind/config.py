@@ -14,6 +14,13 @@ class MigrationSettings(BaseSettings):
     migration_database_url: SecretStr | None = None
 
 
+class ProjectionSourceSettings(BaseSettings):
+    """Only explicit offline byte verification needs the local encryption key."""
+
+    model_config = SettingsConfigDict(env_prefix="REWIND_", env_file=".env", extra="ignore")
+    encryption_key: SecretStr
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="REWIND_", env_file=".env", extra="ignore")
     mode: Literal["development", "production"] = "development"

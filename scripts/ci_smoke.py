@@ -17,6 +17,7 @@ import agent_rewind.scoped_artifacts
 from agent_rewind.migrations.compatibility import runtime_schema_compatibility
 from agent_rewind.migrations.ownership_service import initialize_ownership
 from agent_rewind.migrations.service import install, schema_status
+from agent_rewind.run_projection import utc_created
 from agent_rewind.scoped_repositories import ProjectContext, ResourceNotFound, ScopedRepositories
 
 
@@ -65,6 +66,20 @@ def artifact_smoke(engine: Engine, root: Path) -> None:
         raise RuntimeError("Installed bounded artifact format did not round trip")
 
 
+def projection_smoke(engine: Engine) -> None:
+    from agent_rewind.migrations.projection_service import backfill_run_index, initialize_projection
+
+    result = initialize_projection(engine)
+    if result["revision"] != "ar_0005_run_index" or result["projection_status"] != "complete":
+        raise RuntimeError("Installed empty projection transition failed")
+
+    def forbidden(*args: object) -> bytes:
+        raise RuntimeError("Empty installed projection attempted artifact I/O")
+
+    if backfill_run_index(engine, forbidden) != result:
+        raise RuntimeError("Installed empty projection retry changed progress")
+
+
 def publication_smoke(engine: Engine, root: Path) -> None:
     from cryptography.fernet import Fernet
 
@@ -72,6 +87,7 @@ def publication_smoke(engine: Engine, root: Path) -> None:
     from agent_rewind.artifact_metadata import ArtifactError
     from agent_rewind.artifact_publication import RunPublisher, UnavailableLiveWriter
     from agent_rewind.artifact_storage import LocalArtifactStorage
+    from agent_rewind.projection_publication import ProjectionPublicationWriter
     from agent_rewind.publication_journal import PublicationJournal
 
     journal_root = root / "publication-journal"
@@ -87,7 +103,7 @@ def publication_smoke(engine: Engine, root: Path) -> None:
         engine,
         LocalArtifactStorage(root, Fernet(Fernet.generate_key()), plaintext_limit=4096),
         journal,
-        writer=UnavailableLiveWriter(),
+        writer=ProjectionPublicationWriter(UnavailableLiveWriter()),
     )
     try:
         publisher.prepare(
@@ -152,6 +168,8 @@ def readiness_smoke(root: Path, database_url: str) -> None:
 package = Path(agent_rewind.__file__).resolve()
 if not package.is_relative_to(Path(sys.prefix).resolve()):
     raise RuntimeError("Smoke imported a source checkout instead of the installed wheel")
+if utc_created(1 / 128).microsecond != 7812:
+    raise RuntimeError("Installed projection timestamp rule changed")
 for development_tool in ("pytest", "ruff", "mypy", "pip-audit", "setuptools"):
     try:
         importlib.metadata.version(development_tool)
@@ -169,6 +187,7 @@ for profile in (
     "postgresql16_ownership",
     "sqlite_artifacts",
     "postgresql16_artifacts",
+    "sqlite_projection",
 ):
     shape = json.loads(
         importlib.resources.files("agent_rewind.migrations")
@@ -217,6 +236,7 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
             raise RuntimeError("Installed ownership revision failed the explicit transition")
         repository_smoke(engine)
         artifact_smoke(engine, Path(temporary))
+        projection_smoke(engine)
         publication_smoke(engine, Path(temporary))
         compatibility = runtime_schema_compatibility(engine)
         if compatibility.status != "incompatible" or compatibility.code != "migration_only":

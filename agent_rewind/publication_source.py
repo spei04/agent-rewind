@@ -28,8 +28,9 @@ from .scoped_repositories import (
 def _lock_closure(reads: _Reads, run_id: str) -> None:
     """Lock only the existing bounded validated dependency closure.
 
-    Future graph-source producers must serialize every mutation on the affected
-    owning job/run rows, including event insert/reassignment/deletion, ancestry or
+    Future graph-source producers needing project and job/run locks must take all
+    affected projects in sorted order first, then serialize on owning job/run rows,
+    including event insert/reassignment/deletion, ancestry or
     source identity changes and by_job membership. Reassignment locks both owners
     in a consistent order. Existing-row locks alone do not protect phantoms under
     READ COMMITTED. Producers must revalidate under those locks and never mutate a
@@ -67,7 +68,8 @@ def _snapshot(
 ) -> dict[str, Any]:
     """Capture immutable input, using the same scoped policy as ordinary reads.
 
-    A writer must acquire its job/transaction exclusion before a locking capture.
+    A writer must acquire project exclusion before job/run exclusion and before
+    this locking capture whenever its operation requires both lock families.
     PostgreSQL share locks keep current grant/source/scope rows stable to commit.
     SQLite requires the caller's writer transaction, not an implicit DDL step.
     """
@@ -98,21 +100,31 @@ def _snapshot(
     if lock and connection.dialect.name == "postgresql":
         _lock_closure(reads, run_id)
         repositories._authorize(connection, context, action)
+    result = capture_rows(reads, run_id, lock=lock)
+    repositories._authorize(connection, context, action)
+    return result
+
+
+def capture_rows(
+    reads: _Reads, run_id: str, *, lock: bool = False, complete_only: bool = True
+) -> dict[str, Any]:
+    """Scoped SQL evidence only; caller must establish operator or principal authority."""
+    connection = reads.connection
     lineage: list[dict[str, Any]] = []
     own_events: dict[str, list[dict[str, Any]]] = {}
     seen: set[str] = set()
     current = run_id
-    manifest: dict[str, Any] | None = None
+    closure = Lineage(reads.record, reads.job, reads.by_job)
+    manifest = closure.validate("run", run_id)
     retained = 0
     while current:
         if current in seen or len(seen) > MAX_DEPTH:
             raise ArtifactError("artifact_graph_invalid")
         seen.add(current)
-        run = reads.resource("run", current)
-        if run.get("status") != "complete":
+        run = closure.records[("run", current)]
+        if (complete_only or current != run_id) and run.get("status") != "complete":
             raise ArtifactError("artifact_graph_invalid")
-        if manifest is None:
-            manifest = run
+        if current == run_id:
             retained += len(canonical(manifest))
         item = {
             key: run[key]
@@ -176,7 +188,6 @@ def _snapshot(
                 raise ArtifactError("artifact_graph_invalid")
             history = [row for row in history if row["step"] < fork]
         history.extend(own_events[item["id"]])
-    repositories._authorize(connection, context, action)
     return {"manifest": manifest, "lineage": lineage, "events": history}
 
 

@@ -60,7 +60,12 @@ def _safe_backend_value(value: object, allowed: frozenset[str]) -> str | None:
 
 
 def observe_exclusion_failure(
-    check: Callable[[Connection, list[str]], None], connection: Connection, tables: list[str]
+    check: Callable[[Connection, list[str]], None],
+    connection: Connection,
+    tables: list[str],
+    *,
+    control: Engine | None = None,
+    database: str | None = None,
 ) -> None:
     """Add bounded synthetic-test evidence without changing a migration decision.
 
@@ -100,4 +105,122 @@ def observe_exclusion_failure(
                 # the production refusal, including an interrupted transaction.
                 note = "post_refusal_backend_observation=unavailable"
             refused.add_note(note)
+            if control is not None:
+                refused.add_note(_control_refusal_note(control, database, connection))
         raise
+
+
+def _control_refusal_note(
+    control: Engine, database: str | None, refused_connection: Connection
+) -> str:
+    """A second, later test observation with control visibility, never the refusal snapshot."""
+    label = "post_refusal_control_backend_observation="
+    try:
+        if (
+            not isinstance(database, str)
+            or not 1 <= len(database) <= 63
+            or control.url.database == database
+        ):
+            raise ValueError("Invalid synthetic control observation")
+        # Used only to exclude the already-refused migration client, never emitted.
+        refused_pid = refused_connection.exec_driver_sql(
+            "SELECT pg_catalog.pg_backend_pid()"
+        ).scalar_one()
+        if type(refused_pid) is not int or refused_pid <= 0:
+            raise ValueError("Invalid synthetic migration backend")
+        with control.connect() as observer:
+            observer = observer.execution_options(isolation_level="AUTOCOMMIT")
+            observer.exec_driver_sql("SET statement_timeout = '1s'")
+            observer.exec_driver_sql("SELECT pg_catalog.pg_stat_clear_snapshot()").close()
+            rows = observer.execute(
+                text(
+                    "SELECT backend_type,state FROM pg_catalog.pg_stat_activity "
+                    "WHERE datname=:database AND pid<>:refused_pid LIMIT 9"
+                ),
+                {"database": database, "refused_pid": refused_pid},
+            ).fetchmany(9)
+            return label + json.dumps(
+                {
+                    "rows": [
+                        {
+                            "backend_type": _safe_backend_value(row[0], _BACKEND_TYPES),
+                            "state": _safe_backend_value(row[1], _BACKEND_STATES),
+                        }
+                        for row in rows[:8]
+                    ],
+                    "more_than_eight": len(rows) > 8,
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+    except Exception:
+        # Never replace the original guard exception or expose diagnostic errors.
+        return label + "unavailable"
+
+
+def child_refusal_summary(output: bytes) -> str:
+    """Render only bounded fixed child refusal fields; never forward stdout or stderr."""
+    unavailable = "child_refusal_observation=unavailable"
+    if not isinstance(output, bytes) or len(output) > 8192:
+        return unavailable
+    try:
+        value = json.loads(output)
+        if not isinstance(value, dict):
+            return unavailable
+        failure = (
+            "writers_not_drained" if value.get("failure") == "writers_not_drained" else "other"
+        )
+        reuse = value.get("same_physical_connection")
+        reuse = reuse if type(reuse) is bool else None
+        notes = value.get("notes")
+        if not isinstance(notes, list):
+            return unavailable
+        safe = []
+        allowed = {
+            "post_refusal_backend_observation",
+            "post_refusal_control_backend_observation",
+        }
+        for note in notes[:2]:
+            if not isinstance(note, str) or len(note) > 4096:
+                continue
+            label, separator, payload = note.partition("=")
+            if not separator or label not in allowed:
+                continue
+            if payload == "unavailable":
+                safe.append(label + "=unavailable")
+                continue
+            observed = json.loads(payload)
+            if (
+                not isinstance(observed, dict)
+                or not isinstance(observed.get("rows"), list)
+                or type(observed.get("more_than_eight")) is not bool
+            ):
+                return unavailable
+            rows = []
+            for row in observed["rows"][:8]:
+                if not isinstance(row, dict):
+                    return unavailable
+                rows.append(
+                    {
+                        "backend_type": _safe_backend_value(
+                            row.get("backend_type"), _BACKEND_TYPES
+                        ),
+                        "state": _safe_backend_value(row.get("state"), _BACKEND_STATES),
+                    }
+                )
+            safe.append(
+                label
+                + "="
+                + json.dumps(
+                    {"rows": rows, "more_than_eight": observed["more_than_eight"]},
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+            )
+        return "child_refusal_observation=" + json.dumps(
+            {"failure": failure, "same_physical_connection": reuse, "notes": safe},
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+    except (ValueError, TypeError, RecursionError):
+        return unavailable

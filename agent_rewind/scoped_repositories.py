@@ -9,7 +9,7 @@ import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Protocol
 
 from sqlalchemy import LargeBinary, Text, and_, cast, column, func, literal, select, table
 from sqlalchemy.engine import Connection, Engine
@@ -85,7 +85,12 @@ def _invalid_constant(value: str) -> None:
     raise ResourceNotFound()
 
 
-def _scope(kind: str, resource_id: Any, context: ProjectContext) -> Any:
+class _ProjectScope(Protocol):
+    @property
+    def project_id(self) -> str: ...
+
+
+def _scope(kind: str, resource_id: Any, context: _ProjectScope) -> Any:
     return and_(
         scopes.c.resource_kind == kind,
         scopes.c.resource_id == resource_id,
@@ -117,7 +122,7 @@ def _json_row(value: dict[str, Any]) -> dict[str, Any]:
 
 
 class _Reads:
-    def __init__(self, connection: Connection, context: ProjectContext):
+    def __init__(self, connection: Connection, context: _ProjectScope):
         self.connection, self.context = connection, context
 
     def record(self, kind: str, resource_id: str) -> dict[str, Any]:

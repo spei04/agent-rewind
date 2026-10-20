@@ -57,12 +57,16 @@ def recovery(request):
         version = _run(["docker", "exec", container, tool, "--version"]).decode().strip()
         assert version.startswith(f"{tool} (PostgreSQL) 16."), "Recovery tool version mismatch"
     state = request.getfixturevalue("pg")
-    admin = create_engine(state["admin"].url, isolation_level="AUTOCOMMIT", poolclass=NullPool)
+    # Own a separate control connection outside both disposable databases.
+    # The borrowed state["admin"] connects to the source and cannot observe its drain.
+    admin = create_engine(state["control"].url, isolation_level="AUTOCOMMIT", poolclass=NullPool)
+    assert admin.url.database != state["owner"].url.database
     name = "ar_recovery_" + uuid4().hex
     with admin.connect() as connection:
         connection.exec_driver_sql(f"CREATE DATABASE {name} OWNER {state['owner_role']}")
     target = create_engine(state["owner"].url.set(database=name), poolclass=NullPool)
     try:
+        assert admin.url.database != target.url.database
         with target.begin() as connection:
             connection.exec_driver_sql("REVOKE CREATE ON SCHEMA public FROM PUBLIC")
         yield {**state, "target": target, "control": admin, "container": container}

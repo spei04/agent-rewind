@@ -64,12 +64,13 @@
       "milestone": "M1",
       "priority": "P0",
       "objective": "Make large run histories queryable through bounded authorized requests.",
-      "base_effort_days": 5.0,
+      "base_effort_days": 7.0,
       "children": [
         "AR-006-A",
-        "AR-006-B"
+        "AR-006-B",
+        "AR-006-C"
       ],
-      "status": "Not started"
+      "status": "In progress"
     },
     "AR-007": {
       "milestone": "M1",
@@ -1139,17 +1140,18 @@
       "confidence": "medium",
       "dependencies": [
         "AR-005-C",
-        "AR-007-A"
+        "AR-007-A",
+        "AR-009-B"
       ],
       "contracts": [
         "C04"
       ],
-      "scope": "Create run_index and bounded progress-marked backfill with parent scope closure and preserved event heads",
-      "acceptance": "All known records map or fail with diagnostics; retry resumes without duplicate rows or history edits",
-      "tests": "Interrupted batches, orphan lineage, equal timestamps and mixed historical/new records",
-      "security_reliability": "Unmapped records quarantine; no default cross-project exposure",
-      "out_of_scope": "No branch or event API redesign",
-      "status": "Not started",
+      "scope": "Create run_index and bounded progress-marked backfill with parent scope closure and preserved event heads. Add the constant run resource discriminator and composite project/resource scope FK, immutable commit-ordered per-project sequence, frozen cohort/source/scope/evidence identities and resumable initial inserts. Reuse pure projection classification and expected-state verification rules for later repair. Compose the required same-Connection publication writer with AR-009-B; the unavailable live generation-fence adapter must refuse before storage",
+      "acceptance": "All supported cohort records map or fail with fixed diagnostics; retry resumes without duplicate rows, source/history edits or sequence reassignment. Recheck the frozen source, scope and exact prior prefix each batch; late or changed records require explicit new cohort preparation. Projection/root/ref writes commit or roll back together; current migration-only release never enables customer admission",
+      "tests": "Interrupted batches and fresh-process resume; orphan/cross-project lineage and scope FKs; equal timestamps with independent exact-float rounding oracle; missing/corrupt/redacted/zero-event evidence; source/scope/evidence drift; PostgreSQL rollback, reversed completion, project concurrency, restore and actual publication composition; old-reader fail-closed compatibility; overlapping parent replacement/child publication, allocator corruption and actual process death before/after commit",
+      "security_reliability": "Unmapped or unverifiable records refuse without source repair or default cross-project exposure. Verify captured bytes outside SQL/write locks and recheck immutable source identities before commit; bound cohort, ancestry, retained metadata, aggregate bytes and queries. No owner-only substitute for the required generation/database-time fence. Acquire sorted affected project exclusion before any owning job/run locks, with sequence allocation only after current fence/source validation; matching replay refuses an allocator below its published sequence",
+      "out_of_scope": "No branch or event API redesign, mutable stale/lost-job repair, restricted repair-audit integration, legacy artifact-ref adoption, generation schema, live worker activation or customer admission; AR-006-C owns repair after AR-010-B",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         3.0,
@@ -1159,8 +1161,18 @@
         "BE",
         "QE"
       ],
-      "pull_request_boundary": "Create run_index and bounded progress-marked backfill with parent scope closure and preserved event heads. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "pull_request_boundary": "Create run_index and bounded progress-marked backfill with parent scope closure and preserved event heads. Add the constant run resource discriminator and composite project/resource scope FK, immutable commit-ordered per-project sequence, frozen cohort/source/scope/evidence identities and resumable initial inserts. Reuse pure projection classification and expected-state verification rules for later repair. Compose the required same-Connection publication writer with AR-009-B; the unavailable live generation-fence adapter must refuse before storage. One preparatory schema/backfill/publication-adapter PR; retain migration-only guards until actual live producer and integration gates pass.",
+      "contracts_status": "Reviewed C04 development/testing scope and existing G0 apply. AR-009-B supplies the accepted preparatory publication coordinator; AR-010-A/B still own generation-aware live integration. The retained C04 repair requirement is explicitly assigned to AR-006-C, with AR-012-B integrated acceptance.",
+      "assigned_to": "Engineer C — runtime, evidence/backfill/publication and CLI; Engineer B — schema, catalog and PostgreSQL recovery/concurrency tests; Engineer A and lead — independent review and integration",
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/71",
+      "entry_evidence": "Assigned from accepted main 7c0571ba1cbff1dfe9902bd92f63cea574d8f1fa after AR-005-C, AR-007-A and AR-009-B were Verified and development-scope G0 was satisfied. C reuses its existing checkout; B exclusively reconciles primary planning records, with A/B independent implementation review. No production activation or paid calls. After the immutable planning checkpoint, B retains the primary checkout for schema/revision/compatibility files; C retains capture/backfill/publication files in its independent checkout. Neither switches source under another consumer.",
+      "verification": "AR-006-A preparatory run projection is Verified in PR #72 at reviewed source 46639c49502995870eb19faaea218b84a02a95ec. Hosted run 39497717028 passed 1596 tests on Python 3.11 and 1600 on Python 3.12, including all 21 new actual PostgreSQL backfill/publication cases. Three core Docker skips are covered by three passing gVisor cases; four sqlite3 transaction-mode cases are Python-3.12-only. Lint, formatting, strict types, contract/planning validation, dependency security audit, isolated package smoke and CI gate passed. A/B accepted the scoped runtime, transaction, catalog, test and diagnostic corrections. Frozen history, interrupted process recovery, backup/restore/resume, project serialization and publication rollback/retry have synthetic execution evidence. Live generation-aware publication, API listing, mutable repair/audit, customer admission and production acceptance remain gated. No model calls, new paid resources or partner data were used.",
+      "evidence": {
+        "reviewed_commit": "46639c49502995870eb19faaea218b84a02a95ec",
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/72",
+        "checks": "AR-006-A preparatory run projection is Verified in PR #72 at reviewed source 46639c49502995870eb19faaea218b84a02a95ec. Hosted run 39497717028 passed 1596 tests on Python 3.11 and 1600 on Python 3.12, including all 21 new actual PostgreSQL backfill/publication cases. Three core Docker skips are covered by three passing gVisor cases; four sqlite3 transaction-mode cases are Python-3.12-only. Lint, formatting, strict types, contract/planning validation, dependency security audit, isolated package smoke and CI gate passed. A/B accepted the scoped runtime, transaction, catalog, test and diagnostic corrections. Frozen history, interrupted process recovery, backup/restore/resume, project serialization and publication rollback/retry have synthetic execution evidence. Live generation-aware publication, API listing, mutable repair/audit, customer admission and production acceptance remain gated. No model calls, new paid resources or partner data were used.",
+        "record": "docs/delivery/RUN_PROJECTION.md"
+      }
     },
     {
       "id": "AR-006-B",
@@ -1180,11 +1192,11 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Implement scoped list/detail v1 routes with opaque bound cursors, stable tie ordering and fixed page limits",
-      "acceptance": "Traversal has no duplicate/missing rows on fixed corpus; foreign/modified cursor rejected; indexed query plan",
-      "tests": "M1-005/006, concurrent insert semantics, invalid limit and missing/foreign run cases",
+      "scope": "Implement scoped list/detail v1 routes with opaque bound cursors, stable tie ordering and fixed page limits; apply bounded conservative current-job status/branchability suppression at read time without mutating the projection or scanning artifacts",
+      "acceptance": "Traversal has no duplicate/missing rows on fixed corpus; foreign/modified cursor rejected; indexed query plan; stale/expired/terminal job evidence cannot expose an unsafe branchable result, and listing does not persist repairs",
+      "tests": "M1-005/006, concurrent insert semantics, invalid limit and missing/foreign run cases; current-job changes between publication and read conservatively suppress branchability without source/projection writes or blob I/O",
       "security_reliability": "Authorize before loading body; no payload in cursor/errors",
-      "out_of_scope": "No full history download or arbitrary search engine",
+      "out_of_scope": "No full history download or arbitrary search engine or mutable reconciliation/audit (AR-006-C)",
       "status": "Not started",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
@@ -1195,8 +1207,45 @@
         "BE",
         "QE"
       ],
-      "pull_request_boundary": "Implement scoped list/detail v1 routes with opaque bound cursors, stable tie ordering and fixed page limits. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
+      "pull_request_boundary": "Implement scoped list/detail v1 routes with opaque bound cursors, stable tie ordering and fixed page limits; apply bounded conservative current-job status/branchability suppression at read time without mutating the projection or scanning artifacts. Read-only query/API slice; AR-006-C separately persists fenced repair and restricted audit.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+    },
+    {
+      "id": "AR-006-C",
+      "parent": "AR-006",
+      "milestone": "M1",
+      "priority": "P0",
+      "title": "Fenced stale-projection reconciliation and restricted audit",
+      "objective": "Persist conservative corrections to stale or lost-job projections with attributable, idempotent audit evidence while preserving immutable run history.",
+      "role": "BE",
+      "effort_days": 2.0,
+      "confidence": "medium",
+      "dependencies": [
+        "AR-006-A",
+        "AR-010-B"
+      ],
+      "contracts": [
+        "C04"
+      ],
+      "scope": "Implement bounded explicit reconciliation using AR-006-A classification and expected-state verification rules after AR-010-B supplies the live worker fence. Lock all affected projects in sorted order before the scoped run/job and applicable publication state; compare expected source/projection identity and current database-time lease, generation, cancellation and job state. Atomically persist a conservative status/branchability correction plus restricted additive audit with fixed reason, old/new status and source identity. Preserve published_seq, created_at, hashed source bodies, historical rows and the legacy audit table",
+      "acceptance": "Repeated reconciliation is idempotent with no duplicate audit; stale owners and mismatched source/scope/generation refuse without changes. Correction and audit commit together or neither does. An unverified partial/lost run cannot become complete or branchable. Existing immutable identities and all original fixture rows remain byte/value-identical; no customer activation follows this PR alone",
+      "tests": "Real PostgreSQL concurrent takeover/cancel and repair races, unavailable database, process failure/rollback between repair and audit, duplicate invocation, scope/source drift and bounded batches; old-reader/profile refusal and restore; original-row preservation and unchanged sequence/timestamps",
+      "security_reliability": "Fresh scoped authorization and database-time live fence are required. Fail closed on ambiguity; emit only fixed safe diagnostics. Audit access is restricted and additive outside preserved legacy audit/source rows; no raw artifact, provider payload or secret in audit. Bound row/lock/query work and retain unresolved cases for explicit retry",
+      "out_of_scope": "No provider execution/refund, scheduler, API redesign, fabricated completion, legacy audit/source rewrite, artifact adoption, new evidence capture or production/customer activation",
+      "status": "Not started",
+      "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off. AR-012-B must independently exercise the integrated repair path before G1; this task does not certify that gate.",
+      "effort_range_days": [
+        2.0,
+        3.5
+      ],
+      "review_roles": [
+        "TL",
+        "QE",
+        "SEC"
+      ],
+      "pull_request_boundary": "One bounded repair-and-restricted-audit PR after the projection and live worker fence producers. If additive audit persistence needs a schema revision, include its narrow migration, literal profiles, compatibility and restore checks here; do not repurpose preserved legacy audit. No background scheduler or broad retention system.",
+      "contracts_status": "Existing C04 stale-projection repair/audit requirement, now explicitly assigned under approved staged execution. AR-006-A provides pure rules; AR-010-B provides live fence integration. No new product feature, data access, spending or production authority.",
+      "estimate_uncertainty": "Medium confidence: 2–3.5 days assumes reusable AR-006-A rules and accepted AR-010-B live fence. Exact additive audit persistence/compatibility work must be checked at entry; re-estimate a concrete gap rather than hide it in AR-012-B verification."
     },
     {
       "id": "AR-007-A",
@@ -1486,7 +1535,7 @@
       "scope": "Implement org/project/job accounts, unique logical calls, ordered row locks and compatibility aggregate",
       "acceptance": "Concurrent reservations cannot exceed any cap; periods remain attached to admission; no double accounting",
       "tests": "M1-018/020 races, deadlock retry, period rollover, repeated logical call and integer boundaries",
-      "security_reliability": "Keep uncertain reservations held; no model call while transaction open",
+      "security_reliability": "Keep uncertain reservations held; no model call while transaction open. Reconcile the account-row hierarchy with the C04 project-before-job publication hierarchy explicitly before live integration",
       "out_of_scope": "No online provider dispatch or refunds without receipts",
       "status": "Not started",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
@@ -1520,8 +1569,8 @@
       ],
       "scope": "Require valid owner/lease/cancel state before issuing permit; expose ledger diagnostics without prompt bodies",
       "acceptance": "Stale owner, cancelled job or DB outage cannot obtain new permit; reconciliation requires evidence",
-      "tests": "M1-019/021 stale token, repeated release, missing DB, terminal job and cancel race",
-      "security_reliability": "No automatic timeout refund; prevent privileged bypass of budget hierarchy",
+      "tests": "M1-019/021 stale token, repeated release, missing DB, terminal job and cancel race; simultaneous reservation, publication and cancellation using the documented shared lock hierarchy",
+      "security_reliability": "No automatic timeout refund; prevent privileged bypass of budget hierarchy. Use the common C04 lock hierarchy for publication, cancellation and source mutation; never enter a project lock while retaining a conflicting job lock",
       "out_of_scope": "No distributed study scheduling or automatic paid replay",
       "status": "Not started",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
@@ -1714,6 +1763,7 @@
       "confidence": "medium",
       "dependencies": [
         "AR-006-B",
+        "AR-006-C",
         "AR-008-B",
         "AR-009-B",
         "AR-010-B",
@@ -1723,9 +1773,9 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Wire PostgreSQL/object-backed required checks for all 24 M1 cases and upgrade/legacy compatibility",
+      "scope": "Wire PostgreSQL/object-backed required checks for all 24 M1 cases and upgrade/legacy compatibility; independently validate AR-006-C live stale-projection repair and restricted audit integration",
       "acceptance": "G1 evidence records commit, runtime and every pass/fail; no fixture-only substitute for concurrency tests",
-      "tests": "Execute all M1 cases plus old-reader compatibility and fail-closed startup",
+      "tests": "Execute all M1 cases plus old-reader compatibility and fail-closed startup; actual generation/cancel races and atomic idempotent repair/audit under PostgreSQL; mixed admission/publication/cancellation and overlapping parent/child operations verify the common account/project/job lock order",
       "security_reliability": "Tests isolate projects and contain no real model credentials",
       "out_of_scope": "No benchmark capacity or enterprise readiness declaration",
       "status": "Not started",
@@ -1738,7 +1788,7 @@
         "TL",
         "domain owner"
       ],
-      "pull_request_boundary": "Wire PostgreSQL/object-backed required checks for all 24 M1 cases and upgrade/legacy compatibility. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
+      "pull_request_boundary": "Wire PostgreSQL/object-backed required checks for all 24 M1 cases and upgrade/legacy compatibility; independently validate AR-006-C live stale-projection repair and restricted audit integration. This task verifies producer implementation; it does not implement deferred repair.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
@@ -6961,17 +7011,17 @@
   },
   "estimate_policy": "Engineering effort includes implementation or design, task tests, ordinary review/rework and documentation. Six logical role totals are demand estimates, not six funded human FTEs. Three contributor slots are active; no measured conversion from those slots to engineering days or a launch calendar is assumed. A hypothetical human role at 3.5 delivery days/week is shown only as a capacity lower bound. Ranges are planning bounds, not probabilities; RA-01 uses approved 2–3 and 2–4 day design ranges. The 25% integration reserve is alternative to summed upper ranges, not additive. External review/operations/funding waits and unestimated follow-up implementation remain excluded.",
   "validation": {
-    "task_count": 150,
+    "task_count": 151,
     "parent_count": 52,
     "gate_count": 27,
-    "edge_count": 538,
+    "edge_count": 542,
     "dag_acyclic": true,
     "contract_producers_available_before_consumers": true,
     "schedule_no_predecessor_violations_conditional_on_stated_approvals": true,
     "max_scheduled_delivery_days_per_role_per_day": 0.5,
     "milestone_effort_days": {
       "M0": 8.5,
-      "M1": 41.5,
+      "M1": 43.5,
       "M2": 69.0,
       "M3": 81.0,
       "M4": 82.0,
@@ -6984,12 +7034,12 @@
       "FE": 23.0,
       "RS": 66.0,
       "PL": 88.0,
-      "BE": 77.5,
+      "BE": 79.5,
       "QE": 112.5
     },
-    "base_effort_days": 440.0,
-    "upper_range_days": 744.6,
-    "effort_only_critical_path_days": 152.5,
+    "base_effort_days": 442.0,
+    "upper_range_days": 748.1,
+    "effort_only_critical_path_days": 154.5,
     "effort_only_critical_path": [
       "E0",
       "AR-005-A",
@@ -7006,6 +7056,7 @@
       "AR-008-B",
       "AR-010-A",
       "AR-010-B",
+      "AR-006-C",
       "AR-012-B",
       "AR-014-A",
       "AR-014-B",
@@ -7050,15 +7101,16 @@
       "G7"
     ],
     "critical_path_excludes_external_waits": true,
-    "revision_notes": "2026-10-20 owner #51 reconciliation preserves original work and adds seven base days. Current conditional fortnight uses A/AR-009-A, C/AR-007-B and B/review; completed RA design schedule is historical. The checker recomputes live graph/card/contract/schedule metrics independently from immutable decision issuance metrics.",
-    "independent_review": "Pending independent lead review of this activation commit; prior dated reviews remain in ASSIGNMENTS.md.",
-    "contract_count": 20
+    "revision_notes": "2026-10-20 projection refinement adds the accepted AR-009-B producer edge to AR-006-A and assigns the existing C04 repair/audit requirement to AR-006-C (2 base, 2–3.5 range) after AR-010-B and before AR-012-B. Original issue #51 issuance metrics remain immutable historical evidence. The ten-day foundation/RA tables are historical scenarios; current capacity is C implementation with A/B review, not a new calendar promise.",
+    "independent_review": "Engineer A and lead independently accepted exact planning commit 4b0bee75a8ec040aa4a00ad45f36d269befe11db: metrics, original-edge preservation, cards/status/schedule, immutable C21/API/owner record and retained repair boundary verified. Draft PR #72 tracks integration; hosted checks and run-projection implementation evidence remain pending.",
+    "contract_count": 20,
+    "verification": "Local execution/evaluation/M1 OpenAPI validators and 287 focused planning/contract tests passed; immutable owner/C21/API bytes unchanged and all original dependencies retained. A/lead exact planning review accepted at 4b0bee75. No runtime projection acceptance; hosted checks pending."
   },
   "review_findings": [
     {
       "id": "REV-01",
       "finding": "Five/ten-day packages had generic a/b splits with no assignable PR boundary.",
-      "resolution": "146 specific tasks, 0.5–4 engineering days each, with scope, exclusions, contracts, tests, review and acceptance. Parent IDs retained for traceability."
+      "resolution": "151 specific tasks with bounded scope, exclusions, contracts, tests, review and acceptance. Parent IDs retained for traceability."
     },
     {
       "id": "REV-02",
@@ -7073,7 +7125,7 @@
     {
       "id": "REV-04",
       "finding": "42–50 week GA and 28–34 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff.",
-      "resolution": "Retire dated windows. 429 base engineering days; 146.5-day effort-only longest path excludes role contention and external waits. Reforecast after Day 10 and each gate using actual throughput; no committed launch date."
+      "resolution": "Retire dated windows. 442 base engineering days; 154.5-day effort-only longest path excludes role contention and external waits. Reforecast at integration gates using actual throughput; no committed launch date."
     },
     {
       "id": "REV-05",
@@ -7108,7 +7160,7 @@
     {
       "id": "REV-11",
       "finding": "Aggregate six-engineer capacity hid heavy verification and platform ownership.",
-      "resolution": "Role rollups expose QE 111.5 days and PL 88 days; two-week allocation stays <=0.5 delivery day/role/day. Independent reviewers and support coverage are external capacity dependencies."
+      "resolution": "Role rollups expose QE 112.5 days and PL 88 days; historical two-week allocations stay <=0.5 delivery day/role/day. Independent reviewers and support coverage are external capacity dependencies."
     },
     {
       "id": "REV-12",
@@ -7118,7 +7170,7 @@
     {
       "id": "REV-13",
       "finding": "Planning artifacts, existing tests and live validation risked being read as enterprise implementation evidence.",
-      "resolution": "Internal M0 specifications and development G0 are reviewed; migration and CI work are active. All 24 M1 runtime cases remain planned, and production/customer evidence remains pending. Historical tests do not close future readiness gates."
+      "resolution": "Internal M0 specifications and development G0 are reviewed; migration, ownership, readiness, scoped repositories and preparatory artifacts/publication have scoped evidence. The full 24-case M1 runtime gate and production/customer evidence remain pending."
     },
     {
       "id": "REV-14",
@@ -7128,10 +7180,15 @@
     {
       "id": "REV-15",
       "finding": "Approved research design was outside the active graph while later C08/C09 producers could start without consuming its result.",
-      "resolution": "Activate RA-01-A/B as two bounded M3 design tasks; C20/C21 stay unavailable until review, and AR-020-A/AR-024-A wait for RA-01-B. Preserve original runtime and external gates; follow-up implementations remain unestimated/unapproved."
+      "resolution": "RA-01-A/B and C20/C21 are internally verified; immutable owner decision #51 authorizes nine mapped engineering scopes only. AR-020-A/AR-024-A retain the reviewed design/owner gate and original runtime prerequisites; deferred scopes and external execution gates remain."
+    },
+    {
+      "id": "REV-16",
+      "finding": "C04 required stale-projection repair with restricted audit, but no independently estimated implementation card owned it.",
+      "resolution": "AR-006-A owns initial projection, reusable rules and preparatory publication composition; AR-006-B suppresses unsafe reads without writes; AR-006-C owns bounded fenced repair/audit after AR-010-B, before AR-012-B verification. Add 2 base / 3.5 upper days; preserve source history and existing external gates."
     }
   ],
-  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-007-B, AR-009-A and preparatory AR-009-B are Verified after independent review and matching hosted checks. AR-006-A/011-C/007-C remain ready but unassigned. Customer admission, optional research adapters, paid/held-out evaluation, data access and production remain separately gated.",
+  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-007-B, AR-009-A and preparatory AR-009-B are Verified. AR-006-A is In progress with C and A/B review from accepted main 7c0571b; AR-007-C/011-C are ready but unassigned. AR-006-C explicitly retains C04 repair/audit after AR-006-A and AR-010-B, before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data access and production remain separately gated.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -7162,20 +7219,19 @@
       2,
       3,
       4,
-      5
+      5,
+      9
     ],
     "open_parent_issues": [
       6,
       7,
       8,
-      9,
       10,
       11,
       12
     ],
     "active_child_issues": {
-      "AR-007-B": 52,
-      "AR-009-A": 53
+      "AR-006-A": 71
     },
     "closed_implementation_issues": [
       26,
@@ -7183,7 +7239,10 @@
       30,
       37,
       40,
-      41
+      41,
+      52,
+      53,
+      69
     ],
     "queued_child_issues": {},
     "design_issues": {
@@ -7193,7 +7252,7 @@
     "owner_decision_issues": {
       "RESEARCHSCOPE0": 51
     },
-    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50. Issue #51 approved by owner on 2026-10-20; overlay records exact scope. Implementation issues #52/#53 active."
+    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50. Issue #51 approved by owner on 2026-10-20 and closed after accepted reconciliation; immutable overlay records exact scope. Issues #52/#53/#69 are closed for scoped accepted deliveries; #71 tracks active AR-006-A. Parent #9 is closed for its preparatory children; live integration/customer gates remain open."
   },
   "execution_capacity": {
     "lead": "Project lead",
@@ -7501,9 +7560,9 @@
     "conditions": "B independently reviews both interfaces; A/C cross-review without acting as separate human approval. Review acceptance and hosted checks must actually pass.",
     "contingency": "Upper ranges may need two extra half-day allocations per task in days6–7. Days8–10 retain integration/reforecast capacity. Do not start any dependent on a planned date alone.",
     "unscheduled_approved_queue": [
-      "AR-006-A",
+      "AR-007-C",
       "AR-011-C"
     ],
-    "unscheduled_queue_policy": "Verified direct inputs, no date or new assignment; reuse the same three contributor slots after measured progress."
+    "unscheduled_queue_policy": "Verified direct inputs, no date or new assignment. AR-006-A is assigned separately to C with A/B review; reuse the same three contributor slots after measured progress."
   }
 }

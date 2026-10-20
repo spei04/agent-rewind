@@ -66,6 +66,19 @@ def _migrate(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
                 batch_size=args.batch_size,
                 timeout_seconds=timeout,
             )
+        elif action == "projection-backfill":
+            from .config import ProjectionSourceSettings
+            from .migrations.projection_service import backfill_run_index
+            from .projection_evidence import FrozenLegacySource
+
+            try:
+                key = ProjectionSourceSettings().encryption_key.get_secret_value().encode()
+                source = FrozenLegacySource(args.source_root, Fernet(key))
+            except ValueError:
+                parser.error("valid_projection_encryption_key_required")
+            result = backfill_run_index(
+                engine, source, batch_size=args.batch_size, timeout_seconds=timeout
+            )
         elif action == "adopt":
             result = adopt(
                 engine,
@@ -105,7 +118,19 @@ def main() -> None:
     )
     ownership_parser.add_argument("--input", type=Path, help="Private fresh initialization JSON")
     ownership_parser.add_argument("--batch-size", type=int, default=1000)
-    for migration_parser in (install_parser, adopt_parser, upgrade_parser, ownership_parser):
+    projection_parser = migration_commands.add_parser(
+        "projection-backfill",
+        help="Project one bounded batch from an operator-frozen legacy byte view",
+    )
+    projection_parser.add_argument("--source-root", type=Path, required=True)
+    projection_parser.add_argument("--batch-size", type=int, default=1000)
+    for migration_parser in (
+        install_parser,
+        adopt_parser,
+        upgrade_parser,
+        ownership_parser,
+        projection_parser,
+    ):
         migration_parser.add_argument("--lock-timeout", type=int, default=5)
     serve = commands.add_parser("serve", help="Start the API and debugger")
     serve.add_argument("--host", default="127.0.0.1")

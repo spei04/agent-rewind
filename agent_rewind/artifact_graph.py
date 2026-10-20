@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any, NoReturn
 
 from .artifact_metadata import ArtifactError, digest_value, identifier
@@ -80,6 +80,15 @@ class VerifiedGraph:
     @property
     def root_digest(self) -> str:
         return hashlib.sha256(self.envelope).hexdigest()
+
+
+@dataclass(frozen=True)
+class VerifiedCapture:
+    source_digest: str
+    status: str
+    branchable: bool
+    event_head: str | None
+    evidence_digest: str
 
 
 class _Graph:
@@ -207,16 +216,96 @@ def _verify(envelope: bytes, fetch: Callable[[GraphRef, int], bytes]) -> Verifie
         or root["generation"] < 1
     ):
         fail()
-    lineage = root["lineage"]
+    if not isinstance(root["manifest"], dict) or any(
+        root["manifest"].get(field) != root[root_field]
+        for field, root_field in (("id", "run_id"), ("job_id", "job_id"))
+    ):
+        fail()
+    graph, _ = _verify_capture(
+        {field: root[field] for field in ("manifest", "lineage", "events")},
+        fetch,
+        complete_only=True,
+    )
+    if graph.total + len(envelope) > MAX_BYTES or len(graph.refs) >= MAX_OBJECTS:
+        raise ArtifactError("artifact_graph_limit")
+    root_digest = hashlib.sha256(envelope).hexdigest()
+    graph.objects[root_digest] = envelope
+    graph.refs.add(GraphRef(root["run_id"], "result", root_digest))
+    return VerifiedGraph(envelope, tuple(sorted(graph.refs)), graph.objects)
+
+
+def verify_run_capture(
+    capture: dict[str, Any], fetch: Callable[[GraphRef, int], bytes]
+) -> VerifiedCapture:
+    """Verify bounded operator evidence without inventing a publication or fence.
+
+    Source/owner authorization belongs to the caller. Plaintext is discarded at
+    return; only the verified identities and conservative restore eligibility remain.
+    """
+    try:
+        return verify_run_capture_bytes(canonical(capture), fetch)
+    except (TypeError, ValueError, RecursionError) as error:
+        if isinstance(error, ArtifactError):
+            raise
+        raise ArtifactError("artifact_graph_invalid") from None
+
+
+def verify_run_capture_bytes(
+    encoded: bytes, fetch: Callable[[GraphRef, int], bytes]
+) -> VerifiedCapture:
+    """Verify an immutable bounded capture without copying an entire SQL cohort."""
+    try:
+        if not isinstance(encoded, bytes):
+            fail()
+        source_size = len(encoded)
+        if source_size > MAX_JSON_BYTES:
+            raise ArtifactError("artifact_graph_limit")
+        # The parsed snapshot is private; callbacks only receive immutable refs.
+        frozen = decode(encoded)
+        graph, head = _verify_capture(frozen, fetch, complete_only=False)
+        if graph.total + source_size > MAX_BYTES:
+            raise ArtifactError("artifact_graph_limit")
+        manifest = frozen["manifest"]
+        return VerifiedCapture(
+            digest(frozen),
+            manifest["status"],
+            manifest["status"] == "complete" and manifest["branchable"],
+            head,
+            digest({"capture": frozen, "refs": [asdict(ref) for ref in sorted(graph.refs)]}),
+        )
+    except (KeyError, TypeError, ValueError, RecursionError) as error:
+        if isinstance(error, ArtifactError):
+            raise
+        raise ArtifactError("artifact_graph_invalid") from None
+
+
+def _verify_capture(
+    capture: dict[str, Any], fetch: Callable[[GraphRef, int], bytes], *, complete_only: bool
+) -> tuple[_Graph, str | None]:
+    exact(capture, "manifest lineage events")
+    manifest = capture["manifest"]
+    if not isinstance(manifest, dict):
+        fail()
+    identifier(manifest["id"])
+    identifier(manifest["job_id"])
+    status = manifest.get("status")
+    if status not in {"complete", "failed", "incomplete", "running"}:
+        fail()
+    complete = status == "complete"
+    if complete_only and not complete:
+        fail()
+    lineage = capture["lineage"]
     if not isinstance(lineage, list) or not 1 <= len(lineage) <= MAX_DEPTH + 1:
         fail()
     runs: dict[str, dict[str, Any]] = {}
-    for run in lineage:
+    for position, run in enumerate(lineage):
         if not isinstance(run, dict):
             fail()
         exact(run, "id parent_id fork_step seed image policy task_digest branchable status")
         identifier(run["id"])
-        if run["id"] in runs or type(run["branchable"]) is not bool or run["status"] != "complete":
+        if run["id"] in runs or type(run["branchable"]) is not bool:
+            fail()
+        if run["status"] != (status if position == len(lineage) - 1 else "complete"):
             fail()
         if runs:
             previous = lineage[len(runs) - 1]
@@ -230,29 +319,53 @@ def _verify(envelope: bytes, fetch: Callable[[GraphRef, int], bytes]) -> Verifie
         elif run["parent_id"] is not None or run["fork_step"] is not None:
             fail()
         runs[run["id"]] = run
-    if lineage[-1]["id"] != root["run_id"]:
+    if lineage[-1]["id"] != manifest["id"]:
         fail()
-    manifest = root["manifest"]
-    if not isinstance(manifest, dict):
-        fail()
-    exact(
-        manifest,
-        "id created name job_id parent_id fork_step seed image policy "
-        "task_digest task_ref status branchable head steps intervention "
-        "success evaluation_ref final_workspace",
+    base = set(
+        [
+            "id",
+            "created",
+            "name",
+            "job_id",
+            "parent_id",
+            "fork_step",
+            "seed",
+            "image",
+            "policy",
+            "task_digest",
+            "task_ref",
+            "status",
+            "branchable",
+            "head",
+            "steps",
+            "intervention",
+        ]
     )
+    terminal = {"success", "evaluation_ref", "final_workspace"}
+    expected = base | (terminal if complete else set())
+    if not complete:
+        if "error" in manifest:
+            expected.add("error")
+        if terminal & set(manifest):
+            expected |= terminal
+    if set(manifest) != expected:
+        fail()
+    has_terminal = terminal <= set(manifest)
     if (
-        manifest["id"] != root["run_id"]
-        or manifest["job_id"] != root["job_id"]
-        or manifest["status"] != "complete"
-        or type(manifest["success"]) is not bool
+        (has_terminal and type(manifest["success"]) is not bool)
         or type(manifest["branchable"]) is not bool
         or type(manifest["steps"]) is not int
-        or not 1 <= manifest["steps"] <= 100
+        or not (1 if complete else 0) <= manifest["steps"] <= 100
         or any(
             manifest[k] != lineage[-1][k]
             for k in ("id", "parent_id", "fork_step", "seed", "image", "policy", "branchable")
         )
+    ):
+        fail()
+    # Engine persists an inherited prefix before a branch's first own event.
+    # A complete branch additionally executes at least its selected fork event.
+    if manifest["parent_id"] is not None and manifest["steps"] < manifest["fork_step"] - int(
+        not complete
     ):
         fail()
     if any(
@@ -261,14 +374,17 @@ def _verify(envelope: bytes, fetch: Callable[[GraphRef, int], bytes]) -> Verifie
     ):
         fail()
     graph = _Graph(fetch)
-    task = graph.json(root["run_id"], "task", manifest["task_ref"])
+    task = graph.json(manifest["id"], "task", manifest["task_ref"])
     validated_task = TaskSpec.model_validate(task)
     if manifest["steps"] > validated_task.max_steps:
         fail()
     if digest(task) != manifest["task_digest"]:
         fail()
-    rows = root["events"]
-    if not isinstance(rows, list) or len(rows) != manifest["steps"]:
+    rows = capture["events"]
+    if not isinstance(rows, list) or len(rows) > 100:
+        fail()
+    permitted = {manifest["steps"]} if complete else {manifest["steps"], manifest["steps"] + 1}
+    if len(rows) not in permitted or len(rows) > validated_task.max_steps:
         fail()
     previous_hash = None
     previous_workspace = None
@@ -302,24 +418,23 @@ def _verify(envelope: bytes, fetch: Callable[[GraphRef, int], bytes]) -> Verifie
             fail()
         checkpoint = graph.checkpoint(owner, event["checkpoint"], step, runs[owner])
         if (previous_workspace is not None and checkpoint["workspace"] != previous_workspace) or (
-            manifest["branchable"] and not checkpoint["branchable"]
+            complete and manifest["branchable"] and not checkpoint["branchable"]
         ):
             fail()
         graph.workspace(owner, event["workspace_after"])
         previous_hash = row["hash"]
         previous_workspace = event["workspace_after"]
-    if previous_hash != manifest["head"] or previous_workspace != manifest["final_workspace"]:
+    recorded_head = rows[manifest["steps"] - 1]["hash"] if manifest["steps"] else None
+    if recorded_head != manifest["head"]:
         fail()
-    graph.workspace(root["run_id"], manifest["final_workspace"])
-    evaluation = graph.json(root["run_id"], "evaluation", manifest["evaluation_ref"])
-    if (
-        type(evaluation.get("exit_code")) is not int
-        or (evaluation["exit_code"] == 0) != manifest["success"]
-    ):
-        fail()
-    if graph.total + len(envelope) > MAX_BYTES or len(graph.refs) >= MAX_OBJECTS:
-        raise ArtifactError("artifact_graph_limit")
-    root_digest = hashlib.sha256(envelope).hexdigest()
-    graph.objects[root_digest] = envelope
-    graph.refs.add(GraphRef(root["run_id"], "result", root_digest))
-    return VerifiedGraph(envelope, tuple(sorted(graph.refs)), graph.objects)
+    if has_terminal:
+        if previous_workspace != manifest["final_workspace"]:
+            fail()
+        graph.workspace(manifest["id"], manifest["final_workspace"])
+        evaluation = graph.json(manifest["id"], "evaluation", manifest["evaluation_ref"])
+        if (
+            type(evaluation.get("exit_code")) is not int
+            or (evaluation["exit_code"] == 0) != manifest["success"]
+        ):
+            fail()
+    return graph, previous_hash
