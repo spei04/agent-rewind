@@ -1049,7 +1049,7 @@
       "tests": "M1-001 through M1-004: fresh/legacy/unknown, transactional interruption and concurrent migrators",
       "security_reliability": "Migration credential only; lock/timeouts; backup before adoption",
       "out_of_scope": "No online data rewrite, automatic downgrade or run projection",
-      "status": "In progress",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         3.0,
@@ -1062,7 +1062,14 @@
       "pull_request_boundary": "Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill. PostgreSQL adoption also requires an operator-attested nonempty inventory of retired legacy writer roles, bound to persisted intent; disable their login/superuser and inherited writer paths, refuse other/ambiguous client sessions, and reject indirect public routine write paths. This is a bounded correction for the actual legacy compose superuser, not proof against dishonest administrators. No online data rewrite, automatic downgrade or run projection",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer C \u2014 migrations",
-      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/28"
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/28",
+      "evidence": {
+        "commit": "385e5ecf59b7b7bcf131969b915bac60275fec47",
+        "reviewed_commit": "6cf49a815f46eb72514a06d219c5d6a991fb59cf",
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/35",
+        "checks": "B independently accepted exact catalog/transaction/role source; A accepted DB-only CLI/input/redaction/package scope. Matching hosted run 39348158044 passed 656 tests on each Python version including 42 PostgreSQL cases, three real gVisor tests, security, installed-package smoke and CI gate. Prepared metadata only; no customer activation, runtime guards, ownership or PostgreSQL backup-restore claim.",
+        "record": "docs/delivery/MIGRATION_EVIDENCE_2026-10-20.md"
+      }
     },
     {
       "id": "AR-005-C",
@@ -1085,7 +1092,7 @@
       "tests": "Least-privilege DB startup, future revision, upgrade failure and recovery tests",
       "security_reliability": "Fail closed when schema cannot be read; retain rollback evidence",
       "out_of_scope": "No HA rolling upgrade claim",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.5,
@@ -1097,7 +1104,8 @@
       ],
       "pull_request_boundary": "Add read-only release-profile revision guards before API admission and worker claims; refuse unknown/partial/future or incomplete state without DDL, and document compatible application rollback versus required backup restore. Confirm all supported CLI initialization now uses AR-005-B versioned migrations. No HA rolling upgrade claim.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/37"
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/37",
+      "assigned_to": "Engineer C \u2014 runtime guard; Engineer A \u2014 independent recovery workstream; Engineer B \u2014 review"
     },
     {
       "id": "AR-006-A",
@@ -6850,15 +6858,14 @@
       12
     ],
     "active_child_issues": {
-      "AR-005-B": 28
+      "AR-005-C": 37
     },
     "closed_implementation_issues": [
       26,
+      28,
       30
     ],
-    "queued_child_issues": {
-      "AR-005-C": 37
-    }
+    "queued_child_issues": {}
   },
   "execution_capacity": {
     "lead": "Project lead",
