@@ -7130,7 +7130,7 @@
       "resolution": "Activate RA-01-A/B as two bounded M3 design tasks; C20/C21 stay unavailable until review, and AR-020-A/AR-024-A wait for RA-01-B. Preserve original runtime and external gates; follow-up implementations remain unestimated/unapproved."
     }
   ],
-  "planning_status": "Approved issue #51 mapped engineering scopes activated against immutable C21; only RESEARCHSCOPE0 newly satisfied. Customer admission stays disabled. A/009-A and C/007-B active; B reconciles and reviews. No new paid/held-out evaluation, data, optional adapters, reuse claims or production authority.",
+  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-007-B and AR-009-A are Verified; C implements AR-009-B with A/B independent review and lead integration in PR #70. Final publication hosted checks remain pending. Customer admission, optional research adapters, paid/held-out evaluation, data access and production remain separately gated.",
   "github_tracking": {
     "parent_issues": [
       1,
