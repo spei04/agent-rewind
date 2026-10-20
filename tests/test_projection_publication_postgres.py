@@ -321,6 +321,7 @@ def test_postgres_parent_republication_and_child_share_one_project_lock_order(
     )
     child_intent = capture.intent(child)
     replacement = capture.intent(parent, expected_root=original_parent.root_digest)
+    assert child_intent.job_id != replacement.job_id
     assert replacement.publication_id != original_parent.publication_id
     entered, attempting, release = Event(), Event(), Event()
     pids = {}
