@@ -1,0 +1,715 @@
+{
+  "schema_version": 1,
+  "audit_id": "RA-01-A",
+  "checked_at": "2026-10-20",
+  "scope": {
+    "authorization": "design_review_only",
+    "third_party_execution": false,
+    "paid_calls": false,
+    "customer_data": false,
+    "algorithm_implemented": false,
+    "search_bounds": [
+      "Pinned four paper versions and their author-linked project/repository pages.",
+      "Public GitHub repository title/identifier searches: REFLECT err-loc, 2606.09071, DAAF attribution, 2609.32498; inspect author provenance, not name-matched forks.",
+      "Read selected source blobs and untruncated trees in memory; no clone, dependency installation or execution.",
+      "Bounded adjacent primary publication pages: best arm, halving, thresholding, cost-aware, structured, feasible-arm and test-time compute allocation; no exhaustive novelty certification."
+    ]
+  },
+  "evidence": [
+    {
+      "id": "dover-paper",
+      "kind": "paper",
+      "url": "https://arxiv.org/html/2512.06749v3",
+      "locator": "Sections 3–4 and Appendix C; version 3"
+    },
+    {
+      "id": "dover-project",
+      "kind": "project",
+      "url": "https://mbjinx.github.io/DoVer_Web/",
+      "locator": "Author project site code link; inspected 2026-10-20"
+    },
+    {
+      "id": "dover-readme",
+      "kind": "code",
+      "url": "https://github.com/microsoft/ACV/blob/994ac15db6fff8a5131bbf5a26e84e352e676796/misc/DoVer/README.md",
+      "locator": "Requirements and Run baseline and evaluate"
+    },
+    {
+      "id": "dover-state",
+      "kind": "code",
+      "url": "https://github.com/microsoft/ACV/blob/994ac15db6fff8a5131bbf5a26e84e352e676796/misc/DoVer/scripts/state_loader.py",
+      "locator": "resolve_paths and main"
+    },
+    {
+      "id": "dover-restore",
+      "kind": "code",
+      "url": "https://github.com/microsoft/ACV/blob/994ac15db6fff8a5131bbf5a26e84e352e676796/misc/DoVer/AG2/ag2_checkpoint_system/restoration.py",
+      "locator": "CheckpointValidator and CheckpointLoader"
+    },
+    {
+      "id": "dover-propose",
+      "kind": "code",
+      "url": "https://github.com/microsoft/ACV/blob/994ac15db6fff8a5131bbf5a26e84e352e676796/misc/DoVer/scripts/intervention_recommender_trial.py",
+      "locator": "load_problem_gt and _build_intervention_prompt, lines 146–199"
+    },
+    {
+      "id": "dover-edit",
+      "kind": "code",
+      "url": "https://github.com/microsoft/ACV/blob/994ac15db6fff8a5131bbf5a26e84e352e676796/misc/DoVer/scripts/intervener_trial.py",
+      "locator": "build_new_content, lines 173–264"
+    },
+    {
+      "id": "dover-license",
+      "kind": "license",
+      "url": "https://github.com/microsoft/ACV/blob/994ac15db6fff8a5131bbf5a26e84e352e676796/LICENSE",
+      "locator": "Root MIT text; nested dependency notices not exhaustively audited"
+    },
+    {
+      "id": "dover-tree",
+      "kind": "tree",
+      "url": "https://api.github.com/repos/microsoft/ACV/git/trees/81483179f58c3bc7fa729a713288f2dbc00696d3?recursive=1",
+      "locator": "Untruncated misc/DoVer tree at pinned repository revision"
+    },
+    {
+      "id": "car-paper",
+      "kind": "paper",
+      "url": "https://arxiv.org/html/2606.08275v1",
+      "locator": "Version 1; intervention operators, attribution and synthetic validation"
+    },
+    {
+      "id": "car-readme",
+      "kind": "code",
+      "url": "https://github.com/jaineet17/causal-agent-replay/blob/db90fa28b97164c35e7c524e4597b8cbdb3035af/README.md",
+      "locator": "Install, integrations, license declaration"
+    },
+    {
+      "id": "car-forward",
+      "kind": "code",
+      "url": "https://github.com/jaineet17/causal-agent-replay/blob/db90fa28b97164c35e7c524e4597b8cbdb3035af/src/car/replay/forward.py",
+      "locator": "Module limitations and run_forward"
+    },
+    {
+      "id": "car-intervene",
+      "kind": "code",
+      "url": "https://github.com/jaineet17/causal-agent-replay/blob/db90fa28b97164c35e7c524e4597b8cbdb3035af/src/car/replay/intervene.py",
+      "locator": "InterventionRunner._one_sample"
+    },
+    {
+      "id": "car-contrast",
+      "kind": "code",
+      "url": "https://github.com/jaineet17/causal-agent-replay/blob/db90fa28b97164c35e7c524e4597b8cbdb3035af/src/car/attribute/contrastive.py",
+      "locator": "contrastive_attribution, lines 71–131"
+    },
+    {
+      "id": "car-shapley",
+      "kind": "code",
+      "url": "https://github.com/jaineet17/causal-agent-replay/blob/db90fa28b97164c35e7c524e4597b8cbdb3035af/src/car/attribute/shapley.py",
+      "locator": "ShapleyConfig, permutation sampling and truncation"
+    },
+    {
+      "id": "car-budget",
+      "kind": "code",
+      "url": "https://github.com/jaineet17/causal-agent-replay/blob/db90fa28b97164c35e7c524e4597b8cbdb3035af/src/car/budget/budget.py",
+      "locator": "Budget.charge and fixed cost_per_sample_usd"
+    },
+    {
+      "id": "car-surrogate",
+      "kind": "code",
+      "url": "https://github.com/jaineet17/causal-agent-replay/blob/db90fa28b97164c35e7c524e4597b8cbdb3035af/src/car/bench/surrogate.py",
+      "locator": "WhoWhenSurrogateConfig and ground-truth-conditioned simulation"
+    },
+    {
+      "id": "car-tree",
+      "kind": "tree",
+      "url": "https://api.github.com/repos/jaineet17/causal-agent-replay/git/trees/db90fa28b97164c35e7c524e4597b8cbdb3035af?recursive=1",
+      "locator": "Untruncated tree; no LICENSE, NOTICE or COPYING path"
+    },
+    {
+      "id": "reflect-paper",
+      "kind": "paper",
+      "url": "https://arxiv.org/html/2606.09071v1",
+      "locator": "Sections 3–4; Algorithm 1; Appendices D, H, J, Q, R"
+    },
+    {
+      "id": "daaf-paper",
+      "kind": "paper",
+      "url": "https://arxiv.org/html/2609.32498v1",
+      "locator": "Section 3; Appendices B, E, F.6, G; Table 13"
+    },
+    {
+      "id": "best-arm",
+      "kind": "paper",
+      "url": "https://www.microsoft.com/en-us/research/publication/best-arm-identification-multi-armed-bandits/",
+      "locator": "2010 primary publication page; successive rejects / pure exploration"
+    },
+    {
+      "id": "halving",
+      "kind": "paper",
+      "url": "https://proceedings.mlr.press/v51/jamieson16.html",
+      "locator": "2016 non-stochastic best arm identification / successive halving"
+    },
+    {
+      "id": "threshold",
+      "kind": "paper",
+      "url": "https://proceedings.mlr.press/v48/locatelli16.html",
+      "locator": "2016 fixed-horizon thresholding objective"
+    },
+    {
+      "id": "cost-aware",
+      "kind": "paper",
+      "url": "https://arxiv.org/abs/2402.16710v2",
+      "locator": "Version 2 abstract; heterogeneous testing costs, minimum expected cost"
+    },
+    {
+      "id": "structured",
+      "kind": "paper",
+      "url": "https://www.ijcai.org/proceedings/2022/388",
+      "locator": "2022 fixed-budget structured best arm identification"
+    },
+    {
+      "id": "feasible",
+      "kind": "paper",
+      "url": "https://proceedings.mlr.press/v80/katz-samuels18a.html",
+      "locator": "2018 fixed-budget feasible-arm identification"
+    },
+    {
+      "id": "test-compute",
+      "kind": "paper",
+      "url": "https://arxiv.org/abs/2408.03314v1",
+      "locator": "Version 1; prompt-dependent test-time compute allocation"
+    }
+  ],
+  "methods": [
+    {
+      "id": "dover",
+      "paper": "dover-paper",
+      "paper_version": "2512.06749v3",
+      "availability": {
+        "status": "public_source",
+        "repository": "https://github.com/microsoft/ACV",
+        "commit": "994ac15db6fff8a5131bbf5a26e84e352e676796",
+        "license_status": "root_text_inspected",
+        "license_evidence": [
+          "dover-license"
+        ],
+        "evidence": [
+          "dover-project",
+          "dover-readme",
+          "dover-tree"
+        ],
+        "note": "Root MIT text inspected; preserve notices and audit nested vendored rights before reuse. README names an absent evaluation entry point."
+      },
+      "reproduction": "not_executed",
+      "disposition": "adaptation_candidate",
+      "dimensions": {
+        "checkpoint_state": {
+          "status": "source_inspected",
+          "summary": "History/cache loader and AG2 message-appended checkpoint restoration exist; native filesystem equivalence remains untested.",
+          "evidence": [
+            "dover-state",
+            "dover-restore"
+          ]
+        },
+        "allowed_edits": {
+          "status": "source_inspected",
+          "summary": "Replaces orchestrator instructions or ledger sections and redirects subagent guidance.",
+          "evidence": [
+            "dover-edit"
+          ]
+        },
+        "oracle_access": {
+          "status": "source_inspected",
+          "summary": "Proposal prompt receives reference ground truth, despite prohibiting its verbatim inclusion in edits.",
+          "evidence": [
+            "dover-propose"
+          ]
+        },
+        "proposal_generation": {
+          "status": "paper_reported",
+          "summary": "Trial decomposition, failure hypotheses and targeted intervention proposals.",
+          "evidence": [
+            "dover-paper"
+          ]
+        },
+        "allocation": {
+          "status": "paper_reported",
+          "summary": "Three replays per intervention in the reported validation.",
+          "evidence": [
+            "dover-paper"
+          ]
+        },
+        "stopping": {
+          "status": "paper_reported",
+          "summary": "At least two successful replays validate an intervention; this is not our independent confirmation rule.",
+          "evidence": [
+            "dover-paper"
+          ]
+        },
+        "offline_cost": {
+          "status": "unknown",
+          "summary": "Full reproducible cost ledger and reusable precomputation costs not established by inspected release.",
+          "evidence": [
+            "dover-readme"
+          ]
+        },
+        "evaluation_holdout": {
+          "status": "paper_reported",
+          "summary": "Reports several agent/benchmark settings; does not establish our held-out coding-repository claim.",
+          "evidence": [
+            "dover-paper"
+          ]
+        },
+        "adaptation_fidelity": {
+          "status": "inference",
+          "summary": "Sequential coding adapter changes team/trial and edit semantics; label adaptation, not original-method reproduction.",
+          "evidence": [
+            "dover-edit",
+            "dover-restore"
+          ]
+        },
+        "unknowns": {
+          "status": "source_inspected",
+          "summary": "README invokes scripts/evaluator_trial.py, absent in the untruncated pinned subtree; no baseline was run.",
+          "evidence": [
+            "dover-readme",
+            "dover-tree"
+          ]
+        }
+      }
+    },
+    {
+      "id": "car",
+      "paper": "car-paper",
+      "paper_version": "2606.08275v1",
+      "availability": {
+        "status": "public_source",
+        "repository": "https://github.com/jaineet17/causal-agent-replay",
+        "commit": "db90fa28b97164c35e7c524e4597b8cbdb3035af",
+        "license_status": "declaration_unresolved",
+        "license_evidence": [
+          "car-readme",
+          "car-tree"
+        ],
+        "evidence": [
+          "car-readme",
+          "car-tree"
+        ],
+        "note": "README declares Apache-2.0; license text/notice completeness unresolved. Later code pin is not asserted to be the paper's exact experiment revision."
+      },
+      "reproduction": "not_executed",
+      "disposition": "adaptation_candidate",
+      "dimensions": {
+        "checkpoint_state": {
+          "status": "source_inspected",
+          "summary": "Copies conversational prefix; suffix uses a live Environment. Real-tool side effects are explicitly deferred.",
+          "evidence": [
+            "car-forward"
+          ]
+        },
+        "allowed_edits": {
+          "status": "source_inspected",
+          "summary": "Action, observation, context, policy and resampling operators; observation replacement bypasses ordinary boundary observation.",
+          "evidence": [
+            "car-intervene",
+            "car-forward"
+          ]
+        },
+        "oracle_access": {
+          "status": "source_inspected",
+          "summary": "Later WhoWhen surrogate uses ground-truth-conditioned environment simulation by default; native coding comparator must declare a different information regime.",
+          "evidence": [
+            "car-surrogate"
+          ]
+        },
+        "proposal_generation": {
+          "status": "source_inspected",
+          "summary": "Contrastive resampling ranks steps and identifies the last significant rescue locus; no semantic patch generator is supplied by that procedure.",
+          "evidence": [
+            "car-contrast"
+          ]
+        },
+        "allocation": {
+          "status": "source_inspected",
+          "summary": "Fixed k_samples per step, default 16; Shapley uses configured permutation/sample counts.",
+          "evidence": [
+            "car-contrast",
+            "car-shapley"
+          ]
+        },
+        "stopping": {
+          "status": "source_inspected",
+          "summary": "Budget circuit breaker truncates sampling; no evidence-adaptive candidate allocation established in inspected paths.",
+          "evidence": [
+            "car-shapley",
+            "car-budget"
+          ]
+        },
+        "offline_cost": {
+          "status": "source_inspected",
+          "summary": "Budget estimates dollars using constant cost_per_sample_usd; this is not measured total provider/evaluator accounting.",
+          "evidence": [
+            "car-budget"
+          ]
+        },
+        "evaluation_holdout": {
+          "status": "paper_reported",
+          "summary": "Paper validates synthetic causal scenarios. Later surrogate code is separate evidence, not native coding generalization.",
+          "evidence": [
+            "car-paper",
+            "car-surrogate"
+          ]
+        },
+        "adaptation_fidelity": {
+          "status": "inference",
+          "summary": "Must restore each real environment and distinguish one factual-reference contrast from repeated paired no-edit controls.",
+          "evidence": [
+            "car-forward",
+            "car-contrast"
+          ]
+        },
+        "unknowns": {
+          "status": "unknown",
+          "summary": "Redistribution rights completeness, original paper experiment revision, real-tool fidelity and reproduction cost remain unresolved.",
+          "evidence": [
+            "car-tree",
+            "car-readme",
+            "car-forward"
+          ]
+        }
+      }
+    },
+    {
+      "id": "reflect",
+      "paper": "reflect-paper",
+      "paper_version": "2606.09071v1",
+      "availability": {
+        "status": "not_located",
+        "repository": null,
+        "commit": null,
+        "license_status": "planned_only",
+        "license_evidence": [
+          "reflect-paper"
+        ],
+        "evidence": [
+          "reflect-paper"
+        ],
+        "note": "Paper describes supplementary err-loc 0.1.0 and future MIT code / CC-BY-4.0 WTQ release; public author implementation not located within recorded search."
+      },
+      "reproduction": "not_executed",
+      "disposition": "unavailable_implementation",
+      "dimensions": {
+        "checkpoint_state": {
+          "status": "paper_reported",
+          "summary": "Rollback/forward replay; SWEVerifier executes tests on generated patches.",
+          "evidence": [
+            "reflect-paper"
+          ]
+        },
+        "allowed_edits": {
+          "status": "paper_reported",
+          "summary": "Diagnosis-guided local corrections with a faithfulness gate.",
+          "evidence": [
+            "reflect-paper"
+          ]
+        },
+        "oracle_access": {
+          "status": "paper_reported",
+          "summary": "Expected answers reach localizer, diagnostician and verifier; proxy verification is a different regime.",
+          "evidence": [
+            "reflect-paper"
+          ]
+        },
+        "proposal_generation": {
+          "status": "paper_reported",
+          "summary": "Failed candidate traces update diagnosis and later proposals.",
+          "evidence": [
+            "reflect-paper"
+          ]
+        },
+        "allocation": {
+          "status": "paper_reported",
+          "summary": "Bounded candidate rollback attempts; already adaptive diagnosis, not cost-aware statistical allocation.",
+          "evidence": [
+            "reflect-paper"
+          ]
+        },
+        "stopping": {
+          "status": "paper_reported",
+          "summary": "Stops at first verified success or search limit; outcome flips trigger re-localization.",
+          "evidence": [
+            "reflect-paper"
+          ]
+        },
+        "offline_cost": {
+          "status": "unknown",
+          "summary": "End-to-end reproduction resource ledger not verified.",
+          "evidence": [
+            "reflect-paper"
+          ]
+        },
+        "evaluation_holdout": {
+          "status": "paper_reported",
+          "summary": "Several trace settings, including executable SWE; our repository-family holdout is unverified.",
+          "evidence": [
+            "reflect-paper"
+          ]
+        },
+        "adaptation_fidelity": {
+          "status": "unknown",
+          "summary": "Exact snapshot/restore implementation and public artifact fidelity unverified.",
+          "evidence": [
+            "reflect-paper"
+          ]
+        },
+        "unknowns": {
+          "status": "unknown",
+          "summary": "Supplementary availability is reported, not retrieved; no inspected public code/license pin.",
+          "evidence": [
+            "reflect-paper"
+          ]
+        }
+      }
+    },
+    {
+      "id": "daaf",
+      "paper": "daaf-paper",
+      "paper_version": "2609.32498v1",
+      "availability": {
+        "status": "not_located",
+        "repository": null,
+        "commit": null,
+        "license_status": "not_located",
+        "license_evidence": [
+          "daaf-paper"
+        ],
+        "evidence": [
+          "daaf-paper"
+        ],
+        "note": "Future code/checkpoint/registry/replay release promised; no author implementation or license located within recorded search. Underlying tau2 code is not DAAF."
+      },
+      "reproduction": "not_executed",
+      "disposition": "incompatible_current_intervention",
+      "dimensions": {
+        "checkpoint_state": {
+          "status": "paper_reported",
+          "summary": "Telecom asset replacements replay from initial task state.",
+          "evidence": [
+            "daaf-paper"
+          ]
+        },
+        "allowed_edits": {
+          "status": "paper_reported",
+          "summary": "Registered persistent assets, not arbitrary one-action coding edits.",
+          "evidence": [
+            "daaf-paper"
+          ]
+        },
+        "oracle_access": {
+          "status": "paper_reported",
+          "summary": "Offline evaluator supervision; diagnosis uses no test reward or candidate replay.",
+          "evidence": [
+            "daaf-paper"
+          ]
+        },
+        "proposal_generation": {
+          "status": "paper_reported",
+          "summary": "Learned diagnosis selects registered replacements.",
+          "evidence": [
+            "daaf-paper"
+          ]
+        },
+        "allocation": {
+          "status": "paper_reported",
+          "summary": "Online factual plus selected-intervention execution; not adaptive replay allocation.",
+          "evidence": [
+            "daaf-paper"
+          ]
+        },
+        "stopping": {
+          "status": "paper_reported",
+          "summary": "Fixed selected replay protocol; matched task/repeat seeds.",
+          "evidence": [
+            "daaf-paper"
+          ]
+        },
+        "offline_cost": {
+          "status": "paper_reported",
+          "summary": "5,280 CTCA executions and detector training excluded from Table 13's online two runs per failure.",
+          "evidence": [
+            "daaf-paper"
+          ]
+        },
+        "evaluation_holdout": {
+          "status": "paper_reported",
+          "summary": "Base-task split and paired base-task bootstrap already present; coding transfer unestablished.",
+          "evidence": [
+            "daaf-paper"
+          ]
+        },
+        "adaptation_fidelity": {
+          "status": "inference",
+          "summary": "Separate reusable-asset fresh-start study required; cannot relabel as saved-checkpoint action repair.",
+          "evidence": [
+            "daaf-paper"
+          ]
+        },
+        "unknowns": {
+          "status": "unknown",
+          "summary": "Author implementation, license, checkpoints and complete reproduction cost not publicly verified here.",
+          "evidence": [
+            "daaf-paper"
+          ]
+        }
+      }
+    }
+  ],
+  "adjacent": [
+    {
+      "id": "fixed-budget-best-arm",
+      "evidence": [
+        "best-arm"
+      ],
+      "objective": "One best arm / pure exploration",
+      "boundary": "Adaptive allocation is established; one winner differs from counting confirmed useful repairs."
+    },
+    {
+      "id": "successive-halving",
+      "evidence": [
+        "halving"
+      ],
+      "objective": "Non-stochastic best arm / finite resources",
+      "boundary": "Use as an allocation baseline, not as a new agent-specific algorithm."
+    },
+    {
+      "id": "thresholding",
+      "evidence": [
+        "threshold"
+      ],
+      "objective": "All means above threshold / fixed horizon",
+      "boundary": "Closer to useful-repair yield; fresh confirmation and task grouping add requirements."
+    },
+    {
+      "id": "cost-aware-identification",
+      "evidence": [
+        "cost-aware"
+      ],
+      "objective": "Best reward / minimum expected testing cost",
+      "boundary": "Heterogeneous costs are prior art; objective differs from a hard dollar cap."
+    },
+    {
+      "id": "structured-identification",
+      "evidence": [
+        "structured"
+      ],
+      "objective": "Best arm / fixed observations with shared model",
+      "boundary": "Trace-feature sharing plus elimination alone is not novel."
+    },
+    {
+      "id": "feasible-identification",
+      "evidence": [
+        "feasible"
+      ],
+      "objective": "Feasible vector means / fixed pulls",
+      "boundary": "Multiple success, harm and resource constraints have prior art."
+    },
+    {
+      "id": "test-time-allocation",
+      "evidence": [
+        "test-compute"
+      ],
+      "objective": "Prompt-dependent inference compute",
+      "boundary": "Compute allocation is established; faithful agent replay and confirmation remain separate tests."
+    }
+  ],
+  "candidate": {
+    "status": "unproven_adaptation_hypothesis",
+    "claim": "Under a fixed total budget and independent confirmation reserve, can restoration-aware measured-cost allocation improve distinct-task confirmed repair yield over equal allocation and established allocation baselines?",
+    "not_claimed": [
+      "Novelty of adaptive diagnosis, thresholding, cost-aware or structured selection.",
+      "A unique causal fault, reproduced baseline, superiority, production readiness or approved paid evaluation."
+    ],
+    "requires": [
+      "RA-01-B reviewed protocol and owner baseline/threshold decision",
+      "Independent statistical review",
+      "Stable native replay and evidence contracts C08/C09",
+      "Rights and data permission checks",
+      "Separate implementation and evaluation funding authorization"
+    ]
+  },
+  "adapter_estimates": [
+    {
+      "id": "proposal-controls",
+      "low_days": 2,
+      "high_days": 4,
+      "confidence": "low",
+      "scope": "Common candidate pool, allowed-information manifest and uniform/random/latest-error controls; reviewable separately from allocation.",
+      "prerequisites": [
+        "RA-01-B accepted",
+        "Native replay/evaluator contracts available"
+      ],
+      "authorized": false
+    },
+    {
+      "id": "dover-adaptation",
+      "low_days": 4,
+      "high_days": 8,
+      "confidence": "low",
+      "scope": "Resolve missing evaluator and rights; serial trial/edit mapping plus oracle-parity fixture; original restoration remains separate.",
+      "prerequisites": [
+        "proposal-controls",
+        "DoVer release/rights gate",
+        "Faithful snapshot restore verified"
+      ],
+      "authorized": false
+    },
+    {
+      "id": "car-adaptation",
+      "low_days": 3,
+      "high_days": 6,
+      "confidence": "low",
+      "scope": "Restore-per-trial adapter, resampling rank export and explicit factual-reference versus paired-confirmation separation.",
+      "prerequisites": [
+        "proposal-controls",
+        "CAR license completeness resolved",
+        "Faithful snapshot restore verified"
+      ],
+      "authorized": false
+    },
+    {
+      "id": "reflect-feasibility",
+      "low_days": 1,
+      "high_days": 2,
+      "confidence": "low",
+      "scope": "Author artifact retrieval and oracle/state interface audit only; implementation estimate withheld until release.",
+      "prerequisites": [
+        "Author artifact and license available"
+      ],
+      "authorized": false
+    },
+    {
+      "id": "daaf-feasibility",
+      "low_days": 1,
+      "high_days": 2,
+      "confidence": "low",
+      "scope": "Asset-registry/fresh-start feasibility and rights audit only; separate study scope, no runtime adapter estimate.",
+      "prerequisites": [
+        "Author artifact and license available",
+        "Separate persistent-asset study approved"
+      ],
+      "authorized": false
+    },
+    {
+      "id": "allocation-baselines",
+      "low_days": 3,
+      "high_days": 5,
+      "confidence": "low",
+      "scope": "Separate uniform versus threshold/halving policy PRs and immutable budget receipts; no confirmation stopping change.",
+      "prerequisites": [
+        "proposal-controls",
+        "RA-01-B multiplicity/missingness contract accepted",
+        "Measured-cost and reserve interfaces available"
+      ],
+      "authorized": false
+    }
+  ]
+}
