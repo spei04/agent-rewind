@@ -1,6 +1,6 @@
 """Bounded SQL capture and actual interrupted Engine evidence, without migration writes."""
 
-from copy import deepcopy
+import json
 
 import pytest
 from cryptography.fernet import Fernet
@@ -98,7 +98,7 @@ def test_actual_engine_interruption_shapes(capture, task, monkeypatch, when):
     run = stored[0]
     scope_interrupted(capture, run)
     source = cohort(capture)
-    original = deepcopy(source.captures[run][1])
+    original = json.loads(source.captures[run][1])
     prepared = prepare_evidence(source, reader(capture))
     row = prepared.rows[0]
     assert row.status == ("failed" if when in {"propose", "event-error"} else "incomplete")
@@ -106,7 +106,7 @@ def test_actual_engine_interruption_shapes(capture, task, monkeypatch, when):
     assert original["manifest"]["steps"] == 0 and original["manifest"]["head"] is None
     events = capture.db.event_refs(run)
     assert row.event_head == (events[-1]["hash"] if events else None)
-    assert cohort(capture).captures[run][1] == original
+    assert json.loads(cohort(capture).captures[run][1]) == original
 
 
 def test_foreign_parent_scope_refuses_before_any_operator_reader(capture, task):
@@ -159,7 +159,7 @@ def test_operator_byte_reader_is_bounded_and_corruption_refuses(capture, setting
     )
     prepared = prepare_evidence(source, local)
     assert prepared.rows[0].status == "complete"
-    manifest = source.captures[source.order[0]][1]["manifest"]
+    manifest = json.loads(source.captures[source.order[0]][1])["manifest"]
     path = settings.data_dir / "objects" / manifest["task_ref"]
     with pytest.raises(ArtifactError, match="projection_evidence_invalid"):
         local(CONTEXT.project_id, source.order[0], "task", manifest["task_ref"], 1)
@@ -184,3 +184,85 @@ def test_aggregate_evidence_limit_is_passed_before_reader(capture, task, monkeyp
     with pytest.raises(ArtifactError, match="projection_evidence_limit"):
         prepare_evidence(source, limited)
     assert seen == [1]
+
+
+@pytest.mark.parametrize("target", ["resource_scopes", "projects"])
+def test_nul_suffix_identity_refuses_before_identity_materialization(capture, task, target):
+    from sqlalchemy import event
+
+    capture.run(task)
+    with capture.db.engine.connect() as connection:
+        connection.exec_driver_sql("PRAGMA foreign_keys=OFF")
+        value = "e" * 32 + "\0" + "x" * 4096
+        if target == "resource_scopes":
+            connection.execute(
+                text("UPDATE resource_scopes SET resource_id=:value WHERE resource_kind='run'"),
+                {"value": value},
+            )
+        else:
+            connection.execute(text("UPDATE projects SET id=:value"), {"value": value})
+        connection.commit()
+        connection.exec_driver_sql("PRAGMA foreign_keys=ON")
+
+    def before(connection, cursor, statement, parameters, context, executemany):
+        normalized = " ".join(statement.lower().split())
+        assert not normalized.startswith(
+            "select resource_kind,resource_id,project_id from resource_scopes"
+        )
+        assert not normalized.startswith("select id,organization_id from projects")
+
+    event.listen(capture.db.engine, "before_cursor_execute", before)
+    try:
+        with pytest.raises(ArtifactError, match="projection_source_invalid"):
+            cohort(capture)
+    finally:
+        event.remove(capture.db.engine, "before_cursor_execute", before)
+
+
+@pytest.mark.parametrize("mutation", ["future_capture", "project", "order"])
+def test_reader_cannot_mutate_later_cohort_evidence(capture, task, mutation):
+    from dataclasses import FrozenInstanceError
+
+    parent = capture.run(task)
+    child = capture.run(task, parent, Intervention(step=2, kind="tool_result", result={"x": 1}))
+    source = cohort(capture)
+    before = source.captures[child]
+    attempted = False
+
+    def fetch(project, owner, role, key, limit):
+        nonlocal attempted
+        if not attempted:
+            attempted = True
+            if mutation == "order":
+                with pytest.raises(FrozenInstanceError):
+                    source.order = tuple(reversed(source.order))
+            else:
+                project_id, encoded = before
+                body = json.loads(encoded)
+                if mutation == "future_capture":
+                    body["manifest"]["created"] += 1000
+                else:
+                    project_id = "e" * 32
+                with pytest.raises(TypeError):
+                    source.captures[child] = (project_id, json.dumps(body).encode())
+        return reader(capture)(project, owner, role, key, limit)
+
+    prepared = prepare_evidence(source, fetch)
+    assert attempted and source.captures[child] == before
+    expected = json.loads(before[1])["manifest"]["created"]
+    from agent_rewind.run_projection import utc_created
+
+    assert prepared.rows[1].created_at == utc_created(expected)
+    assert prepared.rows[1].project_id == before[0]
+    assert prepared.identity == cohort(capture).identity
+
+
+def test_decoded_capture_counts_toward_combined_metadata_cap(capture, task, monkeypatch):
+    import agent_rewind.projection_evidence as module
+
+    capture.run(task)
+    source = cohort(capture)
+    encoded = source.captures[source.order[0]][1]
+    monkeypatch.setattr(module, "MAX_COHORT_BYTES", source.retained_bytes + len(encoded) - 1)
+    with pytest.raises(ArtifactError, match="projection_cohort_limit"):
+        prepare_evidence(source, lambda *_: pytest.fail("metadata overflow reached reader"))

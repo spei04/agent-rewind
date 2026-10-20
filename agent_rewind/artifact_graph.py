@@ -243,12 +243,24 @@ def verify_run_capture(
     return; only the verified identities and conservative restore eligibility remain.
     """
     try:
-        encoded = canonical(capture)
+        return verify_run_capture_bytes(canonical(capture), fetch)
+    except (TypeError, ValueError, RecursionError) as error:
+        if isinstance(error, ArtifactError):
+            raise
+        raise ArtifactError("artifact_graph_invalid") from None
+
+
+def verify_run_capture_bytes(
+    encoded: bytes, fetch: Callable[[GraphRef, int], bytes]
+) -> VerifiedCapture:
+    """Verify an immutable bounded capture without copying an entire SQL cohort."""
+    try:
+        if not isinstance(encoded, bytes):
+            fail()
         source_size = len(encoded)
         if source_size > MAX_JSON_BYTES:
             raise ArtifactError("artifact_graph_limit")
-        # Readers are external callbacks. Verify a detached bounded snapshot so
-        # callback mutation cannot alter the evidence or completion disposition.
+        # The parsed snapshot is private; callbacks only receive immutable refs.
         frozen = decode(encoded)
         graph, head = _verify_capture(frozen, fetch, complete_only=False)
         if graph.total + source_size > MAX_BYTES:

@@ -8,7 +8,7 @@ from pathlib import Path
 
 from cryptography.fernet import Fernet, InvalidToken
 
-from .artifact_graph import GraphRef, verify_run_capture
+from .artifact_graph import GraphRef, decode, verify_run_capture_bytes
 from .artifact_metadata import ArtifactError, digest_value, identifier
 from .bounded_bytes import (
     BoundedReadError,
@@ -74,7 +74,11 @@ def prepare_evidence(cohort: SQLCohort, reader: OperatorReader) -> PreparedCohor
     rows: list[RunProjection] = []
     evidence: list[str] = []
     for run_id in cohort.order:
-        project, capture = cohort.captures[run_id]
+        project, encoded = cohort.captures[run_id]
+        # Count the currently decoded capture in addition to retained immutable
+        # cohort bytes and already prepared row metadata (canonical byte units).
+        if retained + len(encoded) + cohort.retained_bytes > MAX_COHORT_BYTES:
+            raise ArtifactError("projection_cohort_limit")
 
         def fetch(ref: GraphRef, limit: int, project: str = project) -> bytes:
             nonlocal total_bytes
@@ -85,8 +89,8 @@ def prepare_evidence(cohort: SQLCohort, reader: OperatorReader) -> PreparedCohor
             total_bytes += len(value)
             return value
 
-        verified = verify_run_capture(capture, fetch)
-        row = classify_capture(project, capture, verified)
+        verified = verify_run_capture_bytes(encoded, fetch)
+        row = classify_capture(project, decode(encoded), verified)
         size = len(canonical([projection_identity(row), verified.evidence_digest]))
         if retained + size + cohort.retained_bytes > MAX_COHORT_BYTES:
             raise ArtifactError("projection_cohort_limit")

@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+import hashlib
+from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import Any
 
 from sqlalchemy import event, func, literal, select, text
@@ -20,6 +22,8 @@ from .publication_source import capture_rows
 from .run_projection import MAX_CAPTURE_QUERIES, MAX_COHORT_BYTES, MAX_RUNS
 from .scoped_lineage import ResourceNotFound
 from .scoped_repositories import _byte_length, _Reads
+from .scoped_repositories import projects as project_table
+from .scoped_repositories import scopes as scope_table
 
 MAX_PROJECTS = 128
 MAX_RECORD_BYTES = 2 * 1024 * 1024
@@ -93,9 +97,60 @@ class CohortIdentity:
 class SQLCohort:
     identity: CohortIdentity
     order: tuple[str, ...]
-    captures: dict[str, tuple[str, dict[str, Any]]]
+    captures: Mapping[str, tuple[str, bytes]]
     retained_bytes: int
     project_ids: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        # Snapshot only association containers. Immutable bytes are shared, so no
+        # second full cohort is retained while external readers execute.
+        if not isinstance(self.order, tuple) or not isinstance(self.project_ids, tuple):
+            raise ArtifactError("projection_source_invalid")
+        if type(self.retained_bytes) is not int or not 0 <= self.retained_bytes <= MAX_COHORT_BYTES:
+            raise ArtifactError("projection_cohort_limit")
+        if len(self.captures) > MAX_RUNS or self.identity.total_runs != len(self.order):
+            raise ArtifactError("projection_cohort_limit")
+        if self.project_ids != tuple(sorted(set(self.project_ids))):
+            raise ArtifactError("projection_source_invalid")
+        for project in self.project_ids:
+            identifier(project)
+        if self.identity.order_digest != digest(self.order):
+            raise ArtifactError("projection_source_changed")
+        frozen: dict[str, tuple[str, bytes]] = {}
+        size = 0
+        for run, value in self.captures.items():
+            identifier(run)
+            if type(value) is not tuple or len(value) != 2 or not isinstance(value[1], bytes):
+                raise ArtifactError("projection_source_invalid")
+            identifier(value[0])
+            if value[0] not in self.project_ids:
+                raise ArtifactError("projection_source_invalid")
+            size += len(value[1])
+            if size > self.retained_bytes or self.retained_bytes > MAX_COHORT_BYTES:
+                raise ArtifactError("projection_cohort_limit")
+            frozen[run] = value
+        if len(self.order) != len(frozen) or set(self.order) != set(frozen):
+            raise ArtifactError("projection_source_invalid")
+        object.__setattr__(self, "captures", MappingProxyType(frozen))
+        if self.identity.cohort_digest != cohort_digest(self.identity, self.order, self.captures):
+            raise ArtifactError("projection_source_changed")
+
+
+def cohort_digest(
+    identity: CohortIdentity, order: tuple[str, ...], captures: Mapping[str, tuple[str, bytes]]
+) -> str:
+    hasher = hashlib.sha256()
+    for run in order:
+        project, encoded = captures[run]
+        hasher.update(canonical([run, project, hashlib.sha256(encoded).hexdigest()]))
+    return digest(
+        {
+            "source": identity.source_digest,
+            "scope": identity.scope_digest,
+            "order": identity.order_digest,
+            "captures": hasher.hexdigest(),
+        }
+    )
 
 
 def _ordered(parents: dict[str, str | None]) -> tuple[str, ...]:
@@ -158,17 +213,24 @@ def _read_cohort(connection: Connection, *, byte_limit: int) -> SQLCohort:
     closure = relational_closure(connection)
     # The existing closure has its own resource/edge/retained-byte bounds. Reject
     # SQLite dynamic fields in SQL before fetching additive scope identity cells.
-    if connection.execute(
-        text(
-            "SELECT 1 FROM resource_scopes WHERE length(resource_kind)>20 "
-            "OR length(resource_id)>32 OR length(project_id)>32 LIMIT 1"
-        )
-    ).first():
-        raise ArtifactError("projection_source_invalid")
+    # SQLite length(TEXT) stops at NUL; byte bounds must cover the entire cell
+    # before fetching identifiers, including unsupported historical values.
+    for identity_source, widths in (
+        (scope_table, {"resource_kind": 20, "resource_id": 32, "project_id": 32}),
+        (project_table, {"id": 32, "organization_id": 32}),
+    ):
+        for name, width in widths.items():
+            if connection.execute(
+                select(literal(1))
+                .select_from(identity_source)
+                .where(_byte_length(connection, identity_source.c[name]) > width)
+                .limit(1)
+            ).first():
+                raise ArtifactError("projection_source_invalid")
     if connection.execute(
         text(
             "SELECT 1 FROM projects p LEFT JOIN organizations o ON o.id=p.organization_id "
-            "WHERE length(p.id)>32 OR length(p.organization_id)>32 OR o.id IS NULL LIMIT 1"
+            "WHERE o.id IS NULL LIMIT 1"
         )
     ).first():
         raise ArtifactError("projection_source_invalid")
@@ -219,7 +281,7 @@ def _read_cohort(connection: Connection, *, byte_limit: int) -> SQLCohort:
     if len(runs) > MAX_RUNS:
         raise ArtifactError("projection_cohort_limit")
     del closure, scope_rows, project_rows
-    captures: dict[str, tuple[str, dict[str, Any]]] = {}
+    captures: dict[str, tuple[str, bytes]] = {}
     parents: dict[str, str | None] = {}
     for run_id in runs:
         project = scoped[("run", run_id)]
@@ -230,18 +292,12 @@ def _read_cohort(connection: Connection, *, byte_limit: int) -> SQLCohort:
         if parent is not None and scoped.get(("run", parent)) != project:
             raise ArtifactError("projection_source_invalid")
         retain([run_id, project, value])
-        captures[run_id] = (project, value)
+        captures[run_id] = (project, canonical(value))
         parents[run_id] = parent
     order = _ordered(parents)
     order_identity = digest(order)
-    cohort_identity = digest(
-        {
-            "source": original,
-            "scope": scope_identity,
-            "order": order_identity,
-            "captures": [digest(captures[run]) for run in order],
-        }
-    )
+    identity = CohortIdentity(original, scope_identity, order_identity, "", len(order))
+    cohort_identity = cohort_digest(identity, order, captures)
     return SQLCohort(
         CohortIdentity(original, scope_identity, order_identity, cohort_identity, len(order)),
         order,

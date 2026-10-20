@@ -173,3 +173,11 @@ Actual interrupted Engine tests include an initial zero-event run, a proposal
 failure with unreachable orphan checkpoints, and the separately committed event
 which is one step ahead of its running or failed manifest. These preserve source
 rows and classify conservatively; they do not fabricate terminal evidence.
+
+Cohort captures are canonical immutable byte strings in a read-only association
+map, with immutable run order and project tuples. Their per-run, project and byte
+digests bind the cohort before the first reader callback. Only one capture is
+decoded at a time; that representation and compact prepared metadata count toward
+the combined 32MiB canonical-metadata bound. This is not a measured Python RSS
+claim. Additive identity cells use dialect-aware SQL byte lengths before fetch,
+including SQLite text containing embedded NUL characters.
