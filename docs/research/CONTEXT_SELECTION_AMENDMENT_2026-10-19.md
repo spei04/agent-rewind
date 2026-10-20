@@ -1,7 +1,7 @@
 # Context, proposal quality and experiment selection
 
 Review date: 2026-10-19 (America/Los_Angeles); recorded 2026-10-20 UTC.
-Status: planning amendment for review. No model calls or method reproductions.
+Status: internally reviewed planning amendment; all six implementation cards remain proposed. No model calls or method reproductions.
 
 This supplements the accepted [C20 audit](PRIOR_METHOD_AUDIT.md) and
 [C21 design](TOTAL_BUDGET_PROTOCOL.md). Their source records and the

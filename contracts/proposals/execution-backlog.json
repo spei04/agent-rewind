@@ -1411,7 +1411,7 @@
       "tests": "Schema scope violations, legacy ciphertext round-trip and duplicate reference tests",
       "security_reliability": "Opaque locator is not authorization; encryption key stays server-side",
       "out_of_scope": "No GCS adapter, KMS rotation or GC",
-      "status": "In progress",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         2.0,
@@ -1425,7 +1425,8 @@
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer A — artifact metadata/storage; independent review assigned by lead",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/53",
-      "entry_evidence": "Assigned from accepted main 555d28cf21ff91d05fca30aec94a86df2510813c after all direct producer tasks were Verified; no customer activation."
+      "entry_evidence": "Assigned from accepted main 555d28cf21ff91d05fca30aec94a86df2510813c after all direct producer tasks were Verified; no customer activation.",
+      "verification": "PR #55 merged at b42b5aba60ffb58635f71d3f4a616b4ade36334d after independent B review of A source through 24096f7 and C integration 260e1d14f8b6b67264db3a8f0f889237ef34a3b4. Matching hosted run 39364861264 passed 1324 tests per Python version, actual PostgreSQL constraint/concurrency/restore cases, three gVisor cases, isolated package smoke, security and CI gate. Preparatory ar_0004_artifacts remains migration-only: local immutable bounded storage and scoped metadata primitives, with no customer admission, publication coordinator, cloud adapter or live power-loss proof."
     },
     {
       "id": "AR-009-B",
@@ -7480,9 +7481,9 @@
     }
   ],
   "schedule_context": {
-    "name": "Conditional approved M1 continuation",
+    "name": "Historical conditional M1 foundation scenario",
     "row_label": "Delivery Day",
-    "anchor": "First staffed working day after issue #51 activation; scenario only, not elapsed-time promise",
+    "anchor": "Original scenario from issue #51 activation; AR-007-B and AR-009-A are now Verified. Retained for audit, not the next calendar allocation.",
     "concurrent_contributor_slots": 3,
     "task_contributors": {
       "AR-007-B": "Engineer C",

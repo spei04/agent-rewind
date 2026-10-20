@@ -14,6 +14,8 @@ from sqlalchemy.engine import Connection
 BASELINE = "ar_0001_baseline"
 HEAD = "ar_0002_adoption"  # Explicit install/adopt preparation target, retained for compatibility.
 OWNERSHIP = "ar_0003_ownership"
+ARTIFACTS = "ar_0004_artifacts"
+ARTIFACT_TABLES = {"artifact_objects", "artifact_refs"}
 OWNERSHIP_TABLES = {"organizations", "projects", "project_memberships", "resource_scopes"}
 SOURCE_COMMIT = "8f1ae757005c95c50a789e4fa0a10aae9b3c4024"
 TABLES = ("api_keys", "audit", "events", "jobs", "records")
@@ -160,7 +162,7 @@ def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None
         "DEFERRABLE",
         "DEFERRED",
     }
-    for table in set(tables) & (set(TABLES) | METADATA_TABLES | OWNERSHIP_TABLES):
+    for table in set(tables) & (set(TABLES) | METADATA_TABLES | OWNERSHIP_TABLES | ARTIFACT_TABLES):
         size: int | None = connection.execute(
             text(
                 "SELECT length(CAST(sql AS BLOB)) FROM sqlite_master "
@@ -176,7 +178,7 @@ def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None
         if not isinstance(sql, str):
             raise MigrationRefused("schema_incompatible")
         restricted = forbidden if table in TABLES else forbidden - {"CHECK", "AS"}
-        if table in OWNERSHIP_TABLES:
+        if table in OWNERSHIP_TABLES | ARTIFACT_TABLES:
             restricted -= {"REFERENCES", "DEFAULT"}
         if restricted.intersection(_sqlite_ddl_tokens(sql)):
             raise MigrationRefused("schema_incompatible")
@@ -472,12 +474,19 @@ def catalog(connection: Connection) -> dict[str, Any]:
 
 
 def verify_baseline(
-    shape: dict[str, Any], name: str, *, versioned: bool = False, ownership: bool = False
+    shape: dict[str, Any],
+    name: str,
+    *,
+    versioned: bool = False,
+    ownership: bool = False,
+    artifacts: bool = False,
 ) -> None:
     actual = set(shape) - {"$postgres"}
     expected = set(TABLES) | (METADATA_TABLES if versioned else set())
-    if ownership:
+    if ownership or artifacts:
         expected |= OWNERSHIP_TABLES
+    if artifacts:
+        expected |= ARTIFACT_TABLES
     if actual != expected:
         raise MigrationRefused("schema_incompatible")
     for table in TABLES:
@@ -555,11 +564,13 @@ def verify_baseline(
 
 def installed_profile(name: str, revision: str = HEAD) -> dict[str, Any]:
     """The checked-in literal profile is authority, never a value stored in the target DB."""
-    if revision not in {HEAD, OWNERSHIP}:
+    if revision not in {HEAD, OWNERSHIP, ARTIFACTS}:
         raise MigrationRefused("unsupported_target_revision")
     profile_name = "postgresql16" if name == "postgresql" else "sqlite"
     if revision == OWNERSHIP:
         profile_name += "_ownership"
+    elif revision == ARTIFACTS:
+        profile_name += "_artifacts"
     profile_path = Path(__file__).parent / "profiles" / (profile_name + ".json")
     if not profile_path.is_file():
         raise MigrationRefused("schema_profile_unavailable")

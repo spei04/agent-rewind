@@ -18,6 +18,7 @@ from sqlalchemy.pool import ConnectionPoolEntry
 
 from .inputs import AdoptionMapping, source_digest, validate_legacy_rows, validate_mapping
 from .schema import (
+    ARTIFACTS,
     BASELINE,
     HEAD,
     METADATA_TABLES,
@@ -215,10 +216,16 @@ def _installed(connection: Connection, shape: dict[str, Any]) -> dict[str, Any]:
     revisions: list[str] = list(
         connection.execute(text("SELECT version_num FROM alembic_version LIMIT 2")).scalars()
     )
-    if len(revisions) != 1 or revisions[0] not in {HEAD, OWNERSHIP}:
+    if len(revisions) != 1 or revisions[0] not in {HEAD, OWNERSHIP, ARTIFACTS}:
         raise MigrationRefused("schema_incompatible")
     revision = revisions[0]
-    verify_baseline(shape, dialect(connection), versioned=True, ownership=revision == OWNERSHIP)
+    verify_baseline(
+        shape,
+        dialect(connection),
+        versioned=True,
+        ownership=revision in {OWNERSHIP, ARTIFACTS},
+        artifacts=revision == ARTIFACTS,
+    )
     verify_installed_profile(shape, dialect(connection), revision)
     rows = connection.execute(text("SELECT * FROM installation_adoptions LIMIT 2")).mappings().all()
     if len(rows) != 1 or rows[0]["installed_schema_fingerprint"] != checksum(shape):
@@ -273,7 +280,7 @@ def _installed(connection: Connection, shape: dict[str, Any]) -> dict[str, Any]:
     except (ValueError, TypeError, RecursionError):
         raise MigrationRefused("adoption_metadata_drift") from None
     row["_revision"] = revision
-    if revision == OWNERSHIP:
+    if revision in {OWNERSHIP, ARTIFACTS}:
         from .ownership_state import inspect_ownership_state
 
         inspect_ownership_state(connection, row)
@@ -456,6 +463,10 @@ def adopt(
 
 
 def upgrade(engine: Engine, target: str = HEAD, *, timeout_seconds: int = 5) -> dict[str, Any]:
+    if target == ARTIFACTS:
+        from .artifact_service import initialize_artifacts
+
+        return initialize_artifacts(engine, timeout_seconds=timeout_seconds)
     if target not in {HEAD, OWNERSHIP}:
         raise MigrationRefused("unsupported_target_revision")
     with migration_transaction(engine, timeout_seconds) as connection:

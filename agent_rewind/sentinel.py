@@ -8,8 +8,7 @@ import os
 import secrets
 import stat
 import time
-from collections.abc import Iterator
-from contextlib import contextmanager, suppress
+from contextlib import suppress
 from pathlib import Path
 from typing import BinaryIO, Literal, cast
 
@@ -20,7 +19,7 @@ from cryptography.fernet import Fernet
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .bounded_bytes import decrypt_checked, read_ciphertext, regular_reader
+from .bounded_bytes import decrypt_checked, directory, read_ciphertext, regular_reader
 from .migrations.inputs import InstallationKey
 
 CONFIG_NAME = "readiness.json"
@@ -58,24 +57,6 @@ class SentinelSettings(BaseSettings):
     s3_bucket: str = ""
     s3_endpoint: str | None = None
     s3_region: str = "us-east-1"
-
-
-@contextmanager
-def directory(root: Path, parts: tuple[str, ...] = (), *, create: bool = False) -> Iterator[int]:
-    if create:
-        root.mkdir(parents=True, exist_ok=True, mode=0o700)
-    descriptor = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
-    try:
-        for part in parts:
-            if create:
-                with suppress(FileExistsError):
-                    os.mkdir(part, mode=0o700, dir_fd=descriptor)
-            child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=descriptor)
-            os.close(descriptor)
-            descriptor = child
-        yield descriptor
-    finally:
-        os.close(descriptor)
 
 
 def load_config(root: Path) -> SentinelConfig:
