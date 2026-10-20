@@ -28,6 +28,7 @@ jobs:
           POSTGRES_DB: rewind
         ports: [5432:5432]
         options: >-
+          --label io.agent-rewind.ci-run=${{ github.run_id }}-${{ github.run_attempt }}
           --health-cmd pg_isready
           --health-interval 5s --health-timeout 3s --health-retries 15
     steps:
@@ -42,6 +43,12 @@ jobs:
           version: '0.11.21'
           checksum: '8c88519b0ef0af9801fcdee419bbb12116bd9e6b18e162ae093c932d8b264050'
           enable-cache: false
+      # Only the disposable service is quieted; operator-supplied databases are untouched.
+      - name: Verify quiet PostgreSQL service for migration tests
+        timeout-minutes: 1
+        env:
+          REWIND_CI_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: python3 scripts/ci_postgres.py
       - run: uv lock --check --offline
       - run: uv sync --frozen --group dev
       - run: uv run --no-sync ruff check .
