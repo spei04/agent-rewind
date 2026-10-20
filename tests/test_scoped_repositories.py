@@ -2,8 +2,8 @@
 
 import hashlib
 import time
-from dataclasses import dataclass
-from datetime import UTC, datetime
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from sqlalchemy import create_engine, event, insert, text, update
@@ -591,15 +591,20 @@ def test_dynamic_sqlite_job_width_cannot_bypass_read_bound(scoped, monkeypatch):
         repo.get_job(CA, JOB_A)
 
 
-def test_object_descriptor_change_during_io_does_not_return_old_bytes(scoped):
+@pytest.mark.parametrize(
+    "change", [{"id": "e" * 32}, {"created_at": Object.created_at + timedelta(seconds=1)}]
+)
+def test_object_descriptor_change_during_io_does_not_return_old_bytes(scoped, change):
     engine, _ = scoped
     objects = Objects()
 
-    def replace(value):
-        objects.refs[(A, "run", RUN_A, "task", HASH)] = Object("e" * 32, A)
+    def replace_during_io(value):
+        objects.refs[(A, "run", RUN_A, "task", HASH)] = replace(value, **change)
         return CONTENT
 
-    repo = ScopedRepositories(engine, artifact_resolver=objects.resolve, artifact_loader=replace)
+    repo = ScopedRepositories(
+        engine, artifact_resolver=objects.resolve, artifact_loader=replace_during_io
+    )
     with pytest.raises(ResourceNotFound):
         repo.read_artifact(CA, "run", RUN_A, "task", HASH)
 
@@ -659,3 +664,22 @@ def test_exact_parent_depth_bound(scoped, depth, allowed):
     else:
         with pytest.raises(ResourceNotFound):
             repo.get_run(CA, parent)
+
+
+@pytest.mark.parametrize("created", ["x" * 4096, b"x" * 4096])
+def test_dynamic_sqlite_record_created_is_bounded_before_decode(scoped, monkeypatch, created):
+    engine, repo = scoped
+    # SQLite FLOAT affinity accepts text/blob cells in retained historical rows.
+    with engine.begin() as connection:
+        connection.execute(
+            text("UPDATE records SET created=:created WHERE id=:id"),
+            {"created": created, "id": RUN_A},
+        )
+    monkeypatch.setattr("agent_rewind.scoped_repositories.MAX_RECORD_BYTES", 1024)
+
+    def no_decode(*args, **kwargs):
+        pytest.fail("Oversize record row crossed the SQL-side read bound")
+
+    monkeypatch.setattr("agent_rewind.scoped_repositories.json.loads", no_decode)
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        repo.get_run(CA, RUN_A)

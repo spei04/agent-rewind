@@ -119,7 +119,7 @@ class _Reads:
                 .where(
                     records.c.id == identifier(resource_id),
                     records.c.kind == kind,
-                    _byte_length(self.connection, records.c.data) <= MAX_RECORD_BYTES,
+                    _bounded_row(self.connection, records),
                 )
             )
             .mappings()
@@ -429,6 +429,7 @@ class ScopedRepositories:
             current.locator,
             current.format_version,
             current.byte_count,
+            current.created_at,
         ) != (
             value.id,
             value.project_id,
@@ -436,6 +437,7 @@ class ScopedRepositories:
             value.locator,
             value.format_version,
             value.byte_count,
+            value.created_at,
         ):
             raise ResourceNotFound()
         return content
