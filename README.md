@@ -147,6 +147,10 @@ confirmed repairs for real coding failures under the same total inference and
 execution budget. No comparative advantage has been established. The
 [roadmap research review](docs/PLAN.md#72-research-objective-and-comparable-evaluation)
 records relevant methods, fair baselines and the proposed evaluation amendment.
+The [pinned prior-method audit](docs/research/PRIOR_METHOD_AUDIT.md) and
+[total-budget protocol proposal](docs/research/TOTAL_BUDGET_PROTOCOL.md) document
+comparison limits, separate recovery and intervention endpoints, and proposed
+implementation work. This design does not establish a research result.
 
 | Question | Agent Rewind's mechanism |
 | --- | --- |

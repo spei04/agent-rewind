@@ -232,3 +232,9 @@ The reviewer and lead each reran all 46 integrity tests and the offline checker;
 the reviewer also verified the primary-source claims and pinned tree mappings.
 Hosted integration checks remain required before the delivery is marked complete.
 No external reviewer, customer validation or completed baseline experiment is claimed.
+
+The audit delivery is accepted in [PR #49](https://github.com/spei04/agent-rewind/pull/49),
+main 10e2729. Corrected integration a0bd48e passed
+[hosted run 39357250799](https://github.com/spei04/agent-rewind/actions/runs/39357250799)
+with 1,036 tests per supported Python version and all required isolation, security
+and package checks. This validates the delivery, not any third-party method.

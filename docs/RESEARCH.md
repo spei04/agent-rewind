@@ -6,6 +6,11 @@ those mechanics from the proposed budget-aware selection study and records
 prior-work overlap. Repeated replay and intervals are not a novelty claim;
 no baseline superiority or generalization result has been demonstrated.
 
+The [prior-method audit](research/PRIOR_METHOD_AUDIT.md) is complete. The
+[total-budget protocol proposal](research/TOTAL_BUDGET_PROTOCOL.md) defines the
+next design and its pending owner decisions. It does not change the current
+mechanics below or authorize held-out adaptive screening.
+
 ## Estimand
 
 For a fixed task, observed prefix, checkpoint, policy configuration, image, and

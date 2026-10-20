@@ -6029,7 +6029,7 @@
     {
       "id": "RA-01-B",
       "title": "Total-budget evaluation and selection-policy contract amendment",
-      "status": "In progress",
+      "status": "Implemented / verification pending",
       "objective": "Make a budget-constrained repair claim measurable without selection bias or unfair baseline resources.",
       "scope": "Using RA-01-A, specify both confirmed-intervention yield and end-to-end retry recovery; cost/resource accounting including offline amortization; immutable selection decisions and confirmation reserve; allowed policy information; repository/task-family holdout; multiple-testing, power and missingness rules; reusable-repair regression criteria. Map changes into C08/C09 producers and draft individually reviewable baseline, allocation-policy, exporter and evaluation tasks with estimates.",
       "out_of_scope": "No adaptive implementation, early-stopped confirmation, new spending, held-out access or automatic revision of accepted contracts/launch gates.",
@@ -6063,7 +6063,8 @@
       "priority": "P0",
       "assigned_to": "Engineer A — protocol author; Engineer C — scientific review; Engineer B — accounting/dependency review",
       "issue": "https://github.com/spei04/agent-rewind/issues/48",
-      "contracts_status": "C02/C04 and accepted C20 available. C21 is this task's pending design output; owner baseline/threshold/expanded-scope and external approvals remain separate."
+      "contracts_status": "C02/C04 and accepted C20 available. C21 is this task's pending design output; owner baseline/threshold/expanded-scope and external approvals remain separate.",
+      "verification": "Protocol and 14 proposed follow-up cards authored at b8b2cba; final independent checker review and matching-head hosted validation pending. Owner/external decisions remain separate."
     }
   ],
   "gates": [

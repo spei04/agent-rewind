@@ -456,6 +456,8 @@ Paid research remains constrained by approved funds. Corpus collection, model dr
 
 ### 7.4 Research amendment RA-01 and delivery impact
 
+The [accepted prior-method audit](research/PRIOR_METHOD_AUDIT.md) and [total-budget protocol proposal](research/TOTAL_BUDGET_PROTOCOL.md) contain the detailed evidence and proposed follow-up cards. The protocol is under final verification; its 14 implementation proposals remain outside the active estimate. The owner recommendation table separates core comparisons, optional adapters, thresholds and nested-protocol choices.
+
 The owner approved the fixed total-budget confirmed-repair objective and the [RA-01 audit/protocol design](EXECUTION_BACKLOG.md#research-amendment-ra-01), with **4 base / 4–7 range engineering days**. RA-01-A is verified in PR #49 after independent source review and hosted checks. A now authors RA-01-B in #48; C reviews scientific semantics and B accounting/dependencies. The active ledger now totals 148 tasks / 433 base days; the earlier 146-task / 429-day baseline is retained as history. This approval covers design, not unspecified adapters, algorithms, baseline/threshold choices or paid evaluation.
 
 C20 is the audit record produced by RA-01-A; C21 is the evaluation-design amendment produced by RA-01-B. C20 is available after PR #49; C21 remains unavailable while protocol review is in progress. Original C08/C09 producers AR-020-A/AR-024-A now wait for RA-01-B, C21 and the unsatisfied RESEARCHSCOPE0 owner-decision gate; all affected AR-024/025/026/038 consumers inherit that dependency. C21 does not fabricate future runtime schemas or change reviewed C04. Runtime prerequisites, fixed independent confirmation, G2/G3, DATA0, STUDYFUNDS0 and independent statistical review remain required.
