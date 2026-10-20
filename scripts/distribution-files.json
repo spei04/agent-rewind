@@ -34,6 +34,7 @@
     "agent_rewind/migrations/profiles/postgresql16.json",
     "agent_rewind/migrations/profiles/postgresql16_artifacts.json",
     "agent_rewind/migrations/profiles/postgresql16_ownership.json",
+    "agent_rewind/migrations/profiles/postgresql16_projection.json",
     "agent_rewind/migrations/profiles/sqlite.json",
     "agent_rewind/migrations/profiles/sqlite_artifacts.json",
     "agent_rewind/migrations/profiles/sqlite_ownership.json",

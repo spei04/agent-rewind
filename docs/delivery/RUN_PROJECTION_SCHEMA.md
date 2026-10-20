@@ -41,13 +41,31 @@ also checks the named index through SQLite PRAGMA metadata: exactly
 `project_id ASC, created_at DESC, run_id DESC`, binary collation, nonunique and
 nonpartial. Replacing it with all ascending columns or another order refuses.
 
-## Remaining evidence
+## PostgreSQL literal provenance
 
-The PostgreSQL literal has not yet been accepted. Its dedicated real PostgreSQL
-test captures only bounded synthetic catalog metadata and fails while that
-literal is absent. The captured shape must be independently compared with the
-accepted artifact catalog and reviewed DDL before a literal is committed.
-Tests then compare the actual database shape with that reviewed literal.
+Both Python jobs in hosted run
+[39494220660](https://github.com/spei04/agent-rewind/actions/runs/39494220660)
+captured identical synthetic PostgreSQL 16 catalog metadata at source
+`ce8d46c`. The lead and Engineer A independently compared that actual catalog
+against the accepted artifact literal and explicit DDL before authorizing its
+freeze as `agent_rewind/migrations/profiles/postgresql16_projection.json`.
+
+- Literal size: 60,573 bytes.
+- Literal file SHA-256: `bcbd0d637871e0443ab66e0e3ee640de38d4d2a7050d5361e1ccc2b2161112d3`.
+- All 13 old non-project table shapes and native entries are unchanged.
+  Additions are the project counter/check and run index: 11 columns,
+  18 constraints and four indexes in the native catalog.
+- Composite scope and parent foreign keys, hexadecimal/status/branchability/reason/
+  sequence checks, unique keys and the exact descending index match the DDL.
+  Historical packaged profiles remain unchanged.
+
+The capture run deliberately failed the missing-literal gate; its Python 3.11
+job also reported a separate scoped-repository writer-drain refusal whose cause
+was not established by the capture. The frozen literal is reviewed schema
+evidence, not a claim that that whole run or the projection integration passed.
+The existing catalog test now compares actual PostgreSQL against this literal.
+
+## Remaining evidence
 
 Combined cohort/state/backfill, publication integration, PostgreSQL rollback,
 concurrency and restore verification remain separate required evidence.
