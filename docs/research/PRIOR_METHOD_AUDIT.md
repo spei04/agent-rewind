@@ -227,6 +227,8 @@ do not fetch URLs, establish license scope, reproduce results, verify scientific
 claims or authorize experiments. Link retrieval and source accuracy are manual
 review evidence.
 
-Independent source review of this exact artifact is pending until an immutable
-revision is supplied. No external reviewer, customer validation or completed
-baseline experiment is claimed.
+Internal independent source review accepted revision 94c80222cd999db5c67c6c77d4e5edef89330998.
+The reviewer and lead each reran all 46 integrity tests and the offline checker;
+the reviewer also verified the primary-source claims and pinned tree mappings.
+Hosted integration checks remain required before the delivery is marked complete.
+No external reviewer, customer validation or completed baseline experiment is claimed.
