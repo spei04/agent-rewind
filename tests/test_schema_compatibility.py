@@ -29,7 +29,12 @@ def test_packaged_profile_is_explicitly_inspection_only(prepared):
     profile = guard.load_release_profile()
     assert profile.release == "0.1.0"
     assert [(r.revision, r.mode, r.required_completed_backfills) for r in profile.revisions] == [
-        (HEAD, "migration_only", ())
+        (HEAD, "migration_only", ()),
+        (
+            "ar_0003_ownership",
+            "migration_only",
+            (guard.BackfillRequirement(revision="ar_0003_ownership", phase="ownership"),),
+        ),
     ]
     result = prepared.schema_compatibility()
     assert (result.status, result.code) == ("incompatible", "migration_only")

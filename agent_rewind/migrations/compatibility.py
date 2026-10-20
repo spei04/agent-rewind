@@ -22,7 +22,7 @@ from sqlalchemy.engine import Connection, Dialect, Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import ConnectionPoolEntry
 
-from .schema import HEAD, MigrationRefused, catalog, dialect
+from .schema import HEAD, OWNERSHIP, MigrationRefused, catalog, dialect
 from .service import _installed
 
 POOL_TIMEOUT_SECONDS = 1
@@ -47,13 +47,20 @@ class BackfillRequirement(BaseModel):
 
 class RevisionProfile(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
-    revision: Literal["ar_0002_adoption"]
-    catalog_profile: Literal["adoption_v1"]
+    revision: Literal["ar_0002_adoption", "ar_0003_ownership"]
+    catalog_profile: Literal["adoption_v1", "ownership_v1"]
     mode: Literal["migration_only"]
     required_completed_backfills: tuple[BackfillRequirement, ...] = Field(max_length=16)
 
     @model_validator(mode="after")
     def unique_backfills(self) -> RevisionProfile:
+        expected = "adoption_v1" if self.revision == HEAD else "ownership_v1"
+        if self.catalog_profile != expected:
+            raise ValueError("Revision catalog profile mismatch")
+        if self.revision == OWNERSHIP and self.required_completed_backfills != (
+            BackfillRequirement(revision=OWNERSHIP, phase="ownership"),
+        ):
+            raise ValueError("Ownership backfill requirement missing")
         if len(set(self.required_completed_backfills)) != len(self.required_completed_backfills):
             raise ValueError("Duplicate backfill requirements")
         return self
@@ -63,7 +70,13 @@ class ReleaseProfile(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
     manifest_version: Literal[1]
     release: Literal["0.1.0"]
-    revisions: tuple[RevisionProfile, ...] = Field(min_length=1, max_length=1)
+    revisions: tuple[RevisionProfile, ...] = Field(min_length=1, max_length=2)
+
+    @model_validator(mode="after")
+    def unique_revisions(self) -> ReleaseProfile:
+        if len({profile.revision for profile in self.revisions}) != len(self.revisions):
+            raise ValueError("Duplicate revision")
+        return self
 
 
 def load_release_profile() -> ReleaseProfile:
@@ -269,10 +282,11 @@ def check_schema_compatibility(
                     text("SELECT version_num FROM alembic_version LIMIT 2")
                 ).scalars()
             )
-            if revisions != [HEAD] or profile.revisions[0].revision != HEAD:
+            selected = [p for p in profile.revisions if revisions == [p.revision]]
+            if len(selected) != 1:
                 return CompatibilityResult("incompatible", "schema_incompatible")
             _installed(connection, shape)
-            for requirement in profile.revisions[0].required_completed_backfills:
+            for requirement in selected[0].required_completed_backfills:
                 rows: Sequence[str] = (
                     connection.execute(
                         text(

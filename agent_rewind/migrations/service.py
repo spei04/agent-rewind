@@ -21,6 +21,7 @@ from .schema import (
     BASELINE,
     HEAD,
     METADATA_TABLES,
+    OWNERSHIP,
     SOURCE_COMMIT,
     MigrationRefused,
     canonical,
@@ -141,6 +142,7 @@ def migration_transaction(engine: Engine, timeout_seconds: int = 5) -> Iterator[
         with engine.connect() as connection:
             try:
                 if dialect(connection) == "sqlite":
+                    connection.exec_driver_sql("PRAGMA foreign_keys=ON")
                     connection.exec_driver_sql(f"PRAGMA busy_timeout={timeout_seconds * 1000}")
                     connection.exec_driver_sql("BEGIN EXCLUSIVE")
                 else:
@@ -208,13 +210,16 @@ def _alembic(connection: Connection, operation: str, target: str) -> None:
 
 
 def _installed(connection: Connection, shape: dict[str, Any]) -> dict[str, Any]:
-    verify_baseline(shape, dialect(connection), versioned=True)
-    verify_installed_profile(shape, dialect(connection))
+    if "alembic_version" not in shape:
+        raise MigrationRefused("schema_incompatible")
     revisions: list[str] = list(
         connection.execute(text("SELECT version_num FROM alembic_version LIMIT 2")).scalars()
     )
-    if revisions != [HEAD]:
+    if len(revisions) != 1 or revisions[0] not in {HEAD, OWNERSHIP}:
         raise MigrationRefused("schema_incompatible")
+    revision = revisions[0]
+    verify_baseline(shape, dialect(connection), versioned=True, ownership=revision == OWNERSHIP)
+    verify_installed_profile(shape, dialect(connection), revision)
     rows = connection.execute(text("SELECT * FROM installation_adoptions LIMIT 2")).mappings().all()
     if len(rows) != 1 or rows[0]["installed_schema_fingerprint"] != checksum(shape):
         raise MigrationRefused("schema_incompatible")
@@ -231,7 +236,8 @@ def _installed(connection: Connection, shape: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("mapping drift")
         if (
             row["singleton"] != 1
-            or row["state"] != "prepared"
+            or row["state"]
+            not in ({"prepared"} if revision == HEAD else {"prepared", "ownership_complete"})
             or row["source_baseline"] != SOURCE_COMMIT
             or not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}", row["installation_key"])
         ):
@@ -241,14 +247,11 @@ def _installed(connection: Connection, shape: dict[str, Any]) -> dict[str, Any]:
         ):
             raise ValueError("source schema provenance drift")
         if row["source_kind"] == "fresh":
+            null_fields = ["backup_evidence_digest", "drain_evidence_digest"]
+            if row["state"] == "prepared":
+                null_fields += ["organization_id", "project_id"]
             if row["mapping"] != {"schema": 1, "source_kind": "fresh"} or any(
-                row[k] is not None
-                for k in [
-                    "organization_id",
-                    "project_id",
-                    "backup_evidence_digest",
-                    "drain_evidence_digest",
-                ]
+                row[k] is not None for k in null_fields
             ):
                 raise ValueError("fresh metadata drift")
         elif row["source_kind"] == "legacy":
@@ -269,12 +272,17 @@ def _installed(connection: Connection, shape: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("invalid origin")
     except (ValueError, TypeError, RecursionError):
         raise MigrationRefused("adoption_metadata_drift") from None
+    row["_revision"] = revision
+    if revision == OWNERSHIP:
+        from .ownership_state import inspect_ownership_state
+
+        inspect_ownership_state(connection, row)
     return row
 
 
 def _public_state(row: dict[str, Any]) -> dict[str, Any]:
     return {
-        "revision": HEAD,
+        "revision": row.get("_revision", HEAD),
         "state": row["state"],
         "source_kind": row["source_kind"],
         "installation_key": row["installation_key"],
@@ -377,7 +385,8 @@ def install(engine: Engine, installation_key: str, *, timeout_seconds: int = 5) 
         if names:
             row = _installed(connection, shape)
             if (
-                row["source_kind"] != "fresh"
+                row.get("_revision") != HEAD
+                or row["source_kind"] != "fresh"
                 or row["state"] != "prepared"
                 or row["installation_key"] != installation_key
                 or row["mapping"] != {"schema": 1, "source_kind": "fresh"}
@@ -421,7 +430,8 @@ def adopt(
         if set(shape) & METADATA_TABLES:
             row = _installed(connection, shape)
             if (
-                row["source_kind"] != "legacy"
+                row.get("_revision") != HEAD
+                or row["source_kind"] != "legacy"
                 or row["state"] != "prepared"
                 or row["mapping"] != parsed.model_dump()
                 or row["backup_evidence_digest"] != backup_evidence
@@ -446,7 +456,10 @@ def adopt(
 
 
 def upgrade(engine: Engine, target: str = HEAD, *, timeout_seconds: int = 5) -> dict[str, Any]:
-    if target != HEAD:
+    if target not in {HEAD, OWNERSHIP}:
         raise MigrationRefused("unsupported_target_revision")
     with migration_transaction(engine, timeout_seconds) as connection:
-        return _public_state(_installed(connection, catalog(connection)))
+        row = _installed(connection, catalog(connection))
+        if row["_revision"] != target:
+            raise MigrationRefused("explicit_ownership_initialization_required")
+        return _public_state(row)
