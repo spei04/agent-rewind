@@ -158,12 +158,12 @@ def test_postgres_profile_is_frozen(pg):
     with service.migration_transaction(pg["owner"]) as connection:
         service._alembic(connection, "upgrade", HEAD)
         shape = catalog(connection)
-        verify_baseline(shape, "postgresql", versioned=True)
         if not PROFILE.is_file():
             pytest.fail(
                 "SYNTHETIC_POSTGRES16_CATALOG_REVIEW_REQUIRED="
                 + json.dumps(shape, sort_keys=True, separators=(",", ":"))
             )
+        verify_baseline(shape, "postgresql", versioned=True)
         assert shape == json.loads(PROFILE.read_text())
 
 
