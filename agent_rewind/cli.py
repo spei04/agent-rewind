@@ -71,7 +71,8 @@ def main() -> None:
         with db.engine.connect() as connection:
             connection.exec_driver_sql("SELECT 1")
         store = Artifacts(settings)
-        assert store.get(store.put(b"health check")) == b"health check"
+        if store.get(store.put(b"health check")) != b"health check":
+            raise ValueError("Artifact store health check failed.")
         runner = DockerRunner(settings)
         print(
             json.dumps(

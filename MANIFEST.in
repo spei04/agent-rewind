@@ -1,4 +1,12 @@
-include uv.lock
-recursive-include docs *.md
-recursive-include tests *.py
-recursive-include examples *.json
+# Keep source distributions limited to installable runtime and public package metadata.
+include LICENSE README.md pyproject.toml uv.lock MANIFEST.in
+recursive-include agent_rewind *.py
+recursive-include agent_rewind/web *.html *.css *.js
+prune tests
+prune docs
+prune contracts
+prune scripts
+prune examples
+prune deploy
+prune .github
+global-exclude *.py[cod] .env .env.*

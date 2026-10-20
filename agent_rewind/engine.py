@@ -148,7 +148,8 @@ class Engine:
                     else proposed
                 )
                 if intervention and step == start and intervention.kind == "action":
-                    assert intervention.action is not None
+                    if intervention.action is None:
+                        raise ValueError("Action intervention requires an action.")
                     applied = intervention.action
                 if (
                     selected
@@ -165,7 +166,8 @@ class Engine:
                     )
                 observed = actual
                 if intervention and step == start and intervention.kind == "tool_result":
-                    assert intervention.result is not None
+                    if intervention.result is None:
+                        raise ValueError("Tool-result intervention requires a result.")
                     observed = intervention.result
                 state = self.policy.observe(state, applied, observed)
                 after_ref = self.artifacts.put_workspace(capture.workspace(files))

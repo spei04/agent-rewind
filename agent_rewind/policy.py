@@ -96,7 +96,8 @@ class ChatPolicy:
         )
         self.reserve(reserve)
         key = self.settings.model_api_key
-        assert key is not None
+        if key is None:
+            raise ValueError("Model API key is not configured.")
         try:
             with httpx.Client(
                 timeout=self.settings.model_timeout_seconds, follow_redirects=False
