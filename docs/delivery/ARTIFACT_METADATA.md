@@ -70,7 +70,9 @@ For each object-path component, the adapter fsyncs the parent directory before
 proceeding, including a component concurrently created by another writer. A new
 local write uses a private temporary inode, flush/fsync and non-replacing
 hard-link publication, followed by fsync of the containing directory. Concurrent losers verify the existing complete object;
-a corrupt existing object is never overwritten. Failure can leave an unreferenced
+a corrupt existing object is never overwritten. A verified existing-object hit
+also fsyncs its containing directory before returning, covering a concurrent
+publisher that has linked the file but has not yet synced that entry. Failure can leave an unreferenced
 complete object but cannot create a completed SQL root. Temporary files are
 removed on handled failures; crash-orphan inventory and GC remain later work.
 Fixed artifact error codes omit locators, ciphertext and cryptographic exceptions.

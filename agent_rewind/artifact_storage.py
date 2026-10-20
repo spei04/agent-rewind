@@ -114,6 +114,9 @@ class LocalArtifactStorage:
                 except FileNotFoundError:
                     pass
                 else:
+                    # A concurrent writer may have linked this verified object
+                    # without syncing its containing directory yet.
+                    os.fsync(parent)
                     return ObjectWriteResult(value, 1, 0, 1, len(data), length, True)
                 ciphertext = self.cipher.encrypt(data)
                 if len(ciphertext) > self.ciphertext_limit:

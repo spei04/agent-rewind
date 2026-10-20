@@ -6,6 +6,7 @@ import os
 import stat
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, replace
+from threading import Event, get_ident
 from types import SimpleNamespace
 
 import pytest
@@ -256,4 +257,39 @@ def test_directory_entries_are_synced_before_object_publication(local, monkeypat
         assert ("sync", event[1]) in operations[position + 1 : published]
     final_parent = str((local.root / value.locator).parent)
     assert ("sync", final_parent) in operations[published + 1 :]
+    assert local.read_verified(value) == DATA
+
+
+def test_cache_hit_syncs_entry_before_unfinished_publisher(local, monkeypatch):
+    value = object_value()
+    linked, release = Event(), Event()
+    link, sync = os.link, os.fsync
+    reader = get_ident()
+    synced_by_reader = []
+    parent = str((local.root / value.locator).parent)
+
+    def pause_after_link(*args, **kwargs):
+        result = link(*args, **kwargs)
+        linked.set()
+        assert release.wait(5), "Synthetic publisher was not released"
+        return result
+
+    def observed_sync(descriptor):
+        if get_ident() == reader:
+            synced_by_reader.append(os.readlink(f"/proc/self/fd/{descriptor}"))
+        return sync(descriptor)
+
+    monkeypatch.setattr(os, "link", pause_after_link)
+    monkeypatch.setattr(os, "fsync", observed_sync)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        writer = pool.submit(local.put_verified, value, DATA)
+        try:
+            assert linked.wait(5), "Synthetic publisher did not link its object"
+            hit = local.put_verified(value, DATA)
+            assert hit.cache_hit and hit.write_requests == 0
+            assert parent in synced_by_reader
+            assert not writer.done()
+        finally:
+            release.set()
+        assert not writer.result(5).cache_hit
     assert local.read_verified(value) == DATA
