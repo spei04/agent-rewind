@@ -597,3 +597,5 @@ few independent repositories and unknown real costs are the highest risks.
 Independent internal source-review dispositions are recorded with the delivery
 revision, separately from the synthetic gate template. No named external or
 customer approval is invented.
+
+2026-10-20 internal review: B accepted accounting/interfaces and C accepted scientific/design-example boundaries at exact source d84eb0e. Both independently reran 150 design tests; C added nine refusal probes. The lead verified the combined 219-case audit/backlog/design set after integration as 99ab2c6. Hosted acceptance is pending. These internal dispositions do not satisfy the owner decision, independent statistical, data or study-funding gates.
