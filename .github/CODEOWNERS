@@ -1,0 +1,7 @@
+# Routing ownership only; a shared account does not provide independent human approval.
+* @spei04
+/.github/ @spei04
+/scripts/ci_* @spei04
+/scripts/distribution-files.json @spei04
+/pyproject.toml @spei04
+/uv.lock @spei04
