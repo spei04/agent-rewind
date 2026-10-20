@@ -10,7 +10,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def test_postgres_skip_locked_claims_and_budget_fences(settings):
+def test_postgres_skip_locked_claims_and_budget_fences(settings, legacy_behavior_schema):
     settings.database_url = os.environ["REWIND_TEST_POSTGRES"]
     db = Database(settings)
     db.migrate(installation_key="synthetic-test")

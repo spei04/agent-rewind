@@ -26,6 +26,14 @@ from sqlalchemy import (
 from sqlalchemy.engine import Connection
 
 from .config import Settings
+from .migrations.compatibility import (
+    CONNECT_TIMEOUT_SECONDS,
+    POOL_TIMEOUT_SECONDS,
+    CompatibilityResult,
+    SchemaNotReady,
+    configure_runtime_engine,
+    runtime_schema_compatibility,
+)
 
 metadata = MetaData()
 records = Table(
@@ -99,8 +107,17 @@ class Database:
         settings.data_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
         kwargs: dict[str, Any] = {"pool_pre_ping": True}
         if settings.database_url.startswith("sqlite"):
-            kwargs["connect_args"] = {"check_same_thread": False, "timeout": 30}
+            kwargs["connect_args"] = {
+                "check_same_thread": False,
+                "timeout": CONNECT_TIMEOUT_SECONDS,
+            }
+        if ":memory:" not in settings.database_url and settings.database_url != "sqlite://":
+            kwargs["pool_timeout"] = POOL_TIMEOUT_SECONDS
         self.engine = create_engine(settings.database_url, **kwargs)
+        configure_runtime_engine(self.engine, production=settings.mode == "production")
+
+    def schema_compatibility(self) -> CompatibilityResult:
+        return runtime_schema_compatibility(self.engine)
 
     def migrate(self, *, installation_key: str | None = None) -> None:
         """Operator compatibility helper; unversioned history needs explicit adoption."""
@@ -199,6 +216,9 @@ class Database:
         return job_id
 
     def claim(self, owner: str) -> dict[str, Any] | None:
+        compatibility = self.schema_compatibility()
+        if compatibility.status != "ready":
+            raise SchemaNotReady(compatibility)
         now = time.time()
         with self.engine.begin() as db:
             # A lost job is not silently retried: model calls may already have been billed.

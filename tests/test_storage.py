@@ -48,7 +48,7 @@ def test_unsafe_archive_is_rejected(name, kind):
         unpack(stream.getvalue(), 10000)
 
 
-def test_budget_reservations_are_atomic(storage):
+def test_budget_reservations_are_atomic(storage, legacy_behavior_schema):
     db, artifacts = storage
     job = db.enqueue("run", artifacts.put_json({}), 0.0001, "test")
     db.claim("worker")
@@ -66,7 +66,7 @@ def test_budget_reservations_are_atomic(storage):
     assert db.job(job)["reserved"] == 90
 
 
-def test_jobs_are_claimed_once_and_expired_owner_cannot_publish(storage):
+def test_jobs_are_claimed_once_and_expired_owner_cannot_publish(storage, legacy_behavior_schema):
     db, artifacts = storage
     job = db.enqueue("run", artifacts.put_json({}), 1, "test")
     with ThreadPoolExecutor(max_workers=4) as pool:
@@ -81,7 +81,7 @@ def test_jobs_are_claimed_once_and_expired_owner_cannot_publish(storage):
     assert db.job(job)["status"] == "failed"
 
 
-def test_cancellation_prevents_new_spend(storage):
+def test_cancellation_prevents_new_spend(storage, legacy_behavior_schema):
     db, artifacts = storage
     job = db.enqueue("run", artifacts.put_json({}), 1, "test")
     db.claim("worker")

@@ -211,11 +211,11 @@ def _installed(connection: Connection, shape: dict[str, Any]) -> dict[str, Any]:
     verify_baseline(shape, dialect(connection), versioned=True)
     verify_installed_profile(shape, dialect(connection))
     revisions: list[str] = list(
-        connection.execute(text("SELECT version_num FROM alembic_version")).scalars()
+        connection.execute(text("SELECT version_num FROM alembic_version LIMIT 2")).scalars()
     )
     if revisions != [HEAD]:
         raise MigrationRefused("schema_incompatible")
-    rows = connection.execute(text("SELECT * FROM installation_adoptions")).mappings().all()
+    rows = connection.execute(text("SELECT * FROM installation_adoptions LIMIT 2")).mappings().all()
     if len(rows) != 1 or rows[0]["installed_schema_fingerprint"] != checksum(shape):
         raise MigrationRefused("schema_incompatible")
     row = dict(rows[0])

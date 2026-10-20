@@ -1,0 +1,12 @@
+{
+  "manifest_version": 1,
+  "release": "0.1.0",
+  "revisions": [
+    {
+      "revision": "ar_0002_adoption",
+      "catalog_profile": "adoption_v1",
+      "mode": "migration_only",
+      "required_completed_backfills": []
+    }
+  ]
+}

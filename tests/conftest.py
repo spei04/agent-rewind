@@ -85,7 +85,23 @@ class FixtureRunner:
 
 
 @pytest.fixture
-def engine(storage):
+def legacy_behavior_schema(monkeypatch):
+    """Only legacy unit behavior is under test; this is not a compatible release.
+
+    Runtime compatibility tests never request this fixture. There is deliberately
+    no product flag, environment variable or injectable application profile.
+    """
+    from agent_rewind.migrations.compatibility import CompatibilityResult
+
+    monkeypatch.setattr(
+        Database,
+        "schema_compatibility",
+        lambda self: CompatibilityResult("ready", "synthetic_legacy_unit_behavior"),
+    )
+
+
+@pytest.fixture
+def engine(storage, legacy_behavior_schema):
     from agent_rewind.engine import Engine
 
     db, artifacts = storage

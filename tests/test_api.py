@@ -6,6 +6,8 @@ from fastapi.testclient import TestClient
 from agent_rewind.api import create_app
 from agent_rewind.models import Action
 
+pytestmark = pytest.mark.usefixtures("legacy_behavior_schema")
+
 
 def test_auth_roles_key_revocation_and_no_payload_echo(settings, task):
     app = create_app(settings)

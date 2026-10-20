@@ -8,6 +8,7 @@ from .config import Settings
 from .database import Database, JobStopped, identifier
 from .engine import Engine
 from .experiments import Experiments
+from .migrations.compatibility import SchemaNotReady
 from .models import BranchRequest, StudyRequest, TaskSpec
 from .policy import ChatPolicy
 from .runner import DockerRunner
@@ -15,7 +16,10 @@ from .runner import DockerRunner
 
 def work_once(settings: Settings, db: Database, artifacts: Artifacts) -> bool:
     owner = identifier()
-    job = db.claim(owner)
+    try:
+        job = db.claim(owner)
+    except SchemaNotReady:
+        return False
     if job is None:
         return False
     done = threading.Event()
