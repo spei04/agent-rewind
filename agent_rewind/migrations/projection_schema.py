@@ -13,7 +13,8 @@ def create_projection_schema(connection: Connection) -> None:
         if postgres:
             return f"{field} ~ '^[0-9a-f]{{{size}}}$'"
         return (
-            f"typeof({field})='text' AND length({field})={size} AND {field} NOT GLOB '*[^0-9a-f]*'"
+            f"typeof({field})='text' AND length({field})={size} "
+            f"AND length(CAST({field} AS BLOB))={size} AND {field} NOT GLOB '*[^0-9a-f]*'"
         )
 
     counter = "run_sequence>=0"
