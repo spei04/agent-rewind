@@ -138,7 +138,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.api_route("/livez", methods=["GET", "HEAD"])
     def liveness() -> dict[str, str]:
-        return {"status": "ok"}
+        return {"status": "live"}
 
     @app.api_route("/healthz", methods=["GET", "HEAD"])
     async def health() -> JSONResponse:
