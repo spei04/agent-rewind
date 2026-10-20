@@ -1,106 +1,129 @@
 # Deployment and operations
 
+This release supports metadata preparation and inspection. Its packaged
+compatibility profile is migration-only: customer API/authentication routes return
+HTTP 503 and workers exit with `worker_schema_refused:<code>`, even after successful
+installation or adoption. The static workbench remains available. No command in
+this guide enables customer admission; later reviewed ownership, authorization,
+readiness and integration work is required. Production spending and partner data
+remain separately gated.
+
 Self-hosted means the adopting organization operates the service in its own
-infrastructure. It does not mean Agent Rewind connects to that organization's
-production application database. Provision a dedicated metadata database,
-artifact bucket, and worker machines.
+infrastructure, using a dedicated metadata database and artifact storage. It does
+not connect to that organization's production application database.
 
-## Control plane
+## Local development preparation
 
-Run the API behind an HTTPS reverse proxy. Set `REWIND_MODE=production`, a
-PostgreSQL DSN, encryption key, public URL, identity settings, and S3 storage.
-Use the same encryption key and bucket on the API and workers. Give the API no
-Docker socket and no model provider key.
+`compose.yaml` is a local development convenience, not a production deployment.
+It forces development mode and uses the same PostgreSQL initdb superuser for its
+API and explicit setup commands. That shared privileged role must never be copied
+into a production API/worker configuration. PostgreSQL is not exposed to the host;
+the API binds only to loopback. No worker or Docker socket is included.
 
-`compose.yaml` provides a local control-plane layout. It intentionally does not
-expose PostgreSQL or include a privileged worker service. For this local layout:
+After creating a private local `.env` (see the repository quickstart), supply a
+URL-safe generated `REWIND_POSTGRES_PASSWORD` in the shell or local `.env`:
 
 ```sh
-# Supply REWIND_POSTGRES_PASSWORD in the local environment or .env.
 docker compose up -d database
+# The setup service defaults to read-only status; this does not initialize metadata.
 docker compose --profile setup run --rm migrate
+```
+
+For a new empty development database, explicitly supply the operator migration
+DSN in the shell. This variable is passed only to the setup container; do not add a
+production migration credential to an API/worker environment file.
+
+```sh
+# Development-only shared role; the hostname resolves inside the Compose network.
+export REWIND_MIGRATION_DATABASE_URL="postgresql+psycopg://rewind:${REWIND_POSTGRES_PASSWORD}@database/rewind"
+docker compose --profile setup run --rm -e REWIND_MIGRATION_DATABASE_URL migrate \
+  rewind migrate install --installation-key local-development
+# Inspect the prepared revision and origin.
+docker compose --profile setup run --rm migrate rewind migrate status
+# Explicit upgrade/re-entry is only for a supported, already-versioned database.
+docker compose --profile setup run --rm -e REWIND_MIGRATION_DATABASE_URL migrate \
+  rewind migrate upgrade
+unset REWIND_MIGRATION_DATABASE_URL
 docker compose up -d api
 ```
 
-Use a URL-safe generated database password in this Compose example. For a
-production deployment, supply a correctly encoded DSN through your secret
-manager, use a managed or independently operated PostgreSQL database, and place
-workers on dedicated Linux hosts with private access to that database.
+If the password is stored only in `.env`, export it privately into the shell before
+constructing that DSN; Compose interpolation does not export variables to a parent
+shell. Use a correctly encoded DSN for arbitrary passwords. Do not print credentials
+or copy them into a command transcript. PostgreSQL mutation commands require
+`REWIND_MIGRATION_DATABASE_URL`; `REWIND_DATABASE_URL` alone is insufficient.
 
-The initial schema is created with `rewind migrate`. It is idempotent; this
-release has no later schema revisions. Back up before upgrading to a future
-revision. Runtime roles need no schema modification rights after initialization.
+`rewind init` creates local secret placeholders only. `init --installation-key`
+delegates to explicit installation. Bare `rewind migrate` means upgrade, not fresh
+installation, and never adopts unversioned history. The supported baseline has a
+linear Alembic baseline/adoption chain; unknown, partial and future states refuse.
+Legacy adoption requires backup/drain evidence and explicit mapping/retired-writer
+inventory under the [migration procedure](MIGRATIONS.md). Do not run install over
+existing history or assume a successful preparation means customer readiness.
 
-## Identity
+## Production design requirements
 
-Register a web client with your identity provider:
+The accepted reference configuration and deployment review are separate from this
+local layout. When a later release is approved, run the API behind HTTPS and use
+separate runtime and migration identities. Runtime roles must have no CREATE,
+ALTER or stamp authority; the migration credential belongs only to explicit
+operator commands. Give the API no Docker socket or model provider key. Worker
+machines are dedicated Linux hosts with private access to metadata and object
+storage. Provisioning these resources is outside this guide's preparation scope.
 
-- Callback: `https://YOUR_HOST/auth/callback`.
-- Authorization code flow with PKCE.
-- ID token containing a dedicated `rewind_role` claim.
-- Allowed claim values: `viewer`, `operator`, `administrator`.
+Production runtime settings require `REWIND_MODE=production`, an encryption key,
+HTTPS public URL, identity configuration and a PostgreSQL psycopg DSN. The runtime
+connection profile requires **one numeric TCP host/hostaddr or explicit Unix socket**.
+A logical hostname may accompany a numeric hostaddr for TLS hostname verification;
+for example, the DSN can retain a managed database hostname and `sslmode=verify-full`
+while supplying its approved numeric `hostaddr`. A local database proxy/socket can
+also satisfy this boundary. DNS-only or multi-host production DSNs, hidden libpq
+service configuration and inherited routing overrides refuse before network use.
+This is not a recommendation to disable TLS verification or bypass private networking.
 
-Configure issuer, client ID, optional client secret, and expected audience. The
-issuer discovery document must match the configured issuer and advertise HTTPS
-endpoints. Scope API keys through the administrator-only `/api/keys` endpoint.
-The authentication implementation is tested with signed local fixtures;
-your organization's actual identity-provider configuration needs a deployment
-smoke test.
+The guard sets pool, connection and server SQL timeouts and limits concurrent API
+probes. Synchronous stalled network reads are not proven to meet an end-to-end
+wall-clock deadline. The later readiness slice must provide its required bounded
+transport behavior; this release makes no HA or rolling-upgrade claim.
 
-## Workers
+## Identity and workers
 
-Install the signed gVisor package on a dedicated Linux host using the
-[official installation guide](https://gvisor.dev/docs/user_guide/install/).
-Register `runsc` with Docker, then test a known container. Preserve all package
-sidecar binaries; a standalone copied binary is not a complete current install.
+Customer login, scoped key issuance, histories and submissions remain blocked by
+the current compatibility profile. The retained authentication and worker handlers
+have unit coverage, but that is not evidence of production authorization readiness.
+Production IdP issuer, audience, signed-token validation and project membership
+integration require the later scoped authorization work and a deployment smoke test.
 
-Install this repository from its lockfile, pre-pull allowed task images by digest,
-and configure a worker-only environment file. Run `rewind doctor`, then
-`rewind worker`. `deploy/rewind-worker.service` is a systemd example. Docker group
-membership is powerful; this service account belongs only on the dedicated
-worker host.
+For future approved workers, install the signed gVisor package on a dedicated Linux
+host using the [official guide](https://gvisor.dev/docs/user_guide/install/), including
+its sidecar binaries, register `runsc` with Docker and pre-pull allowed images by
+digest. `deploy/rewind-worker.service` is an example, not an active deployment.
+The current `rewind worker` fails before claiming jobs or accessing artifacts/models
+when compatibility refuses; starting more processes cannot enable it.
 
-The worker uses its model API key outside sandboxes. Set the selected model's
-input and output rates in USD per million tokens. In-flight calls reserve a
-conservative amount before dispatch. Reservations are not released on uncertain
-failures, and the application does not automatically retry provider calls.
-Pricing correctness is an administrator responsibility; software reservations
-cannot override the provider's billing rules.
+Model credentials stay outside sandboxes. Price configuration and conservative
+reservations are not provider invoices. Do not automatically replay paid jobs or
+release uncertain reservations. The preserved fixture's 245000 microUSD holds are
+historical validation data, not permission to spend that amount.
 
-Use multiple worker processes to handle concurrent jobs. They share PostgreSQL
-and encrypted object storage. PostgreSQL row locks coordinate claims. A study
-runs sequential pairs in its current worker; distributed within-study fanout is
-a future extension.
+## Storage, recovery and probes
 
-## Storage and retention
+Keep metadata, encrypted objects and encryption keys as a consistent backup set.
+Never independently delete referenced objects. Retention, key rotation and cleanup
+require explicit operator procedures; this release does not provide automatic
+trace retention or garbage collection. S3 provisioning and real customer storage
+validation are not performed by metadata installation.
 
-An S3 bucket must already exist. Grant only object read/write and the minimum
-bucket permissions your setup requires; public access is unnecessary. Standard
-cloud credential mechanisms configure the S3 client. The application also
-encrypts object contents before upload.
+Follow [the recovery guide](RECOVERY.md) for synthetic PostgreSQL backup/restore
+coverage, compatible-reader rollback decisions and limitations. The current API
+cannot be used to inspect or cancel legacy customer jobs; drain/cancel them with
+the old version under the explicit adoption procedure before migration. An older
+unguarded binary is not an approved rollback that restores customer access.
 
-Objects are content-addressed at file granularity. Identical unchanged files are
-shared between checkpoints. Temporary shell workspaces live on tmpfs and are
-removed after each command. Neither traces nor secrets are included in the Git
-repository.
-
-Back up PostgreSQL, the bucket, and encryption keys as a consistent operational
-set. Do not apply independent object lifecycle deletion to referenced blobs.
-This release does not include automatic trace retention or garbage collection.
-Retention and key rotation require an explicit operator procedure.
-
-## Failure recovery
-
-- Inspect `/api/jobs` for terminal status and conservative budget reservations.
-- Cancel queued/running jobs through the authenticated API.
-- Wait for an outstanding provider call to return or time out; cancellation
-  cannot guarantee a provider did not already bill that call.
-- Expired worker leases become failed. Do not blindly replay a failed paid job.
-- Partial runs and studies are retained for diagnosis.
-- Worker startup reaps only labeled abandoned resources older than the maximum
-  job lifetime plus a margin. Active tool containers have a 600-second lifetime.
-
-Deploy ingress request-rate/concurrency limits and monitor worker memory,
-PostgreSQL connections, object storage growth, and provider spend. The service
-reports readiness at `/healthz` and provides its authenticated API schema at
-`/api/schema`.
+`GET /livez` returns 200 `{"status":"live"}` for process responsiveness without a
+database or object-store probe. `GET /healthz` retains legacy database-connectivity
+semantics: 200 `{"status":"ok"}` when its read-only check succeeds, otherwise a safe
+503. It does not certify schema compatibility, object integrity or customer
+readiness. The static workbench is inspectable; `/api/schema` remains behind the
+customer compatibility guard. Full `/readyz`, sentinel checks and migration of
+operator probe consumers belong to AR-011-B and are not implemented here.
