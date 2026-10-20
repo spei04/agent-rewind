@@ -6968,7 +6968,7 @@
       "resolution": "Activate RA-01-A/B as two bounded M3 design tasks; C20/C21 stay unavailable until review, and AR-020-A/AR-024-A wait for RA-01-B. Preserve original runtime and external gates; follow-up implementations remain unestimated/unapproved."
     }
   ],
-  "planning_status": "Approved development execution: ownership and safe readiness verified, migration-only customer admission remains denied. RA-01 objective and audit/protocol design activated; A audits, C reviews, B reconciles execution. No new runtime/research spending/partner data/production approval.",
+  "planning_status": "Approved development execution: ownership/readiness verified; customer admission remains disabled. RA-01-A audit and C20 verified in PR #49; A authors RA-01-B, C reviews science, B reviews accounting/dependencies. No new runtime, research spending, partner data or production approval.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -7011,7 +7011,7 @@
       12
     ],
     "active_child_issues": {
-      "RA-01-A": 47
+      "RA-01-B": 48
     },
     "closed_implementation_issues": [
       26,
@@ -7021,8 +7021,9 @@
       40,
       41
     ],
-    "queued_child_issues": {
-      "RA-01-B": 48
+    "queued_child_issues": {},
+    "closed_design_issues": {
+      "RA-01-A": 47
     }
   },
   "execution_capacity": {
