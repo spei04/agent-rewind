@@ -3096,7 +3096,7 @@ No question above asks to reapprove the already selected core architecture. The 
 
 Current dependency validation, 2026-10-20: **148 tasks, 52 parents, 524 acyclic edges, 26 gates and 20 contracts**. Base effort is **433 days**, upper ranges **730.6 days**, alternate 25% allowance **541.25 days**; M3 is 74 days and RS demand 61 days. Other milestone/role totals and the **146.5-day effort-only path** are unchanged. The stdlib command `python scripts/check_execution_backlog.py` recomputes metrics, required fields, E0/producer ancestry, task/card/parent parity and the conditional RA schedule from source. It does not prove runtime behavior or human/external approval.
 
-Issues #1–5 are closed for their recorded internal scope; parent #6–12 remain open. Implementation issues #26/#28/#30/#37/#40/#41 are closed. RA-01-A is active in [#47](https://github.com/spei04/agent-rewind/issues/47); RA-01-B is queued in [#48](https://github.com/spei04/agent-rewind/issues/48) until the audit is accepted. Ownership/readiness are Verified, but scoped route enforcement and the rest of M1 remain pending. The original 19 coarse package edges were removed; exact task/gate dependencies remain authoritative.
+Issues #1–5 are closed for their recorded internal scope; parent #6–12 remain open. Implementation issues #26/#28/#30/#37/#40/#41 are closed. RA-01-A is Verified in closed [#47](https://github.com/spei04/agent-rewind/issues/47) after PR #49; RA-01-B is active in [#48](https://github.com/spei04/agent-rewind/issues/48) following accepted audit integration. Ownership/readiness are Verified, but scoped route enforcement and the rest of M1 remain pending. The original 19 coarse package edges were removed; exact task/gate dependencies remain authoritative.
 
 Update procedure for each completed PR: update task status and evidence in the machine-readable ledger and this card; recalculate parent/milestone effort/status and dependency changes; update PLAN Section 10/14 and the matching issue; rerun ID/required-field/DAG/contract-availability/first-fortnight allocation checks; verify local links and draft OpenAPI structure. Any added edge, new gate or changed estimate requires schedule revalidation. Do not mark a task Verified without applicable commit/environment evidence, reviewer disposition and explicit limitations.
 
@@ -3132,7 +3132,7 @@ AR-005-C acceptance clarification: the reviewed C04 adoption profile is migratio
 
 | Producer / consumer | Required handoff |
 | --- | --- |
-| RA-01-A → C20 → RA-01-B | Accepted primary-source/implementation/license/semantics audit; unavailable until review. |
+| RA-01-A → C20 → RA-01-B | Accepted primary-source/implementation/license/semantics audit, available after PR #49 review and integration. |
 | RA-01-B → C21 → AR-020-A/C08 and AR-024-A/C09 | Accepted evaluation-design amendment before original schema/statistical producers start. C21 is not those runtime interfaces. |
 | AR-024-C, AR-025-A/B/C, AR-026-A, AR-038-A/B/C | Existing producer paths now include RA-01-B transitively. Original runtime, holdout, DATA0/STUDYFUNDS0 and independent statistical gates remain. |
 | Remaining M1 | Ownership/readiness are verified; unscheduled approved queue and review contention are reforecast separately. |
@@ -3152,7 +3152,7 @@ AR-005-C acceptance clarification: the reviewed C04 adoption profile is migratio
 - **Effort / confidence:** 2 engineering days; planning range 2–3; low confidence.
 - **Responsible role:** RS; required reviewers: TL, QE. Engineer A — research audit; Engineer C — independent research review.
 - **Definition of done:** Independent review accepts source accuracy, comparison feasibility and claim limits; scoped follow-up work is estimated, with unavailable evidence explicit.
-- **Progress:** In progress; [issue #47](https://github.com/spei04/agent-rewind/issues/47). Approved design scope only; no runtime or funded evaluation authorization.
+- **Progress:** Verified; [PR #49](https://github.com/spei04/agent-rewind/pull/49), main 10e2729, reviewed integration a0bd48e and [run 39357250799](https://github.com/spei04/agent-rewind/actions/runs/39357250799): 1,036 tests per Python version plus isolation/security/package/CI gate. [Audit](research/PRIOR_METHOD_AUDIT.md) is inspected-source evidence; no method reproduced or novelty established.
 
 <a id="ra-01-b"></a>
 
@@ -3167,10 +3167,12 @@ AR-005-C acceptance clarification: the reviewed C04 adoption profile is migratio
 - **Required automated tests:** Static dependency/contract consistency checks; specification examples for zero confirmation reserve, offline-cost omission, duplicate task credit, hidden-answer asymmetry, uncertain charges and post-confirmation adaptation. Runtime simulations remain assigned to reviewed follow-up implementation tasks.
 - **Security and reliability:** No hidden grader/held-out leakage; immutable provenance and full charge ledger; existing DATA0/STUDYFUNDS0 and confirmation invariants retained.
 - **Effort / confidence:** 2 engineering days; planning range 2–4; low confidence.
-- **Responsible role:** RS; required reviewers: TL, QE. Queued after accepted RA-01-A; assignee confirmed at handoff.
+- **Responsible role:** RS; required reviewers: TL, QE. Engineer A authors; C reviews scientific semantics; B reviews accounting and dependencies.
 - **Definition of done:** Independent internal review accepts the protocol/design; owner baseline, threshold and follow-up scope decisions are recorded or explicitly left pending. Active DAG and estimates reflect only approved work; no consumer starts before its producer. Independent statistical approval remains required before funded evaluation.
-- **Progress:** Not started; [issue #48](https://github.com/spei04/agent-rewind/issues/48). Approved design scope only; no runtime or funded evaluation authorization.
+- **Progress:** In progress; [issue #48](https://github.com/spei04/agent-rewind/issues/48), assigned only after PR #49 merged. Approved design scope only; no runtime or funded evaluation authorization.
 
 Dependency audit: the two new tasks add three prerequisite edges; the two C08/C09 producer links add two more, for 524 total. Every affected research consumer has RA-01-B ancestry. The longest effort path is unchanged because earlier execution prerequisites remain longer; this does not show zero delivery impact. M3 rises from 70 to 74 base days; M5 remains 50 base days pending re-estimation after selected comparisons, power, permitted corpus and costs are known. Unknown follow-up runtime work is outside both figures.
 
 Owner decisions still required after design: actual baseline/adaptation set, any adaptive-policy runtime scope, practical effect threshold/power and evaluation funding. Independent statistical approval is not replaced by internal contributor review. A no-novelty or null-result finding is valid and requires an explicit narrower claim or redesign decision.
+
+2026-10-20 audit handoff: RA-01-A and C20 accepted in PR #49, main 10e2729, after corrected exact-head hosted checks. A begins RA-01-B; C owns scientific review and B accounting/dependency review. The existing 148-task/524-edge/433-day design ledger is unchanged in size; future runtime proposals remain outside it.
