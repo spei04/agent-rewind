@@ -514,4 +514,5 @@ def test_legacy_health_checks_connectivity_without_claiming_schema_readiness(set
         assert response.json() == {"status": "unavailable"}
         assert client.get("/livez").status_code == 200
         assert client.head("/livez").status_code == 200
+        assert client.get("/livez").json() == {"status": "live"}
     app.state.db.engine.dispose()
