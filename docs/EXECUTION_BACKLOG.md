@@ -55,7 +55,7 @@ QE and PL are material resource constraints. At the Day 10 review, redistribute 
 
 ## Critical path, parallel tracks and contingencies
 
-The task DAG has **524 edges**, **26 explicit gates**, no cycles and a **146.5-engineering-day longest effort path**. Under a hypothetical human role at 3.5 delivery days/week this is about 41.9 workweeks before contention and external waits; the three contributor slots have no validated conversion to that staffing scenario. It is a lower bound, not a launch forecast. Zero effort on an external gate means engineering effort is not estimated; it never means the gate is already satisfied or has zero lead time.
+The task DAG has **527 edges**, **27 explicit gates**, no cycles and a **146.5-engineering-day longest effort path**. Under a hypothetical human role at 3.5 delivery days/week this is about 41.9 workweeks before contention and external waits; the three contributor slots have no validated conversion to that staffing scenario. It is a lower bound, not a launch forecast. Zero effort on an external gate means engineering effort is not estimated; it never means the gate is already satisfied or has zero lead time.
 
 The computed effort path, including integration joins, is:
 
@@ -164,10 +164,10 @@ C04 links the [M1 API](../contracts/proposals/m1.openapi.json), [logical data mo
 | C17 — Pilot/operating acceptance | [AR-035-A](#ar-035-a) | Per-customer permitted data/processors, residency, budgets, retention, operator/incident ownership and actual agreement/sign-off references. |
 | C18 — Capacity workload/SLIs | [AR-040-A](#ar-040-a) | Plan Section 5 workload distributions and latency/error/resource bounds, queue fairness, five-minute burst, 24-hour soak and hardware/cost identity. |
 | C19 — Regional recovery manifest | [AR-042-A](#ar-042-a) | Coherent DB/object/key/deletion backups; approved region; RPO/RTO, restore ordering, integrity and off-device evidence. |
-| C20 — Prior-method audit design record | [RA-01-A](#ra-01-a); unavailable until review | Versioned primary-source and implementation/license matrix, intervention/observation/verification semantics, cost coverage and reproducible/adaptable/incompatible/unavailable dispositions; bounded comparison recommendation. Design only. |
-| C21 — Total-budget evaluation design amendment | [RA-01-B](#ra-01-b); unavailable until review | Reviewed design for confirmed-intervention yield versus retry recovery, offline/online costs, selection/confirmation separation, holdout, missingness/multiplicity and scoped follow-up estimates. Input to C08/C09 producers, not their runtime schemas. |
+| C20 — Prior-method audit design record | [RA-01-A](#ra-01-a); accepted in PR #49 | Versioned primary-source and implementation/license matrix, intervention/observation/verification semantics, cost coverage and reproducible/adaptable/incompatible/unavailable dispositions; bounded comparison recommendation. Design only. |
+| C21 — Total-budget evaluation design amendment | [RA-01-B](#ra-01-b); internally accepted in PR #50 | Reviewed design for confirmed-intervention yield versus retry recovery, offline/online costs, selection/confirmation separation, holdout, missingness/multiplicity and scoped follow-up estimates. Input to C08/C09 producers, not their runtime schemas. |
 
-Current availability: C01 workflows/metrics, C02 permission/provenance/protocol and C03 trust/capacity decision records are reviewed internally. C05 ownership/role contracts and AR-011-B bounded readiness are verified for their internal scope; customer admission remains disabled. C20/C21 are approved design work, not yet reviewed outputs. C08/C09 remain unavailable until their original producers consume C21 and complete review. Real partner, statistical, deployment and funding gates remain separate. C04 is reviewed and G0 is satisfied for development/testing; runtime cases remain planned. C14 version-1 offline configuration is reviewed and available, while actual ENV0 approval and provisioning remain gated. The machine-readable register records each current status.
+Current availability: C01 workflows/metrics, C02 permission/provenance/protocol and C03 trust/capacity decision records are reviewed internally. C05 ownership/role contracts and AR-011-B bounded readiness are verified for their internal scope; customer admission remains disabled. C20 is the accepted prior-method audit; C21 protocol design is internally reviewed and available; RESEARCHSCOPE0 remains Not satisfied. C08/C09 remain unavailable until their original producers consume C21 and complete review. Real partner, statistical, deployment and funding gates remain separate. C04 is reviewed and G0 is satisfied for development/testing; runtime cases remain planned. C14 version-1 offline configuration is reviewed and available, while actual ENV0 approval and provisioning remain gated. The machine-readable register records each current status.
 
 
 ## Gate register
@@ -209,6 +209,10 @@ Disposition: [G0_DECISION.md](delivery/G0_DECISION.md), existing owner execution
 <a id="paid0"></a>
 
 **PAID0 — external gate; owner: PL/RS.** Prerequisites: [AR-003-B](#ar-003-b). Reconcile existing $200 authorization against all spend/reservations; record per-smoke cap, configured provider identity/version/rates and available credential. Additional spending needs explicit approval.
+
+<a id="researchscope0"></a>
+
+**RESEARCHSCOPE0 — external gate; owner: Product owner with TL/RS.** Prerequisite: [RA-01-B](#ra-01-b). **Not satisfied.** Record accepted C21 plus owner baseline/information, practical-threshold calibration, follow-up scope and nested-protocol decisions before AR-020-A/C08 or AR-024-A/C09 starts. This defensive gate adds no engineering effort or execution authority. Current C02 and separate statistical, data and funding approvals remain required; internal review cannot supply them.
 
 <a id="studyfunds0"></a>
 
@@ -1267,7 +1271,7 @@ M3 / P0 · 3 PRs · 10 engineering days · Not started
 - **Objective:** Give every study, logical trial and attempt a durable scoped identity. This task delivers study, pair, trial and attempt contract.
 - **Implementation scope / PR boundary:** Freeze logical identities, protocol digests, immutable freeze and attempt/uncertain states; specify study API needs; extend the M1 org/project/job ledger with study-scoped accounts and bind every child attempt/call to its study cap.
 - **Out of scope:** No coordinator or estimators.
-- **Prerequisites:** [AR-012-B](#ar-012-b), [AR-010-B](#ar-010-b), [AR-002-B](#ar-002-b), [RA-01-B](#ra-01-b). E0 applies transitively; required producer contracts must be reviewed.
+- **Prerequisites:** [AR-012-B](#ar-012-b), [AR-010-B](#ar-010-b), [AR-002-B](#ar-002-b), [RA-01-B](#ra-01-b), [RESEARCHSCOPE0](#researchscope0). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C08, C21; C21 is the reviewed design input to this future producer, not an available runtime contract.
 - **Acceptance criteria:** RS/QE approve unique outcome rules, missingness and coordinator transition table.
 - **Required automated tests:** Schema/transition fixtures reject duplicate logical arm and changed frozen candidate.
@@ -1495,7 +1499,7 @@ M3 / P0 · 3 PRs · 10 engineering days · Not started
 - **Objective:** Report intervention effects with correct denominators and uncertainty. This task delivers estimator, missingness and experiment report contract.
 - **Implementation scope / PR boundary:** Specify task-conditional estimand, paired design, intervals, missing data and invalidation/version fields.
 - **Out of scope:** No adaptive stopping or learned estimator.
-- **Prerequisites:** [AR-020-A](#ar-020-a), [AR-002-B](#ar-002-b), [RA-01-B](#ra-01-b). E0 applies transitively; required producer contracts must be reviewed.
+- **Prerequisites:** [AR-020-A](#ar-020-a), [AR-002-B](#ar-002-b), [RA-01-B](#ra-01-b), [RESEARCHSCOPE0](#researchscope0). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C09, C21; C21 is the reviewed design input to this future producer, not an available runtime contract.
 - **Acceptance criteria:** No generalization claim from one run; report includes all assigned trials and uncertain calls.
 - **Required automated tests:** Golden tiny samples, ties, all-failed, all-missing and imbalanced fixtures.
@@ -3094,9 +3098,9 @@ No question above asks to reapprove the already selected core architecture. The 
 
 ## Dependency review, progress and maintenance
 
-Current dependency validation, 2026-10-20: **148 tasks, 52 parents, 524 acyclic edges, 26 gates and 20 contracts**. Base effort is **433 days**, upper ranges **730.6 days**, alternate 25% allowance **541.25 days**; M3 is 74 days and RS demand 61 days. Other milestone/role totals and the **146.5-day effort-only path** are unchanged. The stdlib command `python scripts/check_execution_backlog.py` recomputes metrics, required fields, E0/producer ancestry, task/card/parent parity and the conditional RA schedule from source. It does not prove runtime behavior or human/external approval.
+Current dependency validation, 2026-10-20: **148 tasks, 52 parents, 527 acyclic edges, 27 gates and 20 contracts**. Base effort is **433 days**, upper ranges **730.6 days**, alternate 25% allowance **541.25 days**; M3 is 74 days and RS demand 61 days. Other milestone/role totals and the **146.5-day effort-only path** are unchanged. The stdlib command `python scripts/check_execution_backlog.py` recomputes metrics, required fields, E0/producer ancestry, task/card/parent parity and the conditional RA schedule from source. It does not prove runtime behavior or human/external approval.
 
-Issues #1–5 are closed for their recorded internal scope; parent #6–12 remain open. Implementation issues #26/#28/#30/#37/#40/#41 are closed. RA-01-A is active in [#47](https://github.com/spei04/agent-rewind/issues/47); RA-01-B is queued in [#48](https://github.com/spei04/agent-rewind/issues/48) until the audit is accepted. Ownership/readiness are Verified, but scoped route enforcement and the rest of M1 remain pending. The original 19 coarse package edges were removed; exact task/gate dependencies remain authoritative.
+Issues #1–5 are closed for their recorded internal scope; parent #6–12 remain open. Implementation issues #26/#28/#30/#37/#40/#41 are closed. RA-01-A is Verified in closed [#47](https://github.com/spei04/agent-rewind/issues/47) after PR #49; RA-01-B is Verified for its design scope in [PR #50](https://github.com/spei04/agent-rewind/pull/50), which closes [#48](https://github.com/spei04/agent-rewind/issues/48) upon integration. [#51](https://github.com/spei04/agent-rewind/issues/51) records pending owner choices. Ownership/readiness are Verified, but scoped route enforcement and the rest of M1 remain pending. The original 19 coarse package edges were removed; exact task/gate dependencies remain authoritative.
 
 Update procedure for each completed PR: update task status and evidence in the machine-readable ledger and this card; recalculate parent/milestone effort/status and dependency changes; update PLAN Section 10/14 and the matching issue; rerun ID/required-field/DAG/contract-availability/first-fortnight allocation checks; verify local links and draft OpenAPI structure. Any added edge, new gate or changed estimate requires schedule revalidation. Do not mark a task Verified without applicable commit/environment evidence, reviewer disposition and explicit limitations.
 
@@ -3132,8 +3136,8 @@ AR-005-C acceptance clarification: the reviewed C04 adoption profile is migratio
 
 | Producer / consumer | Required handoff |
 | --- | --- |
-| RA-01-A → C20 → RA-01-B | Accepted primary-source/implementation/license/semantics audit; unavailable until review. |
-| RA-01-B → C21 → AR-020-A/C08 and AR-024-A/C09 | Accepted evaluation-design amendment before original schema/statistical producers start. C21 is not those runtime interfaces. |
+| RA-01-A → C20 → RA-01-B | Accepted primary-source/implementation/license/semantics audit, available after PR #49 review and integration. |
+| RA-01-B → C21 → AR-020-A/C08 and AR-024-A/C09 | Accepted evaluation-design amendment plus satisfied RESEARCHSCOPE0 before original schema/statistical producers start. C21 is not those runtime interfaces. |
 | AR-024-C, AR-025-A/B/C, AR-026-A, AR-038-A/B/C | Existing producer paths now include RA-01-B transitively. Original runtime, holdout, DATA0/STUDYFUNDS0 and independent statistical gates remain. |
 | Remaining M1 | Ownership/readiness are verified; unscheduled approved queue and review contention are reforecast separately. |
 
@@ -3152,7 +3156,7 @@ AR-005-C acceptance clarification: the reviewed C04 adoption profile is migratio
 - **Effort / confidence:** 2 engineering days; planning range 2–3; low confidence.
 - **Responsible role:** RS; required reviewers: TL, QE. Engineer A — research audit; Engineer C — independent research review.
 - **Definition of done:** Independent review accepts source accuracy, comparison feasibility and claim limits; scoped follow-up work is estimated, with unavailable evidence explicit.
-- **Progress:** In progress; [issue #47](https://github.com/spei04/agent-rewind/issues/47). Approved design scope only; no runtime or funded evaluation authorization.
+- **Progress:** Verified; [PR #49](https://github.com/spei04/agent-rewind/pull/49), main 10e2729, reviewed integration a0bd48e and [run 39357250799](https://github.com/spei04/agent-rewind/actions/runs/39357250799): 1,036 tests per Python version plus isolation/security/package/CI gate. [Audit](research/PRIOR_METHOD_AUDIT.md) is inspected-source evidence; no method reproduced or novelty established.
 
 <a id="ra-01-b"></a>
 
@@ -3167,10 +3171,16 @@ AR-005-C acceptance clarification: the reviewed C04 adoption profile is migratio
 - **Required automated tests:** Static dependency/contract consistency checks; specification examples for zero confirmation reserve, offline-cost omission, duplicate task credit, hidden-answer asymmetry, uncertain charges and post-confirmation adaptation. Runtime simulations remain assigned to reviewed follow-up implementation tasks.
 - **Security and reliability:** No hidden grader/held-out leakage; immutable provenance and full charge ledger; existing DATA0/STUDYFUNDS0 and confirmation invariants retained.
 - **Effort / confidence:** 2 engineering days; planning range 2–4; low confidence.
-- **Responsible role:** RS; required reviewers: TL, QE. Queued after accepted RA-01-A; assignee confirmed at handoff.
+- **Responsible role:** RS; required reviewers: TL, QE. Engineer A authors; C reviews scientific semantics; B reviews accounting and dependencies.
 - **Definition of done:** Independent internal review accepts the protocol/design; owner baseline, threshold and follow-up scope decisions are recorded or explicitly left pending. Active DAG and estimates reflect only approved work; no consumer starts before its producer. Independent statistical approval remains required before funded evaluation.
-- **Progress:** Not started; [issue #48](https://github.com/spei04/agent-rewind/issues/48). Approved design scope only; no runtime or funded evaluation authorization.
+- **Progress:** Verified for internal design scope; [PR #50](https://github.com/spei04/agent-rewind/pull/50), accepted source d84eb0e and integrated 80098a8, [hosted run 39359376626](https://github.com/spei04/agent-rewind/actions/runs/39359376626): 1,188 tests per Python version plus isolation/security/package/CI gate. B/C accepted accounting, scientific and design-checker boundaries; lead passed 219 combined targeted cases. Fourteen proposed work packages remain inactive; owner [decision #51](https://github.com/spei04/agent-rewind/issues/51), external review and execution gates remain open. Final status-only composition requires matching hosted checks before merge.
 
-Dependency audit: the two new tasks add three prerequisite edges; the two C08/C09 producer links add two more, for 524 total. Every affected research consumer has RA-01-B ancestry. The longest effort path is unchanged because earlier execution prerequisites remain longer; this does not show zero delivery impact. M3 rises from 70 to 74 base days; M5 remains 50 base days pending re-estimation after selected comparisons, power, permitted corpus and costs are known. Unknown follow-up runtime work is outside both figures.
+Dependency audit: initial activation added five edges for 524 total; the defensive owner gate adds three more, yielding the current 527 edges and 27 gates. Every affected research consumer has RA-01-B ancestry. The longest effort path is unchanged because earlier execution prerequisites remain longer; this does not show zero delivery impact. M3 rises from 70 to 74 base days; M5 remains 50 base days pending re-estimation after selected comparisons, power, permitted corpus and costs are known. Unknown follow-up runtime work is outside both figures.
 
 Owner decisions still required after design: actual baseline/adaptation set, any adaptive-policy runtime scope, practical effect threshold/power and evaluation funding. Independent statistical approval is not replaced by internal contributor review. A no-novelty or null-result finding is valid and requires an explicit narrower claim or redesign decision.
+
+2026-10-20 audit handoff: RA-01-A and C20 accepted in PR #49, main 10e2729, after corrected exact-head hosted checks. A begins RA-01-B; C owns scientific review and B accounting/dependency review. The existing 148-task/524-edge/433-day design ledger is unchanged in size; future runtime proposals remain outside it.
+
+2026-10-20 owner-decision guard: RESEARCHSCOPE0 is Not satisfied and waits for RA-01-B. AR-020-A and AR-024-A now depend on it, preventing internally reviewed design from being mistaken for owner approval of baselines, thresholds, nested evaluation or expanded scope. The defensive change yields 527 edges / 27 gates; task counts, 433 base days and the 146.5-day effort path are unchanged. Proposed runtime work remains outside the active ledger.
+
+2026-10-20 protocol proposal: [C21 design and 14 follow-up cards](research/TOTAL_BUDGET_PROTOCOL.md) specify fair recovery/intervention endpoints, complete physical and comparison costs, sealed fresh confirmation and proposed thresholds. Source b8b2cba is under final checker review. Follow-up effort is classified by overlap with existing tasks; no automatic addition to the 433-day ledger. RESEARCHSCOPE0 remains Not satisfied.

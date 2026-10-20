@@ -1,0 +1,1036 @@
+{
+  "schema_version": 1,
+  "design_id": "RA-01-B",
+  "source_audit_commit": "94c80222cd999db5c67c6c77d4e5edef89330998",
+  "status": "proposed_design",
+  "authorization": {
+    "design_only": true,
+    "runtime_authorized": false,
+    "paid_evaluation_authorized": false,
+    "heldout_access_authorized": false
+  },
+  "consumer_gate": {
+    "id": "RESEARCHSCOPE0",
+    "effort_days": 0,
+    "dependencies": [
+      "RA-01-B"
+    ],
+    "consumers": [
+      "AR-020-A",
+      "AR-024-A"
+    ],
+    "status": "pending",
+    "requires": [
+      "internal_design_review",
+      "owner_baseline_information_choice",
+      "owner_thresholds_for_calibration",
+      "owner_followup_scope_choice",
+      "owner_nested_protocol_disposition"
+    ],
+    "decisions": {
+      "internal_design_review": "pending",
+      "owner_baseline_information_choice": "pending",
+      "owner_thresholds_for_calibration": "pending",
+      "owner_followup_scope_choice": "pending",
+      "owner_nested_protocol_disposition": "pending"
+    },
+    "consumer_ready": false,
+    "not_replaced": [
+      "DATA0",
+      "STUDYFUNDS0",
+      "AR-026-A",
+      "AR-038-C",
+      "amended_C02_execution_approval"
+    ],
+    "record_kind": "synthetic_pending_decision_template"
+  },
+  "policy": {
+    "adaptation_scope": "within_task_only",
+    "cross_task_outcome_transfer": false,
+    "confirmation_feedback": false,
+    "optional_confirmation_stopping": false,
+    "current_c02_authoritative": true,
+    "nested_holdout_execution_approved": false,
+    "outer_leakage_keys": [
+      "repository_family_id",
+      "task_family_id",
+      "task_specific_evaluator_digest",
+      "derived_patch_family_id"
+    ],
+    "allowed_discovery_observations": [
+      "registered_task_input",
+      "factual_prefix",
+      "task_local_discovery_outcomes",
+      "task_local_discovery_cost_receipts"
+    ],
+    "forbidden_observations": [
+      "sealed_confirmation",
+      "other_heldout_task_outcomes",
+      "hidden_expected_answers_in_answer_blind_stratum"
+    ],
+    "maximum_frozen_candidates_per_method_task": 1
+  },
+  "thresholds": {
+    "status": "pending_owner_and_external_review",
+    "useful_effect_lower_bound_gt": 0.1,
+    "population_interval_max_width": 0.2,
+    "family_alpha": 0.05,
+    "target_power": 0.8,
+    "pilot_numbers": {
+      "natural_failures": 100,
+      "repository_families": 10,
+      "development_repository_fraction": 0.6,
+      "confirmation_pairs": 30,
+      "power_guarantee": false
+    },
+    "feasibility_status": "not_demonstrated",
+    "regression_cohort_net_effect_lower_bound_gte": -0.02,
+    "paired_harm_reporting": "descriptive_with_coupling",
+    "optional_nondefault_paired_harm_cap": 0.02
+  },
+  "accounting": {
+    "unit": "usd_micros",
+    "required_stages": [
+      "baseline_capture",
+      "diagnosis",
+      "proposal",
+      "restore",
+      "replay",
+      "grading",
+      "confirmation",
+      "failed_attempt",
+      "uncertain_attempt",
+      "offline_preparation"
+    ],
+    "physical_and_comparison_separate": true,
+    "shared_input_full_charge_per_method": true,
+    "one_shot_primary": true,
+    "amortized_reuse_frozen_before_outcomes": true,
+    "no_cross_task_budget_reallocation": true,
+    "method_total_closure": "offline_attribution + shared_attribution + sum(task_caps) <= method_cap",
+    "physical_closure": "settled + held_including_uncertain + protected_reserve <= authorized_physical_cap",
+    "quote_required": true
+  },
+  "receipt_contract": {
+    "producer": "AR-020-A",
+    "contract": "C08",
+    "identity_fields": [
+      "project_id",
+      "study_id",
+      "protocol_digest",
+      "method_id",
+      "task_id",
+      "repository_family_id",
+      "policy_run_id",
+      "decision_id",
+      "phase",
+      "candidate_digest",
+      "checkpoint_digest",
+      "event_chain_digest",
+      "model_revision",
+      "provider_fingerprint_policy",
+      "adapter_digest",
+      "environment_digest",
+      "evaluator_digest",
+      "allowed_observation_manifest_digest",
+      "price_revision",
+      "resource_cap_digest",
+      "sample_plan_digest",
+      "policy_digest",
+      "policy_state_digest"
+    ],
+    "receipt_fields": [
+      "logical_call_id",
+      "attempt_id",
+      "lease_generation",
+      "source_decision_id",
+      "observed_receipt_ids",
+      "physical_invoice_id",
+      "comparison_allocation_id",
+      "quote_bound",
+      "settled_charge",
+      "held_charge",
+      "reserve_transfer",
+      "outcome_taxonomy",
+      "reconciliation_parent_id",
+      "reservation_id"
+    ],
+    "outcome_states": [
+      "valid_success",
+      "valid_task_failure",
+      "operational_missing",
+      "evaluator_invalid",
+      "capture_invalid",
+      "uncertain_dispatch",
+      "budget_exhausted",
+      "no_candidate",
+      "cancelled"
+    ],
+    "report_contract_producer": "AR-024-A",
+    "report_contract": "C09"
+  },
+  "budget_cases": [
+    {
+      "id": "discovery_exact_boundary",
+      "phase": "discovery",
+      "cap": 100,
+      "settled": 20,
+      "held": 15,
+      "uncertain": 10,
+      "reserve": 25,
+      "quote": 40,
+      "expected": "admit",
+      "purpose": "intervention",
+      "required_reserve": 25
+    },
+    {
+      "id": "discovery_consumes_reserve",
+      "phase": "discovery",
+      "cap": 100,
+      "settled": 20,
+      "held": 15,
+      "uncertain": 10,
+      "reserve": 25,
+      "quote": 41,
+      "expected": "refuse_cap",
+      "purpose": "intervention",
+      "required_reserve": 25
+    },
+    {
+      "id": "zero_confirmation_reserve",
+      "phase": "discovery",
+      "cap": 100,
+      "settled": 20,
+      "held": 15,
+      "uncertain": 10,
+      "reserve": 0,
+      "quote": 1,
+      "expected": "refuse_reserve",
+      "purpose": "intervention",
+      "required_reserve": 25
+    },
+    {
+      "id": "confirmation_transfer",
+      "phase": "confirmation",
+      "cap": 100,
+      "settled": 20,
+      "held": 15,
+      "uncertain": 10,
+      "reserve": 25,
+      "quote": 25,
+      "expected": "admit",
+      "purpose": "intervention",
+      "required_reserve": 25
+    },
+    {
+      "id": "confirmation_over_quote",
+      "phase": "confirmation",
+      "cap": 100,
+      "settled": 20,
+      "held": 15,
+      "uncertain": 10,
+      "reserve": 25,
+      "quote": 26,
+      "expected": "refuse_reserve",
+      "purpose": "intervention",
+      "required_reserve": 25
+    },
+    {
+      "id": "unknown_call_bound",
+      "phase": "discovery",
+      "cap": 100,
+      "settled": 20,
+      "held": 15,
+      "uncertain": 10,
+      "reserve": 25,
+      "quote": null,
+      "expected": "refuse_quote",
+      "purpose": "intervention",
+      "required_reserve": 25
+    },
+    {
+      "id": "uncertain_is_still_held",
+      "phase": "discovery",
+      "cap": 100,
+      "settled": 20,
+      "held": 50,
+      "uncertain": 50,
+      "reserve": 25,
+      "quote": 6,
+      "expected": "refuse_cap",
+      "purpose": "intervention",
+      "required_reserve": 25
+    },
+    {
+      "id": "retry_no_nonexistent_confirmation",
+      "purpose": "recovery_only",
+      "phase": "retry",
+      "cap": 100,
+      "settled": 20,
+      "held": 15,
+      "uncertain": 10,
+      "reserve": 0,
+      "required_reserve": 0,
+      "quote": 65,
+      "expected": "admit"
+    },
+    {
+      "id": "retry_still_obeys_cap",
+      "purpose": "recovery_only",
+      "phase": "retry",
+      "cap": 100,
+      "settled": 20,
+      "held": 15,
+      "uncertain": 10,
+      "reserve": 0,
+      "required_reserve": 0,
+      "quote": 66,
+      "expected": "refuse_cap"
+    }
+  ],
+  "shared_case": {
+    "physical_invoices": [
+      {
+        "id": "pool-1",
+        "amount": 30
+      }
+    ],
+    "method_charges": {
+      "uniform": 30,
+      "adaptive": 30
+    },
+    "required_attribution": 30,
+    "physical_total": 30
+  },
+  "phase_case": {
+    "phase": "freeze",
+    "identity": {
+      "project_id": "synthetic-project",
+      "study_id": "synthetic-study",
+      "method_id": "uniform",
+      "task_id": "synthetic-task",
+      "policy_run_id": "synthetic-policy-run",
+      "policy_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "policy_state_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "candidate_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    "expected_identity": {
+      "project_id": "synthetic-project",
+      "study_id": "synthetic-study",
+      "method_id": "uniform",
+      "task_id": "synthetic-task",
+      "policy_run_id": "synthetic-policy-run",
+      "policy_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "policy_state_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "candidate_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    "observed": [
+      {
+        "project_id": "synthetic-project",
+        "study_id": "synthetic-study",
+        "method_id": "uniform",
+        "task_id": "synthetic-task",
+        "policy_run_id": "synthetic-policy-run",
+        "phase": "discovery",
+        "attempt_id": "d1"
+      }
+    ],
+    "discovery_attempts": [
+      "d1"
+    ],
+    "confirmation_attempts": [
+      "c1",
+      "c2"
+    ],
+    "optional_stop": false,
+    "sample_plan_digest": "0859d776dea5eace6bf8b5e65e17b70b35ecd3c845edb453418fdd639eba782f"
+  },
+  "recovery_case": {
+    "method_kind": "fresh_retry",
+    "assigned_tasks": 5,
+    "successes": 3,
+    "failures": 1,
+    "missing": 1,
+    "expected_intervention_yield": null,
+    "expected_recovery_bounds": [
+      0.6,
+      0.8
+    ]
+  },
+  "followups": [
+    {
+      "id": "RB-01",
+      "title": "Version C08 resource and decision receipt extension",
+      "maps_to": "AR-020-A",
+      "objective": "Make selection and total cost independently attributable.",
+      "scope": "Add proposed identities, allowed-observation references, physical/comparison cost ledgers and reserved-confirmation transitions to the original C08 producer's schema/fixtures.",
+      "out_of_scope": "No database implementation or provider dispatch.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RA-01-B",
+        "AR-012-B",
+        "AR-010-B",
+        "AR-002-B"
+      ],
+      "contracts": [
+        "C02",
+        "C04",
+        "C20",
+        "C21",
+        "C08"
+      ],
+      "acceptance": "Producer review accepts same-study identity closure and immutable phase/price/resource fields; a schema fixture cannot mark C08 available.",
+      "automated_tests": "Reject cross-study calls, missing price bounds, reused phase attempts and changed policy digests.",
+      "security_reliability": "No source/secret bodies in receipts; uncertain dispatch keeps holds.",
+      "effort_days": [
+        2,
+        3
+      ],
+      "confidence": "low",
+      "responsible_role": "BE",
+      "review_roles": [
+        "TL",
+        "QE"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Add proposed identities, allowed-observation references, physical/comparison cost ledgers and reserved-confirmation transitions to the original C08 producer's schema/fixtures.",
+      "conditions": [],
+      "authorized": false,
+      "effort_kind": "producer_amendment",
+      "effort_overlap": "Proposed PR scope total overlaps the mapped producer; reconcile its remaining estimate before assigning any net increment."
+    },
+    {
+      "id": "RB-02",
+      "title": "Enforce protected reserves and attributable shared costs",
+      "maps_to": "AR-020-B",
+      "objective": "Prevent discovery from consuming confirmation funds or hiding shared input costs.",
+      "scope": "Extend the existing study ledger with atomic reserve-to-held conversion and distinct shared-input attribution; retain actual invoice uniqueness.",
+      "out_of_scope": "No new payment integration, automatic refunds or new scheduler.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RB-01",
+        "AR-020-B",
+        "AR-010-B",
+        "AR-023-C"
+      ],
+      "contracts": [
+        "C04",
+        "C08"
+      ],
+      "acceptance": "Concurrent discovery admits only within every task/method/physical cap; settlement and uncertainty preserve exposure.",
+      "automated_tests": "PostgreSQL concurrent reserve, duplicate invoice, shared-pool charge, over-quote settlement, lost callback and idempotent late-reconciliation tests.",
+      "security_reliability": "Freeze breached accounts; never cap a real invoice down to its quote.",
+      "effort_days": [
+        3,
+        5
+      ],
+      "confidence": "low",
+      "responsible_role": "BE",
+      "review_roles": [
+        "TL",
+        "QE"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Extend the existing study ledger with atomic reserve-to-held conversion and distinct shared-input attribution; retain actual invoice uniqueness.",
+      "conditions": [],
+      "authorized": false,
+      "effort_kind": "existing_scope_amendment",
+      "effort_overlap": "Proposed PR scope total may replace or extend work already estimated in maps_to; no net increment claimed until overlap review."
+    },
+    {
+      "id": "RB-03",
+      "title": "Seal task-local selection and confirmation receipt access",
+      "maps_to": "AR-021-A",
+      "objective": "Keep adaptive discovery independent of fresh confirmation.",
+      "scope": "Add frozen task-local policy state, receipt manifests and confirmation access barriers to the existing coordinator; independent execution generations cannot reuse analytical attempts.",
+      "out_of_scope": "No cross-task adaptive allocation, new estimator or changed confirmation sample size.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RB-01",
+        "RB-02",
+        "AR-021-A",
+        "AR-023-C"
+      ],
+      "contracts": [
+        "C08"
+      ],
+      "acceptance": "Only designated discovery receipts are visible; one candidate/task freezes once; confirmation stays sealed until its fixed plan completes or invalidates.",
+      "automated_tests": "Crash/restart at freeze, confirmation-to-discovery leakage, task-state sharing, stale generation and partial-confirmation negatives.",
+      "security_reliability": "Unknown calls remain held; operational abort is explicit inconclusive, not early success.",
+      "effort_days": [
+        2,
+        4
+      ],
+      "confidence": "low",
+      "responsible_role": "BE",
+      "review_roles": [
+        "TL",
+        "QE"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Add frozen task-local policy state, receipt manifests and confirmation access barriers to the existing coordinator; independent execution generations cannot reuse analytical attempts.",
+      "conditions": [],
+      "authorized": false,
+      "effort_kind": "existing_scope_amendment",
+      "effort_overlap": "Proposed PR scope total may replace or extend work already estimated in maps_to; no net increment claimed until overlap review."
+    },
+    {
+      "id": "RB-04",
+      "title": "Extend C09 endpoints, multiplicity and denominator contract",
+      "maps_to": "AR-024-A",
+      "objective": "Separate intervention evidence from retry-inclusive product recovery.",
+      "scope": "Specify task-conditional effects, paired harm, distinct-task confirmed yield, recovery bounds, planned hypothesis family and repository-cluster reporting in C09 fixtures.",
+      "out_of_scope": "No estimator implementation, power claim or held-out outcome access.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RA-01-B",
+        "RB-01",
+        "AR-020-A",
+        "AR-002-B"
+      ],
+      "contracts": [
+        "C02",
+        "C08",
+        "C09",
+        "C21"
+      ],
+      "acceptance": "Pure retry has not-applicable intervention yield and valid recovery; no missing task or unused hypothesis slot disappears.",
+      "automated_tests": "Tiny wins/harms/ties/missing tables, duplicate task credit, insufficient clusters, unused family slots and first-success-only bias cases.",
+      "security_reliability": "Independent statistics review before estimator/evaluation acceptance.",
+      "effort_days": [
+        2,
+        3
+      ],
+      "confidence": "low",
+      "responsible_role": "RS",
+      "review_roles": [
+        "TL",
+        "QE",
+        "independent statistical reviewer"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Specify task-conditional effects, paired harm, distinct-task confirmed yield, recovery bounds, planned hypothesis family and repository-cluster reporting in C09 fixtures.",
+      "conditions": [],
+      "authorized": false,
+      "effort_kind": "producer_amendment",
+      "effort_overlap": "Proposed PR scope total overlaps the mapped producer; reconcile its remaining estimate before assigning any net increment."
+    },
+    {
+      "id": "RB-05",
+      "title": "Add fair retry and common-input controls",
+      "maps_to": "AR-025-B",
+      "objective": "Make inexpensive controls competitive on the recovery endpoint.",
+      "scope": "Extend existing random/latest-error/heuristic controls with unchanged continuation and fresh restart; use the same permitted information/model/resource vectors and common proposal attribution.",
+      "out_of_scope": "No published-method adapter or adaptive allocator.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RB-03",
+        "RB-04",
+        "AR-025-B",
+        "AR-014-C"
+      ],
+      "contracts": [
+        "C08",
+        "C09"
+      ],
+      "acceptance": "Retries receive task-recovery credit; shared proposals are charged equally; identical caps do not imply equal numbers of rollouts.",
+      "automated_tests": "Answer-access mismatch, unequal call caps, zero/free shared pool, invalid checkpoint and independent grader tampering negatives.",
+      "security_reliability": "Untrusted proposals pass existing action/environment/evaluator restrictions.",
+      "effort_days": [
+        2,
+        4
+      ],
+      "confidence": "low",
+      "responsible_role": "RS",
+      "review_roles": [
+        "TL",
+        "QE",
+        "independent statistical reviewer"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Extend existing random/latest-error/heuristic controls with unchanged continuation and fresh restart; use the same permitted information/model/resource vectors and common proposal attribution.",
+      "conditions": [],
+      "authorized": false,
+      "effort_kind": "existing_scope_amendment",
+      "effort_overlap": "Proposed PR scope total may replace or extend work already estimated in maps_to; no net increment claimed until overlap review."
+    },
+    {
+      "id": "RB-06",
+      "title": "Implement the proposed successive-halving allocation comparator",
+      "maps_to": "AR-025-B",
+      "objective": "Measure allocation value without changing the proposal pool.",
+      "scope": "Implement owner-approved successive halving over frozen candidates with within-task updates and immutable resource receipts; compare against uniform allocation.",
+      "out_of_scope": "No novel-algorithm claim, learned cross-task policy or optional confirmation stopping.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RB-05",
+        "AR-024-C",
+        "AR-025-A"
+      ],
+      "contracts": [
+        "C08",
+        "C09"
+      ],
+      "acceptance": "Uniform and selected adaptive policy share inputs and confirmation reserve; caps cannot be borrowed across tasks.",
+      "automated_tests": "Fixed synthetic candidate ordering, ties, missing rewards, exhausted reserve, partial receipts and deterministic policy-replay tests.",
+      "security_reliability": "No confirmation or other held-out task outcomes enter policy state.",
+      "effort_days": [
+        3,
+        5
+      ],
+      "confidence": "low",
+      "responsible_role": "RS",
+      "review_roles": [
+        "TL",
+        "QE",
+        "independent statistical reviewer"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Implement owner-approved successive halving over frozen candidates with within-task updates and immutable resource receipts; compare against uniform allocation.",
+      "conditions": [
+        "Owner approves this calibration comparator; threshold-aware alternatives remain separately scoped"
+      ],
+      "authorized": false,
+      "effort_kind": "net_new_optional_scope",
+      "effort_overlap": "Not present in original baseline scope; still unapproved and not added to active estimates."
+    },
+    {
+      "id": "RB-07",
+      "title": "Resolve DoVer artifact, rights and information mapping",
+      "maps_to": "AR-025-A",
+      "objective": "Decide whether an honest DoVer adaptation can be built.",
+      "scope": "Inspect an exact author release or declare the missing evaluator substitute; freeze license obligations, serial edit mapping and oracle/answer-blind strata.",
+      "out_of_scope": "No baseline execution, copied code or runtime adapter.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RA-01-A"
+      ],
+      "contracts": [
+        "C20",
+        "C21"
+      ],
+      "acceptance": "Reviewer accepts a fidelity manifest or records unavailable disposition; unresolved rights block copying.",
+      "automated_tests": "Static required-artifact/license pin and asymmetric-oracle negative fixtures.",
+      "security_reliability": "No untrusted pickle loading; public release access is not code-execution permission.",
+      "effort_days": [
+        1,
+        2
+      ],
+      "confidence": "low",
+      "responsible_role": "RS",
+      "review_roles": [
+        "TL",
+        "QE",
+        "independent statistical reviewer"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Inspect an exact author release or declare the missing evaluator substitute; freeze license obligations, serial edit mapping and oracle/answer-blind strata.",
+      "conditions": [],
+      "authorized": false,
+      "effort_kind": "net_new_optional_scope",
+      "effort_overlap": "Not present in original baseline scope; still unapproved and not added to active estimates."
+    },
+    {
+      "id": "RB-08",
+      "title": "Implement bounded DoVer coding adaptation",
+      "maps_to": "AR-025-B",
+      "objective": "Compare targeted diagnosis under an explicit coding adaptation.",
+      "scope": "Translate one approved serial instruction/edit path into existing native replay; emit fidelity/oracle and measured-cost receipts.",
+      "out_of_scope": "No multi-agent platform reproduction, author evaluator replacement without review or public-source ingestion.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RB-07",
+        "RB-05",
+        "AR-015-C",
+        "AR-018-C"
+      ],
+      "contracts": [
+        "C08",
+        "C09",
+        "C20"
+      ],
+      "acceptance": "Every trial restores the verified native state; oracle access and altered semantics appear in reports.",
+      "automated_tests": "Restoration equality, edit mapping, ground-truth access restrictions, no-op/irrelevant edit and missing artifact tests.",
+      "security_reliability": "Keep answer-blind and oracle strata separate; preserve third-party notices.",
+      "effort_days": [
+        3,
+        6
+      ],
+      "confidence": "low",
+      "responsible_role": "RS",
+      "review_roles": [
+        "TL",
+        "QE",
+        "independent statistical reviewer"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Translate one approved serial instruction/edit path into existing native replay; emit fidelity/oracle and measured-cost receipts.",
+      "conditions": [
+        "DoVer rights and evaluator/fidelity manifest accepted",
+        "Freeze exactly one adapter interface/path; an unsupported fidelity gap stops work for re-estimation"
+      ],
+      "authorized": false,
+      "effort_kind": "net_new_optional_scope",
+      "effort_overlap": "Not present in original baseline scope; still unapproved and not added to active estimates."
+    },
+    {
+      "id": "RB-09",
+      "title": "Implement bounded CAR resampling adaptation",
+      "maps_to": "AR-025-B",
+      "objective": "Compare checkpoint resampling rankings without mislabeling estimands.",
+      "scope": "Bind per-trial environment restoration to the pinned contrastive-ranking interface; retain original factual-reference output and separate common confirmation.",
+      "out_of_scope": "No Shapley expansion or surrogate-environment substitution.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RB-05",
+        "AR-015-C",
+        "AR-018-C"
+      ],
+      "contracts": [
+        "C08",
+        "C09",
+        "C20"
+      ],
+      "acceptance": "Actual filesystem state resets independently; factual-reference ranking is not exported as a paired-effect estimate.",
+      "automated_tests": "Dirty-state carryover, observation/action semantics, rank provenance, deterministic no-effect and paired-control separation checks.",
+      "security_reliability": "License text/notice completeness must be resolved before reuse.",
+      "effort_days": [
+        3,
+        6
+      ],
+      "confidence": "low",
+      "responsible_role": "RS",
+      "review_roles": [
+        "TL",
+        "QE",
+        "independent statistical reviewer"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Bind per-trial environment restoration to the pinned contrastive-ranking interface; retain original factual-reference output and separate common confirmation.",
+      "conditions": [
+        "CAR rights completeness and adaptation fidelity accepted",
+        "Freeze exactly one adapter interface/path; an unsupported fidelity gap stops work for re-estimation"
+      ],
+      "authorized": false,
+      "effort_kind": "net_new_optional_scope",
+      "effort_overlap": "Not present in original baseline scope; still unapproved and not added to active estimates."
+    },
+    {
+      "id": "RB-10",
+      "title": "Export recomputable phase and dual-cost evidence",
+      "maps_to": "AR-025-C",
+      "objective": "Let another reviewer recompute comparisons without private source.",
+      "scope": "Extend existing safe export with scoped receipt hashes, allowed observation manifests, all denominators and both actual/attributable cost views.",
+      "out_of_scope": "No partner trace publication or export of model credentials.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RB-03",
+        "RB-04",
+        "RB-05",
+        "AR-025-C",
+        "AR-023-C"
+      ],
+      "contracts": [
+        "C08",
+        "C09"
+      ],
+      "acceptance": "Independent verifier detects missing receipts, phase reuse, wrong shared charges and duplicate credit.",
+      "automated_tests": "Tampered/refused/missing records, late adjustment links, permission revocation and reproducible aggregate arithmetic.",
+      "security_reliability": "Export minimizes source and preserves private permission boundaries.",
+      "effort_days": [
+        2,
+        4
+      ],
+      "confidence": "low",
+      "responsible_role": "QE",
+      "review_roles": [
+        "TL",
+        "QE"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Extend existing safe export with scoped receipt hashes, allowed observation manifests, all denominators and both actual/attributable cost views.",
+      "conditions": [],
+      "authorized": false,
+      "effort_kind": "existing_scope_amendment",
+      "effort_overlap": "Proposed PR scope total may replace or extend work already estimated in maps_to; no net increment claimed until overlap review."
+    },
+    {
+      "id": "RB-11A",
+      "title": "Extend the development calibration harness",
+      "maps_to": "AR-024-C",
+      "objective": "Determine whether a funded confirmatory claim is feasible.",
+      "scope": "Extend the existing development-only calibration harness with selected-policy, multiplicity, clustering, missingness and cost-sensitivity cases; freeze the review pack before use.",
+      "out_of_scope": "No held-out tuning, paid trials or guarantee from nominal sample counts.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RB-04",
+        "RB-05",
+        "RB-06",
+        "AR-024-C"
+      ],
+      "contracts": [
+        "C02",
+        "C09",
+        "C21"
+      ],
+      "acceptance": "Independent review accepts the harness and declared error tolerances before feasibility conclusions; no held-out tuning.",
+      "automated_tests": "Development synthetic null/harm/heterogeneity/missingness regressions with declared Monte Carlo error; protocol leakage negatives.",
+      "security_reliability": "No primary threshold changes after held-out unsealing; any revision needs new data/protocol.",
+      "effort_days": [
+        2,
+        4
+      ],
+      "confidence": "low",
+      "responsible_role": "RS",
+      "review_roles": [
+        "TL",
+        "QE",
+        "independent statistical reviewer"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Extend the existing development-only calibration harness with selected-policy, multiplicity, clustering, missingness and cost-sensitivity cases; freeze the review pack before use.",
+      "conditions": [],
+      "authorized": false,
+      "effort_kind": "existing_scope_amendment",
+      "effort_overlap": "Proposed PR scope total may replace or extend work already estimated in maps_to; no net increment claimed until overlap review."
+    },
+    {
+      "id": "RB-11B",
+      "title": "Review calibration evidence and freeze the feasibility decision",
+      "maps_to": "AR-026-A",
+      "objective": "Determine whether a funded confirmatory claim is feasible.",
+      "scope": "Run the reviewed development harness and independently review its evidence; freeze sample, threshold and affordability decisions or explicitly narrow/block the claim.",
+      "out_of_scope": "No held-out tuning, paid trials or guarantee from nominal sample counts.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RB-11A",
+        "AR-026-A"
+      ],
+      "contracts": [
+        "C02",
+        "C09",
+        "C21"
+      ],
+      "acceptance": "Independent reviewer accepts tolerances and affordable sample or explicitly narrows/blocks the claim.",
+      "automated_tests": "Recompute evidence hashes, null/coverage summaries, sample/cost arithmetic and immutable protocol identity.",
+      "security_reliability": "No primary threshold changes after held-out unsealing; any revision needs new data/protocol.",
+      "effort_days": [
+        1,
+        2
+      ],
+      "confidence": "low",
+      "responsible_role": "RS",
+      "review_roles": [
+        "TL",
+        "QE",
+        "independent statistical reviewer"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "One evidence/feasibility PR after the separate harness PR; no new harness code hidden in the decision.",
+      "conditions": [],
+      "authorized": false,
+      "effort_kind": "existing_scope_amendment",
+      "effort_overlap": "Proposed PR scope total may replace or extend work already estimated in maps_to; no net increment claimed until overlap review."
+    },
+    {
+      "id": "RB-12A",
+      "title": "Freeze the approved study execution manifest and preflight",
+      "maps_to": "AR-038-A",
+      "objective": "Produce evidence for a bounded claim or a documented null result.",
+      "scope": "Review the exact corpus/method/sample/budget/permission manifest and pre-dispatch checks as a separate PR before any paid dispatch.",
+      "out_of_scope": "No study execution, new spending authority or broad research claim.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RB-10",
+        "RB-11B",
+        "AR-038-A",
+        "AR-026-C",
+        "STUDYFUNDS0",
+        "DATA0"
+      ],
+      "contracts": [
+        "C02",
+        "C08",
+        "C09"
+      ],
+      "acceptance": "Actual owners and independent reviewer accept the immutable execution manifest; every funding/data/protocol prerequisite is linked.",
+      "automated_tests": "Fail missing or changed permission, funding, estimator, sample, artifact, price and receipt identities.",
+      "security_reliability": "Actual study funding is separate from design approval and existing $200 ceiling.",
+      "effort_days": [
+        1,
+        2
+      ],
+      "confidence": "low",
+      "responsible_role": "RS",
+      "review_roles": [
+        "TL",
+        "QE",
+        "independent statistical reviewer"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Review the exact corpus/method/sample/budget/permission manifest and pre-dispatch checks as a separate PR before any paid dispatch.",
+      "conditions": [
+        "Reviewed amended C02 execution permission if inner holdout discovery is used",
+        "All selected optional adapters accepted",
+        "Independent statistical approval and actual funding record"
+      ],
+      "authorized": false,
+      "effort_kind": "replacement_study_scope",
+      "effort_overlap": "Replaces the selected study scope in the mapped AR-038 task; never authorizes a second baseline-plus-amendment study or automatically adds its full estimate."
+    },
+    {
+      "id": "RB-12B",
+      "title": "Execute the approved study and publish its private evidence report",
+      "maps_to": "AR-038-B",
+      "objective": "Produce evidence for a bounded claim or a documented null result.",
+      "scope": "Execute only the accepted manifest and preserve every attempt/charge; produce the recomputable private report for separate AR-038-C review.",
+      "out_of_scope": "No open-ended follow-up, automatic spending increase or public customer-data release.",
+      "dependencies": [
+        "RESEARCHSCOPE0",
+        "RB-12A",
+        "AR-038-A",
+        "AR-026-C",
+        "STUDYFUNDS0",
+        "DATA0"
+      ],
+      "contracts": [
+        "C02",
+        "C08",
+        "C09"
+      ],
+      "acceptance": "Frozen reports include failures, no proposals, invalids, uncertain costs and retry recoveries; claims await AR-038-C.",
+      "automated_tests": "Pre-dispatch permission/funding/identity checks, immutable plan, exhaustive receipt accounting and independent report reproduction.",
+      "security_reliability": "Actual study funding is separate from design approval and existing $200 ceiling.",
+      "effort_days": [
+        3,
+        6
+      ],
+      "confidence": "low",
+      "responsible_role": "RS",
+      "review_roles": [
+        "TL",
+        "QE",
+        "independent statistical reviewer"
+      ],
+      "definition_of_done": "Scoped PR has independent source review, required automated evidence, immutable contract/version links, updated operator/recovery documentation and a recorded gate disposition. No actual study or expanded authority follows from synthetic checks.",
+      "pr_boundary": "Execution/evidence PR only after RB-12A; independent claim acceptance remains AR-038-C, not the executing author.",
+      "conditions": [
+        "Reviewed amended C02 execution permission if inner holdout discovery is used",
+        "All selected optional adapters accepted",
+        "Independent statistical approval and actual funding record"
+      ],
+      "authorized": false,
+      "effort_kind": "replacement_study_scope",
+      "effort_overlap": "Replaces the selected study scope in the mapped AR-038 task; never authorizes a second baseline-plus-amendment study or automatically adds its full estimate."
+    }
+  ],
+  "method_budget_case": {
+    "cap": 100,
+    "offline": 10,
+    "shared": 30,
+    "task_caps": [
+      20,
+      40
+    ]
+  },
+  "family_case": {
+    "family_alpha_micros": 50000,
+    "confirmation_alpha_micros": 25000,
+    "population_alpha_micros": 25000,
+    "planned_confirmation_claims": 42,
+    "selected_confirmation_claims": 7,
+    "confirmation_divisor": 42,
+    "planned_population_contrasts": 3,
+    "population_divisor": 3,
+    "family_plan_digest": "ee1a198cec7d124223720a96df651cb89cf3b7123a9f48b2644db31205485900"
+  },
+  "comparison_case": {
+    "methods": [
+      {
+        "id": "uniform",
+        "model_revision": "synthetic-model-v1",
+        "information_stratum": "answer_blind",
+        "allowed_observation_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "proposal_pool_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "caps": {
+          "usd_micros": 100,
+          "tokens": 1000,
+          "cpu_seconds": 10,
+          "wall_seconds": 60,
+          "concurrency": 1,
+          "calls": 10
+        }
+      },
+      {
+        "id": "successive_halving",
+        "model_revision": "synthetic-model-v1",
+        "information_stratum": "answer_blind",
+        "allowed_observation_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "proposal_pool_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "caps": {
+          "usd_micros": 100,
+          "tokens": 1000,
+          "cpu_seconds": 10,
+          "wall_seconds": 60,
+          "concurrency": 1,
+          "calls": 10
+        }
+      }
+    ],
+    "kind": "allocation_only_common_pool"
+  },
+  "phase_plan": {
+    "digest": "0859d776dea5eace6bf8b5e65e17b70b35ecd3c845edb453418fdd639eba782f",
+    "body": {
+      "identity": {
+        "project_id": "synthetic-project",
+        "study_id": "synthetic-study",
+        "method_id": "uniform",
+        "task_id": "synthetic-task",
+        "policy_run_id": "synthetic-policy-run",
+        "policy_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "policy_state_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "candidate_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "discovery_attempts": [
+        "d1"
+      ],
+      "confirmation_attempts": [
+        "c1",
+        "c2"
+      ]
+    }
+  },
+  "family_plan": {
+    "digest": "ee1a198cec7d124223720a96df651cb89cf3b7123a9f48b2644db31205485900",
+    "body": {
+      "methods": [
+        "uniform",
+        "successive_halving",
+        "frozen_heuristic",
+        "random"
+      ],
+      "tasks": [
+        "task-1",
+        "task-2",
+        "task-3",
+        "task-4",
+        "task-5",
+        "task-6",
+        "task-7",
+        "task-8",
+        "task-9",
+        "task-10"
+      ],
+      "reuse_claims": [
+        "reuse-1",
+        "reuse-2"
+      ],
+      "population_contrasts": [
+        "contrast-1",
+        "contrast-2",
+        "contrast-3"
+      ]
+    }
+  }
+}
