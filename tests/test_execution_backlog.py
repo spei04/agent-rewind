@@ -100,3 +100,35 @@ def test_documentation_drift_is_not_hidden_by_valid_json(packet, variant):
         plan = plan.replace(f"| RS / 4 days | {status} |", "| RS / 4 days | Unknown |")
     with pytest.raises(ValueError):
         CHECK.validate(data, markdown, plan)
+
+
+@pytest.mark.parametrize("task_id", ["AR-002-B", "RA-01-A"])
+def test_active_and_verified_consumers_require_available_input(packet, task_id):
+    data, markdown, plan = packet
+    data = deepcopy(data)
+    next(c for c in data["contracts"] if c["id"] == "C02")["status"] = (
+        "Not yet available; review withdrawn"
+    )
+    # Isolate each consumer so a preceding consumer cannot hide the active-task case.
+    for task in data["tasks"]:
+        if task["id"] != task_id:
+            task["contracts"] = [c for c in task["contracts"] if c != "C02"]
+    with pytest.raises(ValueError, match=f"consumes unavailable contract: {task_id}/C02"):
+        CHECK.validate(data, markdown, plan)
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        '{"tasks": [], "tasks": []}',
+        '{"tasks": [{"status": "Not started", "status": "Verified"}]}',
+        r'{"a": 1, "\u0061": 2}',
+    ],
+)
+def test_cli_refuses_duplicate_json_members_before_validation(tmp_path, monkeypatch, payload):
+    source = tmp_path / "contracts/proposals/execution-backlog.json"
+    source.parent.mkdir(parents=True)
+    source.write_text(payload)
+    monkeypatch.setattr(CHECK, "ROOT", tmp_path)
+    with pytest.raises(ValueError, match="Duplicate JSON member"):
+        CHECK.main()

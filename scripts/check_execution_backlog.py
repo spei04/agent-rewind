@@ -43,6 +43,18 @@ def require(condition: bool, message: str) -> None:
         raise ValueError(message)
 
 
+def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        require(key not in result, "Duplicate JSON member")
+        result[key] = value
+    return result
+
+
+def contract_available(contract: dict[str, Any]) -> bool:
+    return re.match(r"^(?:Available|Reviewed)(?:$|[ :])", contract["status"]) is not None
+
+
 def indexed(rows: list[dict[str, Any]], label: str) -> dict[str, dict[str, Any]]:
     result = {row["id"]: row for row in rows}
     require(len(result) == len(rows), f"Duplicate {label} identity")
@@ -167,7 +179,7 @@ def validate(data: dict[str, Any], markdown: str, plan: str) -> dict[str, Any]:
     for contract in contracts.values():
         producer = contract["producer"]
         require(producer is None or producer in tasks, "Unknown contract producer")
-        if producer is not None and contract["status"].startswith(("Available", "Reviewed")):
+        if producer is not None and contract_available(contract):
             require(
                 tasks[producer]["status"] == "Verified", "Unreviewed contract claims availability"
             )
@@ -180,6 +192,11 @@ def validate(data: dict[str, Any], markdown: str, plan: str) -> dict[str, Any]:
                 producer is None or producer == key or producer in ancestors[key],
                 f"Contract producer missing from ancestry: {key}/{contract_id}",
             )
+            if task["status"] in READY | {"In progress"} and producer != key:
+                require(
+                    contract_available(contracts[contract_id]),
+                    f"Active or verified task consumes unavailable contract: {key}/{contract_id}",
+                )
             if producer is None:
                 require(
                     contract_id == "C04"
@@ -310,7 +327,7 @@ def main() -> None:
     source = ROOT / "contracts/proposals/execution-backlog.json"
     require(source.stat().st_size <= 2 * 1024 * 1024, "Ledger exceeds review bound")
     result = validate(
-        json.loads(source.read_text()),
+        json.loads(source.read_text(), object_pairs_hook=unique_object),
         (ROOT / "docs/EXECUTION_BACKLOG.md").read_text(),
         (ROOT / "docs/PLAN.md").read_text(),
     )
