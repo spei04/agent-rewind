@@ -13,12 +13,14 @@ import pytest
 import test_migration_recovery_postgres as recovery_tests
 import test_migrations_postgres as migration_tests
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from test_migration_recovery_postgres import _dump, _restore_command, _run
 from test_migrations_postgres import POSTGRES, assert_original_rows, load_legacy, mapping_for
 from test_ownership import FRESH
 
 from agent_rewind.migrations import ownership_service, service
 from agent_rewind.migrations.compatibility import runtime_schema_compatibility
+from agent_rewind.migrations.inputs import source_digest
 from agent_rewind.migrations.ownership_service import initialize_ownership
 from agent_rewind.migrations.schema import HEAD, OWNERSHIP, MigrationRefused, catalog
 
@@ -200,3 +202,82 @@ def test_postgres_ownership_checkpoint_dump_restore_resumes_without_activation(
     assert initialize_ownership(recovery["target"])["state"] == "ownership_complete"
     assert_original_rows(recovery["target"])
     assert runtime_schema_compatibility(recovery["target"]).code == "migration_only"
+
+
+def test_postgres_constraints_reject_foreign_scope_role_principal_and_duplicate_default(
+    pg, ownership_profile
+):
+    prepare(pg)
+    initialize_ownership(pg["owner"])
+    project, organization = "9" * 32, "8" * 32
+    cases = [
+        [
+            (
+                "INSERT INTO resource_scopes VALUES('run',:id,:project)",
+                {"id": "f" * 32, "project": "7" * 32},
+            )
+        ],
+        [
+            (
+                "INSERT INTO project_memberships VALUES(:project,'oidc:bad','viewer',NULL,false)",
+                {"project": project},
+            )
+        ],
+        [
+            (
+                "INSERT INTO project_memberships VALUES(:project,:principal,'admin',NULL,false)",
+                {"project": project, "principal": "oidc:" + "b" * 64},
+            )
+        ],
+        [
+            (
+                "INSERT INTO projects VALUES(:project,:organization,'Synthetic second',now())",
+                {"project": "7" * 32, "organization": organization},
+            ),
+            (
+                "INSERT INTO project_memberships VALUES(:project,:principal,'viewer',NULL,true)",
+                {"project": "7" * 32, "principal": "oidc:" + "a" * 64},
+            ),
+        ],
+    ]
+    for statements in cases:
+        with pytest.raises(IntegrityError), pg["owner"].begin() as connection:
+            for statement, parameters in statements:
+                connection.execute(text(statement), parameters)
+        with pg["owner"].connect() as connection:
+            assert connection.exec_driver_sql("SELECT count(*) FROM projects").scalar_one() == 1
+            assert (
+                connection.exec_driver_sql("SELECT count(*) FROM project_memberships").scalar_one()
+                == 1
+            )
+            assert (
+                connection.exec_driver_sql("SELECT count(*) FROM resource_scopes").scalar_one() == 7
+            )
+        assert_original_rows(pg["owner"])
+    assert service.schema_status(pg["owner"])["state"] == "ownership_complete"
+
+
+def test_postgres_invalid_relational_parent_refuses_without_source_or_revision_changes(
+    pg, ownership_profile
+):
+    load_legacy(pg["owner"])
+    with pg["owner"].begin() as connection:
+        data = connection.execute(
+            text("SELECT data FROM records WHERE id=:id"), {"id": "2" * 32}
+        ).scalar_one()
+        data["parent_id"] = "f" * 32
+        connection.execute(
+            text("UPDATE records SET data=CAST(:data AS JSON) WHERE id=:id"),
+            {"data": json.dumps(data), "id": "2" * 32},
+        )
+    mapping = mapping_for(pg["owner"])
+    service.adopt(pg["owner"], mapping, "b" * 64, "d" * 64)
+    with pytest.raises(MigrationRefused, match="^ownership_lineage_invalid$"):
+        initialize_ownership(pg["owner"])
+    assert service.schema_status(pg["owner"])["revision"] == HEAD
+    with pg["owner"].connect() as connection:
+        assert source_digest(connection) == mapping["source_dataset_digest"]
+        assert (
+            connection.exec_driver_sql("SELECT to_regclass('public.organizations')").scalar_one()
+            is None
+        )
