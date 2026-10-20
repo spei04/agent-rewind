@@ -5,6 +5,7 @@ backup: pg_dump does not back up encrypted objects, encryption keys, or roles.
 """
 
 import hashlib
+import json
 import os
 import re
 import shutil
@@ -28,6 +29,7 @@ from test_migrations_postgres import (
 from test_migrations_postgres import pg as pg
 
 from agent_rewind.migrations import service
+from agent_rewind.migrations.schema import catalog, installed_profile
 
 pytestmark = pytest.mark.skipif(not POSTGRES, reason="Opt-in synthetic PostgreSQL recovery")
 POSTGRES_IMAGE = (
@@ -134,6 +136,35 @@ def _assert_identity(engine):
     assert_original_rows(engine)  # Literal rows, individual hashes and reservation sum.
 
 
+def _assert_restored_catalog(engine):
+    # Diagnostics contain only this disposable synthetic schema, never row values,
+    # connection parameters, or a database-derived replacement for the authority.
+    expected = installed_profile("postgresql")
+    with engine.connect() as connection:
+        connection.exec_driver_sql("SET TRANSACTION READ ONLY")
+        connection.exec_driver_sql("SET LOCAL search_path TO public, pg_temp")
+        actual = catalog(connection)
+    differences = []
+
+    def compare(left, right, path):
+        if len(differences) >= 12 or left == right:
+            return
+        if isinstance(left, dict) and isinstance(right, dict) and left.keys() == right.keys():
+            for key in sorted(left):
+                compare(left[key], right[key], f"{path}/{key}")
+        elif isinstance(left, list) and isinstance(right, list) and len(left) == len(right):
+            for index, (before, after) in enumerate(zip(left, right, strict=True)):
+                compare(before, after, f"{path}/{index}")
+        else:
+            differences.append(
+                {"path": path, "expected": repr(left)[:700], "restored": repr(right)[:700]}
+            )
+
+    compare(expected, actual, "")
+    if actual != expected:
+        pytest.fail("Synthetic restored catalog differs: " + json.dumps(differences), pytrace=False)
+
+
 def _assert_migration_only(engine):
     # This interface arrives with the independently reviewed AR-005-C guard.
     from agent_rewind.migrations.compatibility import runtime_schema_compatibility
@@ -167,6 +198,7 @@ def test_postgres_restore_preserves_literal_history_and_objects(recovery, tmp_pa
         # Restoring the pre-adoption backup permits the same deliberate migration;
         # it neither releases holds nor activates application access.
         service.adopt(recovery["target"], mapping, backup_digest, "d" * 64)
+    _assert_restored_catalog(recovery["target"])
     status = service.schema_status(recovery["target"])
     assert status["state"] == "prepared" and status["customer_ready"] is False
     _assert_migration_only(recovery["target"])
