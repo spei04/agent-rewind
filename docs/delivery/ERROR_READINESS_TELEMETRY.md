@@ -183,7 +183,7 @@ admission/security contract and can require failing closed.
 ## Reconciliation disposition
 
 Revision m1-review-2 in [M1_CONTRACT_FREEZE.md](M1_CONTRACT_FREEZE.md) resolves
-these central proposal differences. Review remains pending and runtime remains
+these central proposal differences. Review is accepted in [G0_DECISION.md](G0_DECISION.md); runtime remains
 unchanged; the list records the agreed implementation contract, not open JSON
 drift. AR-005-C is now required before AR-011-B; the system-sentinel bounded read
 belongs to AR-011-B and is reused by AR-009-A customer storage work.

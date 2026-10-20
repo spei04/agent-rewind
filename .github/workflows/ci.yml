@@ -26,7 +26,7 @@ jobs:
       - run: pip install uv==0.11.21
       - run: uv sync --frozen --group dev
       - run: uv run ruff check . && uv run ruff format --check . && uv run mypy agent_rewind
-      - name: Validate pending M1 contracts and frozen fixtures
+      - name: Validate M1 contracts and frozen fixtures
         run: uv run python scripts/check_m1_contracts.py --openapi-model
       - run: uv run pytest -q
         env:

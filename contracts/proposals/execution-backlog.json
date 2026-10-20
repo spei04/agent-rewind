@@ -46,7 +46,7 @@
         "AR-004-B",
         "AR-004-C"
       ],
-      "status": "In progress"
+      "status": "Verified"
     },
     "AR-005": {
       "milestone": "M1",
@@ -632,7 +632,7 @@
         "QE"
       ],
       "pull_request_boundary": "Document two target workflows, tool-boundary replay guarantees, exclusions and customer interview questions. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer A \u2014 workflow/contracts",
       "evidence": {
         "pull_request": "https://github.com/spei04/agent-rewind/pull/13",
@@ -672,7 +672,7 @@
         "QE"
       ],
       "pull_request_boundary": "Specify capture denominator, investigation timing, two-partner pilot target and accessible task flows. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer A \u2014 workflow/contracts",
       "evidence": {
         "commit": "de05f0b",
@@ -712,7 +712,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Define private corpus manifest with rights, source revision, evaluator identity and allowed processors. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer C \u2014 corpus/quality",
       "evidence": {
         "commit": "096b48f",
@@ -761,7 +761,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Define failure taxonomy, task-level split, evaluator stability checks and effect-size feasibility worksheet. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer A \u2014 research protocol",
       "evidence": {
         "commit": "d90a1b9",
@@ -801,7 +801,7 @@
         "QE"
       ],
       "pull_request_boundary": "Map API, trusted worker, untrusted sandbox, IdP, DB, artifacts and model egress; retain one organization per installation. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer B \u2014 platform/trust boundaries",
       "evidence": {
         "commit": "1e5158e63b3193e8605484f274338560b4f6207b",
@@ -841,7 +841,7 @@
         "QE"
       ],
       "pull_request_boundary": "Estimate reference cloud resources using measured workload assumptions; request named staffing, region, IdP and operating funding. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer B \u2014 platform/capacity",
       "evidence": {
         "commit": "be2ce1f",
@@ -881,7 +881,7 @@
         "QE"
       ],
       "pull_request_boundary": "Map existing routes, SQL tables, event hashes, artifact formats and proposed M1 changes. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer B \u2014 backend/interfaces",
       "evidence": {
         "commit": "8c20226",
@@ -915,7 +915,7 @@
       "tests": "Run contract structure, dependency and historical-fixture manifest checks",
       "security_reliability": "Approval evidence is required; silence is not acceptance",
       "out_of_scope": "No implementation sign-off or invented reviewers",
-      "status": "Implemented / verification pending",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         1.0,
@@ -926,12 +926,13 @@
         "QE"
       ],
       "pull_request_boundary": "Resolve API/schema/test disagreements, explicit composite scope constraints and deferred endpoint ownership. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer B \u2014 backend/platform contract reconciliation",
       "evidence": {
         "commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/24",
-        "checks": "147 targeted tests independently rerun by lead; exact-source FE/RS and PL/QE/SEC reviews accepted; hosted CI pending."
+        "checks": "147 tests independently rerun; exact-source A/C reviews accepted; core/PostgreSQL and gVisor CI passed.",
+        "merge_commit": "4a1a5ae"
       }
     },
     {
@@ -956,7 +957,7 @@
       "tests": "Validate gate record requires approver, date, scope and referenced contract revision",
       "security_reliability": "Never self-approve product or security decisions",
       "out_of_scope": "No code deployment or implicit spending approval",
-      "status": "Not started",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         0.4,
@@ -967,7 +968,14 @@
         "QE"
       ],
       "pull_request_boundary": "Record product-owner disposition, named engineering capacity, approved scope/budgets and first migration slice. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
+      "assigned_to": "Project lead",
+      "evidence": {
+        "decision": "docs/delivery/G0_DECISION.md",
+        "contract_revision": "m1-review-2",
+        "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c",
+        "checks": "Engineer A accepted record/transition at2026-10-19T23:57:30Z; 79 review/harness tests and checker passed. Lead435 core tests (one environment skip), lint/format passed."
+      }
     },
     {
       "id": "AR-005-A",
@@ -1001,7 +1009,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Build synthetic legacy DB/object fixtures plus expected IDs, times, hashes and reservation totals from documented baseline. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer C \u2014 quality/migrations",
       "evidence": {
         "commit": "0ef6ad2",
@@ -1042,7 +1050,7 @@
         "QE"
       ],
       "pull_request_boundary": "Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill. No online data rewrite, automatic downgrade or run projection.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-005-C",
@@ -1076,7 +1084,7 @@
         "QE"
       ],
       "pull_request_boundary": "Add read-only release-profile revision guards before API admission and worker claims; refuse unknown/partial/future or incomplete state without DDL, and document compatible application rollback versus required backup restore. Confirm all supported CLI initialization now uses AR-005-B versioned migrations. No HA rolling upgrade claim.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-006-A",
@@ -1111,7 +1119,7 @@
         "QE"
       ],
       "pull_request_boundary": "Create run_index and bounded progress-marked backfill with parent scope closure and preserved event heads. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-006-B",
@@ -1147,7 +1155,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement scoped list/detail v1 routes with opaque bound cursors, stable tie ordering and fixed page limits. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-007-A",
@@ -1181,7 +1189,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement organization/project/membership/resource scope tables and explicit legacy ownership backfill. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-007-B",
@@ -1215,7 +1223,7 @@
         "QE"
       ],
       "pull_request_boundary": "Require project/principal context for runs, jobs, studies, keys and artifact resolution. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-007-C",
@@ -1250,7 +1258,7 @@
         "QE"
       ],
       "pull_request_boundary": "Route all legacy and v1 reads/writes, exports, cancellation and key use through scoped checks. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-008-A",
@@ -1285,7 +1293,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement operation/key alias constraints, default materialization and transactional job/scope/audit publication after upload. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-008-B",
@@ -1320,7 +1328,7 @@
         "QE"
       ],
       "pull_request_boundary": "Expose five M1 operations with task limits, stable errors and atomic cancel intent. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-009-A",
@@ -1356,7 +1364,7 @@
         "QE"
       ],
       "pull_request_boundary": "Define storage interface and metadata constraints for immutable objects, verified digest and project-scoped owner references. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-009-B",
@@ -1391,7 +1399,7 @@
         "QE"
       ],
       "pull_request_boundary": "Wire upload/verify before DB publication; read requires scoped ref and validates format/digest. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-010-A",
@@ -1425,7 +1433,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement org/project/job accounts, unique logical calls, ordered row locks and compatibility aggregate. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-010-B",
@@ -1460,7 +1468,7 @@
         "QE"
       ],
       "pull_request_boundary": "Require valid owner/lease/cancel state before issuing permit; expose ledger diagnostics without prompt bodies. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-011-A",
@@ -1494,7 +1502,7 @@
         "QE"
       ],
       "pull_request_boundary": "Specify stable error code/request ID envelope, readiness checks and bounded label vocabulary. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer A \u2014 error and telemetry contracts",
       "evidence": {
         "commit": "ea85d2c",
@@ -1536,7 +1544,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement redacted boundary handlers and bounded DB/store/schema readiness. Own the installation-only sentinel provisioning command and bounded byte-read primitive: 4096-byte plaintext, capped ciphertext, one-second deadline, one in-flight check and five-second positive cache. AR-009-A consumes the primitive through a separate scoped interface. No broad observability platform deployment.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-011-C",
@@ -1571,7 +1579,7 @@
         "QE"
       ],
       "pull_request_boundary": "Propagate request/job IDs and instrument admission, queue delay, failure and budget counters. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-012-A",
@@ -1606,7 +1614,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Add structural checks for OpenAPI/schema/acceptance links and baseline fixtures without runtime behavior claims. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation.",
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer C \u2014 quality/contract integration",
       "evidence": {
         "commit": "a5dcdcbe981d729b13e87f78719c3bc46b7b543b",
@@ -1652,7 +1660,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Wire PostgreSQL/object-backed required checks for all 24 M1 cases and upgrade/legacy compatibility. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-013-A",
@@ -1689,7 +1697,7 @@
         "QE"
       ],
       "pull_request_boundary": "Build pinned Linux worker image with runsc, UID/resource limits, read-only base and offline sandbox network. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-013-B",
@@ -1724,7 +1732,7 @@
         "QE"
       ],
       "pull_request_boundary": "Tag every container/workspace with attempt owner and lease; reconcile abandoned resources with bounded cleanup. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-013-C",
@@ -1759,7 +1767,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Exercise production worker profile against fork/output/disk bombs, forbidden mounts, metadata and credential access. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-014-A",
@@ -1794,7 +1802,7 @@
         "QE"
       ],
       "pull_request_boundary": "Specify capability negotiation, serialized state version, image/tool identities, path policy and hash manifest. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-014-B",
@@ -1829,7 +1837,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement preflight and native adapter restore against versioned manifest and immutable source. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-014-C",
@@ -1864,7 +1872,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Verify action substitution and observed-tool-result substitution from identical parent checkpoints. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-015-A",
@@ -1901,7 +1909,7 @@
         "QE"
       ],
       "pull_request_boundary": "Stream encrypted artifact reads/writes with max bytes/file count, digest verification and cancellation. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-015-B",
@@ -1936,7 +1944,7 @@
         "QE"
       ],
       "pull_request_boundary": "Add content cache keyed by project, format and verified digest with bounded eviction. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-015-C",
@@ -1972,7 +1980,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Measure plan baseline/forecast file counts and byte distributions, cache cold/warm restore and cleanup. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-016-A",
@@ -2007,7 +2015,7 @@
         "QE"
       ],
       "pull_request_boundary": "Define object key/version envelope, legacy read path, workload identity and key lifecycle states. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-016-B",
@@ -2043,7 +2051,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement wrapping/unwrapping and trusted-worker secret retrieval with bounded in-memory lifetime. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-016-C",
@@ -2081,7 +2089,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement native Cloud Storage adapter with conditional immutable writes, bounded reads and object metadata validation. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-016-D",
@@ -2117,7 +2125,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Exercise new writes on new key, historical reads, interrupted rotation and restore with retained keys. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-017-A",
@@ -2154,7 +2162,7 @@
         "QE"
       ],
       "pull_request_boundary": "Make heartbeat DB errors cancel local execution; require owner/generation checks before new call and publish. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-017-B",
@@ -2189,7 +2197,7 @@
         "QE"
       ],
       "pull_request_boundary": "Publish complete checkpoint metadata only after artifact verification and fenced transaction; retain incomplete diagnostics. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-017-C",
@@ -2224,7 +2232,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Automate cancellation at queued, sandbox, provider-wait and publication boundaries with resource inventory. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-018-A",
@@ -2261,7 +2269,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Specify independent grader launch, immutable hidden inputs, timeout and invalid-result taxonomy. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-018-B",
@@ -2298,7 +2306,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Implement fresh evaluation run, explicit invalid/timeout/flake records and quarantine policy. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-018-C",
@@ -2332,7 +2340,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Run adversarial test pack and record gaps with security/research review. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-019-A",
@@ -2370,7 +2378,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Compose DB/object/worker fault controls and verify checkpoints, resources, budget holds and trace linkage. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-019-B",
@@ -2406,7 +2414,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Run one predeclared native-agent failed run and branches on gVisor with model/runtime/usage receipts. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-019-C",
@@ -2441,7 +2449,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Assemble runtime inventory, isolation/restore/fault results and supported limitations. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-020-A",
@@ -2477,7 +2485,7 @@
         "QE"
       ],
       "pull_request_boundary": "Freeze logical identities, protocol digests, immutable freeze and attempt/uncertain states; specify study API needs. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-020-B",
@@ -2512,7 +2520,7 @@
         "QE"
       ],
       "pull_request_boundary": "Add normalized studies/pairs/trials/attempts and scoped repositories with fenced updates. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-020-C",
@@ -2547,7 +2555,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement create, freeze, cancel and status service commands with immutable plan digest and audit. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-021-A",
@@ -2583,7 +2591,7 @@
         "QE"
       ],
       "pull_request_boundary": "Persist discovery/freeze/confirmation/publication phases and resumable work intents. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-021-B",
@@ -2618,7 +2626,7 @@
         "QE"
       ],
       "pull_request_boundary": "Recover coordinator after worker/provider uncertainty using ledger status; retry only provably undispatched work. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-021-C",
@@ -2652,7 +2660,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Build bounded state exploration for cancellation/crash ordering and publish reproducible failing traces. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-022-A",
@@ -2688,7 +2696,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement per-project/study worker slots, bounded pending queue and weighted fair scheduling. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-022-B",
@@ -2724,7 +2732,7 @@
         "QE"
       ],
       "pull_request_boundary": "Dispatch independent trials to trusted workers and join frozen arm counts under cancel/retry. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-022-C",
@@ -2758,7 +2766,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Run two-project mixed-duration workload and verify fairness, bounded queue and phase integrity. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-023-A",
@@ -2794,7 +2802,7 @@
         "QE"
       ],
       "pull_request_boundary": "Specify call identity, request/price hash, observed usage, remote ID and evidence-based resolution rules. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-023-B",
@@ -2829,7 +2837,7 @@
         "QE"
       ],
       "pull_request_boundary": "Record dispatch intent before network and observed response after; route discovery and continuation through ledger. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-023-C",
@@ -2864,7 +2872,7 @@
         "QE"
       ],
       "pull_request_boundary": "Add audited operator reconciliation with evidence attachment and immutable adjustment entries. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-024-A",
@@ -2899,7 +2907,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Specify task-conditional estimand, paired design, intervals, missing data and invalidation/version fields. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-024-B",
@@ -2933,7 +2941,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Implement versioned estimates and intervals with independent reference calculations. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-024-C",
@@ -2967,7 +2975,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Run reproducible simulations for null calibration, power, correlated/missing outcomes and task heterogeneity. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-025-A",
@@ -3004,7 +3012,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Version proposal records, checkpoint candidate identity, permitted edits and discovery call budget. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-025-B",
@@ -3039,7 +3047,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Implement last-error, uniform-location and bounded search baselines with identical evaluator/call cost caps. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-025-C",
@@ -3075,7 +3083,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Export safe candidate/protocol/receipt hashes and reproduce ranking plus report from stored evidence. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-026-A",
@@ -3112,7 +3120,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Preregister useful-location metric, minimum effect, task sample, multiple comparisons and stop/invalidation rules. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-026-B",
@@ -3151,7 +3159,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Run synthetic multi-worker study across selection, freeze, confirmation and publication faults. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-026-C",
@@ -3186,7 +3194,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Record reviewed study correctness/statistics evidence and operator actions for uncertainty. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-027-A",
@@ -3221,7 +3229,7 @@
         "QE"
       ],
       "pull_request_boundary": "Extend proposed v1 API with paginated events/files, branch submission and comparison; define observed versus actual fields. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-027-B",
@@ -3257,7 +3265,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement paged timeline/files, idempotent branch admission and bounded comparison from immutable lineage. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-027-C",
@@ -3292,7 +3300,7 @@
         "QE"
       ],
       "pull_request_boundary": "Build typed timeline/file inspection, branchability indicators and keyboard navigation. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-028-A",
@@ -3326,7 +3334,7 @@
         "QE"
       ],
       "pull_request_boundary": "Add action/tool-result edit form with provenance, validation, budget and idempotent submission state. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-028-B",
@@ -3361,7 +3369,7 @@
         "QE"
       ],
       "pull_request_boundary": "Render bounded event/file diffs, divergent decisions and parent/control/treatment links. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-028-C",
@@ -3396,7 +3404,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Test native capture to edited branch and comparison with real API/DB/gVisor fixture. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-029-A",
@@ -3432,7 +3440,7 @@
         "QE"
       ],
       "pull_request_boundary": "Specify study create/status/cancel/report/export and privileged reconciliation routes with immutable protocol references. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-029-B",
@@ -3469,7 +3477,7 @@
         "QE"
       ],
       "pull_request_boundary": "Expose scoped idempotent study commands, paged trial status and recomputable report/export. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-029-C",
@@ -3504,7 +3512,7 @@
         "QE"
       ],
       "pull_request_boundary": "Build budget/queue/phase controls and effect report with uncertainty, missingness and invalidation. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-030-A",
@@ -3539,7 +3547,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement typed client transport, scoped auth, idempotency persistence, list/run/operation/cancel methods. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-030-B",
@@ -3578,7 +3586,7 @@
         "QE"
       ],
       "pull_request_boundary": "Add supported adapter capture, branch/compare and study/report methods with protocol versions. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-030-C",
@@ -3615,7 +3623,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Publish synthetic examples covering capture, branch, study, export and safe deletion; test supported client/server matrix. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-031-A",
@@ -3651,7 +3659,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Timebox selection of one partner framework with documented serializable state and capture hooks. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-031-B",
@@ -3686,7 +3694,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Implement only approved sequential tool-boundary capture/restore and explicit unsupported state errors. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-031-C",
@@ -3721,7 +3729,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Validate permitted representative tasks, record admitted denominator and framework compatibility matrix. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-032-A",
@@ -3758,7 +3766,7 @@
         "QE"
       ],
       "pull_request_boundary": "Define owned resource graph, holds, tombstones, deletion journal, export schema and endpoint role matrix. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-032-B",
@@ -3793,7 +3801,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement bounded evidence export, authenticated deletion intent and hold-protected tombstones. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-032-C",
@@ -3829,7 +3837,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement mark/grace/recheck sweep with concurrent fork protection, orphan tracking and restore journal replay. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-033-A",
@@ -3864,7 +3872,7 @@
         "QE"
       ],
       "pull_request_boundary": "Specify versioned deployment config, region, identities, private ingress, DB/store/KMS and resource labels. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-033-B",
@@ -3899,7 +3907,7 @@
         "QE"
       ],
       "pull_request_boundary": "Provision isolated Cloud SQL, private Cloud Storage, KMS, Secret Manager, service identities and worker host skeleton. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-033-C",
@@ -3936,7 +3944,7 @@
         "QE"
       ],
       "pull_request_boundary": "Deploy versioned API/workers with private ingress, health checks and secret/workload identity wiring. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-033-D",
@@ -3972,7 +3980,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Have a different operator install from pinned config in fresh approved staging and destroy test resources. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-034-A",
@@ -4007,7 +4015,7 @@
         "QE"
       ],
       "pull_request_boundary": "Specify project/membership/key admin endpoints, IdP mapping, revocation and browser recovery states. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-034-B",
@@ -4042,7 +4050,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement membership/key admin service and accessible settings UI, using reviewed scoped repositories. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-034-C",
@@ -4077,7 +4085,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Exercise actual permitted test IdP login/logout, group mapping, revoked user/session and access changes. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-034-D",
@@ -4122,7 +4130,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Run independent install-to-capture-to-investigate-to-confirm-to-compare-to-export/delete workflow. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-035-A",
@@ -4159,7 +4167,7 @@
         "QE"
       ],
       "pull_request_boundary": "Specify per-partner region, processors, data rights, spend cap, retention, contacts and incident responsibilities. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-035-B",
@@ -4196,7 +4204,7 @@
         "QE"
       ],
       "pull_request_boundary": "Install approved release per partner with scoped identities, quotas, safe telemetry and deprovisioning path. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-035-C",
@@ -4232,7 +4240,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Test expected pilot workload and complete DB/object/key restore before customer data, using synthetic evidence. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-036-A",
@@ -4268,7 +4276,7 @@
         "QE"
       ],
       "pull_request_boundary": "Configure selected supported workflow and capture permitted real runs through SDK. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-036-B",
@@ -4305,7 +4313,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Run agreed branch/confirmation/export workflow and document regression use, including failures. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-036-C",
@@ -4339,7 +4347,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Record customer acceptance, compatibility denominator, limitations and operational escalation handoff. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-037-A",
@@ -4375,7 +4383,7 @@
         "QE"
       ],
       "pull_request_boundary": "Configure a second approved team/workflow to test repeatable onboarding within same supported adapter. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-037-B",
@@ -4412,7 +4420,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Run branch/confirmation/regression export for distinct permitted workload. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-037-C",
@@ -4446,7 +4454,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Record operator sign-off and compare onboarding friction/unsupported states with partner one. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-038-A",
@@ -4485,7 +4493,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Curate allowed naturally failed runs, deduplicate task families, freeze splits and evaluator identities. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-038-B",
@@ -4522,7 +4530,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Execute bounded cost-matched location study with fixed candidates, controls, attempts and stopping rules. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-038-C",
@@ -4556,7 +4564,7 @@
         "independent statistical reviewer"
       ],
       "pull_request_boundary": "Have independent statistical reviewer check estimand, sampling, missingness and claims against evidence. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-039-A",
@@ -4591,7 +4599,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Enable safe timing, usage, incident, cost and compatibility measurement for both onboarded partners. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-039-B",
@@ -4626,7 +4634,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Analyze at least 28 calendar days for both partners, 20 investigation target and weekly workflow use. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-039-C",
@@ -4662,7 +4670,7 @@
         "QE"
       ],
       "pull_request_boundary": "Review two-partner evidence, operator feedback, unresolved defects and research result with PM/SEC. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-040-A",
@@ -4697,7 +4705,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Encode Section 5 baseline/forecast/burst mixes, artifact distributions, project skew and provider stub behavior. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-040-B",
@@ -4733,7 +4741,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Run forecast workload, five-minute burst and 24-hour soak including worker loss. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-040-C",
@@ -4767,7 +4775,7 @@
         "QE"
       ],
       "pull_request_boundary": "Identify dominant measured bottleneck and document supported installation sizing/limits. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-041-A",
@@ -4803,7 +4811,7 @@
         "QE"
       ],
       "pull_request_boundary": "Define API/stateless worker failover, Cloud SQL reconnect, claim recovery and expected error budget impact. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-041-B",
@@ -4839,7 +4847,7 @@
         "QE"
       ],
       "pull_request_boundary": "Inject approved staging zone/DB/object/provider failures and restore service with recorded timeline. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-041-C",
@@ -4873,7 +4881,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Independent operator repeats representative failure/recovery using recorded runbook. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-042-A",
@@ -4909,7 +4917,7 @@
         "QE"
       ],
       "pull_request_boundary": "Define coherent DB/object/key backup set, off-region retention, deletion replay and restore ordering. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-042-B",
@@ -4944,7 +4952,7 @@
         "QE"
       ],
       "pull_request_boundary": "Restore to isolated alternate approved region from recorded backups; recover keys and replay deletions. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-042-C",
@@ -4978,7 +4986,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Have secondary operator repeat restore from runbook and record recovery gap dispositions. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-043-A",
@@ -5014,7 +5022,7 @@
         "QE"
       ],
       "pull_request_boundary": "Specify pinned dependency/image inputs, SBOM, attestations, signature verification and supported versions. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-043-B",
@@ -5048,7 +5056,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement reproducible release pipeline, SBOM/provenance and severity/exception expiry policy. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-043-C",
@@ -5083,7 +5091,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Exercise revoked build/signature, compromised dependency and recovery to trusted artifact. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-044-A",
@@ -5120,7 +5128,7 @@
         "QE"
       ],
       "pull_request_boundary": "Define authorized API/auth/storage/worker/CI scope, assessor access, exclusions, timing and retest window. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-044-B",
@@ -5158,7 +5166,7 @@
         "QE"
       ],
       "pull_request_boundary": "Map actual assessor findings to severity, exploit path, owner, fix PR, regression test and retest criterion. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-044-C",
@@ -5194,7 +5202,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Provide fixed candidate to independent assessor and verify original exploits plus regressions. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-045-A",
@@ -5232,7 +5240,7 @@
         "QE"
       ],
       "pull_request_boundary": "Assemble verified control map, audit sample, data-flow/processor/retention record and support limitations. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-045-B",
@@ -5269,7 +5277,7 @@
         "QE"
       ],
       "pull_request_boundary": "Review required controls with two partners; decide whether SCIM or other gaps block target contract. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-045-C",
@@ -5305,7 +5313,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Prepare bounded customer-safe package and record actual customer/security dispositions. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-046-A",
@@ -5342,7 +5350,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement documented admission/queue/runtime/error/budget SLIs and actionable error-budget alerts. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-046-B",
@@ -5380,7 +5388,7 @@
         "QE"
       ],
       "pull_request_boundary": "Write practiced incident triage, provider uncertainty, key loss, customer communications and escalation procedures. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-046-C",
@@ -5415,7 +5423,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Run secondary-led outage/recovery drill and evaluate detection, response, accounting and evidence retention. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-047-A",
@@ -5452,7 +5460,7 @@
         "QE"
       ],
       "pull_request_boundary": "Define supported N/N-1 readers, API/SDK/adapter/image/DB combinations and safe rollback boundary. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-047-B",
@@ -5490,7 +5498,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Exercise supported upgrade/rollback on realistic synthetic history, active jobs drained and partial migration faults. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-047-C",
@@ -5532,7 +5540,7 @@
         "QE"
       ],
       "pull_request_boundary": "Audit every requirement against actual commit/environment evidence with pass/fail/not-tested disposition. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-048-A",
@@ -5568,7 +5576,7 @@
         "QE"
       ],
       "pull_request_boundary": "Publish release candidate notes, supported matrix, installation/upgrade/recovery guide and honest product limits. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-048-B",
@@ -5604,7 +5612,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Have new operator install candidate and run standard recovery/support request from docs. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-048-C",
@@ -5640,7 +5648,7 @@
         "QE"
       ],
       "pull_request_boundary": "Record TL/PL/QE/SEC/RS/customer sign-offs, residual risk, canary scope and rollback triggers. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-049-A",
@@ -5676,7 +5684,7 @@
         "QE"
       ],
       "pull_request_boundary": "Deploy verified release to approved canary scope with health/error/budget/research integrity checks. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-049-B",
@@ -5711,7 +5719,7 @@
         "QE"
       ],
       "pull_request_boundary": "Promote staged customer cohorts only after observed canary gate; maintain version/rollback record. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-049-C",
@@ -5746,7 +5754,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Verify supported customer journeys, alert/support ownership and baseline adoption/cost metrics. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-050-A",
@@ -5781,7 +5789,7 @@
         "QE"
       ],
       "pull_request_boundary": "Analyze at least 30 calendar days of SLOs, incidents, budgets, compatibility and weekly use. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-050-B",
@@ -5815,7 +5823,7 @@
         "QE"
       ],
       "pull_request_boundary": "Review operational failures, useful-location results and customer feedback with named owners. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     },
     {
       "id": "AR-050-C",
@@ -5849,7 +5857,7 @@
         "QE"
       ],
       "pull_request_boundary": "Record launch review disposition and propose demand-backed next priorities with contracts/estimates. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 is an existing pending proposal; other contracts are specified by their producer tasks below. Required producer and approval gates must pass before implementation."
+      "contracts_status": "C04 reviewed for development/testing at source22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
     }
   ],
   "gates": [
@@ -5873,8 +5881,18 @@
       "criteria": "Actual disposition of M0 architecture/contracts, workload, operating region, staffing, model/infra funding and first migration slice.",
       "kind": "external",
       "minimum_elapsed_days": null,
-      "status": "Not satisfied",
-      "effort_days": 0
+      "status": "Satisfied",
+      "effort_days": 0,
+      "evidence": {
+        "approver": "Project owner (existing execution approval and delegated project-lead authority)",
+        "recorded_at": "2026-10-19T23:57:30Z",
+        "scope": "Development/testing in existing workspace; first runtime slice AR-005-B/C; three contributor slots selected by lead. No production deployment, recurring spending, customer data or external certification approval.",
+        "contract_revision": "m1-review-2",
+        "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c",
+        "record": "docs/delivery/G0_DECISION.md",
+        "reviewer": "Engineer A (independent authority/evidence record check)",
+        "owner_scope_confirmation": "Yes\u2014build and test first; gate production spending and partner data."
+      }
     },
     {
       "id": "G0",
@@ -5888,8 +5906,18 @@
       "criteria": "M0 accepted; schemas and initial migration scope reviewed.",
       "kind": "integration",
       "minimum_elapsed_days": null,
-      "status": "Not satisfied",
-      "effort_days": 0
+      "status": "Satisfied",
+      "effort_days": 0,
+      "evidence": {
+        "approver": "Project owner (existing execution approval and delegated project-lead authority)",
+        "recorded_at": "2026-10-19T23:57:30Z",
+        "scope": "Development/testing in existing workspace; first runtime slice AR-005-B/C; three contributor slots selected by lead. No production deployment, recurring spending, customer data or external certification approval.",
+        "contract_revision": "m1-review-2",
+        "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c",
+        "record": "docs/delivery/G0_DECISION.md",
+        "reviewer": "Engineer A (independent authority/evidence record check)",
+        "owner_scope_confirmation": "Yes\u2014build and test first; gate production spending and partner data."
+      }
     },
     {
       "id": "ENV0",
@@ -6347,8 +6375,8 @@
       "id": "C04",
       "producer": null,
       "title": "M1 API, schema and acceptance proposals",
-      "required_interface": "Existing m1.openapi.json, m1.data-model.json and m1.acceptance.json; exact route/schema semantics remain pending until G0.",
-      "status": "Existing draft plus reviewed inventory and observability design; reconciliation and G0 remain pending."
+      "required_interface": "Reviewed m1.openapi.json, m1.data-model.json, m1.acceptance.json and m1.freeze.json at m1-review-2; implementation must satisfy the planned cases.",
+      "status": "Reviewed development/test contract at source22c4376; G0 recorded in docs/delivery/G0_DECISION.md. All24 M1 behavioral cases remain planned."
     },
     {
       "id": "C05",

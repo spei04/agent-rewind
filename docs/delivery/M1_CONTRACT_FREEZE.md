@@ -1,6 +1,6 @@
 # M1 contract reconciliation and proposed freeze
 
-AR-004-B · C04 revision `m1-review-2` · **Pending consumer review**.
+AR-004-B · C04 revision `m1-review-2` · **Reviewed for development/testing**.
 
 This records implementable dispositions for the eight findings in
 [BASELINE_INTERFACES.md](BASELINE_INTERFACES.md), the
@@ -513,8 +513,8 @@ contingency and block adoption, rather than relaxing preservation.
 ## Review evidence and validation limits
 
 BE proposal author: Engineer B, revision m1-review-2. FE/RS review: Engineer A,
-pending exact-commit recheck. PL/SEC/QE review: Engineer C, pending exact-commit
-recheck. Lead acceptance and AR-004-C gate record: pending. These are internal
+accepted at source 22c4376. PL/SEC/QE review: Engineer C, accepted at the same source.
+Lead acceptance and AR-004-C are recorded in [G0_DECISION.md](G0_DECISION.md). These are internal
 contributor roles, not external human security/statistical certification. The
 machine record must contain actual dated dispositions and scope/evidence before
 approval metadata becomes reviewed; a passing structural checker cannot fill them.

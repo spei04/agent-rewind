@@ -52,7 +52,7 @@ def test_current_proposal_suite_checks_links_frozen_rows_and_openapi_model():
     assert result["frozen_rows"] == 14
     assert result["frozen_objects"] == 18
     assert result["fixture_variants"] == 5
-    assert result["approval_status"] == "pending"
+    assert result["approval_status"] == "reviewed"
     assert result["behavior_status"] == "planned-not-executed"
     assert result["openapi_model_checked"] is True
 
@@ -234,7 +234,7 @@ def test_cli_reports_proposal_scope_with_no_behavior_pass_count():
     assert result.returncode == 0, result.stderr
     report = json.loads(result.stdout)
     assert report["behavior_status"] == "planned-not-executed"
-    assert report["approval_status"] == "pending"
+    assert report["approval_status"] == "reviewed"
     assert report["planned_acceptance_cases"] == 24
     assert not any("passed" in key for key in report)
 

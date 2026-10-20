@@ -41,7 +41,14 @@ def reviewed_fixture(documents):
         )
 
 
-def test_current_pending_record_and_future_reviewed_record_keep_behavior_planned(documents):
+def test_current_reviewed_and_synthetic_pending_records_keep_behavior_planned(documents):
+    assert CHECK(*documents) == "reviewed"
+    documents[0]["x-approval-status"] = "pending"
+    for index in (1, 3, 5):
+        documents[index]["approval_status"] = "pending"
+    documents[5]["reviewed_source_commit"] = None
+    for row in documents[5]["reviews"]:
+        row.update(status="pending", reviewed_source_commit=None)
     assert CHECK(*documents) == "pending"
     reviewed_fixture(documents)
     assert CHECK(*documents) == "reviewed"
@@ -80,7 +87,7 @@ def test_revision_drift_is_rejected(documents, index):
 
 def test_approval_drift_and_runtime_claims_are_rejected(documents):
     changed = copy.deepcopy(documents)
-    changed[1]["approval_status"] = "reviewed"
+    changed[1]["approval_status"] = "pending"
     with pytest.raises(ValueError, match="review states"):
         CHECK(*changed)
     for field in ("runtime_implemented", "production_authorized"):

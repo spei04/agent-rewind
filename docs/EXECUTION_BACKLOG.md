@@ -10,7 +10,7 @@ The [machine-readable backlog](../contracts/proposals/execution-backlog.json) re
 
 The instruction “Do not start implementation until I approve the execution backlog” is enforced by **E0**. Day 1 means the first staffed working day after that approval. E0 authorizes only its recorded scope; it does not satisfy architecture, funding, data rights, cloud access, customer, assessor or release gates. M0 and explicitly marked fixture/design preparation can proceed after E0; runtime M1 implementation also requires G0. Later tasks become assignable only when their exact prerequisites and contract-producer reviews pass. No task is scheduled on the assumption that an unavailable credential, future schema or customer approval already exists.
 
-Recommended approval: accept this backlog as the staged delivery baseline, authorize M0 and the named preparatory tasks, and approve the M1 migration-first scope at G0. Keep later milestone implementation and external spending tied to their recorded entry gates. This avoids repeatedly revisiting accepted one-organization/gVisor architecture while preserving decisions that genuinely remain open.
+Execution approval is recorded; [G0_DECISION.md](delivery/G0_DECISION.md) now accepts the reviewed M1 migration-first development/test scope under that existing authority. Keep later milestone implementation and external spending tied to their recorded entry gates. This avoids repeatedly revisiting accepted one-organization/gVisor architecture while preserving decisions that genuinely remain open.
 
 ## Planning review and corrections
 
@@ -127,7 +127,7 @@ C04 links the [M1 API](../contracts/proposals/m1.openapi.json), [logical data mo
 | C01 — Workflow and metrics | [AR-001-A](#ar-001-a) | Two supported journeys, input/output examples, capture denominator, investigation timing, scope and pilot usefulness thresholds. |
 | C02 — Corpus/evaluator protocol | [AR-002-A](#ar-002-a) | Rights/source/evaluator manifest; disjoint task families; failure taxonomy; immutable grader, split and private evidence policy. |
 | C03 — Trust/deployment decisions | [AR-003-A](#ar-003-a) | One-organization topology; deny-by-default sandbox network; API/worker identities; spending, data and region decisions. |
-| C04 — M1 API, schema and acceptance proposals | Existing draft; freeze at G0 | Existing m1.openapi.json, m1.data-model.json and m1.acceptance.json; exact route/schema semantics remain pending until G0. |
+| C04 — M1 API, schema and acceptance proposals | Reviewed at m1-review-2 / source22c4376 | API, logical model and 24 planned cases reviewed; [G0 decision](delivery/G0_DECISION.md) records development scope. |
 | C05 — Project ownership and roles | [AR-007-A](#ar-007-a) | Organization/projects/memberships/resource_scopes; project-parent closure; viewer/operator/maintainer/admin actions and deny matrix. |
 | C06 — Adapter/checkpoint/runner | [AR-014-A](#ar-014-a) | Capability/version preflight; checkpoint/image/state/evaluator hashes; tool-boundary restore; actual versus observed effects; resource and lease bounds. |
 | C07 — Encryption/secret lifecycle | [AR-016-A](#ar-016-a) | Versioned ciphertext envelope, KMS key IDs, legacy format reader, workload identity, rotation/retained-key and bounded decrypt errors. |
@@ -143,7 +143,7 @@ C04 links the [M1 API](../contracts/proposals/m1.openapi.json), [logical data mo
 | C18 — Capacity workload/SLIs | [AR-040-A](#ar-040-a) | Plan Section 5 workload distributions and latency/error/resource bounds, queue fairness, five-minute burst, 24-hour soak and hardware/cost identity. |
 | C19 — Regional recovery manifest | [AR-042-A](#ar-042-a) | Coherent DB/object/key/deletion backups; approved region; RPO/RTO, restore ordering, integrity and off-device evidence. |
 
-Current availability: C01 workflows/metrics, C02 permission/provenance/protocol and C03 trust/capacity decision records are reviewed internally. Real partner, statistical, deployment and funding gates remain separate. C04 is being reconciled before G0. The machine-readable register records each current status.
+Current availability: C01 workflows/metrics, C02 permission/provenance/protocol and C03 trust/capacity decision records are reviewed internally. Real partner, statistical, deployment and funding gates remain separate. C04 is reviewed and G0 is satisfied for development/testing; runtime cases remain planned. The machine-readable register records each current status.
 
 
 ## Gate register
@@ -158,9 +158,13 @@ E0 is **Satisfied** by the project owner’s explicit execution approval on 2026
 
 **ARCH0 — external gate; owner: Product owner with TL/SEC/RS.** Prerequisites: [AR-004-B](#ar-004-b). Actual disposition of M0 architecture/contracts, workload, operating region, staffing, model/infra funding and first migration slice.
 
+Disposition: [G0_DECISION.md](delivery/G0_DECISION.md), existing owner execution authority and exact-source internal reviews; production-specific external gates remain unsatisfied.
+
 <a id="g0"></a>
 
 **G0 — integration gate; owner: TL.** Prerequisites: [AR-001-B](#ar-001-b), [AR-002-B](#ar-002-b), [AR-003-B](#ar-003-b), [AR-004-C](#ar-004-c). M0 accepted; schemas and initial migration scope reviewed.
+
+Disposition: [G0_DECISION.md](delivery/G0_DECISION.md), existing owner execution authority and exact-source internal reviews; production-specific external gates remain unsatisfied.
 
 <a id="env0"></a>
 
@@ -386,7 +390,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Verified · [Tracking issue #3](https:
 
 ### AR-004 — Resolve architecture and interface decisions before runtime changes
 
-M0 / P0 · 3 PRs · 2.5 engineering days · In progress · [Tracking issue #4](https://github.com/spei04/agent-rewind/issues/4)
+M0 / P0 · 3 PRs · 2.5 engineering days · Verified · [Tracking issue #4](https://github.com/spei04/agent-rewind/issues/4)
 
 <a id="ar-004-a"></a>
 
@@ -420,7 +424,7 @@ M0 / P0 · 3 PRs · 2.5 engineering days · In progress · [Tracking issue #4](h
 - **Effort / confidence:** 1 engineering days; planning range 1–1.5; medium confidence.
 - **Responsible role:** TL; required reviewers: BE, QE. Named assignee pending staffing.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Implemented / verification pending; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
+- **Progress:** Verified; source, review and checks in [ASSIGNMENTS.md](ASSIGNMENTS.md) and [G0_DECISION.md](delivery/G0_DECISION.md).
 
 <a id="ar-004-c"></a>
 
@@ -435,9 +439,9 @@ M0 / P0 · 3 PRs · 2.5 engineering days · In progress · [Tracking issue #4](h
 - **Required automated tests:** Validate gate record requires approver, date, scope and referenced contract revision.
 - **Security and reliability:** Never self-approve product or security decisions.
 - **Effort / confidence:** 0.5 engineering days; planning range 0.4–0.6; high confidence.
-- **Responsible role:** TL; required reviewers: BE, QE. Named assignee pending staffing.
+- **Responsible role:** TL; required reviewers: BE, QE. Assigned: project lead; independently reviewed by Engineer A.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** Verified; source, review and checks in [ASSIGNMENTS.md](ASSIGNMENTS.md) and [G0_DECISION.md](delivery/G0_DECISION.md).
 
 <a id="ar-005"></a>
 
@@ -3057,3 +3061,5 @@ Update procedure for each completed PR: update task status and evidence in the m
 Execution dependency review, 2026-10-19: added AR-011-A and AR-012-A before AR-004-B, and AR-005-C before AR-011-B. All 514 edges resolve; graph, producer ancestry, day-by-day ordering and role capacity rechecked. Total effort remains 427 days; the longest effort path increases from 145.5 to 146 days. AR-012-A is verified at merged 8c3a7b9; its 24 runtime cases remain planned.
 
 Contract-consumer dependency review, 2026-10-19: AR-009-A now waits for the AR-011-B bounded byte-read primitive. All 515 edges, contract ancestors and conditional schedule pass; total effort remains 427 days, longest effort path is 146.5 days (about 41.9 workweeks at the stated availability, excluding contention/waits). Previous 514-edge checkpoint remains historical.
+
+G0 execution checkpoint, 2026-10-19: AR-004-B/C verified; ARCH0/G0 satisfied for development/testing under existing owner authority. First runtime assignment is AR-005-B, followed by AR-005-C; AR-033-A configuration may proceed in parallel. No new deployment/spending/data approval is inferred.
