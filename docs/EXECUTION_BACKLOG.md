@@ -1,8 +1,8 @@
 # Agent Rewind — execution backlog
 
-**Revision:** 2026-10-19 · **Owner:** spei04 · **Status:** Approved for staged execution; task-specific gates remain applicable.
+**Revision:** 2026-10-20 · **Owner:** spei04 · **Status:** Approved for staged execution; task-specific gates remain applicable.
 
-This is the assignable execution companion to [the roadmap](PLAN.md). It covers 50 work packages as 145 independently reviewable PR-sized tasks. No application implementation, production provisioning or paid inference was started in preparing this packet. E0 is satisfied by explicit project-owner approval on 2026-10-19. Initial assignments and subsequent reviews are tracked in [ASSIGNMENTS.md](ASSIGNMENTS.md). Task cards and the machine-readable ledger record current status. Existing product code and historical test evidence are the starting point, not completion evidence for these tasks.
+This is the assignable execution companion to [the roadmap](PLAN.md). It covers 51 work packages as 146 independently reviewable PR-sized tasks. No application implementation, production provisioning or paid inference was started in preparing this packet. E0 is satisfied by explicit project-owner approval on 2026-10-19. Initial assignments and subsequent reviews are tracked in [ASSIGNMENTS.md](ASSIGNMENTS.md). Task cards and the machine-readable ledger record current status. Existing product code and historical test evidence are the starting point, not completion evidence for these tasks.
 
 The [machine-readable backlog](../contracts/proposals/execution-backlog.json) records the same task fields, contract producers, gates, first-fortnight allocations and dependency audit. Maintain the roadmap summary, this document, that ledger and affected GitHub issues together. IDs are permanent; never renumber completed evidence. The roadmap remains authoritative for product/architecture requirements; task-level edges here replace coarse package-level start assumptions. A future contract is a required producer deliverable, not an already implemented interface.
 
@@ -18,33 +18,33 @@ Reviewed PLAN, README and the current-release architecture, deployment, security
 
 | ID | Finding | Correction |
 | --- | --- | --- |
-| REV-01 | Five/ten-day packages had generic a/b splits with no assignable PR boundary. | 145 specific tasks, 0.5–4 engineering days each, with scope, exclusions, contracts, tests, review and acceptance. Parent IDs retained for traceability. |
+| REV-01 | Five/ten-day packages had generic a/b splits with no assignable PR boundary. | 146 specific tasks, 0.5–4 engineering days each, with scope, exclusions, contracts, tests, review and acceptance. Parent IDs retained for traceability. |
 | REV-02 | Real storage/KMS/runtime verification depended on IaC scheduled after runtime, creating a coarse milestone loop. | AR-033-A/B are early M4 foundation tasks after G0/ENV0; AR-033-C/D integrate and independently reinstall later. Task graph, not package-level all-to-all edges, governs starts. |
 | REV-03 | Reference cloud uses GCS but current artifact implementation only provides local/S3 paths. | AR-016-C explicitly implements native GCS and real-store conformance. No assumption that S3 support proves GCS compatibility. |
-| REV-04 | 42–50 week GA and 28–34 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff. | Retire dated windows. 427 base engineering days; 146.5-day effort-only longest path excludes role contention and external waits. Reforecast after Day 10 and each gate using actual throughput; no committed launch date. |
+| REV-04 | 42–50 week GA and 28–34 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff. | Retire dated windows. 429 base engineering days; 146.5-day effort-only longest path excludes role contention and external waits. Reforecast after Day 10 and each gate using actual throughput; no committed launch date. |
 | REV-05 | Uniform effort estimates concealed research, independent review and customer integration uncertainty. | Each task has confidence/range. 25% portfolio reserve is separate; audit fixes, procurement gaps, customer remediation and staffing/vendor waits remain explicitly unestimated gates. |
 | REV-06 | Five M1 operations cannot support all branch, study, admin, export and SDK consumers. | Contract producer PRs AR-027-A/029-A/032-A/034-A precede their services/consumers; runtime consumers cannot start on an absent future schema. |
 | REV-07 | Logical artifact and idempotency scope references lacked explicit matching composite unique/FK constraints. | Tighten m1.data-model.json artifact/project/owner and operation/principal/kind constraints; add corresponding scope-negative assertions to existing planned acceptance cases. |
 | REV-08 | Pilot adoption metric requested three partners while onboarding scope funded two. | Use two partners weekly for four weeks, both adopting a resulting regression or policy fix; any third partner is an expansion. Sample shortfall requires honest gate review. |
 | REV-09 | Four-week pilot and 30-day launch review were mixed with engineering days. | P28 and D30 are minimum elapsed-time gates after both onboarding measurement and accepted rollout respectively; approval/wait never auto-completes from passage of time. |
 | REV-10 | The $200 historical validation cap was not a budget for a statistically powered natural-failure study or recurring production infrastructure. | PAID0 reconciles the existing authorization; STUDYFUNDS0, ENV0 and SCALEFUNDS0 require concrete funded scopes. No spending occurred in backlog preparation. |
-| REV-11 | Aggregate six-engineer capacity hid heavy verification and platform ownership. | Role rollups expose QE 111.5 days and PL 86 days; two-week allocation stays <=0.5 delivery day/role/day. Independent reviewers and support coverage are external capacity dependencies. |
+| REV-11 | Aggregate six-engineer capacity hid heavy verification and platform ownership. | Role rollups expose QE 111.5 days and PL 88 days; two-week allocation stays <=0.5 delivery day/role/day. Independent reviewers and support coverage are external capacity dependencies. |
 | REV-12 | A ten-day security package implied arbitrary unknown remediation could be scheduled and completed in advance. | AR-044 splits scope/triage/retest. SECFIX0 requires finding-specific fix PRs estimated after the assessment; prohibited blockers cannot be risk-accepted away. |
-| REV-13 | Planning artifacts, existing tests and live validation risked being read as enterprise implementation evidence. | All execution tasks Not started; contracts pending; 24 M1 cases planned, not executed. Existing current-release docs and historical validation remain separate from future readiness gates. |
+| REV-13 | Planning artifacts, existing tests and live validation risked being read as enterprise implementation evidence. | Internal M0 specifications and development G0 are reviewed; migration and CI work are active. All 24 M1 runtime cases remain planned, and production/customer evidence remains pending. Historical tests do not close future readiness gates. |
 | REV-14 | M1 org/project/job caps do not by themselves cap a fan-out study spanning many child jobs. | AR-020-A/B explicitly introduce study-scoped ledger accounts and project/study/call closure; AR-022-A tests atomic study-wide caps under parallel child dispatch. |
 
 ## Estimates, staffing and uncertainty
 
 Engineering effort includes implementation, task tests, ordinary review/rework and task documentation. Core capacity scenario is six roles at 3.5 delivery days/week each; 30% reserved for coordination/support. High range 0.8–1.2x, medium 1–1.5x, low 1–2x; ranges are planning bounds, not calibrated probabilities. 25% program integration reserve is an alternate portfolio allowance, not additive to summed upper ranges. External assessment fees/waits, unbounded finding remediation, hiring, unknown customer gaps and ongoing operations are excluded and require re-estimate.
 
-Base effort: **427 engineering days**. A 25% integration/rework allowance gives **533.75 days**; summing task upper planning bounds gives **720.6 days**. These are alternative views of uncertainty, not budgets to add together and not calendar commitments. Earlier 430-day/538-day totals are superseded. Research execution time and model charges, external assessment lead time/fees, unknown security fixes, customer-required gaps and ongoing support are not disguised inside a fixed ten-day task. An unknown required fix becomes a new ID/PR with scope and tests before its gate can close.
+Base effort: **429 engineering days**. A 25% integration/rework allowance gives **536.25 days**; summing task upper planning bounds gives **723.6 days**. These are alternative views of uncertainty, not budgets to add together and not calendar commitments. Earlier 430-day/538-day totals are superseded. Research execution time and model charges, external assessment lead time/fees, unknown security fixes, customer-required gaps and ongoing support are not disguised inside a fixed ten-day task. An unknown required fix becomes a new ID/PR with scope and tests before its gate can close.
 
 | Primary role | Base delivery days | Single-role capacity lower bound at 3.5 days/week |
 | --- | ---: | ---: |
 | TL | 73 | 20.9 weeks |
 | FE | 23 | 6.6 weeks |
 | RS | 57 | 16.3 weeks |
-| PL | 86 | 24.6 weeks |
+| PL | 88 | 25.1 weeks |
 | BE | 76.5 | 21.9 weeks |
 | QE | 111.5 | 31.9 weeks |
 
@@ -54,7 +54,7 @@ QE and PL are material resource constraints. At the Day 10 review, redistribute 
 
 ## Critical path, parallel tracks and contingencies
 
-The task DAG has **515 edges**, **26 explicit gates**, no cycles and a **146.5-engineering-day longest effort path**. At 70% delivery availability this alone is about 41.9 workweeks before role contention, mandatory elapsed windows and external waits. It is a lower bound, not a launch forecast. Zero effort on an external gate means engineering effort is not estimated; it never means the gate is already satisfied or has zero lead time.
+The task DAG has **519 edges**, **26 explicit gates**, no cycles and a **146.5-engineering-day longest effort path**. At 70% delivery availability this alone is about 41.9 workweeks before role contention, mandatory elapsed windows and external waits. It is a lower bound, not a launch forecast. Zero effort on an external gate means engineering effort is not estimated; it never means the gate is already satisfied or has zero lead time.
 
 The computed effort path, including integration joins, is:
 
@@ -89,7 +89,7 @@ After the first two weeks, use dependency-ready milestone scheduling. The former
 | Milestone | Base effort | Scheduling after Day 10 | Explicit exit / integration checkpoint |
 | --- | ---: | --- | --- |
 | M0 | 8.5 days | Preparatory work and freeze in Days 1–10; ARCH0/AR-004-C/G0 follow reviewed output | [G0](#g0): M0 accepted; schemas and initial migration scope reviewed. |
-| M1 | 39.5 days | Continue remaining foundation work after G0; first integration is migration plus revision guard | [G1](#g1): Historical identities intact; all 24 M1 behavioral cases, scope/lease/budget concurrency and compatibility pass. |
+| M1 | 41.5 days | Continue foundation work after G0; migration and secure CI run in parallel | [G1](#g1): Historical identities, 24 behavioral cases, scope/lease/budget compatibility, required CI and installable main candidate evidence pass. |
 | M2 | 69 days | Start each task after its foundation inputs; joins G1 plus early staging | [G2](#g2): Real gVisor isolation/restore/cleanup, cloud store/key rotation, fail-closed lease and accounted live smoke verified. |
 | M3 | 70 days | Trial/statistics work may overlap M2 after its contracts; joins G2 | [G3](#g3): Resumable distributed studies preserve frozen protocol, missingness and all call accounting; reports independently recompute. |
 | M4 | 82 days | Early IaC after G0; UI/SDK after producer APIs; complete after G3 | [G4](#g4): Independent full browser/SDK workflow and fresh install pass with real IdP/GCS/KMS/gVisor and selected adapter. |
@@ -116,7 +116,7 @@ Working days, not dates; no weekend work assumed. Each allocation below is **0.5
 | W2 / Day 9 | TL: [AR-004-B](#ar-004-b) (0.5d) | Cross-role consumer review against completed producers; resolve compatibility and ownership. |
 | W2 / Day 10 | TL: [AR-004-B](#ar-004-b) (0.5d) | Complete freeze proposal and capacity reforecast. ARCH0/AR-004-C/G0 follow reviewed output; no runtime work in this conditional fortnight. |
 
-Days 9–10 consume the completed AR-011-A and AR-012-A outputs. ARCH0 and AR-004-C/G0 follow the reviewed freeze; decision latency is not assumed zero. After G0, migration AR-005-B and reference configuration AR-033-A may proceed in parallel. Readiness AR-011-B and project authorization AR-007-A wait for AR-005-C revision guards. No task is scheduled before a predecessor is complete; same-day finish/start assumptions are not used.
+Days 9–10 consume the completed AR-011-A and AR-012-A outputs. ARCH0 and AR-004-C/G0 follow the reviewed freeze; decision latency is not assumed zero. After G0, migration AR-005-B and reference configuration AR-033-A may proceed in parallel. Current execution prioritizes AR-051-A secure CI with B implementing and A reviewing while C implements migration; reference configuration remains queued. This new priority consumes already verified prerequisites and does not alter the original conditional first-ten-day allocation. Readiness AR-011-B and project authorization AR-007-A wait for AR-005-C revision guards. No task is scheduled before a predecessor is complete; same-day finish/start assumptions are not used.
 
 ## Interface and schema contract register
 
@@ -127,7 +127,7 @@ C04 links the [M1 API](../contracts/proposals/m1.openapi.json), [logical data mo
 | C01 — Workflow and metrics | [AR-001-A](#ar-001-a) | Two supported journeys, input/output examples, capture denominator, investigation timing, scope and pilot usefulness thresholds. |
 | C02 — Corpus/evaluator protocol | [AR-002-A](#ar-002-a) | Rights/source/evaluator manifest; disjoint task families; failure taxonomy; immutable grader, split and private evidence policy. |
 | C03 — Trust/deployment decisions | [AR-003-A](#ar-003-a) | One-organization topology; deny-by-default sandbox network; API/worker identities; spending, data and region decisions. |
-| C04 — M1 API, schema and acceptance proposals | Reviewed at m1-review-2 / source22c4376 | API, logical model and 24 planned cases reviewed; [G0 decision](delivery/G0_DECISION.md) records development scope. |
+| C04 — M1 API, schema and acceptance proposals | Reviewed at m1-review-2 / source 22c4376 | API, logical model and 24 planned cases reviewed; [G0 decision](delivery/G0_DECISION.md) records development scope. |
 | C05 — Project ownership and roles | [AR-007-A](#ar-007-a) | Organization/projects/memberships/resource_scopes; project-parent closure; viewer/operator/maintainer/admin actions and deny matrix. |
 | C06 — Adapter/checkpoint/runner | [AR-014-A](#ar-014-a) | Capability/version preflight; checkpoint/image/state/evaluator hashes; tool-boundary restore; actual versus observed effects; resource and lease bounds. |
 | C07 — Encryption/secret lifecycle | [AR-016-A](#ar-016-a) | Versioned ciphertext envelope, KMS key IDs, legacy format reader, workload identity, rotation/retained-key and bounded decrypt errors. |
@@ -232,7 +232,7 @@ Disposition: [G0_DECISION.md](delivery/G0_DECISION.md), existing owner execution
 
 <a id="g1"></a>
 
-**G1 — integration gate; owner: TL/QE.** Prerequisites: [AR-005-A](#ar-005-a), [AR-005-B](#ar-005-b), [AR-005-C](#ar-005-c), [AR-006-A](#ar-006-a), [AR-006-B](#ar-006-b), [AR-007-A](#ar-007-a), [AR-007-B](#ar-007-b), [AR-007-C](#ar-007-c), [AR-008-A](#ar-008-a), [AR-008-B](#ar-008-b), [AR-009-A](#ar-009-a), [AR-009-B](#ar-009-b), [AR-010-A](#ar-010-a), [AR-010-B](#ar-010-b), [AR-011-A](#ar-011-a), [AR-011-B](#ar-011-b), [AR-011-C](#ar-011-c), [AR-012-A](#ar-012-a), [AR-012-B](#ar-012-b), [G0](#g0). Historical identities intact; all 24 M1 behavioral cases, scope/lease/budget concurrency and compatibility pass.
+**G1 — integration gate; owner: TL/QE.** Prerequisites: [AR-005-A](#ar-005-a), [AR-005-B](#ar-005-b), [AR-005-C](#ar-005-c), [AR-006-A](#ar-006-a), [AR-006-B](#ar-006-b), [AR-007-A](#ar-007-a), [AR-007-B](#ar-007-b), [AR-007-C](#ar-007-c), [AR-008-A](#ar-008-a), [AR-008-B](#ar-008-b), [AR-009-A](#ar-009-a), [AR-009-B](#ar-009-b), [AR-010-A](#ar-010-a), [AR-010-B](#ar-010-b), [AR-011-A](#ar-011-a), [AR-011-B](#ar-011-b), [AR-011-C](#ar-011-c), [AR-012-A](#ar-012-a), [AR-012-B](#ar-012-b), [G0](#g0), [AR-051-A](#ar-051-a). Historical identities intact; all 24 M1 behavioral cases, scope/lease/budget concurrency and compatibility pass. Required CI and installable main candidate evidence pass; production publication remains separately gated.
 
 <a id="g2"></a>
 
@@ -471,7 +471,7 @@ M1 / P0 · 3 PRs · 6 engineering days · In progress · [Tracking issue #5](htt
 #### AR-005-B — Explicit Alembic installation and adoption CLI
 
 - **Objective:** Upgrade stored history safely without changing evidence identity. This task delivers explicit alembic installation and adoption cli.
-- **Implementation scope / PR boundary:** Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill.
+- **Implementation scope / PR boundary:** Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill. PostgreSQL adoption requires an explicit nonempty retired-writer-role inventory bound to intent; verify disabled login/superuser and inherited write paths, reject other/ambiguous sessions and indirect public routines. This corrects the legacy compose application-superuser assumption; operator inventory remains attested, not dishonest-admin proof.
 - **Out of scope:** No online data rewrite, automatic downgrade or run projection.
 - **Prerequisites:** [G0](#g0), [AR-005-A](#ar-005-a). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C04; definitions and producer availability in the contract register.
@@ -479,9 +479,9 @@ M1 / P0 · 3 PRs · 6 engineering days · In progress · [Tracking issue #5](htt
 - **Required automated tests:** M1-001 through M1-004: fresh/legacy/unknown, transactional interruption and concurrent migrators.
 - **Security and reliability:** Migration credential only; lock/timeouts; backup before adoption.
 - **Effort / confidence:** 3 engineering days; planning range 3–4.5; medium confidence.
-- **Responsible role:** BE; required reviewers: TL, QE. Named assignee pending staffing.
+- **Responsible role:** BE; required reviewers: TL, QE. Assigned contributor: Engineer C — migrations.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** In progress after verified G0; [implementation issue #28](https://github.com/spei04/agent-rewind/issues/28).
 
 <a id="ar-005-c"></a>
 
@@ -1975,7 +1975,7 @@ M4 / P0 · 3 PRs · 10 engineering days · Not started
 
 ### AR-033 — Make the reference installation reproducible and its trust boundaries testable
 
-M4 / P0 · 4 PRs · 10 engineering days · Not started
+M4 / P0 · 4 PRs · 10 engineering days · In progress
 
 <a id="ar-033-a"></a>
 
@@ -1990,9 +1990,9 @@ M4 / P0 · 4 PRs · 10 engineering days · Not started
 - **Required automated tests:** Config schema, topology/IAM policy lint and missing budget/region rejection.
 - **Security and reliability:** No public DB, shared credentials or sandbox access to cloud metadata.
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
-- **Responsible role:** PL; required reviewers: SEC, QE. Named assignee pending staffing.
+- **Responsible role:** PL; required reviewers: SEC, QE. Assigned contributor: Engineer A — reference configuration.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** In progress; [issue #30](https://github.com/spei04/agent-rewind/issues/30). G0/AR-003-B verified; no provisioning.
 
 <a id="ar-033-b"></a>
 
@@ -3031,11 +3031,35 @@ M7 / P1 · 3 PRs · 10 engineering days · Not started
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
 - **Progress:** Not started; approval/prerequisite gates apply.
 
+
+<a id="ar-051"></a>
+
+### AR-051 — Secure continuous integration and verify traceable installable candidates
+
+M1 / P0 · 1 PR · 2 engineering days · Verified · [Tracking issue #26](https://github.com/spei04/agent-rewind/issues/26)
+
+<a id="ar-051-a"></a>
+
+#### AR-051-A — Secure CI and verify installable release candidates
+
+- **Objective:** Make integration checks mandatory and produce traceable installable main candidates without granting pull requests publication authority.
+- **Implementation scope / PR boundary:** Preserve lint, format, types, Python compatibility, unit/PostgreSQL/gVisor and package checks. Pin actions and infrastructure inputs, use read-only tokens and frozen dependencies, add static/dependency scans and bounded Dependabot updates. Always run CI gate over every required job. Successful main checks build wheel/sdist candidates, install outside checkout, verify import provenance/archive allowlists, and retain checksums/source/lock identity with promotion/rollback instructions.
+- **Out of scope:** No package publication, production deployment, paid services, model calls or repository-settings mutations. AR-043 retains signed releases, SBOM/attestation and broader supply-chain acceptance.
+- **Prerequisites:** [E0](#e0), [AR-004-A](#ar-004-a), [AR-003-A](#ar-003-a), all verified before assignment. G1 consumes this delivery evidence.
+- **Required contracts:** C03 reviewed trust boundaries and AR-004-A baseline inventory.
+- **Acceptance criteria:** Independently reviewed exact PR commit passes required checks; failed, skipped or cancelled prerequisites fail CI gate. Successful main run produces only allowlisted installable candidate files with recorded identities. PRs have no privileged trigger, secrets, delivery uploads or write token. Applicable advisories receive tested fixes, with final alert state and limitations recorded.
+- **Required automated tests:** Workflow negatives for missing/skipped/cancelled gates and PR delivery; installed wheel/sdist smoke outside checkout with module provenance; archive/path allowlist rejection; lint/type/unit/PostgreSQL/gVisor and supported Python jobs; frozen dependency audit without blanket ignores; actual main artifact-generation evidence.
+- **Security and reliability:** Verified full-SHA actions, immutable Postgres/runsc, no persisted checkout credentials, explicit token permissions, bounded jobs/retention/update cadence and PR concurrency without cancelling active main delivery. No credentials/private evidence in archives. Main-only delivery does not establish branch protection; settings need separate read-back.
+- **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
+- **Responsible role:** PL; B implements, A independently reviews, lead integrates.
+- **Definition of done:** Task acceptance, exact-commit independent review, successful PR checks and actual main candidate run with safe evidence; roadmap/backlog and issue updated. This does not close AR-043 or authorize production.
+- **Progress:** Verified via PR #29 and actual protected-main delivery; [evidence record](delivery/CI_EVIDENCE_2026-10-20.md).
+
 ## Highest-risk assumptions and decisions requiring approval
 
 | Decision / risk | Recommendation | Needed before / owner |
 | --- | --- | --- |
-| Execution authority | Approve this baseline and M0/preparatory scope; approve first M1 migration slice at G0. Keep future milestones evidence-gated. | E0 then ARCH0/G0 — product owner |
+| Execution authority | E0 and development-only ARCH0/G0 accepted. Continue approved migration and CI slices; future milestone/external gates remain applicable. | Recorded in G0_DECISION.md; no repeat approval required |
 | Actual staffing and delivery rate | Confirm six named core roles or provide real capacity. Replan if fewer people; verification/platform ownership is a bottleneck. No launch date commitment now. | E0 staffing; Day 10/G1 reforecast — product owner/TL |
 | Recurring cloud/identity operations | Retain accepted single-organization self-hosted GCP/gVisor direction. Choose region, cloud budget owner/cap, test IdP and funded support hours. Development VM access does not supply these. | ENV0/IDP0/SUPPORT0 — product owner/PL/customer admin |
 | Affordable valid research | Retain the existing $200 validation cap; reconcile before smoke. Approve the natural-failure study budget only after sample/power/permission review; narrow the claim if unaffordable or underpowered. | PAID0, DATA0, STUDYFUNDS0 — RS/data owner/product owner |
@@ -3046,9 +3070,9 @@ No question above asks to reapprove the already selected core architecture. The 
 
 ## Dependency review, progress and maintenance
 
-Completed planning validation on 2026-10-19: 145 unique task IDs across 50 parents; all required fields present; task sizes <=4 days; all 515 edges resolve; acyclic graph including external/integration/elapsed gates; every implementation task depends on E0; every producer contract is an ancestor of its consumer; every milestone gate joins its required tasks; first-ten-day predecessor and effort-capacity checks pass under the explicit E0 timing condition; ARCH0/G0 follow the first fortnight. Rollups reconcile to 427 days. Conditional schedule validation is not evidence those approvals exist.
+Current dependency validation, 2026-10-20: 146 unique tasks across 51 parents, 519 resolving acyclic edges, 26 gates and 18 contracts. Required fields, task bounds, E0 ancestry, producer ancestry, parent totals and conditional first-ten-day ordering/capacity pass. Effort is 429 days, M1 41.5, PL 88, upper ranges 723.6, alternate 25% allowance 536.25. Longest effort path remains 146.5 days; no calendar commitment. AR-051-A starts after its verified prerequisites; AR-005-B starts after verified G0. Runtime acceptance and production gates remain unproven.
 
-The 12 existing GitHub issues remain parent trackers, with task-card links and updated rollups. All 12 bodies, open states and approval labels were read back; both milestone descriptions were updated. Nineteen obsolete coarse parent dependency edges were removed because they cannot represent preparatory child handoffs; exact dependencies remain in the validated 515-edge task/gate graph. No task is closed merely because this backlog exists. Future child issues should be materialized from these IDs when their milestone is authorized; preserve exact scope/dependencies and link them back here. This avoids treating unapproved later contracts as active assignments. No application behavioral tests, load tests, production security assessment, deployment rehearsal or recovery drill was run in this planning-only revision.
+GitHub issues #1–4 are closed for verified internal specification/development-decision scope. Parent issues #5–12 remain open; #26 is closed for verified CI/candidates, #28 tracks migration and #30 reference configuration. The original 19 coarse package edges were removed; exact task/gate dependencies remain authoritative. Materialize future child issues when their scope is authorized. Closing a planning issue never establishes customer acceptance or production readiness.
 
 Update procedure for each completed PR: update task status and evidence in the machine-readable ledger and this card; recalculate parent/milestone effort/status and dependency changes; update PLAN Section 10/14 and the matching issue; rerun ID/required-field/DAG/contract-availability/first-fortnight allocation checks; verify local links and draft OpenAPI structure. Any added edge, new gate or changed estimate requires schedule revalidation. Do not mark a task Verified without applicable commit/environment evidence, reviewer disposition and explicit limitations.
 
@@ -3063,3 +3087,7 @@ Execution dependency review, 2026-10-19: added AR-011-A and AR-012-A before AR-0
 Contract-consumer dependency review, 2026-10-19: AR-009-A now waits for the AR-011-B bounded byte-read primitive. All 515 edges, contract ancestors and conditional schedule pass; total effort remains 427 days, longest effort path is 146.5 days (about 41.9 workweeks at the stated availability, excluding contention/waits). Previous 514-edge checkpoint remains historical.
 
 G0 execution checkpoint, 2026-10-19: AR-004-B/C verified; ARCH0/G0 satisfied for development/testing under existing owner authority. First runtime assignment is AR-005-B, followed by AR-005-C; AR-033-A configuration may proceed in parallel. No new deployment/spending/data approval is inferred.
+
+2026-10-20 priority checkpoint: B owns AR-051-A secure CI/candidates, A reviews CI/dependencies, C implements AR-005-B in issue #28. PR #25 records explicit build/test authorization; PR #27 updates cryptography after independent compatibility/advisory review and exact-head core/gVisor success. No production, model spending or customer-data gate was opened.
+
+2026-10-20 delivery checkpoint: AR-051-A verified at merged 13465c1 with independent exact-head review, protected-main run 39346262029 and artifact 12230273836. A reassigned to AR-033-A (issue #30), B to independent AR-005-B review, C continues migration. Migration review exposed the legacy application-superuser assumption; the scoped C04 adoption erratum adds explicit retired writer roles and real exclusion tests. No production gate closes.
