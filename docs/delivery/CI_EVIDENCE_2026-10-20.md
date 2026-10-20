@@ -44,3 +44,11 @@ region, funding, IdP, operator, data and release gates remain open. This batch m
 no provider calls and provisioned no paid resources. An owner-readable indexed
 identity/evidence record is retained outside temporary checkouts; the package
 candidate itself expires as stated above.
+
+## Disposable PostgreSQL maintenance isolation
+
+Projection PR #72 passed matching-head checks, but protected-main [run 39499897626](https://github.com/spei04/agent-rewind/actions/runs/39499897626) at af7e61c failed a migration fixture precondition. Its bounded post-refusal control observation identified an active autovacuum worker. The precise refusal-time snapshot and older unobserved failures remain unknown. That run produced no accepted delivery candidate.
+
+The correction adds a current-run/attempt label to the existing PostgreSQL service and invokes scripts/ci_postgres.py before tests. The helper first verifies the full service ID, exact pinned image, current label and running state. Fixed Unix-socket commands inside that verified container disable ordinary autovacuum and reload once; fresh observations must show effective off, configuration-file source, no pending restart and zero autovacuum workers. Commands and observation waits are bounded; failures expose fixed diagnostic codes. No supplied database DSN is used. Anti-wraparound workers may still start and the unchanged migration guard must still refuse them.
+
+C implemented 96037a, A/B independently reviewed, and the lead integrated 1e30617 with 84 focused tests passing. Actual hosted service execution, the full matrix/security/isolation/package gate and verified protected-main candidate are required for delivery acceptance. The follow-up PR records exact run and candidate identities; durable owner-readable evidence is indexed outside disposable checkouts. No migration retry, production setting, catalog/reloption, package dependency or runtime authorization behavior changed.
