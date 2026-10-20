@@ -1,0 +1,2616 @@
+{
+  "schema_version": 1,
+  "decision_id": "RESEARCHSCOPE0-2026-10-20",
+  "record_kind": "actual_owner_decision",
+  "status": "approved",
+  "authority": {
+    "owner": "spei04",
+    "source": "Explicit user conversation approval of issue #51, recorded by the project lead; no signature or GitHub comment is inferred.",
+    "date": "2026-10-20",
+    "issue": "https://github.com/spei04/agent-rewind/issues/51"
+  },
+  "accepted_c21": {
+    "commit": "555d28cf21ff91d05fca30aec94a86df2510813c",
+    "source_review": "d84eb0e01370ad7304a32ea59241e5aca56f6f63",
+    "record_sha256": "07c9dad5dedcee482a229e9fe5c5df61b13f39902cee76fceeb041a3bef34e37",
+    "document_sha256": "f7f8cb2fd21baf7c99a8467ad413556e130fc647f0b9479ed6deb8c502431554"
+  },
+  "selected_scopes": [
+    "RB-01",
+    "RB-02",
+    "RB-03",
+    "RB-04",
+    "RB-05",
+    "RB-06",
+    "RB-10",
+    "RB-11A",
+    "RB-11B"
+  ],
+  "deferred_scopes": [
+    "RB-07",
+    "RB-08",
+    "RB-09",
+    "RB-12A",
+    "RB-12B"
+  ],
+  "choices": {
+    "information": "answer_blind",
+    "core_controls": [
+      "unchanged_continuation",
+      "fresh_retry",
+      "random_location",
+      "latest_error",
+      "frozen_heuristic"
+    ],
+    "allocation_comparison": [
+      "uniform",
+      "standard_successive_halving"
+    ],
+    "common_pool": "allocation_ablation_only; full end-to-end methods may use different fully attributed proposers",
+    "useful_edit_net_lower_bound": 0.1,
+    "family_alpha": 0.05,
+    "power_target": 0.8,
+    "population_interval_width_target": 0.2,
+    "paired_discordance": "descriptive_with_coupling",
+    "fresh_retry": "full_recovery_cap; intervention_endpoint_not_applicable",
+    "current_c02_authoritative": true
+  },
+  "limits": {
+    "engineering_implementation": true,
+    "paid_evaluation": false,
+    "heldout_execution": false,
+    "optional_adapters": false,
+    "reuse_claims": false,
+    "customer_data": false,
+    "production_resources": false,
+    "external_statistical_approval": false,
+    "existing_validation_cap_usd": 200,
+    "historical_reservations_usd": "36.567974",
+    "invoice_spend_reconciled": false
+  },
+  "baseline": {
+    "commit": "555d28cf21ff91d05fca30aec94a86df2510813c",
+    "ledger_sha256": "59d4387a145f550d76c424134af44cd07be0621b106163dafe93eee98e4e3636",
+    "gate_statuses": {
+      "E0": "Satisfied",
+      "ARCH0": "Satisfied",
+      "G0": "Satisfied",
+      "ENV0": "Not satisfied",
+      "IDP0": "Not satisfied",
+      "PARTNER0": "Not satisfied",
+      "DATA0": "Not satisfied",
+      "PAID0": "Not satisfied",
+      "STUDYFUNDS0": "Not satisfied",
+      "PILOT0": "Not satisfied",
+      "SCALEFUNDS0": "Not satisfied",
+      "AUDIT0": "Not satisfied",
+      "SECFIX0": "Not satisfied",
+      "PROCURE0": "Not satisfied",
+      "SUPPORT0": "Not satisfied",
+      "P28": "Not satisfied",
+      "PILOTFIX0": "Not satisfied",
+      "LAUNCH0": "Not satisfied",
+      "D30": "Not satisfied",
+      "G1": "Not satisfied",
+      "G2": "Not satisfied",
+      "G3": "Not satisfied",
+      "G4": "Not satisfied",
+      "G5": "Not satisfied",
+      "G6": "Not satisfied",
+      "G7": "Not satisfied",
+      "RESEARCHSCOPE0": "Not satisfied"
+    },
+    "task_projection": {
+      "AR-001-A": {
+        "dependencies": [
+          "E0"
+        ],
+        "scope_sha256": "3dc0850f6cead85c6f79482599ab7e8415370edbde9b9f9b646436d9b7f84065",
+        "effort_days": 1.0,
+        "effort_range_days": [
+          1.0,
+          1.5
+        ]
+      },
+      "AR-001-B": {
+        "dependencies": [
+          "AR-001-A"
+        ],
+        "scope_sha256": "41fbca2e71450b7eb8e5191942c473dca23533aa90802dc6906e9439d733f009",
+        "effort_days": 1.0,
+        "effort_range_days": [
+          1.0,
+          1.5
+        ]
+      },
+      "AR-002-A": {
+        "dependencies": [
+          "AR-001-A"
+        ],
+        "scope_sha256": "25ac649a3085a9be5c7e15248cce37a6ecf129bbc2ce4f6dcc5f095311c88777",
+        "effort_days": 1.0,
+        "effort_range_days": [
+          1.0,
+          1.5
+        ]
+      },
+      "AR-002-B": {
+        "dependencies": [
+          "AR-002-A",
+          "AR-001-B"
+        ],
+        "scope_sha256": "f6b47a4ab044a5e30d2d83094d880d6e992087617c0eb0ce1fe405a2ab764575",
+        "effort_days": 1.0,
+        "effort_range_days": [
+          1.0,
+          2.0
+        ]
+      },
+      "AR-003-A": {
+        "dependencies": [
+          "AR-001-A"
+        ],
+        "scope_sha256": "e37806621af6dfe2140a710902b89d3fa31ddf8b5c72ac53401191d7632a0f4e",
+        "effort_days": 1.0,
+        "effort_range_days": [
+          1.0,
+          1.5
+        ]
+      },
+      "AR-003-B": {
+        "dependencies": [
+          "AR-003-A"
+        ],
+        "scope_sha256": "72bebd7dda7443200d9cc76730c582991a4a84ce73c692450ad44fa2f6237f8a",
+        "effort_days": 1.0,
+        "effort_range_days": [
+          1.0,
+          2.0
+        ]
+      },
+      "AR-004-A": {
+        "dependencies": [
+          "E0"
+        ],
+        "scope_sha256": "1b8d56393cbee81d130256bb2566b7e96066ce302957c029f66734fee71a7af6",
+        "effort_days": 1.0,
+        "effort_range_days": [
+          0.8,
+          1.2
+        ]
+      },
+      "AR-004-B": {
+        "dependencies": [
+          "AR-002-B",
+          "AR-003-B",
+          "AR-004-A",
+          "AR-005-A",
+          "AR-011-A",
+          "AR-012-A"
+        ],
+        "scope_sha256": "137d25f399d8901b84574960f812990655851eaa32aac0da2e496f713d61c1c7",
+        "effort_days": 1.0,
+        "effort_range_days": [
+          1.0,
+          1.5
+        ]
+      },
+      "AR-004-C": {
+        "dependencies": [
+          "AR-004-B",
+          "ARCH0"
+        ],
+        "scope_sha256": "580cb08d713272140e617f8e2c8d1620b4e6664fa741c2cc6ea95b1384d091c4",
+        "effort_days": 0.5,
+        "effort_range_days": [
+          0.4,
+          0.6
+        ]
+      },
+      "AR-005-A": {
+        "dependencies": [
+          "E0"
+        ],
+        "scope_sha256": "57b77b6c01647c183d2d5b531e5eeaf450964c5a69f4617ee13295484f15571a",
+        "effort_days": 1.5,
+        "effort_range_days": [
+          1.2,
+          1.8
+        ]
+      },
+      "AR-005-B": {
+        "dependencies": [
+          "G0",
+          "AR-005-A"
+        ],
+        "scope_sha256": "3c099ca24345f9269528c534c3ad4aeaedc7168546d2e3ab863672fed74d786e",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-005-C": {
+        "dependencies": [
+          "AR-005-B"
+        ],
+        "scope_sha256": "6dd03d0d3ed7e5e0b0c3c72cb1d1d2071fe754c0536385094c1a1359514a3ec2",
+        "effort_days": 1.5,
+        "effort_range_days": [
+          1.5,
+          2.2
+        ]
+      },
+      "AR-006-A": {
+        "dependencies": [
+          "AR-005-C",
+          "AR-007-A"
+        ],
+        "scope_sha256": "97f81d8475c53adc22c2630dab07d09db0c6482086a00cdbae8808d89034715b",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-006-B": {
+        "dependencies": [
+          "AR-006-A",
+          "AR-007-C",
+          "AR-011-B"
+        ],
+        "scope_sha256": "76c7764803baaea8a3aff22d0291367c15eef71cf8c57332337f141662387500",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-007-A": {
+        "dependencies": [
+          "AR-005-C"
+        ],
+        "scope_sha256": "322f67e96bf2e6bc961cb8b20105903373319708841ee86f9da2401348f056ae",
+        "effort_days": 1.5,
+        "effort_range_days": [
+          1.5,
+          2.2
+        ]
+      },
+      "AR-007-B": {
+        "dependencies": [
+          "AR-007-A"
+        ],
+        "scope_sha256": "7da8561d57bd3a3ee7706e509f3ce3315b11d7681f9ce4891188621326d28239",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-007-C": {
+        "dependencies": [
+          "AR-007-B",
+          "AR-011-B"
+        ],
+        "scope_sha256": "658e65013b8bfdc1f9bbfade2d56c20888f7053b6290ffdce2154d62626c0f91",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-008-A": {
+        "dependencies": [
+          "AR-007-C",
+          "AR-009-B"
+        ],
+        "scope_sha256": "da7d9180258a7448297e2cf29bf6bedf49889d5230ad2d6b435fffb69161de0b",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-008-B": {
+        "dependencies": [
+          "AR-008-A",
+          "AR-011-B"
+        ],
+        "scope_sha256": "19e488c0e8ee055db64c82021185d44e7289f01e3f5ea30fdcbf541684386ae1",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-009-A": {
+        "dependencies": [
+          "AR-007-A",
+          "AR-005-C",
+          "AR-011-B"
+        ],
+        "scope_sha256": "6f1fc2917f62656f4e9fea358ed8d8616dcba875cbbe2483dcf2559061fb149e",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-009-B": {
+        "dependencies": [
+          "AR-009-A",
+          "AR-007-B"
+        ],
+        "scope_sha256": "6d79b18cbe088f30aea54d79782ba7caa8a99de24c4e151d790ea97d53e41ff6",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-010-A": {
+        "dependencies": [
+          "AR-008-B"
+        ],
+        "scope_sha256": "01ec386549be735b8e99cd502083f1eca2740593acd162f08ef759b3ddf50f22",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-010-B": {
+        "dependencies": [
+          "AR-010-A",
+          "AR-005-C"
+        ],
+        "scope_sha256": "9d6cd3a7c4dd078913fceb68ade23cb60bde450225c0ac142e7462adbe896a3d",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-011-A": {
+        "dependencies": [
+          "AR-004-A"
+        ],
+        "scope_sha256": "0e36795c9934f0fd1c1f00f2c55e3f64fbc69e016885ff400db80225009c7d0d",
+        "effort_days": 1.0,
+        "effort_range_days": [
+          0.8,
+          1.2
+        ]
+      },
+      "AR-011-B": {
+        "dependencies": [
+          "G0",
+          "AR-011-A",
+          "AR-005-C"
+        ],
+        "scope_sha256": "e0875284f7cfe406982179e543bc9a1c1f38a43744366bcc9fc993e8527906a1",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-011-C": {
+        "dependencies": [
+          "AR-011-B",
+          "AR-005-C"
+        ],
+        "scope_sha256": "054b527e041f6a7e2bdf123256e0ec3516e96ba8868c22a5e8050ba00723a948",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-012-A": {
+        "dependencies": [
+          "AR-004-A",
+          "AR-005-A"
+        ],
+        "scope_sha256": "618372492eab70f78c0b3ca5c8339924ff524351cc8d693a63be1fc944d6f6ec",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          1.6,
+          2.4
+        ]
+      },
+      "AR-012-B": {
+        "dependencies": [
+          "AR-006-B",
+          "AR-008-B",
+          "AR-009-B",
+          "AR-010-B",
+          "AR-011-C",
+          "AR-012-A"
+        ],
+        "scope_sha256": "25fe30ce700e938da2c42ca398126beda19334238b30d6277bd668e56aae34d1",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-013-A": {
+        "dependencies": [
+          "AR-009-B",
+          "AR-011-C",
+          "AR-033-A"
+        ],
+        "scope_sha256": "dad29892ce8b1e376b197d38c8c2ce28fa303020f630ad3a57bfb49f402c4ebd",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-013-B": {
+        "dependencies": [
+          "AR-013-A",
+          "AR-033-B"
+        ],
+        "scope_sha256": "0d9f73c354610e99f44d7276f8515ce8b90dd285b73a494206327ca8ed7c2b5d",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-013-C": {
+        "dependencies": [
+          "AR-013-B"
+        ],
+        "scope_sha256": "08b2d5c6cb6f5efdc41deb2b9d61a6a98d1075b5a8604b95f71f580aed016334",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-014-A": {
+        "dependencies": [
+          "AR-006-B",
+          "AR-012-B"
+        ],
+        "scope_sha256": "2717d816427fd807eee269230243fd58cea1ece83d9b8e9b419680bbc7474123",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-014-B": {
+        "dependencies": [
+          "AR-014-A",
+          "AR-009-B"
+        ],
+        "scope_sha256": "3f7beec71e0266934e728237ff0cde14ea016ff8fa13f3a26158ef01f8f29458",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-014-C": {
+        "dependencies": [
+          "AR-014-B",
+          "AR-013-C"
+        ],
+        "scope_sha256": "aa2c7baaa20bca9c83478f239234822514bb591970cd5c804013ac227e9a2894",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-015-A": {
+        "dependencies": [
+          "AR-009-B",
+          "AR-013-A",
+          "AR-014-A"
+        ],
+        "scope_sha256": "94546a4acc063304fb26cbaa53f9e6d150d9a2bfbdd11c3c32817c0abac870a4",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-015-B": {
+        "dependencies": [
+          "AR-015-A",
+          "AR-014-A"
+        ],
+        "scope_sha256": "09f0bd852aeb9f2ecddfff07d725443c26ef55e2cb08f124319752abd63b42a4",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-015-C": {
+        "dependencies": [
+          "AR-015-B",
+          "AR-014-C",
+          "AR-033-B"
+        ],
+        "scope_sha256": "797db0d564fe55a24134cd4535c484a0d03f47350ce33b3ff2bf7bd7ddace04b",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-016-A": {
+        "dependencies": [
+          "AR-009-B",
+          "AR-003-B"
+        ],
+        "scope_sha256": "6994330c859862a91cb807d3fc384317f5f2fa0473b03e57e07fe7b3f7d16225",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-016-B": {
+        "dependencies": [
+          "AR-016-A",
+          "AR-033-B"
+        ],
+        "scope_sha256": "d4e05149f79eb0ebace4a6b9b39571b5dea5f0dfff8963828ce9d2c3c5c1d9ee",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-016-C": {
+        "dependencies": [
+          "AR-016-A",
+          "AR-033-B",
+          "AR-015-A"
+        ],
+        "scope_sha256": "07cf8f31bb2050e7474456d54f8c5f4bc697425424e080c3ac74f97a1b8dfe39",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-016-D": {
+        "dependencies": [
+          "AR-016-B",
+          "AR-016-C",
+          "AR-015-B"
+        ],
+        "scope_sha256": "801925d7425044a3c11d201793bac71e5f58af1d64c2b0263c9c63f459b1eb5e",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-017-A": {
+        "dependencies": [
+          "AR-010-B",
+          "AR-013-B",
+          "AR-014-B"
+        ],
+        "scope_sha256": "5ee330e0726515ed03f27394c27659b913e80d5d54a3c0559bd7a9ff90557100",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-017-B": {
+        "dependencies": [
+          "AR-017-A",
+          "AR-014-C"
+        ],
+        "scope_sha256": "16bda500ec95faa93cb4ab1ec5d3e8253df50f2caa41abce6189dc39fce9c6d5",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-017-C": {
+        "dependencies": [
+          "AR-017-B",
+          "AR-013-C"
+        ],
+        "scope_sha256": "d825c2951e87d82c15aafae5aeec06c30fc3dc017943015ad68eb1396f213358",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-018-A": {
+        "dependencies": [
+          "AR-002-B",
+          "AR-013-A",
+          "AR-014-A"
+        ],
+        "scope_sha256": "3c35175166307d6547adaf39fb38c227551ef41909ffd8c95353cf61ef7e5748",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-018-B": {
+        "dependencies": [
+          "AR-018-A",
+          "AR-013-C",
+          "AR-014-B"
+        ],
+        "scope_sha256": "fdaff92b6ad005bcb08633e82096b24f1d46b40950770d0717afdf47dd51920c",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-018-C": {
+        "dependencies": [
+          "AR-018-B"
+        ],
+        "scope_sha256": "03f90f10f434eef0f24afeb59e6f164d3047413f889c61e36c6d4605ce83f36b",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-019-A": {
+        "dependencies": [
+          "AR-015-C",
+          "AR-016-D",
+          "AR-017-C",
+          "AR-018-C"
+        ],
+        "scope_sha256": "cac7fb9f56ac084ed41ac3a228a3b505df5de40713095929f981006be53eee41",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-019-B": {
+        "dependencies": [
+          "AR-019-A",
+          "PAID0"
+        ],
+        "scope_sha256": "8d1d274bd6f26b309711af19a1a47af87f2003b164bffcab65aa63a4c9b6ad6a",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          4.0
+        ]
+      },
+      "AR-019-C": {
+        "dependencies": [
+          "AR-019-B"
+        ],
+        "scope_sha256": "719819856ad13fe1a34a0668e8566acb7c1a1d45ebea5402cc5ed86bdbebe44c",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-020-A": {
+        "dependencies": [
+          "AR-012-B",
+          "AR-010-B",
+          "AR-002-B",
+          "RA-01-B",
+          "RESEARCHSCOPE0"
+        ],
+        "scope_sha256": "c7d55018c23369a324d91b171f04cf47fa4dabb7c09bba852a18b7d738d61491",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-020-B": {
+        "dependencies": [
+          "AR-020-A",
+          "AR-005-C"
+        ],
+        "scope_sha256": "9ef1704cba2d17c470c1c21eb4a597525ceb5a34467b488bf977a40085b1d925",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-020-C": {
+        "dependencies": [
+          "AR-020-B",
+          "AR-007-C"
+        ],
+        "scope_sha256": "44096f5f1a076ccca9508007d83742b5c90c8272b3cfc34f0bc76be1a40ccffb",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-021-A": {
+        "dependencies": [
+          "AR-020-C",
+          "AR-014-C"
+        ],
+        "scope_sha256": "054bc091c3e3da85758125680d0577e8bd4fe79c4766a8659f74f57f9c4678a8",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-021-B": {
+        "dependencies": [
+          "AR-021-A",
+          "AR-023-B"
+        ],
+        "scope_sha256": "9175e44e464faf6f9ae9897af6187a0fb0ebd44939397472deb36f63c394caa1",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-021-C": {
+        "dependencies": [
+          "AR-021-B"
+        ],
+        "scope_sha256": "4013b2da7642f32589ec5333d08a920c8e3537f3f5997c6dcbf0bc5738e2c6c3",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-022-A": {
+        "dependencies": [
+          "AR-021-A",
+          "AR-017-C",
+          "AR-020-C"
+        ],
+        "scope_sha256": "b6c15442cbe2afce01ec51295d9f89bdd939a62e07df74311ca520ae0eabbd1d",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-022-B": {
+        "dependencies": [
+          "AR-022-A",
+          "AR-021-C",
+          "AR-023-C"
+        ],
+        "scope_sha256": "6ed30c9c05306b1b2d2460cd0b254f3c2b352dfe52d84a5d036c242696800eae",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-022-C": {
+        "dependencies": [
+          "AR-022-B"
+        ],
+        "scope_sha256": "914d49b04af93ea3be900304bbd96e85647a5e884f2cf3413292e145629a0fe0",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-023-A": {
+        "dependencies": [
+          "AR-020-A",
+          "AR-010-B",
+          "AR-017-A"
+        ],
+        "scope_sha256": "6ed3631abb8c89deec5aa93524685d61a2e5661955cdfe8f22517d1932a774aa",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-023-B": {
+        "dependencies": [
+          "AR-023-A",
+          "AR-020-B"
+        ],
+        "scope_sha256": "6270453bbb91270794784c2d2195c8b9740f10bc6366902085e90724701f1720",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-023-C": {
+        "dependencies": [
+          "AR-023-B",
+          "AR-020-C"
+        ],
+        "scope_sha256": "22985f2b8a5908eca1afc2199d9d50ace400312206b0352635cdc86303e38d87",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-024-A": {
+        "dependencies": [
+          "AR-020-A",
+          "AR-002-B",
+          "RA-01-B",
+          "RESEARCHSCOPE0"
+        ],
+        "scope_sha256": "47d4d693c8399ec66171cabc1d51d353f18e9aa6e5c5041087e4b69d8d685655",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-024-B": {
+        "dependencies": [
+          "AR-024-A"
+        ],
+        "scope_sha256": "eaca047a4df70a260823f182bb58ba36f6b99131fe9751249df3cee787ada428",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-024-C": {
+        "dependencies": [
+          "AR-024-B"
+        ],
+        "scope_sha256": "89bfa6d6fb50c342576bc3a72d2ed6429609a3496d56a728b1993f8fbbbe276a",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-025-A": {
+        "dependencies": [
+          "AR-018-C",
+          "AR-023-C",
+          "AR-024-A"
+        ],
+        "scope_sha256": "fa209906aad8e1b341a8888e866ebac31d22be98f6099cf923453d744e1e6783",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-025-B": {
+        "dependencies": [
+          "AR-025-A",
+          "AR-024-C"
+        ],
+        "scope_sha256": "00f737e2f41e5b2b78af3063be3640ea2805ea08a7b47c361605053ed75af946",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-025-C": {
+        "dependencies": [
+          "AR-025-B",
+          "AR-023-C"
+        ],
+        "scope_sha256": "1f45c6fb232ec92f7373b2a6085ab205f6661f8a50e0356aca393ae693911e7c",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-026-A": {
+        "dependencies": [
+          "AR-024-C",
+          "AR-025-B",
+          "AR-002-B"
+        ],
+        "scope_sha256": "a23f099395d706b4f83e81a4e67a58307cacc9c330db07996f608cbbab96a357",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-026-B": {
+        "dependencies": [
+          "G2",
+          "AR-022-C",
+          "AR-023-C",
+          "AR-025-C",
+          "AR-026-A"
+        ],
+        "scope_sha256": "35f186f499a788439da12c4e86956f11ebd5a9ff082056f6e81f2687ec8fc2de",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-026-C": {
+        "dependencies": [
+          "AR-026-B"
+        ],
+        "scope_sha256": "cdf95bd8a0a6cd2712a9fb533e3f13ec862d18aa5a718290b583582b73b19258",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-027-A": {
+        "dependencies": [
+          "AR-006-B",
+          "AR-014-A"
+        ],
+        "scope_sha256": "ed0236ddca96f3b74ef37768b6e58e15f5d326e2e274c0bbacd6d7b2418b76bf",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-027-B": {
+        "dependencies": [
+          "AR-027-A",
+          "AR-014-C",
+          "AR-008-B"
+        ],
+        "scope_sha256": "05106874eaf51e83847b4571655573dc04561614ef83a2ec4bd513fcf69417ac",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-027-C": {
+        "dependencies": [
+          "AR-027-B",
+          "AR-012-B"
+        ],
+        "scope_sha256": "c794115e05a3c441043a67612cca9eb8e23e78f0ba5de4674ebd0d483d08c4fb",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-028-A": {
+        "dependencies": [
+          "AR-027-C"
+        ],
+        "scope_sha256": "74eee2f4a7785195bc05e9b88c1aa9dec69cd165524bcb2101e0f5fa9469e32f",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-028-B": {
+        "dependencies": [
+          "AR-028-A",
+          "AR-027-B"
+        ],
+        "scope_sha256": "1cbd442ffc23ba185e7187c64b71fc11cac3a2866877885aea2fd8dba2eb229b",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-028-C": {
+        "dependencies": [
+          "AR-028-B",
+          "AR-014-C"
+        ],
+        "scope_sha256": "3b26dd3e431bece3e6f6a20badf96a46fcb11f9d977fa1a2cc48d6921c28d1ce",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-029-A": {
+        "dependencies": [
+          "AR-020-C",
+          "AR-023-C",
+          "AR-024-B"
+        ],
+        "scope_sha256": "c28bf5a60062e02c104fa15720c8af0cf1bfd37aac135ff27d0c6a2e5a0454ad",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-029-B": {
+        "dependencies": [
+          "AR-029-A",
+          "AR-022-C",
+          "AR-026-C",
+          "AR-008-B"
+        ],
+        "scope_sha256": "b80dafb8a98b21ce38828e7f0923b4cfbfe4b1c462dc4f730cfcb9b98348ba9b",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-029-C": {
+        "dependencies": [
+          "AR-029-B",
+          "AR-027-C"
+        ],
+        "scope_sha256": "ad833d5e8d529140e20c0a6c6e906db5540eb586901321d2c05c16682dff5626",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-030-A": {
+        "dependencies": [
+          "AR-008-B",
+          "AR-012-B"
+        ],
+        "scope_sha256": "1d9f6c54e6550134f26b48b6e9000aaab0db29a5eefbe1fc1fe2c245e71abacb",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-030-B": {
+        "dependencies": [
+          "AR-030-A",
+          "AR-027-B",
+          "AR-029-B",
+          "AR-014-C"
+        ],
+        "scope_sha256": "82c022e837fca003bb2f270ab3be3b14e2bd454c7e3e87eb5dbed4870764c864",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-030-C": {
+        "dependencies": [
+          "AR-030-B",
+          "AR-032-B"
+        ],
+        "scope_sha256": "8d8bec9ea24d6193f43f07c3e3ffc2db74d23ca7f0a8b046cf0ca7b123ba65af",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-031-A": {
+        "dependencies": [
+          "AR-002-B",
+          "AR-014-A",
+          "PARTNER0"
+        ],
+        "scope_sha256": "62ea67b01fac753e33572ee690bd2a76b2a274379ee7d5f943c210f83e613091",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-031-B": {
+        "dependencies": [
+          "AR-031-A",
+          "AR-030-B"
+        ],
+        "scope_sha256": "cf7e4807b6460a558e3ad7d14db07ce00e1bbb785da5671e511847032f852b1a",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-031-C": {
+        "dependencies": [
+          "AR-031-B",
+          "DATA0"
+        ],
+        "scope_sha256": "7500a3c099163a0e2a82b4f748162fcf50e11defedbebcf1fd3a5370e5d29fe0",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-032-A": {
+        "dependencies": [
+          "AR-007-C",
+          "AR-009-B",
+          "AR-016-A",
+          "AR-020-C"
+        ],
+        "scope_sha256": "e92c28438ee9c307c189189b7a7ad756626d82aa34b1121da2ef7c0da4577a4b",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-032-B": {
+        "dependencies": [
+          "AR-032-A",
+          "AR-029-B"
+        ],
+        "scope_sha256": "f4219442f99c6b008b392646ee3d68da54cb4cd48e2ad923a6b8973d48da13fe",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-032-C": {
+        "dependencies": [
+          "AR-032-B",
+          "AR-016-D"
+        ],
+        "scope_sha256": "d5360a5766cfd0a93ddd580bfab128faff2a96fca36365014f12a9ab6abe857e",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-033-A": {
+        "dependencies": [
+          "G0",
+          "AR-003-B"
+        ],
+        "scope_sha256": "14fc0e6caf3a2a639eeba6d5b0acfce1cfce85f35efcb08d18c5a3a302ff06da",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-033-B": {
+        "dependencies": [
+          "AR-033-A",
+          "ENV0"
+        ],
+        "scope_sha256": "603afe2b245b8fa0b694dfbcb37145c94af463c004c743dd211666bf5b7421af",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-033-C": {
+        "dependencies": [
+          "AR-033-B",
+          "AR-013-C",
+          "AR-016-D",
+          "AR-011-C"
+        ],
+        "scope_sha256": "1896be918a3a54765bcd1bf6fb8e8be093e7d55696c5e07b8d46241a03314909",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-033-D": {
+        "dependencies": [
+          "AR-033-C",
+          "AR-029-B",
+          "AR-032-C"
+        ],
+        "scope_sha256": "aa06eacbfe4173cf01ffd3fa4c1c56aabfb9c647aba630caef47ac0470eefa5e",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          4.0
+        ]
+      },
+      "AR-034-A": {
+        "dependencies": [
+          "AR-007-C",
+          "AR-003-B"
+        ],
+        "scope_sha256": "d0c134ad7d76fe6672c44fed821351bbb8f9f144f92d2fce63e30d95fbc5e9dc",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "AR-034-B": {
+        "dependencies": [
+          "AR-034-A",
+          "AR-033-C"
+        ],
+        "scope_sha256": "463ba2cb7aab8d468824ac22dfce6a8f400ec7a4816cb838a88dbf3a8514c954",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-034-C": {
+        "dependencies": [
+          "AR-034-B",
+          "IDP0"
+        ],
+        "scope_sha256": "8d20755fc516e250449f65c16d2139830aac28ad2db7ed5cf5b506d99dc9e415",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-034-D": {
+        "dependencies": [
+          "G3",
+          "AR-028-C",
+          "AR-029-C",
+          "AR-030-C",
+          "AR-031-C",
+          "AR-032-C",
+          "AR-033-D",
+          "AR-034-C"
+        ],
+        "scope_sha256": "fc50c8c392b0d047b1fcfcc20d4500d7a8e0ae2715f75fc75a80af83ed7507c5",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-035-A": {
+        "dependencies": [
+          "AR-003-B",
+          "AR-026-A",
+          "AR-032-A",
+          "PARTNER0"
+        ],
+        "scope_sha256": "2920c338055754cb8b341536d391ad736c5f240fad9b70270c4b516cc8ca267b",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          4.0
+        ]
+      },
+      "AR-035-B": {
+        "dependencies": [
+          "G4",
+          "AR-035-A",
+          "PILOT0"
+        ],
+        "scope_sha256": "5a64e130772e02ea29020299ba3fbc5a2bfb4e5f5909175146b3790f25ab07cb",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-035-C": {
+        "dependencies": [
+          "AR-035-B"
+        ],
+        "scope_sha256": "8aadc562beacc90abeb0b8478bb4fefe05b738992abe134b5cff9e69cd2a93e6",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-036-A": {
+        "dependencies": [
+          "AR-031-C",
+          "AR-035-C"
+        ],
+        "scope_sha256": "45654bfe90d0e5de34ecbedb0d1e01bf3c2b26091440db6ae77a83b6c1356832",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-036-B": {
+        "dependencies": [
+          "AR-036-A",
+          "AR-030-C"
+        ],
+        "scope_sha256": "f12e12e05a50fdc85e7db6434f12ec8e2f71e107d45fb223f451818da611d50d",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-036-C": {
+        "dependencies": [
+          "AR-036-B"
+        ],
+        "scope_sha256": "562591ea2f29b30293afef6f3fa339546aa00d9c9f1f64fe004e0d812b314722",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-037-A": {
+        "dependencies": [
+          "AR-031-C",
+          "AR-035-C"
+        ],
+        "scope_sha256": "72bd8b2399fb5760b0e8e1df15335bb8dab4967a6916e7bda5f36ccd98ed7090",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-037-B": {
+        "dependencies": [
+          "AR-037-A",
+          "AR-030-C"
+        ],
+        "scope_sha256": "14449bc5deaf605674364f7c92aaaf85d06e4cea5661e8ae374952850a9deab4",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-037-C": {
+        "dependencies": [
+          "AR-037-B"
+        ],
+        "scope_sha256": "d53e61924ce5ba0cc218ce32d4c61825a1d2b01ab84a58b0257028af2946bcc6",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-038-A": {
+        "dependencies": [
+          "AR-026-A",
+          "AR-036-C",
+          "AR-037-C",
+          "DATA0"
+        ],
+        "scope_sha256": "2f20f54e83f4f08f97e190ea274f9ec1de02c6a79c9b4ca5fb623bc6f5d3ea6b",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-038-B": {
+        "dependencies": [
+          "AR-038-A",
+          "STUDYFUNDS0",
+          "AR-026-C"
+        ],
+        "scope_sha256": "2f676bbb1b2b08d3e32397fc05a1795b140f353b66f6b7cbb9df9b052489cdb9",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-038-C": {
+        "dependencies": [
+          "AR-038-B"
+        ],
+        "scope_sha256": "6ef38bff7c3069b146f4c692204e5b1ba3ce2fea0d63f9a005c0bfeb1e6dd110",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-039-A": {
+        "dependencies": [
+          "AR-036-C",
+          "AR-037-C"
+        ],
+        "scope_sha256": "5605c4da58fc0a23e843f32f7cb11399ebc997394ecec393891becbc8e15eed1",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-039-B": {
+        "dependencies": [
+          "AR-039-A",
+          "P28"
+        ],
+        "scope_sha256": "94a885c2dea946fb73f363a7f9a2e26f0c5f7c8035f05c5a42c6da2faeb7f5d3",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-039-C": {
+        "dependencies": [
+          "AR-039-B",
+          "AR-038-C",
+          "PILOTFIX0"
+        ],
+        "scope_sha256": "c1263f5bf1d889c9236d7630c45b0d1eb7fdad0a6115832ef6ca3a5e68d327ab",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-040-A": {
+        "dependencies": [
+          "AR-022-C",
+          "AR-033-C"
+        ],
+        "scope_sha256": "b590960b324e2aea2db6e182464f44c9f5c73499a3af72146a6d07c6ade33152",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-040-B": {
+        "dependencies": [
+          "AR-040-A",
+          "AR-033-D",
+          "SCALEFUNDS0"
+        ],
+        "scope_sha256": "ea05b57b31449ab8eb01a7d80fc57347dfa8fbb0f890b3dfa33cc1c0cdcd761e",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-040-C": {
+        "dependencies": [
+          "AR-040-B"
+        ],
+        "scope_sha256": "2c88202acbca50b1bbaf2ef184b566edcc4b175b0bde1e96ad34cad2da312838",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-041-A": {
+        "dependencies": [
+          "AR-019-C",
+          "AR-021-C",
+          "AR-033-C"
+        ],
+        "scope_sha256": "4b23f9b533c2fede54bfbba68888c5dc27f303a1ab8ed5e7a309883e246d41c2",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-041-B": {
+        "dependencies": [
+          "AR-041-A",
+          "AR-033-D",
+          "SCALEFUNDS0"
+        ],
+        "scope_sha256": "10aa531a538ce3c05fa3df23862eb56c673098800de854efa2d222f1458ac24e",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-041-C": {
+        "dependencies": [
+          "AR-041-B"
+        ],
+        "scope_sha256": "92f286fa09248aaa81102d473aa84e4a1d3ce6f7a94595526b6b7b901471e129",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-042-A": {
+        "dependencies": [
+          "AR-016-D",
+          "AR-032-C",
+          "AR-035-C"
+        ],
+        "scope_sha256": "c73291c6747742295721732778b7e018d9295e9d3c398b8a68afe0d44daa58a7",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-042-B": {
+        "dependencies": [
+          "AR-042-A",
+          "SCALEFUNDS0"
+        ],
+        "scope_sha256": "cfc2f9ae7192c6291cd2350be94f7c3dabdf180a6b2ed25a8f43d51aec805e85",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-042-C": {
+        "dependencies": [
+          "AR-042-B"
+        ],
+        "scope_sha256": "abbc279be004983742ff95ca1cb02b862364afb6a7f1640145d4bef960c61963",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-043-A": {
+        "dependencies": [
+          "AR-012-B",
+          "AR-013-C",
+          "AR-033-C"
+        ],
+        "scope_sha256": "408e783e03d8a4fce59ab7eee4121f76de7c6269d9652e5920421554fb1ff33b",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-043-B": {
+        "dependencies": [
+          "AR-043-A"
+        ],
+        "scope_sha256": "541bacc346b3688d1f6c2b726d04591b8d2f8bf5fe055745594b36af9ff1903f",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-043-C": {
+        "dependencies": [
+          "AR-043-B",
+          "AR-033-D"
+        ],
+        "scope_sha256": "c6ea94032eda0ab7a2d4f2a7835b0f92e2729e773b359a8a51f0ad00db8490a9",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-044-A": {
+        "dependencies": [
+          "AR-003-A",
+          "AR-034-A",
+          "AR-043-A"
+        ],
+        "scope_sha256": "8fd8a86d323cf212e0861ace4e6c2e3aac5f52c7291dc338c2d3d7998197838e",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          4.0
+        ]
+      },
+      "AR-044-B": {
+        "dependencies": [
+          "AR-044-A",
+          "AUDIT0",
+          "AR-034-C",
+          "AR-043-C"
+        ],
+        "scope_sha256": "f822453582e72a16aecef943b54304108b22023e18481111e6b4ce5695973d01",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-044-C": {
+        "dependencies": [
+          "AR-044-B",
+          "SECFIX0"
+        ],
+        "scope_sha256": "f4336993d0a7105d402ec5b88adbad321dcd4756de33e1dc4a3634b1da664641",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-045-A": {
+        "dependencies": [
+          "AR-032-C",
+          "AR-034-C",
+          "AR-035-C"
+        ],
+        "scope_sha256": "e1d0350d790811b1a0f52030b3dbb62c0f4173a6d98bd4420954762fdc1485ae",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-045-B": {
+        "dependencies": [
+          "AR-045-A",
+          "AR-036-C",
+          "AR-037-C"
+        ],
+        "scope_sha256": "0f604862ce4a7f8461088043d0e9ef56be30b55152f304f93afa85f491618f72",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-045-C": {
+        "dependencies": [
+          "AR-045-B",
+          "AR-044-C",
+          "PROCURE0"
+        ],
+        "scope_sha256": "7d510a8ea084a321d376085f9be068ab1c1896fb73a67854ed95045dc3d1ad57",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-046-A": {
+        "dependencies": [
+          "AR-011-C",
+          "AR-033-C",
+          "AR-040-A"
+        ],
+        "scope_sha256": "67af961515592c6d6195bcd8fc0737dc755d170b60389ae6e1acd0210e24a6c0",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-046-B": {
+        "dependencies": [
+          "AR-046-A",
+          "AR-041-C",
+          "AR-042-C",
+          "SUPPORT0"
+        ],
+        "scope_sha256": "cf41ac97fc2da5a8d84bc37ba77b71e4d4b3de2b0e0059b28306b79a661e1205",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-046-C": {
+        "dependencies": [
+          "AR-046-B"
+        ],
+        "scope_sha256": "e45b5b30cf3ed0705f995cd5b56e781e85a5e421ed2dde1ef9cbbe8121f5ddf3",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-047-A": {
+        "dependencies": [
+          "AR-005-C",
+          "AR-033-D",
+          "AR-043-B"
+        ],
+        "scope_sha256": "f4f572cdb5a3bdf08d50bc8f8bf1c7c11cc1b51636c6a162abfc15d8cef1ab31",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-047-B": {
+        "dependencies": [
+          "AR-047-A",
+          "AR-032-C",
+          "AR-043-C"
+        ],
+        "scope_sha256": "9019d63c42b7a4944907f1f190f017d2493720de71eba114cc23a822e26e98b1",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-047-C": {
+        "dependencies": [
+          "G5",
+          "AR-040-C",
+          "AR-041-C",
+          "AR-042-C",
+          "AR-044-C",
+          "AR-045-C",
+          "AR-046-C",
+          "AR-047-B"
+        ],
+        "scope_sha256": "1172e9302482495f0069d5ed030b7da6aa1c87e7faca0a9fd512d4df6af8dd76",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-048-A": {
+        "dependencies": [
+          "G6",
+          "AR-047-C",
+          "AR-043-C"
+        ],
+        "scope_sha256": "728904ae9e4555387fef908e577f9c00ce1ccd97abafff28db449f52b9418178",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "AR-048-B": {
+        "dependencies": [
+          "AR-048-A",
+          "AR-046-C"
+        ],
+        "scope_sha256": "3f8130e26095bcc397069e1162d3cc9a3df9bd7b87a2c6b4a90e4af035e09b38",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-048-C": {
+        "dependencies": [
+          "AR-048-B",
+          "AR-045-C"
+        ],
+        "scope_sha256": "915f598de22d4f9c7390fa61071e1f600690b13f52295a11d70b291b37b0c9f8",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-049-A": {
+        "dependencies": [
+          "AR-048-C",
+          "LAUNCH0"
+        ],
+        "scope_sha256": "2ab1cc199f2e2a9632046275eaede39c54a26782cfd7175ca5fecd699cff4ad0",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-049-B": {
+        "dependencies": [
+          "AR-049-A"
+        ],
+        "scope_sha256": "4fa8953a62473c0f25a81546d8b289d03867ae2c94eb1601022bdf89a0d8437a",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-049-C": {
+        "dependencies": [
+          "AR-049-B"
+        ],
+        "scope_sha256": "9cc5f069f14f62cc14299a9a777319432013c9a2659391e23bafa1b57c597d7f",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-050-A": {
+        "dependencies": [
+          "AR-049-C",
+          "D30"
+        ],
+        "scope_sha256": "f8c9a6d25ce7d20b69bbf80d035ee052b5542291f27e637de907908442c89966",
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "AR-050-B": {
+        "dependencies": [
+          "AR-050-A"
+        ],
+        "scope_sha256": "2e4070b7aedd277373875ea60e17684118c5c1f1eda2d7ea1d1b7a44ca9684a1",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "AR-050-C": {
+        "dependencies": [
+          "AR-050-B"
+        ],
+        "scope_sha256": "76b711ca6391093360d5e2119b055629f4fb796b55953cd45c99ef975f9a003e",
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "AR-051-A": {
+        "dependencies": [
+          "E0",
+          "AR-004-A",
+          "AR-003-A"
+        ],
+        "scope_sha256": "b53bcc2b3904c615cb0383df7b2afd1a08047d6e7afc22e0d79acc60c42fbb19",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "RA-01-A": {
+        "dependencies": [
+          "AR-002-B",
+          "AR-004-C"
+        ],
+        "scope_sha256": "5dcddfaf2bd5c29016e7afa05476a50a9e2f211a388df3767cdc29cead7ec4e3",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "RA-01-B": {
+        "dependencies": [
+          "RA-01-A"
+        ],
+        "scope_sha256": "f203c7c0290c5ede4b76b3ced2c2aeb08f49e70a6c2caeba696d307366da16c5",
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          4.0
+        ]
+      }
+    },
+    "gate_projection": {
+      "E0": {
+        "dependencies": [],
+        "effort_days": 0
+      },
+      "ARCH0": {
+        "dependencies": [
+          "AR-004-B"
+        ],
+        "effort_days": 0
+      },
+      "G0": {
+        "dependencies": [
+          "AR-001-B",
+          "AR-002-B",
+          "AR-003-B",
+          "AR-004-C"
+        ],
+        "effort_days": 0
+      },
+      "ENV0": {
+        "dependencies": [
+          "AR-003-B",
+          "AR-033-A"
+        ],
+        "effort_days": 0
+      },
+      "IDP0": {
+        "dependencies": [
+          "AR-003-B",
+          "AR-034-A"
+        ],
+        "effort_days": 0
+      },
+      "PARTNER0": {
+        "dependencies": [
+          "AR-001-B",
+          "AR-002-A"
+        ],
+        "effort_days": 0
+      },
+      "DATA0": {
+        "dependencies": [
+          "AR-002-B",
+          "PARTNER0"
+        ],
+        "effort_days": 0
+      },
+      "PAID0": {
+        "dependencies": [
+          "AR-003-B"
+        ],
+        "effort_days": 0
+      },
+      "STUDYFUNDS0": {
+        "dependencies": [
+          "AR-026-A",
+          "AR-038-A"
+        ],
+        "effort_days": 0
+      },
+      "PILOT0": {
+        "dependencies": [
+          "AR-035-A",
+          "PARTNER0",
+          "DATA0"
+        ],
+        "effort_days": 0
+      },
+      "SCALEFUNDS0": {
+        "dependencies": [
+          "AR-003-B",
+          "AR-040-A"
+        ],
+        "effort_days": 0
+      },
+      "AUDIT0": {
+        "dependencies": [
+          "AR-044-A",
+          "AR-034-C",
+          "AR-043-C"
+        ],
+        "effort_days": 0
+      },
+      "SECFIX0": {
+        "dependencies": [
+          "AR-044-B"
+        ],
+        "effort_days": 0
+      },
+      "PROCURE0": {
+        "dependencies": [
+          "AR-045-B"
+        ],
+        "effort_days": 0
+      },
+      "SUPPORT0": {
+        "dependencies": [
+          "AR-003-B"
+        ],
+        "effort_days": 0
+      },
+      "P28": {
+        "dependencies": [
+          "AR-039-A"
+        ],
+        "effort_days": 0
+      },
+      "PILOTFIX0": {
+        "dependencies": [
+          "AR-038-C",
+          "AR-039-B"
+        ],
+        "effort_days": 0
+      },
+      "LAUNCH0": {
+        "dependencies": [
+          "AR-048-C"
+        ],
+        "effort_days": 0
+      },
+      "D30": {
+        "dependencies": [
+          "AR-049-C"
+        ],
+        "effort_days": 0
+      },
+      "G1": {
+        "dependencies": [
+          "AR-005-A",
+          "AR-005-B",
+          "AR-005-C",
+          "AR-006-A",
+          "AR-006-B",
+          "AR-007-A",
+          "AR-007-B",
+          "AR-007-C",
+          "AR-008-A",
+          "AR-008-B",
+          "AR-009-A",
+          "AR-009-B",
+          "AR-010-A",
+          "AR-010-B",
+          "AR-011-A",
+          "AR-011-B",
+          "AR-011-C",
+          "AR-012-A",
+          "AR-012-B",
+          "G0",
+          "AR-051-A"
+        ],
+        "effort_days": 0
+      },
+      "G2": {
+        "dependencies": [
+          "AR-013-A",
+          "AR-013-B",
+          "AR-013-C",
+          "AR-014-A",
+          "AR-014-B",
+          "AR-014-C",
+          "AR-015-A",
+          "AR-015-B",
+          "AR-015-C",
+          "AR-016-A",
+          "AR-016-B",
+          "AR-016-C",
+          "AR-016-D",
+          "AR-017-A",
+          "AR-017-B",
+          "AR-017-C",
+          "AR-018-A",
+          "AR-018-B",
+          "AR-018-C",
+          "AR-019-A",
+          "AR-019-B",
+          "AR-019-C",
+          "G1",
+          "AR-033-B"
+        ],
+        "effort_days": 0
+      },
+      "G3": {
+        "dependencies": [
+          "AR-020-A",
+          "AR-020-B",
+          "AR-020-C",
+          "AR-021-A",
+          "AR-021-B",
+          "AR-021-C",
+          "AR-022-A",
+          "AR-022-B",
+          "AR-022-C",
+          "AR-023-A",
+          "AR-023-B",
+          "AR-023-C",
+          "AR-024-A",
+          "AR-024-B",
+          "AR-024-C",
+          "AR-025-A",
+          "AR-025-B",
+          "AR-025-C",
+          "AR-026-A",
+          "AR-026-B",
+          "AR-026-C",
+          "G2"
+        ],
+        "effort_days": 0
+      },
+      "G4": {
+        "dependencies": [
+          "AR-027-A",
+          "AR-027-B",
+          "AR-027-C",
+          "AR-028-A",
+          "AR-028-B",
+          "AR-028-C",
+          "AR-029-A",
+          "AR-029-B",
+          "AR-029-C",
+          "AR-030-A",
+          "AR-030-B",
+          "AR-030-C",
+          "AR-031-A",
+          "AR-031-B",
+          "AR-031-C",
+          "AR-032-A",
+          "AR-032-B",
+          "AR-032-C",
+          "AR-033-A",
+          "AR-033-B",
+          "AR-033-C",
+          "AR-033-D",
+          "AR-034-A",
+          "AR-034-B",
+          "AR-034-C",
+          "AR-034-D",
+          "G3"
+        ],
+        "effort_days": 0
+      },
+      "G5": {
+        "dependencies": [
+          "AR-035-A",
+          "AR-035-B",
+          "AR-035-C",
+          "AR-036-A",
+          "AR-036-B",
+          "AR-036-C",
+          "AR-037-A",
+          "AR-037-B",
+          "AR-037-C",
+          "AR-038-A",
+          "AR-038-B",
+          "AR-038-C",
+          "AR-039-A",
+          "AR-039-B",
+          "AR-039-C",
+          "G4",
+          "P28"
+        ],
+        "effort_days": 0
+      },
+      "G6": {
+        "dependencies": [
+          "AR-040-A",
+          "AR-040-B",
+          "AR-040-C",
+          "AR-041-A",
+          "AR-041-B",
+          "AR-041-C",
+          "AR-042-A",
+          "AR-042-B",
+          "AR-042-C",
+          "AR-043-A",
+          "AR-043-B",
+          "AR-043-C",
+          "AR-044-A",
+          "AR-044-B",
+          "AR-044-C",
+          "AR-045-A",
+          "AR-045-B",
+          "AR-045-C",
+          "AR-046-A",
+          "AR-046-B",
+          "AR-046-C",
+          "AR-047-A",
+          "AR-047-B",
+          "AR-047-C",
+          "G5",
+          "SECFIX0",
+          "PROCURE0",
+          "SUPPORT0"
+        ],
+        "effort_days": 0
+      },
+      "G7": {
+        "dependencies": [
+          "AR-048-A",
+          "AR-048-B",
+          "AR-048-C",
+          "AR-049-A",
+          "AR-049-B",
+          "AR-049-C",
+          "AR-050-A",
+          "AR-050-B",
+          "AR-050-C",
+          "G6",
+          "D30"
+        ],
+        "effort_days": 0
+      },
+      "RESEARCHSCOPE0": {
+        "dependencies": [
+          "RA-01-B"
+        ],
+        "effort_days": 0
+      }
+    }
+  },
+  "mappings": [
+    {
+      "proposal_id": "RB-01",
+      "integration_owner": "AR-020-A",
+      "completion_task": "AR-020-A",
+      "implementation_tasks": [
+        "AR-020-A"
+      ],
+      "retained_work": "Original study/pair/trial/attempt identities, study API requirements, uncertainty/freeze and scope contract remain."
+    },
+    {
+      "proposal_id": "RB-02",
+      "integration_owner": "AR-020-B",
+      "completion_task": "AR-023-C",
+      "implementation_tasks": [
+        "AR-020-B",
+        "AR-023-B",
+        "AR-023-C"
+      ],
+      "retained_work": "020-B normalization, FK closure, legacy migration and fencing remain; 023-B dispatch journal and 023-C audited reconciliation remain. No schema-only declaration of full accounting."
+    },
+    {
+      "proposal_id": "RB-03",
+      "integration_owner": "AR-021-A",
+      "completion_task": "AR-021-A",
+      "implementation_tasks": [
+        "AR-021-A"
+      ],
+      "retained_work": "Original coordinator intents, crash recovery, generation/barrier checks remain."
+    },
+    {
+      "proposal_id": "RB-04",
+      "integration_owner": "AR-024-A",
+      "completion_task": "AR-024-A",
+      "implementation_tasks": [
+        "AR-024-A"
+      ],
+      "retained_work": "Original estimand, paired design, missingness, invalidation/version contract remain."
+    },
+    {
+      "proposal_id": "RB-05",
+      "integration_owner": "AR-025-B",
+      "completion_task": "AR-025-B",
+      "implementation_tasks": [
+        "AR-025-B"
+      ],
+      "retained_work": "Original last-error, uniform/random location and bounded controls remain."
+    },
+    {
+      "proposal_id": "RB-06",
+      "integration_owner": "AR-025-B",
+      "completion_task": "AR-025-D",
+      "implementation_tasks": [
+        "AR-025-D"
+      ],
+      "retained_work": "New comparator adds no replacement or savings against original controls."
+    },
+    {
+      "proposal_id": "RB-10",
+      "integration_owner": "AR-025-C",
+      "completion_task": "AR-025-C",
+      "implementation_tasks": [
+        "AR-025-C"
+      ],
+      "retained_work": "Original safe ranking/protocol export and deterministic recomputation remain."
+    },
+    {
+      "proposal_id": "RB-11A",
+      "integration_owner": "AR-024-C",
+      "completion_task": "AR-024-D",
+      "implementation_tasks": [
+        "AR-024-D"
+      ],
+      "retained_work": "Original AR-024-C null, coverage, power, correlated/missing outcome and heterogeneity simulator remains unchanged; separate selected-policy integration prevents a dependency cycle."
+    },
+    {
+      "proposal_id": "RB-11B",
+      "integration_owner": "AR-026-A",
+      "completion_task": "AR-026-A",
+      "implementation_tasks": [
+        "AR-026-A"
+      ],
+      "retained_work": "Original sample/effect/multiplicity/stop/invalidation feasibility decision remains, after separate reviewed harness."
+    }
+  ],
+  "task_changes": {
+    "AR-020-A": {
+      "before": {
+        "scope": "Freeze logical identities, protocol digests, immutable freeze and attempt/uncertain states; specify study API needs; extend the M1 org/project/job ledger with study-scoped accounts and bind every child attempt/call to its study cap",
+        "dependencies": [
+          "AR-012-B",
+          "AR-010-B",
+          "AR-002-B",
+          "RA-01-B",
+          "RESEARCHSCOPE0"
+        ],
+        "effort_days": 2.0,
+        "effort_range_days": [
+          2.0,
+          3.0
+        ]
+      },
+      "after": {
+        "dependencies": [
+          "AR-012-B",
+          "AR-010-B",
+          "AR-002-B",
+          "RA-01-B",
+          "RESEARCHSCOPE0"
+        ],
+        "effort_days": 3,
+        "effort_range_days": [
+          3,
+          4
+        ]
+      },
+      "retained_original_scope": "Freeze logical identities, protocol digests, immutable freeze and attempt/uncertain states; specify study API needs; extend the M1 org/project/job ledger with study-scoped accounts and bind every child attempt/call to its study cap"
+    },
+    "AR-020-B": {
+      "before": {
+        "scope": "Add normalized studies/pairs/trials/attempts and scoped repositories with fenced updates; migrate study budget accounts and enforce same-project study/job/call relationships",
+        "dependencies": [
+          "AR-020-A",
+          "AR-005-C"
+        ],
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "after": {
+        "dependencies": [
+          "AR-020-A",
+          "AR-005-C"
+        ],
+        "effort_days": 4,
+        "effort_range_days": [
+          4,
+          7
+        ]
+      },
+      "retained_original_scope": "Add normalized studies/pairs/trials/attempts and scoped repositories with fenced updates; migrate study budget accounts and enforce same-project study/job/call relationships"
+    },
+    "AR-021-A": {
+      "before": {
+        "scope": "Persist discovery/freeze/confirmation/publication phases and resumable work intents",
+        "dependencies": [
+          "AR-020-C",
+          "AR-014-C"
+        ],
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          6.0
+        ]
+      },
+      "after": {
+        "dependencies": [
+          "AR-020-C",
+          "AR-014-C",
+          "AR-023-C"
+        ],
+        "effort_days": 4,
+        "effort_range_days": [
+          4,
+          7
+        ]
+      },
+      "retained_original_scope": "Persist discovery/freeze/confirmation/publication phases and resumable work intents"
+    },
+    "AR-023-C": {
+      "before": {
+        "scope": "Add audited operator reconciliation with evidence attachment and immutable adjustment entries",
+        "dependencies": [
+          "AR-023-B",
+          "AR-020-C"
+        ],
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "after": {
+        "dependencies": [
+          "AR-023-B",
+          "AR-020-C"
+        ],
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "retained_original_scope": "Add audited operator reconciliation with evidence attachment and immutable adjustment entries"
+    },
+    "AR-024-A": {
+      "before": {
+        "scope": "Specify task-conditional estimand, paired design, intervals, missing data and invalidation/version fields",
+        "dependencies": [
+          "AR-020-A",
+          "AR-002-B",
+          "RA-01-B",
+          "RESEARCHSCOPE0"
+        ],
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "after": {
+        "dependencies": [
+          "AR-020-A",
+          "AR-002-B",
+          "RA-01-B",
+          "RESEARCHSCOPE0"
+        ],
+        "effort_days": 3,
+        "effort_range_days": [
+          3,
+          5
+        ]
+      },
+      "retained_original_scope": "Specify task-conditional estimand, paired design, intervals, missing data and invalidation/version fields"
+    },
+    "AR-024-D": {
+      "before": null,
+      "after": {
+        "dependencies": [
+          "RESEARCHSCOPE0",
+          "AR-024-C",
+          "AR-025-D"
+        ],
+        "effort_days": 2,
+        "effort_range_days": [
+          2,
+          4
+        ]
+      },
+      "retained_original_scope": "New bounded task; original baseline work remains in its original task."
+    },
+    "AR-025-B": {
+      "before": {
+        "scope": "Implement last-error, uniform-location and bounded search baselines with identical evaluator/call cost caps",
+        "dependencies": [
+          "AR-025-A",
+          "AR-024-C"
+        ],
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "after": {
+        "dependencies": [
+          "AR-025-A",
+          "AR-024-C",
+          "AR-021-A"
+        ],
+        "effort_days": 4.0,
+        "effort_range_days": [
+          4.0,
+          8.0
+        ]
+      },
+      "retained_original_scope": "Implement last-error, uniform-location and bounded search baselines with identical evaluator/call cost caps"
+    },
+    "AR-025-C": {
+      "before": {
+        "scope": "Export safe candidate/protocol/receipt hashes and reproduce ranking plus report from stored evidence",
+        "dependencies": [
+          "AR-025-B",
+          "AR-023-C"
+        ],
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          4.5
+        ]
+      },
+      "after": {
+        "dependencies": [
+          "AR-025-B",
+          "AR-023-C",
+          "AR-025-D"
+        ],
+        "effort_days": 4,
+        "effort_range_days": [
+          4,
+          6
+        ]
+      },
+      "retained_original_scope": "Export safe candidate/protocol/receipt hashes and reproduce ranking plus report from stored evidence"
+    },
+    "AR-025-D": {
+      "before": null,
+      "after": {
+        "dependencies": [
+          "RESEARCHSCOPE0",
+          "AR-025-B",
+          "AR-024-C",
+          "AR-025-A"
+        ],
+        "effort_days": 3,
+        "effort_range_days": [
+          3,
+          5
+        ]
+      },
+      "retained_original_scope": "New bounded task; original baseline work remains in its original task."
+    },
+    "AR-026-A": {
+      "before": {
+        "scope": "Preregister useful-location metric, minimum effect, task sample, multiple comparisons and stop/invalidation rules",
+        "dependencies": [
+          "AR-024-C",
+          "AR-025-B",
+          "AR-002-B"
+        ],
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "after": {
+        "dependencies": [
+          "AR-024-C",
+          "AR-025-B",
+          "AR-002-B",
+          "AR-024-D"
+        ],
+        "effort_days": 3.0,
+        "effort_range_days": [
+          3.0,
+          6.0
+        ]
+      },
+      "retained_original_scope": "Preregister useful-location metric, minimum effect, task sample, multiple comparisons and stop/invalidation rules"
+    }
+  },
+  "integration_boundaries": {
+    "full_accounting": "AR-023-C",
+    "schema_primitives": "AR-020-B",
+    "dispatch_journal": "AR-023-B",
+    "selection_consumer": "AR-021-A",
+    "baseline_simulation": "AR-024-C",
+    "standard_comparator": "AR-025-D",
+    "selected_policy_harness": "AR-024-D",
+    "separate_feasibility_review": "AR-026-A"
+  },
+  "estimate_reasoning": "No completed work or original prerequisite removed. Retain matching schema/phase/control/decision work inside existing base estimates with explicit upper contingency; add one base day each for C08 receipt expansion and safe dual-cost export, two for selected-policy harness integration, and three for the new standard comparator. The 19–34 proposal range overlaps original work and is not an incremental authorization or calendar forecast.",
+  "issuance_promoted_gates": [
+    "RESEARCHSCOPE0"
+  ],
+  "issuance_metrics": {
+    "task_count": 150,
+    "gate_count": 27,
+    "edge_count": 538,
+    "base_effort_days": 440.0,
+    "upper_range_days": 744.6,
+    "effort_only_critical_path_days": 152.5
+  },
+  "maintenance": "This immutable owner decision records only its issuance delta. Later task/gate status, review notes and unrelated estimates use the live backlog checks and their own evidence. A later change to selected mapping, retained work or estimate reconciliation requires a separate versioned technical reconciliation linked to this decision; it must not rewrite owner choices or infer authority for deferred scopes."
+}

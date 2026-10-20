@@ -62,14 +62,15 @@ def test_machine_record_refuses_invalid_planning_claims(packet, variant, message
         tasks["AR-020-A"]["dependencies"].remove("RESEARCHSCOPE0")
     elif variant == "availability":
         tasks["RA-01-B"]["status"] = "Not started"
+        next(g for g in data["gates"] if g["id"] == "RESEARCHSCOPE0")["status"] = "Not satisfied"
         next(c for c in data["contracts"] if c["id"] == "C21")["status"] = "Available"
     elif variant == "active":
         tasks["RA-01-A"]["status"] = "Not started"
         tasks["RA-01-B"]["status"] = "In progress"
     elif variant == "schedule":
-        data["schedule"][4]["work"] = {"RA-01-B": 0.5}
+        data["schedule"][0]["work"] = {"AR-009-B": 0.5}
     elif variant == "capacity":
-        data["schedule"][0]["work"] = {"RA-01-A": 1.0}
+        data["schedule"][0]["work"] = {"AR-007-B": 1.0}
     elif variant == "opening":
         data["first_two_weeks_conditions"]["unreviewed-input"] = 0
     else:
