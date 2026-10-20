@@ -264,7 +264,14 @@ def test_postgres_projection_runtime_role_cannot_initialize_or_backfill(projecte
     with pytest.raises(MigrationRefused, match="migration_owner_required"):
         backfill_run_index(pg["app"], source())
     assert snapshot(pg["owner"]) == before
-    assert runtime_schema_compatibility(pg["app"]).code == "migration_only"
+    guarded = runtime_schema_compatibility(pg["app"])
+    assert (guarded.status, guarded.code) == ("incompatible", "backfill_incomplete")
+    # Only the authorized operator can finish the frozen cohort. Completion still
+    # leaves this release inspection-only for the same SELECT-only runtime role.
+    assert backfill_run_index(pg["owner"], source())["projection_status"] == "complete"
+    guarded = runtime_schema_compatibility(pg["app"])
+    assert (guarded.status, guarded.code) == ("incompatible", "migration_only")
+    preserved(pg["owner"])
 
 
 def test_postgres_projection_checkpoint_restores_and_resumes(
@@ -282,8 +289,11 @@ def test_postgres_projection_checkpoint_restores_and_resumes(
         actual = catalog(connection)
     assert actual == json.loads(PROFILE.read_text())
     assert service.schema_status(recovery["target"])["revision"] == PROJECTION
-    assert runtime_schema_compatibility(recovery["target"]).code == "migration_only"
+    guarded = runtime_schema_compatibility(recovery["target"])
+    assert (guarded.status, guarded.code) == ("incompatible", "backfill_incomplete")
     assert backfill_run_index(recovery["target"], source())["projection_status"] == "complete"
+    guarded = runtime_schema_compatibility(recovery["target"])
+    assert (guarded.status, guarded.code) == ("incompatible", "migration_only")
     preserved(recovery["target"])
 
 

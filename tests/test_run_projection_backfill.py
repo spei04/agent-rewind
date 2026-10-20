@@ -73,9 +73,13 @@ def test_literal_history_preserved_after_every_batch_and_exact_resume(legacy):
     assert initial["projection_rows_verified"] == 0
     assert initial["projection_status"] == "running"
     assert state(engine)["cursor"]["evidence_digest"] is None
+    guarded = runtime_schema_compatibility(engine)
+    assert (guarded.status, guarded.code) == ("incompatible", "backfill_incomplete")
     preserved(path)
     first = backfill_run_index(engine, source, batch_size=1)
     assert first["projection_rows_verified"] == 1
+    guarded = runtime_schema_compatibility(engine)
+    assert (guarded.status, guarded.code) == ("incompatible", "backfill_incomplete")
     first_row = rows(engine)[0]
     assert first_row["run_id"] == "1" * 32 and first_row["published_seq"] == 1
     preserved(path)
