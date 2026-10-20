@@ -143,6 +143,8 @@ class PublicationWriter(Protocol):
     identity; exact success may be inspected after lease expiry. lock_and_check
     must lock and validate current generation/owner/running/cancel/DB-time lease.
     publish_root must compare expected root and write on this same connection.
+    Every future insertion/reassignment affecting by_job membership must lock its
+    job row too; row locks on existing closure entries do not protect phantoms.
     """
 
     def require_available(self) -> None: ...
@@ -192,6 +194,18 @@ class RunPublisher:
     def _connection(self, *, write: bool = False) -> Iterator[Connection]:
         try:
             with self.engine.begin() if write else self.engine.connect() as connection:
+                if write:
+                    raw = connection.connection.driver_connection
+                    dialect = connection.dialect.name
+                    transactional = (
+                        dialect == "postgresql" and getattr(raw, "autocommit", None) is False
+                    ) or (
+                        dialect == "sqlite"
+                        and getattr(raw, "isolation_level", None) is not None
+                        and getattr(raw, "autocommit", False) is not True
+                    )
+                    if not transactional:
+                        raise ArtifactError("publication_transaction_required")
                 yield connection
         except SQLAlchemyError:
             raise ArtifactError("publication_database_unavailable") from None
@@ -518,8 +532,9 @@ class RunPublisher:
         if root.get("project_id") != context.project_id or root.get("run_id") != run_id:
             raise ArtifactError("artifact_graph_invalid")
         graph = verify_run_graph(envelope, fetch)
-        # Recheck every descriptor/owner after all child I/O, using one SQL-only
-        # snapshot. This does not promise network response linearizability.
+        # Recheck every descriptor/owner after all child I/O, using a SQL-only
+        # revalidation pass (READ COMMITTED is not a repeatable snapshot).
+        # This does not promise network response linearizability.
         with self._connection() as connection:
             self.repositories._authorize(connection, context, "read")
             reads = _Reads(connection, context)

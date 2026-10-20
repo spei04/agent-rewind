@@ -383,3 +383,52 @@ def test_oversized_sql_event_cells_refuse_before_materialization(capture, task, 
         event.remove(capture.db.engine, "before_cursor_execute", inspect)
     assert fetched == []
     assert counts(capture) == (0, 0, 0)
+
+
+@pytest.mark.parametrize("mode", ["engine_option", "pooled_driver"])
+def test_sqlite_effective_autocommit_refuses_before_sql_mutation(capture, task, monkeypatch, mode):
+    run = capture.run(task)
+    intent = capture.intent(run)
+    if mode == "engine_option":
+        capture.publisher.engine = capture.db.engine.execution_options(isolation_level="AUTOCOMMIT")
+    else:
+        with capture.db.engine.connect() as connection:
+            connection.connection.driver_connection.isolation_level = None
+    monkeypatch.setattr(
+        capture.publisher.writer,
+        "lock_and_check",
+        lambda *_: pytest.fail("autocommit reached writer"),
+    )
+    with pytest.raises(ArtifactError, match="publication_transaction_required"):
+        capture.publisher.publish(intent, capture.source)
+    assert counts(capture) == (0, 0, 0)
+
+
+def test_failed_ancestor_cannot_publish_branch_even_if_branchable(capture, task):
+    from sqlalchemy import update
+
+    from agent_rewind.database import records
+
+    parent = capture.run(task)
+    parent_intent = capture.intent(parent)
+    capture.publisher.publish(parent_intent, capture.source)
+    child = capture.run(
+        task,
+        parent,
+        Intervention(
+            step=2,
+            kind="action",
+            action=Action(tool="write_file", path="source.py", content="correct"),
+        ),
+    )
+    before = counts(capture)
+    with capture.db.engine.begin() as connection:
+        row = capture.db.get(parent)
+        connection.execute(
+            update(records)
+            .where(records.c.id == parent)
+            .values(data={**row, "status": "failed", "branchable": True})
+        )
+    with pytest.raises(ArtifactError, match="artifact_graph_invalid"):
+        capture.intent(child)
+    assert counts(capture) == before

@@ -166,6 +166,7 @@ class _Graph:
             or value["schema"] != 1
             or type(value["next_step"]) is not int
             or value["next_step"] != step
+            or not isinstance(value["state"], dict)
             or type(value["branchable"]) is not bool
             or any(value[field] != run[field] for field in ("image", "policy", "seed"))
         ):
@@ -213,9 +214,9 @@ def _verify(envelope: bytes, fetch: Callable[[GraphRef, int], bytes]) -> Verifie
     for run in lineage:
         if not isinstance(run, dict):
             fail()
-        exact(run, "id parent_id fork_step seed image policy task_digest branchable")
+        exact(run, "id parent_id fork_step seed image policy task_digest branchable status")
         identifier(run["id"])
-        if run["id"] in runs or type(run["branchable"]) is not bool:
+        if run["id"] in runs or type(run["branchable"]) is not bool or run["status"] != "complete":
             fail()
         if runs:
             previous = lineage[len(runs) - 1]

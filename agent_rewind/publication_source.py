@@ -9,8 +9,9 @@ from sqlalchemy.engine import Connection
 
 from .artifact_graph import MAX_DEPTH, MAX_JSON_BYTES
 from .artifact_metadata import ArtifactError, digest_value
-from .database import events, keys, records
+from .database import events, jobs, keys, records
 from .models import canonical
+from .scoped_lineage import Lineage
 from .scoped_repositories import (
     ProjectContext,
     ScopedRepositories,
@@ -18,8 +19,37 @@ from .scoped_repositories import (
     _Reads,
     _scope,
     members,
+    organizations,
+    projects,
     scopes,
 )
+
+
+def _lock_closure(reads: _Reads, run_id: str) -> None:
+    """Lock only the existing bounded validated dependency closure.
+
+    Future writers must also lock job rows before changing by_job membership;
+    existing-row locks cannot cover inserted/reassigned phantom rows by themselves.
+    """
+
+    def dependencies() -> set[tuple[str, str]]:
+        lineage = Lineage(reads.record, reads.job, reads.by_job)
+        lineage.validate("run", run_id)
+        return set(lineage.records) | {("job", job) for job in lineage.jobs}
+
+    before = dependencies()
+    for kind, resource_id in sorted(before):
+        source = jobs if kind == "job" else records
+        row = reads.connection.execute(
+            select(source.c.id)
+            .select_from(source.join(scopes, _scope(kind, source.c.id, reads.context)))
+            .where(source.c.id == resource_id)
+            .with_for_update(read=True)
+        ).first()
+        if row is None:
+            raise ArtifactError("publication_source_changed")
+    if dependencies() != before:
+        raise ArtifactError("publication_source_changed")
 
 
 def _snapshot(
@@ -41,7 +71,13 @@ def _snapshot(
     if lock and connection.dialect.name == "postgresql":
         connection.execute(
             select(members)
+            .select_from(
+                members.join(projects, members.c.project_id == projects.c.id).join(
+                    organizations, organizations.c.id == projects.c.organization_id
+                )
+            )
             .where(
+                organizations.c.id == context.organization_id,
                 members.c.project_id == context.project_id,
                 members.c.principal_id == context.principal_id,
             )
@@ -55,6 +91,9 @@ def _snapshot(
                 .with_for_update(read=True)
             ).all()
     reads = _Reads(connection, context)
+    if lock and connection.dialect.name == "postgresql":
+        _lock_closure(reads, run_id)
+        repositories._authorize(connection, context, action)
     lineage: list[dict[str, Any]] = []
     own_events: dict[str, list[dict[str, Any]]] = {}
     seen: set[str] = set()
@@ -65,23 +104,9 @@ def _snapshot(
         if current in seen or len(seen) > MAX_DEPTH:
             raise ArtifactError("artifact_graph_invalid")
         seen.add(current)
-        if lock and connection.dialect.name == "postgresql":
-            connection.execute(
-                select(records.c.id)
-                .select_from(records.join(scopes, _scope("run", records.c.id, context)))
-                .where(records.c.id == current)
-                .with_for_update(read=True)
-            ).all()
-            connection.execute(
-                select(scopes)
-                .where(
-                    scopes.c.project_id == context.project_id,
-                    scopes.c.resource_kind == "run",
-                    scopes.c.resource_id == current,
-                )
-                .with_for_update(read=True)
-            ).all()
         run = reads.resource("run", current)
+        if run.get("status") != "complete":
+            raise ArtifactError("artifact_graph_invalid")
         if manifest is None:
             manifest = run
             retained += len(canonical(manifest))
@@ -96,6 +121,7 @@ def _snapshot(
                 "policy",
                 "task_digest",
                 "branchable",
+                "status",
             )
         }
         retained += len(canonical(item))

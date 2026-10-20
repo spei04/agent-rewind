@@ -19,7 +19,13 @@ They are internal captured-byte adapters, not an unscoped customer hash API.
 `publish` verifies every reachable object and performs verified put-if-absent
 storage outside SQL transactions. It then uses one connection and transaction
 for the required current fence, scoped authorization/source checks, immutable
-object metadata, exact references and root writer. Inherited references must
+object metadata, exact references and root writer. Effective DBAPI autocommit is
+refused before any publication SQL mutation, including reused pool connections.
+The PostgreSQL transaction locks the existing bounded validated run/job/study
+closure and its scope rows in deterministic order, then revalidates dependency
+identities. Future writers must serialize inserted/reassigned by-job membership
+on the job row too: existing-row locks alone cannot protect absent-row phantoms
+under READ COMMITTED. Inherited references must
 already exist under their actual ancestor owner. The root is a run `result`
 reference, with a distinct `publication_schema: 1` envelope binding publication,
 project, run, job, worker, generation, manifest, ancestry and event identities.
@@ -30,7 +36,8 @@ insufficient evidence of this publication's commit.
 The supported closure includes task, events, checkpoints, workspaces, file
 blobs and evaluation. SQL event artifact digests, embedded event chain hashes,
 previous/head links and actual ancestor owners are checked independently.
-Checkpoints retain their owner's seed. Workspace byte content, mode, kind and
+Every ancestor must be complete and branchable; checkpoint restore state must be
+a dictionary, whose contents remain opaque. Checkpoints retain their owner's seed. Workspace byte content, mode, kind and
 integer mtime (including negative timestamps) are preserved. Tool/action/state
 payloads are opaque leaves, not arbitrary digest references. Incomplete runs,
 unknown schemas, job/config/result root families, study attachments and provider

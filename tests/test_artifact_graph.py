@@ -177,3 +177,20 @@ def test_reused_workspaces_traverse_once_under_edge_bound(graph, monkeypatch):
     # bound covers its actual graph, not repeated traversal of identical files.
     monkeypatch.setattr(module, "MAX_EDGES", 30)
     assert verify(root, blobs).root_digest == digest(root)
+
+
+@pytest.mark.parametrize("state", [None, [], "text", 1, False])
+def test_checkpoint_state_requires_dictionary(graph, state):
+    root, blobs = graph
+
+    def edit(index, event):
+        if index == 0:
+            checkpoint = json.loads(blobs[event["checkpoint"]])
+            checkpoint["state"] = state
+            key = digest(checkpoint)
+            blobs[key] = canonical(checkpoint)
+            event["checkpoint"] = key
+
+    rewrite_events(root, blobs, edit)
+    with pytest.raises(ArtifactError, match="artifact_graph_invalid"):
+        verify(root, blobs)
