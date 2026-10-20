@@ -161,12 +161,18 @@ class _Reads:
             raise ResourceNotFound()
         return _json_row(dict(row))
 
-    def key(self, resource_id: str) -> dict[str, Any]:
+    def key(self, resource_id: str, *, require_unrevoked: bool = False) -> dict[str, Any]:
         row = (
             self.connection.execute(
                 select(keys.c.id, keys.c.role, keys.c.name, keys.c.expires, keys.c.revoked)
                 .select_from(keys.join(scopes, _scope("key", keys.c.id, self.context)))
-                .where(keys.c.id == identifier(resource_id), _bounded_row(self.connection, keys))
+                .where(
+                    keys.c.id == identifier(resource_id),
+                    _bounded_row(self.connection, keys),
+                    # SQLite Boolean decoding can coerce malformed empty cells
+                    # to False. Authorization must check the SQL value first.
+                    keys.c.revoked.is_(False) if require_unrevoked else literal(True),
+                )
             )
             .mappings()
             .first()
@@ -246,7 +252,7 @@ class ScopedRepositories:
         if role is None or not allows_project_action(role, action):
             raise ResourceNotFound()
         if context.principal_id.startswith("api-key:"):
-            row = _Reads(connection, context).key(context.principal_id[8:])
+            row = _Reads(connection, context).key(context.principal_id[8:], require_unrevoked=True)
             expires = row["expires"]
             if (
                 row["revoked"] is not False

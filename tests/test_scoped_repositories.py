@@ -755,3 +755,23 @@ def test_escaped_metadata_size_is_bounded_after_sql_prefetch(scoped, monkeypatch
     monkeypatch.setattr("agent_rewind.scoped_repositories.MAX_RECORD_BYTES", 1024)
     with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
         repo.get_job(CA, JOB_A)
+
+
+@pytest.mark.parametrize("revoked", ["", b""])
+def test_malformed_empty_key_revocation_cannot_be_coerced_to_active(scoped, revoked):
+    engine, _ = scoped
+    context = add_key(engine)
+    with engine.begin() as connection:
+        connection.execute(
+            text("UPDATE api_keys SET revoked=:revoked WHERE id=:id"),
+            {"revoked": revoked, "id": RUN_A},
+        )
+    objects = Objects()
+    repo = ScopedRepositories(
+        engine, artifact_resolver=objects.resolve, artifact_loader=objects.load
+    )
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        repo.require_action(context, "read")
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        repo.read_artifact(context, "run", RUN_A, "task", HASH)
+    assert objects.resolved == objects.loaded == []
