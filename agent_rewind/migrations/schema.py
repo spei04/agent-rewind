@@ -178,6 +178,95 @@ def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None
             raise MigrationRefused("schema_incompatible")
 
 
+# PostgreSQL 16 pg_dump/pg_restore round trips these three frozen enum checks
+# from a whole-array text cast to per-element text casts. These are the exact
+# observed expressions from synthetic run 39349792047, not generic SQL rewriting.
+# Keep the original catalog/fingerprint authoritative; all other forms refuse.
+_POSTGRES_ENUM_ROUNDTRIPS = (
+    (
+        "installation_adoptions",
+        "installation_adoptions_source_kind_check",
+        (
+            "source_kind::text = ANY (ARRAY['fresh'::character varying, "
+            "'legacy'::character varying]::text[])"
+        ),
+        (
+            "source_kind::text = ANY (ARRAY['fresh'::character varying::text, "
+            "'legacy'::character varying::text])"
+        ),
+        (
+            "CHECK (((source_kind)::text = ANY ((ARRAY['fresh'::character varying, "
+            "'legacy'::character varying])::text[])))"
+        ),
+        (
+            "CHECK (((source_kind)::text = ANY (ARRAY[('fresh'::character varying)::text,"
+            " ('legacy'::character varying)::text])))"
+        ),
+    ),
+    (
+        "installation_adoptions",
+        "installation_adoptions_state_check",
+        (
+            "state::text = ANY (ARRAY['prepared'::character varying, "
+            "'ownership_complete'::character varying]::text[])"
+        ),
+        (
+            "state::text = ANY (ARRAY['prepared'::character varying::text, "
+            "'ownership_complete'::character varying::text])"
+        ),
+        (
+            "CHECK (((state)::text = ANY ((ARRAY['prepared'::character varying, "
+            "'ownership_complete'::character varying])::text[])))"
+        ),
+        (
+            "CHECK (((state)::text = ANY (ARRAY[('prepared'::character varying)::text, "
+            "('ownership_complete'::character varying)::text])))"
+        ),
+    ),
+    (
+        "migration_progress",
+        "migration_progress_status_check",
+        (
+            "status::text = ANY (ARRAY['pending'::character varying, 'running'::character"
+            " varying, 'complete'::character varying, 'blocked'::character "
+            "varying]::text[])"
+        ),
+        (
+            "status::text = ANY (ARRAY['pending'::character varying::text, "
+            "'running'::character varying::text, 'complete'::character varying::text, "
+            "'blocked'::character varying::text])"
+        ),
+        (
+            "CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, "
+            "'running'::character varying, 'complete'::character varying, "
+            "'blocked'::character varying])::text[])))"
+        ),
+        (
+            "CHECK (((status)::text = ANY (ARRAY[('pending'::character varying)::text, "
+            "('running'::character varying)::text, ('complete'::character varying)::text,"
+            " ('blocked'::character varying)::text])))"
+        ),
+    ),
+)
+
+
+def _canonicalize_postgresql_enum_checks(shape: dict[str, Any]) -> None:
+    for (
+        table,
+        name,
+        original,
+        restored,
+        native_original,
+        native_restored,
+    ) in _POSTGRES_ENUM_ROUNDTRIPS:
+        for check in shape.get(table, {}).get("checks", []):
+            if check["name"] == name and check["sqltext"] == restored:
+                check["sqltext"] = original
+        for constraint in shape["$postgres"]["constraints"]:
+            if constraint[0] == table and constraint[1] == "c" and constraint[5] == native_restored:
+                constraint[5] = native_original
+
+
 def catalog(connection: Connection) -> dict[str, Any]:
     """Read structure only. Fixed public/main profile; reject non-table executable objects."""
     name = dialect(connection)
@@ -317,6 +406,7 @@ def catalog(connection: Connection) -> dict[str, Any]:
                 )
             ],
         }
+        _canonicalize_postgresql_enum_checks(result)
     return result
 
 

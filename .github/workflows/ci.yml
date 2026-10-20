@@ -53,6 +53,7 @@ jobs:
         env:
           REWIND_TEST_POSTGRES: postgresql+psycopg://postgres:test-only@127.0.0.1:5432/rewind
           REWIND_TEST_POSTGRES_URL: postgresql+psycopg://postgres:test-only@127.0.0.1:5432/rewind
+          REWIND_TEST_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
       - run: node --check agent_rewind/web/app.js
   isolation:
     runs-on: ubuntu-24.04

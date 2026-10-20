@@ -8,6 +8,7 @@ from .config import Settings
 from .database import Database, JobStopped, identifier
 from .engine import Engine
 from .experiments import Experiments
+from .migrations.compatibility import SchemaNotReady
 from .models import BranchRequest, StudyRequest, TaskSpec
 from .policy import ChatPolicy
 from .runner import DockerRunner
@@ -74,6 +75,13 @@ def work_once(settings: Settings, db: Database, artifacts: Artifacts) -> bool:
 
 def serve_worker(settings: Settings) -> None:
     db, artifacts = Database(settings), Artifacts(settings)
-    while True:
-        if not work_once(settings, db, artifacts):
-            time.sleep(1)
+    try:
+        while True:
+            if not work_once(settings, db, artifacts):
+                time.sleep(1)
+    except SchemaNotReady as error:
+        # Refusal is an operator-visible failure, not an empty queue. Exception
+        # bodies never contain a DSN, SQL statement or provider/customer payload.
+        raise SystemExit(f"worker_schema_refused:{error.result.code}") from None
+    finally:
+        db.engine.dispose()

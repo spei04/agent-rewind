@@ -184,3 +184,74 @@ The checked-in literal profile is reviewed against the explicit revision DDL;
 it is not regenerated from the target database during validation. These initial
 capture runs intentionally failed and do not establish migration acceptance.
 The PostgreSQL image is the digest pinned in `.github/workflows/ci.yml`.
+
+
+## Runtime release compatibility
+
+`agent_rewind/migrations/release_compatibility.json` is packaged with the application.
+It enumerates the exact supported revision, literal catalog validator, allowed use
+and required completed backfills. Release 0.1.0 supports `ar_0002_adoption` for
+migration inspection only: even a valid prepared installation returns
+`incompatible` / `migration_only`. An empty backfill list cannot authorize admission.
+There is no environment flag or public profile override to enable customer traffic.
+A later scoped release must extend both the manifest and its validated state handler.
+
+`check_schema_compatibility(connection, release_profile)` accepts an idle connection,
+performs a read-only transaction and returns immutable `status` (`ready`,
+`incompatible`, `unavailable`) and a fixed safe `code`. The current handler never
+returns ready. Runtime callers use `runtime_schema_compatibility(engine)`, which
+loads only the packaged profile, configures the trusted startup namespace before
+first checkout and does not cache positive decisions. Caller-owned engines cannot
+be protected retroactively for work performed before configuration. Reflection is
+compared against the independently frozen catalog; it cannot authorize itself.
+Missing, partial, future/multiple-head, malformed and unfinished metadata refuse.
+SQL/connection failures return unavailable without exposing DSNs or exception bodies.
+
+All API/authentication paths, including history reads, run through the guard before
+authentication or artifact access. Only GET/HEAD `/`, `/static/*`, `/livez` and `/healthz` bypass customer admission.
+`/livez` is process liveness only and does not open a database. `/healthz` retains
+its legacy database-connectivity check through a read-only `SELECT 1`; it returns
+200 when connected and a fixed 503 when unavailable or probe capacity is exhausted.
+Neither endpoint is customer readiness or an artifact sentinel. Existing `/healthz`
+consumers have not been migrated as part of this slice. CLI `migrate status` remains
+the operator inspection path. `Database.claim` guards the shared claim boundary
+before expiring leases or selecting a job; a worker on incompatible metadata does
+no work or model/artifact calls. The worker command exits nonzero with the fixed
+`worker_schema_refused:<code>` diagnostic instead of silently treating refusal as
+an empty queue. Legacy endpoint and lease unit tests explicitly
+patch the guard through a pytest fixture; production has no equivalent bypass.
+
+Runtime pools wait at most 1s for a checkout, psycopg uses a 3s per-endpoint connection
+timeout, and SQL inspection uses a 2s remaining-work budget under responsive
+transport. PostgreSQL applies a remaining-budget statement timeout and up to 250ms
+lock timeout before each inspection query. SQLite uses a progress interrupt and
+250ms lock wait, restoring connection controls afterward. These are **not a proven
+end-to-end wall-clock deadline**: synchronous driver network reads may stall after
+a server timeout, and OS scheduling is outside these controls. There are no orphaned
+background probe threads. API probes use the framework shared worker pool with at
+most four concurrent checks, reserving at least one configured pool token for other
+handlers. Excess probes return a fixed unavailable result immediately; a stalled
+probe retains its slot until completion. This cap protects liveness/static traffic
+from probe saturation but does not cancel a stalled synchronous network read. AR-011-B must provide an interruptible transport strategy
+for its separate 1s readiness requirement; it must not reuse this cold path and claim
+that requirement is met.
+
+Production PostgreSQL connections require one numeric TCP host/hostaddr or explicit
+Unix socket path. A logical hostname can remain alongside numeric hostaddr for TLS
+identity verification. DNS-only, hidden service and multi-host production DSNs
+refuse before network use. Final DBAPI connection arguments are checked again,
+including overrides; inherited libpq routing/service variables cannot silently
+replace the explicit endpoint. Development permits one DNS host with the operating
+system resolver limitation. Deployment must preserve a bounded transport profile;
+this slice does not certify network-partition recovery or HA rolling upgrades.
+
+Initialization audit: `init` alone writes local secret placeholders without creating
+a database; `init --installation-key` delegates to explicit install. Bare `migrate`
+means explicit upgrade of a known versioned installation. Install/adopt/upgrade are
+operator actions, and serve/worker/health never call them or `create_all`. A missing SQLite file is
+not created by either health or compatibility inspection.
+
+For supported backup restoration and application rollback decisions, see
+[the synthetic recovery rehearsal and limits](RECOVERY.md). No older binary is
+approved for customer-serving rollback at this stage; reverting to an unguarded
+binary is not a compatibility mechanism.
