@@ -66,6 +66,20 @@ def artifact_smoke(engine: Engine, root: Path) -> None:
         raise RuntimeError("Installed bounded artifact format did not round trip")
 
 
+def projection_smoke(engine: Engine) -> None:
+    from agent_rewind.migrations.projection_service import backfill_run_index, initialize_projection
+
+    result = initialize_projection(engine)
+    if result["revision"] != "ar_0005_run_index" or result["projection_status"] != "complete":
+        raise RuntimeError("Installed empty projection transition failed")
+
+    def forbidden(*args: object) -> bytes:
+        raise RuntimeError("Empty installed projection attempted artifact I/O")
+
+    if backfill_run_index(engine, forbidden) != result:
+        raise RuntimeError("Installed empty projection retry changed progress")
+
+
 def publication_smoke(engine: Engine, root: Path) -> None:
     from cryptography.fernet import Fernet
 
@@ -172,6 +186,7 @@ for profile in (
     "postgresql16_ownership",
     "sqlite_artifacts",
     "postgresql16_artifacts",
+    "sqlite_projection",
 ):
     shape = json.loads(
         importlib.resources.files("agent_rewind.migrations")
@@ -220,6 +235,7 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
             raise RuntimeError("Installed ownership revision failed the explicit transition")
         repository_smoke(engine)
         artifact_smoke(engine, Path(temporary))
+        projection_smoke(engine)
         publication_smoke(engine, Path(temporary))
         compatibility = runtime_schema_compatibility(engine)
         if compatibility.status != "incompatible" or compatibility.code != "migration_only":
