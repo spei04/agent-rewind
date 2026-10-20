@@ -80,6 +80,9 @@ def load_release_profile() -> ReleaseProfile:
 class CompatibilityResult:
     status: Literal["ready", "incompatible", "unavailable"]
     code: str
+    # A future ready handler must derive this from its validated adoption row in
+    # the same inspection transaction. Missing identity cannot authorize a sentinel.
+    installation_key: str | None = None
 
 
 class SchemaNotReady(RuntimeError):
