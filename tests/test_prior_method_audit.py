@@ -175,3 +175,54 @@ def test_another_paper_cannot_substitute_for_method_report(record):
     record["methods"][0]["dimensions"]["allocation"]["evidence"] = ["car-paper"]
     with pytest.raises(ValueError, match="matching paper evidence"):
         validate(record)
+
+
+def test_foreign_license_cannot_be_attributed_to_another_method(record):
+    availability = record["methods"][1]["availability"]
+    availability["license_status"] = "root_text_inspected"
+    availability["license_evidence"] = ["dover-license"]
+    with pytest.raises(ValueError, match="matching license-text evidence"):
+        validate(record)
+
+
+def test_inspected_license_cannot_drift_to_another_commit(record):
+    source = next(row for row in record["evidence"] if row["id"] == "dover-license")
+    source["url"] = source["url"].replace(record["methods"][0]["availability"]["commit"], "a" * 40)
+    with pytest.raises(ValueError, match="matching license-text evidence"):
+        validate(record)
+
+
+@pytest.mark.parametrize("foreign_ref", ["car-contrast", "car-tree"])
+def test_availability_list_cannot_authorize_foreign_inspection(record, foreign_ref):
+    method = record["methods"][0]
+    method["availability"]["evidence"].append(foreign_ref)
+    method["dimensions"]["oracle_access"]["evidence"] = [foreign_ref]
+    with pytest.raises(ValueError, match="matching source evidence"):
+        validate(record)
+
+
+def test_inspected_code_cannot_drift_while_readme_stays_pinned(record):
+    source = next(row for row in record["evidence"] if row["id"] == "dover-propose")
+    source["url"] = source["url"].replace(record["methods"][0]["availability"]["commit"], "a" * 40)
+    with pytest.raises(ValueError, match="matching source evidence"):
+        validate(record)
+
+
+@pytest.mark.parametrize(
+    "replacement",
+    [
+        "https://api.github.com/repos/other/ACV/git/trees/81483179f58c3bc7fa729a713288f2dbc00696d3?recursive=1",
+        "https://api.github.com/repos/microsoft/ACV/git/trees/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa?recursive=1",
+    ],
+)
+def test_tree_evidence_requires_declared_repository_and_ref(record, replacement):
+    source = next(row for row in record["evidence"] if row["id"] == "dover-tree")
+    source["url"] = replacement
+    with pytest.raises(ValueError, match="matching pinned tree"):
+        validate(record)
+
+
+def test_unlocated_implementation_cannot_invent_tree_evidence(record):
+    record["methods"][2]["availability"]["tree_ref"] = "a" * 40
+    with pytest.raises(ValueError, match="cannot invent a pin"):
+        validate(record)

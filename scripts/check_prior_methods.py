@@ -80,6 +80,18 @@ def references(value: Any, evidence: dict[str, dict[str, Any]], label: str) -> l
     return refs
 
 
+def matching_source(source: dict[str, Any], availability: dict[str, Any]) -> bool:
+    repository = availability["repository"]
+    commit = availability["commit"]
+    if source["kind"] == "code":
+        return str(source["url"]).startswith(f"{repository}/blob/{commit}/")
+    if source["kind"] == "tree":
+        slug = str(repository).removeprefix("https://github.com/")
+        expected = f"/repos/{slug}/git/trees/{availability['tree_ref']}"
+        return urlsplit(str(source["url"])).path == expected
+    return False
+
+
 def validate(record: Any) -> None:
     data = object_keys(
         record,
@@ -193,6 +205,7 @@ def validate(record: Any) -> None:
                 "status",
                 "repository",
                 "commit",
+                "tree_ref",
                 "license_status",
                 "license_evidence",
                 "evidence",
@@ -206,9 +219,11 @@ def validate(record: Any) -> None:
         if availability["status"] == "public_source":
             repository = text_value(availability["repository"], "repository")
             commit = text_value(availability["commit"], "commit")
+            tree_ref = text_value(availability["tree_ref"], "tree reference")
             require(
                 re.fullmatch(r"https://github.com/[^/]+/[^/]+", repository) is not None
-                and re.fullmatch(r"[0-9a-f]{40}", commit) is not None,
+                and re.fullmatch(r"[0-9a-f]{40}", commit) is not None
+                and re.fullmatch(r"[0-9a-f]{40}", tree_ref) is not None,
                 "repository commit pin",
             )
             require(
@@ -220,13 +235,22 @@ def validate(record: Any) -> None:
                 "public source must cite matching pinned code",
             )
             require(
+                any(
+                    evidence[ref]["kind"] == "tree" and matching_source(evidence[ref], availability)
+                    for ref in source_refs
+                ),
+                "public source must cite matching pinned tree",
+            )
+            require(
                 availability["license_status"] in {"root_text_inspected", "declaration_unresolved"},
                 "public source license status",
             )
         else:
             require(availability["status"] == "not_located", "availability status")
             require(
-                availability["repository"] is None and availability["commit"] is None,
+                availability["repository"] is None
+                and availability["commit"] is None
+                and availability["tree_ref"] is None,
                 "unlocated source cannot invent a pin",
             )
             require(
@@ -238,9 +262,18 @@ def validate(record: Any) -> None:
                 "unlocated source cannot claim inspected license",
             )
         if availability["license_status"] == "root_text_inspected":
+            inspected_licenses = [
+                evidence[ref] for ref in license_refs if evidence[ref]["kind"] == "license"
+            ]
             require(
-                any(evidence[ref]["kind"] == "license" for ref in license_refs),
-                "inspected license requires license-text evidence",
+                bool(inspected_licenses)
+                and all(
+                    source["url"].startswith(
+                        f"{availability['repository']}/blob/{availability['commit']}/"
+                    )
+                    for source in inspected_licenses
+                ),
+                "inspected license requires matching license-text evidence",
             )
         dimensions = object_keys(method["dimensions"], DIMENSIONS, "dimensions")
         for dimension in dimensions.values():
@@ -250,17 +283,12 @@ def validate(record: Any) -> None:
             refs = references(dimension["evidence"], evidence, "dimension evidence")
             if dimension["status"] == "source_inspected":
                 require(availability["status"] == "public_source", "unlocated code inspection")
+                inspected_sources = [
+                    evidence[ref] for ref in refs if evidence[ref]["kind"] in {"code", "tree"}
+                ]
                 require(
-                    any(
-                        evidence[ref]["kind"] in {"code", "tree"}
-                        and (
-                            ref in source_refs
-                            or evidence[ref]["url"].startswith(
-                                f"{availability['repository']}/blob/{availability['commit']}/"
-                            )
-                        )
-                        for ref in refs
-                    ),
+                    bool(inspected_sources)
+                    and all(matching_source(source, availability) for source in inspected_sources),
                     "source inspection requires matching source evidence",
                 )
             if dimension["status"] == "paper_reported":

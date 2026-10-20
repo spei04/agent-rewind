@@ -20,7 +20,7 @@
       "id": "dover-paper",
       "kind": "paper",
       "url": "https://arxiv.org/html/2512.06749v3",
-      "locator": "Sections 3–4 and Appendix C; version 3"
+      "locator": "Sections 3\u20134 and Appendix C; version 3"
     },
     {
       "id": "dover-project",
@@ -50,13 +50,13 @@
       "id": "dover-propose",
       "kind": "code",
       "url": "https://github.com/microsoft/ACV/blob/994ac15db6fff8a5131bbf5a26e84e352e676796/misc/DoVer/scripts/intervention_recommender_trial.py",
-      "locator": "load_problem_gt and _build_intervention_prompt, lines 146–199"
+      "locator": "load_problem_gt and _build_intervention_prompt, lines 146\u2013199"
     },
     {
       "id": "dover-edit",
       "kind": "code",
       "url": "https://github.com/microsoft/ACV/blob/994ac15db6fff8a5131bbf5a26e84e352e676796/misc/DoVer/scripts/intervener_trial.py",
-      "locator": "build_new_content, lines 173–264"
+      "locator": "build_new_content, lines 173\u2013264"
     },
     {
       "id": "dover-license",
@@ -98,7 +98,7 @@
       "id": "car-contrast",
       "kind": "code",
       "url": "https://github.com/jaineet17/causal-agent-replay/blob/db90fa28b97164c35e7c524e4597b8cbdb3035af/src/car/attribute/contrastive.py",
-      "locator": "contrastive_attribution, lines 71–131"
+      "locator": "contrastive_attribution, lines 71\u2013131"
     },
     {
       "id": "car-shapley",
@@ -128,7 +128,7 @@
       "id": "reflect-paper",
       "kind": "paper",
       "url": "https://arxiv.org/html/2606.09071v1",
-      "locator": "Sections 3–4; Algorithm 1; Appendices D, H, J, Q, R"
+      "locator": "Sections 3\u20134; Algorithm 1; Appendices D, H, J, Q, R"
     },
     {
       "id": "daaf-paper",
@@ -197,7 +197,8 @@
           "dover-readme",
           "dover-tree"
         ],
-        "note": "Root MIT text inspected; preserve notices and audit nested vendored rights before reuse. README names an absent evaluation entry point."
+        "note": "Root MIT text inspected; preserve notices and audit nested vendored rights before reuse. README names an absent evaluation entry point.",
+        "tree_ref": "81483179f58c3bc7fa729a713288f2dbc00696d3"
       },
       "reproduction": "not_executed",
       "disposition": "adaptation_candidate",
@@ -294,7 +295,8 @@
           "car-readme",
           "car-tree"
         ],
-        "note": "README declares Apache-2.0; license text/notice completeness unresolved. Later code pin is not asserted to be the paper's exact experiment revision."
+        "note": "README declares Apache-2.0; license text/notice completeness unresolved. Later code pin is not asserted to be the paper's exact experiment revision.",
+        "tree_ref": "db90fa28b97164c35e7c524e4597b8cbdb3035af"
       },
       "reproduction": "not_executed",
       "disposition": "adaptation_candidate",
@@ -393,7 +395,8 @@
         "evidence": [
           "reflect-paper"
         ],
-        "note": "Paper describes supplementary err-loc 0.1.0 and future MIT code / CC-BY-4.0 WTQ release; public author implementation not located within recorded search."
+        "note": "Paper describes supplementary err-loc 0.1.0 and future MIT code / CC-BY-4.0 WTQ release; public author implementation not located within recorded search.",
+        "tree_ref": null
       },
       "reproduction": "not_executed",
       "disposition": "unavailable_implementation",
@@ -485,7 +488,8 @@
         "evidence": [
           "daaf-paper"
         ],
-        "note": "Future code/checkpoint/registry/replay release promised; no author implementation or license located within recorded search. Underlying tau2 code is not DAAF."
+        "note": "Future code/checkpoint/registry/replay release promised; no author implementation or license located within recorded search. Underlying tau2 code is not DAAF.",
+        "tree_ref": null
       },
       "reproduction": "not_executed",
       "disposition": "incompatible_current_intervention",

@@ -219,7 +219,10 @@ PYTHONDONTWRITEBYTECODE=1 python -m pytest -p no:cacheprovider tests/test_prior_
 
 The validator checks versioned links, commit pins, reference integrity, required
 dimensions, availability/reproduction consistency and unapproved follow-up
-estimates. Tests mutate those records to require actual refusal. These checks
+estimates. Inspected code/license references must match their repository and
+commit; tree references must match the declared repository and pinned tree
+reference. DoVer's tree reference is its inspected subtree object, while CAR's
+is its repository commit. Manual review establishes that commit/subtree binding. Tests mutate those records to require actual refusal. These checks
 do not fetch URLs, establish license scope, reproduce results, verify scientific
 claims or authorize experiments. Link retrieval and source accuracy are manual
 review evidence.
