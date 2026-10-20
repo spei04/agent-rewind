@@ -5890,7 +5890,8 @@
         "contract_revision": "m1-review-2",
         "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c",
         "record": "docs/delivery/G0_DECISION.md",
-        "reviewer": "Engineer A (independent authority/evidence record check)"
+        "reviewer": "Engineer A (independent authority/evidence record check)",
+        "owner_scope_confirmation": "Yes\u2014build and test first; gate production spending and partner data."
       }
     },
     {
@@ -5914,7 +5915,8 @@
         "contract_revision": "m1-review-2",
         "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c",
         "record": "docs/delivery/G0_DECISION.md",
-        "reviewer": "Engineer A (independent authority/evidence record check)"
+        "reviewer": "Engineer A (independent authority/evidence record check)",
+        "owner_scope_confirmation": "Yes\u2014build and test first; gate production spending and partner data."
       }
     },
     {

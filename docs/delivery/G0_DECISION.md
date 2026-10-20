@@ -6,7 +6,8 @@ Recorded 2026-10-19. Owner: spei04. Coordinator: project lead.
 owner explicitly approved the execution backlog and instructed the project lead
 to assign independent contributors and reassign completed slots. This records that
 existing authorization; it does not invent a later production approval or require
-reapproval of ordinary implementation choices.
+reapproval of ordinary implementation choices. The owner subsequently confirmed:
+“Yes—build and test first; gate production spending and partner data.”
 
 ## Reviewed inputs and scope
 
@@ -41,9 +42,9 @@ integration gates pass.
 ## Capacity, environment and funding disposition
 
 Execution uses three delegated contributor slots selected by the lead;
-it is not six confirmed human full-time hires. C implements the migration; B
-independently designs/checks failure tests; A may develop AR-033-A reference
-configuration in parallel because it provisions nothing. Named production
+it is not six confirmed human full-time hires. C is assigned the migration after this record integrates. A newly prioritized
+CI/CD slice assigns B implementation and A independent review; migration review
+will use the next available independent slot. AR-033-A stays queued. Named production
 operators and support capacity remain unconfirmed.
 
 Development continues in the existing cloud workspace. Use synthetic fixtures,
