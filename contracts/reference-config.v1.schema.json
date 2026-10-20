@@ -1,0 +1,800 @@
+{
+  "$defs": {
+    "ApprovalRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "gate": {
+          "const": "ENV0",
+          "title": "Gate",
+          "type": "string"
+        },
+        "evidence_id": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "approved_by": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Approved By",
+          "type": "string"
+        },
+        "approved_at": {
+          "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+          "title": "Approved At",
+          "type": "string"
+        },
+        "expires_at": {
+          "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "config_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Config Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "gate",
+        "evidence_id",
+        "approved_by",
+        "approved_at",
+        "expires_at",
+        "config_sha256"
+      ],
+      "title": "ApprovalRecord",
+      "type": "object"
+    },
+    "Budget": {
+      "additionalProperties": false,
+      "properties": {
+        "currency": {
+          "const": "USD",
+          "title": "Currency",
+          "type": "string"
+        },
+        "monthly_limit_microusd": {
+          "exclusiveMinimum": 0,
+          "maximum": 1000000000000000,
+          "title": "Monthly Limit Microusd",
+          "type": "integer"
+        },
+        "bootstrap_limit_microusd": {
+          "exclusiveMinimum": 0,
+          "maximum": 1000000000000000,
+          "title": "Bootstrap Limit Microusd",
+          "type": "integer"
+        },
+        "bootstrap_estimate_microusd": {
+          "maximum": 1000000000000000,
+          "minimum": 0,
+          "title": "Bootstrap Estimate Microusd",
+          "type": "integer"
+        },
+        "owner_id": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Owner Id",
+          "type": "string"
+        },
+        "alert_channel_id": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Alert Channel Id",
+          "type": "string"
+        },
+        "stop_owner_id": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Stop Owner Id",
+          "type": "string"
+        },
+        "alert_percentages": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Alert Percentages",
+          "type": "array"
+        },
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/Estimate"
+          },
+          "maxItems": 10,
+          "minItems": 10,
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "currency",
+        "monthly_limit_microusd",
+        "bootstrap_limit_microusd",
+        "bootstrap_estimate_microusd",
+        "owner_id",
+        "alert_channel_id",
+        "stop_owner_id",
+        "alert_percentages",
+        "lines"
+      ],
+      "title": "Budget",
+      "type": "object"
+    },
+    "Capacity": {
+      "additionalProperties": false,
+      "properties": {
+        "api_max_instances": {
+          "maximum": 16,
+          "minimum": 1,
+          "title": "Api Max Instances",
+          "type": "integer"
+        },
+        "api_vcpus": {
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Api Vcpus",
+          "type": "integer"
+        },
+        "api_memory_mib": {
+          "maximum": 32768,
+          "minimum": 512,
+          "title": "Api Memory Mib",
+          "type": "integer"
+        },
+        "api_pool_size": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Api Pool Size",
+          "type": "integer"
+        },
+        "worker_max_hosts": {
+          "maximum": 64,
+          "minimum": 1,
+          "title": "Worker Max Hosts",
+          "type": "integer"
+        },
+        "worker_machine_type": {
+          "pattern": "^e2-standard-(?:4|8|16|32)$",
+          "title": "Worker Machine Type",
+          "type": "string"
+        },
+        "worker_boot_disk_gib": {
+          "maximum": 1024,
+          "minimum": 20,
+          "title": "Worker Boot Disk Gib",
+          "type": "integer"
+        },
+        "worker_processes_per_host": {
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Worker Processes Per Host",
+          "type": "integer"
+        },
+        "worker_pool_size": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Worker Pool Size",
+          "type": "integer"
+        },
+        "operator_connection_reserve": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Operator Connection Reserve",
+          "type": "integer"
+        },
+        "monthly_class_a_operations": {
+          "maximum": 1000000000000,
+          "minimum": 1,
+          "title": "Monthly Class A Operations",
+          "type": "integer"
+        },
+        "monthly_class_b_operations": {
+          "maximum": 1000000000000,
+          "minimum": 1,
+          "title": "Monthly Class B Operations",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "api_max_instances",
+        "api_vcpus",
+        "api_memory_mib",
+        "api_pool_size",
+        "worker_max_hosts",
+        "worker_machine_type",
+        "worker_boot_disk_gib",
+        "worker_processes_per_host",
+        "worker_pool_size",
+        "operator_connection_reserve",
+        "monthly_class_a_operations",
+        "monthly_class_b_operations"
+      ],
+      "title": "Capacity",
+      "type": "object"
+    },
+    "Database": {
+      "additionalProperties": false,
+      "properties": {
+        "instance_name": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Instance Name",
+          "type": "string"
+        },
+        "engine": {
+          "const": "POSTGRES_16",
+          "title": "Engine",
+          "type": "string"
+        },
+        "availability": {
+          "const": "REGIONAL",
+          "title": "Availability",
+          "type": "string"
+        },
+        "public_ip": {
+          "const": false,
+          "title": "Public Ip",
+          "type": "boolean"
+        },
+        "iam_authentication": {
+          "const": true,
+          "title": "Iam Authentication",
+          "type": "boolean"
+        },
+        "connector_enforcement": {
+          "const": "REQUIRED",
+          "title": "Connector Enforcement",
+          "type": "string"
+        },
+        "tls": {
+          "const": "required",
+          "title": "Tls",
+          "type": "string"
+        },
+        "backup_enabled": {
+          "const": true,
+          "title": "Backup Enabled",
+          "type": "boolean"
+        },
+        "pitr_enabled": {
+          "const": true,
+          "title": "Pitr Enabled",
+          "type": "boolean"
+        },
+        "backup_retained_count": {
+          "maximum": 365,
+          "minimum": 7,
+          "title": "Backup Retained Count",
+          "type": "integer"
+        },
+        "pitr_days": {
+          "maximum": 7,
+          "minimum": 1,
+          "title": "Pitr Days",
+          "type": "integer"
+        },
+        "deletion_protection": {
+          "const": true,
+          "title": "Deletion Protection",
+          "type": "boolean"
+        },
+        "vcpus": {
+          "maximum": 64,
+          "minimum": 2,
+          "title": "Vcpus",
+          "type": "integer"
+        },
+        "memory_mib": {
+          "maximum": 524288,
+          "minimum": 4096,
+          "title": "Memory Mib",
+          "type": "integer"
+        },
+        "disk_gib": {
+          "maximum": 65536,
+          "minimum": 20,
+          "title": "Disk Gib",
+          "type": "integer"
+        },
+        "connection_capacity": {
+          "maximum": 10000,
+          "minimum": 10,
+          "title": "Connection Capacity",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "instance_name",
+        "engine",
+        "availability",
+        "public_ip",
+        "iam_authentication",
+        "connector_enforcement",
+        "tls",
+        "backup_enabled",
+        "pitr_enabled",
+        "backup_retained_count",
+        "pitr_days",
+        "deletion_protection",
+        "vcpus",
+        "memory_mib",
+        "disk_gib",
+        "connection_capacity"
+      ],
+      "title": "Database",
+      "type": "object"
+    },
+    "Estimate": {
+      "additionalProperties": false,
+      "properties": {
+        "line": {
+          "enum": [
+            "api-compute",
+            "worker-compute-disks",
+            "sql-compute",
+            "sql-storage-backups",
+            "artifact-bytes",
+            "artifact-operations",
+            "network",
+            "keys-secrets",
+            "observability",
+            "state-support-contingency"
+          ],
+          "title": "Line",
+          "type": "string"
+        },
+        "monthly_microusd": {
+          "maximum": 1000000000000000,
+          "minimum": 0,
+          "title": "Monthly Microusd",
+          "type": "integer"
+        },
+        "basis": {
+          "enum": [
+            "quote",
+            "allowance",
+            "synthetic"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "evidence_id": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "owner_id": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Owner Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "line",
+        "monthly_microusd",
+        "basis",
+        "evidence_id",
+        "owner_id"
+      ],
+      "title": "Estimate",
+      "type": "object"
+    },
+    "Identities": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "$ref": "#/$defs/Identity"
+        },
+        "worker": {
+          "$ref": "#/$defs/Identity"
+        },
+        "migrator": {
+          "$ref": "#/$defs/Identity"
+        },
+        "provisioner": {
+          "$ref": "#/$defs/Identity"
+        }
+      },
+      "required": [
+        "api",
+        "worker",
+        "migrator",
+        "provisioner"
+      ],
+      "title": "Identities",
+      "type": "object"
+    },
+    "Identity": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9]$",
+          "title": "Account Id",
+          "type": "string"
+        },
+        "capabilities": {
+          "items": {
+            "enum": [
+              "database-dml",
+              "database-ddl",
+              "artifact-create-read",
+              "artifact-crypt",
+              "api-secrets-read",
+              "provider-secret-read",
+              "local-docker",
+              "foundation-manage",
+              "scoped-iam-manage",
+              "state-read-write"
+            ],
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Capabilities",
+          "type": "array"
+        }
+      },
+      "required": [
+        "account_id",
+        "capabilities"
+      ],
+      "title": "Identity",
+      "type": "object"
+    },
+    "KeysAndSecrets": {
+      "additionalProperties": false,
+      "properties": {
+        "key_ring": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Key Ring",
+          "type": "string"
+        },
+        "artifact_key": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Artifact Key",
+          "type": "string"
+        },
+        "location": {
+          "pattern": "^[a-z]+-[a-z]+[1-9][0-9]?$",
+          "title": "Location",
+          "type": "string"
+        },
+        "api_session_secret": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Api Session Secret",
+          "type": "string"
+        },
+        "oidc_client_secret": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Oidc Client Secret",
+          "type": "string"
+        },
+        "provider_secret": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Provider Secret",
+          "type": "string"
+        },
+        "service_account_keys": {
+          "const": "forbidden",
+          "title": "Service Account Keys",
+          "type": "string"
+        },
+        "secret_values": {
+          "const": "external-not-in-config",
+          "title": "Secret Values",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key_ring",
+        "artifact_key",
+        "location",
+        "api_session_secret",
+        "oidc_client_secret",
+        "provider_secret",
+        "service_account_keys",
+        "secret_values"
+      ],
+      "title": "KeysAndSecrets",
+      "type": "object"
+    },
+    "Labels": {
+      "additionalProperties": false,
+      "properties": {
+        "application": {
+          "const": "agent-rewind",
+          "title": "Application",
+          "type": "string"
+        },
+        "installation": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Installation",
+          "type": "string"
+        },
+        "environment": {
+          "const": "staging",
+          "title": "Environment",
+          "type": "string"
+        },
+        "owner": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Owner",
+          "type": "string"
+        },
+        "cost_center": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Cost Center",
+          "type": "string"
+        }
+      },
+      "required": [
+        "application",
+        "installation",
+        "environment",
+        "owner",
+        "cost_center"
+      ],
+      "title": "Labels",
+      "type": "object"
+    },
+    "Network": {
+      "additionalProperties": false,
+      "properties": {
+        "network_name": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Network Name",
+          "type": "string"
+        },
+        "api_subnet": {
+          "title": "Api Subnet",
+          "type": "string"
+        },
+        "worker_subnet": {
+          "title": "Worker Subnet",
+          "type": "string"
+        },
+        "proxy_subnet": {
+          "title": "Proxy Subnet",
+          "type": "string"
+        },
+        "sql_service_range": {
+          "title": "Sql Service Range",
+          "type": "string"
+        },
+        "operator_cidrs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Operator Cidrs",
+          "type": "array"
+        },
+        "ingress": {
+          "const": "internal-https",
+          "title": "Ingress",
+          "type": "string"
+        },
+        "private_google_access": {
+          "const": true,
+          "title": "Private Google Access",
+          "type": "boolean"
+        },
+        "external_egress": {
+          "const": "blocked",
+          "title": "External Egress",
+          "type": "string"
+        },
+        "worker_public_ip": {
+          "const": false,
+          "title": "Worker Public Ip",
+          "type": "boolean"
+        },
+        "sandbox_network": {
+          "const": "none",
+          "title": "Sandbox Network",
+          "type": "string"
+        },
+        "sandbox_metadata_access": {
+          "const": false,
+          "title": "Sandbox Metadata Access",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "network_name",
+        "api_subnet",
+        "worker_subnet",
+        "proxy_subnet",
+        "sql_service_range",
+        "operator_cidrs",
+        "ingress",
+        "private_google_access",
+        "external_egress",
+        "worker_public_ip",
+        "sandbox_network",
+        "sandbox_metadata_access"
+      ],
+      "title": "Network",
+      "type": "object"
+    },
+    "Storage": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_bucket": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "Artifact Bucket",
+          "type": "string"
+        },
+        "state_bucket": {
+          "pattern": "^[a-z][a-z0-9-]{2,39}$",
+          "title": "State Bucket",
+          "type": "string"
+        },
+        "location": {
+          "pattern": "^[a-z]+-[a-z]+[1-9][0-9]?$",
+          "title": "Location",
+          "type": "string"
+        },
+        "public_access_prevention": {
+          "const": "enforced",
+          "title": "Public Access Prevention",
+          "type": "string"
+        },
+        "uniform_bucket_access": {
+          "const": true,
+          "title": "Uniform Bucket Access",
+          "type": "boolean"
+        },
+        "state_versioning": {
+          "const": true,
+          "title": "State Versioning",
+          "type": "boolean"
+        },
+        "automatic_artifact_deletion": {
+          "const": false,
+          "title": "Automatic Artifact Deletion",
+          "type": "boolean"
+        },
+        "retained_gib_envelope": {
+          "maximum": 10000000,
+          "minimum": 1,
+          "title": "Retained Gib Envelope",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact_bucket",
+        "state_bucket",
+        "location",
+        "public_access_prevention",
+        "uniform_bucket_access",
+        "state_versioning",
+        "automatic_artifact_deletion",
+        "retained_gib_envelope"
+      ],
+      "title": "Storage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "contract_id": {
+      "const": "C14",
+      "title": "Contract Id",
+      "type": "string"
+    },
+    "purpose": {
+      "const": "staging-foundation",
+      "title": "Purpose",
+      "type": "string"
+    },
+    "synthetic": {
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "installation_id": {
+      "pattern": "^[a-z][a-z0-9-]{2,39}$",
+      "title": "Installation Id",
+      "type": "string"
+    },
+    "project_id": {
+      "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9]$",
+      "title": "Project Id",
+      "type": "string"
+    },
+    "region": {
+      "pattern": "^[a-z]+-[a-z]+[1-9][0-9]?$",
+      "title": "Region",
+      "type": "string"
+    },
+    "organization_count": {
+      "const": 1,
+      "title": "Organization Count",
+      "type": "integer"
+    },
+    "operator_id": {
+      "pattern": "^[a-z][a-z0-9-]{2,39}$",
+      "title": "Operator Id",
+      "type": "string"
+    },
+    "staging_stop_at": {
+      "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+      "title": "Staging Stop At",
+      "type": "string"
+    },
+    "logging_retention_days": {
+      "maximum": 365,
+      "minimum": 1,
+      "title": "Logging Retention Days",
+      "type": "integer"
+    },
+    "labels": {
+      "$ref": "#/$defs/Labels"
+    },
+    "identities": {
+      "$ref": "#/$defs/Identities"
+    },
+    "network": {
+      "$ref": "#/$defs/Network"
+    },
+    "database": {
+      "$ref": "#/$defs/Database"
+    },
+    "storage": {
+      "$ref": "#/$defs/Storage"
+    },
+    "keys": {
+      "$ref": "#/$defs/KeysAndSecrets"
+    },
+    "capacity": {
+      "$ref": "#/$defs/Capacity"
+    },
+    "budget": {
+      "$ref": "#/$defs/Budget"
+    },
+    "approval_record": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ApprovalRecord"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_id",
+    "purpose",
+    "synthetic",
+    "installation_id",
+    "project_id",
+    "region",
+    "organization_count",
+    "operator_id",
+    "staging_stop_at",
+    "logging_retention_days",
+    "labels",
+    "identities",
+    "network",
+    "database",
+    "storage",
+    "keys",
+    "capacity",
+    "budget",
+    "approval_record"
+  ],
+  "title": "ReferenceConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/spei04/agent-rewind/contracts/reference-config.v1.schema.json"
+}
