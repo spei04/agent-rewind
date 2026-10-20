@@ -77,3 +77,7 @@ positive conclusion.
 
 No model reliability benchmark result is bundled with this release. Test fixture
 policies validate the mechanics and are never used by the application worker.
+
+## Proposed context and model comparisons
+
+The [dated amendment](research/CONTEXT_SELECTION_AMENDMENT_2026-10-19.md) audits the actual proposer and proposes checkpoint context, diverse hypotheses, separate critique, model-tier and budget-allocation ablations. Current policy remains as described above. Repository inspection at the allowed checkpoint is distinct from development-only cross-task memory. Factual-suffix diagnosis is a separately gated arm and cannot enter replay history. These are proposed methods, not measured improvements.
