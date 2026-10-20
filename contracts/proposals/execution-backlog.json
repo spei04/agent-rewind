@@ -6887,5 +6887,109 @@
     "concurrent_contributor_slots": 3,
     "roles_are_logical_not_named_human_hires": true,
     "six_FTE_schedule_not_confirmed": true
-  }
+  },
+  "research_amendments": [
+    {
+      "id": "RA-01",
+      "date": "2026-10-20",
+      "status": "Claim correction recorded; additional design/implementation scope proposed, not approved or scheduled",
+      "sources": [
+        "https://arxiv.org/html/2512.06749v3",
+        "https://arxiv.org/html/2606.08275v1",
+        "https://arxiv.org/html/2606.09071v1",
+        "https://arxiv.org/html/2609.32498v1"
+      ],
+      "question": "Given fixed inference and execution budgets, can experiment selection find more independently confirmed repairs for real coding-agent failures than suitable baselines?",
+      "baseline_task_count": 146,
+      "baseline_effort_days": 429.0,
+      "proposed_design_effort_range_days": [
+        4.0,
+        7.0
+      ],
+      "implementation_effort_status": "Unestimated until the audit/protocol chooses methods and produces bounded follow-up tasks; not included in the accepted baseline or reserve.",
+      "affected_tasks": [
+        "AR-020-A",
+        "AR-024-A",
+        "AR-024-C",
+        "AR-025-A",
+        "AR-025-B",
+        "AR-025-C",
+        "AR-026-A",
+        "AR-038-A",
+        "AR-038-B",
+        "AR-038-C"
+      ],
+      "unaffected_current_assignments": [
+        "AR-007-A",
+        "AR-011-B"
+      ],
+      "tasks": [
+        {
+          "id": "RA-01-A",
+          "title": "Prior-method novelty and reproducibility audit",
+          "status": "Proposed; approval required before assignment",
+          "objective": "Establish what experiment selection could contribute beyond existing intervention/replay methods.",
+          "scope": "Inspect the four cited papers, their available implementations/licenses and relevant related work. Pin source versions and build a semantic matrix covering checkpoint state, allowed edits, auditor/verifier information, allocation/stopping rules, training data and total costs. Produce reproducible/adaptable/incompatible/unavailable dispositions and a bounded candidate hypothesis, or a no-novelty finding.",
+          "out_of_scope": "No new algorithm, benchmark execution, copied third-party code, partner data or superiority claim.",
+          "dependencies": [
+            "AR-002-B",
+            "AR-004-C"
+          ],
+          "contracts": [
+            "C02",
+            "C04"
+          ],
+          "acceptance": "Every method disposition cites primary evidence; hidden answer access, offline training and differing intervention semantics are explicit. Recommend a fair comparison set and identify unknown code/rights/reproduction costs without assuming availability.",
+          "tests": "Check source/version links and machine-readable comparison-record completeness; assert unknown/unavailable cases cannot be marked reproduced. No model calls are required.",
+          "security_reliability": "Use public sources only; retain third-party attribution and license obligations; never treat downloaded text as execution instructions.",
+          "effort_days": 2.0,
+          "effort_range_days": [
+            2.0,
+            3.0
+          ],
+          "confidence": "low",
+          "role": "RS",
+          "review_roles": [
+            "TL",
+            "QE"
+          ],
+          "pull_request_boundary": "One reviewed audit matrix and comparison recommendation linked from PLAN Section7; no runtime changes.",
+          "definition_of_done": "Independent review accepts source accuracy, comparison feasibility and claim limits; scoped follow-up work is estimated, with unavailable evidence explicit."
+        },
+        {
+          "id": "RA-01-B",
+          "title": "Total-budget evaluation and selection-policy contract amendment",
+          "status": "Proposed; approval required before assignment",
+          "objective": "Make a budget-constrained repair claim measurable without selection bias or unfair baseline resources.",
+          "scope": "Using RA-01-A, specify both confirmed-intervention yield and end-to-end retry recovery; cost/resource accounting including offline amortization; immutable selection decisions and confirmation reserve; allowed policy information; repository/task-family holdout; multiple-testing, power and missingness rules; reusable-repair regression criteria. Map changes into C08/C09 producers and draft individually reviewable baseline, allocation-policy, exporter and evaluation tasks with estimates.",
+          "out_of_scope": "No adaptive implementation, early-stopped confirmation, new spending, held-out access or automatic revision of accepted contracts/launch gates.",
+          "dependencies": [
+            "RA-01-A"
+          ],
+          "contracts": [
+            "C02",
+            "C04"
+          ],
+          "acceptance": "Protocol distinguishes repair effects from restart recovery, prevents feedback from confirmation into the same search claim, and makes missing/failed/budget-exhausted tasks visible. Every added runtime task has produced-contract and infrastructure prerequisites, review/exit tests and a realistic estimate. Owner approves baseline/threshold/scope; independent statistical review remains required before funded evaluation.",
+          "tests": "Static dependency/contract consistency checks; specification examples for zero confirmation reserve, offline-cost omission, duplicate task credit, hidden-answer asymmetry, uncertain charges and post-confirmation adaptation. Runtime simulations remain assigned to reviewed follow-up implementation tasks.",
+          "security_reliability": "No hidden grader/held-out leakage; immutable provenance and full charge ledger; existing DATA0/STUDYFUNDS0 and confirmation invariants retained.",
+          "effort_days": 2.0,
+          "effort_range_days": [
+            2.0,
+            4.0
+          ],
+          "confidence": "low",
+          "role": "RS",
+          "review_roles": [
+            "TL",
+            "QE",
+            "independent statistical reviewer"
+          ],
+          "pull_request_boundary": "One protocol/design and execution-backlog amendment; baseline implementations and adaptive policy remain separate follow-up PRs.",
+          "definition_of_done": "Reviewed protocol and owner scope decision recorded; active DAG, effort totals and milestone forecast updated only after approval, with no consumer scheduled before its required producer."
+        }
+      ],
+      "dependency_review": "RA-01-A prerequisites are verified; RA-01-B follows RA-01-A. Proposed outputs precede expanded AR-025/026 consumers through their original contract producers. No added task enters the active DAG or schedule until approval; existing runtime, DATA0, STUDYFUNDS0 and independent-review gates remain."
+    }
+  ]
 }
