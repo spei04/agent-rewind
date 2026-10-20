@@ -12,6 +12,7 @@ from threading import Event
 import pytest
 import test_migration_recovery_postgres as recovery_tests
 import test_migrations_postgres as migration_tests
+from postgres_control import wait_for_database_drain
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from test_migration_recovery_postgres import _dump, _restore_command, _run
@@ -90,6 +91,7 @@ def test_postgres_batches_preserve_history_and_idle_application_blocks_resume(
             ).scalar_one()
             == 2
         )
+    wait_for_database_drain(pg["control"], pg["owner"].url.database)
     result = initialize_ownership(pg["owner"])
     assert result["ownership_rows_verified"] == 7
     assert result["state"] == "ownership_complete"
@@ -151,6 +153,7 @@ os.kill(os.getpid(), signal.SIGKILL)
         },
     )
     assert result.returncode == -signal.SIGKILL, "Child did not reach intended transaction boundary"
+    wait_for_database_drain(pg["control"], pg["owner"].url.database)
     status = service.schema_status(pg["owner"])
     assert status["revision"] == (OWNERSHIP if after_commit else HEAD)
     if after_commit:
@@ -162,6 +165,8 @@ os.kill(os.getpid(), signal.SIGKILL)
                 == 2
             )
     assert_original_rows(pg["owner"])
+    # Verification clients also close asynchronously on the PostgreSQL server.
+    wait_for_database_drain(pg["control"], pg["owner"].url.database)
     assert initialize_ownership(pg["owner"])["state"] == "ownership_complete"
     assert_original_rows(pg["owner"])
 
@@ -199,6 +204,7 @@ def test_postgres_ownership_checkpoint_dump_restore_resumes_without_activation(
     )
     assert service.schema_status(recovery["target"])["state"] == "prepared"
     assert runtime_schema_compatibility(recovery["target"]).status == "incompatible"
+    wait_for_database_drain(recovery["control"], recovery["target"].url.database)
     assert initialize_ownership(recovery["target"])["state"] == "ownership_complete"
     assert_original_rows(recovery["target"])
     assert runtime_schema_compatibility(recovery["target"]).code == "migration_only"
