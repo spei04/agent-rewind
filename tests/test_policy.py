@@ -66,3 +66,20 @@ def test_oversized_input_is_rejected_before_reserving_or_dispatching(settings, t
     policy = ChatPolicy(settings, forbidden)
     with pytest.raises(ValueError, match="token bound"):
         policy.propose(policy.initial(task), 1, 0)
+
+
+def test_missing_key_after_initialization_never_dispatches(settings, task, monkeypatch):
+    settings.model_url = "https://model.example.test/v1/chat/completions"
+    settings.model_name = "test-model-version"
+    settings.model_api_key = SecretStr("fixture-secret")
+    settings.model_input_price = 2
+    settings.model_output_price = 8
+    policy = ChatPolicy(settings, lambda _: None)
+    settings.model_api_key = None
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Missing credentials must not contact the provider.")
+
+    monkeypatch.setattr("agent_rewind.policy.httpx.Client", forbidden)
+    with pytest.raises(ValueError, match="API key is not configured"):
+        policy.propose(policy.initial(task), 1, 0)

@@ -155,7 +155,8 @@ class Auth:
                 response = client.post(document["token_endpoint"], data=body)
                 response.raise_for_status()
                 token = response.json()["id_token"]
-            assert self.jwks is not None
+            if self.jwks is None:
+                raise ValueError("Identity provider signing keys are unavailable.")
             signing_key = self.jwks.get_signing_key_from_jwt(token)
             claims = jwt.decode(
                 token,

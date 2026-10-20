@@ -23,7 +23,10 @@ from agent_rewind.models import canonical
         ({"rewind_role": "unknown"}, False),
     ],
 )
-def test_signed_identity_token_validation(settings, storage, monkeypatch, change, accepted):
+@pytest.mark.parametrize("missing_keys", [False, True])
+def test_signed_identity_token_validation(
+    settings, storage, monkeypatch, change, accepted, missing_keys
+):
     db, _ = storage
     settings.oidc_issuer = "https://identity.example.test"
     settings.oidc_client_id = "test-client"
@@ -44,6 +47,9 @@ def test_signed_identity_token_validation(settings, storage, monkeypatch, change
     auth.jwks = SimpleNamespace(
         get_signing_key_from_jwt=lambda _: SimpleNamespace(key=key.public_key())
     )
+
+    if missing_keys:
+        auth.jwks = None
 
     class FakeClient:
         def __init__(self, **kwargs):
@@ -72,7 +78,7 @@ def test_signed_identity_token_validation(settings, storage, monkeypatch, change
             "headers": [(b"cookie", f"rewind_login={cookie}".encode())],
         }
     )
-    if accepted:
+    if accepted and not missing_keys:
         response = auth.callback(request)
         assert response.status_code == 307
         session_cookie = next(

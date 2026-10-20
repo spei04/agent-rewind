@@ -110,3 +110,14 @@ def test_branch_of_branch_keeps_previously_replaced_action(engine, task):
     )
     assert engine.events(grandchild)[1]["action"]["content"] == "correct"
     assert engine.db.get(grandchild)["success"]
+
+
+@pytest.mark.parametrize("kind", ["action", "tool_result"])
+def test_incomplete_internal_intervention_fails_without_corrupting_parent(engine, task, kind):
+    original = engine.run(task)
+    before = engine.events(original)
+    # Internal callers can bypass model validation; the execution boundary still rejects it.
+    intervention = Intervention.model_construct(step=1, kind=kind, action=None, result=None)
+    with pytest.raises(ValueError, match="requires"):
+        engine.run(task, original, intervention)
+    assert engine.events(original) == before

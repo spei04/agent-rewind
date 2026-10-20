@@ -157,7 +157,7 @@ class Experiments:
                 }
                 pairs.append(pair)
                 order = [("control", control), ("treatment", candidate)]
-                random.Random(seed).shuffle(order)
+                random.Random(seed).shuffle(order)  # noqa: S311 - reproducible trial order, not secrets
                 pair["order"] = [name for name, _ in order]
                 save()
                 try:

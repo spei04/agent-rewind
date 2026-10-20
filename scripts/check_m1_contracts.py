@@ -567,9 +567,12 @@ def check_fixture(root: Path, fixture: dict, baseline: str) -> dict[str, int]:
                     require(len(expected) <= 1000, "Frozen row count exceeds bounds")
                     connection.row_factory = sqlite3.Row
                     order = "run_id, step" if table == "events" else "id"
+                    # Identifiers come from the validated frozen synthetic schema vocabulary.
                     actual = [
                         dict(row)
-                        for row in connection.execute(f'SELECT * FROM "{table}" ORDER BY {order}')
+                        for row in connection.execute(
+                            f'SELECT * FROM "{table}" ORDER BY {order}'  # noqa: S608
+                        )
                     ]
                     if table == "records":
                         for row in actual:
