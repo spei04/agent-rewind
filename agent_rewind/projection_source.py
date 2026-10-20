@@ -63,11 +63,12 @@ def readonly_source(engine: Engine, budget: QueryBudget) -> Iterator[Connection]
             if connection.dialect.name == "sqlite":
                 raw = connection.connection.driver_connection
                 if (
-                    getattr(raw, "autocommit", False) is True
+                    getattr(raw, "autocommit", -1) != -1
                     or getattr(raw, "isolation_level", None) is None
                 ):
-                    # DBAPI rollback may be a no-op in explicit autocommit modes.
-                    # Discard this unsupported pooled connection before BEGIN.
+                    # Only sqlite3 legacy transaction control supports this explicit
+                    # BEGIN/rollback protocol. PEP249 mode reopens transactions;
+                    # autocommit mode can make rollback a no-op. Discard both.
                     connection.invalidate()
                     raise ArtifactError("projection_transaction_required")
                 previous = connection.exec_driver_sql("PRAGMA query_only").scalar_one()
