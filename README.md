@@ -43,7 +43,8 @@ and [security boundaries](docs/SECURITY.md) before deploying.
 The current release prepares and inspects metadata only. Its checked-in compatibility
 profile deliberately refuses customer API/authentication routes with HTTP 503 and
 prevents worker claims, including after a successful fresh installation or legacy
-adoption. The static workbench and process liveness remain accessible. A later
+adoption. The static workbench and `/livez` process liveness remain accessible. `/healthz`
+retains its database-connectivity check and does not certify customer readiness. A later
 reviewed ownership-ready revision must explicitly enable admission; there is no
 runtime configuration bypass. See [migration compatibility](docs/MIGRATIONS.md).
 

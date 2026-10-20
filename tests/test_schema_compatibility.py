@@ -217,7 +217,7 @@ def test_liveness_and_static_do_not_open_or_create_database(settings, monkeypatc
 
     monkeypatch.setattr(app.state.db.engine, "connect", forbidden)
     with TestClient(app) as client:
-        for path in ["/", "/healthz", "/static/app.js"]:
+        for path in ["/", "/livez", "/static/app.js"]:
             assert client.get(path).status_code == 200
         assert client.post("/healthz").status_code == 503
     assert not (settings.data_dir / "metadata.sqlite").exists()
@@ -306,7 +306,7 @@ def test_unavailable_api_guard_does_not_leak_database_error(settings, monkeypatc
         assert response.status_code == 503
         assert response.json()["code"] == "schema_unavailable"
         assert "private" not in response.text
-        assert client.get("/healthz").status_code == 200
+        assert client.get("/livez").status_code == 200
     app.state.db.engine.dispose()
 
 
@@ -369,7 +369,8 @@ def test_stalled_probes_are_capped_while_liveness_and_static_respond(settings, m
             assert full.status_code == 503
             assert full.json()["code"] == "schema_probe_capacity"
             assert calls == 4
-            assert client.get("/healthz").status_code == 200
+            assert client.get("/healthz").status_code == 503
+            assert client.get("/livez").status_code == 200
             assert client.get("/static/app.js").status_code == 200
         finally:
             release.set()
@@ -416,7 +417,7 @@ def test_cancelled_request_retains_capacity_until_its_sync_probe_exits(settings,
                 full = await asyncio.wait_for(client.get("/api/runs"), timeout=1)
                 assert full.json()["code"] == "schema_probe_capacity"
                 assert calls == 4
-                health = await asyncio.wait_for(client.get("/healthz"), timeout=1)
+                health = await asyncio.wait_for(client.get("/livez"), timeout=1)
                 assert health.status_code == 200
             finally:
                 release.set()
@@ -487,3 +488,30 @@ def test_final_connect_args_are_validated_even_after_url_validation(connect_args
     with pytest.raises(service.MigrationRefused):
         engine.connect()
     engine.dispose()
+
+
+def test_legacy_health_checks_connectivity_without_claiming_schema_readiness(settings, monkeypatch):
+    app = create_app(settings)
+    with TestClient(app) as client:
+        assert client.get("/healthz").status_code == 503
+        assert not (settings.data_dir / "metadata.sqlite").exists()
+        app.state.db.migrate(installation_key="synthetic-health")
+        assert client.get("/healthz").json() == {"status": "ok"}
+        assert client.head("/healthz").status_code == 200
+        assert client.get("/api/runs").json()["code"] == "migration_only"
+        with app.state.db.engine.begin() as connection:
+            connection.exec_driver_sql("UPDATE alembic_version SET version_num='ar_future'")
+        # Legacy health is connectivity only, even when admission is incompatible.
+        assert client.get("/healthz").status_code == 200
+        assert client.get("/api/runs").status_code == 503
+
+        def fail(*args, **kwargs):
+            raise OperationalError("private SQL", {}, Exception("private DSN"))
+
+        monkeypatch.setattr(app.state.db.engine, "connect", fail)
+        response = client.get("/healthz")
+        assert response.status_code == 503
+        assert response.json() == {"status": "unavailable"}
+        assert client.get("/livez").status_code == 200
+        assert client.head("/livez").status_code == 200
+    app.state.db.engine.dispose()

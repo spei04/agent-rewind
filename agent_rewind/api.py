@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from threading import Lock
-from typing import Any, Literal
+from typing import Any, Literal, TypeVar
 
 from anyio.to_thread import current_default_thread_limiter
 from fastapi import FastAPI, HTTPException, Request
@@ -23,6 +24,8 @@ from .experiments import locate
 from .middleware import BodyLimit
 from .migrations.compatibility import CompatibilityResult
 from .models import BranchRequest, StrictModel, StudyRequest, TaskSpec, valid_path
+
+ProbeValue = TypeVar("ProbeValue")
 
 
 class KeyRequest(StrictModel):
@@ -51,27 +54,27 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     guard_inflight = 0
     guard_lock = Lock()
 
-    async def admission_status() -> CompatibilityResult:
+    async def database_probe(operation: Callable[[], ProbeValue]) -> ProbeValue | None:
         nonlocal guard_inflight
         # Keep capacity for sync liveness/static handlers. The lock also protects
         # completion in a worker after its requesting ASGI task was cancelled.
         limit = min(4, max(0, int(current_default_thread_limiter().total_tokens) - 1))
         with guard_lock:
             if guard_inflight >= limit:
-                return CompatibilityResult("unavailable", "schema_probe_capacity")
+                return None
             guard_inflight += 1
         started = False
         cancelled = False
 
-        def probe() -> CompatibilityResult:
+        def probe() -> ProbeValue | None:
             nonlocal guard_inflight, started
             with guard_lock:
                 if cancelled:
                     # A request cancelled while queued must not start database I/O.
-                    return CompatibilityResult("unavailable", "schema_unavailable")
+                    return None
                 started = True
             try:
-                return db.schema_compatibility()
+                return operation()
             finally:
                 with guard_lock:
                     guard_inflight -= 1
@@ -90,10 +93,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def security(request: Request, call_next: RequestResponseEndpoint) -> Response:
         response: Response
         safe_inspection = request.method in {"GET", "HEAD"} and (
-            request.url.path in {"/", "/healthz"} or request.url.path.startswith("/static/")
+            request.url.path in {"/", "/healthz", "/livez"}
+            or request.url.path.startswith("/static/")
         )
         if not safe_inspection:
-            compatibility = await admission_status()
+            compatibility = await database_probe(db.schema_compatibility)
+            if compatibility is None:
+                compatibility = CompatibilityResult("unavailable", "schema_probe_capacity")
             if compatibility.status != "ready":
                 response = JSONResponse(
                     {
@@ -130,11 +136,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             {"detail": [{"loc": e["loc"], "msg": e["msg"]} for e in exc.errors()]}, status_code=422
         )
 
-    @app.get("/healthz")
-    def health() -> dict[str, str]:
-        # Process liveness only. Schema compatibility is checked at each customer
-        # boundary; full storage/sentinel readiness belongs to a later slice.
+    @app.api_route("/livez", methods=["GET", "HEAD"])
+    def liveness() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.api_route("/healthz", methods=["GET", "HEAD"])
+    async def health() -> JSONResponse:
+        # Preserve legacy database-connectivity semantics while operators migrate
+        # probes. This is neither customer admission nor artifact/sentinel readiness.
+        connected = await database_probe(db.ping)
+        return JSONResponse(
+            {"status": "ok" if connected else "unavailable"},
+            status_code=200 if connected else 503,
+        )
 
     @app.get("/auth/login")
     def login() -> RedirectResponse:

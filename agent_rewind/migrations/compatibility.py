@@ -311,3 +311,21 @@ def runtime_schema_compatibility(engine: Engine) -> CompatibilityResult:
         return CompatibilityResult("incompatible", "release_profile_or_connection_invalid")
     except (SQLAlchemyError, sqlite3.Error, OSError, TimeoutError):
         return CompatibilityResult("unavailable", "schema_unavailable")
+
+
+def runtime_database_connectivity(engine: Engine) -> bool:
+    """Legacy health check: bounded read-only SELECT1, never schema readiness."""
+    try:
+        configure_runtime_engine(engine)
+        database = engine.url.database
+        if (
+            engine.dialect.name == "sqlite"
+            and isinstance(database, str)
+            and database not in ("", ":memory:")
+            and not Path(database).is_file()
+        ):
+            return False
+        with engine.connect() as connection, _inspection(connection):
+            return bool(connection.exec_driver_sql("SELECT 1").scalar_one() == 1)
+    except (SQLAlchemyError, sqlite3.Error, OSError, TimeoutError, MigrationRefused):
+        return False

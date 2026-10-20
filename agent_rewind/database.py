@@ -32,6 +32,7 @@ from .migrations.compatibility import (
     CompatibilityResult,
     SchemaNotReady,
     configure_runtime_engine,
+    runtime_database_connectivity,
     runtime_schema_compatibility,
 )
 
@@ -118,6 +119,9 @@ class Database:
 
     def schema_compatibility(self) -> CompatibilityResult:
         return runtime_schema_compatibility(self.engine)
+
+    def ping(self) -> bool:
+        return runtime_database_connectivity(self.engine)
 
     def migrate(self, *, installation_key: str | None = None) -> None:
         """Operator compatibility helper; unversioned history needs explicit adoption."""
