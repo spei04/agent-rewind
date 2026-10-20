@@ -26,6 +26,14 @@ def identifier(value: Any) -> str:
     return value
 
 
+def encoded_size(value: Any) -> int:
+    """Measure finite JSON metadata or refuse invalid retained legacy values."""
+    try:
+        return len(json.dumps(value, separators=(",", ":"), allow_nan=False).encode())
+    except (TypeError, ValueError, RecursionError):
+        raise ResourceNotFound() from None
+
+
 class Lineage:
     """No decrypt/load callbacks; metadata is capped and discarded per operation."""
 
@@ -65,7 +73,7 @@ class Lineage:
                 raise ResourceNotFound()
             if current_kind == "job":
                 job = self.job(current_id)
-                retained_bytes += len(json.dumps(job, separators=(",", ":")).encode())
+                retained_bytes += encoded_size(job)
                 if retained_bytes > MAX_RETAINED_BYTES:
                     raise ResourceNotFound()
                 self.jobs[current_id] = job
@@ -78,7 +86,7 @@ class Lineage:
             if current_kind not in {"run", "study"}:
                 raise ResourceNotFound()
             data = self.record(current_kind, current_id)
-            retained_bytes += len(json.dumps(data, separators=(",", ":")).encode())
+            retained_bytes += encoded_size(data)
             if retained_bytes > MAX_RETAINED_BYTES:
                 raise ResourceNotFound()
             self.records[key] = data

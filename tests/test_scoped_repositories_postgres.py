@@ -16,6 +16,7 @@ from test_scoped_repositories import (
     TRIAL,
     A,
     Objects,
+    add_key,
     add_study,
     edit,
     populate,
@@ -91,3 +92,27 @@ def test_postgres_same_hash_project_refs_and_revocation_after_io(pg):
     repo.artifact_loader = revoke
     with pytest.raises(ResourceNotFound):
         repo.read_artifact(CA, "run", RUN_A, "task", HASH)
+
+
+@pytest.mark.parametrize("expires", ["NaN", "Infinity", "-Infinity"])
+def test_postgres_nonfinite_key_expiry_cannot_authorize(pg, expires):
+    repo = prepare(pg)
+    context = add_key(pg["owner"])
+    with pg["owner"].begin() as connection:
+        connection.execute(
+            text("UPDATE api_keys SET expires=CAST(:expires AS double precision) WHERE id=:id"),
+            {"expires": expires, "id": RUN_A},
+        )
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        repo.require_action(context, "read")
+
+
+def test_postgres_json_exponent_overflow_returns_fixed_denial(pg):
+    repo = prepare(pg)
+    with pg["owner"].begin() as connection:
+        connection.execute(
+            text("UPDATE records SET data=CAST(:body AS json) WHERE id=:id"),
+            {"body": '{"job_id":"' + JOB_A + '","parent_id":null,"number":1e999}', "id": RUN_A},
+        )
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        repo.get_run(CA, RUN_A)

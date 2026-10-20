@@ -18,7 +18,7 @@ There is no implicit default project or organization-administrator data grant.
 The repository joins the named project to its organization and current,
 non-revoked membership on every operation, then applies the C05 action matrix.
 API-key principals additionally require the same-project key scope, current
-non-revoked key, future expiry and live key-role ceiling. Viewer and operator
+non-revoked key, finite numeric future expiry and live key-role ceiling. Viewer and operator
 keys cannot exceed either their key role or membership. A retained legacy
 administrator key can have at most operator authority, and only with an explicit
 current project membership. Its old role never creates a grant. Keys cannot create
@@ -53,6 +53,10 @@ most 100 resources and 8 MiB of encoded metadata; direct event-reference reads
 return at most 10,000 rows, reject any event row over 256 bytes, and do not
 implicitly load inherited events.
 Overflow refuses rather than returning a partial authorized result.
+Whole-row SQL byte checks precede fetch; a second strict JSON encoding check
+bounds escaped output and rejects non-finite numbers or SQLite dynamic blob
+cells before metadata is retained, returned or used to authorize a key. Invalid
+legacy metadata receives the same fixed denial; no coercion repairs its types.
 
 Legacy JSON job-reference queries may still scan scoped source records; these
 limits bound returned/retained work, not database scan time or network wall time.

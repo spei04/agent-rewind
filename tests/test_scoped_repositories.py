@@ -683,3 +683,75 @@ def test_dynamic_sqlite_record_created_is_bounded_before_decode(scoped, monkeypa
     monkeypatch.setattr("agent_rewind.scoped_repositories.json.loads", no_decode)
     with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
         repo.get_run(CA, RUN_A)
+
+
+@pytest.mark.parametrize("expires", ["never", b"never", "NaN", float("inf"), float("-inf")])
+def test_current_key_expiry_must_be_finite_numeric_before_authorization(scoped, expires):
+    engine, _ = scoped
+    context = add_key(engine)
+    with engine.begin() as connection:
+        connection.execute(
+            text("UPDATE api_keys SET expires=:expires WHERE id=:id"),
+            {"expires": expires, "id": RUN_A},
+        )
+    objects = Objects()
+    repo = ScopedRepositories(
+        engine, artifact_resolver=objects.resolve, artifact_loader=objects.load
+    )
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        repo.require_action(context, "read")
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        repo.read_artifact(context, "run", RUN_A, "task", HASH)
+    assert objects.resolved == objects.loaded == []
+
+
+@pytest.mark.parametrize(
+    "mutation,kind,resource_id",
+    [
+        ("UPDATE records SET created=:value WHERE id=:id", "run", RUN_A),
+        ("UPDATE jobs SET payload=:value WHERE id=:id", "job", JOB_A),
+        ("UPDATE api_keys SET name=:value WHERE id=:id", "key", RUN_A),
+    ],
+)
+def test_short_dynamic_blob_metadata_returns_fixed_denial(scoped, mutation, kind, resource_id):
+    engine, repo = scoped
+    add_key(engine)
+    with engine.begin() as connection:
+        connection.execute(text(mutation), {"value": b"short", "id": resource_id})
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        getattr(repo, "get_" + kind)(CA, resource_id)
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        repo.list_resources(CA, kind)
+
+
+def test_finite_json_boundary_refuses_exponent_overflow_before_artifact_lookup(scoped):
+    engine, _ = scoped
+    with engine.begin() as connection:
+        connection.execute(
+            text("UPDATE records SET data=:body WHERE id=:id"),
+            {
+                "body": '{"job_id":"' + JOB_A + '","parent_id":null,"number":1e999}',
+                "id": RUN_A,
+            },
+        )
+    objects = Objects()
+    repo = ScopedRepositories(
+        engine, artifact_resolver=objects.resolve, artifact_loader=objects.load
+    )
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        repo.get_run(CA, RUN_A)
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        repo.list_resources(CA, "run")
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        repo.read_artifact(CA, "run", RUN_A, "task", HASH)
+    assert objects.resolved == objects.loaded == []
+
+
+def test_escaped_metadata_size_is_bounded_after_sql_prefetch(scoped, monkeypatch):
+    engine, repo = scoped
+    # Three-byte UTF-8 SQL text expands to six-byte JSON escape sequences.
+    with engine.begin() as connection:
+        connection.execute(text("UPDATE jobs SET payload=:value"), {"value": "☃" * 200})
+    monkeypatch.setattr("agent_rewind.scoped_repositories.MAX_RECORD_BYTES", 1024)
+    with pytest.raises(ResourceNotFound, match="^Resource not found.$"):
+        repo.get_job(CA, JOB_A)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import time
 from collections.abc import Iterator
@@ -18,7 +19,7 @@ from sqlalchemy.sql.elements import ColumnElement
 from .database import events, jobs, keys, records
 from .ownership import allows_project_action
 from .scoped_artifacts import ArtifactLoader, ArtifactObject, ArtifactResolver
-from .scoped_lineage import MAX_NODES, Lineage, identifier
+from .scoped_lineage import MAX_NODES, Lineage, encoded_size, identifier
 from .scoped_lineage import ResourceNotFound as ResourceNotFound
 
 MAX_RECORD_BYTES = 2 * 1024 * 1024
@@ -107,6 +108,14 @@ def _bounded_row(connection: Connection, source: Any) -> Any:
     return size <= MAX_RECORD_BYTES
 
 
+def _json_row(value: dict[str, Any]) -> dict[str, Any]:
+    # SQL-side byte checks precede fetch. This also bounds escaped JSON output
+    # and rejects SQLite dynamic blobs or numeric overflow before retaining it.
+    if encoded_size(value) > MAX_RECORD_BYTES:
+        raise ResourceNotFound()
+    return value
+
+
 class _Reads:
     def __init__(self, connection: Connection, context: ProjectContext):
         self.connection, self.context = connection, context
@@ -136,7 +145,7 @@ class _Reads:
         if not isinstance(data, dict):
             raise ResourceNotFound()
         # Historical JSON cannot override the authoritative SQL identity.
-        return {**data, "id": row["id"], "created": row["created"]}
+        return _json_row({**data, "id": row["id"], "created": row["created"]})
 
     def job(self, resource_id: str) -> dict[str, Any]:
         row = (
@@ -150,7 +159,7 @@ class _Reads:
         )
         if row is None:
             raise ResourceNotFound()
-        return dict(row)
+        return _json_row(dict(row))
 
     def key(self, resource_id: str) -> dict[str, Any]:
         row = (
@@ -164,7 +173,7 @@ class _Reads:
         )
         if row is None:
             raise ResourceNotFound()
-        return dict(row)
+        return _json_row(dict(row))
 
     def by_job(self, job_id: str) -> list[tuple[str, str]]:
         # Scope discovery before its count/limit. A foreign forged incoming
@@ -237,18 +246,18 @@ class ScopedRepositories:
         if role is None or not allows_project_action(role, action):
             raise ResourceNotFound()
         if context.principal_id.startswith("api-key:"):
-            row = connection.execute(
-                select(keys.c.role)
-                .select_from(keys.join(scopes, _scope("key", keys.c.id, context)))
-                .where(
-                    keys.c.id == context.principal_id[8:],
-                    keys.c.revoked.is_(False),
-                    keys.c.expires > time.time(),
-                )
-            ).scalar_one_or_none()
+            row = _Reads(connection, context).key(context.principal_id[8:])
+            expires = row["expires"]
+            if (
+                row["revoked"] is not False
+                or type(expires) not in {int, float}
+                or not math.isfinite(expires)
+                or expires <= time.time()
+            ):
+                raise ResourceNotFound()
             # An explicitly mapped historical administrator key has at most
             # operator authority. Membership can reduce, never expand, its scope.
-            ceiling = "operator" if row == "administrator" else row
+            ceiling = "operator" if row["role"] == "administrator" else row["role"]
             if ceiling not in {"viewer", "operator"} or not allows_project_action(ceiling, action):
                 raise ResourceNotFound()
 
@@ -319,7 +328,7 @@ class ScopedRepositories:
             size = 0
             for resource_id in ids:
                 item = reads.resource(kind, resource_id)
-                size += len(json.dumps(item, separators=(",", ":")).encode())
+                size += encoded_size(item)
                 if size > MAX_LIST_BYTES:
                     raise ResourceNotFound()
                 result.append(item)
