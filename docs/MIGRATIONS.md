@@ -208,9 +208,12 @@ Missing, partial, future/multiple-head, malformed and unfinished metadata refuse
 SQL/connection failures return unavailable without exposing DSNs or exception bodies.
 
 All API/authentication paths, including history reads, run through the guard before
-authentication or artifact access. Only GET/HEAD `/`, `/static/*` and `/healthz` bypass
-customer admission. `/healthz` is process liveness only and does not open a database;
-it is not customer readiness or an artifact sentinel. CLI `migrate status` remains
+authentication or artifact access. Only GET/HEAD `/`, `/static/*`, `/livez` and `/healthz` bypass customer admission.
+`/livez` is process liveness only and does not open a database. `/healthz` retains
+its legacy database-connectivity check through a read-only `SELECT 1`; it returns
+200 when connected and a fixed 503 when unavailable or probe capacity is exhausted.
+Neither endpoint is customer readiness or an artifact sentinel. Existing `/healthz`
+consumers have not been migrated as part of this slice. CLI `migrate status` remains
 the operator inspection path. `Database.claim` guards the shared claim boundary
 before expiring leases or selecting a job; a worker on incompatible metadata does
 no work or model/artifact calls. The worker command exits nonzero with the fixed
@@ -245,7 +248,8 @@ this slice does not certify network-partition recovery or HA rolling upgrades.
 Initialization audit: `init` alone writes local secret placeholders without creating
 a database; `init --installation-key` delegates to explicit install. Bare `migrate`
 means explicit upgrade of a known versioned installation. Install/adopt/upgrade are
-operator actions, and serve/worker/health never call them or `create_all`.
+operator actions, and serve/worker/health never call them or `create_all`. A missing SQLite file is
+not created by either health or compatibility inspection.
 
 For supported backup restoration and application rollback decisions, see
 [the synthetic recovery rehearsal and limits](RECOVERY.md). No older binary is
