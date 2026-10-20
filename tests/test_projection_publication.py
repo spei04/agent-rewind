@@ -184,3 +184,44 @@ def test_equivalent_instants_persist_utc_and_sql_orders_by_time(capture, task):
         ).all()
         assert [row[0] for row in stored] == [second, first]
         assert all(row[1].endswith("+00:00") for row in stored)
+
+
+def test_exact_commit_retry_refuses_corrupt_counter_without_upload_or_repair(capture, task):
+    run = capture.run(task)
+    intent = capture.intent(run)
+    capture.publisher.publish(intent, capture.source)
+    with capture.db.engine.begin() as connection:
+        connection.execute(text("UPDATE projects SET run_sequence=0"))
+    before = counts(capture.db.engine)
+    with pytest.raises(ArtifactError, match="publication_root_conflict"):
+        capture.publisher.publish(intent, lambda *_: pytest.fail("corrupt retry performed I/O"))
+    assert counts(capture.db.engine) == before
+    with capture.db.engine.connect() as connection:
+        assert connection.execute(text("SELECT run_sequence FROM projects")).scalar_one() == 0
+
+
+def test_project_lock_precedes_delegate_and_failed_fence_consumes_no_sequence(
+    capture, task, monkeypatch
+):
+    import agent_rewind.projection_publication as module
+
+    run = capture.run(task)
+    intent = capture.intent(run)
+    calls = []
+    original = module.lock_project_sequence
+
+    def lock(connection, project):
+        calls.append("project")
+        return original(connection, project)
+
+    def fence(connection, value):
+        assert calls == ["project"]
+        raise ArtifactError("publication_fence_lost")
+
+    monkeypatch.setattr(module, "lock_project_sequence", lock)
+    monkeypatch.setattr(capture.publisher.writer.delegate, "lock_and_check", fence)
+    with pytest.raises(ArtifactError, match="publication_fence_lost"):
+        capture.publisher.publish(intent, capture.source)
+    assert counts(capture.db.engine) == (0, 0, 0, 0)
+    with capture.db.engine.connect() as connection:
+        assert connection.execute(text("SELECT run_sequence FROM projects")).scalar_one() == 0

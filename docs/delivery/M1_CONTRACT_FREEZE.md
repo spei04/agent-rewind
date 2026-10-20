@@ -330,7 +330,8 @@ parent FK and run-to-record/project-to-project FKs remain required.
 
 The publication adapter writes `run_index` and event/ref publication coherently in the same
 fenced transaction. Its integration with AR-010-A/B must require every graph-source
-producer to lock all affected owning job/run rows in a consistent order before
+producer needing project and job/run locks to acquire all affected project locks
+in sorted order before affected owning job/run rows in a consistent order before
 mutation, then revalidate while holding those locks. This includes event
 insertion/reassignment/deletion, run/ancestry/source identity changes and by-job
 membership; reassignment covers both old and new owners. Complete source graphs

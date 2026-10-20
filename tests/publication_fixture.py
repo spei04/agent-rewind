@@ -60,6 +60,12 @@ class SQLFixtureWriter:
             )
             now = "CAST(strftime('%s','now') AS REAL)"
         else:
+            # Future producer hierarchy: project exclusion before job/run locks.
+            # The ar4 fixture has no run counter, so lock the existing identity.
+            connection.execute(
+                text("SELECT id FROM projects WHERE id=:project FOR UPDATE"),
+                {"project": intent.context.project_id},
+            ).all()
             connection.execute(
                 select(jobs.c.id).where(jobs.c.id == intent.job_id).with_for_update()
             ).all()

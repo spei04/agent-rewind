@@ -89,10 +89,11 @@ class ProjectionPublicationWriter:
         return "conflict" if state == "matching" and sequence is None else state
 
     def lock_and_check(self, connection: Connection, intent: PublicationIntent) -> None:
-        self.delegate.lock_and_check(connection, intent)
-        # Acquire UPDATE before the coordinator takes grant/source SHARE locks.
-        # This prevents competing publishers upgrading their own shared locks.
+        # Project exclusion precedes every job/run or grant/source lock.
+        # A child and a replacement parent publication otherwise form a cycle.
+        # Allocation still occurs only after fresh fence/source validation.
         lock_project_sequence(connection, intent.context.project_id)
+        self.delegate.lock_and_check(connection, intent)
         _completed_backfill(connection)
 
     def publish_root(self, connection: Connection, intent: PublicationIntent) -> None:

@@ -128,14 +128,18 @@ accepted complete-graph coordinator. The delegate remains required and SQL-only;
 uses the same connection for current fence, exact root inspection/publication,
 projection insertion and artifact references. It cannot call legacy separate-
 transaction `save_event`/`finish_run` methods. Initial insertion or exact existing
-projection replay is supported; mutable repair is a later explicit integration.
+projection replay is supported; matching replay also requires the current bounded
+project counter to cover that immutable sequence. Mutable repair is AR-006-C.
+AR-010/012 integration must implement and verify the same lock hierarchy for every
+producer needing both project and job/run locks; legacy writers do not comply.
 
-Source producers must acquire affected owning job/run locks in consistent order,
+Source producers needing both lock families must acquire all affected project
+locks in sorted order, then affected owning job/run locks in consistent order,
 then revalidate before any event/source/ancestry/by-job mutation. Complete source
 graphs remain immutable. The projection publication wrapper acquires the target
-job/fence lock, then the project allocation UPDATE lock before the coordinator's
-grant/source SHARE locks, avoiding a same-project shared-lock upgrade. It
-increments that counter only with the initial row insert and holds the lock
+project allocation UPDATE lock before the delegate's job/fence lock and the
+coordinator's grant/source SHARE locks. This avoids both shared-lock upgrades and
+overlapping parent/child publication cycles. It increments that counter only with the initial row insert and holds the lock
 through commit. No artifact/journal/network I/O occurs under this lock. Do not use
 preallocated database sequences. The same-project writer that began later cannot
 commit a low pre-watermark sequence after a higher committed one; rollback leaves

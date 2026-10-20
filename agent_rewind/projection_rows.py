@@ -93,6 +93,21 @@ def read_index(
     return [_normalize(dict(row)) for row in rows]
 
 
+def project_sequence(connection: Connection, project_id: str, *, lock: bool = False) -> int:
+    identifier(project_id)
+    projects = table("projects", column("id"), column("run_sequence"))
+    statement = select(projects.c.run_sequence).where(
+        projects.c.id == project_id,
+        _byte_length(connection, projects.c.run_sequence) <= 32,
+    )
+    if lock and connection.dialect.name == "postgresql":
+        statement = statement.with_for_update()
+    counter: Any = connection.execute(statement).scalar_one_or_none()
+    if type(counter) is not int or not 0 <= counter <= MAX_SEQUENCE:
+        raise ArtifactError("projection_sequence_invalid")
+    return counter
+
+
 def matching_projection(connection: Connection, value: RunProjection) -> int | None:
     rows = read_index(connection, limit=2, run_id=value.run_id)
     if not rows:
@@ -104,7 +119,10 @@ def matching_projection(connection: Connection, value: RunProjection) -> int | N
     }
     if len(rows) != 1 or {k: v for k, v in rows[0].items() if k != "published_seq"} != expected:
         raise ArtifactError("projection_conflict")
-    return int(rows[0]["published_seq"])
+    sequence = int(rows[0]["published_seq"])
+    if project_sequence(connection, value.project_id) < sequence:
+        raise ArtifactError("projection_sequence_invalid")
+    return sequence
 
 
 def lock_project_sequence(connection: Connection, project_id: str) -> int:
@@ -127,13 +145,7 @@ def lock_project_sequence(connection: Connection, project_id: str) -> int:
             text("UPDATE projects SET run_sequence=run_sequence WHERE id=:id"),
             {"id": project_id},
         )
-    query = "SELECT run_sequence FROM projects WHERE id=:id"
-    if dialect == "postgresql":
-        query += " FOR UPDATE"
-    counter: Any = connection.execute(text(query), {"id": project_id}).scalar_one_or_none()
-    if type(counter) is not int or not 0 <= counter <= MAX_SEQUENCE:
-        raise ArtifactError("projection_sequence_invalid")
-    return counter
+    return project_sequence(connection, project_id, lock=True)
 
 
 def insert_projection(connection: Connection, value: RunProjection) -> int:

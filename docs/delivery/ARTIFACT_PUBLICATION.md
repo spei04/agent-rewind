@@ -23,8 +23,9 @@ object metadata, exact references and root writer. Effective DBAPI autocommit is
 refused before any publication SQL mutation, including reused pool connections.
 The PostgreSQL transaction locks the existing bounded validated run/job/study
 closure and its scope rows in deterministic order, then revalidates dependency
-identities. Every future graph-source producer must serialize on the affected
-owning job/run rows before mutation: event insertion/reassignment/deletion,
+identities. Every future graph-source producer needing project and job/run locks
+must acquire all affected projects in sorted order before affected owning job/run
+rows, then serialize mutation: event insertion/reassignment/deletion,
 run/ancestry/source identity changes, and by-job membership. Reassignment locks
 both old and new owners in a consistent order; producers then revalidate while
 holding the locks. Complete source graphs remain immutable. Existing-row locks

@@ -28,8 +28,9 @@ from .scoped_repositories import (
 def _lock_closure(reads: _Reads, run_id: str) -> None:
     """Lock only the existing bounded validated dependency closure.
 
-    Future graph-source producers must serialize every mutation on the affected
-    owning job/run rows, including event insert/reassignment/deletion, ancestry or
+    Future graph-source producers needing project and job/run locks must take all
+    affected projects in sorted order first, then serialize on owning job/run rows,
+    including event insert/reassignment/deletion, ancestry or
     source identity changes and by_job membership. Reassignment locks both owners
     in a consistent order. Existing-row locks alone do not protect phantoms under
     READ COMMITTED. Producers must revalidate under those locks and never mutate a
@@ -67,7 +68,8 @@ def _snapshot(
 ) -> dict[str, Any]:
     """Capture immutable input, using the same scoped policy as ordinary reads.
 
-    A writer must acquire its job/transaction exclusion before a locking capture.
+    A writer must acquire project exclusion before job/run exclusion and before
+    this locking capture whenever its operation requires both lock families.
     PostgreSQL share locks keep current grant/source/scope rows stable to commit.
     SQLite requires the caller's writer transaction, not an implicit DDL step.
     """
