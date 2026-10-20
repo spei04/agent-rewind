@@ -74,3 +74,12 @@ IdP/data, production provisioning, recurring funding and release gates remain op
 No paid production resources, provider calls or partner data were used in this slice.
 Private release-control metadata is indexed outside disposable checkouts with
 owner-only permissions; no downloaded log or package archive is retained.
+
+
+Protected-main [run 39350652882](https://github.com/spei04/agent-rewind/actions/runs/39350652882)
+also passed at merge `0737c7b`. Candidate artifact `12233147116` contains exactly
+wheel, source distribution, candidate manifest and checksums; the lead verified
+all hashes and source identity in memory. Its 269597-byte archive SHA-256 is
+`714e93dc74bc6a0c5b91d5a044644b95e25f731c8d45192d41c40c2d262d5e4e`.
+Retention ends 2026-10-27; the private release record retains the identities,
+not the binary. A candidate artifact does not authorize deployment.
