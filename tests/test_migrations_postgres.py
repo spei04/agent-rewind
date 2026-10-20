@@ -436,7 +436,11 @@ def test_postgres_transaction_preserves_builtin_resolution_order(pg):
 
 @pytest.mark.parametrize(
     "function,return_type",
-    [("set_config(text,text,boolean)", "text"), ("pg_my_temp_schema()", "oid")],
+    [
+        ("set_config(text,text,boolean)", "text"),
+        ("pg_my_temp_schema()", "oid"),
+        ("current_schema()", "name"),
+    ],
 )
 def test_postgres_hostile_initial_path_cannot_invoke_public_overload(pg, function, return_type):
     load_legacy(pg["owner"])
@@ -497,3 +501,66 @@ def test_postgres_json_size_preflight_precedes_driver_decode(pg, monkeypatch):
     ):
         source_digest(connection)
     assert_unversioned(pg["owner"])
+
+
+def test_postgres_connection_hook_retains_safe_options_once(pg):
+    engine = create_engine(
+        pg["owner"].url,
+        poolclass=NullPool,
+        connect_args={
+            "options": "-capplication_name=synthetic-migration -csearch_path=public,pg_catalog"
+        },
+    )
+    try:
+        service._secure_engine(engine)
+        service._secure_engine(engine)
+        with engine.connect() as connection:
+            assert (
+                connection.exec_driver_sql("SHOW application_name").scalar_one()
+                == "synthetic-migration"
+            )
+            assert (
+                connection.exec_driver_sql("SELECT current_schemas(true)").scalar_one()[0]
+                == "pg_catalog"
+            )
+        assert service.schema_status(engine)["state"] == "empty"
+    finally:
+        engine.dispose()
+
+
+def test_postgres_autocommit_engine_refuses_before_any_install_ddl(pg, monkeypatch):
+    engine = create_engine(pg["owner"].url, isolation_level="AUTOCOMMIT", poolclass=NullPool)
+
+    def unexpected_record(*args, **kwargs):
+        raise AssertionError("Autocommit reached metadata mutation")
+
+    monkeypatch.setattr(service, "_record", unexpected_record)
+    try:
+        with pytest.raises(MigrationRefused, match="transactional_connection_required"):
+            service.install(engine, "synthetic-autocommit")
+    finally:
+        engine.dispose()
+    assert service.schema_status(pg["owner"])["state"] == "empty"
+
+
+@pytest.mark.parametrize("state", ["empty", "partial", "future"])
+def test_postgres_runtime_role_cannot_mutate_empty_partial_or_future_schema(
+    pg, frozen_profile, state
+):
+    if state == "partial":
+        with pg["owner"].begin() as connection:
+            connection.exec_driver_sql("CREATE TABLE jobs (id VARCHAR(32) PRIMARY KEY)")
+    elif state == "future":
+        service.install(pg["owner"], "synthetic")
+        with pg["owner"].begin() as connection:
+            connection.exec_driver_sql("UPDATE alembic_version SET version_num='ar_9999_unknown'")
+    with pg["owner"].connect() as connection:
+        before = catalog(connection)
+    for operation in [
+        lambda: service.install(pg["app"], "synthetic"),
+        lambda: service.upgrade(pg["app"]),
+    ]:
+        with pytest.raises(MigrationRefused, match="migration_owner_required"):
+            operation()
+    with pg["owner"].connect() as connection:
+        assert catalog(connection) == before

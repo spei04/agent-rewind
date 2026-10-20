@@ -54,9 +54,20 @@ status uses that connection read-only.
 
 Use `rewind migrate status`. `--source-digest` additionally streams known legacy
 rows into a stable source digest, with one-million-row, one-GiB-total and
-16-MiB-per-row limits. Oversized or invalid content is refused. Digests bind values,
+16-MiB-per-row limits. SQL-side row counts and byte sizes cover every original
+cell (including SQLite dynamic values) before driver transfer; encoded row/total
+limits are checked again while fetching one row at a time. Oversized or invalid
+content is refused. Digests bind values,
 not encryption keys or private row content. Inspection never initializes a missing
 SQLite file, changes database contents, adopts a schema or reveals credentials.
+PostgreSQL service entrypoints install a single trusted connection-startup path
+before first checkout and retain a transaction-local reset for pooled sessions.
+Other operator connection options remain intact. Caller-owned engines must enter
+these interfaces before arbitrary external use: previously performed work or
+dialect probes on an already used engine cannot be retroactively protected.
+The supported driver is the pinned psycopg runtime. PostgreSQL AUTOCOMMIT engines
+are refused before metadata mutation; operator operations require real transactions.
+
 The Python interface `schema_status(engine)` exposes the same read-only result for
 the later startup guard. Database errors cross the CLI as fixed diagnostic codes.
 

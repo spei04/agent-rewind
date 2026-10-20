@@ -8,11 +8,13 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
+from threading import Lock
 from typing import Any
 
-from sqlalchemy import text
-from sqlalchemy.engine import Connection, Engine
+from sqlalchemy import event, text
+from sqlalchemy.engine import Connection, Dialect, Engine
 from sqlalchemy.exc import DBAPIError
+from sqlalchemy.pool import ConnectionPoolEntry
 
 from .inputs import AdoptionMapping, source_digest, validate_legacy_rows, validate_mapping
 from .schema import (
@@ -31,6 +33,25 @@ from .schema import (
 )
 
 MIGRATOR_LOCK = 710381250019
+_CONNECTION_HOOK_LOCK = Lock()
+
+
+def _trusted_startup_path(
+    dialect: Dialect, record: ConnectionPoolEntry, arguments: list[Any], parameters: dict[str, Any]
+) -> None:
+    options = parameters.get("options", "")
+    if not isinstance(options, str):
+        raise MigrationRefused("invalid_database_options")
+    # libpq processes options in order; the trusted final value supersedes an
+    # unsafe DSN/role default before SQLAlchemy probes current_schema().
+    parameters["options"] = options + " -csearch_path=public,pg_temp"
+
+
+def _secure_engine(engine: Engine) -> None:
+    if engine.dialect.name == "postgresql":
+        with _CONNECTION_HOOK_LOCK:
+            if not event.contains(engine, "do_connect", _trusted_startup_path):
+                event.listen(engine, "do_connect", _trusted_startup_path)
 
 
 def _postgres_exclusion(connection: Connection, tables: list[str]) -> None:
@@ -113,6 +134,7 @@ def _legacy_role_inventory(connection: Connection, mapping: AdoptionMapping) -> 
 def migration_transaction(engine: Engine, timeout_seconds: int = 5) -> Iterator[Connection]:
     if type(timeout_seconds) is not int or not 1 <= timeout_seconds <= 30:
         raise MigrationRefused("invalid_lock_timeout")
+    _secure_engine(engine)
     try:
         with engine.connect() as connection:
             try:
@@ -120,6 +142,11 @@ def migration_transaction(engine: Engine, timeout_seconds: int = 5) -> Iterator[
                     connection.exec_driver_sql(f"PRAGMA busy_timeout={timeout_seconds * 1000}")
                     connection.exec_driver_sql("BEGIN EXCLUSIVE")
                 else:
+                    if (
+                        getattr(connection.connection.driver_connection, "autocommit", None)
+                        is not False
+                    ):
+                        raise MigrationRefused("transactional_connection_required")
                     connection.begin()
                     # Omitting pg_catalog keeps built-ins implicitly first; explicitly
                     # placing pg_temp last prevents temporary relation shadowing.
@@ -263,9 +290,15 @@ def schema_status(engine: Engine, *, include_source_digest: bool = False) -> dic
         and not Path(database).exists()
     ):
         return {"revision": None, "state": "empty", "customer_ready": False}
+    _secure_engine(engine)
     try:
         with engine.connect() as connection:
             if dialect(connection) == "postgresql":
+                if (
+                    getattr(connection.connection.driver_connection, "autocommit", None)
+                    is not False
+                ):
+                    raise MigrationRefused("transactional_connection_required")
                 connection.begin()
                 connection.exec_driver_sql("SET TRANSACTION READ ONLY")
                 connection.exec_driver_sql("SET LOCAL search_path TO public, pg_temp")

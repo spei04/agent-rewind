@@ -479,3 +479,103 @@ def test_sqlite_json_size_preflight_precedes_decode(legacy, monkeypatch):
         pytest.raises(MigrationRefused, match="source_limit_exceeded"),
     ):
         source_digest(connection)
+
+
+@pytest.mark.parametrize(
+    "clause",
+    ["COLLATE NOCASE", "COLLATE/* synthetic */NOCASE", "CHECK(length(kind)>0)", "DEFAULT 'run'"],
+)
+def test_sqlite_unreflected_baseline_clauses_fail_closed(clause):
+    from legacy_fixture import FIXTURE_ROOT
+
+    sql = (FIXTURE_ROOT / "baseline.sql").read_text()
+    assert hashlib.sha256(sql.encode()).hexdigest() == read_manifest()["baseline_sql_sha256"]
+    changed = sql.replace("kind VARCHAR(20) NOT NULL", f"kind VARCHAR(20) {clause} NOT NULL", 1)
+    engine = create_engine("sqlite:///:memory:")
+    with engine.begin() as connection:
+        connection.connection.driver_connection.executescript(changed)
+        with pytest.raises(MigrationRefused, match="schema_incompatible"):
+            catalog(connection)
+    engine.dispose()
+
+
+def test_sqlite_clause_scanner_treats_comments_and_quoted_identifiers_deliberately():
+    from legacy_fixture import FIXTURE_ROOT
+
+    from agent_rewind.migrations.schema import verify_baseline
+
+    sql = (FIXTURE_ROOT / "baseline.sql").read_text()
+    changed = sql.replace(
+        "kind VARCHAR(20) NOT NULL",
+        "\"kind\" VARCHAR(20) /* COLLATE NOCASE, 'CHECK' */ NOT NULL",
+        1,
+    )
+    engine = create_engine("sqlite:///:memory:")
+    with engine.begin() as connection:
+        connection.connection.driver_connection.executescript(changed)
+        verify_baseline(catalog(connection), "sqlite")
+    engine.dispose()
+
+
+@pytest.mark.parametrize("multiple", [False, True])
+def test_stored_future_or_multiple_revisions_refuse_without_source_changes(legacy, multiple):
+    database, engine, mapping = legacy
+    service.adopt(engine, mapping, "b" * 64, "d" * 64)
+    with engine.begin() as connection:
+        if multiple:
+            connection.exec_driver_sql("INSERT INTO alembic_version VALUES ('ar_9999_unknown')")
+        else:
+            connection.exec_driver_sql("UPDATE alembic_version SET version_num='ar_9999_unknown'")
+    before = database.read_bytes()
+    for operation in [
+        lambda: service.schema_status(engine),
+        lambda: service.upgrade(engine),
+        lambda: service.adopt(engine, mapping, "b" * 64, "d" * 64),
+    ]:
+        with pytest.raises(MigrationRefused, match="schema_incompatible"):
+            operation()
+        assert database.read_bytes() == before
+    assert_preserved_rows(database)
+
+
+def test_sqlite_oversized_nonjson_cell_never_reaches_encoder_or_key_inventory(legacy, monkeypatch):
+    from agent_rewind.migrations import inputs
+
+    _, engine, mapping = legacy
+    with engine.begin() as connection:
+        connection.execute(text("UPDATE audit SET actor=:value"), {"value": "x" * 5000})
+    monkeypatch.setattr(inputs, "MAX_ROW_BYTES", 4096)
+
+    def unexpected_encode(*args, **kwargs):
+        raise AssertionError("Oversized source reached canonical encoding")
+
+    monkeypatch.setattr(inputs, "canonical", unexpected_encode)
+    parsed = inputs.AdoptionMapping.model_validate(mapping)
+    with (
+        engine.connect() as connection,
+        pytest.raises(MigrationRefused, match="source_limit_exceeded"),
+    ):
+        inputs.validate_legacy_rows(connection, parsed)
+
+
+@pytest.mark.parametrize(
+    "table,column", [("installation_adoptions", "mapping"), ("migration_progress", "cursor")]
+)
+def test_sqlite_additive_metadata_unindexed_collation_is_not_self_authorized(
+    tmp_path, table, column
+):
+    engine = create_engine(f"sqlite:///{tmp_path / 'metadata-collation.sqlite'}")
+    service.install(engine, "synthetic")
+    with engine.begin() as connection:
+        sql = connection.execute(
+            text("SELECT sql FROM sqlite_master WHERE name=:name"), {"name": table}
+        ).scalar_one()
+        changed = sql.replace(f"{column} JSON NOT NULL", f"{column} JSON COLLATE NOCASE NOT NULL")
+        assert changed != sql
+        connection.exec_driver_sql(f"ALTER TABLE {table} RENAME TO old_metadata")
+        connection.exec_driver_sql(changed)
+        connection.exec_driver_sql(f"INSERT INTO {table} SELECT * FROM old_metadata")
+        connection.exec_driver_sql("DROP TABLE old_metadata")
+    with pytest.raises(MigrationRefused, match="schema_incompatible"):
+        service.schema_status(engine)
+    engine.dispose()

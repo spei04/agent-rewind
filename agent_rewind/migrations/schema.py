@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -59,6 +60,7 @@ COLUMNS = {
     ],
 }
 PRIMARY_KEYS = {name: ["run_id", "step"] if name == "events" else ["id"] for name in TABLES}
+SQL_WORD = re.compile(r"[A-Za-z_]+")
 METADATA_TABLES = {"alembic_version", "installation_adoptions", "migration_progress"}
 
 
@@ -102,6 +104,80 @@ def create_baseline(connection: Connection) -> None:
         connection.exec_driver_sql(f'CREATE TABLE "{name}" (' + ",".join(fields) + ")")
 
 
+def _sqlite_ddl_tokens(sql: str) -> list[str]:
+    """Read only unquoted SQL words; comments/quoted contents cannot hide a clause."""
+    tokens = []
+    offset = 0
+    while offset < len(sql):
+        if sql.startswith("--", offset):
+            end = sql.find("\n", offset + 2)
+            offset = len(sql) if end < 0 else end + 1
+        elif sql.startswith("/*", offset):
+            end = sql.find("*/", offset + 2)
+            if end < 0:
+                raise MigrationRefused("schema_incompatible")
+            offset = end + 2
+        elif sql[offset] in {"'", '"', "`", "["}:
+            opening = sql[offset]
+            closing = "]" if opening == "[" else opening
+            offset += 1
+            while offset < len(sql):
+                if sql[offset] != closing:
+                    offset += 1
+                elif closing != "]" and sql.startswith(closing * 2, offset):
+                    offset += 2
+                else:
+                    offset += 1
+                    break
+            else:
+                raise MigrationRefused("schema_incompatible")
+        else:
+            word = SQL_WORD.match(sql, offset)
+            if word:
+                tokens.append(word.group().upper())
+                offset += len(word.group())
+            else:
+                offset += 1
+    return tokens
+
+
+def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None:
+    # Unindexed COLLATE and conflict policies are invisible to SQLite reflection.
+    # This is a conservative supported-DDL exclusion, not a replacement SQL parser.
+    forbidden = {
+        "COLLATE",
+        "CONFLICT",
+        "CHECK",
+        "REFERENCES",
+        "GENERATED",
+        "AS",
+        "WITHOUT",
+        "STRICT",
+        "AUTOINCREMENT",
+        "DEFAULT",
+        "DEFERRABLE",
+        "DEFERRED",
+    }
+    for table in set(tables) & (set(TABLES) | METADATA_TABLES):
+        size: int | None = connection.execute(
+            text(
+                "SELECT length(CAST(sql AS BLOB)) FROM sqlite_master "
+                "WHERE type='table' AND name=:name"
+            ),
+            {"name": table},
+        ).scalar_one()
+        if size is None or size > 65536:
+            raise MigrationRefused("schema_incompatible")
+        sql: str = connection.execute(
+            text("SELECT sql FROM sqlite_master WHERE type='table' AND name=:name"), {"name": table}
+        ).scalar_one()
+        if not isinstance(sql, str):
+            raise MigrationRefused("schema_incompatible")
+        restricted = forbidden if table in TABLES else forbidden - {"CHECK", "AS"}
+        if restricted.intersection(_sqlite_ddl_tokens(sql)):
+            raise MigrationRefused("schema_incompatible")
+
+
 def catalog(connection: Connection) -> dict[str, Any]:
     """Read structure only. Fixed public/main profile; reject non-table executable objects."""
     name = dialect(connection)
@@ -111,6 +187,7 @@ def catalog(connection: Connection) -> dict[str, Any]:
     if len(tables) > 16:
         raise MigrationRefused("schema_incompatible")
     if name == "sqlite":
+        _sqlite_supported_clauses(connection, tables)
         extras = connection.exec_driver_sql(
             "SELECT 1 FROM sqlite_master WHERE type IN ('trigger','view') LIMIT 1"
         ).first()

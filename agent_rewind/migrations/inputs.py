@@ -10,8 +10,10 @@ from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
-from sqlalchemy import text
+from sqlalchemy import LargeBinary, Text, cast, column, func, literal, select, text
+from sqlalchemy import table as sql_table
 from sqlalchemy.engine import Connection
+from sqlalchemy.sql.elements import ColumnElement
 
 from .schema import COLUMNS, TABLES, MigrationRefused, canonical, dialect
 
@@ -110,17 +112,39 @@ def read_mapping(path: Path) -> AdoptionMapping:
         raise MigrationRefused("invalid_mapping_file") from None
 
 
+def _source_preflight(connection: Connection) -> None:
+    """Bound every original row/cell before DBAPI transfer, including SQLite affinity."""
+    rows = 0
+    total = 0
+    for name in TABLES:
+        source = sql_table(name, *(column(definition[0]) for definition in COLUMNS[name]))
+        bounded_rows = select(literal(1)).select_from(source).limit(1000001 - rows).subquery()
+        count: int = connection.execute(select(func.count()).select_from(bounded_rows)).scalar_one()
+        rows += count
+        if rows > 1000000:
+            raise MigrationRefused("source_limit_exceeded")
+        row_bytes: ColumnElement[int] = literal(0)
+        for field in source.c:
+            size = (
+                func.octet_length(cast(field, Text))
+                if dialect(connection) == "postgresql"
+                else func.length(cast(field, LargeBinary))
+            )
+            row_bytes = row_bytes + func.coalesce(size, 0)
+        oversized = select(literal(1)).select_from(source).where(row_bytes > MAX_ROW_BYTES).limit(1)
+        if connection.execute(oversized).first():
+            raise MigrationRefused("source_limit_exceeded")
+        stored_bytes: int = connection.execute(
+            select(func.coalesce(func.sum(row_bytes), 0)).select_from(source)
+        ).scalar_one()
+        total += stored_bytes
+        if total > MAX_SOURCE_BYTES:
+            raise MigrationRefused("source_limit_exceeded")
+
+
 def source_digest(connection: Connection) -> str:
     """Hash all original values in stable row order, streaming with hard work bounds."""
-    # JSON must cross the driver as text: PostgreSQL's automatic JSON decoder
-    # otherwise collapses duplicate members before strict validation can inspect them.
-    size_query = (
-        "SELECT 1 FROM records WHERE octet_length(CAST(data AS TEXT)) > :limit LIMIT 1"
-        if dialect(connection) == "postgresql"
-        else "SELECT 1 FROM records WHERE length(CAST(data AS BLOB)) > :limit LIMIT 1"
-    )
-    if connection.execute(text(size_query), {"limit": MAX_ROW_BYTES}).first():
-        raise MigrationRefused("source_limit_exceeded")
+    _source_preflight(connection)
     digest = hashlib.sha256()
     total = 0
     count = 0
@@ -149,6 +173,7 @@ def source_digest(connection: Connection) -> str:
 
 
 def validate_legacy_rows(connection: Connection, mapping: AdoptionMapping) -> None:
+    digest = source_digest(connection)
     if connection.execute(
         text("SELECT 1 FROM jobs WHERE status NOT IN ('succeeded','failed','cancelled') LIMIT 1")
     ).first():
@@ -161,9 +186,11 @@ def validate_legacy_rows(connection: Connection, mapping: AdoptionMapping) -> No
         text("SELECT 1 FROM jobs WHERE reserved < 0 OR budget < reserved LIMIT 1")
     ).first():
         raise MigrationRefused("invalid_legacy_reservation")
-    keys: set[str] = set(connection.execute(text("SELECT id FROM api_keys")).scalars())
-    if any(k.key_id not in keys for k in mapping.key_dispositions):
-        raise MigrationRefused("unknown_key_disposition")
+    for disposition in mapping.key_dispositions:
+        if not connection.execute(
+            text("SELECT 1 FROM api_keys WHERE id=:key"), {"key": disposition.key_id}
+        ).first():
+            raise MigrationRefused("unknown_key_disposition")
     dispositions = {k.key_id: k.role for k in mapping.key_dispositions}
     for grant in mapping.principal_grants:
         if (
@@ -171,5 +198,5 @@ def validate_legacy_rows(connection: Connection, mapping: AdoptionMapping) -> No
             and dispositions.get(grant.principal_id[8:]) != grant.role
         ):
             raise MigrationRefused("invalid_key_grant")
-    if source_digest(connection) != mapping.source_dataset_digest:
+    if digest != mapping.source_dataset_digest:
         raise MigrationRefused("source_digest_mismatch")
