@@ -16,7 +16,7 @@ from uuid import uuid4
 
 import pytest
 from legacy_fixture import FIXTURE_ROOT, canonical_bytes, read_manifest
-from postgres_control import wait_for_database_drain
+from postgres_control import observe_exclusion_failure, wait_for_database_drain
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.pool import NullPool
 
@@ -30,7 +30,13 @@ pytestmark = pytest.mark.skipif(not POSTGRES, reason="Opt-in synthetic PostgreSQ
 
 
 @pytest.fixture
-def pg():
+def pg(monkeypatch):
+    exclusion = service._postgres_exclusion
+
+    def observed_exclusion(connection, tables):
+        observe_exclusion_failure(exclusion, connection, tables)
+
+    monkeypatch.setattr(service, "_postgres_exclusion", observed_exclusion)
     admin = create_engine(POSTGRES, isolation_level="AUTOCOMMIT", poolclass=NullPool)
     token = "ar_migration_" + uuid4().hex
     owner, app, group = token + "_owner", token + "_app", token + "_group"
