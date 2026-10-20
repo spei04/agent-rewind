@@ -391,7 +391,7 @@
         "AR-033-C",
         "AR-033-D"
       ],
-      "status": "Not started"
+      "status": "In progress"
     },
     "AR-034": {
       "milestone": "M4",
@@ -606,7 +606,7 @@
       "children": [
         "AR-051-A"
       ],
-      "status": "In progress"
+      "status": "Verified"
     }
   },
   "tasks": [
@@ -1044,7 +1044,7 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill.",
+      "scope": "Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill. PostgreSQL adoption also requires an operator-attested nonempty inventory of retired legacy writer roles, bound to persisted intent; disable their login/superuser and inherited writer paths, refuse other/ambiguous client sessions, and reject indirect public routine write paths. This is a bounded correction for the actual legacy compose superuser, not proof against dishonest administrators.",
       "acceptance": "Empty install and known baseline upgrade preserve all manifest identities; unknown schema refuses safely",
       "tests": "M1-001 through M1-004: fresh/legacy/unknown, transactional interruption and concurrent migrators",
       "security_reliability": "Migration credential only; lock/timeouts; backup before adoption",
@@ -1059,7 +1059,7 @@
         "TL",
         "QE"
       ],
-      "pull_request_boundary": "Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill. No online data rewrite, automatic downgrade or run projection.",
+      "pull_request_boundary": "Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill. PostgreSQL adoption also requires an operator-attested nonempty inventory of retired legacy writer roles, bound to persisted intent; disable their login/superuser and inherited writer paths, refuse other/ambiguous client sessions, and reject indirect public routine write paths. This is a bounded correction for the actual legacy compose superuser, not proof against dishonest administrators. No online data rewrite, automatic downgrade or run projection",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "assigned_to": "Engineer C \u2014 migrations",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/28"
@@ -3873,7 +3873,7 @@
       "tests": "Config schema, topology/IAM policy lint and missing budget/region rejection",
       "security_reliability": "No public DB, shared credentials or sandbox access to cloud metadata",
       "out_of_scope": "No cloud provisioning or worker image build",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         2.0,
@@ -3884,7 +3884,9 @@
         "QE"
       ],
       "pull_request_boundary": "Specify versioned deployment config, region, identities, private ingress, DB/store/KMS and resource labels. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
+      "assigned_to": "Engineer A \u2014 reference configuration",
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/30"
     },
     {
       "id": "AR-033-B",
@@ -5894,7 +5896,7 @@
       "tests": "Workflow negatives for missing/skipped/cancelled gates and PR delivery; installed wheel/sdist smoke outside checkout with module provenance; archive/path allowlist rejection; lint/type/unit/PostgreSQL/gVisor and supported Python jobs; frozen dependency audit without blanket ignores; actual main artifact-generation evidence.",
       "security_reliability": "Verified full-SHA actions, immutable Postgres/runsc, no persisted checkout credentials, explicit token permissions, bounded jobs/retention/update cadence and PR concurrency without cancelling active main delivery. No credentials/private evidence in archives. Main-only delivery does not establish branch protection; settings need separate read-back.",
       "out_of_scope": "No package publication, production deployment, paid services, model calls or repository-settings mutations. AR-043 retains signed releases, SBOM/attestation and broader supply-chain acceptance.",
-      "status": "In progress",
+      "status": "Verified",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         2.0,
@@ -5909,7 +5911,15 @@
       "contracts_status": "C03 trust boundaries and AR-004-A inventory verified. This bounded CI foundation does not close C16 or AR-043.",
       "assigned_to": "Engineer B \u2014 delivery/platform",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/26",
-      "independent_reviewer": "Engineer A"
+      "independent_reviewer": "Engineer A",
+      "evidence": {
+        "pull_request": "https://github.com/spei04/agent-rewind/pull/29",
+        "reviewed_commit": "7c31b14a04f8be1e4d0bce75a43f1ea9d0ea3abf",
+        "commit": "13465c10add08020b1be67b20ed081c0bc27f3e4",
+        "record": "docs/delivery/CI_EVIDENCE_2026-10-20.md",
+        "checks": "Both Python core/PostgreSQL jobs, real gVisor, security, package, CI gate and protected-main delivery passed; artifact checksums/source identities verified independently.",
+        "reviewer": "Engineer A; lead integration review"
+      }
     }
   ],
   "gates": [
@@ -6784,7 +6794,7 @@
       "resolution": "AR-020-A/B explicitly introduce study-scoped ledger accounts and project/study/call closure; AR-022-A tests atomic study-wide caps under parallel child dispatch."
     }
   ],
-  "planning_status": "Approved execution underway: internal M0 and development G0 verified; migration implementation and secure CI active. No enterprise-readiness claim.",
+  "planning_status": "Approved execution underway: internal M0, development G0 and secure CI/candidate delivery verified; migration and reference configuration active. No enterprise-readiness claim.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -6824,12 +6834,15 @@
       9,
       10,
       11,
-      12,
-      26
+      12
     ],
     "active_child_issues": {
-      "AR-005-B": 28
-    }
+      "AR-005-B": 28,
+      "AR-033-A": 30
+    },
+    "closed_implementation_issues": [
+      26
+    ]
   },
   "execution_capacity": {
     "lead": "Project lead",

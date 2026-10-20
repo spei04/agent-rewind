@@ -471,7 +471,7 @@ M1 / P0 · 3 PRs · 6 engineering days · In progress · [Tracking issue #5](htt
 #### AR-005-B — Explicit Alembic installation and adoption CLI
 
 - **Objective:** Upgrade stored history safely without changing evidence identity. This task delivers explicit alembic installation and adoption cli.
-- **Implementation scope / PR boundary:** Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill.
+- **Implementation scope / PR boundary:** Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill. PostgreSQL adoption requires an explicit nonempty retired-writer-role inventory bound to intent; verify disabled login/superuser and inherited write paths, reject other/ambiguous sessions and indirect public routines. This corrects the legacy compose application-superuser assumption; operator inventory remains attested, not dishonest-admin proof.
 - **Out of scope:** No online data rewrite, automatic downgrade or run projection.
 - **Prerequisites:** [G0](#g0), [AR-005-A](#ar-005-a). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C04; definitions and producer availability in the contract register.
@@ -1990,9 +1990,9 @@ M4 / P0 · 4 PRs · 10 engineering days · Not started
 - **Required automated tests:** Config schema, topology/IAM policy lint and missing budget/region rejection.
 - **Security and reliability:** No public DB, shared credentials or sandbox access to cloud metadata.
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
-- **Responsible role:** PL; required reviewers: SEC, QE. Named assignee pending staffing.
+- **Responsible role:** PL; required reviewers: SEC, QE. Assigned contributor: Engineer A — reference configuration.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** In progress; [issue #30](https://github.com/spei04/agent-rewind/issues/30). G0/AR-003-B verified; no provisioning.
 
 <a id="ar-033-b"></a>
 
@@ -3036,7 +3036,7 @@ M7 / P1 · 3 PRs · 10 engineering days · Not started
 
 ### AR-051 — Secure continuous integration and verify traceable installable candidates
 
-M1 / P0 · 1 PR · 2 engineering days · In progress · [Tracking issue #26](https://github.com/spei04/agent-rewind/issues/26)
+M1 / P0 · 1 PR · 2 engineering days · Verified · [Tracking issue #26](https://github.com/spei04/agent-rewind/issues/26)
 
 <a id="ar-051-a"></a>
 
@@ -3053,7 +3053,7 @@ M1 / P0 · 1 PR · 2 engineering days · In progress · [Tracking issue #26](htt
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
 - **Responsible role:** PL; B implements, A independently reviews, lead integrates.
 - **Definition of done:** Task acceptance, exact-commit independent review, successful PR checks and actual main candidate run with safe evidence; roadmap/backlog and issue updated. This does not close AR-043 or authorize production.
-- **Progress:** In progress; current evidence and handoffs in [ASSIGNMENTS.md](ASSIGNMENTS.md).
+- **Progress:** Verified via PR #29 and actual protected-main delivery; [evidence record](delivery/CI_EVIDENCE_2026-10-20.md).
 
 ## Highest-risk assumptions and decisions requiring approval
 
@@ -3072,7 +3072,7 @@ No question above asks to reapprove the already selected core architecture. The 
 
 Current dependency validation, 2026-10-20: 146 unique tasks across 51 parents, 519 resolving acyclic edges, 26 gates and 18 contracts. Required fields, task bounds, E0 ancestry, producer ancestry, parent totals and conditional first-ten-day ordering/capacity pass. Effort is 429 days, M1 41.5, PL 88, upper ranges 723.6, alternate 25% allowance 536.25. Longest effort path remains 146.5 days; no calendar commitment. AR-051-A starts after its verified prerequisites; AR-005-B starts after verified G0. Runtime acceptance and production gates remain unproven.
 
-GitHub issues #1–4 are closed for verified internal specification/development-decision scope. Parent issues #5–12 remain open; #26 tracks the new CI priority and #28 the active migration child. The original 19 coarse package edges were removed; exact task/gate dependencies remain authoritative. Materialize future child issues when their scope is authorized. Closing a planning issue never establishes customer acceptance or production readiness.
+GitHub issues #1–4 are closed for verified internal specification/development-decision scope. Parent issues #5–12 remain open; #26 is closed for verified CI/candidates, #28 tracks migration and #30 reference configuration. The original 19 coarse package edges were removed; exact task/gate dependencies remain authoritative. Materialize future child issues when their scope is authorized. Closing a planning issue never establishes customer acceptance or production readiness.
 
 Update procedure for each completed PR: update task status and evidence in the machine-readable ledger and this card; recalculate parent/milestone effort/status and dependency changes; update PLAN Section 10/14 and the matching issue; rerun ID/required-field/DAG/contract-availability/first-fortnight allocation checks; verify local links and draft OpenAPI structure. Any added edge, new gate or changed estimate requires schedule revalidation. Do not mark a task Verified without applicable commit/environment evidence, reviewer disposition and explicit limitations.
 
@@ -3089,3 +3089,5 @@ Contract-consumer dependency review, 2026-10-19: AR-009-A now waits for the AR-0
 G0 execution checkpoint, 2026-10-19: AR-004-B/C verified; ARCH0/G0 satisfied for development/testing under existing owner authority. First runtime assignment is AR-005-B, followed by AR-005-C; AR-033-A configuration may proceed in parallel. No new deployment/spending/data approval is inferred.
 
 2026-10-20 priority checkpoint: B owns AR-051-A secure CI/candidates, A reviews CI/dependencies, C implements AR-005-B in issue #28. PR #25 records explicit build/test authorization; PR #27 updates cryptography after independent compatibility/advisory review and exact-head core/gVisor success. No production, model spending or customer-data gate was opened.
+
+2026-10-20 delivery checkpoint: AR-051-A verified at merged 13465c1 with independent exact-head review, protected-main run 39346262029 and artifact 12230273836. A reassigned to AR-033-A (issue #30), B to independent AR-005-B review, C continues migration. Migration review exposed the legacy application-superuser assumption; the scoped C04 adoption erratum adds explicit retired writer roles and real exclusion tests. No production gate closes.
