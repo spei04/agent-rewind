@@ -213,7 +213,9 @@ customer admission. `/healthz` is process liveness only and does not open a data
 it is not customer readiness or an artifact sentinel. CLI `migrate status` remains
 the operator inspection path. `Database.claim` guards the shared claim boundary
 before expiring leases or selecting a job; a worker on incompatible metadata does
-no work or model/artifact calls. Legacy endpoint and lease unit tests explicitly
+no work or model/artifact calls. The worker command exits nonzero with the fixed
+`worker_schema_refused:<code>` diagnostic instead of silently treating refusal as
+an empty queue. Legacy endpoint and lease unit tests explicitly
 patch the guard through a pytest fixture; production has no equivalent bypass.
 
 Runtime pools wait at most 1s for a checkout, psycopg uses a 3s per-endpoint connection
@@ -234,7 +236,9 @@ that requirement is met.
 Production PostgreSQL connections require one numeric TCP host/hostaddr or explicit
 Unix socket path. A logical hostname can remain alongside numeric hostaddr for TLS
 identity verification. DNS-only, hidden service and multi-host production DSNs
-refuse before network use. Development permits one DNS host with the operating
+refuse before network use. Final DBAPI connection arguments are checked again,
+including overrides; inherited libpq routing/service variables cannot silently
+replace the explicit endpoint. Development permits one DNS host with the operating
 system resolver limitation. Deployment must preserve a bounded transport profile;
 this slice does not certify network-partition recovery or HA rolling upgrades.
 

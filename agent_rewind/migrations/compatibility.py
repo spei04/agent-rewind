@@ -4,15 +4,17 @@ from __future__ import annotations
 
 import ipaddress
 import math
+import os
 import sqlite3
 import time
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
 from threading import Lock
 from typing import Any, Literal
+from weakref import WeakKeyDictionary
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 from sqlalchemy import event, text
@@ -27,6 +29,14 @@ POOL_TIMEOUT_SECONDS = 1
 CONNECT_TIMEOUT_SECONDS = 3
 INSPECTION_TIMEOUT_SECONDS = 2
 _CONNECT_HOOK_LOCK = Lock()
+
+
+@dataclass
+class _RuntimePolicy:
+    production: bool
+
+
+_RUNTIME_POLICIES: WeakKeyDictionary[Engine, _RuntimePolicy] = WeakKeyDictionary()
 
 
 class BackfillRequirement(BaseModel):
@@ -79,8 +89,16 @@ class SchemaNotReady(RuntimeError):
 
 
 def _bounded_connect(
-    dialect: Dialect, record: ConnectionPoolEntry, arguments: list[Any], parameters: dict[str, Any]
+    dialect: Dialect,
+    record: ConnectionPoolEntry,
+    arguments: list[Any],
+    parameters: dict[str, Any],
+    *,
+    production: bool = False,
 ) -> None:
+    if arguments:
+        raise MigrationRefused("unsupported_runtime_endpoint")
+    _validate_runtime_endpoint(parameters, production=production)
     options = parameters.get("options", "")
     if not isinstance(options, str):
         raise MigrationRefused("invalid_database_options")
@@ -90,26 +108,28 @@ def _bounded_connect(
     parameters["connect_timeout"] = CONNECT_TIMEOUT_SECONDS
 
 
-def configure_runtime_engine(engine: Engine, *, production: bool = False) -> None:
-    """Configure before the first checkout; no connection is opened here.
-
-    Production uses one numeric address/socket so DNS is outside the connection
-    path. A logical host may accompany hostaddr for TLS hostname verification.
-    Development DNS resolution remains subject to the operating system resolver.
-    """
-    if engine.dialect.name == "sqlite":
-        return
-    if engine.dialect.name != "postgresql" or engine.dialect.driver != "psycopg":
-        raise MigrationRefused("unsupported_runtime_database")
-    query = engine.url.query
-    host = query.get("host", engine.url.host or "")
-    address = query.get("hostaddr", "")
+def _validate_runtime_endpoint(parameters: Mapping[str, Any], *, production: bool) -> None:
+    # libpq may fill absent routing fields from the environment. Refuse hidden
+    # routing rather than validate a URL and then connect to a different endpoint.
+    if any(
+        parameters.get(key) or os.environ.get(env)
+        for key, env in (
+            ("service", "PGSERVICE"),
+            ("servicefile", "PGSERVICEFILE"),
+        )
+    ):
+        raise MigrationRefused("explicit_runtime_endpoint_required")
+    for key, env in (("host", "PGHOST"), ("hostaddr", "PGHOSTADDR"), ("port", "PGPORT")):
+        if os.environ.get(env) and not parameters.get(key):
+            raise MigrationRefused("explicit_runtime_endpoint_required")
+    host, address = parameters.get("host", ""), parameters.get("hostaddr", "")
     if not isinstance(host, str) or not isinstance(address, str):
         raise MigrationRefused("unsupported_runtime_endpoint")
-    if "," in host or "," in address:
+    if "," in host or "," in address or not (host or address):
         raise MigrationRefused("unsupported_runtime_endpoint")
-    if query.get("service") or query.get("servicefile") or not (host or address):
-        raise MigrationRefused("explicit_runtime_endpoint_required")
+    port = parameters.get("port", 5432)
+    if not isinstance(port, str | int) or not str(port).isdigit() or not 1 <= int(port) <= 65535:
+        raise MigrationRefused("unsupported_runtime_endpoint")
     if production:
         endpoint = address or host
         if not endpoint.startswith("/"):
@@ -117,9 +137,43 @@ def configure_runtime_engine(engine: Engine, *, production: bool = False) -> Non
                 ipaddress.ip_address(endpoint)
             except ValueError:
                 raise MigrationRefused("numeric_runtime_endpoint_required") from None
+
+
+def configure_runtime_engine(engine: Engine, *, production: bool = False) -> None:
+    """Configure before first checkout; validate final DBAPI parameters again.
+
+    Production uses one numeric address/socket so DNS is outside the connection
+    path. A logical host may accompany hostaddr for TLS hostname verification.
+    Development DNS resolution remains subject to the operating system resolver.
+    An already production-configured engine cannot be downgraded by its wrapper.
+    """
+    if engine.dialect.name == "sqlite":
+        return
+    if engine.dialect.name != "postgresql" or engine.dialect.driver != "psycopg":
+        raise MigrationRefused("unsupported_runtime_database")
+    arguments, parameters = engine.dialect.create_connect_args(engine.url)
+    if arguments:
+        raise MigrationRefused("unsupported_runtime_endpoint")
+    _validate_runtime_endpoint(parameters, production=production)
     with _CONNECT_HOOK_LOCK:
-        if not event.contains(engine, "do_connect", _bounded_connect):
-            event.listen(engine, "do_connect", _bounded_connect)
+        policy = _RUNTIME_POLICIES.get(engine)
+        if policy is None:
+            policy = _RuntimePolicy(production)
+            _RUNTIME_POLICIES[engine] = policy
+
+            def connect(
+                dialect: Dialect,
+                record: ConnectionPoolEntry,
+                arguments: list[Any],
+                parameters: dict[str, Any],
+            ) -> None:
+                _bounded_connect(
+                    dialect, record, arguments, parameters, production=policy.production
+                )
+
+            event.listen(engine, "do_connect", connect)
+        else:
+            policy.production = policy.production or production
 
 
 @contextmanager
@@ -175,11 +229,18 @@ def _inspection(connection: Connection) -> Iterator[None]:
         finally:
             event.remove(connection, "before_cursor_execute", before_query)
     finally:
-        connection.rollback()
-        if previous is not None and isinstance(raw, sqlite3.Connection):
-            raw.set_progress_handler(None, 0)
-            raw.execute(f"PRAGMA query_only={previous[0]}")
-            raw.execute(f"PRAGMA busy_timeout={previous[1]}")
+        try:
+            # An expired callback must not interrupt rollback itself. Failed cleanup
+            # invalidates the physical connection rather than returning dirty state.
+            if previous is not None and isinstance(raw, sqlite3.Connection):
+                raw.set_progress_handler(None, 0)
+            connection.rollback()
+            if previous is not None and isinstance(raw, sqlite3.Connection):
+                raw.execute(f"PRAGMA query_only={previous[0]}")
+                raw.execute(f"PRAGMA busy_timeout={previous[1]}")
+        except (SQLAlchemyError, sqlite3.Error):
+            connection.invalidate()
+            raise
 
 
 def check_schema_compatibility(
@@ -227,7 +288,7 @@ def check_schema_compatibility(
         return CompatibilityResult("incompatible", "release_profile_invalid")
     except MigrationRefused:
         return CompatibilityResult("incompatible", "schema_incompatible")
-    except (SQLAlchemyError, OSError, TimeoutError):
+    except (SQLAlchemyError, sqlite3.Error, OSError, TimeoutError):
         return CompatibilityResult("unavailable", "schema_unavailable")
 
 
@@ -248,5 +309,5 @@ def runtime_schema_compatibility(engine: Engine) -> CompatibilityResult:
             return check_schema_compatibility(connection, profile)
     except (ValueError, ValidationError, MigrationRefused):
         return CompatibilityResult("incompatible", "release_profile_or_connection_invalid")
-    except (SQLAlchemyError, OSError, TimeoutError):
+    except (SQLAlchemyError, sqlite3.Error, OSError, TimeoutError):
         return CompatibilityResult("unavailable", "schema_unavailable")
