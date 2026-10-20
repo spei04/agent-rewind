@@ -1,6 +1,7 @@
 # Keep source distributions limited to installable runtime and public package metadata.
 include LICENSE README.md pyproject.toml uv.lock MANIFEST.in
 recursive-include agent_rewind *.py
+recursive-include agent_rewind/migrations/profiles *.json
 recursive-include agent_rewind/web *.html *.css *.js
 prune tests
 prune docs

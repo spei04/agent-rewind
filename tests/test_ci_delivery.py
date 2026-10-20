@@ -87,11 +87,18 @@ def test_distribution_rejects_private_and_unsafe_members(tmp_path, wheel, forbid
 
 
 @pytest.mark.parametrize("wheel", [False, True])
-def test_distribution_rejects_links_and_missing_web_asset(tmp_path, wheel):
+@pytest.mark.parametrize(
+    "asset",
+    [
+        "agent_rewind/web/app.js",
+        "agent_rewind/migrations/profiles/sqlite.json",
+        "agent_rewind/migrations/versions/0002_adoption.py",
+    ],
+)
+def test_distribution_rejects_links_and_missing_runtime_resource(tmp_path, wheel, asset):
     path = make_distribution(tmp_path, wheel, "agent_rewind/cli.py", link=True)
     with pytest.raises(ValueError):
         ARTIFACTS["validate_distribution"](path, "0.1.0")
-    asset = "agent_rewind/web/app.js"
     if not wheel:
         asset = "agent_rewind-0.1.0/" + asset
     path = make_distribution(tmp_path, wheel, omit=asset)

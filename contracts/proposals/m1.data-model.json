@@ -318,7 +318,8 @@
         "Fresh install records source_kind=fresh, verified empty-source fingerprint, null target/evidence and fresh-only mapping; AR-007-A explicit operator initialization supplies ownership/grants atomically. Never run legacy adopt on a versioned fresh install.",
         "Legacy source requires non-null target/evidence and bounded schema-1 mapping naming dataset digest, all-verified-legacy-resources selector, canonical grants/defaults and key dispositions. Unknown kinds/ambiguous closure block activation.",
         "Target organization/project IDs may be NULL only for fresh/prepared state; ownership_complete always requires both targets.",
-        "Backup/drain evidence is required for legacy source in every state, and explicitly NULL/inapplicable for fresh source in both prepared and ownership_complete; never fabricate legacy evidence for initialization."
+        "Backup/drain evidence is required for legacy source in every state, and explicitly NULL/inapplicable for fresh source in both prepared and ownership_complete; never fabricate legacy evidence for initialization.",
+        "AR-005-B erratum: PostgreSQL schema-1 mapping requires 1..64 distinct legacy_writer_roles, existing NOLOGIN/NOSUPERUSER roles excluding current migrator; no application login may inherit/SET ROLE them. Persist exact inventory in mapping/digest; changed retry conflicts. Refuse every other target-DB session including superusers/ambiguous visibility. Unrelated cluster administrators are trusted; inventory/evidence remains operator-attested. SQLite requires absent/empty inventory and process/OS drain."
       ]
     },
     "migration_progress": {

@@ -9,7 +9,7 @@ from agent_rewind.models import Action
 
 def test_auth_roles_key_revocation_and_no_payload_echo(settings, task):
     app = create_app(settings)
-    app.state.db.migrate()
+    app.state.db.migrate(installation_key="synthetic-test")
     with TestClient(app) as client:
         assert client.get("/api/runs").status_code == 401
         admin = {"Authorization": "Bearer " + settings.bootstrap_key.get_secret_value()}
@@ -31,7 +31,7 @@ def test_auth_roles_key_revocation_and_no_payload_echo(settings, task):
 
 def test_tampered_cookie_rejected(settings):
     app = create_app(settings)
-    app.state.db.migrate()
+    app.state.db.migrate(installation_key="synthetic-test")
     with TestClient(app) as client:
         client.cookies.set("rewind_session", "forged")
         assert client.get("/api/me").status_code == 401
@@ -45,7 +45,7 @@ def test_tool_paths_are_normalized(path):
 
 def test_scoped_key_expiry(settings):
     app = create_app(settings)
-    app.state.db.migrate()
+    app.state.db.migrate(installation_key="synthetic-test")
     app.state.db.issue_key("expired-token", "administrator", "expired", time.time() - 1, "test")
     with TestClient(app) as client:
         assert (
@@ -56,7 +56,7 @@ def test_scoped_key_expiry(settings):
 
 def test_oversized_body_is_rejected_before_parsing(settings):
     app = create_app(settings)
-    app.state.db.migrate()
+    app.state.db.migrate(installation_key="synthetic-test")
     with TestClient(app) as client:
         response = client.post("/api/runs", content=b"x" * (9 * 1024 * 1024 + 1))
         assert response.status_code == 413
@@ -66,7 +66,7 @@ def test_cookie_write_requires_csrf_and_origin(settings, task):
     from agent_rewind.models import canonical
 
     app = create_app(settings)
-    app.state.db.migrate()
+    app.state.db.migrate(installation_key="synthetic-test")
     cookie = app.state.auth.cipher.encrypt(
         canonical({"sub": "test-user", "role": "operator", "csrf": "nonce"})
     ).decode()

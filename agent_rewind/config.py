@@ -6,6 +6,14 @@ from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class MigrationSettings(BaseSettings):
+    """Metadata operators do not require artifact or inference credentials."""
+
+    model_config = SettingsConfigDict(env_prefix="REWIND_", env_file=".env", extra="ignore")
+    database_url: SecretStr | None = None
+    migration_database_url: SecretStr | None = None
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="REWIND_", env_file=".env", extra="ignore")
     mode: Literal["development", "production"] = "development"

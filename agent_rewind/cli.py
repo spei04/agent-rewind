@@ -8,16 +8,90 @@ from pathlib import Path
 import httpx
 import uvicorn
 from cryptography.fernet import Fernet
+from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
+from sqlalchemy.exc import ArgumentError
 
-from .config import Settings
+from .config import MigrationSettings, Settings
 from .database import Database
+
+
+def _migrate(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    from .migrations.inputs import read_mapping
+    from .migrations.schema import HEAD, MigrationRefused
+    from .migrations.service import adopt, install, schema_status, upgrade
+
+    settings = MigrationSettings()
+    action = "install" if args.command == "init" else (args.migration_action or "upgrade")
+    selected = (
+        (settings.database_url or settings.migration_database_url)
+        if action == "status"
+        else (settings.migration_database_url or settings.database_url)
+    )
+    if selected is None:
+        parser.error("migration_database_url_required")
+    try:
+        url = make_url(selected.get_secret_value())
+        if (
+            url.get_backend_name() == "postgresql"
+            and action != "status"
+            and (settings.migration_database_url is None)
+        ):
+            parser.error("dedicated_migration_database_url_required")
+        if url.get_backend_name() not in {"sqlite", "postgresql"}:
+            parser.error("unsupported_database")
+        if (
+            url.get_backend_name() == "sqlite"
+            and url.database
+            and action == "install"
+            and url.database != ":memory:"
+        ):
+            Path(url.database).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        engine = create_engine(url, pool_pre_ping=True)
+    except (ArgumentError, ImportError, ValueError, OSError):
+        parser.error("invalid_migration_database_url")
+    try:
+        timeout = getattr(args, "lock_timeout", 5)
+        if action == "status":
+            result = schema_status(engine, include_source_digest=args.source_digest)
+        elif action == "install":
+            result = install(engine, args.installation_key, timeout_seconds=timeout)
+        elif action == "adopt":
+            result = adopt(
+                engine,
+                read_mapping(args.mapping),
+                args.backup_evidence,
+                args.drain_evidence,
+                timeout_seconds=timeout,
+            )
+        else:
+            result = upgrade(engine, getattr(args, "target", HEAD), timeout_seconds=timeout)
+        print(json.dumps(result, sort_keys=True))
+    except MigrationRefused as error:
+        parser.error(error.code)
+    finally:
+        engine.dispose()
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Agent Rewind experiment service")
     commands = parser.add_subparsers(dest="command", required=True)
-    commands.add_parser("init", help="Create local secret placeholders and initialize metadata")
-    commands.add_parser("migrate", help="Initialize the database schema")
+    initialize = commands.add_parser("init", help="Create local secret placeholders")
+    initialize.add_argument("--installation-key")
+    migrate = commands.add_parser("migrate", help="Explicit versioned metadata migration")
+    migration_commands = migrate.add_subparsers(dest="migration_action")
+    status = migration_commands.add_parser("status", help="Read revision and adoption state")
+    status.add_argument("--source-digest", action="store_true")
+    install_parser = migration_commands.add_parser("install", help="Install an empty database")
+    install_parser.add_argument("--installation-key", required=True)
+    adopt_parser = migration_commands.add_parser("adopt", help="Adopt the exact known baseline")
+    adopt_parser.add_argument("--mapping", type=Path, required=True)
+    adopt_parser.add_argument("--backup-evidence", required=True)
+    adopt_parser.add_argument("--drain-evidence", required=True)
+    upgrade_parser = migration_commands.add_parser("upgrade", help="Upgrade known versioned state")
+    upgrade_parser.add_argument("--target", default="ar_0002_adoption")
+    for migration_parser in (install_parser, adopt_parser, upgrade_parser):
+        migration_parser.add_argument("--lock-timeout", type=int, default=5)
     serve = commands.add_parser("serve", help="Start the API and debugger")
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8080)
@@ -51,11 +125,14 @@ def main() -> None:
             Path(temporary).unlink(missing_ok=True)
         path.chmod(0o600)
         print("Local secrets saved in .env. Keep this file private and back up the encryption key.")
-    settings = Settings()
+    if args.command == "init" and not args.installation_key:
+        print("Run rewind migrate install --installation-key <key> to install metadata explicitly.")
+        return
     if args.command in {"init", "migrate"}:
-        Database(settings).migrate()
-        print("Metadata schema initialized.")
-    elif args.command == "serve":
+        _migrate(parser, args)
+        return
+    settings = Settings()
+    if args.command == "serve":
         from .api import create_app
 
         uvicorn.run(create_app(settings), host=args.host, port=args.port, access_log=False)
