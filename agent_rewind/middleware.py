@@ -1,7 +1,8 @@
 """Bound request bodies before JSON parsing, including chunked requests."""
 
-from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
+
+from .errors import error_response
 
 
 class BodyLimit:
@@ -19,7 +20,7 @@ class BodyLimit:
                 return
             body.extend(message.get("body", b""))
             if len(body) > self.limit:
-                response = JSONResponse({"detail": "Request exceeds 9 MiB."}, status_code=413)
+                response = error_response(scope, "invalid_request", body_limit=True)
                 await response(scope, receive, send)
                 return
             if not message.get("more_body", False):

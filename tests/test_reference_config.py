@@ -177,9 +177,9 @@ def test_cross_resource_and_funding_invariants(variant):
 @pytest.mark.parametrize(
     ("api_processes", "api_overflow", "worker_overflow", "minimum_capacity"),
     [
-        (1, 0, 0, 52),  # 2*1*5 + 2*4*2 + 10 = 36 peak connections.
-        (2, 10, 10, 238),  # 2*2*15 + 2*4*12 + 10 = 166 peak connections.
-        (1, 3, 4, 106),  # 2*1*8 + 2*4*6 + 10 = 74 peak connections.
+        (1, 0, 0, 55),  # 2*1*(5+1) + 2*4*2 + 10 = 38 peak connections.
+        (2, 10, 10, 243),  # 2*2*(15+1) + 2*4*12 + 10 = 170 peak connections.
+        (1, 3, 4, 109),  # 2*1*(8+1) + 2*4*6 + 10 = 76 peak connections.
     ],
 )
 def test_connection_envelope_counts_processes_and_overflow_at_seventy_percent_boundary(
@@ -339,3 +339,10 @@ def test_cli_is_offline_non_authorizing_and_does_not_echo_invalid_secrets(tmp_pa
     result = subprocess.run([*command, str(path)], capture_output=True, text=True, timeout=10)
     assert result.returncode == 2
     assert json.loads(result.stdout)["issues"] == [{"path": ["region"], "code": "missing"}]
+
+
+def test_readiness_connection_cannot_be_configured_away():
+    value = sample()
+    value["capacity"]["readiness_connections"] = 0
+    with pytest.raises(ValidationError):
+        parse(value)

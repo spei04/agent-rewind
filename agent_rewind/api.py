@@ -1,17 +1,19 @@
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import AsyncIterator, Callable
+from contextlib import asynccontextmanager
 from pathlib import Path
 from threading import Lock
 from typing import Any, Literal, TypeVar
 
 from anyio.to_thread import current_default_thread_limiter
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import Field
 from starlette.concurrency import run_in_threadpool
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import RequestResponseEndpoint
 
 from .artifacts import Artifacts
@@ -20,10 +22,12 @@ from .compare import compare
 from .config import Settings
 from .database import Database
 from .engine import read_events
+from .errors import Fault, SafeBoundary, error_response, exception_response
 from .experiments import locate
 from .middleware import BodyLimit
 from .migrations.compatibility import CompatibilityResult
 from .models import BranchRequest, StrictModel, StudyRequest, TaskSpec, valid_path
+from .readiness import Readiness
 
 ProbeValue = TypeVar("ProbeValue")
 
@@ -46,10 +50,26 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
     db, artifacts = Database(settings), Artifacts(settings)
     auth = Auth(settings, db)
+    readiness = Readiness(settings)
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        readiness.start()
+        try:
+            yield
+        finally:
+            await readiness.close()
+
     app = FastAPI(
-        title="Agent Rewind", version="0.1.0", docs_url=None, redoc_url=None, openapi_url=None
+        title="Agent Rewind",
+        version="0.1.0",
+        docs_url=None,
+        redoc_url=None,
+        openapi_url=None,
+        lifespan=lifespan,
     )
     app.state.db, app.state.artifacts, app.state.auth = db, artifacts, auth
+    app.state.readiness = readiness
     app.add_middleware(BodyLimit)
     guard_inflight = 0
     guard_lock = Lock()
@@ -93,7 +113,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def security(request: Request, call_next: RequestResponseEndpoint) -> Response:
         response: Response
         safe_inspection = request.method in {"GET", "HEAD"} and (
-            request.url.path in {"/", "/healthz", "/livez"}
+            request.url.path in {"/", "/healthz", "/livez", "/readyz"}
             or request.url.path.startswith("/static/")
         )
         if not safe_inspection:
@@ -101,12 +121,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             if compatibility is None:
                 compatibility = CompatibilityResult("unavailable", "schema_probe_capacity")
             if compatibility.status != "ready":
-                response = JSONResponse(
-                    {
-                        "detail": "Customer access is unavailable for this database schema.",
-                        "code": compatibility.code,
-                    },
-                    status_code=503,
+                response = error_response(
+                    request.scope,
+                    "schema_incompatible"
+                    if compatibility.status == "incompatible"
+                    else "dependency_unavailable",
                 )
             else:
                 response = await call_next(request)
@@ -121,20 +140,33 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         return response
 
-    @app.exception_handler(KeyError)
-    async def not_found(request: Request, exc: KeyError) -> JSONResponse:
-        return JSONResponse({"detail": "Record not found."}, status_code=404)
+    # Register last so this pure ASGI layer encloses body/security handlers.
+    app.add_middleware(SafeBoundary)
 
-    @app.exception_handler(ValueError)
-    async def invalid(request: Request, exc: ValueError) -> JSONResponse:
-        return JSONResponse({"detail": str(exc)}, status_code=422)
-
+    @app.exception_handler(StarletteHTTPException)
     @app.exception_handler(RequestValidationError)
-    async def validation(request: Request, exc: RequestValidationError) -> JSONResponse:
-        # Do not echo submitted payloads, which can contain private source or credentials.
-        return JSONResponse(
-            {"detail": [{"loc": e["loc"], "msg": e["msg"]} for e in exc.errors()]}, status_code=422
-        )
+    @app.exception_handler(Fault)
+    async def safe_exception(request: Request, exc: Exception) -> JSONResponse:
+        return exception_response(request.scope, exc)
+
+    async def require_work_readiness(request: Request) -> None:
+        await run_in_threadpool(auth.principal, request, "operator")
+        result = await readiness.check()
+        if result != "ready":
+            raise Fault(result)
+
+    def record(record_id: str, kind: str) -> Any:
+        try:
+            return db.get(record_id, kind)
+        except KeyError:
+            raise Fault("not_found") from None
+
+    @app.api_route("/readyz", methods=["GET", "HEAD"])
+    async def ready(request: Request) -> JSONResponse:
+        result = await readiness.check()
+        if result != "ready":
+            return error_response(request.scope, result)
+        return JSONResponse({"status": "ready"})
 
     @app.api_route("/livez", methods=["GET", "HEAD"])
     def liveness() -> dict[str, str]:
@@ -183,7 +215,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/runs/{run_id}")
     def run(request: Request, run_id: str) -> Any:
         auth.principal(request)
-        result = db.get(run_id, "run")
+        result = record(run_id, "run")
         result["events"] = read_events(db, artifacts, run_id)
         result["locations"] = locate(result["events"])
         if result.get("evaluation_ref"):
@@ -194,6 +226,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/runs/{run_id}/files/{step}")
     def files(request: Request, run_id: str, step: int, path: str | None = None) -> Any:
         auth.principal(request)
+        if path is not None:
+            try:
+                valid_path(path)
+            except ValueError:
+                raise Fault("invalid_request") from None
         history = read_events(db, artifacts, run_id)
         if not 1 <= step <= len(history):
             raise HTTPException(404, "Decision not found.")
@@ -204,7 +241,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 {"path": p, "bytes": len(f.data), "mode": oct(f.mode)}
                 for p, f in sorted(workspace.items())
             ]
-        valid_path(path)
         if path not in workspace:
             raise HTTPException(404, "File not found.")
         return {
@@ -213,7 +249,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "truncated": len(workspace[path].data) > 100000,
         }
 
-    @app.post("/api/runs", status_code=202)
+    @app.post("/api/runs", status_code=202, dependencies=[Depends(require_work_readiness)])
     def submit(request: Request, task: TaskSpec) -> dict[str, str]:
         actor = auth.principal(request, "operator")
         return {
@@ -222,10 +258,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             )
         }
 
-    @app.post("/api/branches", status_code=202)
+    @app.post("/api/branches", status_code=202, dependencies=[Depends(require_work_readiness)])
     def branch(request: Request, value: BranchRequest) -> dict[str, str]:
         actor = auth.principal(request, "operator")
-        source = db.get(value.parent_id, "run")
+        source = record(value.parent_id, "run")
         if source["status"] != "complete" or not source["branchable"]:
             raise HTTPException(409, "Source run is not branchable.")
         return {
@@ -234,20 +270,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             )
         }
 
-    @app.post("/api/studies", status_code=202)
+    @app.post("/api/studies", status_code=202, dependencies=[Depends(require_work_readiness)])
     def study(request: Request, value: StudyRequest) -> dict[str, str]:
         actor = auth.principal(request, "operator")
-        db.get(value.run_id, "run")
+        record(value.run_id, "run")
         return {
             "job_id": db.enqueue(
                 "study", artifacts.put_json(value.model_dump()), value.budget_usd, actor.subject
             )
         }
 
-    @app.post("/api/investigations", status_code=202)
+    @app.post(
+        "/api/investigations", status_code=202, dependencies=[Depends(require_work_readiness)]
+    )
     def investigate(request: Request, value: InvestigationRequest) -> dict[str, str]:
         actor = auth.principal(request, "operator")
-        db.get(value.run_id, "run")
+        record(value.run_id, "run")
         return {
             "job_id": db.enqueue(
                 "investigate",
@@ -270,7 +308,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/studies/{study_id}")
     def get_study(request: Request, study_id: str) -> Any:
         auth.principal(request)
-        return db.get(study_id, "study")
+        return record(study_id, "study")
 
     @app.get("/api/jobs")
     def get_jobs(request: Request) -> Any:

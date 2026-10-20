@@ -15,6 +15,46 @@ import agent_rewind.cli
 from agent_rewind.migrations.compatibility import runtime_schema_compatibility
 from agent_rewind.migrations.service import install, schema_status
 
+
+def readiness_smoke(root: Path, database_url: str) -> None:
+    import asyncio
+    import time
+
+    from cryptography.fernet import Fernet
+    from pydantic import SecretStr
+
+    from agent_rewind.config import Settings
+    from agent_rewind.readiness import Readiness
+    from agent_rewind.sentinel import SentinelSettings, provision, read_system_sentinel
+
+    key = SecretStr(Fernet.generate_key().decode())
+    sentinel = SentinelSettings(
+        _env_file=None,
+        data_dir=root,
+        encryption_key=key,
+        installation_key=SecretStr("synthetic-package-smoke"),
+    )
+    provision(sentinel)
+    read_system_sentinel(sentinel, time.monotonic() + 1, installation_key="synthetic-package-smoke")
+    settings = Settings(
+        _env_file=None, data_dir=root, database_url=database_url, encryption_key=key
+    )
+
+    async def check() -> None:
+        manager = Readiness(settings)
+        manager.start()
+        try:
+            async with asyncio.timeout(5):
+                while not manager._warm:
+                    await asyncio.sleep(0.01)
+            if await manager.check() != "schema_incompatible":
+                raise RuntimeError("Installed readiness process admitted migration-only metadata")
+        finally:
+            await manager.close()
+
+    asyncio.run(check())
+
+
 package = Path(agent_rewind.__file__).resolve()
 if not package.is_relative_to(Path(sys.prefix).resolve()):
     raise RuntimeError("Smoke imported a source checkout instead of the installed wheel")
@@ -57,4 +97,5 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
             raise RuntimeError("Installed release manifest incorrectly permits customer admission")
     finally:
         engine.dispose()
+    readiness_smoke(Path(temporary), f"sqlite:///{database}")
 print("Installed runtime, web assets, migration revisions and profile verified outside checkout.")
