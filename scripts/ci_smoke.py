@@ -29,7 +29,7 @@ for asset in ("index.html", "style.css", "app.js"):
     content = importlib.resources.files("agent_rewind").joinpath("web", asset).read_bytes()
     if not content:
         raise RuntimeError("Packaged web asset is empty")
-for profile in ("sqlite", "postgresql16", "sqlite_ownership"):
+for profile in ("sqlite", "postgresql16", "sqlite_ownership", "postgresql16_ownership"):
     shape = json.loads(
         importlib.resources.files("agent_rewind.migrations")
         .joinpath("profiles", profile + ".json")
