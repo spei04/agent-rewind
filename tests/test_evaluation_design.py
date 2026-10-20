@@ -534,3 +534,140 @@ def test_population_count_and_divisor_cannot_jointly_shrink(inputs):
     row["planned_population_contrasts"] = row["population_divisor"] = 1
     with pytest.raises(ValueError, match="frozen inventory"):
         CHECK.family_check(row, data["family_plan"])
+
+
+@pytest.fixture
+def activation():
+    return (
+        copy.deepcopy(CHECK.load_json(ROOT / "contracts/research/owner-decision.v1.json")),
+        copy.deepcopy(CHECK.load_json(ROOT / "contracts/proposals/execution-backlog.json")),
+        (ROOT / "contracts/research/evaluation-design.json").read_bytes(),
+        (ROOT / "docs/research/TOTAL_BUDGET_PROTOCOL.md").read_bytes(),
+    )
+
+
+def test_actual_approval_is_separate_from_unchanged_synthetic_template(activation, inputs):
+    CHECK.validate_activation(*activation)
+    design, ledger, document = inputs
+    CHECK.validate(design, ledger, document)
+    assert not CHECK.consumer_ready(design["consumer_gate"])
+    assert len(activation[0]["selected_scopes"]) == 9
+    gate = next(g for g in ledger["gates"] if g["id"] == "RESEARCHSCOPE0")
+    assert gate["status"] == "Satisfied"
+
+
+@pytest.mark.parametrize(
+    "variant,message",
+    [
+        ("source_commit", "immutable accepted C21"),
+        ("record_bytes", "immutable accepted C21"),
+        ("document_bytes", "immutable accepted C21"),
+        ("selected", "exact approved subset"),
+        ("deferred", "exact approved subset"),
+        ("funding", "approval cannot expand"),
+        ("heldout", "approval cannot expand"),
+        ("oracle", "approved comparison"),
+        ("threshold", "approved comparison"),
+        ("baseline", "pinned original"),
+        ("gate", "only recorded owner gate"),
+        ("joint_gate", "pinned original"),
+        ("mapping", "completion mapping"),
+        ("lost_original_edge", "original prerequisite removed"),
+        ("lost_original_scope", "original work lost"),
+        ("invented_savings", "original work lost"),
+        ("unmapped_scope", "deferred scope activated"),
+        ("accounting_early", "accounting/harness"),
+        ("harness_cycle", "accounting/harness"),
+        ("decision_digest", "decision digest"),
+        ("metrics", "reconciled issuance metrics"),
+    ],
+)
+def test_actual_overlay_refuses_binding_scope_and_integration_drift(activation, variant, message):
+    decision, ledger, record, document = activation
+    tasks = {row["id"]: row for row in ledger["tasks"]}
+    gates = {row["id"]: row for row in ledger["gates"]}
+    if variant == "source_commit":
+        decision["accepted_c21"]["commit"] = "0" * 40
+    elif variant == "record_bytes":
+        record += b"\n"
+    elif variant == "document_bytes":
+        document += b"\n"
+    elif variant == "selected":
+        decision["selected_scopes"].append("RB-08")
+    elif variant == "deferred":
+        decision["deferred_scopes"].remove("RB-12B")
+    elif variant in {"funding", "heldout"}:
+        decision["limits"]["paid_evaluation" if variant == "funding" else "heldout_execution"] = (
+            True
+        )
+    elif variant == "oracle":
+        decision["choices"]["information"] = "oracle_assisted"
+    elif variant == "threshold":
+        decision["choices"]["power_target"] = 0.2
+    elif variant == "baseline":
+        decision["baseline"]["task_projection"]["AR-020-A"]["effort_days"] = 1
+    elif variant == "gate":
+        gates["STUDYFUNDS0"]["status"] = "Satisfied"
+        gates["STUDYFUNDS0"]["decision_record"] = "contracts/research/owner-decision.v1.json"
+    elif variant == "joint_gate":
+        decision["baseline"]["gate_statuses"]["STUDYFUNDS0"] = "Satisfied"
+        gates["STUDYFUNDS0"]["status"] = "Satisfied"
+    elif variant == "mapping":
+        next(m for m in decision["mappings"] if m["proposal_id"] == "RB-02")["completion_task"] = (
+            "AR-020-B"
+        )
+    elif variant == "lost_original_edge":
+        tasks["AR-020-B"]["dependencies"].remove("AR-005-C")
+    elif variant == "lost_original_scope":
+        tasks["AR-020-B"]["scope"] = "Only new reserves; original migration omitted"
+    elif variant == "invented_savings":
+        decision["task_changes"]["AR-020-B"]["before"]["effort_days"] = 2
+    elif variant == "unmapped_scope":
+        tasks["AR-025-A"]["research_scopes"] = ["RB-08"]
+    elif variant in {"accounting_early", "harness_cycle"}:
+        key = "AR-021-A" if variant == "accounting_early" else "AR-024-D"
+        deps = tasks[key]["dependencies"]
+        deps.remove("AR-023-C" if variant == "accounting_early" else "AR-025-D")
+        decision["task_changes"][key]["after"]["dependencies"] = deps.copy()
+    elif variant == "decision_digest":
+        gates["RESEARCHSCOPE0"]["decision_sha256"] = "0" * 64
+    elif variant == "metrics":
+        decision["issuance_metrics"]["base_effort_days"] += 1
+    with pytest.raises(ValueError, match=message):
+        CHECK.validate_activation(decision, ledger, record, document)
+
+
+def test_normal_gate_and_review_progress_does_not_rewrite_owner_approval(activation):
+    decision, ledger, record, document = activation
+    original = copy.deepcopy(decision)
+    gate = next(g for g in ledger["gates"] if g["id"] == "G1")
+    gate["status"] = "Satisfied"
+    gate["evidence"] = "Separate later implementation/review evidence, not issue #51"
+    ledger["validation"]["independent_review"] = "Later reviewer completed review"
+    ledger["validation"]["revision_notes"] = "Later live progress"
+    CHECK.validate_activation(decision, ledger, record, document)
+    assert decision == original
+    # This test checks authority separation only. The ordinary backlog validator
+    # still requires every G1 producer to be Verified before accepting live status.
+
+
+def test_unrelated_later_estimate_does_not_change_issuance_metrics(activation):
+    decision, ledger, record, document = activation
+    task = next(t for t in ledger["tasks"] if t["id"] == "AR-039-A")
+    task["effort_days"] += 1
+    task["effort_range_days"][1] += 1
+    CHECK.validate_activation(decision, ledger, record, document)
+    assert decision["issuance_metrics"]["base_effort_days"] == 440
+    # The live checker must separately recompute parent/role/milestone/graph totals.
+
+
+def test_issuance_gate_projection_is_bound_independently_of_live_progress(activation):
+    activation[0]["baseline"]["gate_projection"]["G7"]["dependencies"].pop()
+    with pytest.raises(ValueError, match="pinned original"):
+        CHECK.validate_activation(*activation)
+
+
+def test_second_issuance_gate_cannot_be_added(activation):
+    activation[0]["issuance_promoted_gates"].append("STUDYFUNDS0")
+    with pytest.raises(ValueError, match="only recorded owner gate"):
+        CHECK.validate_activation(*activation)

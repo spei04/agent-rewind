@@ -8,7 +8,7 @@ no baseline superiority or generalization result has been demonstrated.
 
 The [prior-method audit](research/PRIOR_METHOD_AUDIT.md) is complete. The
 [total-budget protocol proposal](research/TOTAL_BUDGET_PROTOCOL.md) defines the
-next design and its pending owner decisions. It does not change the current
+accepted design; the separate [owner decision overlay](research/OWNER_DECISION_2026-10-20.md) records approved core engineering choices and retained execution gates. It does not change the current
 mechanics below or authorize held-out adaptive screening.
 
 ## Estimand

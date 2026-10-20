@@ -292,7 +292,9 @@ def validate(data: dict[str, Any], markdown: str, plan: str) -> dict[str, Any]:
             "Contributor overbooked",
         )
         matches = [
-            line for line in markdown.splitlines() if line.startswith(f"| RA Day {row['day']} |")
+            line
+            for line in markdown.splitlines()
+            if line.startswith(f"| {context.get('row_label', 'RA Day')} {row['day']} |")
         ]
         require(len(matches) == 1, "Conditional schedule row missing or duplicate")
         documented = {

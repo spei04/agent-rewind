@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import stat
+from graphlib import CycleError, TopologicalSorter
 from pathlib import Path
 from typing import Any
 
@@ -619,13 +620,272 @@ def read_inputs() -> tuple[dict[str, Any], dict[str, Any], str]:
     )
 
 
+APPROVED_MAPPING = {
+    "RB-01": "AR-020-A",
+    "RB-02": "AR-023-C",
+    "RB-03": "AR-021-A",
+    "RB-04": "AR-024-A",
+    "RB-05": "AR-025-B",
+    "RB-06": "AR-025-D",
+    "RB-10": "AR-025-C",
+    "RB-11A": "AR-024-D",
+    "RB-11B": "AR-026-A",
+}
+APPROVED_LIMITS = {
+    "engineering_implementation": True,
+    "paid_evaluation": False,
+    "heldout_execution": False,
+    "optional_adapters": False,
+    "reuse_claims": False,
+    "customer_data": False,
+    "production_resources": False,
+    "external_statistical_approval": False,
+    "existing_validation_cap_usd": 200,
+    "historical_reservations_usd": "36.567974",
+    "invoice_spend_reconciled": False,
+}
+APPROVED_CHOICES = {
+    "information": "answer_blind",
+    "core_controls": [
+        "unchanged_continuation",
+        "fresh_retry",
+        "random_location",
+        "latest_error",
+        "frozen_heuristic",
+    ],
+    "allocation_comparison": ["uniform", "standard_successive_halving"],
+    "common_pool": (
+        "allocation_ablation_only; full end-to-end methods may use "
+        "different fully attributed proposers"
+    ),
+    "useful_edit_net_lower_bound": 0.10,
+    "family_alpha": 0.05,
+    "power_target": 0.80,
+    "population_interval_width_target": 0.20,
+    "paired_discordance": "descriptive_with_coupling",
+    "fresh_retry": "full_recovery_cap; intervention_endpoint_not_applicable",
+    "current_c02_authoritative": True,
+}
+C21_COMMIT = "555d28cf21ff91d05fca30aec94a86df2510813c"
+C21_RECORD_SHA256 = "07c9dad5dedcee482a229e9fe5c5df61b13f39902cee76fceeb041a3bef34e37"
+C21_DOCUMENT_SHA256 = "f7f8cb2fd21baf7c99a8467ad413556e130fc647f0b9479ed6deb8c502431554"
+BASELINE_PROJECTION_SHA256 = "303d22fb96cd95e1ddf29733ba40767bdf9e6ffb90f514718e0d6f1e9fe58393"
+
+
+def validate_activation(
+    decision: dict[str, Any], ledger: dict[str, Any], record: bytes, document: bytes
+) -> None:
+    """Check this reviewed overlay; consistency is not authentication of a person."""
+    require(
+        decision["schema_version"] == 1
+        and decision["record_kind"] == "actual_owner_decision"
+        and decision["decision_id"] == "RESEARCHSCOPE0-2026-10-20"
+        and decision["status"] == "approved",
+        "actual decision identity",
+    )
+    authority = decision["authority"]
+    require(
+        authority["owner"] == "spei04"
+        and authority["date"] == "2026-10-20"
+        and authority["issue"] == "https://github.com/spei04/agent-rewind/issues/51"
+        and authority["source"].startswith("Explicit user conversation approval"),
+        "actual decision provenance",
+    )
+    binding = decision["accepted_c21"]
+    require(
+        binding["commit"] == C21_COMMIT
+        and binding["record_sha256"] == C21_RECORD_SHA256
+        and binding["document_sha256"] == C21_DOCUMENT_SHA256
+        and hashlib.sha256(record).hexdigest() == C21_RECORD_SHA256
+        and hashlib.sha256(document).hexdigest() == C21_DOCUMENT_SHA256,
+        "immutable accepted C21 binding",
+    )
+    require(
+        decision["selected_scopes"] == list(APPROVED_MAPPING)
+        and decision["deferred_scopes"] == ["RB-07", "RB-08", "RB-09", "RB-12A", "RB-12B"],
+        "exact approved subset",
+    )
+    require(decision["limits"] == APPROVED_LIMITS, "approval cannot expand execution/funding")
+    require(decision["choices"] == APPROVED_CHOICES, "approved comparison/calibration choices")
+    baseline = decision["baseline"]
+    projection = baseline["task_projection"]
+    frozen_baseline = {
+        key: baseline[key]
+        for key in (
+            "commit",
+            "ledger_sha256",
+            "task_projection",
+            "gate_statuses",
+            "gate_projection",
+        )
+    }
+    digest = hashlib.sha256(
+        json.dumps(frozen_baseline, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    require(
+        baseline["commit"] == C21_COMMIT and digest == BASELINE_PROJECTION_SHA256,
+        "pinned original work/dependency projection",
+    )
+    tasks = {row["id"]: row for row in ledger["tasks"]}
+    gates = {row["id"]: row for row in ledger["gates"]}
+    require(
+        len(tasks) == len(ledger["tasks"])
+        and (set(projection) | {"AR-024-D", "AR-025-D"}) <= set(tasks),
+        "mapped task identities",
+    )
+    require(
+        decision["issuance_promoted_gates"] == ["RESEARCHSCOPE0"],
+        "only recorded owner gate is promoted at issuance",
+    )
+    require(set(baseline["gate_statuses"]) <= set(gates), "original gate removed")
+    for key, current in gates.items():
+        if key != "RESEARCHSCOPE0":
+            require(
+                current.get("decision_record") != "contracts/research/owner-decision.v1.json",
+                "only recorded owner gate may cite this decision",
+            )
+    gate = gates["RESEARCHSCOPE0"]
+    require(
+        gate["status"] == "Satisfied"
+        and gate["decision_record"] == "contracts/research/owner-decision.v1.json"
+        and gate["dependencies"] == ["RA-01-B"]
+        and gate["effort_days"] == 0,
+        "actual gate binding",
+    )
+    mappings = {row["proposal_id"]: row for row in decision["mappings"]}
+    require(
+        len(mappings) == len(decision["mappings"]) == len(APPROVED_MAPPING)
+        and {key: row["completion_task"] for key, row in mappings.items()} == APPROVED_MAPPING,
+        "approved scope completion mapping",
+    )
+    changes = decision["task_changes"]
+    require(
+        set(changes) == set(APPROVED_MAPPING.values()) | {"AR-020-B"},
+        "complete overlap reconciliation",
+    )
+    for key, original in projection.items():
+        task = tasks[key]
+        require(
+            set(original["dependencies"]) <= set(task["dependencies"]),
+            f"original prerequisite removed: {key}",
+        )
+        if key in changes:
+            prior = changes[key]["before"]
+            require(
+                prior is not None
+                and hashlib.sha256(prior["scope"].encode()).hexdigest() == original["scope_sha256"]
+                and prior["dependencies"] == original["dependencies"]
+                and prior["effort_days"] == original["effort_days"]
+                and prior["effort_range_days"] == original["effort_range_days"]
+                and prior["scope"] in task["scope"],
+                f"original work lost or invented savings: {key}",
+            )
+    for key, change in changes.items():
+        require(
+            all(tasks[key][field] == value for field, value in change["after"].items()),
+            f"mapped task differs: {key}",
+        )
+        require(
+            bool(change["retained_original_scope"]),
+            "retained work must be explicit",
+        )
+    for key, mapping in mappings.items():
+        require(bool(mapping["retained_work"]), "missing retained-work disposition")
+        for target in mapping["implementation_tasks"]:
+            require(target in tasks, "unknown mapped implementation task")
+        require(
+            key in tasks[mapping["completion_task"]]["research_scopes"],
+            "completion task does not own approved scope",
+        )
+    for task in tasks.values():
+        require(
+            set(task.get("research_scopes", [])) <= set(APPROVED_MAPPING),
+            "deferred scope activated",
+        )
+    require(
+        mappings["RB-02"]["implementation_tasks"] == ["AR-020-B", "AR-023-B", "AR-023-C"]
+        and "AR-023-C" in tasks["AR-021-A"]["dependencies"]
+        and "AR-021-A" in tasks["AR-025-B"]["dependencies"]
+        and "AR-025-D" in tasks["AR-025-C"]["dependencies"]
+        and tasks["AR-024-C"]["dependencies"] == ["AR-024-B"]
+        and tasks["AR-025-D"]["dependencies"]
+        == ["RESEARCHSCOPE0", "AR-025-B", "AR-024-C", "AR-025-A"]
+        and tasks["AR-024-D"]["dependencies"] == ["RESEARCHSCOPE0", "AR-024-C", "AR-025-D"]
+        and "AR-024-D" in tasks["AR-026-A"]["dependencies"],
+        "accounting/harness integration boundary bypass",
+    )
+    graph = {row["id"]: row["dependencies"] for row in ledger["tasks"] + ledger["gates"]}
+    try:
+        list(TopologicalSorter(graph).static_order())
+    except CycleError as error:
+        raise ValueError("activated dependency cycle") from error
+    # Issuance is frozen; normal live status/estimate progress is checked separately
+    # by check_execution_backlog, not made into a new owner decision.
+    issued = {key: dict(row) for key, row in projection.items()}
+    for key, change in changes.items():
+        issued[key] = {**issued.get(key, {}), **change["after"]}
+    issued_nodes = {**issued, **baseline["gate_projection"]}
+    issued_graph = {key: row["dependencies"] for key, row in issued_nodes.items()}
+    require(
+        all(dep in issued_nodes for deps in issued_graph.values() for dep in deps),
+        "unknown issuance prerequisite",
+    )
+    try:
+        ordered = list(TopologicalSorter(issued_graph).static_order())
+    except CycleError as error:
+        raise ValueError("issuance dependency cycle") from error
+    durations: dict[str, float] = {}
+    for key in ordered:
+        durations[key] = issued_nodes[key]["effort_days"] + max(
+            (durations[dep] for dep in issued_graph[key]), default=0
+        )
+    computed = {
+        "task_count": len(issued),
+        "gate_count": len(baseline["gate_projection"]),
+        "edge_count": sum(len(deps) for deps in issued_graph.values()),
+        "base_effort_days": sum(t["effort_days"] for t in issued.values()),
+        "upper_range_days": round(sum(t["effort_range_days"][1] for t in issued.values()), 4),
+        "effort_only_critical_path_days": max(durations.values()),
+    }
+    require(
+        decision["issuance_metrics"] == computed
+        and computed
+        == {
+            "task_count": 150,
+            "gate_count": 27,
+            "edge_count": 538,
+            "base_effort_days": 440,
+            "upper_range_days": 744.6,
+            "effort_only_critical_path_days": 152.5,
+        },
+        "reconciled issuance metrics",
+    )
+    canonical_decision = (json.dumps(decision, indent=2, ensure_ascii=False) + "\n").encode()
+    require(
+        gate["decision_sha256"] == hashlib.sha256(canonical_decision).hexdigest(),
+        "ledger decision digest differs",
+    )
+
+
 def main() -> None:
     try:
         data, ledger, document = read_inputs()
         validate(data, ledger, document)
+        decision = load_json(ROOT / "contracts/research/owner-decision.v1.json")
+        validate_activation(
+            decision,
+            ledger,
+            bounded_text(ROOT / "contracts/research/evaluation-design.json").encode(),
+            document.encode(),
+        )
     except (KeyError, TypeError, ValueError, OSError) as error:
         raise SystemExit(f"Evaluation design invalid: {error}") from None
-    print(f"Design examples valid; {len(data['followups'])} proposed scopes; consumer gate closed.")
+    print(
+        f"Historical examples valid: {len(data['followups'])} proposed scopes; "
+        "synthetic template pending. "
+        "Actual owner decision valid: 9 mapped engineering scopes; RESEARCHSCOPE0 satisfied; "
+        "runtime prerequisites and external execution gates retained."
+    )
 
 
 if __name__ == "__main__":
