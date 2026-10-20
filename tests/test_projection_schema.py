@@ -85,6 +85,7 @@ def test_only_projection_and_counter_are_added(projection_engine):
     with projection_engine.connect() as connection:
         shape = catalog(connection)
         verify_baseline(shape, "sqlite", versioned=True, projection=True)
+        assert shape == installed_profile("sqlite", PROJECTION)
         old = installed_profile("sqlite", ARTIFACTS)
         assert set(shape) - set(old) == {"run_index"}
         for table, fields in old.items():
@@ -260,11 +261,17 @@ def test_scope_does_not_replace_required_source_record(projection_engine):
         ("parent_id", PARENT),
     ],
 )
-def test_nul_suffix_cannot_bypass_new_hexadecimal_checks(projection_engine, field, value):
+@pytest.mark.parametrize("location", ["suffix", "earlier", "terminal"])
+def test_nul_cannot_bypass_new_hexadecimal_checks(projection_engine, field, value, location):
     with projection_engine.connect() as connection:
         assert connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one() == 1
     with pytest.raises(IntegrityError) as error, projection_engine.begin() as connection:
-        insert(connection, **{field: value + chr(0) + "not-hex"})
+        malformed = {
+            "suffix": value + chr(0) + "not-hex",
+            "earlier": value[:1] + chr(0) + value[2:],
+            "terminal": value[:-1] + chr(0),
+        }[location]
+        insert(connection, **{field: malformed})
     # The new CHECK itself refuses, rather than relying on a missing FK target.
     assert error.value.orig.sqlite_errorname == "SQLITE_CONSTRAINT_CHECK"
     with projection_engine.connect() as connection:
