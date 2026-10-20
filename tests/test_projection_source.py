@@ -266,3 +266,27 @@ def test_decoded_capture_counts_toward_combined_metadata_cap(capture, task, monk
     monkeypatch.setattr(module, "MAX_COHORT_BYTES", source.retained_bytes + len(encoded) - 1)
     with pytest.raises(ArtifactError, match="projection_cohort_limit"):
         prepare_evidence(source, lambda *_: pytest.fail("metadata overflow reached reader"))
+
+
+@pytest.mark.parametrize("mode", ["isolation_none", "driver_autocommit"])
+def test_read_snapshot_refuses_and_discards_sqlite_autocommit(capture, mode):
+    import sqlite3
+
+    with capture.db.engine.connect() as connection:
+        raw = connection.connection.driver_connection
+        if mode == "driver_autocommit":
+            if not hasattr(raw, "autocommit"):
+                pytest.skip("sqlite3 driver autocommit is a Python3.12 boundary")
+            raw.autocommit = True
+        else:
+            raw.isolation_level = None
+    with (
+        pytest.raises(ArtifactError, match="projection_transaction_required"),
+        readonly_source(capture.db.engine, QueryBudget()),
+    ):
+        pytest.fail("unsupported transaction reached cohort reader")
+    with pytest.raises(sqlite3.ProgrammingError):
+        raw.execute("SELECT 1")
+    with capture.db.engine.connect() as connection:
+        assert connection.exec_driver_sql("PRAGMA query_only").scalar_one() == 0
+        assert not connection.connection.driver_connection.in_transaction

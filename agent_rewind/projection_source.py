@@ -61,6 +61,15 @@ def readonly_source(engine: Engine, budget: QueryBudget) -> Iterator[Connection]
         previous: int | None = None
         try:
             if connection.dialect.name == "sqlite":
+                raw = connection.connection.driver_connection
+                if (
+                    getattr(raw, "autocommit", False) is True
+                    or getattr(raw, "isolation_level", None) is None
+                ):
+                    # DBAPI rollback may be a no-op in explicit autocommit modes.
+                    # Discard this unsupported pooled connection before BEGIN.
+                    connection.invalidate()
+                    raise ArtifactError("projection_transaction_required")
                 previous = connection.exec_driver_sql("PRAGMA query_only").scalar_one()
                 connection.exec_driver_sql("BEGIN")
                 connection.exec_driver_sql("PRAGMA query_only=ON")
