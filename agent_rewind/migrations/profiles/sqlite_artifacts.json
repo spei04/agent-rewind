@@ -1,0 +1,1104 @@
+{
+  "alembic_version": {
+    "checks": [],
+    "columns": [
+      [
+        "version_num",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "version_num"
+    ],
+    "uniques": []
+  },
+  "api_keys": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "hash",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "role",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "name",
+        "VARCHAR(120)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "expires",
+        "FLOAT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "revoked",
+        "BOOLEAN",
+        true,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "hash"
+      ]
+    ]
+  },
+  "artifact_objects": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "length(id)=32 AND id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(digest)=64 AND digest NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(locator) BETWEEN 1 AND 1024"
+      },
+      {
+        "name": null,
+        "sqltext": "format_version=1"
+      },
+      {
+        "name": null,
+        "sqltext": "byte_count>=0"
+      },
+      {
+        "name": null,
+        "sqltext": "locator='objects/' || digest\n          OR locator='objects/' || project_id || '/v1/' || digest"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "locator",
+        "VARCHAR(1024)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "format_version",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "byte_count",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "project_id",
+        "digest",
+        "format_version"
+      ],
+      [
+        "project_id",
+        "id"
+      ]
+    ]
+  },
+  "artifact_refs": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "owner_kind='run' OR owner_kind='study' OR owner_kind='job' OR owner_kind='provider_call'"
+      },
+      {
+        "name": null,
+        "sqltext": "role='payload' OR role='admission_config' OR role='task' OR role='event' OR role='checkpoint' OR role='workspace' OR role='file_blob' OR role='evaluation' OR role='result' OR role='study_attachment' OR role='budget_evidence'"
+      },
+      {
+        "name": null,
+        "sqltext": "role<>'budget_evidence' OR owner_kind='provider_call'"
+      }
+    ],
+    "columns": [
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "owner_kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "owner_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "artifact_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "role",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "project_id",
+          "artifact_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "artifact_objects"
+      },
+      {
+        "constrained_columns": [
+          "project_id",
+          "owner_kind",
+          "owner_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "resource_kind",
+          "resource_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "resource_scopes"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "project_id",
+      "owner_kind",
+      "owner_id",
+      "artifact_id",
+      "role"
+    ],
+    "uniques": []
+  },
+  "audit": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created",
+        "FLOAT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "actor",
+        "VARCHAR(256)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "action",
+        "VARCHAR(80)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "target",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": []
+  },
+  "events": {
+    "checks": [],
+    "columns": [
+      [
+        "run_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "step",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "artifact",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "hash",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "run_id",
+      "step"
+    ],
+    "uniques": []
+  },
+  "installation_adoptions": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "singleton = 1"
+      },
+      {
+        "name": null,
+        "sqltext": "length(installation_key) BETWEEN 1 AND 64"
+      },
+      {
+        "name": null,
+        "sqltext": "source_kind IN ('fresh','legacy')"
+      },
+      {
+        "name": null,
+        "sqltext": "state IN ('prepared','ownership_complete')"
+      },
+      {
+        "name": null,
+        "sqltext": "length(CAST(mapping AS BLOB)) <= 1048576"
+      },
+      {
+        "name": null,
+        "sqltext": "(source_kind='fresh' AND state='prepared' AND organization_id IS NULL AND project_id IS NULL) OR (organization_id IS NOT NULL AND project_id IS NOT NULL)"
+      },
+      {
+        "name": null,
+        "sqltext": "(source_kind='fresh' AND backup_evidence_digest IS NULL AND drain_evidence_digest IS NULL) OR (source_kind='legacy' AND backup_evidence_digest IS NOT NULL AND drain_evidence_digest IS NOT NULL)"
+      },
+      {
+        "name": null,
+        "sqltext": "length(source_baseline) = 40 AND source_baseline NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(schema_fingerprint) = 64 AND schema_fingerprint NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(installed_schema_fingerprint) = 64 AND installed_schema_fingerprint NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(mapping_digest) = 64 AND mapping_digest NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(organization_id) = 32 AND organization_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(project_id) = 32 AND project_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(backup_evidence_digest) = 64 AND backup_evidence_digest NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(drain_evidence_digest) = 64 AND drain_evidence_digest NOT GLOB '*[^0-9a-f]*'"
+      }
+    ],
+    "columns": [
+      [
+        "installation_key",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "singleton",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_kind",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_baseline",
+        "VARCHAR(40)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "schema_fingerprint",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "installed_schema_fingerprint",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "mapping_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "mapping",
+        "JSON",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "backup_evidence_digest",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "drain_evidence_digest",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "state",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "installation_key"
+    ],
+    "uniques": [
+      [
+        "singleton"
+      ]
+    ]
+  },
+  "jobs": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created",
+        "FLOAT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "payload",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "status",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "owner",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "lease_until",
+        "FLOAT",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "cancel",
+        "BOOLEAN",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "budget",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "reserved",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "result",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "error",
+        "VARCHAR(300)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "actor",
+        "VARCHAR(256)",
+        true,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": []
+  },
+  "migration_progress": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "rows_verified >= 0"
+      },
+      {
+        "name": null,
+        "sqltext": "status IN ('pending','running','complete','blocked')"
+      },
+      {
+        "name": null,
+        "sqltext": "length(source_digest) = 64 AND source_digest NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(CAST(cursor AS BLOB)) <= 65536"
+      }
+    ],
+    "columns": [
+      [
+        "revision",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "phase",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "cursor",
+        "JSON",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "rows_verified",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "status",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "updated_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "revision",
+      "phase"
+    ],
+    "uniques": []
+  },
+  "organizations": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "length(id) = 32 AND id NOT GLOB '*[^0-9a-f]*'"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "installation_key",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "installation_key"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "installation_key"
+        ],
+        "referred_schema": null,
+        "referred_table": "installation_adoptions"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "installation_key"
+      ]
+    ]
+  },
+  "project_memberships": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "(substr(principal_id,1,5)='oidc:' AND length(principal_id)=69 AND substr(principal_id,6) NOT GLOB '*[^0-9a-f]*') OR (substr(principal_id,1,8)='api-key:' AND length(principal_id)=40 AND substr(principal_id,9) NOT GLOB '*[^0-9a-f]*')"
+      },
+      {
+        "name": null,
+        "sqltext": "role IN ('viewer','operator','maintainer')"
+      },
+      {
+        "name": null,
+        "sqltext": "legacy_default IN (false,true)"
+      }
+    ],
+    "columns": [
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "principal_id",
+        "VARCHAR(256)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "role",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "revoked_at",
+        "DATETIME",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "legacy_default",
+        "BOOLEAN",
+        false,
+        "false",
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [
+      {
+        "column_names": [
+          "principal_id"
+        ],
+        "dialect_options": {
+          "sqlite_where": "legacy_default = true AND revoked_at IS NULL"
+        },
+        "name": "membership_active_legacy_default",
+        "unique": 1
+      }
+    ],
+    "pk": [
+      "project_id",
+      "principal_id"
+    ],
+    "uniques": []
+  },
+  "projects": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "length(id) = 32 AND id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(name) BETWEEN 1 AND 120"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "name",
+        "VARCHAR(120)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "organization_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "organizations"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "organization_id",
+        "id"
+      ]
+    ]
+  },
+  "records": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created",
+        "FLOAT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "data",
+        "JSON",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": []
+  },
+  "resource_scopes": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "resource_kind IN ('run','study','job','key','provider_call')"
+      },
+      {
+        "name": null,
+        "sqltext": "length(resource_id) = 32 AND resource_id NOT GLOB '*[^0-9a-f]*'"
+      }
+    ],
+    "columns": [
+      [
+        "resource_kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "resource_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "resource_kind",
+      "resource_id"
+    ],
+    "uniques": [
+      [
+        "project_id",
+        "resource_kind",
+        "resource_id"
+      ]
+    ]
+  }
+}

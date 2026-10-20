@@ -35,6 +35,11 @@ def test_packaged_profile_is_explicitly_inspection_only(prepared):
             "migration_only",
             (guard.BackfillRequirement(revision="ar_0003_ownership", phase="ownership"),),
         ),
+        (
+            "ar_0004_artifacts",
+            "migration_only",
+            (guard.BackfillRequirement(revision="ar_0003_ownership", phase="ownership"),),
+        ),
     ]
     result = prepared.schema_compatibility()
     assert (result.status, result.code) == ("incompatible", "migration_only")
