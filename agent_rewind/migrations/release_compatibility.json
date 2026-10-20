@@ -18,6 +18,17 @@
           "phase": "ownership"
         }
       ]
+    },
+    {
+      "revision": "ar_0004_artifacts",
+      "catalog_profile": "artifacts_v1",
+      "mode": "migration_only",
+      "required_completed_backfills": [
+        {
+          "revision": "ar_0003_ownership",
+          "phase": "ownership"
+        }
+      ]
     }
   ]
 }
