@@ -2567,7 +2567,8 @@
       "contracts_status": "Issue #51 approved this mapped engineering scope against C21 at 555d28c. Original producer, runtime and independent review prerequisites remain; no paid/held-out execution, customer data, optional adapter or reuse-claim approval.",
       "research_scopes": [
         "RB-01"
-      ]
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/57"
     },
     {
       "id": "AR-020-B",
@@ -2605,7 +2606,8 @@
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "research_scopes": [
         "RB-02"
-      ]
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/58"
     },
     {
       "id": "AR-020-C",
@@ -2680,7 +2682,8 @@
       "contracts_status": "Issue #51 approved this mapped engineering scope against C21 at 555d28c. Original producer, runtime and independent review prerequisites remain; no paid/held-out execution, customer data, optional adapter or reuse-claim approval.",
       "research_scopes": [
         "RB-03"
-      ]
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/61"
     },
     {
       "id": "AR-021-B",
@@ -2926,7 +2929,8 @@
         "QE"
       ],
       "pull_request_boundary": "Record dispatch intent before network and observed response after; route discovery and continuation through ledger. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/59"
     },
     {
       "id": "AR-023-C",
@@ -2965,7 +2969,8 @@
       "contracts_status": "Issue #51 approved this mapped engineering scope against C21 at 555d28c. Original producer, runtime and independent review prerequisites remain; no paid/held-out execution, customer data, optional adapter or reuse-claim approval.",
       "research_scopes": [
         "RB-02"
-      ]
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/60"
     },
     {
       "id": "AR-024-A",
@@ -3008,7 +3013,8 @@
       "contracts_status": "Issue #51 approved this mapped engineering scope against C21 at 555d28c. Original producer, runtime and independent review prerequisites remain; no paid/held-out execution, customer data, optional adapter or reuse-claim approval.",
       "research_scopes": [
         "RB-04"
-      ]
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/62"
     },
     {
       "id": "AR-024-B",
@@ -3153,7 +3159,8 @@
       "contracts_status": "Issue #51 approved this mapped engineering scope against C21 at 555d28c. Original producer, runtime and independent review prerequisites remain; no paid/held-out execution, customer data, optional adapter or reuse-claim approval.",
       "research_scopes": [
         "RB-05"
-      ]
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/63"
     },
     {
       "id": "AR-025-C",
@@ -3193,7 +3200,8 @@
       "contracts_status": "Issue #51 approved this mapped engineering scope against C21 at 555d28c. Original producer, runtime and independent review prerequisites remain; no paid/held-out execution, customer data, optional adapter or reuse-claim approval.",
       "research_scopes": [
         "RB-10"
-      ]
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/64"
     },
     {
       "id": "AR-026-A",
@@ -3235,7 +3243,8 @@
       "contracts_status": "Issue #51 approved this mapped engineering scope against C21 at 555d28c. Original producer, runtime and independent review prerequisites remain; no paid/held-out execution, customer data, optional adapter or reuse-claim approval.",
       "research_scopes": [
         "RB-11B"
-      ]
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/67"
     },
     {
       "id": "AR-026-B",
@@ -6150,7 +6159,8 @@
       "contracts_status": "Issue #51 approved this mapped engineering scope against C21 at 555d28c. Original producer, runtime and independent review prerequisites remain; no paid/held-out execution, customer data, optional adapter or reuse-claim approval.",
       "research_scopes": [
         "RB-06"
-      ]
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/65"
     },
     {
       "id": "AR-024-D",
@@ -6192,7 +6202,8 @@
       "contracts_status": "Issue #51 approved this mapped engineering scope against C21 at 555d28c. Original producer, runtime and independent review prerequisites remain; no paid/held-out execution, customer data, optional adapter or reuse-claim approval.",
       "research_scopes": [
         "RB-11A"
-      ]
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/66"
     }
   ],
   "gates": [

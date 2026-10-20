@@ -1291,6 +1291,8 @@ M3 / P0 · 3 PRs · 11 engineering days · Not started
 
 #### AR-020-A — Study, pair, trial and attempt contract
 
+- **Tracking issue:** [#57](https://github.com/spei04/agent-rewind/issues/57); blocked until the prerequisites below are accepted.
+
 - **Objective:** Give every study, logical trial and attempt a durable scoped identity. This task delivers study, pair, trial and attempt contract.
 - **Implementation scope / PR boundary:** Freeze logical identities, protocol digests, immutable freeze and attempt/uncertain states; specify study API needs; extend the M1 org/project/job ledger with study-scoped accounts and bind every child attempt/call to its study cap. Approved RB-01 addition: Add proposed identities, allowed-observation references, physical/comparison cost ledgers and reserved-confirmation transitions to the original C08 producer's schema/fixtures.
 - **Out of scope:** No coordinator or estimators. No database implementation or provider dispatch.
@@ -1307,6 +1309,8 @@ M3 / P0 · 3 PRs · 11 engineering days · Not started
 <a id="ar-020-b"></a>
 
 #### AR-020-B — Trial schema and repository migration
+
+- **Tracking issue:** [#58](https://github.com/spei04/agent-rewind/issues/58); blocked until the prerequisites below are accepted.
 
 - **Objective:** Give every study, logical trial and attempt a durable scoped identity. This task delivers trial schema and repository migration.
 - **Implementation scope / PR boundary:** Add normalized studies/pairs/trials/attempts and scoped repositories with fenced updates; migrate study budget accounts and enforce same-project study/job/call relationships. RB-02 primitive layer: normalized reserve-to-held transitions and separate unique physical invoices/shared-input attribution under study/method/task closure. This schema acceptance does not establish the complete accounting invariant; AR-023-C owns end-to-end settlement/reconciliation evidence.
@@ -1347,6 +1351,8 @@ M3 / P0 · 3 PRs · 10 engineering days · Not started
 <a id="ar-021-a"></a>
 
 #### AR-021-A — Durable coordinator phase machine
+
+- **Tracking issue:** [#61](https://github.com/spei04/agent-rewind/issues/61); blocked until the prerequisites below are accepted.
 
 - **Objective:** Resume studies without silently repeating paid work or changing the protocol. This task delivers durable coordinator phase machine.
 - **Implementation scope / PR boundary:** Persist discovery/freeze/confirmation/publication phases and resumable work intents. Approved RB-03 addition: Add frozen task-local policy state, receipt manifests and confirmation access barriers to the existing coordinator; independent execution generations cannot reuse analytical attempts.
@@ -1479,6 +1485,8 @@ M3 / P0 · 3 PRs · 10 engineering days · Not started
 
 #### AR-023-B — Dispatch receipts and uncertain-call journal
 
+- **Tracking issue:** [#59](https://github.com/spei04/agent-rewind/issues/59); blocked until the prerequisites below are accepted.
+
 - **Objective:** Account for every provider call and preserve uncertainty until reconciled. This task delivers dispatch receipts and uncertain-call journal.
 - **Implementation scope / PR boundary:** Record dispatch intent before network and observed response after; route discovery and continuation through ledger.
 - **Out of scope:** No invoice truth inferred from token estimate.
@@ -1495,6 +1503,8 @@ M3 / P0 · 3 PRs · 10 engineering days · Not started
 <a id="ar-023-c"></a>
 
 #### AR-023-C — Reconciliation command and accounting export
+
+- **Tracking issue:** [#60](https://github.com/spei04/agent-rewind/issues/60); blocked until the prerequisites below are accepted.
 
 - **Objective:** Account for every provider call and preserve uncertainty until reconciled. This task delivers reconciliation command and accounting export.
 - **Implementation scope / PR boundary:** Add audited operator reconciliation with evidence attachment and immutable adjustment entries. Approved RB-02 addition: Extend the existing study ledger with atomic reserve-to-held conversion and distinct shared-input attribution; retain actual invoice uniqueness. Complete RB-02 integration only here after AR-023-B dispatch journal and AR-020-C lifecycle: prove protected reserve conversion, timeout holds, invoice uniqueness, actual over-quote charges, per-method attribution and late adjustments together.
@@ -1518,6 +1528,8 @@ M3 / P0 · 4 PRs · 12 engineering days · Not started
 <a id="ar-024-a"></a>
 
 #### AR-024-A — Estimator, missingness and experiment report contract
+
+- **Tracking issue:** [#62](https://github.com/spei04/agent-rewind/issues/62); blocked until the prerequisites below are accepted.
 
 - **Objective:** Report intervention effects with correct denominators and uncertainty. This task delivers estimator, missingness and experiment report contract.
 - **Implementation scope / PR boundary:** Specify task-conditional estimand, paired design, intervals, missing data and invalidation/version fields. Approved RB-04 addition: Specify task-conditional effects, paired harm, distinct-task confirmed yield, recovery bounds, planned hypothesis family and repository-cluster reporting in C09 fixtures.
@@ -1570,6 +1582,8 @@ M3 / P0 · 4 PRs · 12 engineering days · Not started
 
 #### AR-024-D — Selected-policy calibration harness extension
 
+- **Tracking issue:** [#66](https://github.com/spei04/agent-rewind/issues/66); blocked until the prerequisites below are accepted.
+
 - **Objective:** Determine whether a funded confirmatory claim is feasible.
 - **Implementation scope / PR boundary:** Extend the existing development-only calibration harness with selected-policy, multiplicity, clustering, missingness and cost-sensitivity cases; freeze the review pack before use. Consume the separately accepted unchanged AR-024-C baseline null/coverage simulator and AR-025-D comparator; add selected-policy integration without moving baseline readiness after its consumers.
 - **Out of scope:** No held-out tuning, paid trials or guarantee from nominal sample counts.
@@ -1611,6 +1625,8 @@ M3 / P0 · 4 PRs · 14 engineering days · Not started
 
 #### AR-025-B — Cost-matched ranking baselines and negative controls
 
+- **Tracking issue:** [#63](https://github.com/spei04/agent-rewind/issues/63); blocked until the prerequisites below are accepted.
+
 - **Objective:** Compare useful intervention locations against fair inexpensive baselines. This task delivers cost-matched ranking baselines and negative controls.
 - **Implementation scope / PR boundary:** Implement last-error, uniform-location and bounded search baselines with identical evaluator/call cost caps. Approved RB-05 addition: Extend existing random/latest-error/heuristic controls with unchanged continuation and fresh restart; use the same permitted information/model/resource vectors and common proposal attribution.
 - **Out of scope:** No claim of superiority before held-out study. No published-method adapter or adaptive allocator.
@@ -1628,6 +1644,8 @@ M3 / P0 · 4 PRs · 14 engineering days · Not started
 
 #### AR-025-C — Recomputable ranking evidence package
 
+- **Tracking issue:** [#64](https://github.com/spei04/agent-rewind/issues/64); blocked until the prerequisites below are accepted.
+
 - **Objective:** Compare useful intervention locations against fair inexpensive baselines. This task delivers recomputable ranking evidence package.
 - **Implementation scope / PR boundary:** Export safe candidate/protocol/receipt hashes and reproduce ranking plus report from stored evidence. Approved RB-10 addition: Extend existing safe export with scoped receipt hashes, allowed observation manifests, all denominators and both actual/attributable cost views.
 - **Out of scope:** No public release of partner traces. No partner trace publication or export of model credentials.
@@ -1644,6 +1662,8 @@ M3 / P0 · 4 PRs · 14 engineering days · Not started
 <a id="ar-025-d"></a>
 
 #### AR-025-D — Implement the successive-halving allocation comparator
+
+- **Tracking issue:** [#65](https://github.com/spei04/agent-rewind/issues/65); blocked until the prerequisites below are accepted.
 
 - **Objective:** Measure allocation value without changing the proposal pool.
 - **Implementation scope / PR boundary:** Implement owner-approved successive halving over frozen candidates with within-task updates and immutable resource receipts; compare against uniform allocation.
@@ -1668,6 +1688,8 @@ M3 / P0 · 3 PRs · 10 engineering days · Not started
 <a id="ar-026-a"></a>
 
 #### AR-026-A — Frozen evaluation and power decision
+
+- **Tracking issue:** [#67](https://github.com/spei04/agent-rewind/issues/67); blocked until the prerequisites below are accepted.
 
 - **Objective:** Establish experiment correctness before relying on research conclusions. This task delivers frozen evaluation and power decision.
 - **Implementation scope / PR boundary:** Preregister useful-location metric, minimum effect, task sample, multiple comparisons and stop/invalidation rules. Approved RB-11B addition: Run the reviewed development harness and independently review its evidence; freeze sample, threshold and affordability decisions or explicitly narrow/block the claim. Consume reviewed AR-024-D harness evidence in this separate feasibility PR; do not hide harness implementation in the decision or infer approval of a paid study.

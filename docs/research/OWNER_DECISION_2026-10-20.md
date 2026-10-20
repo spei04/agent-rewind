@@ -59,3 +59,23 @@ These checks verify consistency and reject scope or binding drift; they do not a
 The immutable record contains computed **issuance** metrics from a minimal pinned original task/gate projection plus the approved task changes. It does not pin future gate statuses, live review notes or unrelated estimates. Normal progress uses the live backlog validator and separately reviewed evidence; another gate cannot cite this owner decision as its authority. A later selected-task mapping, retained-work or estimate reconciliation must be a separately versioned technical record linked to this decision, preserving the original owner choices and exclusions. It is not a request to reapprove unchanged choices.
 
 Issue #51 closes only after this reconciliation is accepted and the eleven unique implementation tasks (020-A/B, 023-B/C, 021-A, 024-A/D, 025-B/C/D, 026-A) have detailed linked GitHub issues. Those issues retain prerequisite IDs and blocked/unassigned status; issue creation does not dispatch research runtime work.
+
+## Linked implementation issues
+
+The reviewed mapping is tracked in eleven independently assignable issues. Each contains scope exclusions, prerequisites, contracts, acceptance/tests, security/reliability, effort/confidence, responsible/review roles and definition of done. All remain blocked/not started; these links do not dispatch work ahead of its prerequisites.
+
+| Task | Issue | Entry state |
+| --- | --- | --- |
+| AR-020-A | [#57](https://github.com/spei04/agent-rewind/issues/57) | Blocked / not started |
+| AR-020-B | [#58](https://github.com/spei04/agent-rewind/issues/58) | Blocked / not started |
+| AR-023-B | [#59](https://github.com/spei04/agent-rewind/issues/59) | Blocked / not started |
+| AR-023-C | [#60](https://github.com/spei04/agent-rewind/issues/60) | Blocked / not started |
+| AR-021-A | [#61](https://github.com/spei04/agent-rewind/issues/61) | Blocked / not started |
+| AR-024-A | [#62](https://github.com/spei04/agent-rewind/issues/62) | Blocked / not started |
+| AR-025-B | [#63](https://github.com/spei04/agent-rewind/issues/63) | Blocked / not started |
+| AR-025-C | [#64](https://github.com/spei04/agent-rewind/issues/64) | Blocked / not started |
+| AR-025-D | [#65](https://github.com/spei04/agent-rewind/issues/65) | Blocked / not started |
+| AR-024-D | [#66](https://github.com/spei04/agent-rewind/issues/66) | Blocked / not started |
+| AR-026-A | [#67](https://github.com/spei04/agent-rewind/issues/67) | Blocked / not started |
+
+Internal review accepted source 1f2eabace62b36418c2196f8e3b98d5218bbcb95: C independently passed 245 tests and four refusal probes; the lead separately passed the 245 tests, validators and immutable C21 byte checks. Hosted and final-composition acceptance remain required before closing #51. This is internal source review, not external statistical approval.
