@@ -6740,7 +6740,7 @@
       "G7"
     ],
     "critical_path_excludes_external_waits": true,
-    "revision_notes": "2026-10-20: AR-051-A secure CI/candidates starts after verified E0/AR-004-A/AR-003-A; G1 consumes its evidence. AR-005-B active after G0. Fields, DAG, producer ancestry, conditional schedule and rollups rerun.",
+    "revision_notes": "2026-10-20: AR-051-A secure CI/candidates, AR-033-A offline reference configuration and AR-005-B explicit migration are verified. AR-005-C starts after integrated005B, with separate guard/recovery workstreams and independent review. Fields, card statuses, DAG, producer ancestry, active prerequisite ordering, conditional schedule and unchanged rollups checked.",
     "independent_review": "Engineer A independently recomputed the 146-task/51-parent/519-edge graph, E0/producer ancestry, parent totals, all task cards/dependencies, conditional schedule and 429-day/146.5-day rollups; bounded stale narrative figures corrected before publication."
   },
   "review_findings": [

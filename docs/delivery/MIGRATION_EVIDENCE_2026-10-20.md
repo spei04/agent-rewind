@@ -16,10 +16,11 @@ Pull-request candidate delivery was skipped and uploaded zero artifacts.
 
 The PostgreSQL tests exercise explicit fresh installation and historical adoption,
 exact retry/conflict behavior, frozen catalog validation, transactional interruption
-and process termination, writer-role/session exclusion, future/multiple heads,
-non-owner runtime refusal, namespace protection before dialect probing, repeated
+and process termination, writer-role/session exclusion, DDL refusal for a
+non-owner runtime role on unsafe schemas, namespace protection before dialect probing, repeated
 connections, autocommit refusal and bounded strict source parsing. SQLite tests
-also cover backup restoration and structural drift, including unindexed collation.
+also cover stored future/multiple-head refusal, backup restoration and structural
+drift, including unindexed collation.
 Installed-package smoke loads the shipped migration profiles and actually runs
 installation/retry/status outside the checkout.
 

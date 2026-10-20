@@ -65,7 +65,7 @@ Source inspected on 2026-10-19 at the baseline above. Historical test results be
 
 Use **Not started**, **In progress**, **Blocked**, **Implemented / verification pending**, and **Verified**. A checked box means its stated acceptance evidence exists. Historical implementation is not retroactively marked enterprise-ready. Milestone completion requires all exit gates, not just merged code. Each implementation change updates its task row, requirement row, and dated evidence log in this file. No fabricated overall percentage.
 
-Current planning work: blueprint and M0/M1 packet published; execution review now covers all 51 packages as 146 bounded tasks with dependencies, contracts, tests and conditional daily scheduling. Section 10 links the execution ledger. E0 is approved and initial independent assignments are in progress; see [ASSIGNMENTS.md](ASSIGNMENTS.md). M0 and later gates remain evidence-dependent.
+Current planning work: blueprint and M0/M1 packet published; execution review now covers all 51 packages as 146 bounded tasks with dependencies, contracts, tests and conditional daily scheduling. Section 10 links the execution ledger. E0 and development-scope G0 are satisfied; explicit migration, offline reference configuration and secure CI are verified. Runtime guards and recovery are in progress; see [ASSIGNMENTS.md](ASSIGNMENTS.md). Later runtime, production and partner-data gates remain evidence-dependent.
 
 ### 1.4 Decisions still requiring confirmation
 
