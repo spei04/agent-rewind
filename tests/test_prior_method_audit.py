@@ -1,11 +1,22 @@
 """Record integrity tests; no third-party algorithm execution or scientific validation."""
 
 import copy
+import importlib.util
 import json
+from pathlib import Path
 
 import pytest
 
-from scripts.check_prior_methods import load_record, validate
+ROOT = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location(
+    "prior_methods_check", ROOT / "scripts/check_prior_methods.py"
+)
+if SPEC is None or SPEC.loader is None:
+    raise RuntimeError("Prior-method checker cannot be loaded")
+CHECK = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(CHECK)
+load_record = CHECK.load_record
+validate = CHECK.validate
 
 
 @pytest.fixture
