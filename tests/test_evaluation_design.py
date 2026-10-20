@@ -19,6 +19,26 @@ CHECK = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(CHECK)
 
 
+def update_card_links(document, card):
+    """Keep deliberate graph-negative fixtures consistent with their Markdown."""
+    heading = f"### {card['id']} — {card['title']}"
+    before, section = document.split(heading, 1)
+    body, separator, after = section.partition("\n### ")
+    lines = body.splitlines()
+    for index, line in enumerate(lines):
+        if line.startswith("- **Dependencies:** "):
+            lines[index] = (
+                f"- **Dependencies:** {', '.join(card['dependencies'])}. "
+                f"Integration owner: {card['maps_to']}; original prerequisites remain."
+            )
+        elif line.startswith("- **Contracts:** "):
+            lines[index] = (
+                f"- **Contracts:** {', '.join(card['contracts'])}; "
+                "producer acceptance is not granted here."
+            )
+    return before + heading + "\n".join(lines) + separator + after
+
+
 @pytest.fixture
 def inputs():
     return copy.deepcopy(CHECK.read_inputs())
@@ -121,62 +141,62 @@ def test_discovery_receipt_cannot_cross_method_or_other_identity_scope(inputs, s
     row = inputs[0]["phase_case"]
     row["observed"][0][scope] = "foreign"
     with pytest.raises(ValueError, match="foreign receipt scope"):
-        CHECK.phase_check(row)
+        CHECK.phase_check(row, inputs[0]["phase_plan"])
 
 
 @pytest.mark.parametrize("field", ["policy_digest", "policy_state_digest"])
 def test_changed_policy_or_state_is_not_same_decision(inputs, field):
     row = inputs[0]["phase_case"]
     row["identity"][field] = "f" * 64
-    with pytest.raises(ValueError, match="changed decision"):
-        CHECK.phase_check(row)
+    with pytest.raises(ValueError, match="changed frozen decision identity"):
+        CHECK.phase_check(row, inputs[0]["phase_plan"])
 
 
 @pytest.mark.parametrize("field", sorted(CHECK.DECISION_IDENTITY))
 def test_decision_requires_all_identity_fields(inputs, field):
     row = inputs[0]["phase_case"]
     del row["identity"][field]
-    with pytest.raises(ValueError, match="complete decision identity"):
-        CHECK.phase_check(row)
+    with pytest.raises(ValueError, match="changed frozen decision identity"):
+        CHECK.phase_check(row, inputs[0]["phase_plan"])
 
 
 @pytest.mark.parametrize("field", ["policy_digest", "policy_state_digest"])
 def test_c08_cannot_drop_policy_or_state_contract(inputs, field):
     data, ledger, document = inputs
     data["receipt_contract"]["identity_fields"].remove(field)
-    with pytest.raises(ValueError, match="policy/state receipt identity"):
+    with pytest.raises(ValueError, match="complete required C08"):
         CHECK.validate(data, ledger, document)
 
 
 def test_discovery_attempt_cannot_be_reused_for_confirmation(inputs):
     row = inputs[0]["phase_case"]
     row["confirmation_attempts"].append(row["discovery_attempts"][0])
-    with pytest.raises(ValueError, match="fresh phase attempts"):
-        CHECK.phase_check(row)
+    with pytest.raises(ValueError, match="attempt phases differ from frozen registration"):
+        CHECK.phase_check(row, inputs[0]["phase_plan"])
 
 
 def test_confirmation_outcome_cannot_feed_candidate_selection(inputs):
     row = inputs[0]["phase_case"]
     row["observed"][0]["phase"] = "confirmation"
     with pytest.raises(ValueError, match="confirmation or foreign phase"):
-        CHECK.phase_check(row)
+        CHECK.phase_check(row, inputs[0]["phase_plan"])
 
 
 def test_optional_confirmation_stopping_refuses(inputs):
     row = inputs[0]["phase_case"]
     row["optional_stop"] = True
     with pytest.raises(ValueError, match="fixed phase boundary"):
-        CHECK.phase_check(row)
+        CHECK.phase_check(row, inputs[0]["phase_plan"])
 
 
 def test_planned_family_does_not_shrink_to_selected_winners(inputs):
     row = inputs[0]["family_case"]
-    confirmation, population = CHECK.family_check(row)
+    confirmation, population = CHECK.family_check(row, inputs[0]["family_plan"])
     assert confirmation == pytest.approx(0.025 / 42)
     assert population == pytest.approx(0.025 / 3)
     row["confirmation_divisor"] = 7
     with pytest.raises(ValueError, match="full planned family"):
-        CHECK.family_check(row)
+        CHECK.family_check(row, inputs[0]["family_plan"])
 
 
 @pytest.mark.parametrize("field", ["population_divisor", "population_alpha_micros"])
@@ -184,7 +204,7 @@ def test_population_contrasts_cannot_escape_family_allocation(inputs, field):
     row = inputs[0]["family_case"]
     row[field] += 1
     with pytest.raises(ValueError, match="family"):
-        CHECK.family_check(row)
+        CHECK.family_check(row, inputs[0]["family_plan"])
 
 
 @pytest.mark.parametrize(
@@ -308,8 +328,7 @@ def test_unknown_dependency_refuses_even_if_document_matches(inputs):
     data, ledger, document = inputs
     card = data["followups"][0]
     card["dependencies"].append("MISSING-999")
-    heading = f"### {card['id']} — {card['title']}"
-    document = document.replace(heading, heading + "\nMISSING-999")
+    document = update_card_links(document, card)
     with pytest.raises(ValueError, match="unknown prerequisite"):
         CHECK.validate(data, ledger, document)
 
@@ -318,8 +337,7 @@ def test_dependency_cycle_refuses_even_if_document_matches(inputs):
     data, ledger, document = inputs
     card = data["followups"][0]
     card["dependencies"].append("RB-01")
-    heading = f"### {card['id']} — {card['title']}"
-    document = document.replace(heading, heading + "\nRB-01")
+    document = update_card_links(document, card)
     with pytest.raises(ValueError, match="dependency cycle"):
         CHECK.validate(data, ledger, document)
 
@@ -328,6 +346,7 @@ def test_missing_contract_producer_ancestry_refuses(inputs):
     data, ledger, document = inputs
     card = next(row for row in data["followups"] if row["id"] == "RB-07")
     card["contracts"].append("C08")
+    document = update_card_links(document, card)
     with pytest.raises(ValueError, match="required contract producer missing"):
         CHECK.validate(data, ledger, document)
 
@@ -396,3 +415,122 @@ def test_cli_fails_cleanly_for_malformed_input(tmp_path, raw, reason):
     assert f"Evaluation design invalid: {reason}" in process.stderr
     assert "Traceback" not in process.stderr
     assert "valid;" not in process.stdout
+
+
+def test_simultaneously_undercharging_shared_pool_still_refuses(inputs):
+    row = inputs[0]["shared_case"]
+    row["required_attribution"] = 15
+    row["method_charges"] = dict.fromkeys(row["method_charges"], 15)
+    assert row["physical_total"] == 30
+    with pytest.raises(ValueError, match="full-pool attribution"):
+        CHECK.shared_costs(row)
+
+
+@pytest.mark.parametrize("field", sorted(CHECK.REQUIRED_C08_IDENTITY))
+def test_every_declared_c08_identity_field_is_required(inputs, field):
+    data, ledger, document = inputs
+    data["receipt_contract"]["identity_fields"].remove(field)
+    with pytest.raises(ValueError, match="complete required C08"):
+        CHECK.validate(data, ledger, document)
+
+
+@pytest.mark.parametrize("field", sorted(CHECK.REQUIRED_C08_RECEIPTS))
+def test_every_declared_c08_receipt_field_is_required(inputs, field):
+    data, ledger, document = inputs
+    data["receipt_contract"]["receipt_fields"].remove(field)
+    with pytest.raises(ValueError, match="complete required C08"):
+        CHECK.validate(data, ledger, document)
+
+
+@pytest.mark.parametrize("field,removed", [("dependencies", "AR-012-B"), ("contracts", "C20")])
+def test_card_link_removal_cannot_silently_disagree_with_document(inputs, field, removed):
+    data, ledger, document = inputs
+    data["followups"][0][field].remove(removed)
+    with pytest.raises(ValueError, match="card/document"):
+        CHECK.validate(data, ledger, document)
+
+
+@pytest.mark.parametrize("field,added", [("dependencies", "AR-038-C"), ("contracts", "C01")])
+def test_card_link_addition_cannot_silently_disagree_with_document(inputs, field, added):
+    data, ledger, document = inputs
+    data["followups"][0][field].append(added)
+    with pytest.raises(ValueError, match="card/document"):
+        CHECK.validate(data, ledger, document)
+
+
+def test_integration_owner_is_checked_separately_from_prerequisite_ids(inputs):
+    data, ledger, document = inputs
+    data["followups"][0]["maps_to"] = "AR-024-A"
+    with pytest.raises(ValueError, match="card/document dependency drift"):
+        CHECK.validate(data, ledger, document)
+
+
+@pytest.mark.parametrize(
+    "field,removed",
+    [
+        ("outer_leakage_keys", "task_specific_evaluator_digest"),
+        ("allowed_discovery_observations", "registered_task_input"),
+        ("forbidden_observations", "sealed_confirmation"),
+    ],
+)
+def test_required_information_and_leakage_boundaries_cannot_be_removed(inputs, field, removed):
+    data, ledger, document = inputs
+    data["policy"][field].remove(removed)
+    with pytest.raises(ValueError, match="narrow information/split"):
+        CHECK.validate(data, ledger, document)
+
+
+def test_extra_discovery_observation_cannot_grant_hidden_answer_access(inputs):
+    data, ledger, document = inputs
+    data["policy"]["allowed_discovery_observations"].append("hidden_expected_answer")
+    with pytest.raises(ValueError, match="narrow information/split"):
+        CHECK.validate(data, ledger, document)
+
+
+def test_confirmation_attempt_cannot_be_relabelled_in_both_lists_and_receipt(inputs):
+    data = inputs[0]
+    row = data["phase_case"]
+    row["confirmation_attempts"].remove("c1")
+    row["discovery_attempts"].append("c1")
+    row["observed"][0]["attempt_id"] = "c1"
+    with pytest.raises(ValueError, match="frozen registration"):
+        CHECK.phase_check(row, data["phase_plan"])
+
+
+def test_confirmation_plan_cannot_be_truncated(inputs):
+    data = inputs[0]
+    data["phase_case"]["confirmation_attempts"].pop()
+    with pytest.raises(ValueError, match="frozen registration"):
+        CHECK.phase_check(data["phase_case"], data["phase_plan"])
+
+
+def test_plan_identity_cannot_change_without_frozen_input(inputs):
+    data = inputs[0]
+    row = data["phase_case"]
+    row["identity"]["policy_state_digest"] = "f" * 64
+    row["expected_identity"]["policy_state_digest"] = "f" * 64
+    with pytest.raises(ValueError, match="changed frozen decision"):
+        CHECK.phase_check(row, data["phase_plan"])
+
+
+def test_plan_payload_cannot_change_under_its_existing_digest(inputs):
+    data = inputs[0]
+    data["phase_plan"]["body"]["confirmation_attempts"].pop()
+    with pytest.raises(ValueError, match="frozen plan digest"):
+        CHECK.phase_check(data["phase_case"], data["phase_plan"])
+
+
+def test_planned_count_and_divisor_cannot_jointly_shrink_to_selected_count(inputs):
+    data = inputs[0]
+    row = data["family_case"]
+    row["planned_confirmation_claims"] = row["confirmation_divisor"] = 7
+    with pytest.raises(ValueError, match="frozen inventory"):
+        CHECK.family_check(row, data["family_plan"])
+
+
+def test_population_count_and_divisor_cannot_jointly_shrink(inputs):
+    data = inputs[0]
+    row = data["family_case"]
+    row["planned_population_contrasts"] = row["population_divisor"] = 1
+    with pytest.raises(ValueError, match="frozen inventory"):
+        CHECK.family_check(row, data["family_plan"])

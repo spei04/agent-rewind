@@ -299,7 +299,7 @@ ceiling or invent external statistical approval.
 
 C08's original producer **AR-020-A** must review the additional fields listed in
 the JSON: scoped study/task/policy/decision identities; frozen artifacts and
-allowed observations; logical calls/attempts/lease generations; prices, quotes,
+allowed observations; logical calls/attempts/lease generations and reservation IDs; prices, quotes,
 reserves, physical invoices and comparison allocations; phase/seal and linked
 reconciliation history. Keep C04 idempotency, scope, uncertainty and fencing
 semantics. No new public endpoint or runtime schema is added by this document.
@@ -581,6 +581,10 @@ The offline validator checks design invariants, example arithmetic, phase/source
 separation, owner-gate closure and dependency/card completeness. Its small
 deterministic oracles are specification examples, not a scheduler, estimator,
 runtime simulation, authorization service or proof of statistical validity.
+Separate synthetic frozen plans bind scoped attempt registration and the full
+method/task/reuse/contrast inventory. Their digest consistency checks catch
+relabeling or truncation of derived examples; they are not signatures, production
+seals or evidence that an owner approved a plan.
 Tests must run using the pytest console entry point with PYTHONPATH unset and
 file-based checker loading. No study data, model calls or new dependencies are
 needed.

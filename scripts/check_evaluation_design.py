@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import stat
@@ -31,6 +32,64 @@ GATE_CHOICES = {
     "owner_nested_protocol_disposition",
 }
 DECISION_IDENTITY = SCOPE | {"policy_digest", "policy_state_digest", "candidate_digest"}
+REQUIRED_C08_IDENTITY = {
+    "phase",
+    "task_id",
+    "repository_family_id",
+    "checkpoint_digest",
+    "method_id",
+    "model_revision",
+    "evaluator_digest",
+    "candidate_digest",
+    "adapter_digest",
+    "sample_plan_digest",
+    "policy_digest",
+    "environment_digest",
+    "event_chain_digest",
+    "policy_state_digest",
+    "decision_id",
+    "provider_fingerprint_policy",
+    "policy_run_id",
+    "price_revision",
+    "resource_cap_digest",
+    "allowed_observation_manifest_digest",
+    "project_id",
+    "protocol_digest",
+    "study_id",
+}
+REQUIRED_C08_RECEIPTS = {
+    "lease_generation",
+    "reserve_transfer",
+    "reconciliation_parent_id",
+    "source_decision_id",
+    "settled_charge",
+    "outcome_taxonomy",
+    "attempt_id",
+    "quote_bound",
+    "comparison_allocation_id",
+    "reservation_id",
+    "held_charge",
+    "logical_call_id",
+    "observed_receipt_ids",
+    "physical_invoice_id",
+}
+LEAKAGE_KEYS = {
+    "repository_family_id",
+    "task_family_id",
+    "task_specific_evaluator_digest",
+    "derived_patch_family_id",
+}
+ALLOWED_OBSERVATIONS = {
+    "registered_task_input",
+    "factual_prefix",
+    "task_local_discovery_outcomes",
+    "task_local_discovery_cost_receipts",
+}
+FORBIDDEN_OBSERVATIONS = {
+    "sealed_confirmation",
+    "other_heldout_task_outcomes",
+    "hidden_expected_answers_in_answer_blind_stratum",
+}
 CARD_FIELDS = {
     "id",
     "title",
@@ -134,8 +193,10 @@ def shared_costs(row: dict[str, Any]) -> None:
     require(all(nonnegative(x["amount"]) for x in invoices), "physical invoice amount")
     require(sum(x["amount"] for x in invoices) == row["physical_total"], "physical total")
     require(
-        nonnegative(row["required_attribution"]) and row["required_attribution"] > 0,
-        "shared attribution",
+        nonnegative(row["required_attribution"])
+        and row["required_attribution"] > 0
+        and row["required_attribution"] == row["physical_total"],
+        "full-pool attribution must equal physical input total",
     )
     require(
         bool(row["method_charges"])
@@ -147,7 +208,28 @@ def shared_costs(row: dict[str, Any]) -> None:
     )
 
 
-def phase_check(row: dict[str, Any]) -> None:
+def frozen_body(plan: dict[str, Any], expected_digest: str) -> dict[str, Any]:
+    """Digest consistency of a separate synthetic plan, never owner authorization."""
+    require(set(plan) == {"body", "digest"} and isinstance(plan["body"], dict), "frozen plan shape")
+    calculated = hashlib.sha256(
+        json.dumps(plan["body"], sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    require(calculated == plan["digest"] == expected_digest, "frozen plan digest changed")
+    return dict(plan["body"])
+
+
+def phase_check(row: dict[str, Any], plan: dict[str, Any]) -> None:
+    frozen = frozen_body(plan, row["sample_plan_digest"])
+    require(
+        set(frozen) == {"identity", "discovery_attempts", "confirmation_attempts"},
+        "attempt plan fields",
+    )
+    require(row["identity"] == frozen["identity"], "changed frozen decision identity")
+    require(
+        row["discovery_attempts"] == frozen["discovery_attempts"]
+        and row["confirmation_attempts"] == frozen["confirmation_attempts"],
+        "attempt phases differ from frozen registration",
+    )
     require(row["phase"] == "freeze" and row["optional_stop"] is False, "fixed phase boundary")
     expected, observed = row["expected_identity"], row["identity"]
     require(set(expected) == set(observed) == DECISION_IDENTITY, "complete decision identity")
@@ -179,9 +261,34 @@ def recovery_report(row: dict[str, Any]) -> tuple[None, tuple[float, float]]:
     return None, (row["successes"] / count, (row["successes"] + row["missing"]) / count)
 
 
-def family_check(row: dict[str, Any]) -> tuple[float, float]:
+def family_check(row: dict[str, Any], plan: dict[str, Any]) -> tuple[float, float]:
     """Fixed allocation arithmetic only; no statistical interval is implemented."""
-    require(all(nonnegative(value) for value in row.values()), "family integer inputs")
+    frozen = frozen_body(plan, row["family_plan_digest"])
+    require(
+        set(frozen) == {"methods", "tasks", "reuse_claims", "population_contrasts"},
+        "family plan fields",
+    )
+    for values in frozen.values():
+        require(
+            isinstance(values, list)
+            and len(values) == len(set(values))
+            and all(isinstance(value, str) and value for value in values),
+            "family plan inventory",
+        )
+    require(
+        bool(frozen["methods"]) and bool(frozen["tasks"]) and bool(frozen["population_contrasts"]),
+        "empty planned family",
+    )
+    require(
+        all(nonnegative(value) for key, value in row.items() if key != "family_plan_digest"),
+        "family integer inputs",
+    )
+    require(
+        row["planned_confirmation_claims"]
+        == len(frozen["methods"]) * len(frozen["tasks"]) + len(frozen["reuse_claims"])
+        and row["planned_population_contrasts"] == len(frozen["population_contrasts"]),
+        "family count differs from frozen inventory",
+    )
     total, confirmation, population = (
         row["family_alpha_micros"],
         row["confirmation_alpha_micros"],
@@ -320,8 +427,34 @@ def validate_followups(data: dict[str, Any], ledger: dict[str, Any], document: s
         ):
             require(row[key] in section, f"card/document drift: {key}")
         require(f"{days[0]}–{days[1]} engineering days" in section, "card/document effort drift")
+        dependency_lines = [
+            line.removeprefix("- **Dependencies:** ")
+            for line in section.splitlines()
+            if line.startswith("- **Dependencies:** ")
+        ]
+        contract_lines = [
+            line.removeprefix("- **Contracts:** ")
+            for line in section.splitlines()
+            if line.startswith("- **Contracts:** ")
+        ]
+        require(len(dependency_lines) == len(contract_lines) == 1, "card link fields")
+        dependency_text, separator, owner = dependency_lines[0].partition(". Integration owner: ")
+        dependency_ids = dependency_text.split(", ")
         require(
-            all(dep in section for dep in row["dependencies"]), "card/document dependency drift"
+            bool(separator)
+            and owner == f"{row['maps_to']}; original prerequisites remain."
+            and len(dependency_ids) == len(set(dependency_ids))
+            and set(dependency_ids) == set(row["dependencies"]),
+            "card/document dependency drift",
+        )
+        contract_text, separator, suffix = contract_lines[0].partition("; ")
+        contract_ids = contract_text.split(", ")
+        require(
+            bool(separator)
+            and suffix == "producer acceptance is not granted here."
+            and len(contract_ids) == len(set(contract_ids))
+            and set(contract_ids) == set(row["contracts"]),
+            "card/document contract drift",
         )
     ancestors: dict[str, set[str]] = {}
 
@@ -393,6 +526,17 @@ def validate(data: dict[str, Any], ledger: dict[str, Any], document: str) -> Non
         and policy["nested_holdout_execution_approved"] is False,
         "phase/holdout policy",
     )
+    for key, required in (
+        ("outer_leakage_keys", LEAKAGE_KEYS),
+        ("allowed_discovery_observations", ALLOWED_OBSERVATIONS),
+        ("forbidden_observations", FORBIDDEN_OBSERVATIONS),
+    ):
+        require(
+            isinstance(policy[key], list)
+            and set(policy[key]) == required
+            and len(policy[key]) == len(required),
+            "complete narrow information/split contract",
+        )
     thresholds = data["thresholds"]
     require(
         thresholds["status"] == "pending_owner_and_external_review"
@@ -419,16 +563,18 @@ def validate(data: dict[str, Any], ledger: dict[str, Any], document: str) -> Non
         "original C08/C09 producers",
     )
     require(
-        set(contract["identity_fields"]) >= DECISION_IDENTITY
-        and len(set(contract["identity_fields"])) == len(contract["identity_fields"]),
-        "policy/state receipt identity required",
+        set(contract["identity_fields"]) == REQUIRED_C08_IDENTITY
+        and len(set(contract["identity_fields"])) == len(contract["identity_fields"])
+        and set(contract["receipt_fields"]) == REQUIRED_C08_RECEIPTS
+        and len(set(contract["receipt_fields"])) == len(contract["receipt_fields"]),
+        "complete required C08 identity/receipt fields",
     )
     for case in data["budget_cases"]:
         require(budget_decision(case) == case["expected"], "budget example decision")
     method_closure(data["method_budget_case"])
     shared_costs(data["shared_case"])
-    phase_check(data["phase_case"])
-    family_check(data["family_case"])
+    phase_check(data["phase_case"], data["phase_plan"])
+    family_check(data["family_case"], data["family_plan"])
     comparison_check(data["comparison_case"])
     yield_value, bounds = recovery_report(data["recovery_case"])
     require(

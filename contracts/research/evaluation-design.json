@@ -152,7 +152,8 @@
       "held_charge",
       "reserve_transfer",
       "outcome_taxonomy",
-      "reconciliation_parent_id"
+      "reconciliation_parent_id",
+      "reservation_id"
     ],
     "outcome_states": [
       "valid_success",
@@ -341,7 +342,8 @@
       "c1",
       "c2"
     ],
-    "optional_stop": false
+    "optional_stop": false,
+    "sample_plan_digest": "0859d776dea5eace6bf8b5e65e17b70b35ecd3c845edb453418fdd639eba782f"
   },
   "recovery_case": {
     "method_kind": "fresh_retry",
@@ -939,7 +941,8 @@
     "selected_confirmation_claims": 7,
     "confirmation_divisor": 42,
     "planned_population_contrasts": 3,
-    "population_divisor": 3
+    "population_divisor": 3,
+    "family_plan_digest": "ee1a198cec7d124223720a96df651cb89cf3b7123a9f48b2644db31205485900"
   },
   "comparison_case": {
     "methods": [
@@ -975,5 +978,59 @@
       }
     ],
     "kind": "allocation_only_common_pool"
+  },
+  "phase_plan": {
+    "digest": "0859d776dea5eace6bf8b5e65e17b70b35ecd3c845edb453418fdd639eba782f",
+    "body": {
+      "identity": {
+        "project_id": "synthetic-project",
+        "study_id": "synthetic-study",
+        "method_id": "uniform",
+        "task_id": "synthetic-task",
+        "policy_run_id": "synthetic-policy-run",
+        "policy_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "policy_state_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "candidate_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "discovery_attempts": [
+        "d1"
+      ],
+      "confirmation_attempts": [
+        "c1",
+        "c2"
+      ]
+    }
+  },
+  "family_plan": {
+    "digest": "ee1a198cec7d124223720a96df651cb89cf3b7123a9f48b2644db31205485900",
+    "body": {
+      "methods": [
+        "uniform",
+        "successive_halving",
+        "frozen_heuristic",
+        "random"
+      ],
+      "tasks": [
+        "task-1",
+        "task-2",
+        "task-3",
+        "task-4",
+        "task-5",
+        "task-6",
+        "task-7",
+        "task-8",
+        "task-9",
+        "task-10"
+      ],
+      "reuse_claims": [
+        "reuse-1",
+        "reuse-2"
+      ],
+      "population_contrasts": [
+        "contrast-1",
+        "contrast-2",
+        "contrast-3"
+      ]
+    }
   }
 }
