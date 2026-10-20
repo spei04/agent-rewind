@@ -102,9 +102,14 @@ class Database:
             kwargs["connect_args"] = {"check_same_thread": False, "timeout": 30}
         self.engine = create_engine(settings.database_url, **kwargs)
 
-    def migrate(self) -> None:
-        # Initial schema. Later schema changes require an explicit migration revision.
-        metadata.create_all(self.engine)
+    def migrate(self, *, installation_key: str | None = None) -> None:
+        """Operator compatibility helper; unversioned history needs explicit adoption."""
+        from .migrations.service import install, upgrade
+
+        if installation_key is None:
+            upgrade(self.engine)
+        else:
+            install(self.engine, installation_key)
 
     def add(self, kind: str, data: dict[str, Any], record_id: str | None = None) -> str:
         record_id = record_id or identifier()

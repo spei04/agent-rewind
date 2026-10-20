@@ -424,6 +424,22 @@ unknown record kinds, conflicting targets and missing principal/key authority;
 resource closure verification is still required. AR-007-A verifies the intent against current
 rows under writer exclusion before setting ownership_complete.
 
+AR-005-B implementation erratum (bounded legacy-writer inventory): PostgreSQL
+adoption additionally requires a nonempty `legacy_writer_roles` list in the
+schema-1 mapping, at most 64 distinct existing PostgreSQL role names. Each role
+must be NOLOGIN/NOSUPERUSER and cannot be the current migrator; no remaining
+application login may inherit or SET ROLE a declared legacy role. Persist the
+inventory within the exact mapping/digest, so changed inventories conflict on
+retry. Reject every other target-database session, including superusers and
+restricted/ambiguous activity visibility. Unrelated privileged cluster operators
+remain explicitly trusted. The inventory and evidence attest the operator's
+historic-role/process knowledge; they are not independently discoverable proof of
+historic application purpose or protection against a dishonest administrator.
+SQLite requires an absent/empty role inventory and its separate process/OS drain
+profile. This closes the existing Compose deployment's application-superuser gap;
+legacy app superuser authority must be disabled before adoption, not implicitly
+classified as a trusted operator.
+
 `migration_progress` has `(revision,phase)` PK, source_digest char64, bounded cursor
 JSON, rows_verified bigint≥0, status `pending|running|complete|blocked` and
 updated_at timestamptz. Completed batches and cursor advance in one transaction;

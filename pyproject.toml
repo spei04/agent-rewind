@@ -28,7 +28,7 @@ security = ["pip-audit==2.10.1"]
 include = ["agent_rewind*"]
 
 [tool.setuptools.package-data]
-agent_rewind = ["web/*"]
+agent_rewind = ["web/*", "migrations/profiles/*.json"]
 
 [tool.ruff]
 line-length = 100

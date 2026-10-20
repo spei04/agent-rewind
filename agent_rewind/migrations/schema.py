@@ -1,0 +1,426 @@
+"""Frozen unversioned DDL and bounded, dialect-specific schema inspection."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+from pathlib import Path
+from typing import Any
+
+from sqlalchemy import inspect, text
+from sqlalchemy.engine import Connection
+
+BASELINE = "ar_0001_baseline"
+HEAD = "ar_0002_adoption"
+SOURCE_COMMIT = "8f1ae757005c95c50a789e4fa0a10aae9b3c4024"
+TABLES = ("api_keys", "audit", "events", "jobs", "records")
+COLUMNS = {
+    "records": [
+        ("id", "VARCHAR(32)", False),
+        ("kind", "VARCHAR(20)", False),
+        ("created", "FLOAT", False),
+        ("data", "JSON", False),
+    ],
+    "events": [
+        ("run_id", "VARCHAR(32)", False),
+        ("step", "INTEGER", False),
+        ("artifact", "VARCHAR(64)", False),
+        ("hash", "VARCHAR(64)", False),
+    ],
+    "jobs": [
+        ("id", "VARCHAR(32)", False),
+        ("kind", "VARCHAR(20)", False),
+        ("created", "FLOAT", False),
+        ("payload", "VARCHAR(64)", False),
+        ("status", "VARCHAR(20)", False),
+        ("owner", "VARCHAR(64)", True),
+        ("lease_until", "FLOAT", True),
+        ("cancel", "BOOLEAN", False),
+        ("budget", "BIGINT", False),
+        ("reserved", "BIGINT", False),
+        ("result", "VARCHAR(64)", True),
+        ("error", "VARCHAR(300)", True),
+        ("actor", "VARCHAR(256)", True),
+    ],
+    "api_keys": [
+        ("id", "VARCHAR(32)", False),
+        ("hash", "VARCHAR(64)", True),
+        ("role", "VARCHAR(20)", False),
+        ("name", "VARCHAR(120)", False),
+        ("expires", "FLOAT", False),
+        ("revoked", "BOOLEAN", True),
+    ],
+    "audit": [
+        ("id", "VARCHAR(32)", False),
+        ("created", "FLOAT", False),
+        ("actor", "VARCHAR(256)", False),
+        ("action", "VARCHAR(80)", False),
+        ("target", "VARCHAR(64)", False),
+    ],
+}
+PRIMARY_KEYS = {name: ["run_id", "step"] if name == "events" else ["id"] for name in TABLES}
+SQL_WORD = re.compile(r"[A-Za-z_]+")
+METADATA_TABLES = {"alembic_version", "installation_adoptions", "migration_progress"}
+
+
+class MigrationRefused(RuntimeError):
+    """Only a fixed safe code crosses the CLI boundary; never database exception text."""
+
+    def __init__(self, code: str):
+        self.code = code
+        super().__init__(code)
+
+
+def canonical(value: Any) -> bytes:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+
+
+def checksum(value: Any) -> str:
+    return hashlib.sha256(canonical(value)).hexdigest()
+
+
+def dialect(connection: Connection) -> str:
+    name = connection.dialect.name
+    if name not in {"sqlite", "postgresql"}:
+        raise MigrationRefused("unsupported_database")
+    if name == "postgresql":
+        version = connection.dialect.server_version_info
+        if not version or version[0] != 16:
+            raise MigrationRefused("unsupported_postgresql_version")
+    return name
+
+
+def create_baseline(connection: Connection) -> None:
+    # These are fixed schema constants, deliberately independent from application metadata.
+    for name in TABLES:
+        fields = [
+            f'"{column}" {kind}' + ("" if nullable else " NOT NULL")
+            for column, kind, nullable in COLUMNS[name]
+        ]
+        fields.append("PRIMARY KEY (" + ",".join(PRIMARY_KEYS[name]) + ")")
+        if name == "api_keys":
+            fields.append("UNIQUE (hash)")
+        connection.exec_driver_sql(f'CREATE TABLE "{name}" (' + ",".join(fields) + ")")
+
+
+def _sqlite_ddl_tokens(sql: str) -> list[str]:
+    """Read only unquoted SQL words; comments/quoted contents cannot hide a clause."""
+    tokens = []
+    offset = 0
+    while offset < len(sql):
+        if sql.startswith("--", offset):
+            end = sql.find("\n", offset + 2)
+            offset = len(sql) if end < 0 else end + 1
+        elif sql.startswith("/*", offset):
+            end = sql.find("*/", offset + 2)
+            if end < 0:
+                raise MigrationRefused("schema_incompatible")
+            offset = end + 2
+        elif sql[offset] in {"'", '"', "`", "["}:
+            opening = sql[offset]
+            closing = "]" if opening == "[" else opening
+            offset += 1
+            while offset < len(sql):
+                if sql[offset] != closing:
+                    offset += 1
+                elif closing != "]" and sql.startswith(closing * 2, offset):
+                    offset += 2
+                else:
+                    offset += 1
+                    break
+            else:
+                raise MigrationRefused("schema_incompatible")
+        else:
+            word = SQL_WORD.match(sql, offset)
+            if word:
+                tokens.append(word.group().upper())
+                offset += len(word.group())
+            else:
+                offset += 1
+    return tokens
+
+
+def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None:
+    # Unindexed COLLATE and conflict policies are invisible to SQLite reflection.
+    # This is a conservative supported-DDL exclusion, not a replacement SQL parser.
+    forbidden = {
+        "COLLATE",
+        "CONFLICT",
+        "CHECK",
+        "REFERENCES",
+        "GENERATED",
+        "AS",
+        "WITHOUT",
+        "STRICT",
+        "AUTOINCREMENT",
+        "DEFAULT",
+        "DEFERRABLE",
+        "DEFERRED",
+    }
+    for table in set(tables) & (set(TABLES) | METADATA_TABLES):
+        size: int | None = connection.execute(
+            text(
+                "SELECT length(CAST(sql AS BLOB)) FROM sqlite_master "
+                "WHERE type='table' AND name=:name"
+            ),
+            {"name": table},
+        ).scalar_one()
+        if size is None or size > 65536:
+            raise MigrationRefused("schema_incompatible")
+        sql: str = connection.execute(
+            text("SELECT sql FROM sqlite_master WHERE type='table' AND name=:name"), {"name": table}
+        ).scalar_one()
+        if not isinstance(sql, str):
+            raise MigrationRefused("schema_incompatible")
+        restricted = forbidden if table in TABLES else forbidden - {"CHECK", "AS"}
+        if restricted.intersection(_sqlite_ddl_tokens(sql)):
+            raise MigrationRefused("schema_incompatible")
+
+
+def catalog(connection: Connection) -> dict[str, Any]:
+    """Read structure only. Fixed public/main profile; reject non-table executable objects."""
+    name = dialect(connection)
+    inspector = inspect(connection)
+    schema = "public" if name == "postgresql" else None
+    tables = inspector.get_table_names(schema=schema)
+    if len(tables) > 16:
+        raise MigrationRefused("schema_incompatible")
+    if name == "sqlite":
+        _sqlite_supported_clauses(connection, tables)
+        extras = connection.exec_driver_sql(
+            "SELECT 1 FROM sqlite_master WHERE type IN ('trigger','view') LIMIT 1"
+        ).first()
+        if extras or connection.exec_driver_sql("SELECT 1 FROM sqlite_temp_master LIMIT 1").first():
+            raise MigrationRefused("schema_incompatible")
+    else:
+        if connection.execute(
+            text("SELECT 1 FROM pg_class WHERE relnamespace=pg_my_temp_schema() LIMIT 1")
+        ).first():
+            raise MigrationRefused("schema_incompatible")
+        if connection.execute(
+            text(
+                "SELECT 1 FROM pg_namespace WHERE "
+                "nspname NOT IN ('public','information_schema') "
+                "AND nspname NOT LIKE 'pg_%' LIMIT 1"
+            )
+        ).first():
+            raise MigrationRefused("unsupported_database_schema")
+        extras = connection.execute(
+            text("""
+            SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+            WHERE n.nspname='public' AND
+              (c.relkind NOT IN ('r','i') OR c.relrowsecurity OR c.relforcerowsecurity
+               OR c.relpersistence <> 'p' OR c.relispartition) LIMIT 1
+        """)
+        ).first()
+        executable = connection.execute(
+            text("""
+            SELECT 1 FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid
+            JOIN pg_namespace n ON n.oid=c.relnamespace
+            WHERE n.nspname='public' AND NOT t.tgisinternal
+            UNION ALL
+            SELECT 1 FROM pg_rewrite r JOIN pg_class c ON c.oid=r.ev_class
+            JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public'
+            UNION ALL
+            SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+            WHERE n.nspname='public'
+            LIMIT 1
+        """)
+        ).first()
+        if extras or executable:
+            raise MigrationRefused("schema_incompatible")
+    result: dict[str, Any] = {}
+    for table in sorted(tables):
+        columns = inspector.get_columns(table, schema=schema)
+        if len(columns) > 32:
+            raise MigrationRefused("schema_incompatible")
+        indexes = inspector.get_indexes(table, schema=schema)
+        uniques = sorted(
+            [c["column_names"] for c in inspector.get_unique_constraints(table, schema=schema)]
+        )
+        if name == "sqlite":
+            # SQLAlchemy's SQLite SQL parser misses inline UNIQUE declarations in the
+            # frozen fixture. SQLite's own index catalog is the structural authority.
+            quoted = connection.dialect.identifier_preparer.quote_identifier(table)
+            uniques = []
+            for index in connection.exec_driver_sql(f"PRAGMA index_list({quoted})"):
+                index_name = connection.dialect.identifier_preparer.quote_identifier(index[1])
+                parts = list(connection.exec_driver_sql(f"PRAGMA index_xinfo({index_name})"))
+                if index[4] or any(part[3] or part[4] != "BINARY" for part in parts):
+                    raise MigrationRefused("schema_incompatible")
+                if index[3] == "u":
+                    uniques.append([part[2] for part in parts if part[5]])
+            uniques.sort()
+            options = connection.exec_driver_sql("PRAGMA table_list").all()
+            if any(r[1] == table and (r[4] or r[5]) for r in options):
+                raise MigrationRefused("schema_incompatible")
+        result[table] = {
+            "columns": [
+                [
+                    c["name"],
+                    str(c["type"].compile(dialect=connection.dialect)).upper(),
+                    c["nullable"],
+                    c.get("default"),
+                    c.get("computed"),
+                    c.get("identity"),
+                ]
+                for c in columns
+            ],
+            "pk": inspector.get_pk_constraint(table, schema=schema)["constrained_columns"],
+            "uniques": uniques,
+            "foreign_keys": inspector.get_foreign_keys(table, schema=schema),
+            "checks": inspector.get_check_constraints(table, schema=schema),
+            "indexes": [i for i in indexes if not i.get("duplicates_constraint")],
+        }
+    if name == "postgresql":
+        # Include physical index expressions, predicates, opclasses, sort options and typmods.
+        # A stored installed fingerprint also detects drift in the additive metadata tables.
+        result["$postgres"] = {
+            "indexes": [
+                list(r)
+                for r in connection.execute(
+                    text("""
+                SELECT c.relname, pg_get_indexdef(i.indexrelid), i.indisvalid, i.indisready
+                FROM pg_index i JOIN pg_class c ON c.oid=i.indrelid
+                JOIN pg_namespace n ON n.oid=c.relnamespace
+                WHERE n.nspname='public' ORDER BY c.relname, pg_get_indexdef(i.indexrelid)
+            """)
+                )
+            ],
+            "columns": [
+                list(r)
+                for r in connection.execute(
+                    text("""
+                SELECT c.relname,a.attname,a.atttypmod,a.attgenerated,a.attidentity,
+                  a.attnum,a.attisdropped,
+                  CASE WHEN a.attcollation=0 THEN NULL ELSE cn.nspname||'.'||co.collname END
+                FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid
+                JOIN pg_namespace n ON n.oid=c.relnamespace
+                LEFT JOIN pg_collation co ON co.oid=a.attcollation
+                LEFT JOIN pg_namespace cn ON cn.oid=co.collnamespace
+                WHERE n.nspname='public' AND c.relkind='r' AND a.attnum>0
+                ORDER BY c.relname,a.attnum
+            """)
+                )
+            ],
+            "constraints": [
+                list(r)
+                for r in connection.execute(
+                    text("""
+                SELECT c.relname,k.contype,k.condeferrable,k.condeferred,k.convalidated,
+                  pg_get_constraintdef(k.oid)
+                FROM pg_constraint k JOIN pg_class c ON c.oid=k.conrelid
+                JOIN pg_namespace n ON n.oid=c.relnamespace
+                WHERE n.nspname='public' ORDER BY c.relname,pg_get_constraintdef(k.oid)
+            """)
+                )
+            ],
+        }
+    return result
+
+
+def verify_baseline(shape: dict[str, Any], name: str, *, versioned: bool = False) -> None:
+    actual = set(shape) - {"$postgres"}
+    expected = set(TABLES) | (METADATA_TABLES if versioned else set())
+    if actual != expected:
+        raise MigrationRefused("schema_incompatible")
+    for table in TABLES:
+        cols = [
+            [
+                column,
+                "DOUBLE PRECISION" if name == "postgresql" and kind == "FLOAT" else kind,
+                nullable,
+                None,
+                None,
+                None,
+            ]
+            for column, kind, nullable in COLUMNS[table]
+        ]
+        s = shape[table]
+        if (
+            s["columns"] != cols
+            or s["pk"] != PRIMARY_KEYS[table]
+            or s["uniques"] != ([["hash"]] if table == "api_keys" else [])
+            or s["foreign_keys"]
+            or s["checks"]
+            or s["indexes"]
+        ):
+            raise MigrationRefused("schema_incompatible")
+    if name == "postgresql":
+        expected_indexes = []
+        for table in TABLES:
+            columns = ", ".join(PRIMARY_KEYS[table])
+            expected_indexes.append(
+                [
+                    table,
+                    f"CREATE UNIQUE INDEX {table}_pkey ON public.{table} USING btree ({columns})",
+                    True,
+                    True,
+                ]
+            )
+        expected_indexes.append(
+            [
+                "api_keys",
+                "CREATE UNIQUE INDEX api_keys_hash_key ON public.api_keys USING btree (hash)",
+                True,
+                True,
+            ]
+        )
+        baseline_indexes = [r for r in shape["$postgres"]["indexes"] if r[0] in TABLES]
+        if sorted(baseline_indexes) != sorted(expected_indexes):
+            raise MigrationRefused("schema_incompatible")
+
+        expected_columns = []
+        for table in TABLES:
+            for position, (column, kind, _) in enumerate(COLUMNS[table], 1):
+                length = int(kind[8:-1]) + 4 if kind.startswith("VARCHAR(") else -1
+                collation = "pg_catalog.default" if kind.startswith("VARCHAR(") else None
+                expected_columns.append([table, column, length, "", "", position, False, collation])
+        actual_columns = [r for r in shape["$postgres"]["columns"] if r[0] in TABLES]
+        if actual_columns != expected_columns:
+            raise MigrationRefused("schema_incompatible")
+        expected_constraints = []
+        for table in TABLES:
+            expected_constraints.append(
+                [
+                    table,
+                    "p",
+                    False,
+                    False,
+                    True,
+                    "PRIMARY KEY (" + ", ".join(PRIMARY_KEYS[table]) + ")",
+                ]
+            )
+        expected_constraints.append(["api_keys", "u", False, False, True, "UNIQUE (hash)"])
+        actual_constraints = [r for r in shape["$postgres"]["constraints"] if r[0] in TABLES]
+        if sorted(actual_constraints) != sorted(expected_constraints):
+            raise MigrationRefused("schema_incompatible")
+
+
+def installed_profile(name: str) -> dict[str, Any]:
+    """The checked-in literal profile is authority, never a value stored in the target DB."""
+    profile_name = "postgresql16" if name == "postgresql" else "sqlite"
+    profile_path = Path(__file__).parent / "profiles" / (profile_name + ".json")
+    if not profile_path.is_file():
+        raise MigrationRefused("schema_profile_unavailable")
+    result = json.loads(profile_path.read_text())
+    if not isinstance(result, dict):
+        raise MigrationRefused("schema_profile_invalid")
+    return result
+
+
+def source_profile_checksum(name: str, origin: str) -> str:
+    profile = installed_profile(name)
+    source = {table: profile[table] for table in TABLES} if origin == "legacy" else {}
+    if name == "postgresql":
+        source["$postgres"] = {
+            key: [row for row in rows if row[0] in TABLES] if origin == "legacy" else []
+            for key, rows in profile["$postgres"].items()
+        }
+    return checksum(source)
+
+
+def verify_installed_profile(shape: dict[str, Any], name: str) -> None:
+    if shape != installed_profile(name):
+        raise MigrationRefused("schema_incompatible")

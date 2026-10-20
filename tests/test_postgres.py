@@ -13,7 +13,7 @@ pytestmark = pytest.mark.skipif(
 def test_postgres_skip_locked_claims_and_budget_fences(settings):
     settings.database_url = os.environ["REWIND_TEST_POSTGRES"]
     db = Database(settings)
-    db.migrate()
+    db.migrate(installation_key="synthetic-test")
     ids = {db.enqueue("test", "0" * 64, 0.0001, "integration-test") for _ in range(8)}
     with ThreadPoolExecutor(max_workers=8) as pool:
         claimed = list(pool.map(lambda i: db.claim(f"pg-worker-{i}"), range(8)))

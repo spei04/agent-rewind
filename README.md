@@ -49,6 +49,7 @@ cd agent-rewind
 uv sync --frozen --group dev
 cp .env.example .env
 uv run rewind init
+uv run rewind migrate install --installation-key local-development
 ```
 
 `init` fills empty encryption and bootstrap keys. Keep `.env` private; Git ignores
@@ -167,3 +168,7 @@ concurrent claims and budget reservations. CI runs both PostgreSQL and gVisor
 integration checks without model credentials.
 
 MIT licensed.
+
+Metadata installation and historical adoption use explicit operator commands; see
+[the migration and recovery guide](docs/MIGRATIONS.md). Schema preparation does not
+activate customer access or validate encrypted historical artifacts.
