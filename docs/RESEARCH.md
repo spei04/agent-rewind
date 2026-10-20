@@ -1,5 +1,11 @@
 # Intervention studies
 
+This document describes current fixed-screening/fixed-confirmation mechanics.
+The [roadmap research program](PLAN.md#7-research-and-evaluation-program) separates
+those mechanics from the proposed budget-aware selection study and records
+prior-work overlap. Repeated replay and intervals are not a novelty claim;
+no baseline superiority or generalization result has been demonstrated.
+
 ## Estimand
 
 For a fixed task, observed prefix, checkpoint, policy configuration, image, and

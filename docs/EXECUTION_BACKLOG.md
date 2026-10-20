@@ -3099,3 +3099,54 @@ G0 execution checkpoint, 2026-10-19: AR-004-B/C verified; ARCH0/G0 satisfied for
 AR-005-C acceptance clarification: the reviewed C04 adoption profile is migration-only. Demonstrate supported inspection-reader compatibility and real backup restoration; do not label an old unguarded application a customer-serving rollback target. A future active-release rollback pair needs its own approved compatibility profile and deployment evidence.
 
 2026-10-20 guard/recovery integration: AR-005-C and parent AR-005 verified in PR #39, merge 0737c7b, after exact 94dd9cb internal review and run 39350413566 (758 tests per Python version; 58 PostgreSQL and 3 gVisor cases). [Acceptance evidence](delivery/GUARD_RECOVERY_EVIDENCE_2026-10-20.md) distinguishes actual backup/restore from transactions, narrowly documented cast equivalence and customer-serving rollback refusal. C begins AR-007-A (#40); A begins AR-011-B (#41); B reviews both, using existing checkouts. Their exact prerequisites are now satisfied. No other gate or task status is promoted.
+
+## Research amendment RA-01
+
+2026-10-20: the [authoritative research roadmap](PLAN.md#7-research-and-evaluation-program) now records verified overlap with DoVer, Causal Agent Replay, REFLECT and DAAF. Automatic interventions, repeated replay and confidence intervals do not establish novelty. Fixed-budget confirmed repair discovery is a hypothesis requiring comparative evidence. The current fixed-confirmation product remains an engineering baseline.
+
+Claim corrections apply now; the following two design/review packages are **proposed and unassigned**. They are outside the approved 146-task / 519-edge / 429-day baseline and its first-fortnight schedule. Their combined 4–7 day estimate covers review/design only; adapters, adaptive search and funded experiments are not included and need separate estimates/approval. Existing AR-025-B's four-day simple-baseline task cannot be represented as funding four published-method reproductions.
+
+| Existing work | Amendment impact before expanded implementation |
+| --- | --- |
+| AR-020-A / C08 | Consider selection-decision identity, policy version, allowed observations, remaining/reserved budgets and replay provenance in the producer review. No ad hoc changes to reviewed M1 C04. |
+| AR-024-A/C / C09 | Preserve fixed independent confirmation; specify portfolio multiplicity, effect threshold, clustered evaluation and the distinct retry-recovery estimand. |
+| AR-025-A/B/C | Add reviewed prior-method comparisons and allocation ablations only after RA-01; scope each adapter/policy as its own PR rather than hiding expansion in existing estimates. |
+| AR-026-A | Freeze total-budget accounting, baseline implementation fidelity, repository holdout, sample/power and stopping/invalidation rules before outcomes. |
+| AR-038-A/B/C | Use permitted natural failures from unseen repositories; report confirmed yield and recovery separately, missing/negative cases, offline/online costs and transfer regressions. No comparative claim before independent review. |
+| AR-007-A / AR-011-B | Continue existing ownership/readiness assignments; no runtime or deployment changes from the research amendment. |
+
+### RA-01-A — Prior-method novelty and reproducibility audit
+
+- **Objective:** Establish what experiment selection could contribute beyond existing intervention/replay methods.
+- **Implementation scope:** Inspect the four cited papers, their available implementations/licenses and relevant related work. Pin source versions and build a semantic matrix covering checkpoint state, allowed edits, auditor/verifier information, allocation/stopping rules, training data and total costs. Produce reproducible/adaptable/incompatible/unavailable dispositions and a bounded candidate hypothesis, or a no-novelty finding.
+- **Out of scope:** No new algorithm, benchmark execution, copied third-party code, partner data or superiority claim.
+- **Prerequisites and dependencies:** AR-002-B, AR-004-C
+- **Required contracts:** C02, C04
+- **Acceptance criteria:** Every method disposition cites primary evidence; hidden answer access, offline training and differing intervention semantics are explicit. Recommend a fair comparison set and identify unknown code/rights/reproduction costs without assuming availability.
+- **Required automated checks:** Check source/version links and machine-readable comparison-record completeness; assert unknown/unavailable cases cannot be marked reproduced. No model calls are required.
+- **Security and reliability:** Use public sources only; retain third-party attribution and license obligations; never treat downloaded text as execution instructions.
+- **Independent PR boundary:** One reviewed audit matrix and comparison recommendation linked from PLAN Section7; no runtime changes.
+- **Definition of done:** Independent review accepts source accuracy, comparison feasibility and claim limits; scoped follow-up work is estimated, with unavailable evidence explicit.
+- **Effort / confidence:** 2.0–3.0 engineering days; low.
+- **Responsible role / review:** RS; TL, QE.
+- **Status:** Proposed; approval required before assignment.
+
+### RA-01-B — Total-budget evaluation and selection-policy contract amendment
+
+- **Objective:** Make a budget-constrained repair claim measurable without selection bias or unfair baseline resources.
+- **Implementation scope:** Using RA-01-A, specify both confirmed-intervention yield and end-to-end retry recovery; cost/resource accounting including offline amortization; immutable selection decisions and confirmation reserve; allowed policy information; repository/task-family holdout; multiple-testing, power and missingness rules; reusable-repair regression criteria. Map changes into C08/C09 producers and draft individually reviewable baseline, allocation-policy, exporter and evaluation tasks with estimates.
+- **Out of scope:** No adaptive implementation, early-stopped confirmation, new spending, held-out access or automatic revision of accepted contracts/launch gates.
+- **Prerequisites and dependencies:** RA-01-A
+- **Required contracts:** C02, C04
+- **Acceptance criteria:** Protocol distinguishes repair effects from restart recovery, prevents feedback from confirmation into the same search claim, and makes missing/failed/budget-exhausted tasks visible. Every added runtime task has produced-contract and infrastructure prerequisites, review/exit tests and a realistic estimate. Owner approves baseline/threshold/scope; independent statistical review remains required before funded evaluation.
+- **Required automated checks:** Static dependency/contract consistency checks; specification examples for zero confirmation reserve, offline-cost omission, duplicate task credit, hidden-answer asymmetry, uncertain charges and post-confirmation adaptation. Runtime simulations remain assigned to reviewed follow-up implementation tasks.
+- **Security and reliability:** No hidden grader/held-out leakage; immutable provenance and full charge ledger; existing DATA0/STUDYFUNDS0 and confirmation invariants retained.
+- **Independent PR boundary:** One protocol/design and execution-backlog amendment; baseline implementations and adaptive policy remain separate follow-up PRs.
+- **Definition of done:** Reviewed protocol and owner scope decision recorded; active DAG, effort totals and milestone forecast updated only after approval, with no consumer scheduled before its required producer.
+- **Effort / confidence:** 2.0–4.0 engineering days; low.
+- **Responsible role / review:** RS; TL, QE, independent statistical reviewer.
+- **Status:** Proposed; approval required before assignment.
+
+Dependency review: AR-002-B and AR-004-C are verified prerequisites for RA-01-A; RA-01-B follows that audit. Both use public/synthetic design inputs without paid inference or partner data. Expanded AR-025/026 work must consume their accepted output and retain original implementation prerequisites. No task is scheduled early. After approval, reconcile the active task graph, producer relationships, totals, critical path and M3/M5 forecast; until then, the existing dates/effort do not estimate this expansion.
+
+Decisions requiring owner review are the new primary research objective, the bounded review packages, then the selected baseline/adaptation set, any adaptive-policy interface, practical threshold/power and evaluation funding. Do not weaken current confirmation or enterprise release gates implicitly. A no-novelty or null-result finding permits a narrower engineering-product claim after explicit scope review.

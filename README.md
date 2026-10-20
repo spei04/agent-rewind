@@ -138,7 +138,15 @@ The API schema is available at `/api/schema` after authentication. See
 
 [AgentReplay](https://github.com/gadda00/agentreplay) emphasizes intercepted
 recordings, deterministic playback, and counterfactual mutation. Agent Rewind
-focuses on **selecting and evaluating interventions through new executions**.
+implements **auditable intervention experiments through new executions**.
+Automatic interventions, repeated replay and confidence intervals already appear
+in prior work; these features alone are not a novelty claim.
+
+The research hypothesis is whether experiment selection can find more independently
+confirmed repairs for real coding failures under the same total inference and
+execution budget. No comparative advantage has been established. The
+[roadmap research review](docs/PLAN.md#72-research-objective-and-comparable-evaluation)
+records relevant methods, fair baselines and the proposed evaluation amendment.
 
 | Question | Agent Rewind's mechanism |
 | --- | --- |
