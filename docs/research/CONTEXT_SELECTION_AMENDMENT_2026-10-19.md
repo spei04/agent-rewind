@@ -13,7 +13,8 @@ The active backlog remains 150 tasks, 538 edges and 440 base engineering days.
 
 ## What the product actually does
 
-Inspected runtime source is unchanged between main `555d28c` and reviewed
+The five audited files (config.py, worker.py, policy.py, experiments.py and
+engine.py) are unchanged between main `555d28c` and reviewed
 artifact branch `24096f7`. This is a source audit, not inspection of a running
 deployment.
 
@@ -92,8 +93,8 @@ identities, not claims to be the exact paper evaluation commit.
 
 ## Context contract and information boundaries
 
-A proposed `DiagnosisContextManifest` should bind installation/project/task,
-checkpoint and event-chain digests, workspace/image/tool versions, task text,
+A proposed `DiagnosisContextManifest` should bind installation/project/study/method/task/policy-run/phase and frozen policy/state
+identities, checkpoint and event-chain digests, workspace/image/tool versions, task text,
 original action, allowed observations, selected file/symbol ranges, visible test
 errors, prior proposal identifiers, retrieval provenance, token counts,
 truncation decisions and all prompt/view digests. Each source item carries a
@@ -110,11 +111,11 @@ confirmation result enters the proposal context.
 
 | View / ablation | Information and comparison rule |
 | --- | --- |
-| V0 current baseline | Saved pre-action conversation plus current failure flag, original action and heuristic reason; record exactly what the current template exposes. |
+| V0 current baseline | Saved pre-action conversation plus current failure flag, original action and heuristic reason; record exactly what the current template exposes. Its heuristic reason is derived from the selected action's actual result and workspace changes, so legacy V0 already includes post-action-derived information. Remove that flag or explicitly declare and review equal access before using V0 in a prefix-only C21 comparison. |
 | V1 structured checkpoint | V0 plus permitted files/diffs and test errors already available at that checkpoint. Record missing fields rather than fabricating observations. Compare structure against the same evidence as raw excerpts. Token-matched irrelevant context comes from the same allowed checkpoint; it cannot contain hidden answers or future results. |
 | V2 factual diagnosis | Optional separately reviewed arm with the original action's later result or full failed factual suffix. Label this extra information explicitly and give equivalent baselines the same access. It is not authorized by the present prefix-only protocol. Never inject the diagnostic suffix into the replayed agent's saved history. |
 | V3 retrieved examples | V1 plus versioned development-only examples/memory. Exclude held-out repository/task families from memory, retriever training and tuning. Charge indexing and retrieval, report amortization and prevent near-duplicate leakage. |
-| Prior failed proposals | Only receipts from that task's allowed discovery phase under the frozen protocol. Keep confirmation outcomes and other held-out tasks inaccessible. |
+| Prior failed proposals | Only receipts from the same authorized study/method/task/policy-run/phase under the frozen policy and state registry. Another method's same-task outcomes are excluded; shared proposal inputs require declared immutable provenance and comparison-cost attribution. Keep confirmation outcomes and other held-out tasks inaccessible. |
 
 Use separate context objects for diagnosis, proposal and continuation. Replay
 continues from the authentic checkpoint even when a future reviewed diagnostic
@@ -192,7 +193,7 @@ parameters on development tasks. Compare against simpler controls and ablate
 the cost term. This is a proposed RB-07 extension, not an implemented algorithm
 or a novelty claim; its exact score and calibration must pass review first.
 
-Selection freezes one intervention before fresh fixed-size confirmation.
+Selection freezes one intervention per (method, task) before fresh fixed-size confirmation.
 Confirmation never feeds the same search policy. No optional stopping for a
 positive result. Report unsuccessful, missing, invalid and exhausted tasks.
 C21 multiplicity, effect threshold, power feasibility and independent statistical
