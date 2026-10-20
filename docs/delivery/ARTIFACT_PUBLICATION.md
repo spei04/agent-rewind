@@ -110,3 +110,11 @@ publication, and refuses a complete source after the publication lock is release
 This tests the future producer contract, not compliance of current legacy writers.
 Hosted evidence is required before acceptance; SQLite tests alone do not prove
 PostgreSQL locking or the unavailable future production fence.
+
+## Accepted development evidence — 2026-10-20
+
+AR-009-B preparatory publication is Verified in [PR #70](https://github.com/spei04/agent-rewind/pull/70): reviewed integration 5923bbe passed hosted run [39461271604](https://github.com/spei04/agent-rewind/actions/runs/39461271604) with 1431 tests on each supported Python version, all eleven actual PostgreSQL publication cases, three gVisor cases, security, isolated package smoke and the required CI gate. A accepted graph/fidelity and diagnostic behavior; B accepted transaction/ownership and full source-writer contracts. Live worker publication stays unavailable until AR-006-A and AR-010-A/B are integrated and AR-012-B verifies the complete path. Customer admission, historical adoption and production gates remain open.
+
+The matching Python 3.11/3.12 core suites each skipped three Docker cases that passed separately under gVisor. The suite retains an existing TestClient dependency deprecation warning. Eleven PostgreSQL publication cases cover exact reentry, rollback, reader visibility, competing identities, both effective-autocommit modes, four existing-closure mutations and event-insertion serialization. They exercise the explicit synthetic future writer contract, not an enabled production adapter.
+
+Earlier run 39459916673 had one migration-install refusal on Python 3.11 after the synthetic fixture had observed drain. The extra backend identity was not captured and its cause is unknown. A test-only recorder now adds bounded backend type/state after a refusal while preserving the identical exception. This later observation is not the original decision snapshot; neither the production predicate nor retry policy was changed. Final matching checks passed, but that does not establish the earlier cause.

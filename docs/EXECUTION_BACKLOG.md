@@ -121,7 +121,7 @@ The table preserves the conditional foundation scenario from the issue #51 decis
 | Delivery Day 9 | Review, contingency and integration; no new base allocation | Reserve for measured rework and hosted verification; reforecast the ready M1 queue only after actual acceptance. |
 | Delivery Day 10 | Review, contingency and integration; no new base allocation | Reserve for measured rework and hosted verification; reforecast the ready M1 queue only after actual acceptance. |
 
-The 2–3 day ranges leave days 6–7 for up to two additional half-day allocations per author; later days retain hosted integration/review and reforecast capacity. Review dates are conditional, not automatic acceptance. AR-009-B has verified direct inputs and is assigned to C in #69 with A/B review. AR-006-A, AR-011-C and AR-007-C remain ready but unassigned; the lead must allocate implementation and independent review before their starts. Research implementation remains unscheduled because its original C08/C09 and runtime prerequisites are not yet available. M3 is now 81 base days, while M5 stays 50 pending measured calibration, permissions, funding and independent statistical review.
+The 2–3 day ranges leave days 6–7 for up to two additional half-day allocations per author; later days retain hosted integration/review and reforecast capacity. Review dates are conditional, not automatic acceptance. AR-009-B is Verified for its preparatory scope in PR #70 after C implementation, independent A/B review and matching hosted checks. AR-006-A, AR-011-C and AR-007-C remain ready but unassigned; the lead must allocate implementation and independent review before their starts. Research implementation remains unscheduled because its original C08/C09 and runtime prerequisites are not yet available. M3 is now 81 base days, while M5 stays 50 pending measured calibration, permissions, funding and independent statistical review.
 
 ### Historical RA-01 conditional design schedule — 2026-10-20
 
@@ -692,7 +692,7 @@ M1 / P0 · 2 PRs · 4 engineering days · Not started · [Tracking issue #8](htt
 
 ### AR-009 — Keep published evidence immutable, scoped and complete
 
-M1 / P0 · 2 PRs · 4 engineering days · In progress
+M1 / P0 · 2 PRs · 4 engineering days · Verified
 
 <a id="ar-009-a"></a>
 
@@ -726,7 +726,7 @@ M1 / P0 · 2 PRs · 4 engineering days · In progress
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
 - **Responsible role:** PL; required reviewers: SEC, QE. Engineer C implements; Engineer A reviews failure/security behavior and Engineer B reviews contracts/transactions.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** In progress; [issue #69](https://github.com/spei04/agent-rewind/issues/69). Both direct prerequisites were Verified on main 4e509a2 before assignment.
+- **Progress:** Verified preparatory scope; [issue #69](https://github.com/spei04/agent-rewind/issues/69), [PR #70](https://github.com/spei04/agent-rewind/pull/70). Reviewed integration 5923bbe and hosted run 39461271604: 1431 tests per Python, eleven actual PostgreSQL publication cases and all required checks. Live adapter/run projection and full M1 gates remain separate.
 
 **Publication integration boundary (2026-10-20):** AR-009-B provides the preparatory run-graph publication coordinator and complete scoped manifest reference, with a required same-transaction fence/writer interface. AR-010-A owns the unavailable generation schema and database-time live fence; AR-006-A owns run-projection integration. The current live adapter must refuse rather than fall back to an owner-only check. Contract fixtures test atomic publication, but do not close live-worker or full M1 acceptance; AR-010-A/B and AR-012-B retain those integration gates. No historical adoption or unsupported job/study/provider graph production is added.
 
@@ -3281,3 +3281,5 @@ The [context/selection amendment and RC-01–06 cards](research/CONTEXT_SELECTIO
 2026-10-20 final approval reconciliation: [PR #56](https://github.com/spei04/agent-rewind/pull/56) merged at d408e5d1b10191dacbfe43a78f43df6de08b5950 after independent source/composition review and [run39365454903](https://github.com/spei04/agent-rewind/actions/runs/39365454903), with1350 passing tests per Python version, actual PostgreSQL, installed distributions, three gVisor tests and all required gates. Issue #51 is closed; its eleven mapped runtime issues remain blocked on their prerequisites. The separate [context planning amendment](research/CONTEXT_SELECTION_AMENDMENT_2026-10-19.md) is internally reviewed; RC-01–06 remain proposed and excluded from active totals. No new paid evaluation, held-out access or production scope.
 
 2026-10-20 next replay-path assignment: AR-009-B is In progress in [issue #69](https://github.com/spei04/agent-rewind/issues/69), after accepted AR-009-A/007-B on main 4e509a2. C owns complete graph verification and atomic scoped publication; A reviews failure/security behavior and B reviews contracts/transactions. The observable gate is all verified run/checkpoint children and the root becoming visible together, or no completed root on upload, corruption, scope, fence or SQL failure. The generation-aware live adapter and run projection remain later integration work, with no owner-only fallback. Existing C checkout is reused; primary retains the reviewed architecture explanation. No new paid calls, infrastructure or partner data; reconcile historical reservations against actual spend before paid validation.
+
+2026-10-20 publication acceptance: AR-009-B preparatory publication is Verified in [PR #70](https://github.com/spei04/agent-rewind/pull/70): reviewed integration 5923bbe passed hosted run [39461271604](https://github.com/spei04/agent-rewind/actions/runs/39461271604) with 1431 tests on each supported Python version, all eleven actual PostgreSQL publication cases, three gVisor cases, security, isolated package smoke and the required CI gate. A accepted graph/fidelity and diagnostic behavior; B accepted transaction/ownership and full source-writer contracts. Live worker publication stays unavailable until AR-006-A and AR-010-A/B are integrated and AR-012-B verifies the complete path. Customer admission, historical adoption and production gates remain open. No prerequisite, estimate, customer or paid-study gate changed.
