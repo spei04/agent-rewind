@@ -129,7 +129,9 @@ def migration_transaction(engine: Engine, timeout_seconds: int = 5) -> Iterator[
                         text("SELECT set_config('statement_timeout',:value,true)"),
                         {"value": f"{timeout_seconds * 4}s"},
                     )
-                    connection.exec_driver_sql("SET LOCAL search_path TO public, pg_catalog")
+                    # Omitting pg_catalog keeps built-ins implicitly first; explicitly
+                    # placing pg_temp last prevents temporary relation shadowing.
+                    connection.exec_driver_sql("SET LOCAL search_path TO public, pg_temp")
                     acquired: bool = connection.execute(
                         text("SELECT pg_try_advisory_xact_lock(:key)"), {"key": MIGRATOR_LOCK}
                     ).scalar_one()

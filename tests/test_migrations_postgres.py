@@ -416,3 +416,18 @@ def test_postgres_nologin_superuser_inventory_is_still_rejected(pg):
     with pytest.raises(MigrationRefused, match="legacy_writer_role_not_disabled"):
         service.adopt(pg["owner"], mapping, "b" * 64, "d" * 64)
     assert_unversioned(pg["owner"])
+
+
+def test_postgres_catalog_refuses_session_temporary_state(pg):
+    load_legacy(pg["owner"])
+    with pg["owner"].begin() as connection:
+        connection.exec_driver_sql("CREATE TEMP TABLE jobs (reserved INTEGER)")
+        with pytest.raises(MigrationRefused, match="schema_incompatible"):
+            catalog(connection)
+
+
+def test_postgres_transaction_preserves_builtin_resolution_order(pg):
+    with service.migration_transaction(pg["owner"]) as connection:
+        schemas = connection.exec_driver_sql("SELECT current_schemas(true)").scalar_one()
+        assert schemas[0] == "pg_catalog"
+        assert schemas.index("public") > schemas.index("pg_catalog")

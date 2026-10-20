@@ -118,6 +118,10 @@ def catalog(connection: Connection) -> dict[str, Any]:
             raise MigrationRefused("schema_incompatible")
     else:
         if connection.execute(
+            text("SELECT 1 FROM pg_class WHERE relnamespace=pg_my_temp_schema() LIMIT 1")
+        ).first():
+            raise MigrationRefused("schema_incompatible")
+        if connection.execute(
             text(
                 "SELECT 1 FROM pg_namespace WHERE "
                 "nspname NOT IN ('public','information_schema') "
