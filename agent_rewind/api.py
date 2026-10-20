@@ -3,11 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Literal
 
+from anyio.to_thread import current_default_thread_limiter
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import Field
+from starlette.concurrency import run_in_threadpool
 from starlette.middleware.base import RequestResponseEndpoint
 
 from .artifacts import Artifacts
@@ -18,6 +20,7 @@ from .database import Database
 from .engine import read_events
 from .experiments import locate
 from .middleware import BodyLimit
+from .migrations.compatibility import CompatibilityResult
 from .models import BranchRequest, StrictModel, StudyRequest, TaskSpec, valid_path
 
 
@@ -44,10 +47,43 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.db, app.state.artifacts, app.state.auth = db, artifacts, auth
     app.add_middleware(BodyLimit)
+    guard_inflight = 0
+
+    async def admission_status() -> CompatibilityResult:
+        nonlocal guard_inflight
+        # Keep capacity for sync liveness/static handlers. This counter is touched
+        # only on the app event loop, with no await between admission and increment.
+        limit = min(4, max(0, int(current_default_thread_limiter().total_tokens) - 1))
+        if guard_inflight >= limit:
+            return CompatibilityResult("unavailable", "schema_probe_capacity")
+        guard_inflight += 1
+        try:
+            # The framework shields this bounded worker slot until its call returns;
+            # cancellation must not abandon a probe and free its admission slot early.
+            return await run_in_threadpool(db.schema_compatibility)
+        finally:
+            guard_inflight -= 1
 
     @app.middleware("http")
     async def security(request: Request, call_next: RequestResponseEndpoint) -> Response:
-        response = await call_next(request)
+        response: Response
+        safe_inspection = request.method in {"GET", "HEAD"} and (
+            request.url.path in {"/", "/healthz"} or request.url.path.startswith("/static/")
+        )
+        if not safe_inspection:
+            compatibility = await admission_status()
+            if compatibility.status != "ready":
+                response = JSONResponse(
+                    {
+                        "detail": "Customer access is unavailable for this database schema.",
+                        "code": compatibility.code,
+                    },
+                    status_code=503,
+                )
+            else:
+                response = await call_next(request)
+        else:
+            response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["Cache-Control"] = "no-store"
@@ -74,8 +110,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/healthz")
     def health() -> dict[str, str]:
-        with db.engine.connect() as connection:
-            connection.exec_driver_sql("SELECT 1")
+        # Process liveness only. Schema compatibility is checked at each customer
+        # boundary; full storage/sentinel readiness belongs to a later slice.
         return {"status": "ok"}
 
     @app.get("/auth/login")

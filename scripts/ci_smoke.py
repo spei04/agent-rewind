@@ -12,6 +12,7 @@ from sqlalchemy import create_engine
 import agent_rewind
 import agent_rewind.api
 import agent_rewind.cli
+from agent_rewind.migrations.compatibility import runtime_schema_compatibility
 from agent_rewind.migrations.service import install, schema_status
 
 package = Path(agent_rewind.__file__).resolve()
@@ -51,6 +52,9 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
             or install(engine, "synthetic-package-smoke") != prepared
         ):
             raise RuntimeError("Installed Alembic revisions/profile failed the migration smoke")
+        compatibility = runtime_schema_compatibility(engine)
+        if compatibility.status != "incompatible" or compatibility.code != "migration_only":
+            raise RuntimeError("Installed release manifest incorrectly permits customer admission")
     finally:
         engine.dispose()
 print("Installed runtime, web assets, migration revisions and profile verified outside checkout.")

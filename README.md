@@ -40,6 +40,14 @@ and [security boundaries](docs/SECURITY.md) before deploying.
 
 ## Start locally
 
+The current release prepares and inspects metadata only. Its checked-in compatibility
+profile deliberately refuses customer API/authentication routes with HTTP 503 and
+prevents worker claims, including after a successful fresh installation or legacy
+adoption. The static workbench and process liveness remain accessible. A later
+reviewed ownership-ready revision must explicitly enable admission; there is no
+runtime configuration bypass. See [migration compatibility](docs/MIGRATIONS.md).
+
+
 Requires Python 3.11+, [uv](https://docs.astral.sh/uv/), and a Docker daemon.
 The model endpoint must support chat-completions requests with JSON output.
 
@@ -97,16 +105,17 @@ uv run rewind serve
 uv run rewind worker
 ```
 
-Open [localhost:8080](http://127.0.0.1:8080). Sign in with the local
-`REWIND_BOOTSTRAP_KEY`, then load `examples/invoice-task.json` under **Record a
-run**. This submits a real model-backed coding task. Its outcome is not forced;
-strong models may solve it immediately. Investigations require a failed run.
-
-Use **Create branch** to edit one decision, or **Investigate failure** to propose
-and evaluate interventions automatically. Jobs reserve budget before model
-calls. The UI reports conservative reservations, not a provider billing total.
+Open [localhost:8080](http://127.0.0.1:8080) to inspect the static workbench.
+Signing in, loading customer histories and submitting `examples/invoice-task.json`
+remain disabled in this migration-only release. Model credentials and a running
+sandbox do not change that compatibility decision. The existing recording,
+branching and investigation handlers retain unit coverage for later integration;
+those tests do not certify an admitted customer-serving release.
 
 ## Use from Python
+
+The SDK contract below is retained for the later customer-ready release. Current
+servers return HTTP 503 for these operations while the migration-only profile is active.
 
 ```python
 import json
