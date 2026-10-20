@@ -656,7 +656,7 @@
       ],
       "pull_request_boundary": "Document two target workflows, tool-boundary replay guarantees, exclusions and customer interview questions. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer A \u2014 workflow/contracts",
+      "assigned_to": "Engineer A — workflow/contracts",
       "evidence": {
         "pull_request": "https://github.com/spei04/agent-rewind/pull/13",
         "commit": "074a49f274cb6fb78bdd54646f27f0f284fc5cac",
@@ -696,7 +696,7 @@
       ],
       "pull_request_boundary": "Specify capture denominator, investigation timing, two-partner pilot target and accessible task flows. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer A \u2014 workflow/contracts",
+      "assigned_to": "Engineer A — workflow/contracts",
       "evidence": {
         "commit": "de05f0b",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/16",
@@ -736,7 +736,7 @@
       ],
       "pull_request_boundary": "Define private corpus manifest with rights, source revision, evaluator identity and allowed processors. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer C \u2014 corpus/quality",
+      "assigned_to": "Engineer C — corpus/quality",
       "evidence": {
         "commit": "096b48f",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/18",
@@ -785,7 +785,7 @@
       ],
       "pull_request_boundary": "Define failure taxonomy, task-level split, evaluator stability checks and effect-size feasibility worksheet. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer A \u2014 research protocol",
+      "assigned_to": "Engineer A — research protocol",
       "evidence": {
         "commit": "d90a1b9",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/21",
@@ -825,7 +825,7 @@
       ],
       "pull_request_boundary": "Map API, trusted worker, untrusted sandbox, IdP, DB, artifacts and model egress; retain one organization per installation. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer B \u2014 platform/trust boundaries",
+      "assigned_to": "Engineer B — platform/trust boundaries",
       "evidence": {
         "commit": "1e5158e63b3193e8605484f274338560b4f6207b",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/17",
@@ -865,7 +865,7 @@
       ],
       "pull_request_boundary": "Estimate reference cloud resources using measured workload assumptions; request named staffing, region, IdP and operating funding. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer B \u2014 platform/capacity",
+      "assigned_to": "Engineer B — platform/capacity",
       "evidence": {
         "commit": "be2ce1f",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/20",
@@ -905,7 +905,7 @@
       ],
       "pull_request_boundary": "Map existing routes, SQL tables, event hashes, artifact formats and proposed M1 changes. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer B \u2014 backend/interfaces",
+      "assigned_to": "Engineer B — backend/interfaces",
       "evidence": {
         "commit": "8c20226",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/14",
@@ -950,7 +950,7 @@
       ],
       "pull_request_boundary": "Resolve API/schema/test disagreements, explicit composite scope constraints and deferred endpoint ownership. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer B \u2014 backend/platform contract reconciliation",
+      "assigned_to": "Engineer B — backend/platform contract reconciliation",
       "evidence": {
         "commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/24",
@@ -1033,7 +1033,7 @@
       ],
       "pull_request_boundary": "Build synthetic legacy DB/object fixtures plus expected IDs, times, hashes and reservation totals from documented baseline. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer C \u2014 quality/migrations",
+      "assigned_to": "Engineer C — quality/migrations",
       "evidence": {
         "commit": "0ef6ad2",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/15",
@@ -1074,7 +1074,7 @@
       ],
       "pull_request_boundary": "Install linear Alembic baseline/adoption revisions with frozen DDL, exact dialect schema classifier, bounded migrator locks and real legacy-writer exclusion; persist fresh/legacy installation origin and explicit mapping/evidence intent. Preserve original rows, event/artifact identities and reservations. AR-007-A alone owns organization/project/membership/resource DDL and backfill. PostgreSQL adoption also requires an operator-attested nonempty inventory of retired legacy writer roles, bound to persisted intent; disable their login/superuser and inherited writer paths, refuse other/ambiguous client sessions, and reject indirect public routine write paths. This is a bounded correction for the actual legacy compose superuser, not proof against dishonest administrators. No online data rewrite, automatic downgrade or run projection",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer C \u2014 migrations",
+      "assigned_to": "Engineer C — migrations",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/28",
       "evidence": {
         "commit": "385e5ecf59b7b7bcf131969b915bac60275fec47",
@@ -1118,7 +1118,7 @@
       "pull_request_boundary": "Add read-only release-profile revision guards before API admission and worker claims; refuse unknown/partial/future or incomplete state without DDL, and document compatible application rollback versus required backup restore. Confirm all supported CLI initialization now uses AR-005-B versioned migrations. No HA rolling upgrade claim.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/37",
-      "assigned_to": "Engineer C \u2014 runtime guard; Engineer A \u2014 independent recovery workstream; Engineer B \u2014 review",
+      "assigned_to": "Engineer C — runtime guard; Engineer A — independent recovery workstream; Engineer B — review",
       "evidence": {
         "commit": "0737c7bd236422577457e3dff52da02266d957cf",
         "reviewed_commit": "94dd9cb339f1e68e35e70847ca0539ecb0fafb29",
@@ -1232,7 +1232,7 @@
       "pull_request_boundary": "Implement organization/project/membership/resource scope tables and explicit legacy ownership backfill. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/40",
-      "assigned_to": "Engineer C \u2014 ownership schema/backfill; Engineer B \u2014 review",
+      "assigned_to": "Engineer C — ownership schema/backfill; Engineer B — review",
       "entry_evidence": "Assigned only after accepted AR-005-C merge 0737c7bd236422577457e3dff52da02266d957cf",
       "evidence": {
         "pull_request": "https://github.com/spei04/agent-rewind/pull/43",
@@ -1278,7 +1278,7 @@
       ],
       "pull_request_boundary": "Require project/principal context for runs, jobs, studies, keys and artifact resolution. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer C \u2014 scoped repositories; independent review assigned by lead",
+      "assigned_to": "Engineer C — scoped repositories; independent review assigned by lead",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/52",
       "entry_evidence": "Assigned from accepted main 555d28cf21ff91d05fca30aec94a86df2510813c after all direct producer tasks were Verified; no customer activation.",
       "verification": "PR #54 merged at9b33ddd after independent A/B source review through2a3c52d and hosted39364339490:1281tests/Python, actual PostgreSQL cases, three gVisor cases, security/package/CI gate. Preparatory scoped repositories only; route migration and customer activation remain separate."
@@ -1423,7 +1423,7 @@
       ],
       "pull_request_boundary": "Define storage interface and metadata constraints for immutable objects, verified digest and project-scoped owner references. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer A \u2014 artifact metadata/storage; independent review assigned by lead",
+      "assigned_to": "Engineer A — artifact metadata/storage; independent review assigned by lead",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/53",
       "entry_evidence": "Assigned from accepted main 555d28cf21ff91d05fca30aec94a86df2510813c after all direct producer tasks were Verified; no customer activation."
     },
@@ -1564,7 +1564,7 @@
       ],
       "pull_request_boundary": "Specify stable error code/request ID envelope, readiness checks and bounded label vocabulary. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer A \u2014 error and telemetry contracts",
+      "assigned_to": "Engineer A — error and telemetry contracts",
       "evidence": {
         "commit": "ea85d2c",
         "pull_request": "https://github.com/spei04/agent-rewind/pull/19",
@@ -1607,7 +1607,7 @@
       "pull_request_boundary": "Implement redacted boundary handlers and bounded DB/store/schema readiness. Own the installation-only sentinel provisioning command and bounded byte-read primitive: 4096-byte plaintext, capped ciphertext, one-second deadline, one in-flight check and five-second positive cache. AR-009-A consumes the primitive through a separate scoped interface. No broad observability platform deployment.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/41",
-      "assigned_to": "Engineer A \u2014 safe errors/readiness; Engineer B \u2014 review",
+      "assigned_to": "Engineer A — safe errors/readiness; Engineer B — review",
       "entry_evidence": "Assigned only after accepted AR-005-C merge 0737c7bd236422577457e3dff52da02266d957cf",
       "evidence": {
         "pull_request": "https://github.com/spei04/agent-rewind/pull/46",
@@ -1689,7 +1689,7 @@
       ],
       "pull_request_boundary": "Add structural checks for OpenAPI/schema/acceptance links and baseline fixtures without runtime behavior claims. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer C \u2014 quality/contract integration",
+      "assigned_to": "Engineer C — quality/contract integration",
       "evidence": {
         "commit": "a5dcdcbe981d729b13e87f78719c3bc46b7b543b",
         "merge_commit": "8c3a7b9",
@@ -3998,7 +3998,7 @@
       ],
       "pull_request_boundary": "Specify versioned deployment config, region, identities, private ingress, DB/store/KMS and resource labels. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
       "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.",
-      "assigned_to": "Engineer A \u2014 reference configuration",
+      "assigned_to": "Engineer A — reference configuration",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/30",
       "evidence": {
         "commit": "4abc35280f2a7b9161585c5561c1c67ef1f5da29",
@@ -6028,7 +6028,7 @@
       ],
       "pull_request_boundary": "One coherent CI/candidate-delivery PR with scoped helpers, failure tests, dependency fixes and operator runbook; publication and production stay gated.",
       "contracts_status": "C03 trust boundaries and AR-004-A inventory verified. This bounded CI foundation does not close C16 or AR-043.",
-      "assigned_to": "Engineer B \u2014 delivery/platform",
+      "assigned_to": "Engineer B — delivery/platform",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/26",
       "independent_reviewer": "Engineer A",
       "evidence": {
@@ -6075,7 +6075,7 @@
       "parent": "RA-01",
       "milestone": "M3",
       "priority": "P0",
-      "assigned_to": "Engineer A \u2014 research audit; Engineer C \u2014 independent research review",
+      "assigned_to": "Engineer A — research audit; Engineer C — independent research review",
       "issue": "https://github.com/spei04/agent-rewind/issues/47",
       "contracts_status": "C02/C04 inputs reviewed; C20 available as an internally reviewed audit only. No baseline execution or runtime authority.",
       "verification": "PR #49 merged at 10e272978bffeca520ebc06da64b66154629a88f; independent source review plus corrected integration a0bd48e; hosted run 39357250799 passed 1036 tests per supported Python version, three isolation tests and security/package/CI gate. No method reproduction or novelty certification."
@@ -6115,7 +6115,7 @@
       "parent": "RA-01",
       "milestone": "M3",
       "priority": "P0",
-      "assigned_to": "Engineer A \u2014 protocol author; Engineer C \u2014 scientific review; Engineer B \u2014 accounting/dependency review",
+      "assigned_to": "Engineer A — protocol author; Engineer C — scientific review; Engineer B — accounting/dependency review",
       "issue": "https://github.com/spei04/agent-rewind/issues/48",
       "contracts_status": "C02/C04 and accepted C20 available. C21 internally reviewed design available. The separate versioned owner decision satisfies RESEARCHSCOPE0 for the nine approved scopes and reconciled mappings only; deferred adapters, reuse claims, held-out execution, funding, data and external statistical approvals remain outside that decision.",
       "verification": "PR #50: B/C accepted exact d84eb0e; lead combined 219 audit/backlog/design checks passed. Final 72e286d passed hosted run 39359708075 (1188 tests per Python version, three gVisor tests, security/package/CI gate) and merged at 555d28cf21ff91d05fca30aec94a86df2510813c. This verifies the design/checker slice; later owner scope approval is recorded separately in owner-decision.v1.json. No runtime or statistical coverage claim is implied."
@@ -6238,7 +6238,7 @@
         "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c",
         "record": "docs/delivery/G0_DECISION.md",
         "reviewer": "Engineer A (independent authority/evidence record check)",
-        "owner_scope_confirmation": "Yes\u2014build and test first; gate production spending and partner data."
+        "owner_scope_confirmation": "Yes—build and test first; gate production spending and partner data."
       }
     },
     {
@@ -6263,7 +6263,7 @@
         "reviewed_source_commit": "22c43765f83d815328e3a222a1d56e2aca4dff8c",
         "record": "docs/delivery/G0_DECISION.md",
         "reviewer": "Engineer A (independent authority/evidence record check)",
-        "owner_scope_confirmation": "Yes\u2014build and test first; gate production spending and partner data."
+        "owner_scope_confirmation": "Yes—build and test first; gate production spending and partner data."
       }
     },
     {
@@ -6954,7 +6954,7 @@
     "G0": 0,
     "RESEARCHSCOPE0": 0
   },
-  "estimate_policy": "Engineering effort includes implementation or design, task tests, ordinary review/rework and documentation. Six logical role totals are demand estimates, not six funded human FTEs. Three contributor slots are active; no measured conversion from those slots to engineering days or a launch calendar is assumed. A hypothetical human role at 3.5 delivery days/week is shown only as a capacity lower bound. Ranges are planning bounds, not probabilities; RA-01 uses approved 2\u20133 and 2\u20134 day design ranges. The 25% integration reserve is alternative to summed upper ranges, not additive. External review/operations/funding waits and unestimated follow-up implementation remain excluded.",
+  "estimate_policy": "Engineering effort includes implementation or design, task tests, ordinary review/rework and documentation. Six logical role totals are demand estimates, not six funded human FTEs. Three contributor slots are active; no measured conversion from those slots to engineering days or a launch calendar is assumed. A hypothetical human role at 3.5 delivery days/week is shown only as a capacity lower bound. Ranges are planning bounds, not probabilities; RA-01 uses approved 2–3 and 2–4 day design ranges. The 25% integration reserve is alternative to summed upper ranges, not additive. External review/operations/funding waits and unestimated follow-up implementation remain excluded.",
   "validation": {
     "task_count": 150,
     "parent_count": 52,
@@ -7053,7 +7053,7 @@
     {
       "id": "REV-01",
       "finding": "Five/ten-day packages had generic a/b splits with no assignable PR boundary.",
-      "resolution": "146 specific tasks, 0.5\u20134 engineering days each, with scope, exclusions, contracts, tests, review and acceptance. Parent IDs retained for traceability."
+      "resolution": "146 specific tasks, 0.5–4 engineering days each, with scope, exclusions, contracts, tests, review and acceptance. Parent IDs retained for traceability."
     },
     {
       "id": "REV-02",
@@ -7067,7 +7067,7 @@
     },
     {
       "id": "REV-04",
-      "finding": "42\u201350 week GA and 28\u201334 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff.",
+      "finding": "42–50 week GA and 28–34 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff.",
       "resolution": "Retire dated windows. 429 base engineering days; 146.5-day effort-only longest path excludes role contention and external waits. Reforecast after Day 10 and each gate using actual throughput; no committed launch date."
     },
     {
@@ -7210,7 +7210,7 @@
       "question": "Given fixed inference and execution budgets, can experiment selection find more independently confirmed repairs for real coding-agent failures than suitable baselines?",
       "baseline_task_count": 146,
       "baseline_effort_days": 429.0,
-      "implementation_effort_status": "Nine scopes approved in #51; eight overlap mappings retain original work, with AR-024-D separating selected-policy harness review. AR-025-D is the new standard comparator. Reconciled +7 base/+14 upper, not +19\u201334 wholesale.",
+      "implementation_effort_status": "Nine scopes approved in #51; eight overlap mappings retain original work, with AR-024-D separating selected-policy harness review. AR-025-D is the new standard comparator. Reconciled +7 base/+14 upper, not +19–34 wholesale.",
       "affected_tasks": [
         "AR-020-A",
         "AR-020-B",
@@ -7445,7 +7445,7 @@
         },
         "max_delivery_days_per_contributor_per_day": 0.5,
         "conditions": "Review acceptance days are scenario conditions, not recorded approvals. Shift RA-01-B if A is not accepted. C supplies independent review; B audits integration/backlog. No six-human-FTE assumption.",
-        "contingency": "RA-01-A upper range of 3 days may require 2 extra half-day allocations; RA-01-B upper range of 4 days may require 4 extra half-day allocations. Shift acceptance/handoff by actual completion; no automatic start on Day 6. Stop at the approved 4\u20137 day total design scope and rescope unknown follow-up work.",
+        "contingency": "RA-01-A upper range of 3 days may require 2 extra half-day allocations; RA-01-B upper range of 4 days may require 4 extra half-day allocations. Shift acceptance/handoff by actual completion; no automatic start on Day 6. Stop at the approved 4–7 day total design scope and rescope unknown follow-up work.",
         "unscheduled_approved_queue": [
           "AR-006-A",
           "AR-007-B",
@@ -7494,7 +7494,7 @@
     },
     "max_delivery_days_per_contributor_per_day": 0.5,
     "conditions": "B independently reviews both interfaces; A/C cross-review without acting as separate human approval. Review acceptance and hosted checks must actually pass.",
-    "contingency": "Upper ranges may need two extra half-day allocations per task in days6\u20137. Days8\u201310 retain integration/reforecast capacity. Do not start any dependent on a planned date alone.",
+    "contingency": "Upper ranges may need two extra half-day allocations per task in days6–7. Days8–10 retain integration/reforecast capacity. Do not start any dependent on a planned date alone.",
     "unscheduled_approved_queue": [
       "AR-006-A",
       "AR-011-C"
