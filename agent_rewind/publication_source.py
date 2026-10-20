@@ -98,21 +98,31 @@ def _snapshot(
     if lock and connection.dialect.name == "postgresql":
         _lock_closure(reads, run_id)
         repositories._authorize(connection, context, action)
+    result = capture_rows(reads, run_id, lock=lock)
+    repositories._authorize(connection, context, action)
+    return result
+
+
+def capture_rows(
+    reads: _Reads, run_id: str, *, lock: bool = False, complete_only: bool = True
+) -> dict[str, Any]:
+    """Scoped SQL evidence only; caller must establish operator or principal authority."""
+    connection = reads.connection
     lineage: list[dict[str, Any]] = []
     own_events: dict[str, list[dict[str, Any]]] = {}
     seen: set[str] = set()
     current = run_id
-    manifest: dict[str, Any] | None = None
+    closure = Lineage(reads.record, reads.job, reads.by_job)
+    manifest = closure.validate("run", run_id)
     retained = 0
     while current:
         if current in seen or len(seen) > MAX_DEPTH:
             raise ArtifactError("artifact_graph_invalid")
         seen.add(current)
-        run = reads.resource("run", current)
-        if run.get("status") != "complete":
+        run = closure.records[("run", current)]
+        if (complete_only or current != run_id) and run.get("status") != "complete":
             raise ArtifactError("artifact_graph_invalid")
-        if manifest is None:
-            manifest = run
+        if current == run_id:
             retained += len(canonical(manifest))
         item = {
             key: run[key]
@@ -176,7 +186,6 @@ def _snapshot(
                 raise ArtifactError("artifact_graph_invalid")
             history = [row for row in history if row["step"] < fork]
         history.extend(own_events[item["id"]])
-    repositories._authorize(connection, context, action)
     return {"manifest": manifest, "lineage": lineage, "events": history}
 
 

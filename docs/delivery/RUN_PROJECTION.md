@@ -157,3 +157,19 @@ projection rollback and exact retry on one connection. Fixture execution is not
 proof that the unavailable production fence exists. Installed-package smoke,
 read-only revision guard, lint/type/security checks and independent source review
 remain required; no production or customer acceptance is implied by this design.
+
+## Source capture boundary
+
+The operator path takes one consistent SQL read snapshot (PostgreSQL repeatable
+read/read-only; explicit SQLite read transaction), retaining only the capped
+cohort metadata. It closes that connection before invoking the byte reader.
+Original row/cell preflight precedes the legacy parser; scoped lineage validation
+precedes any artifact request. The internal project-only SQL reader is not a
+public authentication context, and ordinary scoped repository authorization is
+unchanged. Each run's graph bytes are discarded after verification; only compact
+projection/evidence identities survive to the later SQL-only source recheck.
+
+Actual interrupted Engine tests include an initial zero-event run, a proposal
+failure with unreachable orphan checkpoints, and the separately committed event
+which is one step ahead of its running or failed manifest. These preserve source
+rows and classify conservatively; they do not fabricate terminal evidence.

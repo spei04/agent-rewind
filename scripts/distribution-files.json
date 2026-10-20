@@ -48,6 +48,8 @@
     "agent_rewind/models.py",
     "agent_rewind/ownership.py",
     "agent_rewind/policy.py",
+    "agent_rewind/projection_evidence.py",
+    "agent_rewind/projection_source.py",
     "agent_rewind/publication_journal.py",
     "agent_rewind/publication_source.py",
     "agent_rewind/readiness.py",
