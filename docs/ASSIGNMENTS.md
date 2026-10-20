@@ -101,3 +101,5 @@ The next runtime task AR-005-C remains unscheduled until AR-005-B is accepted an
 | 2026-10-20 | B — independent reviewer | AR-005-C integration | reused engineer-b checkout, read only | Review initial interface and exact guard/recovery deliveries before a coherent PR is accepted. |
 
 All three checkouts remain active and are reused. Shared filesystem headroom is approximately 131 MiB; heavier validation stays on hosted CI. A retains its existing old-lock environment without claiming frozen dependency validation; C owns its refreshed locked environment. No new model calls, infrastructure or partner-data access. No task was started before its prerequisites were integrated.
+
+2026-10-20 review clarification: B confirmed that AR-005-C has no approved customer-serving rollback target. The card now distinguishes inspection-reader compatibility, actual PostgreSQL restoration and refusal of runtime rollback without an active release profile; C04 scope and production gates are unchanged.

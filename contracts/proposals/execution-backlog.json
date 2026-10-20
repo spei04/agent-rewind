@@ -1088,8 +1088,8 @@
         "C04"
       ],
       "scope": "Add read-only release-profile revision guards before API admission and worker claims; refuse unknown/partial/future or incomplete state without DDL, and document compatible application rollback versus required backup restore. Confirm all supported CLI initialization now uses AR-005-B versioned migrations.",
-      "acceptance": "No runtime DDL; unsupported revision prevents admission and worker dispatch; compatible rollback demonstrated on fixture",
-      "tests": "Least-privilege DB startup, future revision, upgrade failure and recovery tests",
+      "acceptance": "No runtime DDL; unsupported or incomplete revisions prevent admission and worker dispatch; supported inspection-reader compatibility and verified backup restoration are demonstrated, while customer-serving rollback refuses without an approved active release profile",
+      "tests": "Least-privilege DB startup, future/multiple revisions, upgrade failure, inspection-only compatibility and actual PostgreSQL backup/restore refusal/recovery tests",
       "security_reliability": "Fail closed when schema cannot be read; retain rollback evidence",
       "out_of_scope": "No HA rolling upgrade claim",
       "status": "In progress",

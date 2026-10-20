@@ -492,8 +492,8 @@ M1 / P0 · 3 PRs · 6 engineering days · In progress · [Tracking issue #5](htt
 - **Out of scope:** No HA rolling upgrade claim.
 - **Prerequisites:** [AR-005-B](#ar-005-b). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C04; definitions and producer availability in the contract register.
-- **Acceptance criteria:** No runtime DDL; unsupported revision prevents admission and worker dispatch; compatible rollback demonstrated on fixture.
-- **Required automated tests:** Least-privilege DB startup, future revision, upgrade failure and recovery tests.
+- **Acceptance criteria:** No runtime DDL; unsupported or incomplete revisions prevent admission and worker dispatch; supported inspection-reader compatibility and verified backup restoration are demonstrated, while customer-serving rollback refuses without an approved active release profile.
+- **Required automated tests:** Least-privilege DB startup, future/multiple revisions, upgrade failure, inspection-only compatibility and actual PostgreSQL backup/restore refusal/recovery tests.
 - **Security and reliability:** Fail closed when schema cannot be read; retain rollback evidence.
 - **Effort / confidence:** 1.5 engineering days; planning range 1.5–2.2; medium confidence.
 - **Responsible role:** BE; required reviewers: TL, QE. Assigned contributors: C (guard), A (recovery), B (independent review).
@@ -3095,3 +3095,5 @@ G0 execution checkpoint, 2026-10-19: AR-004-B/C verified; ARCH0/G0 satisfied for
 2026-10-20 configuration checkpoint: AR-033-A verified in PR #36 at 4abc352 after independent B review and hosted locked checks. C14 now includes process/overflow connection bounds and safe regular-file loading. A reassigned to complementary migration CLI/input/package review; B owns catalog/transaction acceptance, C implements fixes. AR-005-C still waits for accepted AR-005-B; AR-033-B still waits for ENV0.
 
 2026-10-20 migration integration: AR-005-B verified in PR #35 at 385e5ecf; AR-005-C starts only after that merge. C runtime guards and A recovery work own disjoint files in reused checkouts; B independently reviews both for one coherent integration. PostgreSQL backup/restore evidence remains pending, distinct from the already executed transaction/process-death rollback tests. Parent #5 remains open; G1 and customer admission are not accepted.
+
+AR-005-C acceptance clarification: the reviewed C04 adoption profile is migration-only. Demonstrate supported inspection-reader compatibility and real backup restoration; do not label an old unguarded application a customer-serving rollback target. A future active-release rollback pair needs its own approved compatibility profile and deployment evidence.
