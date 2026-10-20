@@ -182,9 +182,10 @@ def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None
             raise MigrationRefused("schema_incompatible")
 
 
-# PostgreSQL 16 pg_dump/pg_restore round trips these three frozen enum checks
+# PostgreSQL 16 pg_dump/pg_restore round trips these frozen enum checks
 # from a whole-array text cast to per-element text casts. These are the exact
-# observed expressions from synthetic run 39349792047, not generic SQL rewriting.
+# observed expressions from synthetic runs 39349792047 (adoption) and
+# 39353816614 (ownership), not generic SQL rewriting.
 # Keep the original catalog/fingerprint authoritative; all other forms refuse.
 _POSTGRES_ENUM_ROUNDTRIPS = (
     (
@@ -249,6 +250,50 @@ _POSTGRES_ENUM_ROUNDTRIPS = (
             "CHECK (((status)::text = ANY (ARRAY[('pending'::character varying)::text, "
             "('running'::character varying)::text, ('complete'::character varying)::text,"
             " ('blocked'::character varying)::text])))"
+        ),
+    ),
+    (
+        "project_memberships",
+        "project_memberships_role_check",
+        (
+            "role::text = ANY (ARRAY['viewer'::character varying, "
+            "'operator'::character varying, 'maintainer'::character varying]::text[])"
+        ),
+        (
+            "role::text = ANY (ARRAY['viewer'::character varying::text, "
+            "'operator'::character varying::text, 'maintainer'::character varying::text])"
+        ),
+        (
+            "CHECK (((role)::text = ANY ((ARRAY['viewer'::character varying, "
+            "'operator'::character varying, 'maintainer'::character varying])::text[])))"
+        ),
+        (
+            "CHECK (((role)::text = ANY (ARRAY[('viewer'::character varying)::text, "
+            "('operator'::character varying)::text, ('maintainer'::character varying)::text])))"
+        ),
+    ),
+    (
+        "resource_scopes",
+        "resource_scopes_resource_kind_check",
+        (
+            "resource_kind::text = ANY (ARRAY['run'::character varying, "
+            "'study'::character varying, 'job'::character varying, "
+            "'key'::character varying, 'provider_call'::character varying]::text[])"
+        ),
+        (
+            "resource_kind::text = ANY (ARRAY['run'::character varying::text, "
+            "'study'::character varying::text, 'job'::character varying::text, "
+            "'key'::character varying::text, 'provider_call'::character varying::text])"
+        ),
+        (
+            "CHECK (((resource_kind)::text = ANY ((ARRAY['run'::character varying, "
+            "'study'::character varying, 'job'::character varying, 'key'::character varying, "
+            "'provider_call'::character varying])::text[])))"
+        ),
+        (
+            "CHECK (((resource_kind)::text = ANY (ARRAY[('run'::character varying)::text, "
+            "('study'::character varying)::text, ('job'::character varying)::text, "
+            "('key'::character varying)::text, ('provider_call'::character varying)::text])))"
         ),
     ),
 )
