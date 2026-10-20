@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 
 import agent_rewind
 import agent_rewind.api
@@ -15,6 +16,36 @@ import agent_rewind.cli
 from agent_rewind.migrations.compatibility import runtime_schema_compatibility
 from agent_rewind.migrations.ownership_service import initialize_ownership
 from agent_rewind.migrations.service import install, schema_status
+
+
+def artifact_smoke(engine: Engine, root: Path) -> None:
+    import hashlib
+    from datetime import UTC, datetime
+
+    from cryptography.fernet import Fernet
+
+    from agent_rewind.artifact_metadata import ArtifactObject
+    from agent_rewind.artifact_storage import LocalArtifactStorage
+    from agent_rewind.migrations.artifact_service import initialize_artifacts
+
+    state = initialize_artifacts(engine)
+    if state["revision"] != "ar_0004_artifacts" or state["customer_ready"]:
+        raise RuntimeError("Installed artifact revision failed its explicit transition")
+    content = b"synthetic-installed-object"
+    digest = hashlib.sha256(content).hexdigest()
+    value = ArtifactObject(
+        id="a" * 32,
+        project_id="9" * 32,
+        digest=digest,
+        locator=f"objects/{'9' * 32}/v1/{digest}",
+        format_version=1,
+        byte_count=len(content),
+        created_at=datetime.now(UTC),
+    )
+    store = LocalArtifactStorage(root, Fernet(Fernet.generate_key()), plaintext_limit=4096)
+    store.put_verified(value, content)
+    if store.read_verified(value) != content:
+        raise RuntimeError("Installed bounded artifact format did not round trip")
 
 
 def readiness_smoke(root: Path, database_url: str) -> None:
@@ -69,7 +100,14 @@ for asset in ("index.html", "style.css", "app.js"):
     content = importlib.resources.files("agent_rewind").joinpath("web", asset).read_bytes()
     if not content:
         raise RuntimeError("Packaged web asset is empty")
-for profile in ("sqlite", "postgresql16", "sqlite_ownership", "postgresql16_ownership"):
+for profile in (
+    "sqlite",
+    "postgresql16",
+    "sqlite_ownership",
+    "postgresql16_ownership",
+    "sqlite_artifacts",
+    "postgresql16_artifacts",
+):
     shape = json.loads(
         importlib.resources.files("agent_rewind.migrations")
         .joinpath("profiles", profile + ".json")
@@ -115,9 +153,12 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
         )
         if ownership["state"] != "ownership_complete" or ownership["customer_ready"]:
             raise RuntimeError("Installed ownership revision failed the explicit transition")
+        artifact_smoke(engine, Path(temporary))
         compatibility = runtime_schema_compatibility(engine)
         if compatibility.status != "incompatible" or compatibility.code != "migration_only":
-            raise RuntimeError("Installed ownership revision incorrectly permits admission")
+            raise RuntimeError(
+                "Installed ownership/artifact revision incorrectly permits admission"
+            )
     finally:
         engine.dispose()
     readiness_smoke(Path(temporary), f"sqlite:///{database}")
