@@ -28,8 +28,12 @@ from .scoped_repositories import (
 def _lock_closure(reads: _Reads, run_id: str) -> None:
     """Lock only the existing bounded validated dependency closure.
 
-    Future writers must also lock job rows before changing by_job membership;
-    existing-row locks cannot cover inserted/reassigned phantom rows by themselves.
+    Future graph-source producers must serialize every mutation on the affected
+    owning job/run rows, including event insert/reassignment/deletion, ancestry or
+    source identity changes and by_job membership. Reassignment locks both owners
+    in a consistent order. Existing-row locks alone do not protect phantoms under
+    READ COMMITTED. Producers must revalidate under those locks and never mutate a
+    complete source graph. Current legacy writers do not establish this contract.
     """
 
     def dependencies() -> set[tuple[str, str]]:

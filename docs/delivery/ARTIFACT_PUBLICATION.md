@@ -23,9 +23,14 @@ object metadata, exact references and root writer. Effective DBAPI autocommit is
 refused before any publication SQL mutation, including reused pool connections.
 The PostgreSQL transaction locks the existing bounded validated run/job/study
 closure and its scope rows in deterministic order, then revalidates dependency
-identities. Future writers must serialize inserted/reassigned by-job membership
-on the job row too: existing-row locks alone cannot protect absent-row phantoms
-under READ COMMITTED. Inherited references must
+identities. Every future graph-source producer must serialize on the affected
+owning job/run rows before mutation: event insertion/reassignment/deletion,
+run/ancestry/source identity changes, and by-job membership. Reassignment locks
+both old and new owners in a consistent order; producers then revalidate while
+holding the locks. Complete source graphs remain immutable. Existing-row locks
+alone cannot protect absent-row phantoms under READ COMMITTED. Current legacy
+writers do not establish this discipline, so these locks do not enable the
+unavailable live adapter. Inherited references must
 already exist under their actual ancestor owner. The root is a run `result`
 reference, with a distinct `publication_schema: 1` envelope binding publication,
 project, run, job, worker, generation, manifest, ancestry and event identities.
@@ -100,5 +105,8 @@ successful branch graphs, immutable identity reuse, post-upload authority loss,
 transaction rollback, durable intent reload and process death before/after SQL
 commit. Opt-in PostgreSQL tests use the existing pinned disposable CI service
 for transaction visibility, exact reentry, rollback and competing publishers.
+The synthetic event producer takes the required job/run locks, is blocked during
+publication, and refuses a complete source after the publication lock is released.
+This tests the future producer contract, not compliance of current legacy writers.
 Hosted evidence is required before acceptance; SQLite tests alone do not prove
 PostgreSQL locking or the unavailable future production fence.

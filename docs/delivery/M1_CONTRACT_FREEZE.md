@@ -319,7 +319,16 @@ readiness while never treating current full-object reads as bounded.
 ## Run projection and pagination
 
 AR-006-A writes `run_index` and event/ref publication coherently in the same
-fenced transaction. Historical `records.data`, events.hash, ciphertext and original
+fenced transaction. Its integration with AR-010-A/B must require every graph-source
+producer to lock all affected owning job/run rows in a consistent order before
+mutation, then revalidate while holding those locks. This includes event
+insertion/reassignment/deletion, run/ancestry/source identity changes and by-job
+membership; reassignment covers both old and new owners. Complete source graphs
+remain immutable. AR-009-B's existing-row locks cannot protect absent-row phantoms
+under READ COMMITTED; current legacy writers do not establish this discipline and
+the preparatory live adapter remains unavailable.
+
+Historical `records.data`, events.hash, ciphertext and original
 floating created timestamps are never rewritten by backfill. `created_at` is a
 deterministic UTC projection rounded to nearest microsecond with ties-to-even;
 retain original float separately in the preserved record. `(created_at,run_id)`

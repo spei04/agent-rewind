@@ -143,8 +143,12 @@ class PublicationWriter(Protocol):
     identity; exact success may be inspected after lease expiry. lock_and_check
     must lock and validate current generation/owner/running/cancel/DB-time lease.
     publish_root must compare expected root and write on this same connection.
-    Every future insertion/reassignment affecting by_job membership must lock its
-    job row too; row locks on existing closure entries do not protect phantoms.
+    All future graph-source producers must first lock affected owning job/run
+    rows in a consistent order, then revalidate before mutation. This includes
+    event insert/reassignment/deletion, run/ancestry/source identity changes and
+    by_job membership; reassignment covers both old and new owners. Existing-row
+    locks cannot protect absent-row phantoms. Complete source graphs are immutable.
+    Current legacy producers do not establish this contract; live use is disabled.
     """
 
     def require_available(self) -> None: ...

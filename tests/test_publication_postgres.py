@@ -160,15 +160,16 @@ def test_postgres_effective_autocommit_refuses_before_sql_mutation(
 
 
 @pytest.mark.parametrize(
-    "dependency", ["ancestor_job", "ancestor_scope", "study_record", "by_job_membership"]
+    "dependency",
+    ["ancestor_job", "ancestor_scope", "study_record", "by_job_membership", "event_insertion"],
 )
 def test_postgres_validated_closure_is_locked_through_publication_commit(
     capture_pg, task, monkeypatch, dependency
 ):
-    from sqlalchemy import insert, update
+    from sqlalchemy import insert, select, update
     from sqlalchemy.exc import DBAPIError
 
-    from agent_rewind.database import jobs, records
+    from agent_rewind.database import events, jobs, records
     from agent_rewind.models import Action, Intervention
 
     capture = capture_pg
@@ -218,6 +219,21 @@ def test_postgres_validated_closure_is_locked_through_publication_commit(
             assert released.wait(10)
         return result
 
+    def append_event(connection):
+        # A future producer must serialize before discovering whether this source
+        # is already complete; an event FK alone does not take this job lock.
+        connection.execute(
+            select(jobs.c.id).where(jobs.c.id == parent_intent.job_id).with_for_update()
+        ).scalar_one()
+        source = connection.execute(
+            select(records.c.data).where(records.c.id == parent).with_for_update()
+        ).scalar_one()
+        if source["status"] == "complete":
+            raise ArtifactError("synthetic_complete_source_immutable")
+        connection.execute(
+            insert(events).values(run_id=parent, step=4, artifact="e" * 64, hash="f" * 64)
+        )
+
     monkeypatch.setattr(capture.publisher, "_complete", held)
     with ThreadPoolExecutor(max_workers=1) as pool:
         pending = pool.submit(capture.publisher.publish, intent, capture.source)
@@ -242,6 +258,8 @@ def test_postgres_validated_closure_is_locked_through_publication_commit(
                     c.execute(
                         text("UPDATE records SET data='{}'::json WHERE id=:study"), {"study": study}
                     )
+                elif dependency == "event_insertion":
+                    append_event(c)
                 else:
                     # Required producer discipline: serialize even a new member
                     # on its job before inserting/reassigning a by_job record.
@@ -261,6 +279,19 @@ def test_postgres_validated_closure_is_locked_through_publication_commit(
         finally:
             released.set()
         assert pending.result(10) == intent.root_digest
+    if dependency == "event_insertion":
+        with (
+            pytest.raises(ArtifactError, match="synthetic_complete_source_immutable"),
+            capture.db.engine.begin() as c,
+        ):
+            append_event(c)
+        with capture.db.engine.connect() as c:
+            assert (
+                c.execute(
+                    select(events.c.step).where(events.c.run_id == parent, events.c.step == 4)
+                ).first()
+                is None
+            )
     assert (
         capture.publisher.read(CONTEXT, child, intent.root_digest).root_digest == intent.root_digest
     )
