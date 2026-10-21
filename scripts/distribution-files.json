@@ -2,6 +2,9 @@
   "runtime": [
     "agent_rewind/__init__.py",
     "agent_rewind/__main__.py",
+    "agent_rewind/admission_configuration.py",
+    "agent_rewind/admission_envelope.py",
+    "agent_rewind/admission_request.py",
     "agent_rewind/api.py",
     "agent_rewind/artifact_graph.py",
     "agent_rewind/artifact_metadata.py",

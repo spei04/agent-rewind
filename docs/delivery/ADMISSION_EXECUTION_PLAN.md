@@ -1,10 +1,10 @@
 # Admission execution plan
 
-2026-10-21 · Planning reconciliation of existing AR-008-A/B and reviewed C04 obligations. AR-008-A/P1 is In progress with C; P2/P3 and AR-008-B remain Not started. This document does not supply an implemented registry, admission service, accepted migration, customer-ready profile or spending authority.
+2026-10-21 · Planning reconciliation of existing AR-008-A/B and reviewed C04 obligations. AR-008-A/P1 is Verified, with pure parser/configuration/envelope modules described in [ADMISSION_FOUNDATION.md](ADMISSION_FOUNDATION.md). C starts P2; P3 and AR-008-B remain Not started. The pure registry prepares explicit immutable values; no deployed registry, admission service, accepted migration, customer-ready profile or spending authority is supplied.
 
 ## Entry and delivery boundaries
 
-AR-008-A retains direct prerequisites AR-007-C and AR-009-B, both Verified for their preparatory scope. AR-007-C completed accepted PR #79/main/candidate gates; see [P2 evidence](EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21). AR-008-A [#80](https://github.com/spei04/agent-rewind/issues/80) and P1 [#81](https://github.com/spei04/agent-rewind/issues/81) are In progress with C; P2 [#82](https://github.com/spei04/agent-rewind/issues/82) and P3 [#83](https://github.com/spei04/agent-rewind/issues/83) remain Not started until accepted merged predecessors. P1 inherits both prerequisites and C04; P2 requires accepted merged P1 and P3 requires accepted merged P2. The aggregate cannot be Verified until all three and the full service matrix pass. AR-008-B retains AR-008-A and AR-011-B. No outer dependency is removed or added.
+AR-008-A retains direct prerequisites AR-007-C and AR-009-B, both Verified for their preparatory scope. AR-007-C completed accepted PR #79/main/candidate gates; see [P2 evidence](EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21). AR-008-A [#80](https://github.com/spei04/agent-rewind/issues/80) remains In progress; P1 [#81](https://github.com/spei04/agent-rewind/issues/81) is Verified after accepted PR #85 merge 81905a5 and matching PR/main/candidate evidence; C starts P2 [#82](https://github.com/spei04/agent-rewind/issues/82), while P3 [#83](https://github.com/spei04/agent-rewind/issues/83) remains Not started until accepted merged P2. P1 inherits both prerequisites and C04; P2 requires accepted merged P1 and P3 requires accepted merged P2. The aggregate cannot be Verified until all three and the full service matrix pass. AR-008-B retains AR-008-A and AR-011-B. No outer dependency is removed or added.
 
 | Delivery | Scope | Base / planning range | Handoff |
 | --- | --- | --- | --- |
@@ -56,3 +56,32 @@ AR-010-A/B still own budget/generation/permit and worker dispatch. Adding them a
 The producer-boundary finding raised at the admission-only checkpoint is resolved by the separately reviewed [observability execution plan](OBSERVABILITY_EXECUTION_PLAN.md). Both AR-011-C packages wait for Verified AR-010-B; there is no early foundation start. That plan owns the revised telemetry estimate and dependency, while admission retains correlation persistence. The frozen metric vocabulary and external gates remain unchanged.
 
 2026-10-21 implementation assignment: C implements AR-008-A/P1 in its retained checkout from f08b1ca; B reconciles acceptance in primary then independently reviews contracts/security; A completed the read-only AR-006-B cursor audit and will author a separate planning amendment after reviewing this delta, with no 006-B runtime assigned. Lead owns integration/delivery. A reviews admission boundary tests after its planning handoff. The reviewed P1 design uses explicit bounded immutable optional native-v1 entries and separate client/config identities; 9 MiB raw JSON is bounded before parse, the fully materialized TaskSpec is at most 8 MiB, and canonical configuration plaintext at most 64 KiB. No SQL/route/P2 work, deployed registry or admission availability is claimed. The accepted planning review does not count as runtime verification; full package checks/accepted merges remain required.
+
+2026-10-21 source handoff: AR-008-A/P1 is Implemented; verification pending. C authored parser 4c6a558, configuration 0e6cb05, envelope 1dde230 and packaging/guide e699394; lead integrated unchanged file contents as 7ea387f/3f74d69/d0448d4/02424e0 onto reviewed c390726. B independently accepted each runtime component for source and test design. Author validation passed 230 focused admission/package-helper/workflow/contract/model/legacy/artifact-metadata tests in 10.37 seconds, strict types, lint/security lint, formatting and whitespace. Final independent composed execution, actual installed wheel/sdist smoke, hosted checks, accepted merge and protected-main candidate remain required. No SQL/HTTP/storage/worker activation or provider call occurred; P2/P3 remain Not started.
+
+## Accepted P1 delivery — 2026-10-21
+
+[PR #85](https://github.com/spei04/agent-rewind/pull/85) reviewed source
+bc2a784cd40ded5c18ee5b67c2d3d7f5ec1c948e merged as
+81905a5ace65823c91196771f7cd2474a9117306. A independently passed 228 tests,
+128 boundary probes and three validators; B accepted component, package and
+composition source. [PR checks](https://github.com/spei04/agent-rewind/actions/runs/39539994853)
+and [protected-main checks](https://github.com/spei04/agent-rewind/actions/runs/39541051449)
+passed 2170/2176 core tests on Python 3.11/3.12 with 9/3 expected skips and one
+existing warning per job, actual PostgreSQL, three gVisor cases, installed
+package smoke, security, gate and main delivery. Lead verified candidate
+12320076132 (483833 bytes), its exact four files, source/manifests and hashes;
+the private indexed release record remains outside checkouts, review 2026-11-20.
+P1 is Verified; lead closes #81 only. Aggregate #80 and parent #8 remain open.
+
+C starts P2 #82 in the reused matching-lock checkout; B reviews schema/contracts
+and A preservation/boundaries as available. P3 #83 remains Not started until
+accepted merged P2. No estimates, dependencies or frozen contract bytes change.
+A independently owns AR-006-B/P1 in PR #89; its unmerged package/estimate changes
+are not imported into this admission branch. C's separate listing-session
+PostgreSQL test handoff d9fa9a8 (17 opt-in cases) received A's source/test-design
+acceptance; 14 local session tests passed and all 17 PostgreSQL cases explicitly
+skipped. The close-failure case depends on A's e85ccd80 correction. This is no
+local PostgreSQL execution or listing acceptance claim; all C test consumers
+were released before checkout reuse. Admission P2 adds no coordinator,
+HTTP/worker/ledger/generation, provider access or customer activation.
