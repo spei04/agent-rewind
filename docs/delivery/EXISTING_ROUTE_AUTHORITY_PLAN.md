@@ -1,10 +1,10 @@
 # Existing-route authority — AR-007-C
 
 Planning/design reconciliation, 2026-10-20. Source inspected:
-3c60f1a4b5e6d16504b2209dadd4b735d57037ce. P1 implementation is **In progress** after A/lead acceptance of planning correction 839f3a7; P2 remains **Not started** until accepted merged P1;
+3c60f1a4b5e6d16504b2209dadd4b735d57037ce. P1 implementation is **Implemented; verification pending** at independently reviewed runtime 1cf7717 after accepted planning correction 839f3a7; P2 remains **Not started** until accepted merged P1;
 this record is not route acceptance or permission to enable customer admission.
-The lead and A accepted the exact planning composition. Runtime review and
-hosted acceptance remain pending.
+The lead and A accepted the exact planning composition. Runtime source review is accepted; matching hosted checks and an accepted merge
+remain pending.
 
 ## Entry, ownership and estimate
 

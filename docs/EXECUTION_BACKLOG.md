@@ -96,7 +96,7 @@ After the first two weeks, use dependency-ready milestone scheduling. The former
 | Milestone | Base effort | Scheduling after Day 10 | Explicit exit / integration checkpoint |
 | --- | ---: | --- | --- |
 | M0 | 8.5 days | Internal development freeze verified; external production conditions remain separate | [G0](#g0): M0 accepted; schemas and initial migration scope reviewed. |
-| M1 | 47.5 days | Projection Verified; accepted planning 839f3a7; P1 #76 In progress with C, P2 #77 Not started until accepted merged P1 | [G1](#g1): Historical identities, 24 behavioral cases, scope/lease/budget compatibility, required CI and installable main candidate evidence pass. |
+| M1 | 47.5 days | Projection Verified; accepted planning 839f3a7; P1 #76 implemented with hosted verification pending, P2 #77 Not started until accepted merged P1 | [G1](#g1): Historical identities, 24 behavioral cases, scope/lease/budget compatibility, required CI and installable main candidate evidence pass. |
 | M2 | 69 days | Start each task after its foundation inputs; joins G1 plus early staging | [G2](#g2): Real gVisor isolation/restore/cleanup, cloud store/key rotation, fail-closed lease and accounted live smoke verified. |
 | M3 | 81 days | Includes 4 base days of RA-01 design before C08/C09 producers; runtime follows its original prerequisites and G2 | [G3](#g3): Resumable distributed studies preserve frozen protocol, missingness and all call accounting; reports independently recompute. |
 | M4 | 82 days | Early IaC after G0; UI/SDK after producer APIs; complete after G3 | [G4](#g4): Independent full browser/SDK workflow and fresh install pass with real IdP/GCS/KMS/gVisor and selected adapter. |
@@ -684,7 +684,7 @@ Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium-low confidence.
 - **Responsible role:** BE; C implements, A identity/security/read review, B transaction review, lead integration.
 - **Definition of done:** Independent A identity/read and B transaction review accepted; matching hosted checks and behavior-preservation regressions pass; record accepted merged source and review evidence before P2 starts. This closes P1 only, not aggregate AR-007-C or any route-activation gate.
-- **Progress:** In progress; [issue #76](https://github.com/spei04/agent-rewind/issues/76), [draft PR #78](https://github.com/spei04/agent-rewind/pull/78). A accepted identity/authority checkpoint 31b0a1b with 58 tests; B delivered 23 PostgreSQL cases at dda70ba, pending hosted execution. Reader/package integration, complete independent review, matching hosted checks and accepted merge remain pending.
+- **Progress:** Implemented; verification pending; [issue #76](https://github.com/spei04/agent-rewind/issues/76), [draft PR #78](https://github.com/spei04/agent-rewind/pull/78). A/B accepted corrected runtime source 1cf7717; 261 integrated focused tests pass, with 53 explicit local PostgreSQL skips. All 46 new PostgreSQL cases, installed-package checks and full hosted regression evidence must pass on matching source before an accepted merge is recorded.
 
 <a id="ar-007-c-p2"></a>
 

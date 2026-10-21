@@ -1367,7 +1367,7 @@
         "QE"
       ],
       "pull_request_boundary": "Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days, then AR-007-C/P2 full existing-route integration 4 [4–7] days after accepted merged P1. P1 does not wire Auth/session issuance, routes, UI, mutations or admission. Aggregate AR-007-C remains unverified until P2 and the full existing-route matrix are accepted.",
-      "contracts_status": "C04/C05 and AR-007-B/011-B/009-B are reviewed and Verified prerequisites. A and lead accepted planning correction 839f3a7; P1 implementation is assigned to C in issue #76, with A identity/read and B transaction review. P2 in issue #77 remains Not started until accepted merged P1. CT-M1-007/009 remain planned overall and CT-M1-008 awaits actual durable replay producers.",
+      "contracts_status": "C04/C05 and AR-007-B/011-B/009-B are Verified prerequisites. P1 runtime source 1cf7717 has A identity/read and B authority/transaction acceptance plus 261 integrated focused passes; full hosted PostgreSQL/package evidence and accepted merge remain pending. P2 #77 remains Not started until accepted merged P1. CT-M1-007/009 remain planned overall and CT-M1-008 awaits actual durable replay producers.",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/75",
       "delivery_packages": [
         {
@@ -1377,7 +1377,7 @@
             "C04",
             "C05"
           ],
-          "status": "In progress",
+          "status": "Implemented; verification pending",
           "accepted_merge_commit": null,
           "review_evidence": null,
           "id": "AR-007-C/P1",
@@ -7262,7 +7262,7 @@
       "resolution": "Own existing routes and reusable authority in two sequential delivery PRs: P1 foundation 2 [2–3], P2 full integration 4 [4–7] after accepted merged P1; aggregate 6 [6–10] BE days, medium-low. Retain verified AR-009-B/C04 and future consumer obligations without reverse dependencies; full CT-M1-007/008/009 gates remain open."
     }
   ],
-  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. A and lead accepted AR-007-C planning correction 839f3a7; C implements P1 #76 with A identity/read and B transaction review. P2 #77 remains Not started until accepted merged P1; aggregate #75 is In progress. AR-011-C is ready but unassigned. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated.",
+  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. A and lead accepted AR-007-C planning correction 839f3a7; P1 #76 is implemented in draft PR #78 at reviewed source 1cf7717, with matching hosted checks and accepted merge pending. P2 #77 remains Not started until accepted merged P1; aggregate #75 is In progress. AR-011-C is ready but unassigned. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated.",
   "github_tracking": {
     "parent_issues": [
       1,
