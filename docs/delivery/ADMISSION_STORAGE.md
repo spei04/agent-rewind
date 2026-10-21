@@ -128,3 +128,12 @@ initializer. This capture is a review aid, not automatic profile acceptance.
 Actual PostgreSQL execution, backup/restore, installed-package evidence and
 final independent repository/P2 acceptance remain pending. P3 and customer
 admission remain unavailable.
+
+
+The package allowlist includes the two repository modules, two admission migration
+modules, revision and exact reviewed SQLite literal. Installed smoke advances an
+explicit empty ar5 installation to ar6, checks exact reentry and missing/scoped
+identity reads, and proves no operation/alias rows were created. It retains the
+final migration-only refusal. The exact smoke helper plus delivery helper cases
+pass 45 local tests; two actual-PG capture/initializer cases are explicitly skipped
+locally. This source-helper result is not isolated wheel/sdist execution evidence.
