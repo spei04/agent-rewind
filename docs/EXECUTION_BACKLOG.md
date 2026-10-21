@@ -684,7 +684,7 @@ Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium-low confidence.
 - **Responsible role:** BE; C implements, A identity/security/read review, B transaction review, lead integration.
 - **Definition of done:** Independent A identity/read and B transaction review accepted; matching hosted checks and behavior-preservation regressions pass; record accepted merged source and review evidence before P2 starts. This closes P1 only, not aggregate AR-007-C or any route-activation gate.
-- **Progress:** In progress; [issue #76](https://github.com/spei04/agent-rewind/issues/76). C assigned after accepted planning 839f3a7; independent runtime review, hosted checks and accepted merge remain pending.
+- **Progress:** In progress; [issue #76](https://github.com/spei04/agent-rewind/issues/76), [draft PR #78](https://github.com/spei04/agent-rewind/pull/78). A accepted identity/authority checkpoint 31b0a1b with 58 tests; B delivered 23 PostgreSQL cases at dda70ba, pending hosted execution. Reader/package integration, complete independent review, matching hosted checks and accepted merge remain pending.
 
 <a id="ar-007-c-p2"></a>
 
