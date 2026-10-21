@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| A | Guard diagnostics and delivery-verifier review complete | Bounded guard checks passed; database restored/stopped; no active holds. |
-| C | HTTP test application cleanup complete | a992425: 94 targeted cases passed on each local interpreter; no runtime-limit or existing-assertion changes. |
-| B | Corrected source inventory and hosted delivery audit | Review immutable source, complete run attempts and candidate evidence. |
-| Lead | Corrected HTTP integration and approved ledger planning | Primary owns final HTTP composition; secondary retained for delivery corrections. Ledger code waits for accepted HTTP and exact entry review. |
+| Platform/security | Patched uv repair complete; final inventory next | Independent source review and hosted container validation remain required. |
+| Delivery reviewer | Immutable repair and hosted delivery audit | Verify source, complete run attempts and candidate evidence. |
+| Planning/verification | Ledger amendment accepted; private verifier update | Preserve old release records; require patched toolchain and container proof. |
+| Lead | HTTP integration and approved ledger handoff | Reuse primary; ledger implementation waits for accepted HTTP protected-main delivery. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -611,3 +611,14 @@ AR-008-B/P2 remains In progress: PR #106 run 39631674974 failed on Python 3.11. 
 The owner approved the [reviewed ledger plan](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md): one finite job execution window supplied by trusted provisioning; retries, claims and restarts cannot extend it; expiry prevents new paid work while retaining obligations. The schema/provisioning then reservation/concurrency split and provisional 6–10 engineering-day estimate are approved. The original owner message and its exact proposal context were verified and recorded privately.
 
 The lead will reconcile the ledger planning amendment and assign exact manifest/interface/SQL entry work. Ledger implementation still waits for accepted HTTP protected-main delivery and entry review. Existing spending authorization, migration-only compatibility, later worker and settlement gates remain unchanged. Earlier dated pending-decision checkpoints remain historical.
+
+
+## Patched toolchain delivery assignments — 2026-10-21
+
+Corrected HTTP source a439bce passed complete PR run [39638999615](https://github.com/spei04/agent-rewind/actions/runs/39638999615): Python 3.11 recorded 3,838 passes and 14 expected skips; Python 3.12 recorded 3,849 passes and 3 expected skips. Package, security, three isolation tests and CI gate passed. This is functional evidence using the former uv pin, not acceptance of a patched build.
+
+[GHSA-hq85-5cpj-mr62](https://github.com/astral-sh/uv/security/advisories/GHSA-hq85-5cpj-mr62) requires a build-tool update before delivery. Platform/security prepared 6c54c3c with uv 0.13.4 and verified official archive/wheel hashes, exact candidate provenance, version refusal, and a hosted container build/offline CLI smoke. All 53 focused cases and static checks passed; the isolated package smoke passed and 114 runtime members matched Git, wheel, sdist and installation. Project dependencies and runtime bytes are unchanged.
+
+The delivery reviewer independently audits the repair. Planning/verification owns a separately reviewed private verifier update, preserving earlier failed and successful run identities. Platform/security next binds the final source collection; the lead owns PR, protected-main and candidate acceptance. The existing Docker base and shared host trust store are separate inputs; this uv repair does not claim to remediate them. Local Docker remains unavailable, so actual container validation must come from hosted CI.
+
+The approved ledger amendment and accepted schema/provisioning entry are published on [work/ledger-backlog-amendment](https://github.com/spei04/agent-rewind/blob/work/ledger-backlog-amendment/docs/ASSIGNMENTS.md). They establish design readiness only. Ledger #107, #108 and #109 remain Not started; HTTP #95 and #93 remain In progress until the required delivery evidence is accepted. No new paid resources, provider calls, partner data or production activation were used.
