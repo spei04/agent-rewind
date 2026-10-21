@@ -1,6 +1,6 @@
 # Operation adapter entry checkpoint
 
-Draft preserved for independent design review. Its proposed limits and interfaces are not runtime acceptance. Validation and A's independent review remain pending while the confirmed PR #92 runtime correction takes priority.
+Entry design for independent review. Its proposed limits and interfaces are not runtime acceptance. The separate PR #92 error-context correction is preserved at 8e935baa; this document changes no runtime source.
 
 2026-10-21 · Design only, against accepted planning source `8382131ff70a92f8dd41fefa1eb7a9c8b33d340d` and runtime producer source `5d3ff3096d81f159a457870a1f4fa57590a06cc2`.
 [AR-008-B #93](https://github.com/spei04/agent-rewind/issues/93),
@@ -121,7 +121,8 @@ snapshot and progress handler only for that checkout. Remove owned hooks,
 restore settings and roll back/close on every path; invalidate/discard when
 cleanup cannot be confirmed. Do not alter engine-wide defaults or steal a
 callback owned by another session. Admission's mutation transaction is reused
-only for cancel. Native timeout/progress exhaustion fails closed, and successful
+only for cancel through the optional work scope below; the current helper alone
+does not enforce this service's cumulative limits. Native timeout/progress exhaustion fails closed, and successful
 phase exit also checks the cumulative clock. Storage duration is not covered by
 this SQL-active budget; no end-to-end timeout or filesystem latency guarantee is
 claimed. No background timeout thread or event-loop bridge is introduced.
@@ -183,10 +184,21 @@ Result handling is independent of error:null on supported rows:
   link; no complete/branchable/evaluator outcome is inferred from the ID.
   This endpoint does not claim graph replay/completion verification.
 
-Unsupported failure data is rejected before result storage work. Missing,
-corrupt, foreign, over-limit or mismatched result evidence is a fixed
-dependency_unavailable response; missing/inaccessible operation or target
-ownership retains the normal non-disclosing not_found boundary.
+Unsupported failure data is rejected before result storage work. The requested
+operation and its original associated job form the primary visibility boundary:
+missing/inaccessible operation or original job ownership is not_found (404)
+before result I/O. Once that boundary is established, the optional result run
+and its ancestors are secondary evidence. Missing, inaccessible/foreign,
+corrupt, over-limit or mismatched secondary run/ref/ancestor evidence is
+fixed dependency_unavailable (503), including ResourceNotFound raised only by
+that secondary proof. Never disclose a partial result ID.
+
+Keep fresh principal/project authority calls outside this secondary-proof
+translation. On secondary evidence failure, recheck the caller's current
+original-project authority before emitting 503; a revoked caller must retain
+the typed 401/403/404 denial. In particular, revocation during result I/O is 404,
+while a still-authorized caller with foreign result/ancestor evidence gets 503.
+No broad ResourceNotFound catch may turn authorization loss into dependency.
 
 ## Original receipts and final read phase
 
@@ -254,6 +266,82 @@ No generic action framework or legacy transaction refactor is part of P1.
 Repeated cancellation requests may record repeated fixed intent audits, as
 existing behavior does; they never refund reservations or dispatch work.
 
+### Cancellation work scope and cleanup
+
+The existing admission helper has native per-statement/lock timeouts, but no
+aggregate clock or SQL-count hook. The proposed minimal extension is an optional
+internal work scope; all existing callers retain `work=None` and their current
+setup, transaction outcome mapping and behavior:
+
+```python
+class TransactionWork(Protocol):
+    def attach(self, connection: Connection) -> None: ...
+    def remaining_timeouts_ms(self) -> tuple[int, int]: ...
+    def check(self) -> None: ...
+    def control_attempt(self, kind: Literal["commit", "rollback", "close"]) -> None: ...
+    def detach(self) -> None: ...
+
+admission_transaction(
+    engine: Engine, outcome: TransactionOutcome,
+    *, work: TransactionWork | None = None,
+) -> Iterator[Connection]
+```
+
+OperationService supplies one request-owned budget. The optional argument is
+internal composition, not a public authorization, fault-injection or ready
+switch. Its counters/time are shared with separate read-only preflight and
+disclosure scopes. The future implementation must establish these mechanics:
+
+1. Attach to the acquired Connection before the first setup SQL; use only
+   Connection-local listeners and the owned SQLite progress callback. Track
+   each successful listener/callback installation, including partial attach.
+   Count setup, authority, receipt, effect and native-timeout control SQL.
+   Raw-cursor control SQL must debit the same counter explicitly; it is not
+   visible to ordinary SQLAlchemy cursor-execution listeners.
+2. Check effective driver mode as today. For this opted-in scope only, narrow
+   native setup accepts the finite remaining statement/lock millisecond caps:
+   no more than 5,000/3,000 and no more than remaining SQL-active time. Values
+   below one millisecond refuse; zero must never mean an unlimited timeout.
+   Install PostgreSQL local limits before other setup SQL, without a SELECT
+   before SET TRANSACTION; preserve the existing default setup for work=None.
+   Before ordinary statements, check the cumulative budget and refresh native
+   limits. A fixed, counted raw-cursor setter avoids recursive listener calls;
+   it must not create a repeated adjustment loop or bypass customer SQL counts.
+3. Check after setup/before yielding and immediately before commit. Cursor
+   events do not account for body fetch/parse work or DBAPI commit/rollback/close.
+   The helper must check that elapsed work, apply fresh nonzero remaining native
+   caps, and call control_attempt("commit") **before** marking commit_attempted.
+   After actual commit returns, first mark commit_acknowledged, then check the
+   budget again. A post-ACK deadline cannot be classified as a known rollback.
+4. Reserve the fixed bounded control/cleanup attempt allowance inside the 512
+   total before work begins. The helper explicitly accounts for DBAPI commit,
+   rollback and close attempts; direct timeout restoration is counted too.
+   Exhaustion never skips cleanup. Detach owned listeners/progress callbacks
+   before rollback/restoration/close so an exhausted callback cannot interrupt
+   cleanup. Cleanup accounting records the reserved attempts without throwing
+   a new budget-exhaustion error. Each cleanup action follows the helper's
+   existing bounded attempt/discard/reclose rules, not an automatic work retry.
+5. Partial attach or detach failure must still reach rollback/discard/close.
+   If removal cannot be confirmed, mark cleanup_failed, discard the physical
+   connection and refuse success; preserve the original typed denial through
+   secondary cleanup failures. Detach is idempotent over the scope's own tracked
+   registrations, never another owner's callbacks. The phase clock also covers
+   final fetch/parse before the last check; owned hooks cannot survive release.
+6. After ACK and confirmed release, attach a fresh **read-only** disclosure
+   scope to another Connection with the same remaining counters/time. Check
+   before its first SQL, after its final fetch, and at successful phase exit.
+   No budget reset, mutation retry or connection held across phases is allowed.
+
+Expiry before commit with acknowledged rollback and clean release is
+dependency_unavailable. Expiry after commit is attempted or acknowledged, or
+during committed disclosure, is outcome_uncertain; the effect/audit is not
+undone or repeated. Typed authority denials retain 401/403/404. The 10-second
+value is a successful-completion/refusal ceiling, not a hard real-time limit
+on connection establishment, native interruption latency, storage or emergency
+cleanup. No Engine-global hooks, background timeout thread or new service is
+required. These optional hooks do not exist yet and require exact-source review
+and actual SQLite/PostgreSQL proof before P1 acceptance.
+
 ## Fixed failures and transaction stages
 
 Public service methods preserve IdentityInvalid, ResourceNotFound and
@@ -265,13 +353,24 @@ P2 later maps these through the unchanged four-field Error machinery.
 | --- | --- |
 | Runtime compatibility incompatible | Fault(schema_incompatible), 503; no customer rows |
 | Compatibility/service unavailable; bounded metadata/result/failure unsupported or malformed after ownership is established | Fault(dependency_unavailable), 503; never raw text or partial view |
-| Missing/inaccessible operation or target ownership | ResourceNotFound / 404; no result I/O |
+| Missing/inaccessible requested operation or original associated job ownership | ResourceNotFound / 404; no result I/O |
+| Visible operation's secondary result/ref/run/ancestor proof fails, with fresh caller authority still valid | Fault(dependency_unavailable), 503; no result ID or partial response |
 | Invalid authenticated principal / visible denied action | IdentityInvalid / 401 or ActionForbidden / 403 |
 | Malformed public operation ID | Existing identifier/not_found service behavior after project authority; P2 preserves frozen transport/authority precedence |
 | Cancellation failure before commit with acknowledged rollback and clean release | Fault(dependency_unavailable), 503; no success or automatic retry |
 | Commit attempted without known acknowledgment; rollback/cleanup uncertainty; acknowledged commit followed by dependency/association disclosure failure | Fault(outcome_uncertain), 503, retryable=false; never a second mutation |
 | Postcommit typed identity/access denial | Preserve the typed 401/404/403; do not claim cancellation was rolled back |
-| Unexpected programming exception | Existing sanitized internal_error boundary; do not relabel generic ValueError/IntegrityError as client conflict |
+| Unexpected Exception inside admission_transaction, including effect/audit/work callbacks | Preserve that helper's existing mapping: dependency_unavailable before commit with known rollback, outcome_uncertain on commit/rollback uncertainty; never a generic client conflict |
+| Unrelated programming exception outside SQL/native-session translation boundaries | Existing sanitized internal_error boundary; no raw cause or driver text in public output |
+
+Translate the helper's finite AdmissionError to the same-code Fault only after
+SQL release. Explicit cleanup/commit/disclosure observations may tighten a
+dependency to outcome_uncertain; they do not reconstruct a raw exception already
+translated by the helper or weaken a typed denial. Existing admission callers
+and their mappings remain unchanged. Native read-session boundaries translate
+driver/timeout/budget/cleanup failures to dependency_unavailable; unrelated
+programming exceptions outside those boundaries reach sanitized internal_error.
+There is no blanket catch-all relabeling every adapter bug as a dependency.
 
 The read path has no mutation uncertainty: a read-only timeout/cleanup failure
 is dependency_unavailable. Cancellation must preserve explicit commit/rollback/
@@ -309,7 +408,8 @@ Unit/SQLite and actual PostgreSQL tests must cover:
   noncreator viewer, foreign scope, malformed selected cells before Python
   decode, raw-error canaries and unsupported loader;
 - result ref/body/format/digest/length/created_at changes, same-project wrong job,
-  foreign run/ancestor and by_job phantom; mutation of an early receipt during a
+  authorized foreign run/ancestor 503 versus caller revoked during result-load
+  404, and by_job phantom; mutation of an early receipt during a
   later final check; no partial response, no connection checked out during I/O;
 - exact matching maximum mixed receipts, count/byte/native-work boundaries and
   cleanup, unchanged pool settings/handler release, unsupported DBAPI modes,
@@ -317,10 +417,25 @@ Unit/SQLite and actual PostgreSQL tests must cover:
 - separate writer changes operations.job_id while cancellation waits on project
   exclusion; both membership/key revocation schedules, current expiry, worker
   terminal transition, repeated intent, terminal/reservation preservation;
+- setup SQL/control accounting, partial hook attach/detach cleanup and shared
+  remaining disclosure budget; actual deadline crossed during body fetch/parse
+  before commit leaves exact rows/audit unchanged after acknowledged rollback;
+  deadline crossed after real ACK/disclosure preserves one effect/audit and
+  returns uncertainty without a repeated mutation; work=None callers unchanged;
 - real stage rollback after effect/audit, lost commit acknowledgment and close/
   disclosure failures; fixed safe result and no duplicate audit/automatic retry;
 - real migration-only zero customer sinks and explicit per-instance synthetic
   supported-profile controls, retaining prior ScopedActions regressions.
+
+PostgreSQL read fixtures use a genuinely SELECT-only role. Cancellation adds
+only the necessary row-lock privilege on operations: SELECT plus column-level
+UPDATE(kind), where kind is constrained to run, for the exact row SHARE lock.
+This is an explicit minimal UPDATE grant, not zero UPDATE permission. Prove real
+SHARE succeeds and the same role cannot UPDATE job_id/principal/config
+associations or INSERT/DELETE operations. Assert cancellation never changes an
+operation row. Other required job/audit/grant privileges remain explicit. A
+separate owner connection may drive replacement races, but cannot substitute for
+restricted-role proof; read_operation must still pass with SELECT-only access.
 
 Observe locks with PostgreSQL barriers/events and pg_blocking_pids, native
 timeouts and real commits; no arbitrary sleeps or product fault switches.
