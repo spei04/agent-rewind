@@ -10,17 +10,17 @@ Retain direct prerequisites AR-008-A and AR-011-B and frozen C04. Both packages 
 
 | Package | Independently reviewable scope | Base / range | Exit |
 | --- | --- | --- | --- |
-| AR-008-B/P1 | Bounded Operation read/cancel adapters; factory-born SQLite ownership and producer checkpoint | 3 / 3–5 BE days | Reviewed ownership/source/cancellation tables, all shared-engine caller and SQLite/PostgreSQL proof, matching hosted checks and accepted merge |
+| AR-008-B/P1 | Bounded Operation read/cancel adapters; factory-born SQLite ownership and producer checkpoint | 4 / 4–7 BE days | Reviewed ownership/source/cancellation tables, all shared-engine caller and SQLite/PostgreSQL proof, matching hosted checks and accepted merge |
 | AR-008-B/P2 | Exactly submit, operation status and cancellation HTTP, using accepted P1 and coordinator | 2 / 2–3 BE days | Full HTTP/contract/race and installed-package matrix, independent review, accepted merge and protected-main candidate |
 
-Total **5 [5–8] BE days, medium-low confidence**. The original adapter/HTTP reconciliation replaced provisional 3 [3–5] with 4 [4–6]; the current additional P1 day accounts for the measured SQLite callback-ownership gap, explicit pool lifecycle and shared-engine caller proof. Reforecast if the concrete producer decision requires work beyond these adapters; do not silently implement worker persistence or weaken refusal to fit the estimate. The full cards are in the [backlog](../EXECUTION_BACKLOG.md#ar-008-b) and [ledger](../../contracts/proposals/execution-backlog.json).
+Total **6 [6–10] BE days, medium-low confidence**. The original adapter/HTTP reconciliation replaced provisional 3 [3–5] with 4 [4–6]; the current two additional P1 days account for the measured SQLite callback-ownership gap, generation-bound post-close verdicts and explicit 33-site/14-module caller adaptation. The first ownership draft's 3 [3–5] P1 estimate was superseded after the missing ordinary-caller reporting boundary was identified. Reforecast if the concrete producer decision requires work beyond these adapters; do not silently implement worker persistence or weaken refusal to fit the estimate. The full cards are in the [backlog](../EXECUTION_BACKLOG.md#ar-008-b) and [ledger](../../contracts/proposals/execution-backlog.json).
 
 At the original operation HTTP planning checkpoint: 151 aggregate tasks, 157 delivery PRs, 52 parents, 544 outer edges, 27 gates and 20 contracts; 457 base days, 772.1 summed upper days, alternative 571.25 days with a 25% allowance, M1 58.5 and BE 90.5. The effort-only critical path is 169.5 days. Relative to the published baseline this is +1 base, +1 upper and +1 PR, with no outer edge/status change. These are engineering estimates, not elapsed-time or spending commitments.
 
 The current ownership reforecast retains 151 tasks, 158 delivery PRs, 544 outer
-edges, 52 parents, 27 gates and 20 contracts: **460 base / 777.1 upper / 575
-alternative allowance / 172.5 effort-path days**, with M1 61.5 and BE 93.5.
-Parent AR-008 totals 12 days. Earlier checkpoint totals above remain history.
+edges, 52 parents, 27 gates and 20 contracts: **461 base / 779.1 upper / 576.25
+alternative allowance / 173.5 effort-path days**, with M1 62.5 and BE 94.5.
+Parent AR-008 totals 13 days. Earlier checkpoint totals above remain history.
 Ownership entry review by B/lead is **pending**; C may complete separately
 assigned regressions but cannot start ownership implementation or dependent
 services on this plan alone. All current task/package statuses and later gates
@@ -118,4 +118,4 @@ No code, schema, profile, frozen contract, historical schedule, task dependency,
 
 ## P1 implementation assignment — 2026-10-21
 
-Engineer C owns P1 #94 in the reused secondary cloud checkout. B independently reviews cumulative work accounting, optional transaction work and raw receipts before dependent read/cancel services. A authors the ownership/reforecast amendment in primary while C corrects the independently reproduced cleanup/native-type regressions in secondary. B and lead must accept the new ownership entry before its implementation; planning alone does not dispatch it. The initial failure table remains fail-closed: no stored-failure producer is invented. The entry audit found no additional producer prerequisite. Actual PostgreSQL, hosted/package checks, independent source review and accepted delivery are still required. P2 remains Not started; no HTTP/schema/profile/worker/provider/customer activation is included.
+Engineer C owns P1 #94 in the reused secondary cloud checkout. B independently reviews cumulative work accounting, optional transaction work and raw receipts before dependent read/cancel services. A authors the ownership/reforecast amendment in primary while C owns separate component PostgreSQL tests in secondary after the cleanup/native-type correction review. B and lead must accept the new ownership entry before its implementation; planning alone does not dispatch it. The initial failure table remains fail-closed: no stored-failure producer is invented. The entry audit found no additional producer prerequisite. Actual PostgreSQL, hosted/package checks, independent source review and accepted delivery are still required. P2 remains Not started; no HTTP/schema/profile/worker/provider/customer activation is included.

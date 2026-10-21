@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| A | AR-008-B/P1 ownership entry and reforecast in primary | Planning only; B/lead review pending before ownership implementation. C07/C15 staged branches remain preserved. |
+| A | AR-008-B/P1 post-close receipt/caller-map entry and reforecast in primary | Planning only; B/lead review pending before ownership implementation. C07/C15 staged branches remain preserved. |
 | C | AR-008-B/P1 #94 component PostgreSQL tests in secondary | Owns the existing synthetic PostgreSQL lifecycle for those tests; ownership/service wiring awaits entry review. P2 stays Not started. |
 | B | Independent main/CI and source review | Review exact ownership amendment after A freezes it; narrow cleanup correction source accepted. |
-| Lead | Exact delivery and independent correction execution | Planning #101 merged at 10f54914; main audit pending. C07 draft #102 remains pending. No contract availability or full P1 acceptance is inferred. |
+| Lead | Exact delivery and independent correction execution | Planning #101 at 10f54914 is accepted after main/candidate proof. C07 #102 merged at 2bb75695; protected-main/candidate acceptance remains pending. No contract availability or full P1 acceptance is inferred. |
 
 Only two existing cloud checkouts are retained and reused. C07/C15 are offline design work, not available runtime contracts or production approval.
 
@@ -459,3 +459,13 @@ full P1 delivery. P1 reforecasts to 3 [3–5], aggregate B to 5 [5–8] BE days,
 medium-low; P2 stays 2 [2–3]. No task, edge, status advance or runtime change
 follows. Existing contract branches, dated evidence and activation gates remain
 unchanged. Lead owns integration, hosted/main/candidate proof and publication.
+
+2026-10-21 post-close entry clarification: B found that nonthrowing pool hooks
+alone cannot prevent a successful caller result after cleanup failure. Lead
+selected narrow owned_connect/owned_begin contexts and a retained generation
+verdict, with all 33 acquisition sites/14 modules explicitly assigned to P1.
+No Engine facade/private SQLAlchemy override or ownership implementation is
+authorized here. P1 is 4 [4–7], aggregate B 6 [6–10] BE days, medium-low; P2
+stays 2 [2–3]. The earlier ownership estimate above remains historical.
+B/lead exact-entry review is pending; C's component PostgreSQL proof remains
+separate. All current statuses, outer edges and later acceptance gates remain.
