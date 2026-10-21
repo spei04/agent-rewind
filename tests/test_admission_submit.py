@@ -1,7 +1,8 @@
 """Synthetic policy/ready instance, actual SQLite and encrypted local publication."""
 
+import hashlib
 import json
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import replace
 from types import SimpleNamespace
 
@@ -11,17 +12,17 @@ from cryptography.fernet import Fernet
 from sqlalchemy import event, text
 from sqlalchemy.engine import Connection
 from test_admission_configuration import configuration
-from test_admission_request import submission
+from test_admission_request import at_task_size, submission
 
 from agent_rewind import admission_coordinator
 from agent_rewind.admission_adapters import AdmissionReady, ProcessorPermission
-from agent_rewind.admission_configuration import NativeRegistry
+from agent_rewind.admission_configuration import NativeConfiguration, NativeRegistry
 from agent_rewind.admission_coordinator import AdmissionCoordinator
 from agent_rewind.admission_envelope import OriginCorrelation
 from agent_rewind.admission_journal import AdmissionJournal
-from agent_rewind.admission_journal_state import JournalIdentity
+from agent_rewind.admission_journal_state import MAX_CHILD_BYTES, JournalIdentity
 from agent_rewind.admission_repository import AdmissionRepository
-from agent_rewind.admission_request import MAX_TASK_BYTES, parse_submit
+from agent_rewind.admission_request import MAX_CONFIG_BYTES, MAX_TASK_BYTES, parse_submit
 from agent_rewind.admission_transaction import AdmissionError
 from agent_rewind.artifact_metadata import record_verified
 from agent_rewind.artifact_storage import LocalArtifactStorage
@@ -775,3 +776,182 @@ def test_pending_submit_preserves_typed_denial_and_explicit_schema_refusal(
     if denial == "schema":
         assert caught.value.code == "schema_incompatible"
     assert snapshot(f) == before and len(f.storage.calls) == 3 and f.ready.calls == 1
+
+
+@pytest.mark.parametrize(
+    "variant", ["new-client", "new-key", "changed-body", "one-sided", "truncated", "busy"]
+)
+def test_unresolved_locators_never_authorize_new_preparation(publication, monkeypatch, variant):
+    f = publication
+    before = freeze_pending(f, monkeypatch)
+    arguments = {}
+    if variant in {"new-client", "changed-body"}:
+        changed = json.loads(f.intent.canonical_bytes)
+        if variant == "new-client":
+            changed["client_operation_id"] = "b" * 32
+        else:
+            changed["task"]["files"]["main.py"] += " "
+        arguments["intent"] = parse_submit(canonical(changed))
+    elif variant == "new-key":
+        arguments["key_hash"] = "8" * 64
+    elif variant == "one-sided":
+        (f.root / sorted(identity(f).locators)[0] / "intent.json").unlink()
+    elif variant == "truncated":
+        (f.root / identity(f).children[0] / "intent.json").write_bytes(b"{")
+
+    def records():
+        return {p.relative_to(f.root): p.read_bytes() for p in f.root.rglob("*.json")}
+
+    retained = records()
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Unresolved journal authorized preparation or mutation")
+
+    held = f.journal.open(identity(f)) if variant == "busy" else nullcontext()
+    with held:
+        for target, name in (
+            (f.policy, "require_available"),
+            (f.ready, "check"),
+            (f.storage, "put_verified"),
+            (f.service.repository, "bind_alias"),
+            (NativeRegistry, "resolve_new"),
+            (JournalSession, "freeze"),
+            (admission_coordinator, "publish_rows"),
+        ):
+            monkeypatch.setattr(target, name, forbidden)
+        with pytest.raises(AdmissionError, match="^outcome_uncertain$"):
+            submit(f, **arguments)
+    assert snapshot(f) == before and records() == retained
+    assert len(f.storage.calls) == 3 and f.ready.calls == 1
+    assert f.engine.pool.checkedout() == 0
+
+
+@pytest.mark.parametrize("persisted", [False, True])
+def test_pending_append_failure_cannot_publish_and_reload_obeys_actual_history(
+    publication, monkeypatch, persisted
+):
+    f = publication
+    before = snapshot(f)
+    append, publish = JournalSession.append, admission_coordinator.publish_rows
+    publications = []
+
+    def failed_append(session, kind, data):
+        if kind == "commit_pending":
+            if persisted:
+                append(session, kind, data)  # Actual append and fsync completed.
+            raise OSError("PRIVATE-PENDING")
+        return append(session, kind, data)
+
+    def observed_publish(*args, **kwargs):
+        publications.append(True)
+        return publish(*args, **kwargs)
+
+    monkeypatch.setattr(JournalSession, "append", failed_append)
+    monkeypatch.setattr(admission_coordinator, "publish_rows", observed_publish)
+    with pytest.raises(AdmissionError, match="^outcome_uncertain$"):
+        submit(f)
+    assert snapshot(f) == before and not publications and len(f.storage.calls) == 3
+    monkeypatch.setattr(JournalSession, "append", append)
+    with f.journal.open(identity(f)) as session:
+        proposed = session.snapshot.data()
+        assert session.route == ("reconcile" if persisted else "resume")
+        assert session.states[0].commit_pending is persisted
+    if persisted:
+
+        def forbidden(*args, **kwargs):
+            pytest.fail("Durable pending resumed external work")
+
+        monkeypatch.setattr(f.policy, "require_available", forbidden)
+        monkeypatch.setattr(f.storage, "put_verified", forbidden)
+        with pytest.raises(AdmissionError, match="^outcome_uncertain$"):
+            submit(f)
+        assert not publications and len(f.storage.calls) == 3 and snapshot(f) == before
+    else:
+        accepted = submit(f)
+        assert accepted == {"operation_id": proposed["operation_id"], "job_id": proposed["job_id"]}
+        assert len(publications) == 1 and len(f.storage.calls) == 6
+        with f.journal.open(identity(f)) as session:
+            assert session.states[0].commit_status == "CONFIRMED"
+            assert session.states[0].logical_writes == 6
+            assert session.states[0].write_requests == 3
+            # Three initial miss+verification pairs, then three cache-hit reads.
+            assert session.states[0].read_requests == 9
+
+
+def test_full_accepted_task_publishes_encrypted_with_bounded_journal(publication):
+    f = publication
+    f.intent = parse_submit(canonical(at_task_size(MAX_TASK_BYTES)))
+    assert len(f.intent.task_bytes) == MAX_TASK_BYTES
+    maximum = json.loads(f.config.canonical_bytes)
+    for field in (
+        "endpoint_profile",
+        "endpoint_revision",
+        "model_revision",
+        "processor_profile",
+        "price_version",
+    ):
+        maximum[field] = "p" * 128
+    maximum.update(
+        max_input_tokens=1000000,
+        max_output_tokens=128000,
+        input_microusd_per_million_tokens=2**63 - 1,
+        output_microusd_per_million_tokens=2**63 - 1,
+        reasoning_effort="minimal",
+    )
+    encoded = canonical(maximum)
+    # The strict native-v1 fields cannot fill 64 KiB. Preserve their real maxima;
+    # the existing preparse/overflow tests separately cover the outer byte cap.
+    assert len(encoded) < MAX_CONFIG_BYTES
+    f.config = NativeConfiguration(encoded, expected_digest=hashlib.sha256(encoded).hexdigest())
+    f.registry = f.service.registry = NativeRegistry(f.config, ["fixture-image"])
+    accepted = submit(f)
+    assert len(f.storage.calls) == 3
+    task = f.storage.calls[0]
+    assert task.byte_count == MAX_TASK_BYTES
+    assert f.storage.local.read_verified(task) == f.intent.task_bytes
+    assert f.storage.local.read_verified(f.storage.calls[1]) == encoded
+    with f.journal.open(identity(f)) as session:
+        frozen = session.snapshot.data()
+        assert len(session.snapshot.encoded) <= MAX_CHILD_BYTES
+        assert frozen["job_id"] == accepted["job_id"]
+        assert frozen["task_digest"] == f.intent.task_digest
+        assert frozen["configuration"] == maximum
+        assert "task_plaintext" not in frozen and "files" not in frozen
+        assert session.states[0].commit_status == "CONFIRMED"
+        assert session.states[0].logical_writes == 3
+
+
+def test_parsed_default_equivalence_replays_but_source_whitespace_conflicts(
+    publication, monkeypatch
+):
+    f = publication
+    accepted = submit(f)
+    explicit_defaults = parse_submit(canonical(json.loads(f.intent.canonical_bytes)))
+    assert explicit_defaults == f.intent
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Canonical replay or conflict invoked new work")
+
+    f.service.registry = f.service.readiness = f.service.storage = None
+    monkeypatch.setattr(f.policy, "require_available", forbidden)
+    monkeypatch.setattr(f.journal, "open", forbidden)
+    assert (
+        submit(f, intent=explicit_defaults, key_hash="8" * 64, origin=OriginCorrelation("9" * 32))
+        == accepted
+    )
+    after_alias = snapshot(f)
+    assert len(after_alias["operation_keys"]) == 2 and len(after_alias["operations"]) == 1
+    changed = json.loads(f.intent.canonical_bytes)
+    changed["task"]["files"]["main.py"] += " "
+    different_source = parse_submit(canonical(changed))
+    assert different_source.request_digest != f.intent.request_digest
+    with pytest.raises(AdmissionError, match="^idempotency_conflict$"):
+        submit(f, intent=different_source, key_hash="9" * 64)
+    assert snapshot(f) == after_alias and len(f.storage.calls) == 3
+    with f.engine.connect() as connection:
+        assert (
+            connection.exec_driver_sql(
+                "SELECT count(*) FROM audit WHERE action='job.create'"
+            ).scalar_one()
+            == 1
+        )
