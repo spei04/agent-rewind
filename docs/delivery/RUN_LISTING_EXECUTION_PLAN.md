@@ -5,8 +5,8 @@ its accepted foundation does not complete route integration or activate customer
 The [task cards](../EXECUTION_BACKLOG.md#ar-006-b) and
 [machine ledger](../../contracts/proposals/execution-backlog.json) retain the
 aggregate identity and prerequisites: Verified AR-006-A, AR-007-C and AR-011-B,
-consuming C04. The aggregate remains **In progress**; A starts P2 **In progress**
-in reused primary work/scoped-run-routes after accepted P1 delivery.
+consuming C04. The aggregate remains **In progress**; P2 is **Implemented; verification pending**
+in draft [PR #91](https://github.com/spei04/agent-rewind/pull/91), under lead delivery after independent source review.
 
 A authored exact plan `9b97a09`; B independently accepted its contract, dependency
 and arithmetic review, and the lead accepted the plan. Tracking: aggregate
@@ -15,7 +15,7 @@ and arithmetic review, and the lead accepted the plan. Tracking: aggregate
 [#88](https://github.com/spei04/agent-rewind/issues/88). P1 [PR #89](https://github.com/spei04/agent-rewind/pull/89) merged as
 `ed0d6c48b8db3533c1bb20a75df93d7efc89fc7c`; successful PR/main checks and
 verified candidate 12323231309 establish the [accepted P1 delivery](#accepted-p1-delivery--2026-10-21).
-Issue #87 is closed, #88 is assigned to A and aggregate #86 remains open.
+Issue #87 is closed; #88 remains open pending delivery verification and aggregate #86 remains open.
 No customer-ready profile or production activation follows.
 
 C04, the frozen OpenAPI/logical schema and CT-M1-005/006 remain authoritative.
@@ -345,3 +345,96 @@ on work/scoped-run-routes; B independently reviews and lead integrates/delivers.
 Aggregate #86 remains In progress. P2 owns only the frozen v1 GET list/detail
 route integration and its required tests/package coverage; no schema/profile,
 legacy-route, artifact/event/repair, provider or customer-activation expansion.
+
+## P2 HTTP source checkpoint
+
+After P1's accepted merge `ed0d6c4`, the two project-scoped GET operations now
+delegate to the accepted SQL reader. Actual credential authentication and named
+project visibility precede raw query validation and lazy LIST key resolution.
+The limit grammar is bounded canonical ASCII decimal from 1 through 200; omitted
+continuation limits remain absent. Unknown or duplicate parameters refuse.
+DETAIL has no cursor-key dependency. Required nulls and false booleans remain
+present in the seven-field summary and two-field page.
+
+The generated schema for these two operations preserves the frozen success and
+fixed-error schemas, response headers, path patterns and query metadata.
+Path patterns are documentation only, so malformed path values still receive
+authentication/visibility precedence. No eager request model, quota mechanism,
+legacy renderer, audit, storage, event read or admission path was added.
+
+The final HTTP regressions cover two populated projects, real v2 cookies and
+scoped service keys, no/default-to-another-project membership, pagination and
+late/rolled-back publication, final source/membership changes, exact error
+envelopes and zero side-effect sinks. The real migration-only guard remains
+unchanged and independently refuses before customer sinks. Synthetic successful
+route tests substitute only their own app instance's compatibility result.
+
+The existing installed-package helper now exercises both actual HTTP route
+registrations: real migration refusal first, then synthetic viewer empty-list
+success, missing-detail and invalid-cursor errors, and LIST-only missing-key
+failure after identity/project visibility. A second app retains the real guard.
+The helper restores the original guard and removes its synthetic membership;
+the helper regression checks unchanged membership and migration-only status.
+Local execution of the helper is source-level evidence; installed wheel/sdist
+execution remains a hosted requirement.
+
+Author checks passed 41 route cases and a separate 143-case package/API/boundary/
+schema/existing-route selection, with no skips and the existing TestClient
+warning. Configured lint/security rules, formatting and strict typing passed.
+C independently accepted the initial `af1722a` HTTP/auth/guard source after 168
+passes and a separate populated-project probe. B's metadata finding is corrected
+here; B accepted exact final source `1954f3e`. Matching hosted checks, installed
+package proof, accepted merge and protected-main candidate verification remain
+required; this source checkpoint grants no customer-ready activation.
+
+## P2 verification-pending checkpoint — 2026-10-21
+
+P2 #88 is **Implemented; verification pending** in draft
+[PR #91](https://github.com/spei04/agent-rewind/pull/91). B accepted exact
+`1954f3e7a7c6047562fc80d2ecca19ac7f5d95f7`; C independently passed 181
+route/package-helper/API/schema/auth/authority cases with no skips and one existing
+TestClient warning in 70.92 seconds. This covers the exact frozen OpenAPI metadata,
+observed final revocation/source changes, two populated projects, real
+cookies/service keys, zero writes/downstream I/O, the real migration-only guard
+and the installed-helper second-app isolation through source execution. It is not
+an installed-wheel or PostgreSQL claim.
+
+Lead composed that source with merged admission PR #90 as
+`47abde4164fbf136b16ca6b4e9b170923d4ea844`. B accepted the exact union,
+including all ten smoke-function bodies; A independently passed 217 tests with no
+skips and one warning in 71.51 seconds and executed the combined source smoke
+sequence through ar6, migration-only and readiness refusal. Lead
+lint/security/format/strict-types/lock/three-validator checks passed. Matching
+hosted/installed-package checks, accepted merge and protected-main candidate
+verification remain required. Lead owns delivery; A/B reviewers are available
+and all independent checkout consumers are released. Aggregate #86 and parent #6
+remain open. No profile, schema, contract, scope or effort change and no customer
+activation follow.
+
+## P2 hosted failure and correction — 2026-10-21
+
+Run 39553977500 at reviewed source 745ea042 failed one Python 3.11 case
+(2611 passed, 11 expected skips); Python 3.12 passed 2620 with three expected
+skips. Package, security and three gVisor cases passed, but the overall gate
+failed and supplies no delivery acceptance. The maximum mixed PostgreSQL receipt
+fixture exhausted the unchanged two-second cumulative work budget at 2.001788
+seconds. A frozen Fault then masked that safe refusal during standard generator
+context-manager traceback propagation.
+
+A corrected the exception protocol in f411e286: its normalized public code stays
+read-only, while standard exception metadata can propagate. Deterministic nested
+generator and final-phase list/detail HTTP tests require the original fixed 503,
+no partial response, and clean reusable connections. The maximum-size JSONB
+fixture now controls only the adapter's test clock and retains all 683-record,
+683-job, 2048-node and changed-receipt assertions. It proves data correctness,
+not aggregate latency. Production limits and actual PostgreSQL native-timeout
+tests are unchanged.
+
+B accepted the exact correction and its caller/test review. A passed 223 focused
+boundary/route/session/listing/cursor tests, with 31 explicit PostgreSQL skips
+and one existing warning, in 95.90 seconds; configured lint/security/format/strict
+types passed. Local skipped cases are not PostgreSQL evidence. A preserved the
+admission branch and released the primary checkout; C owns independent execution,
+B reviews, and lead owns fresh hosted checks and delivery. P2 remains
+Implemented; verification pending. No accepted merge, candidate or activation is
+claimed by this correction.

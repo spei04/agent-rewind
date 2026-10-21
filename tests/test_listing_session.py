@@ -1,6 +1,7 @@
 """Native cancellation/cleanup, without timeout threads or arbitrary sleeps."""
 
 import sqlite3
+from types import SimpleNamespace
 
 import pytest
 from sqlalchemy import create_engine, text
@@ -92,7 +93,9 @@ def test_statement_budget_is_shared_across_connections(engine, monkeypatch):
 def test_time_budget_native_callback(engine, monkeypatch):
     work = SQLWork()
     clock = [0.0]
-    monkeypatch.setattr("agent_rewind.listing_session.time.monotonic", lambda: clock[0])
+    monkeypatch.setattr(
+        "agent_rewind.listing_session.time", SimpleNamespace(monotonic=lambda: clock[0])
+    )
     with (
         pytest.raises(Fault, match="dependency_unavailable"),
         listing_connection(engine, work) as connection,
@@ -146,7 +149,9 @@ def test_unsupported_sqlite_mode_discards_physical_connection(tmp_path, mode):
 
 def test_final_fetch_parse_tail_cannot_return_over_budget(engine, monkeypatch):
     clock = [0.0]
-    monkeypatch.setattr("agent_rewind.listing_session.time.monotonic", lambda: clock[0])
+    monkeypatch.setattr(
+        "agent_rewind.listing_session.time", SimpleNamespace(monotonic=lambda: clock[0])
+    )
     work = SQLWork()
     with (
         pytest.raises(Fault, match="dependency_unavailable"),
@@ -258,3 +263,14 @@ def test_preclose_failure_discards_without_retaining_checkout(engine, monkeypatc
     with listing_connection(engine, SQLWork()) as c:
         assert c.connection.driver_connection is not captured[0]
         assert c.exec_driver_sql("SELECT 1").scalar_one() == 1
+
+
+def test_body_fault_preserves_identity_and_cleanup(engine):
+    fault = Fault("invalid_cursor")
+    with pytest.raises(Fault) as caught, listing_connection(engine, SQLWork()) as connection:
+        assert connection.exec_driver_sql("SELECT 1").scalar_one() == 1
+        raise fault
+    assert caught.value is fault
+    assert engine.pool.checkedout() == 0
+    with engine.connect() as connection:
+        assert connection.exec_driver_sql("PRAGMA query_only").scalar_one() == 0
