@@ -6,7 +6,7 @@ import pytest
 import test_migrations_postgres as migration_tests
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
-from test_admission_schema import OTHER, PROJECT, predecessor
+from test_admission_schema import OTHER, PROJECT, SECOND_JOB, predecessor
 from test_artifact_metadata import object_value
 from test_ledger_schema import (
     CALL,
@@ -16,6 +16,7 @@ from test_ledger_schema import (
     NOW,
     ORG_ACCOUNT,
     PROJECT_ACCOUNT,
+    START,
     account,
     call,
     triple,
@@ -59,10 +60,10 @@ def committed_call(ledger_pg):
 
 
 @contextmanager
-def commit_refused(engine):
+def commit_refused(engine, *, message=None):
     """Prove the entire mutation body ran before a deferred COMMIT refusal."""
     body_completed = False
-    with pytest.raises(IntegrityError) as caught, engine.begin() as connection:
+    with pytest.raises(IntegrityError, match=message) as caught, engine.begin() as connection:
         yield connection
         body_completed = True
     assert body_completed, "An earlier SQL failure masked the deferred constraint"
@@ -341,11 +342,17 @@ def evidence(connection, *, owner_id=CALL):
     return value.id
 
 
-def entries(connection, kind, amounts, artifact_id):
+def entries(
+    connection,
+    kind,
+    amounts,
+    artifact_id,
+    *,
+    account_ids=(ORG_ACCOUNT, PROJECT_ACCOUNT, JOB_ACCOUNT),
+):
+    assert len(account_ids) == 3
     assert len(amounts) <= 3
-    for identifier, amount in zip(
-        [ORG_ACCOUNT, PROJECT_ACCOUNT, JOB_ACCOUNT], amounts, strict=False
-    ):
+    for identifier, amount in zip(account_ids, amounts, strict=False):
         connection.execute(
             text(
                 "INSERT INTO budget_entries(call_id,account_id,entry_kind,amount_microusd,"
@@ -447,4 +454,128 @@ def test_opening_account_retains_its_actual_job_and_scope_without_any_call(ledge
                 {"id": JOB},
             ).scalar_one()
             == 1
+        )
+
+
+@pytest.mark.parametrize("foreign_member", [False, True])
+def test_complete_equal_cohort_requires_the_calls_exact_account_members(
+    committed_call, foreign_member
+):
+    engine = committed_call["owner"]
+    foreign_account = "1" * 32
+    with engine.begin() as connection:
+        account(connection, "job", id=foreign_account, scope_id=SECOND_JOB, job_id=SECOND_JOB)
+    with engine.connect() as connection:
+        assert (
+            connection.execute(
+                text("SELECT job_id FROM budget_accounts WHERE id=:id"), {"id": foreign_account}
+            ).scalar_one()
+            == SECOND_JOB
+        )
+    selected = [ORG_ACCOUNT, PROJECT_ACCOUNT, foreign_account if foreign_member else JOB_ACCOUNT]
+    transaction = (
+        commit_refused(engine, message="ledger entry cohort") if foreign_member else engine.begin()
+    )
+    with transaction as connection:
+        artifact_id = evidence(connection)
+        entries(connection, "settle", [1, 1, 1], artifact_id, account_ids=selected)
+        cohort = connection.execute(
+            text(
+                "SELECT count(*), count(DISTINCT account_id), min(amount_microusd), "
+                "max(amount_microusd) FROM budget_entries "
+                "WHERE call_id=:call AND entry_kind='settle'"
+            ),
+            {"call": CALL},
+        ).one()
+        assert tuple(cohort) == (3, 3, 1, 1)
+    with engine.connect() as connection:
+        assert connection.exec_driver_sql(
+            "SELECT count(*) FROM budget_entries WHERE entry_kind='settle'"
+        ).scalar_one() == (0 if foreign_member else 3)
+
+
+@pytest.mark.parametrize("scope", ["organization", "project", "job"])
+@pytest.mark.parametrize("position", ["at_start", "before_start", "at_end"])
+def test_call_time_is_checked_against_each_account_independently(ledger_pg, scope, position):
+    engine = ledger_pg["owner"]
+    after_now = "2026-10-21T00:00:00.000001Z"
+    intervals = {
+        "at_start": (NOW, after_now),
+        "before_start": (after_now, END),
+        "at_end": (START, NOW),
+    }
+    with engine.begin() as connection:
+        for kind in ["organization", "project", "job"]:
+            bounds = intervals[position] if kind == scope else (START, END)
+            account(connection, kind, period_start=bounds[0], period_end=bounds[1])
+    with engine.connect() as connection:
+        membership = dict(
+            connection.execute(
+                text(
+                    "SELECT scope, period_start <= CAST(:now AS timestamptz) AND "
+                    "CAST(:now AS timestamptz) < period_end FROM budget_accounts"
+                ),
+                {"now": NOW},
+            ).all()
+        )
+        assert membership == {
+            kind: kind != scope or position == "at_start"
+            for kind in ["organization", "project", "job"]
+        }
+    transaction = (
+        engine.begin()
+        if position == "at_start"
+        else commit_refused(engine, message="ledger account scope or period")
+    )
+    with transaction as connection:
+        call(connection)
+        assert connection.exec_driver_sql("SELECT count(*) FROM budget_entries").scalar_one() == 3
+    with engine.connect() as connection:
+        assert connection.exec_driver_sql("SELECT count(*) FROM provider_calls").scalar_one() == (
+            1 if position == "at_start" else 0
+        )
+
+
+@pytest.mark.parametrize("foreign_project", [False, True])
+def test_valid_foreign_project_account_cannot_replace_the_calls_project_account(
+    ledger_pg, foreign_project
+):
+    engine = ledger_pg["owner"]
+    foreign_account = "1" * 32
+    with engine.begin() as connection:
+        triple(connection)
+        account(connection, "project", id=foreign_account, scope_id=OTHER, project_id=OTHER)
+    with engine.connect() as connection:
+        assert (
+            connection.execute(
+                text("SELECT organization_id FROM budget_accounts WHERE id=:id"),
+                {"id": foreign_account},
+            ).scalar_one()
+            == connection.execute(
+                text("SELECT organization_id FROM budget_accounts WHERE id=:id"),
+                {"id": PROJECT_ACCOUNT},
+            ).scalar_one()
+        )
+    selected_project = foreign_account if foreign_project else PROJECT_ACCOUNT
+    selected = [ORG_ACCOUNT, selected_project, JOB_ACCOUNT]
+    transaction = (
+        commit_refused(engine, message="ledger account scope or period")
+        if foreign_project
+        else engine.begin()
+    )
+    with transaction as connection:
+        call(connection, reserves=0, project_account_id=selected_project)
+        entries(connection, "reserve", [10, 10, 10], None, account_ids=selected)
+        assert set(
+            connection.exec_driver_sql("SELECT account_id FROM budget_entries").scalars()
+        ) == set(selected)
+        assert (
+            connection.exec_driver_sql(
+                "SELECT count(*) FROM budget_entries WHERE amount_microusd=10"
+            ).scalar_one()
+            == 3
+        )
+    with engine.connect() as connection:
+        assert connection.exec_driver_sql("SELECT count(*) FROM provider_calls").scalar_one() == (
+            0 if foreign_project else 1
         )

@@ -1,5 +1,7 @@
 """Independent PostgreSQL catalog bounds, literal identity and invoker controls."""
 
+import json
+
 import pytest
 import test_migrations_postgres as migration_tests
 from sqlalchemy import event, text
@@ -223,3 +225,82 @@ def test_trigger_creation_requires_function_execute_privilege(ledger_pg):
             ).scalar_one()
             == 5
         )
+
+
+def test_aggregate_metadata_limit_is_independent_of_per_object_limits(ledger_pg, request):
+    engine = ledger_pg["owner"]
+    with engine.begin() as connection:
+        baseline = ledger_executables(connection)
+        assert (
+            baseline == installed_profile("postgresql", LEDGER)["$postgres"]["ledger_executables"]
+        )
+        definitions = connection.exec_driver_sql(
+            "SELECT t.tgname, c.relname, pg_get_triggerdef(t.oid) "
+            "FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid "
+            "JOIN pg_namespace n ON n.oid=c.relnamespace "
+            "WHERE n.nspname='public' AND NOT t.tgisinternal ORDER BY t.tgname"
+        ).all()
+        assert len(definitions) == 5
+        # A bounded literal in each WHEN is also represented in native pg_node_tree
+        # metadata. Measure both representations rather than assuming their ratio.
+        condition = " WHEN (length('" + "x" * 3000 + "') > 0) EXECUTE FUNCTION "
+        for name, relation, definition in definitions:
+            assert definition.count(" EXECUTE FUNCTION ") == 1
+            quote = connection.dialect.identifier_preparer.quote
+            connection.exec_driver_sql(f"DROP TRIGGER {quote(name)} ON public.{quote(relation)}")
+            connection.exec_driver_sql(definition.replace(" EXECUTE FUNCTION ", condition, 1))
+        function = connection.exec_driver_sql(
+            "SELECT count(*), max(octet_length(p.prosrc)), "
+            "max(octet_length(pg_get_functiondef(p.oid))), "
+            "max(octet_length(coalesce(p.proconfig::text,''))), "
+            "max(cardinality(p.proacl)) "
+            "FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace "
+            "WHERE n.nspname='public'"
+        ).one()
+        triggers = connection.exec_driver_sql(
+            "SELECT count(*), max(octet_length(pg_get_triggerdef(t.oid))) "
+            "FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid "
+            "JOIN pg_namespace n ON n.oid=c.relnamespace "
+            "WHERE n.nspname='public' AND NOT t.tgisinternal"
+        ).one()
+        aggregate = connection.exec_driver_sql(
+            "SELECT sum(bytes) FROM ("
+            "SELECT octet_length(pg_get_functiondef(p.oid)) + "
+            "octet_length(row_to_json(p)::text) AS bytes "
+            "FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace "
+            "WHERE n.nspname='public' UNION ALL "
+            "SELECT octet_length(pg_get_triggerdef(t.oid)) + "
+            "octet_length(row_to_json(t)::text) AS bytes "
+            "FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid "
+            "JOIN pg_namespace n ON n.oid=c.relnamespace "
+            "WHERE n.nspname='public' AND NOT t.tgisinternal) AS executable_metadata"
+        ).scalar_one()
+        sizes = {
+            "functions": function[0],
+            "function_source_bytes": function[1],
+            "function_definition_bytes": function[2],
+            "function_settings_bytes": function[3],
+            "function_acl_entries": function[4],
+            "triggers": triggers[0],
+            "max_trigger_definition_bytes": triggers[1],
+            "aggregate_metadata_bytes": aggregate,
+        }
+        request.node.user_properties.append(("ledger_native_metadata_sizes", json.dumps(sizes)))
+        assert function[0] == 1 and triggers[0] == 5, sizes
+        assert function[1] < 16384 and function[2] < 16384, sizes
+        assert function[3] < 4096 and function[4] == 1, sizes
+        assert triggers[1] < 4096, sizes
+        assert aggregate > 65536, sizes
+        statements = []
+
+        def observe(_conn, _cursor, statement, _parameters, _context, _many):
+            statements.append(statement)
+
+        event.listen(connection, "before_cursor_execute", observe)
+        try:
+            with pytest.raises(MigrationRefused, match="schema_incompatible"):
+                ledger_executables(connection)
+        finally:
+            event.remove(connection, "before_cursor_execute", observe)
+        assert any("row_to_json" in statement for statement in statements)
+        assert not any(" AS definition" in statement for statement in statements)
