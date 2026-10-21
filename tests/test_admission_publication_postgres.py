@@ -31,6 +31,7 @@ from sqlalchemy.pool import NullPool
 from test_admission_configuration import configuration
 from test_admission_repository import KEY, PRINCIPAL, PROJECT
 from test_admission_request import submission
+from test_artifact_metadata import FRESH
 from test_artifact_postgres import prepare_postgres
 from test_scoped_actions_postgres import wait_blocked
 
@@ -424,16 +425,43 @@ def poison_new_work(f, monkeypatch):
     monkeypatch.setattr(NativeRegistry, "resolve_new", forbidden)
 
 
-def test_postgres_new_work_real_guard_and_default_policy_refuse_before_side_effects(publication_pg):
-    f = publication_pg
-    before = snapshot(f)
-    # The restricted publication role intentionally cannot inspect alembic_version.
-    # Use the existing schema-capable owner for this real guard observation only.
-    real = AdmissionCoordinator(f.owner, RequestAuthority(f.owner))
+def test_postgres_new_work_real_guard_refuses_before_side_effects(pg, monkeypatch):
+    # The real migration-only profile requires the original adoption membership
+    # set. The separate publication fixture adds synthetic operator authority.
+    prepare_postgres(pg)
+    wait_for_database_drain(pg["control"], pg["owner"].url.database)
+    initialize_projection(pg["owner"])
+    wait_for_database_drain(pg["control"], pg["owner"].url.database)
+    initialize_admission(pg["owner"])
+    authority = RequestAuthority(pg["owner"])
+    principal = VerifiedPrincipal(FRESH["principal_grants"][0]["principal_id"])
+    context = authority.named(principal, PROJECT).context
+    real = AdmissionCoordinator(pg["owner"], authority)
     observed = real.schema_compatibility()
     assert (observed.status, observed.code) == ("incompatible", "migration_only")
+    state = SimpleNamespace(owner=pg["owner"])
+    before = snapshot(state)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Migration-only guard reached customer recovery or new-work preparation")
+
+    monkeypatch.setattr(real, "_locked_identities", forbidden)
+    monkeypatch.setattr(real, "_new_work", forbidden)
     with pytest.raises(AdmissionError, match="^schema_incompatible$"):
-        real.submit(f.principal, f.context, f.intent, KEY, f.origin)
+        real.submit(
+            principal,
+            context,
+            parse_submit(canonical(submission())),
+            KEY,
+            OriginCorrelation("6" * 32),
+        )
+    assert snapshot(state) == before
+    assert real.schema_compatibility() == observed
+
+
+def test_postgres_new_work_default_policy_refuses_before_side_effects(publication_pg):
+    f = publication_pg
+    before = snapshot(f)
     unavailable = AdmissionCoordinator(
         f.engine,
         f.authority,
