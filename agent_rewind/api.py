@@ -18,6 +18,7 @@ from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import RequestResponseEndpoint
 
+from .admission_coordinator import AdmissionCoordinator
 from .artifact_metadata import ArtifactError, configure_artifact_engine
 from .artifact_storage import LocalArtifactStorage
 from .auth import Auth
@@ -29,6 +30,8 @@ from .legacy_views import LegacyViews
 from .middleware import BodyLimit
 from .migrations.compatibility import CompatibilityResult
 from .models import BranchRequest, StrictModel, StudyRequest, TaskSpec, valid_path
+from .operation_http import OperationAPI, register_operation_routes
+from .operation_service import OperationService
 from .published_reader import PublishedRunReader
 from .readiness import Readiness
 from .request_authority import ProjectDecision, RequestAuthority
@@ -126,7 +129,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         finally:
             await readiness.close()
 
-    app = FastAPI(
+    app = OperationAPI(
         title="Agent Rewind",
         version="0.1.0",
         docs_url=None,
@@ -137,6 +140,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.db, app.state.auth = db, auth
     app.state.authority, app.state.actions = authority, actions
     app.state.reader, app.state.views = reader, views
+    app.state.operation_coordinator = AdmissionCoordinator(db.engine, authority)
+    result_storage = (
+        LocalArtifactStorage(settings.data_dir, auth.cipher, plaintext_limit=4096)
+        if settings.storage == "local"
+        else None
+    )
+    app.state.operation_service = OperationService(
+        db.engine,
+        authority,
+        artifact_loader=result_storage.read_verified if result_storage is not None else None,
+    )
+    register_operation_routes(app, auth=auth, authority=authority)
     app.state.run_listing = run_listing
     app.state.admission, app.state.readiness = admission, readiness
     app.add_middleware(BodyLimit)

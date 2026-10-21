@@ -65,10 +65,14 @@ class Fault(Exception):
         return self._code
 
 
-def error_response(scope: Scope, code: ErrorCode, *, body_limit: bool = False) -> JSONResponse:
+def error_response(
+    scope: Scope, code: ErrorCode, *, body_limit: bool = False, task_limit: bool = False
+) -> JSONResponse:
     status, message, retryable = RULES[code]
     if body_limit:
         status, message = 413, "Request body exceeds 9 MiB."
+    if task_limit:
+        status, message = 413, "Canonical materialized task exceeds 8 MiB."
     identifier = scope["state"]["request_id"]
     headers = {"X-Request-ID": identifier, "Cache-Control": "no-store"}
     if code == "unauthenticated":
