@@ -1,8 +1,8 @@
 # Operation HTTP execution plan
 
-2026-10-21 · Planning amendment for the existing AR-008-B scope, originally prepared against source 5d3ff3096d81f159a457870a1f4fa57590a06cc2. P1 is **Verified** at merge 03a8e074 after [accepted delivery](#accepted-p1-delivery--2026-10-21); aggregate AR-008-B and P2 are **In progress**. HTTP implementation, independent PostgreSQL tests and installed-package proof are complete as components. C reviews final composition, B reviews hosted delivery and the lead integrates; A performs read-only successor readiness review. HTTP delivery remains subject to matching hosted checks, accepted merge and protected-main candidate verification. AR-008-A/P3 and aggregate A remain Verified after [accepted PR/main/candidate evidence](ADMISSION_EXECUTION_PLAN.md#accepted-p3-delivery--2026-10-21). Default adapters/customer admission remain unavailable.
+2026-10-21 · Existing AR-008-B scope, originally planned against 5d3ff3096d81f159a457870a1f4fa57590a06cc2. P1, P2, aggregate AR-008-B and parent AR-008 are **Verified** for the bounded internal operation scope. [Accepted P1](#accepted-p1-delivery--2026-10-21) retains merge 03a8e074; [accepted P2](#accepted-p2-delivery--2026-10-21) records merge cefd222 and matching hosted/candidate proof. Default adapters/customer admission, worker integration and full M1/G1 acceptance remain gated.
 
-The design-only [P1 adapter entry checkpoint](OPERATION_ADAPTER_ENTRY.md) proposes concrete APIs, cumulative bounds and the initial unavailable-failure support table. Tracking is aggregate [#93](https://github.com/spei04/agent-rewind/issues/93), P1 [#94](https://github.com/spei04/agent-rewind/issues/94), P2 [#95](https://github.com/spei04/agent-rewind/issues/95); P1 is Verified/closed; aggregate and P2 are In progress.
+The [P1 adapter entry checkpoint](OPERATION_ADAPTER_ENTRY.md) freezes APIs, bounds and the initial unavailable-failure support table. Aggregate [#93](https://github.com/spei04/agent-rewind/issues/93), P1 [#94](https://github.com/spei04/agent-rewind/issues/94), P2 [#95](https://github.com/spei04/agent-rewind/issues/95) and parent [#8](https://github.com/spei04/agent-rewind/issues/8) are Verified/closed; the lead read back the P2/aggregate/parent transition on 2026-10-21.
 
 ## Entry and delivery boundaries
 
@@ -17,7 +17,7 @@ Total **6 [6–10] BE days, medium-low confidence**. The original adapter/HTTP r
 
 At the original operation HTTP planning checkpoint: 151 aggregate tasks, 157 delivery PRs, 52 parents, 544 outer edges, 27 gates and 20 contracts; 457 base days, 772.1 summed upper days, alternative 571.25 days with a 25% allowance, M1 58.5 and BE 90.5. The effort-only critical path is 169.5 days. Relative to the published baseline this is +1 base, +1 upper and +1 PR, with no outer edge/status change. These are engineering estimates, not elapsed-time or spending commitments.
 
-The current ownership reforecast retains 151 tasks, 158 delivery PRs, 544 outer
+At the accepted P1 ownership-reforecast checkpoint, the plan retained 151 tasks, 158 delivery PRs, 544 outer
 edges, 52 parents, 27 gates and 20 contracts: **461 base / 779.1 upper / 576.25
 alternative allowance / 173.5 effort-path days**, with M1 62.5 and BE 94.5.
 Parent AR-008 totals 13 days. Earlier checkpoint totals above remain history.
@@ -25,7 +25,7 @@ B/lead accepted ownership entry **5bedede** and C independently confirmed the
 acquisition map. The complete caller, factory and service implementation is now
 accepted at **03a8e074**, including full hosted and candidate proof below.
 P2 HTTP entry and implementation have separate review and delivery gates.
-Aggregate #93, parent #8 and all later customer/production gates remain open.
+P2 later passed its separate delivery gates; aggregate #93 and parent #8 are now closed. The current owner-approved ledger amendment records 159 PRs, 464 base / 784.6 upper / 580 alternative / 176.5 effort-path days, M1 65.5 and BE 97.5. Customer/production gates remain open.
 
 ## Frozen responses and actual producer seams
 
@@ -207,3 +207,18 @@ C separately demonstrated that three process-global classifier LRUs in pinned Fa
 The weak-reference regression failed before the cleanup and passed afterward. The exact 94-case selection passed on Python 3.11.15 in 66.05 seconds and Python 3.12.3 in 62.53 seconds, with zero skips and one existing warning each. It includes 80 HTTP, five independent contract, three new cleanup, two formerly failing SQLite and four deliberate work-exhaustion/cleanup controls. Ruff, formatting, diff and AST-preservation checks passed. PostgreSQL was not rerun locally for its single fixture import; the corrected hosted matrix must execute it. The private correction index SHA-256 is 04bd29a6dca7aa08ba678c6d025c8fb3e93358970bbdd74fa3176d635ad74948; the preceding diagnostic index is e62e617679d8fb95d5060faafc55d1eaf362cd8d0c7c08aa766ac7314b37ec02.
 
 This fixes demonstrated fixture retention without establishing the original hosted failures' causes or eliminating all timing sensitivity. The private candidate verifier now binds explicit PR/main attempt numbers, exact complete job sets and the retained failed attempt, with independent positive/negative review. A corrected-source matrix, protected-main checks and verified candidate remain required before P2 or aggregate acceptance. No unchanged-source retry was dispatched.
+
+## Accepted P2 delivery — 2026-10-21
+
+[PR #106](https://github.com/spei04/agent-rewind/pull/106) delivered reviewed source `065df8c89da384d6e502cf0c15bf174e380c53c7` as protected merge `cefd222230c800eb2e90c49a3b3c411b394d0393`, with identical source trees. Independent source, test, build and hosted-evidence reviews passed. [PR run 39683408934](https://github.com/spei04/agent-rewind/actions/runs/39683408934) and [main run 39686498691](https://github.com/spei04/agent-rewind/actions/runs/39686498691) both passed on attempt 1.
+
+| Exact attempt | Python 3.11 | Python 3.12 |
+| --- | --- | --- |
+| PR | 3893 passed, 14 skipped, one existing warning; 1245.66 s | 3904 passed, 3 skipped, one existing warning; 1193.93 s |
+| Protected main | 3893 passed, 14 skipped, one existing warning; 1510.38 s | 3904 passed, 3 skipped, one existing warning; 1571.81 s |
+
+Actual PostgreSQL cases and flags, all three separate gVisor cases, installed packaging, security and strict gates passed. The hosted Docker build and no-network installed CLI passed; the separate final-image trust check verified the exact retained OS bundle, OpenSSL hashed directory, base pip bundle and runtime certifi identities. Component, local and synthetic probes alone were not used as final-image acceptance.
+
+The lead verified candidate **12387716715**, **646987 bytes**, archive SHA256 `60aca9665c9582c405db6f1b88a5f4820ac53e6ca351b93b44fd743c84690048`, exactly four files and all **114** expected Git/wheel/sdist runtime members. The accepted verifier binds source/merge/tree, exact attempts and jobs, archive/manifests, toolchain/build inputs and preserved failed-attempt history. The private release record is `reviewed-delivery-20261021-pr106-cefd222.json`, SHA256 `96ba3b331513625b45ffcbe5fe76679847e2b468932fa23f3985991138077627`; evidence remains outside disposable checkouts.
+
+P2 #95, aggregate #93 and parent #8 are Verified/closed after lead read-back; P1 #94 and its 03a8e074 acceptance remain unchanged. Earlier failed, superseded and security-blocked attempts remain dated history, including the ASCII configuration and host-contaminated test-fixture failures. This accepts only the three frozen HTTP routes and their internal adapters. It does not activate default adapters, customer admission, ledger reservations, worker dispatch, G1 or production. No paid resources, provider calls or partner data were introduced by this reconciliation.

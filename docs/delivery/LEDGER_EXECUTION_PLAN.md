@@ -1,8 +1,8 @@
 # Ledger execution plan
 
-2026-10-21 · Readiness review against HTTP source `a304d52b52667b882c70e922b73d7070d714efb0`.
+2026-10-21 · Approved ledger execution plan. The original readiness review used HTTP source `a304d52b52667b882c70e922b73d7070d714efb0`; the current HTTP prerequisite is accepted at protected merge `cefd222230c800eb2e90c49a3b3c411b394d0393`.
 
-**State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md) on 2026-10-21, including the finite execution-window interpretation and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. This planning amendment reconciles the approved task ledger; AR-010-A and both packages remain Not started with null acceptance. P1 entry policy is independently accepted at 51af77dc; implementation still waits for AR-008-B accepted protected-main delivery. P2's exact reservation/fence entry remains a separate review after accepted P1. No runtime, public/native-v1 contract, compatibility profile or external gate changes follow.
+**State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry policy is independently accepted at 51af77dc and HTTP delivery is now accepted at cefd222. AR-010-A/P1/P2 remain Not started with null acceptance in this ordered predecessor-acceptance checkpoint; an explicit runtime handoff follows separately. P2 waits for accepted P1 and its own reservation/fence entry review. No public/native-v1 contract, ready-profile or external gate is changed.
 
 ## Problem and intended result
 
@@ -26,13 +26,13 @@ Consume the [frozen C04 contract](M1_CONTRACT_FREEZE.md#relational-closure-fence
 | SQL execution support | Exact, revision-specific PostgreSQL trigger/function inventory and literal dialect profiles | C04 requires deferred relational checks. Earlier profiles must continue rejecting extra executable objects. Never allow arbitrary functions/triggers to make a catalog pass. |
 | Live activation | Keep migration-only compatibility and reserve-only internal services | AR-010-B owns actual worker/permit/cancellation integration. This plan enables no provider calls or customer readiness. |
 
-The owner settled the authorized-window meaning on 2026-10-21; no repeated semantic approval is required. It is not actual first start through eventual completion. Changing to that different lifetime model would require an explicit contract amendment; it is outside this plan. Exact trusted bounds, authority, storage and transition behavior still require entry review.
+The owner settled the authorized-window meaning on 2026-10-21; no repeated semantic approval is required. It is not actual first start through eventual completion. Changing to that different lifetime model would require an explicit contract amendment; it is outside this plan. P1 trusted bounds, authority, storage and transition policy was independently accepted at 51af77dc; exact implementation/catalog/recovery evidence is still required. P2 retains its own later reservation/fence entry review.
 
 The operator manifest must have a reviewed exact schema, canonical digest, authority model, size/cardinality bounds and replay/conflict semantics before implementation. Entry review also freezes schema and function-body/security/search-path/privilege/profile policy and the preservation/restore matrix. Implementation then produces exact DDL and literal dialect catalog captures; independent comparison against the reviewed policy is a delivery-acceptance gate, not a requirement to have implemented captures before code. Job-account limits must not expand the unchanged job budget. Historical and newly created jobs need explicit producers; absence of one is an unavailable path, not a fallback to mutable settings.
 
 ## Approved two-package delivery
 
-The two approved delivery packages retain the stable AR-010-A aggregate and its sole outer prerequisite AR-008-B. Both remain Not started; P2 waits for accepted merged P1 and all inherited prerequisites. AR-010-B consumes the whole accepted aggregate, not early schema availability.
+The two approved packages retain AR-010-A and its sole outer prerequisite AR-008-B, now Verified. Both remain Not started in this predecessor-acceptance checkpoint. P1 entry is accepted; P2 waits for accepted merged P1 and its own exact entry. AR-010-B consumes the whole accepted aggregate, not early schema availability.
 
 ### P1 — Ledger schema, trusted provisioning and opening backfill
 
@@ -81,12 +81,12 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- A: reconcile the approved plan, complete package cards, current forecasts and preservation proof in the primary checkout.
-- C: specify the exact schema/provisioning entry in the secondary checkout; no implementation is assigned.
-- B: independent planning/entry review and the separate HTTP hosted-delivery audit.
-- Lead: integrate reviewed planning and maintain actual predecessor/delivery and external gates; GitHub tracking is updated separately.
+- Planning/verification: reconcile accepted HTTP delivery and the subsequent explicit ledger handoff; independent test authoring waits for released ownership and stable runtime interfaces.
+- Platform/security: accepted P1 entry is ready for the explicit runtime handoff; no implementation assignment is recorded in this first predecessor-acceptance checkpoint.
+- Delivery reviewer: HTTP audit is accepted; independent ledger implementation/delivery review remains required.
+- Lead: accepted HTTP candidate and issue closures, owns the explicit next assignment, integration and public issue read-back.
 
-The first-fortnight historical schedules and opening conditions remain unchanged. No ledger implementation receives a calendar allocation before accepted HTTP and exact entry review. Three contributor slots are not six staffed roles, and no staffing or elapsed-time conversion follows from the effort totals.
+The historical first-fortnight schedules and opening conditions remain unchanged. Accepted HTTP and exact P1 entry satisfy the implementation entry prerequisites; the explicit handoff remains separately recorded. Three contributor slots do not imply six staffed roles or an elapsed-time conversion.
 
 Before assigning implementation, verify accepted AR-008-B delivery; reviewed exact provisioning manifest, authority, cardinality/byte bounds and replay/conflict semantics; schema/profile/deferred SQL and lock-order/restore decisions; existing consumer interfaces and finite outcomes; synchronized planning records and independent entry acceptance. Worker dispatch remains AR-010-B; authentic settlement/opening/transfer producers remain AR-023-A/C. No public API, runtime migration, provider request, paid resource or task-status advance is made by this amendment.
 
@@ -96,6 +96,10 @@ A and the lead accepted the [exact schema/provisioning entry](LEDGER_SCHEMA_ENTR
 
 Return values, cursor/native types and fixed refusals are explicit. Non-owning inspection returns a persisted receipt without claiming commit/cleanup, while initialize_ledger returns complete only after its own acknowledged/replayed result and confirmed cleanup. Initial and later-provision uncertainty have separate bounded absence proofs, and each call requires its own same-project scope at commit. All actual product constraints/catalogs/max-state bounds/outcome/restore evidence remain implementation gates. P1/P2 and aggregate remain Not started/null acceptance pending accepted HTTP delivery; no new approval, spending or customer-data authority is inferred.
 
-## Current predecessor security gate — 2026-10-21
+## Earlier predecessor security gate — 2026-10-21
 
 The corrected HTTP PR matrix passed at a439, but [GHSA-hq85-5cpj-mr62](https://github.com/astral-sh/uv/security/advisories/GHSA-hq85-5cpj-mr62) requires updating the pinned uv build tool and verifying its official checksum/provenance. Ledger implementation still waits for reviewed patched HTTP delivery, matching protected-main checks and candidate acceptance. This does not reopen the approved finite-window decision or the accepted P1 entry policy.
+
+## Accepted HTTP prerequisite — 2026-10-21
+
+HTTP P2 is Verified at cefd222 after exact PR/main attempts 39683408934/39686498691 and verified candidate 12387716715; see [accepted evidence](OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). The earlier security gate and failed attempts above remain history. P1 entry 51af77dc needs no repeated approval. This ordered checkpoint leaves ledger packages Not started/null acceptance pending the explicit assignment; actual constraints, privileges, maximum bounds and recovery remain product evidence to build.
