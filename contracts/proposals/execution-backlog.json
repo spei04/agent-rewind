@@ -1357,7 +1357,7 @@
       "security_reliability": "Keep migration-only schema guard and customer/second-project activation gates; authorize before expensive I/O and reauthorize before return/commit; project-before-job lock hierarchy; token role intersects current membership and never grants key administration; no client-selected legacy scope, raw artifact fallback or raw enqueue",
       "out_of_scope": "No new v1/debugger/study/export routes, session infrastructure or IdP provisioning, historical artifact adoption, customer-ready schema profile, live publication, or actual work admission. The required C04 v2 session format upgrade is included; durable admission/replay/frozen config and worker integration remain with AR-008-A/B and AR-010-B",
       "status": "In progress",
-      "definition_of_done": "P1 and P2 each have independent review, matching checks and a recorded accepted merge. Aggregate completion additionally requires the full P2 existing-route/transaction matrix with A security/auth/read review, B transaction review and lead integration. Only partial coverage of CT-M1-007/009 is attributed here; CT-M1-008 and future-route gates remain planned. No customer activation or full M1 acceptance follows.",
+      "definition_of_done": "P1 and P2 each have independent review, matching checks and a recorded accepted merge. Aggregate completion additionally requires the full P2 existing-route/transaction matrix. A independently reviews identity/read/security and B's mutation implementation; B independently reviews C's transaction consumption; C checks action-interface integration; lead integrates. Only partial coverage of CT-M1-007/009 is attributed here; CT-M1-008 and future-route gates remain planned. No customer activation or full M1 acceptance follows.",
       "effort_range_days": [
         6.0,
         10.0
@@ -1429,7 +1429,7 @@
           "acceptance": "All existing routes use fresh scoped authority and verified evidence with no raw-hash/raw-enqueue fallback; current revoked users can use identity-only me/logout safely; cancel/key effects and restricted audit are atomic; explicit role gates UI actions; unavailable admission refuses before readiness probes/storage/enqueue; the full current-route matrix passes before aggregate completion",
           "tests": "Exhaustive route/alias 401/403/404 and legacy-shape matrix; old-cookie refusal and v2 issuance, CSRF/exact Origin, me/logout revoked/default/DB-error cases; real PostgreSQL revocation-before-return, mutation races, terminal cancel and rollback at each stage; key/default/secret one-time handling; shared-object cross-project probes; zero readiness/storage/enqueue/provider calls with unavailable adapter; real migration guard refusal",
           "security_reliability": "P2 starts only after accepted merged P1; fresh authorization before I/O and effect/return; account/project/job lock discipline; no service-key escalation or cookie-role fallback; all customer/live/external gates unchanged",
-          "definition_of_done": "Independent A security/auth/read and B transaction review, matching hosted full current-route/PG matrix and accepted merge recorded. Lead may then verify aggregate AR-007-C for preparatory scope only; CT-M1-007/009 remain partial overall and CT-M1-008 remains planned until later actual producers pass",
+          "definition_of_done": "A independently reviews identity/read/security and B's mutation implementation; B independently reviews C's transaction consumption; C checks action-interface integration; lead integrates. Matching hosted full current-route/PG matrix and accepted merge must be recorded. Lead may then verify aggregate AR-007-C for preparatory scope only; CT-M1-007/009 remain partial overall and CT-M1-008 remains planned until later actual producers pass.",
           "tracking_issue": "https://github.com/spei04/agent-rewind/issues/77"
         }
       ]
@@ -7306,7 +7306,7 @@
     ],
     "active_child_issues": {
       "AR-007-C": 75,
-      "AR-007-C/P1": 76
+      "AR-007-C/P2": 77
     },
     "closed_implementation_issues": [
       26,
@@ -7318,11 +7318,10 @@
       52,
       53,
       69,
-      71
+      71,
+      76
     ],
-    "queued_child_issues": {
-      "AR-007-C/P2": 77
-    },
+    "queued_child_issues": {},
     "design_issues": {
       "RA-01-A": 47,
       "RA-01-B": 48
@@ -7330,7 +7329,7 @@
     "owner_decision_issues": {
       "RESEARCHSCOPE0": 51
     },
-    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50. Issue #51 approved by owner on 2026-10-20 and closed after accepted reconciliation; immutable overlay records exact scope. Issues #52/#53/#69 are closed for scoped accepted deliveries; #71 is closed after accepted preparatory AR-006-A in PR #72. Parent #9 is closed for its preparatory children; live integration/customer gates remain open. Issue #75 is the In progress aggregate AR-007-C tracker after accepted planning 839f3a7. P1 #76 is assigned to C; P2 #77 remains Not started until accepted merged P1."
+    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50. Issue #51 approved by owner on 2026-10-20 and closed after accepted reconciliation; immutable overlay records exact scope. Issues #52/#53/#69 are closed for scoped accepted deliveries; #71 is closed after accepted preparatory AR-006-A in PR #72. Parent #9 is closed for its preparatory children; live integration/customer gates remain open. Issue #75 is the In progress aggregate AR-007-C tracker after accepted planning 839f3a7. P1 #76 is closed after accepted PR #78/main candidate at merge 51a2b1f. P2 #77 is In progress with C route/auth/read/UI and B mutation ownership, independent A review and lead integration."
   },
   "execution_capacity": {
     "lead": "Project lead",
@@ -7640,6 +7639,6 @@
     "unscheduled_approved_queue": [
       "AR-011-C"
     ],
-    "unscheduled_queue_policy": "AR-011-C has Verified direct inputs and remains unassigned, with no calendar commitment. AR-007-C/P1 is assigned to C after accepted planning 839f3a7, with A identity/read and B transaction review; P2 waits for accepted merged P1. Reuse the same three contributor slots. Historical daily tables are not current allocations."
+    "unscheduled_queue_policy": "AR-007-C/P1 #76 is Verified at accepted merge 51a2b1f with matching main candidate evidence. P2 #77 is In progress after that prerequisite: C owns routes/Auth/verified views/UI, B scoped atomic mutations, A independent security and mutation review, lead integration. AR-011-C remains ready but unassigned; AR-006-C waits for AR-010-B. Historical daily allocations do not schedule these current assignments or authorize external gates."
   }
 }

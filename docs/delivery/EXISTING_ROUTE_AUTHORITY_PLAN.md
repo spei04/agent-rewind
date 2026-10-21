@@ -9,8 +9,10 @@ verified publication reader are Verified. C04 and C05 are required contracts.
 The new direct AR-009-B edge records an actual consumed interface. No reverse
 dependency on future route or admission producers is introduced.
 
-C owns implementation, A reviews authentication/security/read behavior,
-B reviews transactions, and the lead integrates. [Issue #75](https://github.com/spei04/agent-rewind/issues/75)
+For P2, C owns route/auth/read/UI integration and B owns atomic scoped mutations.
+A independently reviews identity/read/security and B's mutation implementation;
+B independently reviews C's transaction consumption; C checks action-interface
+integration, and the lead integrates. [Issue #75](https://github.com/spei04/agent-rewind/issues/75)
 tracks aggregate AR-007-C. The user requested smaller PRs; use two independently
 reviewable delivery packages with their own cards in the execution backlog:
 
