@@ -129,7 +129,6 @@ Actual PostgreSQL execution, backup/restore, installed-package evidence and
 final independent repository/P2 acceptance remain pending. P3 and customer
 admission remain unavailable.
 
-
 The package allowlist includes the two repository modules, two admission migration
 modules, revision and exact reviewed SQLite literal. Installed smoke advances an
 explicit empty ar5 installation to ar6, checks exact reentry and missing/scoped
@@ -137,3 +136,34 @@ identity reads, and proves no operation/alias rows were created. It retains the
 final migration-only refusal. The exact smoke helper plus delivery helper cases
 pass 45 local tests; two actual-PG capture/initializer cases are explicitly skipped
 locally. This source-helper result is not isolated wheel/sdist execution evidence.
+
+## PostgreSQL migration and restore test boundary
+
+The separate `test_admission_migration_postgres.py` suite covers incomplete
+projection refusal, completed source/scope/cohort drift, rollback after DDL and
+fingerprint update, runtime-role and effective-autocommit refusal, and the
+17-table limit's eighteenth-table sentinel. It uses the existing disposable
+PostgreSQL fixture and observes setup connections draining before the unchanged
+single-attempt migration guard. These 11 cases are locally skipped explicitly;
+they require the independently approved PostgreSQL literal and hosted execution.
+Only the mandatory catalog-capture test deliberately fails while that literal
+is absent; dependent execution tests skip pending review.
+
+The restore test preserves each of the original 14 row/hash identities and all
+18 ciphertext bytes separately from a complete SQL snapshot containing a new
+synthetic job, operation, alias, three object descriptors and scoped references.
+It preserves the original 245000 reserved units, run heads, projection rows,
+progress and counters. The new job uses the already-adopted maintainer and leaves
+the frozen grant inventory and all original job actors unchanged. After restore,
+old v1 NULL configs remain unavailable to the common config checker, the exact
+new identities/config association resolve, an ar5-only reader refuses ar6, and
+initializer reentry remains migration-only. The new object metadata is a SQL
+association fixture, not verified upload or available-byte evidence. `pg_dump`
+does not back up objects, encryption keys or roles; the historical encrypted
+objects are copied and verified separately.
+
+The composed local admission-storage selection passed 117 cases with 33 explicit
+PostgreSQL skips. A small SQLite probe also exercised the restore fixture's new
+identity setup, exact row snapshot and initializer reentry; it did not execute
+PostgreSQL or backup/restore. Actual PostgreSQL schema, contention, restore and
+installed-distribution acceptance remain hosted gates, not these local results.
