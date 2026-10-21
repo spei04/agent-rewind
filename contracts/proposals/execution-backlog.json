@@ -1356,7 +1356,7 @@
       "tests": "Existing-route/alias matrix; v2 issuer collision and old-cookie refusal; missing/ambiguous default, named/cross-project and shared-object probes; CSRF/exact Origin; me/logout after revocation and DB failure; real PostgreSQL revocation-before-return and mutation races, cancel/key rollback and terminal cancellation; unavailable adapter fails before readiness probes, storage, enqueue and all writes/provider access; actual schema guard still denies customer routes",
       "security_reliability": "Keep migration-only schema guard and customer/second-project activation gates; authorize before expensive I/O and reauthorize before return/commit; project-before-job lock hierarchy; token role intersects current membership and never grants key administration; no client-selected legacy scope, raw artifact fallback or raw enqueue",
       "out_of_scope": "No new v1/debugger/study/export routes, session infrastructure or IdP provisioning, historical artifact adoption, customer-ready schema profile, live publication, or actual work admission. The required C04 v2 session format upgrade is included; durable admission/replay/frozen config and worker integration remain with AR-008-A/B and AR-010-B",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "P1 and P2 each have independent review, matching checks and a recorded accepted merge. Aggregate completion additionally requires the full P2 existing-route/transaction matrix with A security/auth/read review, B transaction review and lead integration. Only partial coverage of CT-M1-007/009 is attributed here; CT-M1-008 and future-route gates remain planned. No customer activation or full M1 acceptance follows.",
       "effort_range_days": [
         6.0,
@@ -1367,7 +1367,7 @@
         "QE"
       ],
       "pull_request_boundary": "Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days, then AR-007-C/P2 full existing-route integration 4 [4–7] days after accepted merged P1. P1 does not wire Auth/session issuance, routes, UI, mutations or admission. Aggregate AR-007-C remains unverified until P2 and the full existing-route matrix are accepted.",
-      "contracts_status": "C04/C05 and AR-007-B/011-B/009-B are reviewed and Verified prerequisites. This planning reconciliation is pending exact-source review; implementation is Not started. CT-M1-007/009 remain planned overall, with only the existing-route subset assigned here; CT-M1-008 awaits AR-008-A/B and AR-012-B. Later consumers retain the full requirements.",
+      "contracts_status": "C04/C05 and AR-007-B/011-B/009-B are reviewed and Verified prerequisites. A and lead accepted planning correction 839f3a7; P1 implementation is assigned to C in issue #76, with A identity/read and B transaction review. P2 in issue #77 remains Not started until accepted merged P1. CT-M1-007/009 remain planned overall and CT-M1-008 awaits actual durable replay producers.",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/75",
       "delivery_packages": [
         {
@@ -1377,7 +1377,7 @@
             "C04",
             "C05"
           ],
-          "status": "Not started",
+          "status": "In progress",
           "accepted_merge_commit": null,
           "review_evidence": null,
           "id": "AR-007-C/P1",
@@ -1399,7 +1399,8 @@
           "acceptance": "Helpers reject invalid/v1 session encodings without issuing cookies; default/named authority preserves inaccessible404 versus accessible-action403; reader rejects zero/ambiguous roots, foreign/nested refs and revoked authority before protected return; RunPublisher.read retains supported output/failure semantics and uses the shared reader; every existing auth/route/UI/mutation behavior remains unchanged",
           "tests": "Codec issuer collision/strict shape/version and safe-error tests; default/named role and service-key intersections; shared-object and unique-root denial; compound recheck after I/O and real PostgreSQL revocation races; existing publication-reader regressions prove delegation preserves semantics; package smoke includes reusable modules",
           "security_reliability": "No journal needed for reads and no connection held across storage I/O; bound graph/ref operations; final compound recheck before return; preserve migration-only guard and unavailable live writer",
-          "definition_of_done": "Independent A identity/read and B transaction review accepted; matching hosted checks and behavior-preservation regressions pass; record accepted merged source and review evidence before P2 starts. This closes P1 only, not aggregate AR-007-C or any route-activation gate"
+          "definition_of_done": "Independent A identity/read and B transaction review accepted; matching hosted checks and behavior-preservation regressions pass; record accepted merged source and review evidence before P2 starts. This closes P1 only, not aggregate AR-007-C or any route-activation gate",
+          "tracking_issue": "https://github.com/spei04/agent-rewind/issues/76"
         },
         {
           "role": "BE",
@@ -1428,7 +1429,8 @@
           "acceptance": "All existing routes use fresh scoped authority and verified evidence with no raw-hash/raw-enqueue fallback; current revoked users can use identity-only me/logout safely; cancel/key effects and restricted audit are atomic; explicit role gates UI actions; unavailable admission refuses before readiness probes/storage/enqueue; the full current-route matrix passes before aggregate completion",
           "tests": "Exhaustive route/alias 401/403/404 and legacy-shape matrix; old-cookie refusal and v2 issuance, CSRF/exact Origin, me/logout revoked/default/DB-error cases; real PostgreSQL revocation-before-return, mutation races, terminal cancel and rollback at each stage; key/default/secret one-time handling; shared-object cross-project probes; zero readiness/storage/enqueue/provider calls with unavailable adapter; real migration guard refusal",
           "security_reliability": "P2 starts only after accepted merged P1; fresh authorization before I/O and effect/return; account/project/job lock discipline; no service-key escalation or cookie-role fallback; all customer/live/external gates unchanged",
-          "definition_of_done": "Independent A security/auth/read and B transaction review, matching hosted full current-route/PG matrix and accepted merge recorded. Lead may then verify aggregate AR-007-C for preparatory scope only; CT-M1-007/009 remain partial overall and CT-M1-008 remains planned until later actual producers pass"
+          "definition_of_done": "Independent A security/auth/read and B transaction review, matching hosted full current-route/PG matrix and accepted merge recorded. Lead may then verify aggregate AR-007-C for preparatory scope only; CT-M1-007/009 remain partial overall and CT-M1-008 remains planned until later actual producers pass",
+          "tracking_issue": "https://github.com/spei04/agent-rewind/issues/77"
         }
       ]
     },
@@ -7633,9 +7635,8 @@
     "conditions": "B independently reviews both interfaces; A/C cross-review without acting as separate human approval. Review acceptance and hosted checks must actually pass.",
     "contingency": "Upper ranges may need two extra half-day allocations per task in days6–7. Days8–10 retain integration/reforecast capacity. Do not start any dependent on a planned date alone.",
     "unscheduled_approved_queue": [
-      "AR-007-C",
       "AR-011-C"
     ],
-    "unscheduled_queue_policy": "Both tasks have Verified direct inputs and no calendar commitment. AR-007-C has B planning/C design/A review allocation only; runtime remains Not started pending accepted card/design. Reuse the same three contributor slots for C implementation, A security/auth/read review and B transaction review after that handoff. AR-011-C remains unassigned; historical daily tables are not current allocations."
+    "unscheduled_queue_policy": "AR-011-C has Verified direct inputs and remains unassigned, with no calendar commitment. AR-007-C/P1 is assigned to C after accepted planning 839f3a7, with A identity/read and B transaction review; P2 waits for accepted merged P1. Reuse the same three contributor slots. Historical daily tables are not current allocations."
   }
 }

@@ -1,10 +1,10 @@
 # Existing-route authority — AR-007-C
 
 Planning/design reconciliation, 2026-10-20. Source inspected:
-3c60f1a4b5e6d16504b2209dadd4b735d57037ce. Implementation is **Not started**;
+3c60f1a4b5e6d16504b2209dadd4b735d57037ce. P1 implementation is **In progress** after A/lead acceptance of planning correction 839f3a7; P2 remains **Not started** until accepted merged P1;
 this record is not route acceptance or permission to enable customer admission.
-The lead and A accepted the concrete design; the exact planning composition
-still requires review.
+The lead and A accepted the exact planning composition. Runtime review and
+hosted acceptance remain pending.
 
 ## Entry, ownership and estimate
 
@@ -162,3 +162,5 @@ shapes and documented future obligations are required. The lead records
 Verified for the aggregate only after accepted merged P1 and P2 and the complete current-route matrix. M1/customer activation,
 live publication, production readiness and external funding/data gates remain
 open.
+
+Current assignment: C implements [P1 #76](https://github.com/spei04/agent-rewind/issues/76), A reviews identity/read security, B reviews authority/transactions, and the lead integrates. [P2 #77](https://github.com/spei04/agent-rewind/issues/77) remains dependency-gated. Planning validation is not runtime acceptance.

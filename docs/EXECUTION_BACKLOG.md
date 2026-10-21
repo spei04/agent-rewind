@@ -123,7 +123,7 @@ The table preserves the conditional foundation scenario from the issue #51 decis
 | Delivery Day 9 | Review, contingency and integration; no new base allocation | Reserve for measured rework and hosted verification; reforecast the ready M1 queue only after actual acceptance. |
 | Delivery Day 10 | Review, contingency and integration; no new base allocation | Reserve for measured rework and hosted verification; reforecast the ready M1 queue only after actual acceptance. |
 
-The historical 2–3 day scenario ranges left days 6–7 for contingency; those rows do not allocate the current wave. AR-009-B and AR-006-A are Verified for preparatory scope in PR #70/#72; issue #71 is closed. Current allocation is B planning reconciliation, C design and A independent boundary review for AR-007-C. After accepted card/design, C implements the coherent preparatory PR with A security/auth/read and B transaction review. Its P1 foundation 2 [2–3] and P2 integration 4 [4–7] day packages total 6 [6–10] days and are reforecast at the first immutable identity/reader handoff, not converted into a new fortnight or launch calendar. AR-011-C remains ready/unassigned; AR-006-C waits for AR-010-B. Research implementation stays unscheduled behind original runtime prerequisites; M3 remains 81 and M5 50 base days with external execution gates.
+The historical 2–3 day scenario ranges left days 6–7 for contingency; those rows do not allocate the current wave. AR-009-B and AR-006-A are Verified for preparatory scope in PR #70/#72; issue #71 is closed. Current allocation is C implementation of AR-007-C/P1 in #76 after A/lead acceptance of 839f3a7, with A identity/security/read and B authority/transaction review. P2 in #77 remains Not started until accepted merged P1. Its P1 foundation 2 [2–3] and P2 integration 4 [4–7] day packages total 6 [6–10] days and are reforecast at the first immutable identity/reader handoff, not converted into a new fortnight or launch calendar. AR-011-C remains ready/unassigned; AR-006-C waits for AR-010-B. Research implementation stays unscheduled behind original runtime prerequisites; M3 remains 81 and M5 50 base days with external execution gates.
 
 ### Historical RA-01 conditional design schedule — 2026-10-20
 
@@ -665,7 +665,7 @@ M1 / P0 · 4 PRs across 3 aggregate tasks · 9.5 engineering days · In progress
 - **Effort / confidence:** 6 engineering days; planning range 6–10; medium-low confidence. Reforecast after the first immutable identity/reader handoff at about 1.5–2 engineering days.
 - **Responsible role:** BE; C implements after accepted planning/design, A reviews security/auth/read behavior, B reviews transactions, lead integrates; required reviewers: TL, QE.
 - **Definition of done:** P1 and P2 each have independent review, matching checks and a recorded accepted merge. Aggregate completion additionally requires the full P2 existing-route/transaction matrix with A security/auth/read review, B transaction review and lead integration. Only partial coverage of CT-M1-007/009 is attributed here; CT-M1-008 and future-route gates remain planned. No customer activation or full M1 acceptance follows.
-- **Progress:** Not started; [aggregate tracker #75](https://github.com/spei04/agent-rewind/issues/75); B owns planning reconciliation, C design and A independent review. Runtime starts only after this card/design is accepted; no current-route implementation or full CT-M1-007/008/009 acceptance.
+- **Progress:** In progress; [aggregate tracker #75](https://github.com/spei04/agent-rewind/issues/75). A and lead accepted planning correction 839f3a7; C implements P1, A reviews identity/read behavior, B reviews authority/transactions and lead integrates. P2 waits for accepted merged P1; no full current-route or CT-M1-007/008/009 acceptance.
 
 Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days, then AR-007-C/P2 full existing-route integration 4 [4–7] days after accepted merged P1. P1 does not wire Auth/session issuance, routes, UI, mutations or admission. Aggregate AR-007-C remains unverified until P2 and the full existing-route matrix are accepted.
 
@@ -684,7 +684,7 @@ Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium-low confidence.
 - **Responsible role:** BE; C implements, A identity/security/read review, B transaction review, lead integration.
 - **Definition of done:** Independent A identity/read and B transaction review accepted; matching hosted checks and behavior-preservation regressions pass; record accepted merged source and review evidence before P2 starts. This closes P1 only, not aggregate AR-007-C or any route-activation gate.
-- **Progress:** Not started; accepted merged source and review evidence not yet available.
+- **Progress:** In progress; [issue #76](https://github.com/spei04/agent-rewind/issues/76). C assigned after accepted planning 839f3a7; independent runtime review, hosted checks and accepted merge remain pending.
 
 <a id="ar-007-c-p2"></a>
 
@@ -701,7 +701,7 @@ Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days
 - **Effort / confidence:** 4 engineering days; planning range 4–7; medium-low confidence.
 - **Responsible role:** BE; C implements, A identity/security/read review, B transaction review, lead integration.
 - **Definition of done:** Independent A security/auth/read and B transaction review, matching hosted full current-route/PG matrix and accepted merge recorded. Lead may then verify aggregate AR-007-C for preparatory scope only; CT-M1-007/009 remain partial overall and CT-M1-008 remains planned until later actual producers pass.
-- **Progress:** Not started; accepted merged source and review evidence not yet available.
+- **Progress:** Not started; [issue #77](https://github.com/spei04/agent-rewind/issues/77). Requires accepted merged P1; accepted merged source and review evidence not yet available.
 
 <a id="ar-008"></a>
 
@@ -3350,3 +3350,5 @@ Recomputed live planning totals: 151 tasks, 52 parents, 27 gates, 20 contracts a
 2026-10-20 smaller-PR correction supersedes the preceding one-PR/four-commit proposal: the user requested separately reviewable deliveries. AR-007-C/P1 is the 2 [2–3] day foundation with unwired strict v2 helpers, fresh authority, shared journal-free verified reader and preserved RunPublisher.read delegation; AR-007-C/P2 is the 4 [4–7] day complete integration after accepted merged P1. Both retain migration-only limits; aggregate AR-007-C stays Not started until implementation begins and cannot be Verified before accepted P2/full route matrix. Issue #75 is the aggregate tracker. Refusal by the unavailable admission adapter precedes readiness probes, storage and enqueue. A/C/lead accepted the split in principle; exact delta review remains required.
 
 The aggregate graph and effort stay 151 tasks, 543 edges, 446 base / 755.1 upper / 557.5 alternate allowance and 160.5 effort-path days. Delivery accounting is now explicitly 152 planned PRs; parent AR-007 has four PRs across three aggregate tasks. Nested package checks require inherited prerequisites/contracts, sum base/ranges without double counting, accepted merged P1 before P2, and complete package evidence before aggregate verification. Historical decisions and prior daily schedules remain unchanged.
+
+2026-10-20 foundation assignment: A/lead accepted exact planning correction 839f3a7. P1 is In progress with C; A and B independently review its runtime handoffs. P2 remains Not started pending accepted merged P1, aggregate #75 remains In progress, and the current ready/unassigned queue contains only AR-011-C. Historical conditional daily allocations are preserved.

@@ -149,7 +149,22 @@ def test_research_producers_cannot_bypass_owner_decision_gate(packet, task_id):
 
 def _delivery_packet(packet):
     data, markdown, plan = deepcopy(packet)
+    import re
+
     task = next(t for t in data["tasks"] if t["id"] == "AR-007-C")
+    # Refusal fixtures must not inherit the live delivery's progress.
+    task["status"] = "In progress"
+    for package in task["delivery_packages"]:
+        package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
+    start = markdown.index("#### AR-007-C —")
+    end = markdown.index("\n#### ", start + 5)
+    body = re.sub(
+        r"(?m)^- \*\*Progress:\*\* .*$",
+        "- **Progress:** In progress; synthetic test fixture.",
+        markdown[start:end],
+    )
+    markdown = markdown[:start] + body + markdown[end:]
+    markdown = _sync_package_cards(markdown, task["delivery_packages"])
     return data, markdown, plan, task, task["delivery_packages"]
 
 
@@ -229,6 +244,7 @@ def test_delivery_packages_refuse_premature_or_incomplete_claims(packet, variant
     elif variant == "missing_sequence":
         p2["dependencies"] = []
     elif variant == "active_unstarted":
+        task["status"] = "Not started"
         p1["status"] = "In progress"
     elif variant == "unverified_merge":
         p1["accepted_merge_commit"] = "a" * 40
