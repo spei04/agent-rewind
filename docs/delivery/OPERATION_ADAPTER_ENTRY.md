@@ -169,6 +169,19 @@ has a fresh X-Request-ID. Until then, its JSON-looking jobs.error text refuses
 exactly like other unsupported text. No synthetic positive may imply an
 implemented worker producer.
 
+The producer handoff is owned by AR-010-B: P1 freezes and implements the
+complete bounded version/encoding/provenance/parser and consumer extension,
+including an operator-only idempotent historical-marker policy preserving
+original rows/bytes, audit and ciphertexts; P2 integrates both completion and
+lease-expiry producers under their distinct fences. Current jobs.error
+String(300) neither proves encoding fit nor truncates safely. If P1 needs
+additive DDL, its owner/revision, captured catalog and preservation/rollback/
+restore evidence must be decided before code, with broader work reforecast.
+No reverse AR-008-B prerequisite is added: the initial refusal table above
+remains valid until accepted producer evidence supports the consumer extension.
+AR-011-C consumes the completed producer and AR-012-B verifies integration;
+neither owns this missing producer implementation.
+
 Result handling is independent of error:null on supported rows:
 - SQL NULL jobs.result becomes result_run_id:null without storage I/O.
 - A non-null digest requires exactly one matching same-project job-owned

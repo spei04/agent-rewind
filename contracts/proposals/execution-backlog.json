@@ -110,7 +110,7 @@
       "milestone": "M1",
       "priority": "P0",
       "objective": "Enforce budget limits before every potentially paid action.",
-      "base_effort_days": 5.0,
+      "base_effort_days": 7.0,
       "children": [
         "AR-010-A",
         "AR-010-B"
@@ -1852,8 +1852,8 @@
       "title": "Lease-fenced admission permits and cancellation accounting",
       "objective": "Enforce budget limits before every potentially paid action. This task delivers lease-fenced admission permits and cancellation accounting.",
       "role": "BE",
-      "effort_days": 2.0,
-      "confidence": "medium",
+      "effort_days": 4,
+      "confidence": "medium-low",
       "dependencies": [
         "AR-010-A",
         "AR-005-C"
@@ -1861,23 +1861,84 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Require valid owner/lease/cancel state before issuing permit; expose ledger diagnostics without prompt bodies; validate scoped immutable common configuration and generation/cancel authority before dispatch for all newly admitted jobs; integrate the required admission/publication fence without enabling historical redispatch",
-      "acceptance": "Stale owner, cancelled job or DB outage cannot obtain new permit; reconciliation requires evidence",
-      "tests": "M1-019/021 stale token, repeated release, missing DB, terminal job and cancel race; simultaneous reservation, publication and cancellation using the documented shared lock hierarchy",
-      "security_reliability": "No automatic timeout refund; prevent privileged bypass of budget hierarchy. Use the common C04 lock hierarchy for publication, cancellation and source mutation; never enter a project lock while retaining a conflicting job lock",
-      "out_of_scope": "No distributed study scheduling or automatic paid replay",
+      "scope": "Deliver two sequential accepted-merge-gated PRs: bounded structured worker-failure persistence, authentic origin and historical-marker/consumer handoff, then live permit/configuration/cancellation and both completion/lease-expiry producer integrations. Require current owner/lease/generation/cancel authority before new paid work or normal completion; expiry uses a database-time conditional transition of the observed generation. Preserve scoped immutable common configuration and historical non-dispatchability",
+      "acceptance": "Stale owners, cancelled jobs and DB outages cannot obtain a new permit. Both worker-failure paths persist only reviewed bounded safe Error evidence with authentic originating correlation; polling never invents origin or exposes legacy text. Reconciliation requires evidence; expiry cannot overwrite a newer generation/completion, and operator-only historical markers preserve original rows, audit and ciphertexts",
+      "tests": "CT-M1-009/019/021/022: immutable configuration and stale-token checks, repeated release, DB outage, terminal/cancel races, shared lock ordering, both actual failure producers and bounded parser/native storage, secret canaries and stable stored versus fresh polling correlation, operator-only idempotent markers and historical preservation/restore, atomic rollback/acknowledgment/restart and actual PostgreSQL completion/expiry races",
+      "security_reliability": "No automatic timeout refund, paid replay or guessed failure origin. Use the common C04 project-first hierarchy for permits, publication, cancellation and source mutation; never retain a conflicting job lock while entering project exclusion. Allowlist codes/messages and phase-correct retryability; unknown provider outcome retains its hold. Ordinary completion needs a live worker fence; expiry must conditionally match the observed generation using database time",
+      "out_of_scope": "No distributed study scheduling, automatic paid replay, provider retry/refund without evidence, telemetry/exporter vocabulary, API feature or reverse AR-008-B prerequisite; no production/customer activation or paid validation",
       "status": "Not started",
-      "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
+      "definition_of_done": "Both packages require independent source/security review, matching hosted checks and accepted merged-source evidence in order. Aggregate verification requires actual SQLite/PostgreSQL producer, parser, preservation, lock/race and recovery evidence plus the existing permit/configuration/cancellation matrix. AR-011-C and AR-012-B still consume accepted whole AR-010-B; no early completion or activation follows",
       "effort_range_days": [
-        2.0,
-        3.0
+        4,
+        6
       ],
       "review_roles": [
         "TL",
         "QE"
       ],
-      "pull_request_boundary": "Require valid owner/lease/cancel state before issuing permit; expose ledger diagnostics without prompt bodies. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied. CT-M1-009 worker configuration checks and live permit evidence remain required before work activation."
+      "pull_request_boundary": "Two sequential independently reviewable BE PRs: P1 bounded failure persistence/provenance, historical-marker decision and consumer handoff 2 [2–3] days; P2 permit/configuration/cancellation and both worker producer integrations 2 [2–3] after accepted merged P1. Aggregate 4 [4–6], medium-low; both inherit AR-010-A and AR-005-C",
+      "contracts_status": "Frozen C04 already requires safe stored Error, originating correlation and explicit historical migration markers. AR-010-B owns the missing producer handoff: P1 freezes and implements the chosen version/encoding/native bounds/provenance/parser and marker policy, P2 integrates normal completion and lease expiry. Before code, any required additive DDL needs explicit owner, linear revision, captured catalog, preservation and rollback/restore decisions; reforecast broader work. AR-008-B retains unsupported-evidence 503 until this producer is accepted; no reverse edge, invented envelope or early AR-011-C/AR-012-B acceptance",
+      "delivery_packages": [
+        {
+          "role": "BE",
+          "effort_days": 2,
+          "effort_range_days": [
+            2,
+            3
+          ],
+          "confidence": "medium-low",
+          "contracts": [
+            "C04"
+          ],
+          "status": "Not started",
+          "accepted_merge_commit": null,
+          "review_evidence": null,
+          "id": "AR-010-B/P1",
+          "title": "Bounded worker failure persistence and provenance",
+          "dependencies": [
+            "AR-010-A",
+            "AR-005-C"
+          ],
+          "objective": "Implement the complete chosen bounded stored-failure representation and consumer handoff before wiring either live worker failure path",
+          "scope": "Freeze version/encoding, allowlisted safe code/message and phase-specific retryability mappings, exact byte/native-type/work bounds, authentic originating correlation and immutable job/operation association. Implement persistence/parser helpers and the bounded AR-008-B consumer extension using original receipts and fresh authority. Define and implement an operator-only idempotent historical migration-marker path that preserves original job rows/bytes, audit, ciphertexts and hash history; a marker never promotes raw legacy text into a trusted Error. Before code, decide whether existing storage suffices; any additive DDL requires explicit migration owner/revision, captured catalogs and preservation/rollback/restore proof within P1, with reforecast if broader",
+          "out_of_scope": "No live completion/expiry wiring, paid dispatch, guessed schema/version, automatic legacy-text conversion, GET-triggered markers, new Error fields/metrics, history rewrite or production activation",
+          "interface_contracts": "Frozen C04 four-field Error and Operation.error data, original failure versus fresh poll correlation and historical marker; AR-010-A generation/ledger identities, AR-005-C history, accepted AR-008-B bounded Operation adapter and AR-011-B safe vocabulary. ENTRY review must inspect worker.work_once, Database.complete_job, Database.claim, jobs.error String(300) and operations.failure_correlation_id",
+          "acceptance": "Only supported bounded versioned/provenance-checked failure evidence is returned as nested Error, including outcome_uncertain as HTTP 200 data with stable original correlation and a fresh poll header. Unknown provider outcome retains its hold and retryable=false; evaluator false is not a worker failure. Missing/malformed/unsupported evidence remains safe 503. Historical markers are explicit, operator-only, repeat-stable and additive to preserved evidence; neither a poll ID nor an exception string proves origin",
+          "tests": "SQLite and restricted actual PostgreSQL storage/parser vectors for both producer inputs, native type/byte overflow and pre-materialization bounds; all allowlisted mappings and secret canaries; stable original correlation across polls, evaluator false and provider uncertainty; operator authorization, repeated/interrupted marker application, exact old rows/audit/ciphertexts/hash preservation and backup/restore. If DDL is chosen, prove linear upgrade, frozen predecessor profiles, rollback and restart with captured catalog checks",
+          "security_reliability": "Current VARCHAR(300) is a representation constraint, not a complete encoding/provenance fit proof: PostgreSQL rejects overflow while SQLite width is not enforcement, and the current producer does not truncate. Freeze actual canonical size and native bounds before persistence; no raw exception/provider/SQL/source/token payload. No inferred authentic origin, mutable overwrite or client/poll-derived marker. Preserve scoped receipts, visibility/action errors and current authority in the consumer",
+          "definition_of_done": "Independent entry review accepts the complete representation, producer mapping, marker and bounded consumer design before code, including explicit migration ownership/evidence if needed. Implement that chosen P1 boundary and pass SQLite/actual PostgreSQL, package/security and preservation checks at reviewed source; accepted merged P1 is required before P2. Reforecast instead of hiding broader DDL or migration work in P2"
+        },
+        {
+          "role": "BE",
+          "effort_days": 2,
+          "effort_range_days": [
+            2,
+            3
+          ],
+          "confidence": "medium-low",
+          "contracts": [
+            "C04"
+          ],
+          "status": "Not started",
+          "accepted_merge_commit": null,
+          "review_evidence": null,
+          "id": "AR-010-B/P2",
+          "title": "Live permit and completion/expiry failure integration",
+          "dependencies": [
+            "AR-010-A",
+            "AR-005-C",
+            "AR-010-B/P1"
+          ],
+          "objective": "Integrate the accepted bounded failure producer with live permits, cancellation and both worker terminal transitions",
+          "scope": "Require scoped immutable common configuration and current generation/cancel authority before dispatch for all newly admitted jobs. Integrate permit/reservation/publication fences and diagnostics without prompt bodies. Route normal worker completion/failure through accepted P1 persistence under a current owner/generation/live-lease fence. Replace the lease-expiry failure producer with a database-time conditional transition of the observed generation under shared project-first exclusion; it must not require an expired worker permit or overwrite a new generation/completion. Persist corresponding outcome/correlation evidence atomically and retain evidence-based cancellation/reconciliation",
+          "out_of_scope": "No new storage representation or hidden migration decision, historical redispatch, distributed scheduling, automatic paid retry/refund, telemetry expansion, provider cancellation guarantee, customer activation or paid validation",
+          "interface_contracts": "Accepted merged AR-010-B/P1 plus inherited AR-010-A and AR-005-C; C04 ledger/permit/publication/cancel hierarchy, scoped common configuration and authentic stored Error/origin. Both worker.work_once→Database.complete_job and Database.claim lease-expiry writes must consume the same reviewed persistence contract with distinct fences",
+          "acceptance": "Stale owner/generation, expired normal worker lease, cancellation or DB failure prevents a new permit and stale publication. Conditional expiry affects only the observed still-expired generation and preserves any newer terminal result. Both actual producers commit safe failure/correlation with their intended terminal state; acknowledgment loss stays uncertain without automatic replay/refund. Historical rows remain non-dispatchable; accepted evidence reaches the Operation consumer and later telemetry without invented origin",
+          "tests": "Actual SQLite and PostgreSQL producer paths plus bounded observed races: stale/live owner and generation, worker completion versus DB-time expiry, reclaim/new completion versus stale expiry, simultaneous reservation/publication/cancel, repeated release and DB outage. Inject failure at outcome/correlation/audit/commit boundaries and verify rollback, acknowledgment uncertainty and restart; exercise CT-M1-009/019/021/022 correlation/canary/unknown-hold controls and original history preservation with no paid provider calls",
+          "security_reliability": "Acquire affected project exclusions before organization/grants/target locks according to C04; no job-to-project inversion. Normal completion and expiry have different authority proofs; never require the already-expired worker's live permit for expiry or accept a stale observed generation. Preserve gross reservations and unknown holds, no automatic timeout refund or privileged budget bypass, and no raw errors or prompt bodies in diagnostics",
+          "definition_of_done": "Independent review and matching hosted SQLite/actual PostgreSQL race, atomicity, recovery, package/security and full permit/configuration/cancellation evidence establish accepted merged P2 and aggregate completion. Both packages and all inherited prerequisites must be accepted before AR-011-C or AR-012-B claims integrated producer evidence; full M1/customer/funding gates remain separate"
+        }
+      ]
     },
     {
       "id": "AR-011-A",
@@ -7376,7 +7437,7 @@
     "max_scheduled_delivery_days_per_role_per_day": 0.5,
     "milestone_effort_days": {
       "M0": 8.5,
-      "M1": 58.5,
+      "M1": 60.5,
       "M2": 69.0,
       "M3": 81.0,
       "M4": 82.0,
@@ -7389,12 +7450,12 @@
       "FE": 23.0,
       "RS": 66.0,
       "PL": 90.0,
-      "BE": 90.5,
+      "BE": 92.5,
       "QE": 112.5
     },
-    "base_effort_days": 457.0,
-    "upper_range_days": 772.1,
-    "effort_only_critical_path_days": 169.5,
+    "base_effort_days": 459.0,
+    "upper_range_days": 775.1,
+    "effort_only_critical_path_days": 171.5,
     "effort_only_critical_path": [
       "E0",
       "AR-005-A",
@@ -7457,11 +7518,11 @@
       "G7"
     ],
     "critical_path_excludes_external_waits": true,
-    "revision_notes": "2026-10-21 separate AR-006-B planning reconciliation replaces 2 [2\u20133] with two sequential packages totaling 4 [4\u20136] TL days. Existing aggregate prerequisites, outer graph, statuses, contracts and frozen history remain unchanged. Dedicated cursor lifecycle, finite suppression and bounded SQL receipt/work evidence precede HTTP integration; no runtime assignment or activation follows. The separate 2026-10-21 AR-008-B amendment reforecasts the existing three-operation scope from 3 [3\u20135] to two sequential 2 [2\u20133] BE packages, total 4 [4\u20136]. Both remain Not started; outer edges, other tasks/statuses, gates/contracts and dated evidence are unchanged. Stored-failure producer support is an explicit pre-runtime checkpoint, not claimed availability",
+    "revision_notes": "2026-10-21 separate AR-006-B planning reconciliation replaces 2 [2–3] with two sequential packages totaling 4 [4–6] TL days. Existing aggregate prerequisites, outer graph, statuses, contracts and frozen history remain unchanged. Dedicated cursor lifecycle, finite suppression and bounded SQL receipt/work evidence precede HTTP integration; no runtime assignment or activation follows. The separate 2026-10-21 AR-008-B amendment reforecasts the existing three-operation scope from 3 [3–5] to two sequential 2 [2–3] BE packages, total 4 [4–6]. Both remain Not started; outer edges, other tasks/statuses, gates/contracts and dated evidence are unchanged. Stored-failure producer support is an explicit pre-runtime checkpoint, not claimed availability. The separate 2026-10-21 worker-failure ownership reconciliation replaces AR-010-B 2 [2–3] with two sequential 2 [2–3] BE packages, total 4 [4–6], medium-low. Both inherit AR-010-A and AR-005-C; P2 waits for accepted merged P1. This assigns existing C04 producer/provenance/marker obligations without changing outer edges, statuses, historical evidence or activation gates",
     "independent_review": "A/C independently accepted admission plan 1d284ba and observability plan 9a70fdc; A accepted the final admission-history clarification f08b1ca. A independently passed 54 backlog cases and all three planning/evaluation/M1 OpenAPI validators at 9a70fdc with unchanged owned source/environment. Historical planning estimates/decisions and evidence remain auditable; no runtime authority is added by these planning checks. PR #79 reviewed source db5f992582c0d925a7921d26ae231312eaa41107 and accepted merge e117aaae0ef1f4ff4c293747482364a0791bc5d0 have identical trees. PR run 39535364867 and protected-main run 39536476328 passed 2013/2019 core tests on Python 3.11/3.12, with 9/3 expected skips and one warning per job; actual PostgreSQL, three separate gVisor tests, package/security/CI gate and main delivery passed. A accepted identity/read/mutation/UI security; B accepted C transaction consumption; C accepted interface and compatibility/OpenAPI corrections; lead integrated and verified delivery. Lead independently verified candidate 12318112434 (470334 bytes), archive/API digest, exact four files, source/manifests/package hashes; private indexed record reviewed-delivery-20261021-pr79-e117aaa.json is retained outside checkouts. P2 and aggregate AR-007-C are Verified for preparatory existing-route scope only. Customer-ready admission, full CT-M1-007/008/009, G1 and external production/funding/data gates remain open. A independently accepted status checkpoint c94b9b0 with 54 backlog passes and three validators; the one-line live admission correction is c390726. A authored AR-006-B plan 9b97a09; B independently accepted its contract, dependency and arithmetic review, and the lead accepted the plan. Tracking #86/#87/#88 does not start runtime or establish implementation acceptance. Listing P2 and aggregate AR-006-B were subsequently accepted on 2026-10-21: B audited reviewed source 5ab8984 and PR/main runs 39556621316/39558270300; lead verified accepted merge cd021542 and candidate 12327092547. The earlier plan/tracking statements remain historical; current delivery evidence is in RUN_LISTING_EXECUTION_PLAN.md and the package record. Parent AR-006 and repair AR-006-C remain open.",
     "contract_count": 20,
     "verification": "Two-PR reconciliation passed execution/evaluation/M1 OpenAPI validators and 296 focused tests, including 41 backlog tests with package-order, inherited-input, effort, merge-evidence, aggregate-completion and PR-count refusal cases. Ruff lint/security/format, strict checker types and whitespace passed. Aggregate DAG/effort/status, gates, historical schedules/C21/owner/API/acceptance bytes are unchanged from b42f00b. These are historical planning-check results; current runtime evidence and remaining acceptance gates are recorded in each delivery package and planning_status. The 2026-10-21 admission reconciliation passed the unchanged execution/evaluation/M1 OpenAPI validators and 256 focused tests, including 47 backlog cases (six new third-stage sequencing/input/effort refusals). Final 47-case backlog rerun, Ruff/format and whitespace pass. A separate comparison confirmed identical task IDs/statuses/outer dependencies, gates/contracts, historical schedules, frozen contract/research records and runtime/checker bytes; +6 base/+10 upper/+2 PRs only. Exact-source admission review was subsequently accepted by A/C at 1d284ba. The separate AR-011-C amendment passed all three validators and 263 focused backlog/evaluation/M1 tests, including seven new package producer/merge-gate cases (54 backlog cases total). Configured test lint/format and whitespace passed. A separate comparison confirmed only AR-011-C changes, exactly one added AR-010-B prerequisite, no removed edges, unchanged statuses/gates/contracts/history and frozen runtime/checker/research bytes. Generic validation is unchanged; exact-source observability review was subsequently accepted by A/C at 9a70fdc and A at clarification f08b1ca. The 2026-10-21 P2 acceptance/admission assignment reconciliation passed 54 backlog cases (1.33 seconds), all three execution/evaluation/M1 OpenAPI validators, configured checker/test lint and format, and whitespace. A historical package fixture now also resets downstream admission packages when rewinding AR-007-C; checker behavior and assertions are unchanged. Independent comparison confirms unchanged task IDs, effort, dependencies, gates/contracts, history, AR-006-B scope/estimate and runtime source; only acceptance/assignment metadata changes. The 2026-10-21 AR-006-B planning amendment passed all three execution/evaluation/M1 OpenAPI validators and the existing 54 backlog cases in 1.56 seconds, using the primary owned interpreter with PYTHONPATH unset and bytecode/cache disabled. Existing checker/test Ruff lint and format plus whitespace passed; no checker or test-source changes were needed. Separate comparison confirms identical outer dependencies, statuses, gates/contracts, historical schedules/research records and every other task, with +2 base/+3 upper/+1 delivery PR and the identical 168.5-day path. Runtime and frozen contract bytes are unchanged; independent plan review remains pending.",
-    "delivery_pr_count": 157
+    "delivery_pr_count": 158
   },
   "review_findings": [
     {
@@ -7563,6 +7624,11 @@
       "id": "REV-20",
       "finding": "The two-day listing estimate assumed a customer cursor key and bounded projection reader that do not exist; LIMIT alone does not bound late-backfill query work",
       "resolution": "Retain AR-006-B identity, C04 and prerequisites; two sequential TL packages of 2 [2–3] days each separate cursor/SQL foundation from exactly two GET routes. Review finite suppression and original receipt semantics plus measured native SQL ceilings before code; no runtime assignment, schema/profile mutation or reverse worker dependency"
+    },
+    {
+      "id": "REV-22",
+      "finding": "AR-010-B omitted explicit bounded worker Error persistence, authentic originating correlation and historical marker ownership, although both completion and lease-expiry paths produce legacy strings",
+      "resolution": "Retain AR-010-B identity, C04 and outer prerequisites; two sequential 2 [2–3] BE packages total 4 [4–6], medium-low. P1 owns the complete chosen representation/provenance/parser/consumer and operator-only historical marker, including reviewed migration ownership/evidence if needed; P2 integrates permits and both distinct failure fences. AR-008-B retains unsupported-evidence refusal and AR-011-C/AR-012-B wait for the whole aggregate"
     }
   ],
   "planning_status": "Approved engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-A/B/C and preparatory AR-009-A/B remain Verified. AR-008-A/P1 #81 is Verified after accepted PR #85 merge 81905a5 and matching PR/main/candidate evidence. AR-008-A/P2 #82 is Verified at accepted PR #90 merge 41759bb240d7aac0f17bd1c113e6b66d11e06b8b from reviewed source 4135c6f. PR/main runs 39550589433/39552010828 passed 2571/2579 core tests on Python 3.11/3.12 with 11/3 expected skips, actual PostgreSQL, three gVisor cases and installed-package/security/gate checks. Lead verified candidate 12324805344 (544761 bytes), its exact four files and source/manifests/package/archive hashes. Issue #82 is closed. P3 #83 is Implemented; verification pending in draft PR #92. C completed the internal coordinator and fault cases; B accepted runtime/test design and A's 32-case PostgreSQL publication suite. At composed edf85ae, lead passed 530 local tests with 94 explicit PostgreSQL skips and configured static/lock/three-validator checks. Early PR #92 run 39558425762 proves only the prior recovery checkpoint, including 26 PostgreSQL recovery cases; all 32 new publication/crash cases still require hosted execution. Accepted-merge/review-evidence fields remain null. Lead owns final delivery, with A/B available for independent review; AR-008-B remains Not started and default adapters/customer admission remain unavailable. Aggregate #80 and parent #8 remain In progress/open. AR-006-B/P1 #87 remains Verified at accepted merge ed0d6c48b8db3533c1bb20a75df93d7efc89fc7c. P2 #88 and aggregate #86 are Verified after reviewed source 5ab8984b13622f3d9a9363f5fe303d71b8a80529 and accepted PR #91 merge cd021542981aadf5d8d0e2be280e2e19068b80c9. PR/main runs 39556621316/39558270300 passed 2620/2628 core tests on Python 3.11/3.12, with 11/3 expected skips and one warning each; actual PostgreSQL, installed-package/security checks, three gVisor cases and delivery gates passed. B independently audited source and both runs; lead verified candidate 12327092547 (547434 bytes), its exact four files and source/tree/parent/manifests/package/archive hashes. Issues #88/#86 are closed after lead read-back. Parent #6 and AR-006-C remain open. AR-011-C and AR-006-C remain blocked on AR-010-B. No coordinator, HTTP/worker/ledger/generation activation, provider call or customer-ready profile follows. CT-M1-008/010/011/012 service acceptance remains with P3 and later integration; G1 and external spending/data/production gates remain unchanged.",
