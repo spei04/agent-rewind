@@ -1,0 +1,92 @@
+{
+  "additionalProperties": false,
+  "description": "C07 canonical header for proposed format 2; framing, decoded byte bounds, scope, KMS allowlist and authenticated bytes are additional mandatory checks.",
+  "properties": {
+    "format_version": {
+      "const": 2,
+      "title": "Format Version",
+      "type": "integer"
+    },
+    "algorithm": {
+      "const": "AES-256-GCM",
+      "title": "Algorithm",
+      "type": "string"
+    },
+    "wrapping": {
+      "const": "gcp-kms-symmetric-v1",
+      "title": "Wrapping",
+      "type": "string"
+    },
+    "project_id": {
+      "pattern": "^[0-9a-f]{32}$",
+      "title": "Project Id",
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 32,
+      "not": {
+        "pattern": "[^0-9a-f]"
+      }
+    },
+    "digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Digest",
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64,
+      "not": {
+        "pattern": "[^0-9a-f]"
+      }
+    },
+    "byte_count": {
+      "maximum": 536870912,
+      "minimum": 0,
+      "title": "Byte Count",
+      "type": "integer"
+    },
+    "nonce": {
+      "maxLength": 16,
+      "minLength": 16,
+      "pattern": "^[A-Za-z0-9_-]{16}$",
+      "title": "Nonce",
+      "type": "string",
+      "not": {
+        "pattern": "[^A-Za-z0-9_-]"
+      }
+    },
+    "key_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "pattern": "^projects/[a-z0-9][a-z0-9-]*/locations/[a-z0-9-]+/keyRings/[A-Za-z0-9_-]+/cryptoKeys/[A-Za-z0-9_-]+/cryptoKeyVersions/[1-9][0-9]{0,19}$",
+      "title": "Key Version",
+      "type": "string",
+      "not": {
+        "pattern": "[^A-Za-z0-9_/-]"
+      }
+    },
+    "wrapped_dek": {
+      "maxLength": 1366,
+      "minLength": 2,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "title": "Wrapped Dek",
+      "type": "string",
+      "not": {
+        "pattern": "[^A-Za-z0-9_-]"
+      }
+    }
+  },
+  "required": [
+    "format_version",
+    "algorithm",
+    "wrapping",
+    "project_id",
+    "digest",
+    "byte_count",
+    "nonce",
+    "key_version",
+    "wrapped_dek"
+  ],
+  "title": "Header",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/spei04/agent-rewind/contracts/encryption-envelope.v1.schema.json"
+}

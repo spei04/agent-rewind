@@ -5,7 +5,7 @@ Entry design for independent review. Its proposed limits and interfaces are not 
 2026-10-21 · Design only, against accepted planning source `8382131ff70a92f8dd41fefa1eb7a9c8b33d340d` and runtime producer source `5d3ff3096d81f159a457870a1f4fa57590a06cc2`.
 [AR-008-B #93](https://github.com/spei04/agent-rewind/issues/93),
 [P1 #94](https://github.com/spei04/agent-rewind/issues/94) and
-[P2 #95](https://github.com/spei04/agent-rewind/issues/95) remain **Not started**.
+[P2 #95](https://github.com/spei04/agent-rewind/issues/95) were **Not started** at this entry-design checkpoint; see the [current P1 assignment](OPERATION_HTTP_EXECUTION_PLAN.md#p1-implementation-assignment--2026-10-21).
 P1 runtime requires accepted AR-008-A/P3 main/candidate evidence and a separate
 implementation assignment. This checkpoint adds no producer, schema, HTTP
 route, available default adapter, profile, worker or customer activation.
