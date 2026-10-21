@@ -1,0 +1,1848 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Agent Rewind C15 administrative identity proposal",
+    "version": "1.0.0-proposal.1",
+    "description": "Offline contract and synthetic examples only. No endpoints or authority implemented. SEC/TL/QE peer review pending; no human certification, IdP access or production approval."
+  },
+  "x-contract": "C15",
+  "x-producer": "AR-034-A",
+  "x-runtime-producer": "AR-034-B",
+  "x-live-idp-proof": "AR-034-C + IDP0",
+  "x-approval-status": "pending-peer-review",
+  "x-runtime-implemented": false,
+  "x-production-authorized": false,
+  "x-source-baseline": "0b8f99c70f0b203adfc7eed062704b2c43ecdcf1",
+  "x-limits": {
+    "raw_body_bytes": 16384,
+    "response_bytes": 131072,
+    "list_items": 50,
+    "list_candidate_rows": 51,
+    "cursor_characters": 1024,
+    "mapping_bytes": 65536,
+    "administrators": 32,
+    "group_rules": 64,
+    "group_snapshot_bytes": 16384,
+    "groups": 128,
+    "group_characters": 128,
+    "group_utf8_bytes": 512,
+    "sql_statements": 128,
+    "sql_seconds": 5,
+    "sqlite_vm_instructions": 5000000
+  },
+  "x-error-codes": {
+    "401": [
+      "unauthenticated"
+    ],
+    "403": [
+      "forbidden"
+    ],
+    "404": [
+      "not_found"
+    ],
+    "413": [
+      "invalid_request"
+    ],
+    "422": [
+      "invalid_request",
+      "invalid_cursor"
+    ],
+    "500": [
+      "internal_error"
+    ],
+    "503": [
+      "schema_incompatible",
+      "dependency_unavailable",
+      "outcome_uncertain"
+    ]
+  },
+  "security": [
+    {
+      "sessionCookie": []
+    }
+  ],
+  "paths": {
+    "/api/v1/admin/projects/{project_id}": {
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          }
+        }
+      ],
+      "patch": {
+        "operationId": "renameAdminProject",
+        "summary": "Rename a visible project; no deletion/archive.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-authority": "fresh installation organization administrator; explicit target project",
+        "x-producer": "AR-034-B",
+        "x-runtime-implemented": false,
+        "x-reject-authorization-header": true,
+        "x-csrf-required-for-cookie-auth": true,
+        "parameters": [
+          {
+            "name": "X-Rewind-CSRF",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+            }
+          },
+          {
+            "name": "Origin",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Acknowledged result; never infer commit from an uncertain failure.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                },
+                "description": "All successful and failed responses."
+              },
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+                },
+                "description": "Fresh server-generated correlation, never echo client values."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Fault401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Fault403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Fault404"
+          },
+          "413": {
+            "$ref": "#/components/responses/Fault413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Fault422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Fault500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Fault503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/projects/{project_id}/memberships": {
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listAdminMemberships",
+        "summary": "List selected-project memberships, including revoked rows.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-authority": "fresh installation organization administrator; explicit target project",
+        "x-producer": "AR-034-B",
+        "x-runtime-implemented": false,
+        "x-reject-authorization-header": true,
+        "x-csrf-required-for-cookie-auth": false,
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Acknowledged result; never infer commit from an uncertain failure.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                },
+                "description": "All successful and failed responses."
+              },
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+                },
+                "description": "Fresh server-generated correlation, never echo client values."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Fault401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Fault403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Fault404"
+          },
+          "413": {
+            "$ref": "#/components/responses/Fault413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Fault422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Fault500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Fault503"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/projects/{project_id}/memberships/{principal_id}": {
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          }
+        },
+        {
+          "name": "principal_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 69,
+            "maxLength": 69,
+            "pattern": "^oidc:[0-9a-f]{64}(?![\\s\\S])"
+          }
+        }
+      ],
+      "put": {
+        "operationId": "setAdminMembership",
+        "summary": "Set an explicit human project grant; no organization-admin role.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-authority": "fresh installation organization administrator; explicit target project",
+        "x-producer": "AR-034-B",
+        "x-runtime-implemented": false,
+        "x-reject-authorization-header": true,
+        "x-csrf-required-for-cookie-auth": true,
+        "parameters": [
+          {
+            "name": "X-Rewind-CSRF",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+            }
+          },
+          {
+            "name": "Origin",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Acknowledged result; never infer commit from an uncertain failure.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                },
+                "description": "All successful and failed responses."
+              },
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+                },
+                "description": "Fresh server-generated correlation, never echo client values."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Membership"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Fault401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Fault403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Fault404"
+          },
+          "413": {
+            "$ref": "#/components/responses/Fault413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Fault422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Fault500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Fault503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MembershipInput"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "revokeAdminMembership",
+        "summary": "Soft-revoke a known human grant; preserve historical ownership.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-authority": "fresh installation organization administrator; explicit target project",
+        "x-producer": "AR-034-B",
+        "x-runtime-implemented": false,
+        "x-reject-authorization-header": true,
+        "x-csrf-required-for-cookie-auth": true,
+        "parameters": [
+          {
+            "name": "X-Rewind-CSRF",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+            }
+          },
+          {
+            "name": "Origin",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Acknowledged result; never infer commit from an uncertain failure.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                },
+                "description": "All successful and failed responses."
+              },
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+                },
+                "description": "Fresh server-generated correlation, never echo client values."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Acknowledged"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Fault401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Fault403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Fault404"
+          },
+          "413": {
+            "$ref": "#/components/responses/Fault413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Fault422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Fault500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Fault503"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/projects/{project_id}/keys": {
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listAdminKeys",
+        "summary": "List bounded metadata, never token/hash.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-authority": "fresh installation organization administrator; explicit target project",
+        "x-producer": "AR-034-B",
+        "x-runtime-implemented": false,
+        "x-reject-authorization-header": true,
+        "x-csrf-required-for-cookie-auth": false,
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Acknowledged result; never infer commit from an uncertain failure.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                },
+                "description": "All successful and failed responses."
+              },
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+                },
+                "description": "Fresh server-generated correlation, never echo client values."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Fault401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Fault403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Fault404"
+          },
+          "413": {
+            "$ref": "#/components/responses/Fault413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Fault422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Fault500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Fault503"
+          }
+        }
+      },
+      "post": {
+        "operationId": "issueAdminKey",
+        "summary": "Issue a selected-project viewer/operator key; secret only after ACK.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-authority": "fresh installation organization administrator; explicit target project",
+        "x-producer": "AR-034-B",
+        "x-runtime-implemented": false,
+        "x-reject-authorization-header": true,
+        "x-csrf-required-for-cookie-auth": true,
+        "parameters": [
+          {
+            "name": "X-Rewind-CSRF",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+            }
+          },
+          {
+            "name": "Origin",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Acknowledged result; never infer commit from an uncertain failure.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                },
+                "description": "All successful and failed responses."
+              },
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+                },
+                "description": "Fresh server-generated correlation, never echo client values."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuedKey"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Fault401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Fault403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Fault404"
+          },
+          "413": {
+            "$ref": "#/components/responses/Fault413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Fault422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Fault500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Fault503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KeyInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/projects/{project_id}/keys/{key_id}": {
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          }
+        },
+        {
+          "name": "key_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          }
+        }
+      ],
+      "delete": {
+        "operationId": "revokeAdminKey",
+        "summary": "Revoke key plus matching membership atomically.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-authority": "fresh installation organization administrator; explicit target project",
+        "x-producer": "AR-034-B",
+        "x-runtime-implemented": false,
+        "x-reject-authorization-header": true,
+        "x-csrf-required-for-cookie-auth": true,
+        "parameters": [
+          {
+            "name": "X-Rewind-CSRF",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+            }
+          },
+          {
+            "name": "Origin",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Acknowledged result; never infer commit from an uncertain failure.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                },
+                "description": "All successful and failed responses."
+              },
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+                },
+                "description": "Fresh server-generated correlation, never echo client values."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Acknowledged"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Fault401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Fault403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Fault404"
+          },
+          "413": {
+            "$ref": "#/components/responses/Fault413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Fault422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Fault500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Fault503"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/projects": {
+      "parameters": [],
+      "get": {
+        "operationId": "listAdminProjects",
+        "summary": "List installation projects; no artifact authority.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-authority": "fresh installation organization administrator; explicit target project",
+        "x-producer": "AR-034-B",
+        "x-runtime-implemented": false,
+        "x-reject-authorization-header": true,
+        "x-csrf-required-for-cookie-auth": false,
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Acknowledged result; never infer commit from an uncertain failure.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                },
+                "description": "All successful and failed responses."
+              },
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+                },
+                "description": "Fresh server-generated correlation, never echo client values."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Fault401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Fault403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Fault404"
+          },
+          "413": {
+            "$ref": "#/components/responses/Fault413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Fault422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Fault500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Fault503"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAdminProject",
+        "summary": "Create a named project without implicit membership.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-authority": "fresh installation organization administrator; explicit target project",
+        "x-producer": "AR-034-B",
+        "x-runtime-implemented": false,
+        "x-reject-authorization-header": true,
+        "x-csrf-required-for-cookie-auth": true,
+        "parameters": [
+          {
+            "name": "X-Rewind-CSRF",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+            }
+          },
+          {
+            "name": "Origin",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Acknowledged result; never infer commit from an uncertain failure.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                },
+                "description": "All successful and failed responses."
+              },
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+                },
+                "description": "Fresh server-generated correlation, never echo client values."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Fault401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Fault403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Fault404"
+          },
+          "413": {
+            "$ref": "#/components/responses/Fault413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Fault422"
+          },
+          "500": {
+            "$ref": "#/components/responses/Fault500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Fault503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectInput"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "rewind_session"
+      }
+    },
+    "schemas": {
+      "Identifier": {
+        "type": "string",
+        "minLength": 32,
+        "maxLength": 32,
+        "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+      },
+      "HumanPrincipal": {
+        "type": "string",
+        "minLength": 69,
+        "maxLength": 69,
+        "pattern": "^oidc:[0-9a-f]{64}(?![\\s\\S])"
+      },
+      "Principal": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 72,
+        "pattern": "^(oidc:[0-9a-f]{64}|api-key:[0-9a-f]{32})(?![\\s\\S])"
+      },
+      "ProjectRole": {
+        "type": "string",
+        "enum": [
+          "viewer",
+          "operator",
+          "maintainer"
+        ]
+      },
+      "KeyRole": {
+        "type": "string",
+        "enum": [
+          "viewer",
+          "operator"
+        ]
+      },
+      "ProjectInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])",
+            "x-max-utf8-bytes": 480
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "MembershipInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "operator",
+              "maintainer"
+            ]
+          },
+          "legacy_default": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "role",
+          "legacy_default"
+        ]
+      },
+      "KeyInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])",
+            "x-max-utf8-bytes": 480
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "operator"
+            ]
+          },
+          "days": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 90
+          }
+        },
+        "required": [
+          "name",
+          "role",
+          "days"
+        ]
+      },
+      "Project": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          },
+          "organization_id": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])",
+            "x-max-utf8-bytes": 480
+          }
+        },
+        "required": [
+          "id",
+          "organization_id",
+          "name"
+        ]
+      },
+      "Membership": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          },
+          "principal_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 72,
+            "pattern": "^(oidc:[0-9a-f]{64}|api-key:[0-9a-f]{32})(?![\\s\\S])"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "operator",
+              "maintainer"
+            ]
+          },
+          "revoked": {
+            "type": "boolean"
+          },
+          "legacy_default": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "project_id",
+          "principal_id",
+          "role",
+          "revoked",
+          "legacy_default"
+        ]
+      },
+      "Key": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          },
+          "project_id": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])",
+            "x-max-utf8-bytes": 480
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "operator"
+            ]
+          },
+          "expires_at": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 20,
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z(?![\\s\\S])"
+          },
+          "revoked": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "name",
+          "role",
+          "expires_at",
+          "revoked"
+        ]
+      },
+      "IssuedKey": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          },
+          "project_id": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "operator"
+            ]
+          },
+          "token": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+          },
+          "expires_at": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 20,
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z(?![\\s\\S])"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "role",
+          "token",
+          "expires_at"
+        ]
+      },
+      "Acknowledged": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "invalid_request",
+              "unauthenticated",
+              "forbidden",
+              "not_found",
+              "idempotency_conflict",
+              "invalid_cursor",
+              "budget_exhausted",
+              "quota_exceeded",
+              "dependency_unavailable",
+              "schema_incompatible",
+              "internal_error",
+              "outcome_uncertain"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "request_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "retryable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "request_id",
+          "retryable"
+        ]
+      },
+      "Fault": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Error"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "AdministratorBinding": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "principal_id": {
+            "type": "string",
+            "minLength": 69,
+            "maxLength": 69,
+            "pattern": "^oidc:[0-9a-f]{64}(?![\\s\\S])"
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "x-max-utf8-bytes": 1024
+          }
+        },
+        "required": [
+          "principal_id",
+          "subject"
+        ]
+      },
+      "GroupRule": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "group": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])",
+            "x-max-utf8-bytes": 512
+          },
+          "project_id": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "operator",
+              "maintainer"
+            ]
+          }
+        },
+        "required": [
+          "group",
+          "project_id",
+          "role"
+        ]
+      },
+      "ProjectPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Project"
+            },
+            "minItems": 0,
+            "maxItems": 50
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024,
+                "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ]
+      },
+      "MembershipPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Membership"
+            },
+            "minItems": 0,
+            "maxItems": 50
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024,
+                "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ]
+      },
+      "KeyPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Key"
+            },
+            "minItems": 0,
+            "maxItems": 50
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024,
+                "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ]
+      },
+      "InstallationMapping": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "type": "integer",
+            "const": 1
+          },
+          "installation_key": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64,
+            "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+          },
+          "organization_id": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          },
+          "issuer": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "pattern": "^https://",
+            "x-max-utf8-bytes": 4096
+          },
+          "administrators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdministratorBinding"
+            },
+            "minItems": 1,
+            "maxItems": 32
+          },
+          "group_claim": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32,
+            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}(?![\\s\\S])"
+          },
+          "group_rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupRule"
+            },
+            "minItems": 0,
+            "maxItems": 64
+          }
+        },
+        "required": [
+          "version",
+          "installation_key",
+          "organization_id",
+          "issuer",
+          "administrators",
+          "group_claim",
+          "group_rules"
+        ],
+        "x-max-canonical-bytes": 65536,
+        "x-transport": "operator-only; never an HTTP request body",
+        "description": "Proposed immutable installation mapping. Exact issuer/subject hashes, unique administrators and unique (group,project) rules require semantic validation. Not a credential or approval record.",
+        "x-max-raw-bytes": 65536
+      },
+      "VerifiedGroupSnapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "issuer": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "pattern": "^https://",
+            "x-max-utf8-bytes": 4096
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "x-max-utf8-bytes": 1024
+          },
+          "mapping_digest": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64,
+            "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])",
+              "x-max-utf8-bytes": 512
+            },
+            "minItems": 0,
+            "maxItems": 128
+          }
+        },
+        "required": [
+          "issuer",
+          "subject",
+          "mapping_digest",
+          "groups"
+        ],
+        "x-max-canonical-bytes": 16384,
+        "x-transport": "internal producer output only after signed OIDC verification; schema conformance is not trust",
+        "x-max-raw-bytes": 16384
+      },
+      "RecoveryRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "type": "integer",
+            "const": 1
+          },
+          "operation_id": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+          },
+          "installation_key": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64,
+            "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+          },
+          "expected_mapping_digest": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64,
+            "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+          },
+          "replacement_administrators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdministratorBinding"
+            },
+            "minItems": 1,
+            "maxItems": 32
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "last_admin_lockout",
+              "administrator_rotation"
+            ]
+          }
+        },
+        "required": [
+          "version",
+          "operation_id",
+          "installation_key",
+          "expected_mapping_digest",
+          "replacement_administrators",
+          "reason"
+        ],
+        "x-max-canonical-bytes": 16384,
+        "x-transport": "operator-only; no HTTP endpoint or credential field",
+        "x-max-raw-bytes": 16384
+      }
+    },
+    "responses": {
+      "Fault401": {
+        "description": "Missing/invalid cookie, unsupported bearer credentials, or failed CSRF/exact Origin.",
+        "headers": {
+          "Cache-Control": {
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            },
+            "description": "All successful and failed responses."
+          },
+          "X-Request-ID": {
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 32,
+              "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+            },
+            "description": "Fresh server-generated correlation, never echo client values."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Fault"
+            }
+          }
+        }
+      },
+      "Fault403": {
+        "description": "Authenticated caller lacks installation administrator authority.",
+        "headers": {
+          "Cache-Control": {
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            },
+            "description": "All successful and failed responses."
+          },
+          "X-Request-ID": {
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 32,
+              "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+            },
+            "description": "Fresh server-generated correlation, never echo client values."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Fault"
+            }
+          }
+        }
+      },
+      "Fault404": {
+        "description": "An authorized administrator selected an absent/foreign project or target.",
+        "headers": {
+          "Cache-Control": {
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            },
+            "description": "All successful and failed responses."
+          },
+          "X-Request-ID": {
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 32,
+              "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+            },
+            "description": "Fresh server-generated correlation, never echo client values."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Fault"
+            }
+          }
+        }
+      },
+      "Fault413": {
+        "description": "Raw body limit exceeded before parsing.",
+        "headers": {
+          "Cache-Control": {
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            },
+            "description": "All successful and failed responses."
+          },
+          "X-Request-ID": {
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 32,
+              "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+            },
+            "description": "Fresh server-generated correlation, never echo client values."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Fault"
+            }
+          }
+        }
+      },
+      "Fault422": {
+        "description": "Invalid bounded input, cursor or unsupported fields.",
+        "headers": {
+          "Cache-Control": {
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            },
+            "description": "All successful and failed responses."
+          },
+          "X-Request-ID": {
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 32,
+              "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+            },
+            "description": "Fresh server-generated correlation, never echo client values."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Fault"
+            }
+          }
+        }
+      },
+      "Fault500": {
+        "description": "Unexpected failure outside a safely classified transaction; fixed internal_error.",
+        "headers": {
+          "Cache-Control": {
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            },
+            "description": "All successful and failed responses."
+          },
+          "X-Request-ID": {
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 32,
+              "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+            },
+            "description": "Fresh server-generated correlation, never echo client values."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Fault"
+            }
+          }
+        }
+      },
+      "Fault503": {
+        "description": "Schema/dependency unavailable or commit outcome uncertain; no success disclosure.",
+        "headers": {
+          "Cache-Control": {
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            },
+            "description": "All successful and failed responses."
+          },
+          "X-Request-ID": {
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 32,
+              "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+            },
+            "description": "Fresh server-generated correlation, never echo client values."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Fault"
+            }
+          }
+        }
+      }
+    }
+  }
+}
