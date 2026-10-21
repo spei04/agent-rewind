@@ -1301,7 +1301,7 @@ M2 / P0 · 3 PRs · 10 engineering days · Not started
 
 ### AR-016 — Protect cloud evidence and credentials throughout key and storage lifecycles
 
-M2 / P0 · 4 PRs · 11 engineering days · Not started
+M2 / P0 · 4 PRs · 11 engineering days · In progress
 
 <a id="ar-016-a"></a>
 
@@ -2420,7 +2420,7 @@ M4 / P0 · 4 PRs · 10 engineering days · In progress
 
 ### AR-034 — Support real enterprise identity workflows and independent product acceptance
 
-M4 / P0 · 4 PRs · 12 engineering days · Not started
+M4 / P0 · 4 PRs · 12 engineering days · In progress
 
 <a id="ar-034-a"></a>
 

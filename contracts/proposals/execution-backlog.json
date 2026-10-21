@@ -1666,7 +1666,7 @@
         "TL",
         "QE"
       ],
-      "pull_request_boundary": "Two sequential independently reviewable PRs: P1 bounded operation read/cancel adapters 2 [2–3] BE days, then P2 exactly three HTTP operations 2 [2–3] after accepted merged P1. Total 4 [4–6], medium-low; both inherit the aggregate entry gate and remain Not started",
+      "pull_request_boundary": "Two sequential independently reviewable PRs: P1 bounded operation read/cancel adapters 2 [2\u20133] BE days, then P2 exactly three HTTP operations 2 [2\u20133] after accepted merged P1. Total 4 [4\u20136], medium-low; both inherit the aggregate entry gate and remain Not started",
       "contracts_status": "C04 reviewed for development/testing. Both packages wait for accepted AR-008-A including P3 merge/main/candidate proof and Verified AR-011-B. OPERATION_HTTP_EXECUTION_PLAN.md freezes response and cancellation requirements; actual bounded stored-failure producer representation remains an explicit pre-runtime decision. Unsupported legacy jobs.error is not an Error envelope; no fabricated correlation, reverse worker prerequisite or ready profile",
       "delivery_packages": [
         {
