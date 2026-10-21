@@ -1318,7 +1318,8 @@ M2 / P0 · 4 PRs · 11 engineering days · Not started
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
 - **Responsible role:** PL; required reviewers: SEC, QE. Named assignee pending staffing.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** In progress; offline contract and synthetic fixtures assigned after verified prerequisites and lead entry review. Runtime and external gates remain open.
+- **Tracking:** https://github.com/spei04/agent-rewind/issues/99
 
 <a id="ar-016-b"></a>
 
@@ -2434,9 +2435,10 @@ M4 / P0 · 4 PRs · 12 engineering days · Not started
 - **Required automated tests:** OpenAPI fixtures for admin denial, membership revoke and invalid mapping.
 - **Security and reliability:** No self-assigned admin; recovery requires explicit audited operator procedure.
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
-- **Responsible role:** FE; required reviewers: TL, QE. Named assignee pending staffing.
+- **Responsible role:** FE; required reviewers: SEC, TL, QE. Named assignee pending staffing.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Progress:** In progress; offline contract and synthetic fixtures assigned after verified prerequisites and lead entry review. Runtime and external gates remain open.
+- **Tracking:** https://github.com/spei04/agent-rewind/issues/100
 
 <a id="ar-034-b"></a>
 

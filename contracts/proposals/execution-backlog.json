@@ -187,7 +187,7 @@
         "AR-016-C",
         "AR-016-D"
       ],
-      "status": "Not started"
+      "status": "In progress"
     },
     "AR-017": {
       "milestone": "M2",
@@ -407,7 +407,7 @@
         "AR-034-C",
         "AR-034-D"
       ],
-      "status": "Not started"
+      "status": "In progress"
     },
     "AR-035": {
       "milestone": "M5",
@@ -1666,7 +1666,7 @@
         "TL",
         "QE"
       ],
-      "pull_request_boundary": "Two sequential independently reviewable PRs: P1 bounded operation read/cancel adapters 2 [2\u20133] BE days, then P2 exactly three HTTP operations 2 [2\u20133] after accepted merged P1. Total 4 [4\u20136], medium-low; both inherit the aggregate entry gate and remain Not started",
+      "pull_request_boundary": "Two sequential independently reviewable PRs: P1 bounded operation read/cancel adapters 2 [2–3] BE days, then P2 exactly three HTTP operations 2 [2–3] after accepted merged P1. Total 4 [4–6], medium-low; both inherit the aggregate entry gate and remain Not started",
       "contracts_status": "C04 reviewed for development/testing. Both packages wait for accepted AR-008-A including P3 merge/main/candidate proof and Verified AR-011-B. OPERATION_HTTP_EXECUTION_PLAN.md freezes response and cancellation requirements; actual bounded stored-failure producer representation remains an explicit pre-runtime decision. Unsupported legacy jobs.error is not an Error envelope; no fabricated correlation, reverse worker prerequisite or ready profile",
       "delivery_packages": [
         {
@@ -2552,7 +2552,7 @@
       "tests": "Envelope schema, unknown key, denied decrypt and legacy format fixtures",
       "security_reliability": "No plaintext master key in DB or sandbox; use scoped runtime identity",
       "out_of_scope": "No cloud resource creation",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         2.0,
@@ -2563,7 +2563,10 @@
         "QE"
       ],
       "pull_request_boundary": "Define object key/version envelope, legacy read path, workload identity and key lifecycle states. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C07 design assigned; first producer proposal remains unavailable until independent review and accepted delivery. Existing C04/C14 requirements stay unchanged.",
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/99",
+      "assigned_to": "Engineer A — offline contract and fixtures; independent peer review; Engineer B — delivery review",
+      "entry_evidence": "Lead accepted the immutable 0b8f99c entry audit on 2026-10-21; listed producer prerequisites are Verified. Existing build/test approval covers this offline design only; no runtime implementation, infrastructure, provider or IdP traffic, partner data or production activation."
     },
     {
       "id": "AR-016-B",
@@ -4611,18 +4614,22 @@
       "tests": "OpenAPI fixtures for admin denial, membership revoke and invalid mapping",
       "security_reliability": "No self-assigned admin; recovery requires explicit audited operator procedure",
       "out_of_scope": "No SCIM or multiple IdPs per installation",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
       "effort_range_days": [
         2.0,
         3.0
       ],
       "review_roles": [
+        "SEC",
         "TL",
         "QE"
       ],
       "pull_request_boundary": "Specify project/membership/key admin endpoints, IdP mapping, revocation and browser recovery states. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C15 design assigned; first producer proposal remains unavailable until independent review and accepted delivery. Existing C04/C14 requirements stay unchanged.",
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/100",
+      "assigned_to": "Engineer C — offline contract and fixtures; independent peer review; Engineer B — delivery review",
+      "entry_evidence": "Lead accepted the immutable 0b8f99c entry audit on 2026-10-21; listed producer prerequisites are Verified. Existing build/test approval covers this offline design only; no runtime implementation, infrastructure, provider or IdP traffic, partner data or production activation."
     },
     {
       "id": "AR-034-B",
@@ -7678,7 +7685,9 @@
     ],
     "active_child_issues": {
       "AR-008-A": 80,
-      "AR-008-A/P3": 83
+      "AR-008-A/P3": 83,
+      "AR-016-A": 99,
+      "AR-034-A": 100
     },
     "closed_implementation_issues": [
       26,
@@ -7710,7 +7719,9 @@
     },
     "design_issues": {
       "RA-01-A": 47,
-      "RA-01-B": 48
+      "RA-01-B": 48,
+      "AR-016-A": 99,
+      "AR-034-A": 100
     },
     "owner_decision_issues": {
       "RESEARCHSCOPE0": 51
