@@ -224,6 +224,20 @@ def open_frame(
 
 def schema() -> dict[str, object]:
     result = Header.model_json_schema()
+    # JSON Schema regexes search; "$" may stop before a final line terminator.
+    # Portable unanchored exclusion also works in ECMAScript, unlike Python-only
+    # fullmatch/\Z or lookaround passed to Pydantic's Rust regex engine.
+    for name, length in (("project_id", 32), ("digest", 64)):
+        result["properties"][name].update(minLength=length, maxLength=length)
+    alphabets = {
+        "project_id": "0-9a-f",
+        "digest": "0-9a-f",
+        "nonce": "A-Za-z0-9_-",
+        "key_version": "A-Za-z0-9_/-",
+        "wrapped_dek": "A-Za-z0-9_-",
+    }
+    for name, alphabet in alphabets.items():
+        result["properties"][name]["not"] = {"pattern": f"[^{alphabet}]"}
     result["$schema"] = "https://json-schema.org/draft/2020-12/schema"
     result["$id"] = (
         "https://github.com/spei04/agent-rewind/contracts/encryption-envelope.v1.schema.json"

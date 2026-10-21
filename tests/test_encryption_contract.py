@@ -5,6 +5,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -443,3 +444,36 @@ def test_contract_does_not_enable_current_runtime_format_two(tmp_path):
     with pytest.raises(ArtifactError, match="^artifact_format_unsupported$"):
         storage.read_verified(descriptor)
     assert blob.read_bytes() == frame(item)
+
+
+def exported_string_accepts(field, value):
+    """Evaluate the exported string-keyword subset using JSON Schema search semantics."""
+    exported = json.loads((ROOT / "contracts/encryption-envelope.v1.schema.json").read_text())
+    rule = exported["properties"][field]
+    assert set(rule) <= {"type", "title", "pattern", "minLength", "maxLength", "not"}
+    assert rule["type"] == "string"
+    if not rule.get("minLength", 0) <= len(value) <= rule.get("maxLength", 100000):
+        return False
+    if re.search(rule["pattern"], value) is None:
+        return False
+    if "not" in rule:
+        assert set(rule["not"]) == {"pattern"}
+        if re.search(rule["not"]["pattern"], value) is not None:
+            return False
+    return True
+
+
+@pytest.mark.parametrize("field", ["project_id", "digest", "nonce", "key_version", "wrapped_dek"])
+@pytest.mark.parametrize("control", ["\n", "\r", "\r\n", "\u2028", "\u2029", "\x00", "\x7f"])
+def test_exported_schema_rejects_terminal_controls_without_fullmatch(field, control):
+    value = vector()["header"]
+    value[field] += control
+    assert not exported_string_accepts(field, value[field])
+    with pytest.raises(ValidationError):
+        MODULE.Header.model_validate(value)
+
+
+def test_exported_schema_retains_existing_valid_ascii_vectors():
+    for item in VECTORS:
+        for field in ["project_id", "digest", "nonce", "key_version", "wrapped_dek"]:
+            assert exported_string_accepts(field, item["header"][field])
