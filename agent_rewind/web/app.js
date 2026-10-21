@@ -9,7 +9,12 @@ const state = {
   step: 1,
   view: "runs",
   busy: false,
+  identityGeneration: 0,
 };
+class SupersededIdentity extends Error {}
+function checkIdentity(generation) {
+  if (generation !== state.identityGeneration) throw new SupersededIdentity();
+}
 function element(tag, text, className) {
   const e = document.createElement(tag);
   if (text !== undefined) e.textContent = text;
@@ -22,24 +27,37 @@ function notice(message) {
 }
 function guard(fn) {
   return async (...args) => {
+    const generation = state.identityGeneration;
     try {
       await fn(...args);
     } catch (error) {
-      notice(error.message);
+      if (
+        generation === state.identityGeneration &&
+        !(error instanceof SupersededIdentity)
+      )
+        notice(error.message);
     }
   };
 }
 async function api(path, body, method) {
+  const generation = state.identityGeneration;
   const headers = {};
   if (state.token) headers.Authorization = `Bearer ${state.token}`;
   if (state.csrf) headers["X-Rewind-CSRF"] = state.csrf;
   if (body !== undefined) headers["Content-Type"] = "application/json";
-  const response = await fetch(`/api${path}`, {
-    method: method || (body === undefined ? "GET" : "POST"),
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  const data = await response.json();
+  let response, data;
+  try {
+    response = await fetch(`/api${path}`, {
+      method: method || (body === undefined ? "GET" : "POST"),
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    data = await response.json();
+  } catch (error) {
+    checkIdentity(generation);
+    throw error;
+  }
+  checkIdentity(generation);
   if (!response.ok)
     throw new Error(
       typeof data.detail === "string"
@@ -101,6 +119,9 @@ function clearProtectedState() {
   });
 }
 async function authenticate() {
+  // An old poll must neither block this lookup nor publish under new credentials.
+  state.identityGeneration += 1;
+  state.busy = false;
   state.user = null;
   state.csrf = "";
   clearProtectedState();
@@ -108,11 +129,13 @@ async function authenticate() {
 }
 async function refresh() {
   if (state.busy) return;
+  const generation = state.identityGeneration;
   state.busy = true;
   try {
     // Manual refresh and polling must refresh the role hint too. A prior page
     // grant is never permission to retain actions after access has changed.
     const user = await api("/me");
+    checkIdentity(generation);
     if (user.subject !== state.user?.subject || user.role !== state.user?.role)
       clearProtectedState();
     state.user = user;
@@ -129,6 +152,7 @@ async function refresh() {
       api("/studies"),
       api("/jobs"),
     ]);
+    checkIdentity(generation);
     state.runs = runs;
     renderRuns();
     renderStudies(studies);
@@ -136,6 +160,7 @@ async function refresh() {
     if (state.run && state.run.status === "running")
       await selectRun(state.run.id, false);
   } catch (error) {
+    checkIdentity(generation);
     // Preserve the caller's own CSRF/logout even when data access fails, but
     // require another successful refresh before offering privileged actions.
     if (state.user) {
@@ -145,7 +170,7 @@ async function refresh() {
     clearProtectedState();
     throw error;
   } finally {
-    state.busy = false;
+    if (generation === state.identityGeneration) state.busy = false;
   }
 }
 function renderRuns() {
@@ -174,7 +199,10 @@ function renderRuns() {
   });
 }
 async function selectRun(id, reset = true) {
-  state.run = await api(`/runs/${id}`);
+  const generation = state.identityGeneration;
+  const run = await api(`/runs/${id}`);
+  checkIdentity(generation);
+  state.run = run;
   if (reset) state.step = 1;
   state.step = Math.min(state.step, state.run.events.length || 1);
   $("run-empty").classList.add("hidden");
@@ -266,10 +294,12 @@ function resetReplacement() {
     );
 }
 async function loadFiles() {
+  const generation = state.identityGeneration;
   const runId = state.run.id,
     step = state.step;
   const files = await api(`/runs/${runId}/files/${step}`);
-  if (runId !== state.run.id || step !== state.step) return;
+  checkIdentity(generation);
+  if (runId !== state.run?.id || step !== state.step) return;
   $("file-list").replaceChildren();
   files.forEach((file) => {
     const b = element("button", file.path);
@@ -277,7 +307,8 @@ async function loadFiles() {
       const f = await api(
         `/runs/${runId}/files/${step}?path=${encodeURIComponent(file.path)}`,
       );
-      if (runId === state.run.id && step === state.step)
+      checkIdentity(generation);
+      if (runId === state.run?.id && step === state.step)
         $("file-content").textContent =
           f.content + (f.truncated ? "\n[truncated]" : "");
     });
@@ -286,7 +317,9 @@ async function loadFiles() {
 }
 async function queued(path, body) {
   requireOperator();
+  const generation = state.identityGeneration;
   const result = await api(path, body);
+  checkIdentity(generation);
   notice(`Job ${result.job_id.slice(0, 12)} queued. A worker will execute it.`);
   await refresh();
 }
@@ -465,18 +498,25 @@ function renderJobs(jobs) {
     $("jobs-list").append(row);
   });
 }
-$("login-form").onsubmit = guard(async (e) => {
+$("login-form").onsubmit = (e) => {
   e.preventDefault();
   state.token = $("api-key").value.trim();
   $("api-key").value = "";
-  try {
-    await authenticate();
-    notice("");
-  } catch (error) {
-    state.token = "";
-    throw error;
-  }
-});
+  const authentication = authenticate();
+  const generation = state.identityGeneration;
+  // Capture the new generation, rather than the credential state being replaced.
+  return guard(async () => {
+    try {
+      await authentication;
+      checkIdentity(generation);
+      notice("");
+    } catch (error) {
+      checkIdentity(generation);
+      state.token = "";
+      throw error;
+    }
+  })();
+};
 $("logout").onclick = guard(async () => {
   if (!state.token)
     await fetch("/auth/logout", {
@@ -580,9 +620,11 @@ setInterval(() => {
 }, 4000);
 
 $("compare").onclick = guard(async () => {
+  const generation = state.identityGeneration;
   const result = await api(
     `/compare?left=${state.run.parent_id}&right=${state.run.id}`,
   );
+  checkIdentity(generation);
   $("compare-output").textContent = JSON.stringify(result, null, 2);
   $("compare-dialog").showModal();
 });

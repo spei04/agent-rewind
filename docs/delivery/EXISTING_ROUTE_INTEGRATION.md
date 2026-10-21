@@ -23,7 +23,10 @@ maintainer as action-capable. Manual refresh and polling re-read the current rol
 null/unknown roles or a failed data refresh clear earlier protected state, close
 privileged dialogs and disable actions while preserving own CSRF/logout. Submission
 handlers recheck the role hint, and a later successful operator refresh restores
-actions. The server remains the authority for every request.
+actions. Switching credentials advances an in-memory identity generation: obsolete
+refresh/selection responses, failures and completion handlers cannot restore old
+identity/data, clear new credentials or release the new lookup's busy state. No
+token persistence is added. The server remains the authority for every request.
 
 All resources are scoped before action decisions: inaccessible/missing/invalid
 resources return fixed 404; an accessible resource with a denied action returns
