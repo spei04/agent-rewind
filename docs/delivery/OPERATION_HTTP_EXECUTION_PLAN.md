@@ -2,6 +2,8 @@
 
 2026-10-21 · Planning amendment for the existing AR-008-B scope, based on published source 5d3ff3096d81f159a457870a1f4fa57590a06cc2. AR-008-B and both packages remain **Not started**. AR-008-A/P3 is Implemented; verification pending. This plan does not accept its pending CI, merge or candidate, implement routes, or enable customer admission.
 
+The design-only [P1 adapter entry checkpoint](OPERATION_ADAPTER_ENTRY.md) proposes concrete APIs, cumulative bounds and the initial unavailable-failure support table. Tracking is aggregate [#93](https://github.com/spei04/agent-rewind/issues/93), P1 [#94](https://github.com/spei04/agent-rewind/issues/94), P2 [#95](https://github.com/spei04/agent-rewind/issues/95); all remain Not started.
+
 ## Entry and delivery boundaries
 
 Retain direct prerequisites AR-008-A and AR-011-B and frozen C04. Both packages inherit the aggregate entry gate: accepted AR-008-A, including P3's matching hosted checks, accepted merge and protected-main candidate, plus Verified AR-011-B. P2 additionally requires accepted merged P1. Planning assignment is not runtime assignment. AR-006-B remains the owner of run list/detail/cursors; later AR-010-A/B own generation, ledger and worker dispatch. No reverse worker dependency is added.

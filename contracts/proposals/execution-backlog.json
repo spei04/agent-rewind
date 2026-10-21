@@ -1696,7 +1696,8 @@
           "acceptance": "Viewer status reads disclose only the authorized project and valid original operation/job association. Null result remains null; non-null evidence requires exact scoped ref and run lineage. Supported stored failures retain original correlation, including outcome_uncertain as data; unsupported evidence refuses. Cancellation locks and rechecks the association, preserves terminal outcomes and gross reservations, and reports only an acknowledged committed intent",
           "tests": "SQLite and actual PostgreSQL malformed/oversized metadata and result/failure producer cases; original operation/job/config/ref drift and final revocation; viewer read versus cancel denial, foreign scope, queued/running/terminal intent, repeated cancellation, observed operation replacement and worker/member/key races, rollback and lost acknowledgment with bounded cleanup",
           "security_reliability": "Project then organization, caller grants/key and target exclusion follows accepted ordering; no separate get-then-cancel transaction or storage under locks. Bound bodies before decoding and preserve original receipts; unsupported legacy error strings never become trusted envelopes or null success. No accounting refund or running-provider interruption claim",
-          "definition_of_done": "Independent producer/security review freezes the finite source-support and cancellation tables before implementation; bounded SQLite and actual PostgreSQL tests, matching hosted checks and accepted merged-source evidence complete P1 before P2. No HTTP availability or aggregate completion follows"
+          "definition_of_done": "Independent producer/security review freezes the finite source-support and cancellation tables before implementation; bounded SQLite and actual PostgreSQL tests, matching hosted checks and accepted merged-source evidence complete P1 before P2. No HTTP availability or aggregate completion follows",
+          "tracking_issue": "https://github.com/spei04/agent-rewind/issues/94"
         },
         {
           "role": "BE",
@@ -1724,9 +1725,11 @@
           "acceptance": "Raw JSON and exact Idempotency-Key validation retain duplicate detection and canonical limits after authority. Accepted replay retains IDs/config/origin despite current dependency outages; unknown commit never creates new work. Every route preserves exact status/headers/null fields, cookie and key authority, original nested failure versus fresh polling correlation, and real migration-only refusal before customer sinks",
           "tests": "Actual cookie and scoped-key routes with two populated projects, viewer/operator and revoked/foreign precedence; duplicate headers/JSON, chunked 9 MiB and materialized 8 MiB boundaries, exact encoding/media type and schemas; eight-request replay/contention, changed defaults/storage outage, fixed uncertainty/error mapping, cancellation races, original/fresh correlation, zero prohibited sinks and isolated installed wheel/sdist smoke",
           "security_reliability": "No eager validation before identity/visibility, collapsed duplicate headers or client-provided origin. Cookie mutations retain CSRF/exact Origin; GET remains read-only. Default required adapters refuse before readiness/storage, existing committed replay bypasses new-work dependencies, and exceptions map only through reviewed finite safe boundaries",
-          "definition_of_done": "Independent HTTP/security review, actual PostgreSQL integration, matching hosted installed-package/security/gVisor checks, accepted merge and protected-main candidate evidence establish P2 and aggregate completion. Preserve historical records, existing routes and later AR-010/AR-012-B/customer gates"
+          "definition_of_done": "Independent HTTP/security review, actual PostgreSQL integration, matching hosted installed-package/security/gVisor checks, accepted merge and protected-main candidate evidence establish P2 and aggregate completion. Preserve historical records, existing routes and later AR-010/AR-012-B/customer gates",
+          "tracking_issue": "https://github.com/spei04/agent-rewind/issues/95"
         }
-      ]
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/93"
     },
     {
       "id": "AR-009-A",
@@ -7628,7 +7631,11 @@
       87,
       88
     ],
-    "queued_child_issues": {},
+    "queued_child_issues": {
+      "AR-008-B": 93,
+      "AR-008-B/P1": 94,
+      "AR-008-B/P2": 95
+    },
     "design_issues": {
       "RA-01-A": 47,
       "RA-01-B": 48
