@@ -1,6 +1,6 @@
 # Admission storage foundation
 
-AR-008-A/P2 is **Implemented; verification pending** in [PR #90](https://github.com/spei04/agent-rewind/pull/90).
+AR-008-A/P2 is **Implemented; verification pending** after [PR #90](https://github.com/spei04/agent-rewind/pull/90) merged reviewed `4135c6f` as `41759bb`. PR checks passed; protected-main run 39552010828 and candidate acceptance remain pending.
 This package adds storage constraints and connection-bound primitives for the
 later P3 coordinator. It supplies no HTTP admission, worker dispatch, budget or
 generation schema, upload coordinator or customer-ready profile. Existing
@@ -218,7 +218,8 @@ fingerprint. Recovery and a second reentry use an independent NullPool engine,
 preserve the source and 18 ciphertexts, leave identities empty and v1 configs
 NULL, and remain migration-only. These are P2 DDL interruption tests, not P3
 upload/publication or uncertain-operation recovery. Actual PostgreSQL execution
-is still required; local collection/skips cannot prove these assertions.
+is required; local collection/skips cannot prove these assertions. The later PR
+execution evidence is recorded in the current delivery checkpoint below.
 
 The unchanged migration exclusion is also covered by the existing PostgreSQL
 writer-authority, hidden-session, advisory/table-lock and observed-backend-drain
@@ -231,6 +232,7 @@ compiles and focused lint/format/whitespace checks pass. No child PostgreSQL
 execution or successful interruption/recovery is claimed from these checks.
 
 Current delivery ownership and composed independent checks are recorded in the
-[P2 implementation checkpoint](ADMISSION_EXECUTION_PLAN.md#p2-implementation-checkpoint--2026-10-21).
-Lead owns matching hosted validation and delivery; A/B reviews are accepted and
-reviewers remain available. Aggregate AR-008-A stays In progress and P3 Not started.
+[current P2 delivery checkpoint](ADMISSION_EXECUTION_PLAN.md#p2-merged-verification-pending--2026-10-21).
+PR run 39550589433 passed actual PostgreSQL and installed-package checks; lead
+owns the pending protected-main/candidate acceptance. A/B reviews are accepted
+and reviewers remain available. Aggregate AR-008-A stays In progress and P3 Not started.

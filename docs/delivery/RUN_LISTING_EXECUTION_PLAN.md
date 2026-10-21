@@ -5,8 +5,8 @@ its accepted foundation does not complete route integration or activate customer
 The [task cards](../EXECUTION_BACKLOG.md#ar-006-b) and
 [machine ledger](../../contracts/proposals/execution-backlog.json) retain the
 aggregate identity and prerequisites: Verified AR-006-A, AR-007-C and AR-011-B,
-consuming C04. The aggregate remains **In progress**; A starts P2 **In progress**
-in reused primary work/scoped-run-routes after accepted P1 delivery.
+consuming C04. The aggregate remains **In progress**; P2 is **Implemented; verification pending**
+in draft [PR #91](https://github.com/spei04/agent-rewind/pull/91), under lead delivery after independent source review.
 
 A authored exact plan `9b97a09`; B independently accepted its contract, dependency
 and arithmetic review, and the lead accepted the plan. Tracking: aggregate
@@ -15,7 +15,7 @@ and arithmetic review, and the lead accepted the plan. Tracking: aggregate
 [#88](https://github.com/spei04/agent-rewind/issues/88). P1 [PR #89](https://github.com/spei04/agent-rewind/pull/89) merged as
 `ed0d6c48b8db3533c1bb20a75df93d7efc89fc7c`; successful PR/main checks and
 verified candidate 12323231309 establish the [accepted P1 delivery](#accepted-p1-delivery--2026-10-21).
-Issue #87 is closed, #88 is assigned to A and aggregate #86 remains open.
+Issue #87 is closed; #88 remains open pending delivery verification and aggregate #86 remains open.
 No customer-ready profile or production activation follows.
 
 C04, the frozen OpenAPI/logical schema and CT-M1-005/006 remain authoritative.
@@ -383,6 +383,30 @@ schema/existing-route selection, with no skips and the existing TestClient
 warning. Configured lint/security rules, formatting and strict typing passed.
 C independently accepted the initial `af1722a` HTTP/auth/guard source after 168
 passes and a separate populated-project probe. B's metadata finding is corrected
-here and awaits exact-source final review. Matching hosted checks, installed
+here; B accepted exact final source `1954f3e`. Matching hosted checks, installed
 package proof, accepted merge and protected-main candidate verification remain
 required; this source checkpoint grants no customer-ready activation.
+
+## P2 verification-pending checkpoint — 2026-10-21
+
+P2 #88 is **Implemented; verification pending** in draft
+[PR #91](https://github.com/spei04/agent-rewind/pull/91). B accepted exact
+`1954f3e7a7c6047562fc80d2ecca19ac7f5d95f7`; C independently passed 181
+route/package-helper/API/schema/auth/authority cases with no skips and one existing
+TestClient warning in 70.92 seconds. This covers the exact frozen OpenAPI metadata,
+observed final revocation/source changes, two populated projects, real
+cookies/service keys, zero writes/downstream I/O, the real migration-only guard
+and the installed-helper second-app isolation through source execution. It is not
+an installed-wheel or PostgreSQL claim.
+
+Lead composed that source with merged admission PR #90 as
+`47abde4164fbf136b16ca6b4e9b170923d4ea844`. B accepted the exact union,
+including all ten smoke-function bodies; A independently passed 217 tests with no
+skips and one warning in 71.51 seconds and executed the combined source smoke
+sequence through ar6, migration-only and readiness refusal. Lead
+lint/security/format/strict-types/lock/three-validator checks passed. Matching
+hosted/installed-package checks, accepted merge and protected-main candidate
+verification remain required. Lead owns delivery; A/B reviewers are available
+and all independent checkout consumers are released. Aggregate #86 and parent #6
+remain open. No profile, schema, contract, scope or effort change and no customer
+activation follow.

@@ -1,10 +1,10 @@
 # Admission execution plan
 
-2026-10-21 · Planning reconciliation of existing AR-008-A/B and reviewed C04 obligations. AR-008-A/P1 is Verified, with pure parser/configuration/envelope modules described in [ADMISSION_FOUNDATION.md](ADMISSION_FOUNDATION.md). P2 is Implemented; verification pending under lead delivery; P3 and AR-008-B remain Not started. The pure registry prepares explicit immutable values; no deployed registry, admission service, accepted migration, customer-ready profile or spending authority is supplied.
+2026-10-21 · Planning reconciliation of existing AR-008-A/B and reviewed C04 obligations. AR-008-A/P1 is Verified, with pure parser/configuration/envelope modules described in [ADMISSION_FOUNDATION.md](ADMISSION_FOUNDATION.md). P2 is Implemented; verification pending after merged PR #90, with protected-main/candidate acceptance pending under lead delivery; P3 and AR-008-B remain Not started. The pure registry prepares explicit immutable values; no deployed registry, admission service, accepted migration, customer-ready profile or spending authority is supplied.
 
 ## Entry and delivery boundaries
 
-AR-008-A retains direct prerequisites AR-007-C and AR-009-B, both Verified for their preparatory scope. AR-007-C completed accepted PR #79/main/candidate gates; see [P2 evidence](EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21). AR-008-A [#80](https://github.com/spei04/agent-rewind/issues/80) remains In progress; P1 [#81](https://github.com/spei04/agent-rewind/issues/81) is Verified after accepted PR #85 merge 81905a5 and matching PR/main/candidate evidence; P2 [#82](https://github.com/spei04/agent-rewind/issues/82) is Implemented; verification pending in draft PR #90, while P3 [#83](https://github.com/spei04/agent-rewind/issues/83) remains Not started until accepted merged P2. P1 inherits both prerequisites and C04; P2 requires accepted merged P1 and P3 requires accepted merged P2. The aggregate cannot be Verified until all three and the full service matrix pass. AR-008-B retains AR-008-A and AR-011-B. No outer dependency is removed or added.
+AR-008-A retains direct prerequisites AR-007-C and AR-009-B, both Verified for their preparatory scope. AR-007-C completed accepted PR #79/main/candidate gates; see [P2 evidence](EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21). AR-008-A [#80](https://github.com/spei04/agent-rewind/issues/80) remains In progress; P1 [#81](https://github.com/spei04/agent-rewind/issues/81) is Verified after accepted PR #85 merge 81905a5 and matching PR/main/candidate evidence; P2 [#82](https://github.com/spei04/agent-rewind/issues/82) is Implemented; verification pending after merged [PR #90](https://github.com/spei04/agent-rewind/pull/90) and passing PR checks, while P3 [#83](https://github.com/spei04/agent-rewind/issues/83) remains Not started until protected-main/candidate acceptance of that predecessor. A merge alone does not satisfy this gate. P1 inherits both prerequisites and C04; P2 requires accepted merged P1 and P3 requires accepted merged P2. The aggregate cannot be Verified until all three and the full service matrix pass. AR-008-B retains AR-008-A and AR-011-B. No outer dependency is removed or added.
 
 | Delivery | Scope | Base / planning range | Handoff |
 | --- | --- | --- | --- |
@@ -95,3 +95,28 @@ P2 #82 is **Implemented; verification pending** in [PR #90](https://github.com/s
 A independently checked composed source `01b3b65`: 461 tests passed, 78 actual-PostgreSQL cases skipped explicitly and one existing warning. Lead's full Ruff/security checks, formatting (202 files), strict typing (86 source files), frozen lock and all three validators passed. Matching hosted P2 migration, repository/contention, restore, SIGKILL and installed-package checks, accepted merge and protected-main candidate verification remain required. [Storage evidence and limits](ADMISSION_STORAGE.md) retain exact source/literal identities.
 
 Lead owns admission delivery, B reviews independently and C releases the reused checkout after progress validation. Aggregate #80/parent #8 remain open; P3 #83 is Not started. Listing P1 #87 is now Verified after accepted merge `ed0d6c48b8db3533c1bb20a75df93d7efc89fc7c`, successful PR/main runs 39547572853/39548734170 (2419/2427 core tests and three gVisor cases) and verified candidate 12323231309. A is assigned listing P2 #88 in reused primary work/scoped-run-routes; aggregate #86 remains open. No runtime, historical contract/profile, dependency, estimate, paid execution or activation change is made by this checkpoint.
+
+## P2 merged; verification pending — 2026-10-21
+
+[PR #90](https://github.com/spei04/agent-rewind/pull/90) merged reviewed source
+`4135c6fd1376cb630bf9b94e7c958c70e996a023` as `41759bb`.
+[PR run 39550589433](https://github.com/spei04/agent-rewind/actions/runs/39550589433)
+passed 2571/2579 core tests on Python 3.11/3.12 with 11/3 expected skips, actual
+PostgreSQL migration/repository/restore/process-death coverage, three gVisor tests,
+installed-package checks, security and gate.
+[Protected-main run 39552010828](https://github.com/spei04/agent-rewind/actions/runs/39552010828)
+and candidate verification remain pending. P2 stays **Implemented; verification pending**,
+with ledger accepted-merge/review-evidence fields null until final acceptance.
+P3 #83 remains **Not started**; aggregate #80 and parent #8 stay open.
+
+Lead composed reviewed listing route source `1954f3e` with admission main
+`41759bb` as `47abde4164fbf136b16ca6b4e9b170923d4ea844`. B accepted the exact
+source union; A independently passed 217 tests with no skips and one existing
+warning in 71.51 seconds, plus the combined source smoke sequence through
+ar6/migration-only/readiness refusal. These composition checks are source-level
+evidence, not installed-wheel or PostgreSQL execution. Lead full lint/security,
+formatting (203 files), strict typing (86 files), frozen lock and all three
+validators passed. Listing P2 #88 remains Implemented; verification pending in
+draft PR #91. Lead owns delivery; A/B reviews are available and C releases primary
+after this docs-only reconciliation. No runtime, estimates, dependencies, frozen
+history or activation changes.
