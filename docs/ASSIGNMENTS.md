@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Compose approved ledger planning with accepted fixture isolation | Independent exact-union review; P1 implementation still waits for accepted HTTP delivery. |
-| Delivery reviewer | Failed-attempt audit complete; verifier v8 and next hosted delivery | Independent verifier review, fresh PR/main checks and candidate acceptance remain required. |
-| Planning/verification | Review planning composition and verifier v8 | Preserve the frozen entry and Not started packages; keep source and actual execution evidence distinct. |
-| Lead | Corrected HTTP source integration and final inventory | Own primary and PR #106; release implementation only after protected-main candidate acceptance. |
+| Platform/security | Backlog test correction independently accepted | Ledger schema author assignment remains gated on HTTP main/candidate acceptance. |
+| Delivery reviewer | Audit protected-main run 39686498691, attempt 1 | Verify actual logs and candidate metadata; source is merged at cefd222. |
+| Planning/verification | Backlog fixture correction complete and independently reviewed | Ledger independent tests remain gated on the explicit implementation handoff. |
+| Lead | Main build verification and progress reconciliation | Own final candidate verification, issue read-back, and next assignment. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -794,3 +794,33 @@ inventory, not new hosted success. Fresh exact-source CI, protected-main and
 candidate acceptance remain required. HTTP #95/#93 remain In progress; ledger
 #107/#108/#109 remain Not started. This composition adds no runtime or ledger
 implementation, database work, model calls, paid resources or checkout.
+
+
+## Protected HTTP merge and backlog test correction — 2026-10-21
+
+[PR #106](https://github.com/spei04/agent-rewind/pull/106) merged through strict
+main protection as cefd222230c800eb2e90c49a3b3c411b394d0393 from reviewed
+source 065df8c. The source tree is unchanged. Independent review accepted PR
+run 39683408934 attempt 1: Python 3.11 had 3,893 passes and 14 expected skips;
+Python 3.12 had 3,904 passes and three expected skips. Actual PostgreSQL,
+installed-package and container trust, security, three gVisor cases, and the
+CI gate passed. Main run 39686498691 attempt 1 and final candidate verification
+remain pending; HTTP remains In progress and ledger packages remain Not started.
+
+Platform composed the accepted planning tree with the actual main merge at
+a1029f6. Independent planning review confirmed the exact ancestry and zero file
+changes; all approved scope, status, estimate and entry bytes were preserved.
+
+Planning/verification then owned a separate test-only correction at dbec08b.
+Four backlog negative tests previously rejected an unrelated AR-034-A
+prerequisite before checking their intended mutations. Each now first validates
+the unchanged live baseline, then asserts the intended refusal. The synthetic
+package-sequencing fixture also rewinds future ledger progress when it rewinds
+HTTP, with a new regression control and coherent cards and parent rollups.
+This fixture remains scoped to package/card tests, rather than a full dependency
+graph. Platform independently accepted the single-file correction after 55
+passing tests, four exact-refusal probes and three additional ledger-rewind
+states. The checker, actual plan, estimates, statuses and runtime did not change.
+
+Lead retains integration ownership. Both cloud checkouts are clean and reusable;
+no additional checkout, database process, provider call or resource was created.
