@@ -279,3 +279,23 @@ def test_capath_directory_bound_refuses_before_writes(stores, monkeypatch):
     with pytest.raises(ValueError, match="directory exceeds bounds"):
         stores.module.repair()
     assert not stores.calls and stores.module.CA_SOURCE.exists()
+
+
+@pytest.mark.parametrize("slot", ["00", "01"])
+def test_noncanonical_hash_slot_refuses_before_writes(stores, slot):
+    m = stores.module
+    alias = m.CAPATH / "00000000.0"
+    target = alias.readlink()
+    alias.unlink()
+    (m.CAPATH / ("00000000." + slot)).symlink_to(target)
+    with pytest.raises(ValueError, match="Noncanonical"):
+        m.repair()
+    assert not stores.calls and m.CA_SOURCE.exists()
+
+
+def test_canonical_collision_slots_preserve_every_root(stores, monkeypatch):
+    m = stores.module
+    monkeypatch.setattr(m, "subject_hash", lambda body: "00000000")
+    for number in (1, 2):
+        (m.CAPATH / f"{number:08x}.0").rename(m.CAPATH / f"00000000.{number}")
+    assert m.capath_roots("os_before") == set(stores.roots)

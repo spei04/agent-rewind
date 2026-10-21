@@ -185,6 +185,8 @@ def capath_roots(expected: str) -> set[str]:
         match = re.fullmatch(r"([0-9a-f]{8})\.(\d+)", path.name)
         if not match:
             continue
+        if not re.fullmatch(r"0|[1-9][0-9]*", match[2]):
+            raise ValueError("Noncanonical certificate hash slot")
         values = certificates(read_file(resolve_alias(path)))
         if len(values) != 1 or roots.intersection(values):
             raise ValueError("Unexpected hashed certificate alias")
