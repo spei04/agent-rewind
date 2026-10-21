@@ -49,6 +49,15 @@ def test_cookie_v2_issuer_binding_and_no_bootstrap(settings, storage):
         old = auth.cipher.encrypt(canonical(payload)).decode()
         with pytest.raises(IdentityInvalid):
             auth.principal(request(cookie="rewind_session=" + old))
+    # Even an accidentally persisted matching hash cannot turn the operator
+    # bootstrap setting into a customer credential.
+    db.issue_key(
+        settings.bootstrap_key.get_secret_value(),
+        "operator",
+        "collision",
+        time.time() + 1000,
+        "fixture",
+    )
     with pytest.raises(IdentityInvalid):
         auth.principal(request(token="Bearer " + settings.bootstrap_key.get_secret_value()))
     settings.oidc_issuer = "https://different.invalid"
@@ -88,8 +97,8 @@ def test_key_credential_prefetch_bound_and_real_database_failure(settings, stora
     db.issue_key("token", "operator", "test", time.time() + 1000, "fixture")
     with db.engine.begin() as connection:
         connection.execute(text("UPDATE api_keys SET expires=:value"), {"value": "x" * 100000})
-    # Bounded CASE must prevent transfer of the invalid cell, not merely reject
-    # it after parsing; inspect the actual result at the DBAPI boundary.
+    # The body SELECT must retain its CASE bound, so it cannot rely solely on
+    # a prior size query or a Python check after fetching the oversized cell.
     selected = []
 
     def statement(connection, cursor, sql, parameters, context, many):

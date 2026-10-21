@@ -6,10 +6,11 @@ import pytest
 from fastapi import HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.testclient import TestClient
+from route_fixture import cookie_headers, prepared_app, source_run, work_bodies
 from sqlalchemy.exc import OperationalError
 
 from agent_rewind import errors
-from agent_rewind.api import create_app
+from agent_rewind.artifact_metadata import ArtifactError
 from agent_rewind.database import Database
 from agent_rewind.errors import RULES, Fault
 from agent_rewind.migrations.compatibility import CompatibilityResult
@@ -34,9 +35,7 @@ def boundary_app(settings, monkeypatch):
         lambda self: CompatibilityResult("ready", "test_only", "synthetic-install"),
     )
     monkeypatch.setattr(Readiness, "start", lambda self: None)
-    app = create_app(settings)
-    app.state.db.migrate(installation_key="synthetic-install")
-    return app
+    return prepared_app(settings)
 
 
 @pytest.mark.parametrize("kind", ["value", "key", "nested", "malformed", "validation", "http"])
@@ -145,34 +144,35 @@ def test_outage_gate_auth_before_probe_and_before_upload(boundary_app, settings,
 
     monkeypatch.setattr(boundary_app.state.readiness, "check", unavailable)
     monkeypatch.setattr(
-        boundary_app.state.artifacts,
-        "put_json",
-        lambda value: pytest.fail("Upload occurred before successful readiness"),
+        boundary_app.state.reader.repositories,
+        "artifact_loader",
+        lambda value: pytest.fail("Unavailable admission reached storage"),
     )
-    admin = {"Authorization": "Bearer " + settings.bootstrap_key.get_secret_value()}
+    admin = cookie_headers(boundary_app)
+    run, job = source_run(boundary_app)
     db = boundary_app.state.db
-    key = db.issue_key("viewer-token", "viewer", "synthetic-viewer", 9999999999, "test")
-    job = db.enqueue("run", "0" * 64, 1, "test")
     with TestClient(boundary_app) as client:
+        key = client.post(
+            "/api/keys", headers=admin, json={"role": "viewer", "name": "reader", "days": 1}
+        ).json()
         assert client.post("/api/runs", json=task.model_dump()).status_code == 401
         assert (
             client.post(
                 "/api/runs",
                 json=task.model_dump(),
-                headers={"Authorization": "Bearer viewer-token"},
+                headers={"Authorization": "Bearer " + key["token"]},
             ).status_code
             == 403
         )
         assert not probes
-        for path in ("/api/runs", "/api/branches", "/api/studies", "/api/investigations"):
-            response = client.post(path, json=task.model_dump(), headers=admin)
-            assert response.status_code == 503
-        assert len(probes) == 4
+        for path, body in work_bodies(run, task):
+            assert client.post(path, json=body, headers=admin).status_code == 503
+        assert not probes  # Required admission adapter is unavailable before readiness.
         assert len(db.list_jobs()) == 1
         assert client.post(f"/api/jobs/{job}/cancel", headers=admin).status_code == 200
-        assert client.delete(f"/api/keys/{key}", headers=admin).status_code == 200
+        assert client.delete("/api/keys/" + key["id"], headers=admin).status_code == 200
         assert client.post("/auth/logout", headers=admin).status_code == 200
-        assert len(probes) == 4
+        assert not probes
         assert client.get("/livez").json() == {"status": "live"}
         assert client.get("/healthz").json() == {"status": "ok"}
         response = client.get("/readyz")
@@ -212,15 +212,17 @@ def test_malformed_validation_exception_does_not_call_errors(boundary_app):
 def test_invalid_workspace_path_is_safe_client_error_before_reads(
     boundary_app, settings, monkeypatch
 ):
+    run, _ = source_run(boundary_app)
     monkeypatch.setattr(
-        "agent_rewind.api.read_events",
-        lambda *args: pytest.fail("Invalid path reached customer event reads"),
+        boundary_app.state.reader,
+        "read_current",
+        lambda *args: pytest.fail("Invalid path reached graph read"),
     )
     with TestClient(boundary_app) as client:
         response = client.get(
-            "/api/runs/synthetic/files/1",
+            f"/api/runs/{run}/files/1",
             params={"path": "../private-source"},
-            headers={"Authorization": "Bearer " + settings.bootstrap_key.get_secret_value()},
+            headers=cookie_headers(boundary_app),
         )
     assert response.status_code == 422
     assert "private-source" not in response.text
@@ -305,9 +307,7 @@ def test_default_log_message_contains_safe_correlation(boundary_app, caplog, dia
 )
 def test_requested_missing_run_is_404(boundary_app, settings, path):
     with TestClient(boundary_app) as client:
-        response = client.get(
-            path, headers={"Authorization": "Bearer " + settings.bootstrap_key.get_secret_value()}
-        )
+        response = client.get(path, headers=cookie_headers(boundary_app))
     assert response.status_code == 404
     assert response.json() == {"detail": "Resource not found."}
 
@@ -315,17 +315,22 @@ def test_requested_missing_run_is_404(boundary_app, settings, path):
 @pytest.mark.parametrize(
     "path", ["/api/runs/present/files/1", "/api/compare?left=present&right=present"]
 )
-def test_internal_missing_evidence_field_remains_500(boundary_app, settings, monkeypatch, path):
-    # Requested records exist; a malformed nested event is an internal data error.
-    monkeypatch.setattr(boundary_app.state.db, "get", lambda *args: {})
-    monkeypatch.setattr("agent_rewind.api.read_events", lambda *args: [{}])
-    monkeypatch.setattr("agent_rewind.compare.read_events", lambda *args: [{}])
+def test_internal_corrupt_evidence_has_fixed_unavailable_response(
+    boundary_app, settings, monkeypatch, path
+):
+    run, _ = source_run(boundary_app)
+
+    def corrupt(*args):
+        raise ArtifactError(CANARY)
+
+    monkeypatch.setattr(boundary_app.state.views, "files", corrupt)
+    monkeypatch.setattr(boundary_app.state.views, "compare", corrupt)
+    path = path.replace("present", run)
     with TestClient(boundary_app) as client:
-        response = client.get(
-            path, headers={"Authorization": "Bearer " + settings.bootstrap_key.get_secret_value()}
-        )
-    assert response.status_code == 500
-    assert response.json() == {"detail": "The request could not be completed."}
+        response = client.get(path, headers=cookie_headers(boundary_app))
+    assert response.status_code == 503
+    assert response.json() == {"detail": "A required service is temporarily unavailable."}
+    assert CANARY not in response.text
 
 
 def test_global_logger_handlers_cannot_receive_or_reformat_diagnostic(

@@ -207,6 +207,9 @@ def test_sqlite_budget_interrupts_expensive_inspection(prepared, monkeypatch):
         ("/auth/login", "get"),
         ("/auth/callback", "get"),
         ("/auth/logout", "post"),
+        ("/api/me/lookalike", "get"),
+        ("/auth/logout/lookalike", "post"),
+        ("/api/schema/lookalike", "get"),
     ],
 )
 def test_all_customer_routes_refuse_before_auth_or_artifacts(settings, path, method, monkeypatch):
@@ -217,8 +220,11 @@ def test_all_customer_routes_refuse_before_auth_or_artifacts(settings, path, met
         pytest.fail("Customer data or auth reached before compatibility refusal")
 
     monkeypatch.setattr(app.state.auth, "principal", forbidden)
-    monkeypatch.setattr(app.state.artifacts, "put_json", forbidden)
-    monkeypatch.setattr(app.state.artifacts, "json", forbidden)
+    monkeypatch.setattr(app.state.auth, "session", forbidden)
+    monkeypatch.setattr(app.state.auth, "login", forbidden)
+    monkeypatch.setattr(app.state.auth, "callback", forbidden)
+    monkeypatch.setattr(app.state.admission, "admit", forbidden)
+    monkeypatch.setattr(app.state.reader.repositories, "artifact_loader", forbidden)
     with TestClient(app) as client:
         response = getattr(client, method)(path)
     assert response.status_code == 503

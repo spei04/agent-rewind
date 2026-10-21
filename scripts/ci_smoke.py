@@ -14,6 +14,7 @@ import agent_rewind
 import agent_rewind.api
 import agent_rewind.cli
 import agent_rewind.scoped_artifacts
+from agent_rewind.artifact_metadata import configure_artifact_engine
 from agent_rewind.migrations.compatibility import runtime_schema_compatibility
 from agent_rewind.migrations.ownership_service import initialize_ownership
 from agent_rewind.migrations.service import install, schema_status
@@ -162,6 +163,44 @@ def request_foundation_smoke(engine: Engine, root: Path) -> None:
         raise RuntimeError("Installed reader inferred an unpublished run root")
 
 
+def existing_routes_smoke(engine: Engine, root: Path) -> None:
+    from cryptography.fernet import Fernet
+
+    from agent_rewind.artifact_storage import LocalArtifactStorage
+    from agent_rewind.errors import Fault
+    from agent_rewind.legacy_admission import UnavailableAdmission
+    from agent_rewind.legacy_views import LegacyViews
+    from agent_rewind.published_reader import PublishedRunReader
+    from agent_rewind.request_authority import RequestAuthority
+    from agent_rewind.request_identity import VerifiedPrincipal
+    from agent_rewind.scoped_actions import ScopedActions
+
+    principal = VerifiedPrincipal("oidc:" + "a" * 64)
+    authority = RequestAuthority(engine)
+    context = authority.named(principal, "9" * 32).context
+    reader = PublishedRunReader(
+        engine, LocalArtifactStorage(root, Fernet(Fernet.generate_key()), plaintext_limit=4096)
+    )
+    views = LegacyViews(reader, 4096)
+    if views.runs(context) != [] or views.jobs(context) != [] or views.studies(context) != []:
+        raise RuntimeError("Installed bounded view changed empty scoped metadata")
+    try:
+        ScopedActions(engine, authority).record_run_read(principal, context, "c" * 32)
+    except ResourceNotFound:
+        pass
+    else:
+        raise RuntimeError("Installed audit accepted a missing run")
+    try:
+        UnavailableAdmission().require_available()
+    except Fault as error:
+        if error.code != "dependency_unavailable":
+            raise RuntimeError(
+                "Installed unavailable admission changed its fixed refusal"
+            ) from None
+    else:
+        raise RuntimeError("Installed admission unexpectedly available")
+
+
 def readiness_smoke(root: Path, database_url: str) -> None:
     import asyncio
     import time
@@ -237,6 +276,7 @@ if importlib.metadata.version("agent-rewind") != "0.1.0":
 with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporary:
     database = Path(temporary) / "metadata.sqlite"
     engine = create_engine(f"sqlite:///{database}")
+    configure_artifact_engine(engine)
     try:
         if schema_status(engine)["state"] != "empty" or database.exists():
             raise RuntimeError("Installed schema inspection modified an empty database")
@@ -275,6 +315,7 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
         projection_smoke(engine)
         publication_smoke(engine, Path(temporary))
         request_foundation_smoke(engine, Path(temporary))
+        existing_routes_smoke(engine, Path(temporary))
         compatibility = runtime_schema_compatibility(engine)
         if compatibility.status != "incompatible" or compatibility.code != "migration_only":
             raise RuntimeError(

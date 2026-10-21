@@ -7,7 +7,7 @@ from threading import Lock
 from typing import Any, Literal, TypeVar
 
 from anyio.to_thread import current_default_thread_limiter
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -16,26 +16,29 @@ from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import RequestResponseEndpoint
 
-from .artifacts import Artifacts
+from .artifact_metadata import ArtifactError, configure_artifact_engine
+from .artifact_storage import LocalArtifactStorage
 from .auth import Auth
-from .compare import compare
 from .config import Settings
 from .database import Database
-from .engine import read_events
-from .errors import Fault, SafeBoundary, error_response, exception_response
-from .experiments import locate
+from .errors import ErrorCode, Fault, SafeBoundary, error_response, exception_response
+from .legacy_admission import UnavailableAdmission, WorkAdmission, WorkKind
+from .legacy_views import LegacyViews
 from .middleware import BodyLimit
 from .migrations.compatibility import CompatibilityResult
 from .models import BranchRequest, StrictModel, StudyRequest, TaskSpec, valid_path
+from .published_reader import PublishedRunReader
 from .readiness import Readiness
+from .request_authority import ProjectDecision, RequestAuthority
+from .scoped_actions import ScopedActionError, ScopedActions
 
 ProbeValue = TypeVar("ProbeValue")
 
 
 class KeyRequest(StrictModel):
-    name: str
-    role: Literal["viewer", "operator", "administrator"]
-    days: int = Field(default=30, ge=1, le=90)
+    name: str = Field(min_length=1, max_length=120)
+    role: Literal["viewer", "operator"]
+    days: int = Field(default=30, ge=1, le=90, strict=True)
 
 
 class InvestigationRequest(StrictModel):
@@ -48,8 +51,24 @@ class InvestigationRequest(StrictModel):
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
-    db, artifacts = Database(settings), Artifacts(settings)
+    db = Database(settings)
+    configure_artifact_engine(db.engine)
     auth = Auth(settings, db)
+    authority = RequestAuthority(db.engine)
+    actions = ScopedActions(db.engine, authority)
+    reader = PublishedRunReader(
+        db.engine,
+        LocalArtifactStorage(settings.data_dir, auth.cipher, plaintext_limit=64 * 1024 * 1024),
+    )
+    if settings.storage != "local":
+        # No raw S3 client, ambient credential discovery or local-file fallback.
+        # The scoped remote storage adapter remains a separate delivery task.
+        def unavailable_storage(value: Any) -> bytes:
+            raise ArtifactError("artifact_storage_unsupported")
+
+        reader.repositories.artifact_loader = unavailable_storage
+    views = LegacyViews(reader, settings.workspace_mb * 1024 * 1024)
+    admission: WorkAdmission = UnavailableAdmission()
     readiness = Readiness(settings)
 
     @asynccontextmanager
@@ -68,8 +87,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url=None,
         lifespan=lifespan,
     )
-    app.state.db, app.state.artifacts, app.state.auth = db, artifacts, auth
-    app.state.readiness = readiness
+    app.state.db, app.state.auth = db, auth
+    app.state.authority, app.state.actions = authority, actions
+    app.state.reader, app.state.views = reader, views
+    app.state.admission, app.state.readiness = admission, readiness
     app.add_middleware(BodyLimit)
     guard_inflight = 0
     guard_lock = Lock()
@@ -149,17 +170,59 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def safe_exception(request: Request, exc: Exception) -> JSONResponse:
         return exception_response(request.scope, exc)
 
-    async def require_work_readiness(request: Request) -> None:
-        await run_in_threadpool(auth.principal, request, "operator")
+    def decision(
+        request: Request,
+        action: str = "read",
+        *,
+        kind: str | None = None,
+        resource_id: str | None = None,
+    ) -> ProjectDecision:
+        principal = auth.principal(request)
+        request.state.principal = principal
+        return authority.legacy(
+            principal.verified, action, resource_kind=kind, resource_id=resource_id
+        )
+
+    async def admit(
+        request: Request, kind: WorkKind, body: dict[str, Any], source_id: str | None = None
+    ) -> dict[str, str]:
+        action = {
+            "run": "record",
+            "branch": "branch",
+            "study": "study",
+            "investigate": "investigate",
+        }[kind]
+        context = (
+            await run_in_threadpool(
+                decision,
+                request,
+                action,
+                kind="run" if source_id is not None else None,
+                resource_id=source_id,
+            )
+        ).context
+        # The absent adapter refuses BEFORE any artifact-readiness probe, upload,
+        # enqueue, audit, credential creation or provider invocation.
+        adapter: WorkAdmission = app.state.admission
+        await run_in_threadpool(adapter.require_available)
         result = await readiness.check()
         if result != "ready":
             raise Fault(result)
+        return {
+            "job_id": await run_in_threadpool(
+                adapter.admit, request.state.principal.verified, context, kind, body
+            )
+        }
 
-    def record(record_id: str, kind: str) -> Any:
-        try:
-            return db.get(record_id, kind)
-        except KeyError:
-            raise Fault("not_found") from None
+    @app.exception_handler(ScopedActionError)
+    async def action_exception(request: Request, exc: ScopedActionError) -> JSONResponse:
+        codes: dict[str, ErrorCode] = {
+            "action_invalid_input": "invalid_request",
+            "action_unavailable": "dependency_unavailable",
+            "outcome_uncertain": "outcome_uncertain",
+        }
+        code = codes.get(exc.code, "internal_error")
+        return exception_response(request.scope, Fault(code))
 
     @app.api_route("/readyz", methods=["GET", "HEAD"])
     async def ready(request: Request) -> JSONResponse:
@@ -192,151 +255,105 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.post("/auth/logout")
     def logout(request: Request) -> JSONResponse:
-        auth.principal(request)
+        # Cookie clearing ALWAYS validates that cookie's CSRF/Origin, even if a
+        # bearer header is also supplied. Membership is deliberately irrelevant.
+        auth.session(request)
         response = JSONResponse({"ok": True})
         response.delete_cookie("rewind_session")
         return response
 
     @app.get("/api/me")
-    def me(request: Request) -> dict[str, str]:
+    def me(request: Request) -> dict[str, str | None]:
         principal = auth.principal(request)
-        return {"subject": principal.subject, "role": principal.role, "csrf": principal.csrf}
+        return {
+            "subject": principal.subject,
+            "role": authority.legacy_role(principal.verified),
+            "csrf": principal.csrf,
+        }
 
     @app.get("/api/schema")
     def schema(request: Request) -> Any:
-        auth.principal(request)
-        return app.openapi()
+        context = decision(request).context
+        result = app.openapi()
+        authority.repositories.require_action(context, "read")
+        return result
 
     @app.get("/api/runs")
     def runs(request: Request) -> Any:
-        auth.principal(request)
-        return db.list_records("run")
+        return views.runs(decision(request, "list").context)
 
     @app.get("/api/runs/{run_id}")
     def run(request: Request, run_id: str) -> Any:
-        auth.principal(request)
-        result = record(run_id, "run")
-        result["events"] = read_events(db, artifacts, run_id)
-        result["locations"] = locate(result["events"])
-        if result.get("evaluation_ref"):
-            result["evaluation"] = artifacts.json(result["evaluation_ref"])
-        db.audit(auth.principal(request).subject, "run.read", run_id)
+        context = decision(request, kind="run", resource_id=run_id).context
+        result = views.run(context, run_id)
+        actions.record_run_read(request.state.principal.verified, context, run_id)
         return result
 
     @app.get("/api/runs/{run_id}/files/{step}")
     def files(request: Request, run_id: str, step: int, path: str | None = None) -> Any:
-        auth.principal(request)
+        context = decision(request, kind="run", resource_id=run_id).context
         if path is not None:
             try:
                 valid_path(path)
             except ValueError:
                 raise Fault("invalid_request") from None
-        record(run_id, "run")
-        history = read_events(db, artifacts, run_id)
-        if not 1 <= step <= len(history):
-            raise HTTPException(404, "Decision not found.")
-        snapshot = artifacts.json(history[step - 1]["checkpoint"])
-        workspace = artifacts.workspace(snapshot["workspace"], settings.workspace_mb * 1024 * 1024)
-        if path is None:
-            return [
-                {"path": p, "bytes": len(f.data), "mode": oct(f.mode)}
-                for p, f in sorted(workspace.items())
-            ]
-        if path not in workspace:
-            raise HTTPException(404, "File not found.")
-        return {
-            "path": path,
-            "content": workspace[path].data[:100000].decode("utf-8", errors="replace"),
-            "truncated": len(workspace[path].data) > 100000,
-        }
+        return views.files(context, run_id, step, path)
 
-    @app.post("/api/runs", status_code=202, dependencies=[Depends(require_work_readiness)])
-    def submit(request: Request, task: TaskSpec) -> dict[str, str]:
-        actor = auth.principal(request, "operator")
-        return {
-            "job_id": db.enqueue(
-                "run", artifacts.put_json(task.model_dump()), task.budget_usd, actor.subject
-            )
-        }
+    @app.post("/api/runs", status_code=202)
+    async def submit(request: Request, task: TaskSpec) -> dict[str, str]:
+        return await admit(request, "run", task.model_dump())
 
-    @app.post("/api/branches", status_code=202, dependencies=[Depends(require_work_readiness)])
-    def branch(request: Request, value: BranchRequest) -> dict[str, str]:
-        actor = auth.principal(request, "operator")
-        source = record(value.parent_id, "run")
-        if source["status"] != "complete" or not source["branchable"]:
-            raise HTTPException(409, "Source run is not branchable.")
-        return {
-            "job_id": db.enqueue(
-                "branch", artifacts.put_json(value.model_dump()), value.budget_usd, actor.subject
-            )
-        }
+    @app.post("/api/branches", status_code=202)
+    async def branch(request: Request, value: BranchRequest) -> dict[str, str]:
+        return await admit(request, "branch", value.model_dump(), value.parent_id)
 
-    @app.post("/api/studies", status_code=202, dependencies=[Depends(require_work_readiness)])
-    def study(request: Request, value: StudyRequest) -> dict[str, str]:
-        actor = auth.principal(request, "operator")
-        record(value.run_id, "run")
-        return {
-            "job_id": db.enqueue(
-                "study", artifacts.put_json(value.model_dump()), value.budget_usd, actor.subject
-            )
-        }
+    @app.post("/api/studies", status_code=202)
+    async def study(request: Request, value: StudyRequest) -> dict[str, str]:
+        return await admit(request, "study", value.model_dump(), value.run_id)
 
-    @app.post(
-        "/api/investigations", status_code=202, dependencies=[Depends(require_work_readiness)]
-    )
-    def investigate(request: Request, value: InvestigationRequest) -> dict[str, str]:
-        actor = auth.principal(request, "operator")
-        record(value.run_id, "run")
-        return {
-            "job_id": db.enqueue(
-                "investigate",
-                artifacts.put_json(value.model_dump()),
-                value.budget_usd,
-                actor.subject,
-            )
-        }
+    @app.post("/api/investigations", status_code=202)
+    async def investigate(request: Request, value: InvestigationRequest) -> dict[str, str]:
+        return await admit(request, "investigate", value.model_dump(), value.run_id)
 
     @app.get("/api/compare")
     def compare_runs(request: Request, left: str, right: str) -> dict[str, Any]:
-        auth.principal(request)
-        record(left, "run")
-        record(right, "run")
-        return compare(db, artifacts, left, right, settings.workspace_mb * 1024 * 1024)
+        context = decision(request, kind="run", resource_id=left).context
+        return views.compare(context, left, right)
 
     @app.get("/api/studies")
     def studies(request: Request) -> Any:
-        auth.principal(request)
-        return db.list_records("study")
+        return views.studies(decision(request, "list").context)
 
     @app.get("/api/studies/{study_id}")
     def get_study(request: Request, study_id: str) -> Any:
-        auth.principal(request)
-        return record(study_id, "study")
+        return views.study(decision(request, kind="study", resource_id=study_id).context, study_id)
 
     @app.get("/api/jobs")
     def get_jobs(request: Request) -> Any:
-        auth.principal(request)
-        result = db.list_jobs()
-        for job in result:
-            if job["result"]:
-                job["result"] = artifacts.json(job["result"])
-        return result
+        return views.jobs(decision(request, "list").context)
 
     @app.post("/api/jobs/{job_id}/cancel")
     def cancel(request: Request, job_id: str) -> dict[str, bool]:
-        actor = auth.principal(request, "operator")
-        db.cancel(job_id, actor.subject)
+        context = decision(request, "cancel", kind="job", resource_id=job_id).context
+        actions.cancel(request.state.principal.verified, context, job_id)
         return {"ok": True}
 
     @app.post("/api/keys", status_code=201)
     def issue_key(request: Request, value: KeyRequest) -> dict[str, str]:
-        actor = auth.principal(request, "administrator")
-        return auth.issue(value.role, value.name, value.days, actor.subject)
+        context = decision(request, "create_key").context
+        issued = actions.issue_key(
+            request.state.principal.verified,
+            context,
+            role=value.role,
+            name=value.name,
+            days=value.days,
+        )
+        return {"id": issued.id, "token": issued.token, "role": issued.role}
 
     @app.delete("/api/keys/{key_id}")
     def revoke_key(request: Request, key_id: str) -> dict[str, bool]:
-        actor = auth.principal(request, "administrator")
-        db.revoke_key(key_id, actor.subject)
+        context = decision(request, "revoke_key", kind="key", resource_id=key_id).context
+        actions.revoke_key(request.state.principal.verified, context, key_id)
         return {"ok": True}
 
     web = Path(__file__).parent / "web"

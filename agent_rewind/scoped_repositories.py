@@ -1,4 +1,4 @@
-"""Preparatory project-scoped reads; routes and customer admission remain disabled."""
+"""Project-scoped reads; release compatibility and admission remain separate guards."""
 
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ members = table(
 class ProjectContext:
     """Identity already verified by a trusted authenticator, never request role claims.
 
-    Construction is not authentication. AR-007-C must translate only verified
+    Construction is not authentication. HTTP authority translates only verified
     issuer-bound OIDC identities or verified API-key identities into this context.
     """
 
@@ -235,7 +235,7 @@ class ScopedRepositories:
     """SQL ownership and fresh authorization, with explicit scope on every call.
 
     This interface does not replace the release revision guard or authenticate
-    callers. It is deliberately not wired into legacy or v1 routes in this slice.
+    callers. Existing HTTP views compose it; future routes must do the same.
     """
 
     def __init__(

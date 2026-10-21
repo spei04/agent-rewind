@@ -71,10 +71,31 @@ function showView(view) {
     jobs: "Execution jobs",
   }[view];
 }
+function canOperate() {
+  return ["operator", "maintainer"].includes(state.user?.role);
+}
+function clearProtectedState() {
+  state.runs = [];
+  state.run = null;
+  for (const id of ["run-list", "studies-list", "jobs-list"])
+    $(id).replaceChildren();
+  $("run-detail").classList.add("hidden");
+  $("run-empty").classList.remove("hidden");
+  for (const id of ["branch", "investigate", "new-run", "empty-record"])
+    $(id).disabled = true;
+  document.querySelectorAll("[data-project-action]").forEach((button) => {
+    button.disabled = true;
+  });
+}
 async function authenticate() {
+  state.user = null;
+  state.csrf = "";
+  clearProtectedState();
   state.user = await api("/me");
   state.csrf = state.user.csrf;
-  $("identity").textContent = `${state.user.subject} · ${state.user.role}`;
+  $("identity").textContent = `${state.user.subject} · ${state.user.role || "no project access"}`;
+  for (const id of ["new-run", "empty-record"])
+    $(id).disabled = !canOperate();
   $("connection").textContent = "Connected";
   $("logout").classList.remove("hidden");
   $("login-panel").classList.add("hidden");
@@ -172,7 +193,7 @@ async function selectRun(id, reset = true) {
     null,
     2,
   );
-  const operator = state.user.role !== "viewer";
+  const operator = canOperate();
   $("branch").disabled =
     !operator || !state.run.branchable || state.run.status !== "complete";
   $("investigate").disabled =
@@ -404,7 +425,8 @@ function renderJobs(jobs) {
       row.append(b);
     } else if (["queued", "running"].includes(job.status)) {
       const b = element("button", "Cancel", "quiet");
-      b.disabled = state.user.role === "viewer";
+      b.dataset.projectAction = "cancel";
+      b.disabled = !canOperate();
       b.onclick = guard(async () => {
         await api(`/jobs/${job.id}/cancel`, {});
         await refresh();
@@ -440,8 +462,8 @@ document
   .forEach((b) => (b.onclick = () => showView(b.dataset.view)));
 for (const id of ["new-run", "empty-record"])
   $(id).onclick = () => {
-    if (!state.user) {
-      notice("Connect with a service API key or organization login first.");
+    if (!canOperate()) {
+      notice("A current operator or maintainer grant is required.");
       return;
     }
     $("task-dialog").showModal();
