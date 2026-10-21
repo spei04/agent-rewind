@@ -9,6 +9,7 @@ from sqlalchemy import event, text
 from sqlalchemy.exc import DBAPIError
 
 from agent_rewind.api import create_app
+from agent_rewind.artifacts import Artifacts
 from agent_rewind.database import Database
 from agent_rewind.migrations import compatibility as guard
 from agent_rewind.migrations import service
@@ -86,7 +87,13 @@ def test_postgres_api_and_worker_cannot_touch_customer_data(pg, settings, monkey
     def forbidden(*args, **kwargs):
         pytest.fail("An incompatible runtime accessed customer artifacts or a provider")
 
-    monkeypatch.setattr(app.state.artifacts, "json", forbidden)
+    # HTTP uses the scoped reader; the worker still consumes legacy Artifacts.
+    # Trap both current byte boundaries without substituting the schema guard.
+    monkeypatch.setattr(app.state.reader.repositories, "artifact_loader", forbidden)
+    artifacts = Artifacts(settings)
+    monkeypatch.setattr(artifacts, "get", forbidden)
+    monkeypatch.setattr(artifacts, "put", forbidden)
+    monkeypatch.setattr("agent_rewind.worker.DockerRunner", forbidden)
     monkeypatch.setattr("agent_rewind.worker.ChatPolicy", forbidden)
     with TestClient(app) as client:
         assert client.get("/api/runs").status_code == 503
@@ -95,7 +102,7 @@ def test_postgres_api_and_worker_cannot_touch_customer_data(pg, settings, monkey
     with pytest.raises(guard.SchemaNotReady, match="migration_only"):
         db.claim("synthetic-worker")
     with pytest.raises(guard.SchemaNotReady, match="migration_only"):
-        work_once(settings, db, app.state.artifacts)
+        work_once(settings, db, artifacts)
     with pg["owner"].connect() as connection:
         assert connection.exec_driver_sql("SELECT status,owner,reserved FROM jobs").one() == (
             "queued",
