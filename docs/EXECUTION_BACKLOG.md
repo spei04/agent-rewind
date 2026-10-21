@@ -867,7 +867,7 @@ Three delivery PRs: P1 2 [2–3], P2 2 [2–3], P3 3 [3–5] BE days. All three 
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium-low confidence.
 - **Responsible role:** BE; C owns HTTP entry/implementation after independent entry review; A owns independent test design and actual PostgreSQL tests; B reviews security/contracts; the lead owns integration and delivery.
 - **Definition of done:** Independent HTTP/security review, actual PostgreSQL integration, matching hosted installed-package/security/gVisor checks, accepted merge and protected-main candidate evidence establish P2 and aggregate completion. Preserve historical records, existing routes and later AR-010/AR-012-B/customer gates.
-- **Progress:** In progress in #95 after accepted P1 delivery. C prepares the HTTP entry; runtime follows independent A/B/lead entry review. A owns independent tests, B security/contract review and the lead integration. Accepted-merge/review evidence remains null; no HTTP delivery is claimed.
+- **Progress:** In progress in #95 after accepted P1 delivery. A/B/lead accepted entry 9f4f9a34; C implements the three routes and SQLite/ASGI tests. A owns independent tests, B security/contract review and the lead integration. Accepted-merge/review evidence remains null; no HTTP delivery is claimed.
 
 <a id="ar-009"></a>
 

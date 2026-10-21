@@ -7,9 +7,9 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
 | A | P2 independent HTTP test design, then actual PostgreSQL tests | Read-only until entry review and explicit primary checkout/database handoff. |
-| C | P2 HTTP entry, then implementation and SQLite/ASGI tests | Secondary checkout; freeze the entry before runtime. |
+| C | P2 HTTP implementation and SQLite/ASGI tests | Secondary checkout after accepted entry 9f4f9a34; freeze runtime for A/B review. |
 | B | Independent P2 security/contract and progress review | Review immutable entry and exact source; no checkout or database ownership. |
-| Lead | P1 acceptance, P2 integration and progress | Primary checkout for progress; hand off to A after entry composition. |
+| Lead | P2 integration and progress | Primary checkout until A receives frozen runtime for independent tests. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -547,3 +547,7 @@ P1 #94 is Verified/closed at merge 03a8e074 from reviewed source 1b0d1fe4. B acc
 - Lead: reconcile roadmap/backlog/issues, compose accepted work, verify delivery and assign only dependency-ready successors.
 
 P1 acceptance satisfies P2's predecessor gate. The entry review remains before P2 runtime; P2 accepted-merge/review fields stay null. Aggregate #93 and parent #8 remain open. No new paid resources, provider calls, partner data or production activation.
+
+## P2 entry accepted and implementation assigned — 2026-10-21
+
+A, B and the lead accepted corrected entry 9f4f9a34 after fixing the migration-only status/reason description; no runtime guard changed. Composition 9692e706 preserves the exact reviewed five-file progress delta and entry document. C now implements the three routes and SQLite/ASGI tests in the reused secondary checkout. A owns disjoint actual PostgreSQL HTTP tests after immutable runtime handoff; B reviews runtime security and metadata. Primary/database handoff remains explicit and the existing synthetic instance stays stopped until A receives it. No new checkout, dependency installation, provider call or paid resource is required.
