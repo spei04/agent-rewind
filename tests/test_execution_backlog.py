@@ -171,6 +171,12 @@ def _delivery_packet(packet):
     for package in admission["delivery_packages"]:
         package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
     markdown = _sync_package_cards(markdown, admission["delivery_packages"])
+    # Operation adapters likewise cannot retain progress without admission.
+    operation = next(t for t in data["tasks"] if t["id"] == "AR-008-B")
+    operation["status"] = "Not started"
+    for package in operation["delivery_packages"]:
+        package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
+    markdown = _sync_package_cards(markdown, operation["delivery_packages"])
     # Listing also consumes the rewound authority producer.
     listing = next(t for t in data["tasks"] if t["id"] == "AR-006-B")
     listing["status"] = "Not started"
