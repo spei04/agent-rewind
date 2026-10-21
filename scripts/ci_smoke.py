@@ -429,6 +429,7 @@ for profile in (
     "postgresql16_artifacts",
     "sqlite_projection",
     "sqlite_admission",
+    "postgresql16_admission",
 ):
     shape = json.loads(
         importlib.resources.files("agent_rewind.migrations")

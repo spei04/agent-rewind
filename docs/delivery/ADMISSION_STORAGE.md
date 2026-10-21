@@ -125,12 +125,36 @@ for independent comparison and freeze authorization. Subsequent matching-source
 tests compare the actual catalog to the reviewed literal and exercise the real
 initializer. This capture is a review aid, not automatic profile acceptance.
 
-Actual PostgreSQL execution, backup/restore, installed-package evidence and
-final independent repository/P2 acceptance remain pending. P3 and customer
-admission remain unavailable.
+The reviewed PostgreSQL literal is now packaged as
+`agent_rewind/migrations/profiles/postgresql16_admission.json`. Hosted capture
+run [39547523509](https://github.com/spei04/agent-rewind/actions/runs/39547523509)
+at published source `86938b1d6fa451c8c19a6f00a956c6eacbe4e9d6` tested merge
+`1201d4fe40bfc444a789570f1325a88ddc52d1b4`. Python jobs 119048965928 and
+119048966175 produced byte-identical candidates. Lead verified the tested
+source/tree and three DDL/catalog/revision hashes; Engineer B independently
+accepted the exact catalog and native constraint semantics before freezing.
+
+- File SHA-256: `970a99d22a06b38c9fb6036a0199d4a1a35d63004b335635359478adc7fc5eef`.
+- Size: 79,455 bytes; canonical catalog SHA-256:
+  `b94d8e1e8a65614122bfa6bcab5695d68f480305196a42116b018c9b2abfd442`.
+- Exactly 17 tables plus the native `$postgres` catalog entry. All 14 prior
+  non-job tables/native rows and original 13 job columns are preserved. Only
+  the reviewed three job columns/two checks and operations/operation_keys are new.
+- The private source/provenance/candidate records remain owner-readable outside
+  checkouts, with source, purpose and review date 2026-11-20 recorded.
+
+The capture run failed and is not runtime or release acceptance. Its deliberate
+missing-literal gate, dependent missing-profile fixture and stale exact revision
+expectation are now resolved in source; the separately reported S608 query rule
+was corrected at `af24c727`. The exact fifth release expectation at `9ab73f2`
+retains ar6 migration-only status and both completed ownership/run-index phases.
+The next matching hosted run must compare the literal, execute the initializer,
+repository/contention/backup/restore cases and isolated package smoke, and pass
+all required checks. P2 is unverified; P3 and customer admission remain unavailable.
 
 The package allowlist includes the two repository modules, two admission migration
-modules, revision and exact reviewed SQLite literal. Installed smoke advances an
+modules, revision and both exact reviewed literals. Installed smoke reads each
+packaged literal and advances an
 explicit empty ar5 installation to ar6, checks exact reentry and missing/scoped
 identity reads, and proves no operation/alias rows were created. It retains the
 final migration-only refusal. The exact smoke helper plus delivery helper cases
@@ -167,3 +191,11 @@ PostgreSQL skips. A small SQLite probe also exercised the restore fixture's new
 identity setup, exact row snapshot and initializer reentry; it did not execute
 PostgreSQL or backup/restore. Actual PostgreSQL schema, contention, restore and
 installed-distribution acceptance remain hosted gates, not these local results.
+
+With the exact reviewed PostgreSQL literal packaged, the focused initializer,
+catalog, package-helper, compatibility and delivery selection passed 128 tests
+with 33 explicit local PostgreSQL skips and one existing Starlette warning.
+Configured lint, security rules, formatting and strict typing passed. All eight
+predecessor profiles and eighteen frozen contract files remain byte-identical.
+These local checks do not replace matching hosted PostgreSQL or installed-package
+execution.

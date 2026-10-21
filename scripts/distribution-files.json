@@ -43,6 +43,7 @@
     "agent_rewind/migrations/ownership_service.py",
     "agent_rewind/migrations/ownership_state.py",
     "agent_rewind/migrations/profiles/postgresql16.json",
+    "agent_rewind/migrations/profiles/postgresql16_admission.json",
     "agent_rewind/migrations/profiles/postgresql16_artifacts.json",
     "agent_rewind/migrations/profiles/postgresql16_ownership.json",
     "agent_rewind/migrations/profiles/postgresql16_projection.json",
