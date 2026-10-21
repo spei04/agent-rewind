@@ -70,14 +70,61 @@ Nullable failure correlation preserves schema compatibility; every new P3
 operation must supply its trusted first origin, which replay/alias binding
 cannot overwrite.
 
-## Evidence boundary
+## Reviewed SQLite literal and evidence boundary
 
-The first DDL checkpoint passed 62 SQLite constraint/rollback cases. The next
+The exact SQLite literal is packaged as
+`agent_rewind/migrations/profiles/sqlite_admission.json`.
+Engineer B independently reviewed its DDL and catalog-source hashes against
+`a5918c7`; lead authorized freezing these exact bytes.
+
+- File SHA-256: `2f67620749cda91728bfaa86c921a4ea65b67ea1d9f7f99a1205c41c481a9aac`.
+- Size: 33,071 bytes. There are exactly 17 tables. All 14 non-jobs predecessor
+  entries and the original 13 job columns, indexes and foreign keys are unchanged.
+- Only operations/operation_keys and the three job columns/two job checks are new.
+  Historical packaged profiles are unchanged. The private candidate and index
+  are owner-readable and identify source, purpose and review date 2026-11-20.
+
+The DDL checkpoint passed 62 SQLite constraint/rollback cases. The next
 source/catalog checkpoint passed 132 combined admission/projection/preservation
-cases, including the unchanged 14-row, 18-ciphertext, literal-head and 245000-unit
-fixture, exact projection rows/progress/counters and the 18th-table refusal.
-The SQLite candidate has 17 tables, unchanged entries for all 14 non-jobs
-predecessor tables and only the three job-column additions; it remains subject
-to independent literal review. No PostgreSQL execution, backup/restore acceptance,
-completed repository or P2 acceptance is claimed at this checkpoint. Actual
-hosted PostgreSQL and independently reviewed profiles remain required.
+cases. Fixed initializer error mapping at `162ba6b` passed five catalog cases,
+including real oversized-cohort and query-budget refusal without revision/source
+changes or a raw exception chain. Eight additional initializer cases verify exact
+reentry, completed-cohort drift refusal, old-reader refusal and full rollback
+after DDL or fingerprint update. The unchanged fixture retains all 14 historical
+rows, 18 ciphertexts, literal event heads and 245000 reserved units; projection
+rows/progress/counters are unchanged.
+
+The connection-only repositories have 36 SQLite behavior cases at `dc250f4`.
+They do not own commit or publication exclusion. Every metadata read caps
+candidate cardinality at two and CASE-bounds selected cells before driver
+materialization. Missing/malformed/extra config refs are retained as refusal
+candidates, not filtered away to produce false uniqueness. All seven original
+descriptor fields are compared for prepared task/config/payload associations.
+Finite UTC timestamps and the initial 90-day floor are validated on insert/read.
+Typed authentication/authority denials remain separate from fixed storage errors.
+No retention timestamp makes replay expire.
+
+## Hosted PostgreSQL capture contract
+
+`tests/test_admission_schema_postgres.py::test_postgres_admission_profile_requires_independent_freeze`
+uses only the existing opt-in disposable PostgreSQL 16 fixture. It completes the
+accepted ar5 backfill, snapshots projection/progress/counters and bounded cohort
+identity, executes raw ar6 DDL in the existing excluded migration transaction,
+and rechecks original rows/hash projection/cohort/defaults and table deltas.
+It does not install a guessed literal or declare the raw DDL a valid installation.
+
+Until a PostgreSQL literal is independently reviewed and packaged, the test
+deliberately fails with the fixed marker
+`SYNTHETIC_ADMISSION_POSTGRES16_CATALOG_REVIEW_REQUIRED=`.
+Its canonical JSON payload is capped at 192 KiB and contains only synthetic
+catalog metadata, the preserved cohort digests/count, predecessor catalog hash,
+validated CI source SHA and hashes of the exact DDL/catalog/revision sources.
+No DSN, role credential, row body, artifact plaintext or production data is
+emitted. Lead retrieves that existing CI log output into indexed private evidence
+for independent comparison and freeze authorization. Subsequent matching-source
+tests compare the actual catalog to the reviewed literal and exercise the real
+initializer. This capture is a review aid, not automatic profile acceptance.
+
+Actual PostgreSQL execution, backup/restore, installed-package evidence and
+final independent repository/P2 acceptance remain pending. P3 and customer
+admission remain unavailable.
