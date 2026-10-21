@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import traceback
 from contextlib import contextmanager, nullcontext
 from dataclasses import replace
 from types import SimpleNamespace
@@ -275,6 +276,70 @@ def test_default_unavailable_policy_precedes_new_intents_and_readiness(publicati
         submit(f)
     assert not list(f.root.rglob("*.json")) and not f.storage.calls and f.ready.calls == 0
     assert snapshot(f) == before
+
+
+@pytest.mark.parametrize("with_journal", [False, True])
+def test_default_policy_suppresses_callers_private_exception_context(publication, with_journal):
+    f = publication
+    f.service = AdmissionCoordinator(
+        f.engine,
+        f.authority,
+        journal=f.journal if with_journal else None,
+        storage=f.storage,
+        registry=f.registry,
+        readiness=f.ready,
+    )
+    f.service.schema_compatibility = lambda: CompatibilityResult("ready", "ready")
+    before = snapshot(f)
+    private = "private-caller-correlation-canary"
+    try:
+        raise RuntimeError(private)
+    except RuntimeError:
+        with pytest.raises(AdmissionError, match="^dependency_unavailable$") as caught:
+            submit(f)
+    assert caught.value.__suppress_context__ is True
+    assert caught.value.__cause__ is None
+    assert private not in "".join(traceback.format_exception(caught.value))
+    assert snapshot(f) == before and f.engine.pool.checkedout() == 0
+    assert not list(f.root.rglob("*.json")) and not f.storage.calls and f.ready.calls == 0
+
+
+@pytest.mark.parametrize("with_journal", [False, True])
+@pytest.mark.parametrize(
+    "code",
+    [
+        "invalid_request",
+        "idempotency_conflict",
+        "dependency_unavailable",
+        "schema_incompatible",
+        "outcome_uncertain",
+    ],
+)
+def test_policy_failure_suppresses_private_cause_without_reclassification(
+    publication, monkeypatch, code, with_journal
+):
+    f = publication
+    if not with_journal:
+        f.service.journal = None
+    before = snapshot(f)
+    private = "private-policy-endpoint-canary"
+    failure = AdmissionError(code)
+
+    def unavailable():
+        try:
+            raise RuntimeError(private)
+        except RuntimeError as cause:
+            raise failure from cause
+
+    monkeypatch.setattr(f.policy, "require_available", unavailable)
+    with pytest.raises(AdmissionError, match="^" + code + "$") as caught:
+        submit(f)
+    assert caught.value is failure and caught.value.code == code
+    assert caught.value.__suppress_context__ is True
+    assert caught.value.__cause__ is None
+    assert private not in "".join(traceback.format_exception(caught.value))
+    assert snapshot(f) == before and f.engine.pool.checkedout() == 0
+    assert not list(f.root.rglob("*.json")) and not f.storage.calls and f.ready.calls == 0
 
 
 @pytest.mark.parametrize(
