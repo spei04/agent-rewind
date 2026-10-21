@@ -232,6 +232,8 @@ def publication_pg(pg, tmp_path, monkeypatch):
             "resource_scopes",
             "api_keys",
             "jobs",
+            # Fresh job authorization discovers associated records even when empty.
+            "records",
             "artifact_objects",
             "artifact_refs",
             "operations",
@@ -425,7 +427,11 @@ def poison_new_work(f, monkeypatch):
 def test_postgres_new_work_real_guard_and_default_policy_refuse_before_side_effects(publication_pg):
     f = publication_pg
     before = snapshot(f)
-    real = AdmissionCoordinator(f.engine, f.authority)
+    # The restricted publication role intentionally cannot inspect alembic_version.
+    # Use the existing schema-capable owner for this real guard observation only.
+    real = AdmissionCoordinator(f.owner, RequestAuthority(f.owner))
+    observed = real.schema_compatibility()
+    assert (observed.status, observed.code) == ("incompatible", "migration_only")
     with pytest.raises(AdmissionError, match="^schema_incompatible$"):
         real.submit(f.principal, f.context, f.intent, KEY, f.origin)
     unavailable = AdmissionCoordinator(
@@ -448,14 +454,22 @@ def test_postgres_real_publication_exact_columns_privileges_and_replay(publicati
     with f.engine.connect() as c:
         assert (
             c.exec_driver_sql(
+                "SELECT has_table_privilege(current_user,'records','SELECT')"
+            ).scalar_one()
+            is True
+        )
+        assert (
+            c.exec_driver_sql(
                 "SELECT has_schema_privilege(current_user,'public','CREATE'),"
                 "has_table_privilege(current_user,'jobs','DELETE'),"
                 "has_column_privilege(current_user,'jobs','reserved','UPDATE'),"
                 "has_column_privilege(current_user,'jobs','status','UPDATE'),"
                 "has_table_privilege(current_user,'records','INSERT'),"
+                "has_table_privilege(current_user,'records','UPDATE'),"
+                "has_table_privilege(current_user,'records','DELETE'),"
                 "has_table_privilege(current_user,'events','INSERT')"
             ).one()
-            == (False,) * 6
+            == (False,) * 8
         )
     accepted = submit(f)
     before = assert_publication(f, accepted)
