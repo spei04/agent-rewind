@@ -614,7 +614,7 @@ def test_postgres_grant_target_and_operation_locks_survive_effect_until_commit(
         return original_disclose(*args, **kwargs)
 
     statements = {
-        "organization": "UPDATE organizations SET name=name WHERE id=:org",
+        "organization": "UPDATE organizations SET id=id WHERE id=:org",
         "membership": (
             "UPDATE project_memberships SET role='viewer' WHERE project_id=:p AND principal_id=:id"
         ),
@@ -660,7 +660,14 @@ def test_postgres_grant_target_and_operation_locks_survive_effect_until_commit(
                 pytest.fail("Cancellation did not reach its staged effect")
             mutation = pool.submit(writer)
             assert writer_started.wait(3)
-            wait_blocked(f.pg, writer_pid[0], actor_pid[0])
+            if writer_done.is_set():
+                mutation.result(timeout=1)
+            try:
+                wait_blocked(f.pg, writer_pid[0], actor_pid[0])
+            except BaseException:
+                if writer_done.is_set():
+                    mutation.result(timeout=1)
+                raise
         finally:
             release.set()
         assert mutation.result(timeout=8) is None
@@ -864,3 +871,94 @@ def test_postgres_after_ack_typed_authority_denial_survives_cleanup_failure(
     assert caught.value is denials[0]
     assert state(f)[0]["cancel"] is True and len(state(f)[1]) == 1
     released(f)
+
+
+@pytest.mark.parametrize("after_ack", [False, True])
+def test_postgres_queuepool_cleanup_failure_discards_physical_connection_then_reuses(
+    cancel_pg, monkeypatch, after_ack
+):
+    from sqlalchemy import create_engine
+    from sqlalchemy.pool import QueuePool
+
+    from agent_rewind.migrations.compatibility import (
+        CompatibilityResult,
+        configure_runtime_engine,
+    )
+
+    f = cancel_pg
+    engine = create_engine(
+        f.reader_engine.url, poolclass=QueuePool, pool_size=1, max_overflow=0, pool_timeout=1
+    )
+    configure_runtime_engine(engine)
+    service = OperationService(
+        engine, RequestAuthority(engine), artifact_loader=f.service.artifact_loader
+    )
+    monkeypatch.setattr(
+        service, "schema_compatibility", lambda: CompatibilityResult("ready", "ready")
+    )
+    original_close, original_commit = Connection.close, Connection.commit
+    original_effect = service._actions._cancel_effect
+    staged, raw, commits, close_faults, connections = [], [], [], [], [], []
+
+    def connected(connection):
+        connections.append(connection)
+
+    def effect(connection, *args):
+        result = original_effect(connection, *args)
+        staged.append(connection)
+        raw.append(connection.connection.driver_connection)
+        if not after_ack:
+            raise RuntimeError("private staged-effect failure")
+        return result
+
+    def commit(connection):
+        result = original_commit(connection)
+        if connection.engine is engine:
+            commits.append(connection)
+        return result
+
+    def close(connection):
+        if staged and connection is staged[0] and not close_faults:
+            close_faults.append(connection)
+            raise RuntimeError("private pooled pre-close failure")
+        return original_close(connection)
+
+    event.listen(engine, "engine_connect", connected)
+    monkeypatch.setattr(service._actions, "_cancel_effect", effect)
+    monkeypatch.setattr(Connection, "commit", commit)
+    monkeypatch.setattr(Connection, "close", close)
+    try:
+        fault(
+            lambda: service.cancel_operation(f.principal, f.context, OPERATION),
+            "outcome_uncertain" if after_ack else "dependency_unavailable",
+        )
+        assert len(staged) == len(raw) == len(close_faults) == 1
+        assert len(commits) == int(after_ack)
+        assert state(f)[0]["cancel"] is after_ack and len(state(f)[1]) == int(after_ack)
+        assert engine.pool.checkedout() == 0
+        assert raw[0].closed and all(connection.closed for connection in connections)
+        assert all(work._started is None for work in f.work)
+
+        # Public pool checkout proves usable capacity and a different physical
+        # PostgreSQL connection, not merely a closed SQLAlchemy wrapper.
+        with engine.connect() as connection:
+            current = connection.connection.driver_connection
+            assert current is not raw[0] and not current.closed
+            assert current.info.transaction_status == 0
+            assert connection.exec_driver_sql("SHOW transaction_read_only").scalar_one() == "off"
+            assert (
+                connection.exec_driver_sql("SHOW transaction_isolation").scalar_one()
+                == "read committed"
+            )
+        assert engine.pool.checkedout() == 0
+        monkeypatch.setattr(service._actions, "_cancel_effect", original_effect)
+        monkeypatch.setattr(Connection, "commit", original_commit)
+        monkeypatch.setattr(Connection, "close", original_close)
+        assert service.cancel_operation(f.principal, f.context, OPERATION) == expected("succeeded")
+        assert len(state(f)[1]) == 1 + int(after_ack)
+        assert engine.pool.checkedout() == 0
+        assert all(connection.closed for connection in connections)
+        assert all(work._started is None for work in f.work)
+    finally:
+        event.remove(engine, "engine_connect", connected)
+        engine.dispose()
