@@ -545,8 +545,12 @@ after both representations pass pure decoding. Distractor fixtures contain
 2,000 same-project other-job and 2,000 foreign rows plus oversized nonmembers.
 SQLite measured 101,000 instructions for the maximum clean cohort, and 177,000
 including discovery/final comparison with distractors (zero-match: 81,000).
-The SELECT-only PostgreSQL matrix measured 26 charged attempts including its
-privilege probe/setup/cleanup, with no UPDATE or schema CREATE grant. These
+The SELECT-only PostgreSQL trace recorded 26 charged attempts before cleanup,
+including its privilege probe/setup, with no UPDATE or schema CREATE grant.
+The normal post-cleanup total is 28 by source accounting, not a printed final
+measurement. The SQLite distractor trace similarly recorded 16 attempts before
+four cleanup actions (20 by source accounting); the clean maximum trace records
+20 after cleanup. Final-cap assertions passed after context exit in both suites. These
 are synthetic measured capacities, not an index-independent throughput promise:
 the schema has no by-job JSON or project-scope index and arbitrary global table
 growth can still exhaust unchanged work bounds. The remaining-budget regression

@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| A | Independent primitive security/test-design review | Review native types, original association, cohort/ref phantoms and aggregate transfer/scan bounds before C's first frozen primitive. Read only. |
-| C | AR-008-B/P1 bounded SQL primitives in secondary | Implement cohort/final receipt/association checkpoint from accepted 97d39edf. Prove SQLite/PostgreSQL bounds before service orchestration. |
-| B | Draft PR #105 CI and independent primitive review | Primitive entry accepted; audit foundation source 97d39edf without inferring full P1 acceptance. |
-| Lead | Integration, progress and delivery | Composed activation component accepted; PR #104 protected-main candidate verified. P1 remains In progress and P2 Not started. |
+| A | Independent cancellation phase-entry review | Primitive behavior accepted: 174 SQLite and 18 actual PostgreSQL passes; test-only cbed928 released. Review shared retention and phase lifecycle before implementation. |
+| C | AR-008-B/P1 GET service preparation | Primitive 691ad661 and exact 111-member package proof complete. Prepare the concrete GET call sequence; no service implementation yet. |
+| B | Cancellation phase API and independent source review | Primitive SQL/security accepted; review the three added PostgreSQL controls and freeze the next phase interface. |
+| Lead | Integrated CI, progress and delivery | Compose reviewed primitives and doctor correction for draft #105. Full service/P1 delivery remains pending; P2 Not started. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -498,3 +498,5 @@ separate. All current statuses, outer edges and later acceptance gates remain.
 - 2026-10-21 independent primitive test review: A accepted the test-design direction and supplied native-type/large-integer controls, fresh-job versus immutable-association checks, optional-ref/cohort races, aggregate-before-transfer probes and nonmatching scan cases. Original job.created is part of the immutable association; worker state remains separately fresh. The later independent PostgreSQL proof uses a real SELECT-only role without operation UPDATE/lock privileges. No runtime evidence is claimed by this read-only review.
 
 - 2026-10-21 hosted fixture correction: A owned the primary checkout for test_cli_doctor.py only, reproduced the four failures from draft run 39596377455 and froze a92db83 after 37 doctor/CLI/sentinel passes. B and the lead accepted its source; all seven original assertions and the real owned_connect remain. A released the clean checkout and all consumers to the lead. C retains the secondary and the existing isolated PostgreSQL lifecycle for the bounded primitive checkpoint; A next reviews its frozen source, while B reviews independent evidence. The failed 3.11/3.12 run is preserved (3326/3337 passes, four failures each, 14/3 skips, one warning); all 99 targeted PostgreSQL cases and package/security/three gVisor checks passed. No corrected hosted run or full P1 acceptance is claimed.
+
+- 2026-10-21 primitive verification complete: C delivered 691ad661 and exact-source wheel/sdist proof; B accepted SQL/security source; A independently passed 174 SQLite and 18 actual PostgreSQL cases across separate runs and froze test-only cbed928. Lead verified source/evidence/package hashes; all database and checkout consumers were released. A now reviews cancellation phase ownership, B prepares that concrete interface and C prepares GET composition. Lead owns the primary checkout and integrated CI; the secondary is retained for the next implementation. Full service and P1 acceptance remain pending.
