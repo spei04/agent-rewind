@@ -201,6 +201,123 @@ def existing_routes_smoke(engine: Engine, root: Path) -> None:
         raise RuntimeError("Installed admission unexpectedly available")
 
 
+def admission_foundation_smoke() -> None:
+    """Synthetic pure preparation from the installed package, with no admission."""
+    import hashlib
+    from datetime import UTC, datetime
+
+    from agent_rewind.admission_configuration import NativeConfiguration, NativeRegistry
+    from agent_rewind.admission_envelope import (
+        ArtifactBinding,
+        OriginCorrelation,
+        prepare_admission,
+    )
+    from agent_rewind.admission_request import AdmissionPreparationError, parse_submit
+    from agent_rewind.artifact_metadata import ArtifactObject, object_locator
+    from agent_rewind.models import canonical
+
+    raw = canonical(
+        {
+            "client_operation_id": "a" * 32,
+            "adapter_config_id": "native-v1",
+            "seed": 0,
+            "budget_microusd": 1,
+            "task": {
+                "name": "installed",
+                "instruction": "Synthetic preparation only.",
+                "image": "installed-fixture",
+                "files": {},
+                "evaluator_files": {},
+                "evaluator_command": "true",
+            },
+        }
+    )
+    intent = parse_submit(raw)
+    config_bytes = canonical(
+        {
+            "schema": 1,
+            "kind": "native-v1",
+            "image_identity": "sha256:" + "1" * 64,
+            "endpoint_profile": "installed-fixture",
+            "endpoint_revision": "revision-1",
+            "model_revision": "model-1",
+            "adapter_digest": "2" * 64,
+            "prompt_digest": "3" * 64,
+            "tool_policy_digest": "4" * 64,
+            "configuration_digest": "5" * 64,
+            "processor_profile": "fixture",
+            "max_input_tokens": 1000,
+            "max_output_tokens": 1,
+            "reasoning_effort": "",
+            "seed_supported": False,
+            "seed_strategy": "trial-plus-step-mod-2147483647",
+            "price_version": "prices-1",
+            "input_microusd_per_million_tokens": 1,
+            "output_microusd_per_million_tokens": 1,
+        }
+    )
+    config = NativeConfiguration(
+        config_bytes, expected_digest=hashlib.sha256(config_bytes).hexdigest()
+    )
+    registry = NativeRegistry(config, ["installed-fixture"])
+    project, job = "6" * 32, "7" * 32
+
+    def metadata(content: bytes, identifier: str) -> ArtifactObject:
+        digest = hashlib.sha256(content).hexdigest()
+        return ArtifactObject(
+            identifier,
+            project,
+            digest,
+            object_locator(project, digest),
+            1,
+            len(content),
+            datetime(2026, 10, 21, tzinfo=UTC),
+        )
+
+    task = ArtifactBinding(
+        project_id=project,
+        job_id=job,
+        role="task",
+        descriptor=metadata(intent.task_bytes, "8" * 32),
+        plaintext=intent.task_bytes,
+    )
+    configuration = ArtifactBinding(
+        project_id=project,
+        job_id=job,
+        role="admission_config",
+        descriptor=metadata(config_bytes, "9" * 32),
+        plaintext=config_bytes,
+    )
+    result = prepare_admission(
+        intent,
+        registry,
+        project_id=project,
+        job_id=job,
+        origin=OriginCorrelation("b" * 32),
+        task_binding=task,
+        configuration_binding=configuration,
+        permitted_processor_profile="fixture",
+    )
+    payload = result.bind_payload(metadata(result.envelope_bytes, "c" * 32))
+    envelope = json.loads(payload.plaintext)
+    if (
+        len(envelope) != 11
+        or envelope["schema"] != 2
+        or envelope["budget_microusd"] != 1
+        or envelope["execution_config_ref"] != config.digest
+        or envelope["task_ref"] != intent.task_digest
+        or payload.descriptor.digest != result.envelope_digest
+    ):
+        raise RuntimeError("Installed admission foundation changed frozen identities")
+    try:
+        registry.resolve_new("native-v1", "installed-fixture", permitted_processor_profile=None)
+    except AdmissionPreparationError as error:
+        if error.code != "admission_configuration_unavailable":
+            raise RuntimeError("Installed configuration refusal changed") from None
+    else:
+        raise RuntimeError("Installed configuration expanded processor permission")
+
+
 def readiness_smoke(root: Path, database_url: str) -> None:
     import asyncio
     import time
@@ -273,6 +390,7 @@ for profile in (
         raise RuntimeError("Packaged frozen migration profile is missing or invalid")
 if importlib.metadata.version("agent-rewind") != "0.1.0":
     raise RuntimeError("Unexpected installed package identity")
+admission_foundation_smoke()
 with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporary:
     database = Path(temporary) / "metadata.sqlite"
     engine = create_engine(f"sqlite:///{database}")
