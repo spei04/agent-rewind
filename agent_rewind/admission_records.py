@@ -8,6 +8,7 @@ alone do not establish finite UTC timestamps or retention policy.
 from __future__ import annotations
 
 import re
+import sqlite3
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -24,6 +25,7 @@ from .admission_envelope import ArtifactBinding
 from .artifact_metadata import ArtifactError, ArtifactObject, _object, object_locator
 from .models import canonical
 from .published_reader import _bounded_columns, _objects, _refs
+from .request_identity import IdentityInvalid
 from .scoped_lineage import ResourceNotFound
 from .scoped_repositories import ProjectContext, _byte_length, scopes
 
@@ -87,9 +89,11 @@ JOBS = table("jobs", *(column(name) for name in JOB_LIMITS))
 def storage_errors() -> Iterator[None]:
     try:
         yield
+    except IdentityInvalid:
+        raise
     except IntegrityError:
         raise AdmissionStorageError("admission_conflict") from None
-    except SQLAlchemyError:
+    except (SQLAlchemyError, sqlite3.Error):
         raise AdmissionStorageError("admission_storage_unavailable") from None
     except (ArtifactError, ValueError, TypeError, OverflowError, KeyError):
         raise AdmissionStorageError("admission_metadata_invalid") from None

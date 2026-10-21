@@ -21,7 +21,7 @@ from agent_rewind.admission_request import parse_submit
 from agent_rewind.artifact_metadata import record_verified, register_ref
 from agent_rewind.models import canonical
 from agent_rewind.request_authority import ActionForbidden, RequestAuthority
-from agent_rewind.request_identity import VerifiedPrincipal
+from agent_rewind.request_identity import IdentityInvalid, VerifiedPrincipal
 from agent_rewind.scoped_lineage import ResourceNotFound
 
 admission_engine = schema_tests.admission_engine
@@ -560,3 +560,22 @@ def test_missing_config_object_is_not_filtered_into_absence_or_uniqueness(reposi
         connection.commit()
         with pytest.raises(AdmissionStorageError, match="^admission_metadata_invalid$"):
             verify_job_configuration(connection, context=f.context, job_id=JOB, payload_version=2)
+
+
+def test_identity_failure_is_not_reclassified_as_invalid_metadata(repository):
+    f = repository
+    with f.engine.connect() as connection, pytest.raises(IdentityInvalid):
+        f.repo.get_operation(connection, "unverified", f.context, operation_id=OPERATION)
+
+
+def test_closed_native_sqlite_setup_has_fixed_storage_failure(repository):
+    f = repository
+    with f.engine.connect() as connection:
+        connection.exec_driver_sql("BEGIN IMMEDIATE")
+        connection.connection.driver_connection.close()
+        try:
+            with pytest.raises(AdmissionStorageError, match="^admission_storage_unavailable$"):
+                insert(f, connection)
+        finally:
+            # The caller owns/discards this deliberately broken connection.
+            connection.invalidate()
