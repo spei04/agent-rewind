@@ -898,7 +898,7 @@ def test_postgres_queuepool_cleanup_failure_discards_physical_connection_then_re
     )
     original_close, original_commit = Connection.close, Connection.commit
     original_effect = service._actions._cancel_effect
-    staged, raw, commits, close_faults, connections = [], [], [], [], [], []
+    staged, raw, commits, close_faults, connections = [], [], [], [], []
 
     def connected(connection):
         connections.append(connection)
