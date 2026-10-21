@@ -76,6 +76,7 @@
     "agent_rewind/migrations/versions/0006_admission.py",
     "agent_rewind/migrations/versions/__init__.py",
     "agent_rewind/models.py",
+    "agent_rewind/operation_cancellation.py",
     "agent_rewind/operation_reads.py",
     "agent_rewind/operation_sources.py",
     "agent_rewind/operation_work.py",

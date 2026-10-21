@@ -571,3 +571,60 @@ Only operation_sources.py is added to the distribution allowlist. It is a
 required emitted module, with no new entry point or dependency. Full installed
 package/service/hosted acceptance remains a later composed gate; exact focused
 test/static and synthetic PostgreSQL evidence is bound to the immutable handoff.
+
+## Cancellation receipt phases (component only)
+
+The cancellation component adds CancellationReceipts(work, original_context,
+operation_id), phase(), and CancellationPhase.associate/verify. It owns one
+original immutable association and one live receipt generation. Each phase
+encloses its connection or admission transaction through cleanup and commit
+acknowledgment. Verification seals that phase before any later intentional
+effect. A failed active phase aborts its owner; rejected nested or stale use
+cannot alter a current generation. Every reader and query entry checks the
+retained book's generation and active OperationWork connection before SQL.
+Phase exit clears mutable receipt buffers, preserving the original association
+and all cumulative work, source-visit and edge counters.
+
+The private ReceiptBook scope accounts for the actual canonical original/phase
+wrapper, receipt field names, values, observations, separators and reserved
+original association before cohort transfer. Live bytes remain at most 4 MiB
+and the union remains at most 259 identities. Repeated mutable bytes can be
+released between phases; there is no new cumulative decode-byte limit. Three
+phases of 84 roots consume 255 visits and 504 edges. Three phases of 85 roots
+refuse before third-phase bodies cross the driver. The existing native SQL
+limits remain unchanged. A later cancellation service must separately check
+whether normal disclosure can still fit before performing its effect; this
+helper neither reserves future visits nor performs an effect.
+
+The cancellation comparison reuses the typed materialized final query while
+filtering admission_config candidates before LIMIT 2. It verifies the full
+phase-local job16, operation14, configuration descriptor/ref, cohort, scopes,
+candidate count and by-job phantoms in one statement. Result artifact refs are
+never observed and cannot trigger storage access or refusal, even when extra
+or malformed. The job.result cell remains part of the within-phase job
+snapshot. Between phases valid worker fields, job.result and root cohorts may
+advance; original operation/configuration and immutable job fields, including
+created, must still match. GET books and their result observation/query
+semantics are unchanged.
+
+The dedicated tests exercise owned SQLite and actual PostgreSQL 16.15 with a
+SELECT-only application role: no job/operation UPDATE or artifact-ref INSERT
+grant is added. All 43 new SQLite and 18 new PostgreSQL cases passed across
+focused runs and affected reruns; the unchanged 80 read/source SQLite and
+18 source PostgreSQL cases also passed. Final measured counters after cleanup
+are 18 SQLite / 22 PostgreSQL attempts per ordinary phase (54 / 66 for three);
+the cancellation query compiles to 23 / 20 binds respectively. The SQLite
+three-phase 84-root case measured 111,000 VM instructions, or 315,000 with
+2,000 same-project other-job and 2,000 foreign distractors. These are synthetic
+capacity observations, not a latency or arbitrary-table-size guarantee.
+
+The transaction controls cover successful real commit, a typed precommit
+denial with confirmed rollback, and cleanup failure after acknowledged commit.
+They preserve the existing transaction outcome classification, but do not
+claim cancellation mutations, lock ordering, response disclosure, authority,
+HTTP or service acceptance. Local test development corrected a colliding
+synthetic descriptor ID and two cleanup-oracle mistakes; their failed logs
+and the corrected results remain in private source-bound evidence. The reused
+PostgreSQL instance was restored to its exact original inventory and stopped
+before lifecycle handoff. Only operation_cancellation.py is added to the
+distribution allowlist; installed and hosted composition remain later gates.

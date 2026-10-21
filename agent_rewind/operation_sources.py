@@ -95,6 +95,9 @@ def cohort_query(
     job_id: str,
     book: ReceiptBook,
 ) -> Any:
+    book._check_connection(connection)
+    book._check_live(context, "job", job_id)
+    book._before_cohort()
     hexadecimal(job_id, 32)
     remaining = 256 - book.source_visits
     if remaining < 0:
@@ -167,6 +170,8 @@ def read_run_cohort(
     job: RawReceipt,
     book: ReceiptBook,
 ) -> RunCohort:
+    book._check_connection(connection)
+    book._check_live(context, "job", job.identity)
     if job.domain != "job" or job.fields != tuple(JOB_LIMITS) or job.row()["kind"] != "run":
         raise invalid()
     rows = (
@@ -301,6 +306,19 @@ def matching_query(
     cohort: RunCohort,
 ) -> tuple[Any, dict[str, str]]:
     """One relational observation; caller reauthorizes after exact key equality."""
+    return _matching_query(connection, context, book, cohort, cancellation=False)
+
+
+def _matching_query(
+    connection: Connection,
+    context: ProjectContext,
+    book: ReceiptBook,
+    cohort: RunCohort,
+    *,
+    cancellation: bool,
+) -> tuple[Any, dict[str, str]]:
+    book._check_connection(connection)
+    book._check_live(context, "job", cohort.job_id)
     rows = {(r.domain, r.identity): r for r in book.receipts}
     operations = [r for r in book.receipts if r.domain == "operation"]
     if len(operations) != 1:
@@ -308,13 +326,15 @@ def matching_query(
     try:
         job = rows["job", cohort.job_id]
         config = rows["admission_config", cohort.job_id]
-        result_count = book.observations["result_count", cohort.job_id]
+        result_count = (0,) if cancellation else book.observations["result_count", cohort.job_id]
     except KeyError:
         raise invalid() from None
     validate_association(operations[0], job, config)
     result = rows.get(("result", cohort.job_id))
-    if job.row()["result"] is not None and (
-        result is None or result.row()["digest"] != job.row()["result"]
+    if (
+        not cancellation
+        and job.row()["result"] is not None
+        and (result is None or result.row()["digest"] != job.row()["result"])
     ):
         raise invalid()
     if (
@@ -329,6 +349,8 @@ def matching_query(
             *({("result", cohort.job_id)} if result_count == (1,) else set()),
         }
     ):
+        raise invalid()
+    if cancellation and set(book.observations) != {("cohort", cohort.job_id)}:
         raise invalid()
     fields = {
         "operation": tuple(OPERATION_LIMITS),
@@ -418,9 +440,11 @@ def matching_query(
             _refs.c.project_id == context.project_id,
             _refs.c.owner_kind == "job",
             _refs.c.owner_id == cohort.job_id,
-            _refs.c.role.in_(("admission_config", "result")),
+            (_refs.c.role == "admission_config")
+            if cancellation
+            else _refs.c.role.in_(("admission_config", "result")),
         )
-        .limit(3)
+        .limit(2 if cancellation else 3)
         .cte("observed_refs")
         .prefix_with("MATERIALIZED")
     )
@@ -507,7 +531,7 @@ def matching_query(
         .where(
             ~unknown,
             config_count == 1,
-            results == result_count[0],
+            *(() if cancellation else (results == result_count[0],)),
         )
         .limit(len(rows) + 1)
     )
@@ -524,6 +548,21 @@ def verify_read_snapshot(
     cohort: RunCohort,
 ) -> None:
     query, parameters = matching_query(connection, context, book, cohort)
+    rows = connection.execute(query, parameters).all()
+    keys = {(row.domain, row.id) for row in rows}
+    expected = {(row.domain, row.identity) for row in book.receipts}
+    if len(rows) != len(keys) or keys != expected:
+        raise invalid()
+
+
+def _verify_cancellation_snapshot(
+    connection: Connection,
+    context: ProjectContext,
+    book: ReceiptBook,
+    cohort: RunCohort,
+) -> None:
+    """Phase-local equality only; no result artifacts or cancellation effect."""
+    query, parameters = _matching_query(connection, context, book, cohort, cancellation=True)
     rows = connection.execute(query, parameters).all()
     keys = {(row.domain, row.id) for row in rows}
     expected = {(row.domain, row.identity) for row in book.receipts}

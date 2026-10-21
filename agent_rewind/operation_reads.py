@@ -11,7 +11,7 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Any, Literal, Protocol
 
 from sqlalchemy import Text, and_, case, cast, column, func, literal, select, table
 from sqlalchemy.engine import Connection
@@ -91,17 +91,66 @@ class RawReceipt:
         return dict(zip(self.fields, self.values, strict=True))
 
 
+class _ReceiptScope(Protocol):
+    """Private cancellation-phase accounting; ordinary GET books have none."""
+
+    @property
+    def source_visits(self) -> int: ...
+
+    @property
+    def edges(self) -> int: ...
+
+    def check(
+        self,
+        context: ProjectContext | None = None,
+        domain: Domain | None = None,
+        identity: str | None = None,
+    ) -> None: ...
+
+    def connection(self, connection: Connection) -> None: ...
+
+    def charge(self, count: int, edges: int) -> None: ...
+
+    def remaining(self, book: ReceiptBook) -> int: ...
+
+    def reserve(self, book: ReceiptBook, size: int, key: tuple[Domain, str] | None) -> None: ...
+
+    def before_cohort(self) -> None: ...
+
+
 class ReceiptBook:
     """Request-wide retained identities and encoded bytes; no authorization."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, _scope: _ReceiptScope | None = None) -> None:
+        self._scope = _scope
+        self._wire_bytes = len(receipt_bytes({"rows": [], "observations": []}, MAX_RECEIPT_BYTES))
         self._receipts: dict[tuple[Domain, str], RawReceipt] = {}
         self.byte_count = 2  # canonical array brackets
-        self.source_visits = 0
-        self.edges = 0
+        self.source_visits = 0 if _scope is None else _scope.source_visits
+        self.edges = 0 if _scope is None else _scope.edges
         self.observations: dict[tuple[str, str], tuple[Scalar, ...]] = {}
 
+    def _check_live(
+        self,
+        context: ProjectContext | None = None,
+        domain: Domain | None = None,
+        identity: str | None = None,
+    ) -> None:
+        if self._scope is not None:
+            self._scope.check(context, domain, identity)
+
+    def _check_connection(self, connection: Connection) -> None:
+        self._check_live()
+        if self._scope is not None:
+            self._scope.connection(connection)
+
+    def _before_cohort(self) -> None:
+        self._check_live()
+        if self._scope is not None:
+            self._scope.before_cohort()
+
     def charge_sources(self, count: int, *, edges: int = 0) -> None:
+        self._check_live()
         if (
             type(count) is not int
             or type(edges) is not int
@@ -111,10 +160,13 @@ class ReceiptBook:
             or self.edges + edges > 512
         ):
             raise invalid()
+        if self._scope is not None:
+            self._scope.charge(count, edges)
         self.source_visits += count
         self.edges += edges
 
     def observe(self, kind: str, identity: str, values: tuple[Scalar, ...]) -> None:
+        self._check_live()
         hexadecimal(identity, 32)
         key = kind, identity
         previous = self.observations.get(key)
@@ -125,34 +177,45 @@ class ReceiptBook:
         encoded = receipt_bytes([kind, identity, list(values)], self.remaining)
         if self.byte_count + len(encoded) + 1 > MAX_RECEIPT_BYTES:
             raise invalid()
+        size = len(encoded) + bool(self.observations)
+        if self._scope is not None:
+            self._scope.reserve(self, size, None)
         self.byte_count += len(encoded) + 1
+        self._wire_bytes += size
         self.observations[key] = values
 
+    def _payload(self) -> dict[str, Any]:
+        return {
+            "rows": [
+                [r.domain, r.identity, list(r.fields), list(r.values)]
+                for r in self._receipts.values()
+            ],
+            "observations": [
+                [kind, identity, list(values)]
+                for (kind, identity), values in self.observations.items()
+            ],
+        }
+
     def encoded(self) -> bytes:
-        return receipt_bytes(
-            {
-                "rows": [
-                    [r.domain, r.identity, list(r.fields), list(r.values)] for r in self.receipts
-                ],
-                "observations": [
-                    [kind, identity, list(values)]
-                    for (kind, identity), values in self.observations.items()
-                ],
-            },
-            MAX_RECEIPT_BYTES,
-        )
+        self._check_live()
+        return receipt_bytes(self._payload(), MAX_RECEIPT_BYTES)
 
     @property
     def remaining(self) -> int:
+        self._check_live()
+        if self._scope is not None:
+            return self._scope.remaining(self)
         return MAX_RECEIPT_BYTES - self.byte_count
 
     @property
     def receipts(self) -> tuple[RawReceipt, ...]:
+        self._check_live()
         return tuple(self._receipts.values())
 
     def remember(
         self, domain: Domain, identity: str, fields: tuple[str, ...], row: Mapping[str, Any]
     ) -> RawReceipt:
+        self._check_live(domain=domain, identity=identity)
         hexadecimal(identity, 32)
         values = tuple(row[name] for name in fields)
         if any(
@@ -180,8 +243,11 @@ class ReceiptBook:
         size = len(encoded) + bool(self._receipts)
         if len(self._receipts) >= MAX_IDENTITIES or size > self.remaining:
             raise invalid()
+        if self._scope is not None:
+            self._scope.reserve(self, size, key)
         self._receipts[key] = receipt
         self.byte_count += size
+        self._wire_bytes += size
         return receipt
 
 
@@ -203,6 +269,8 @@ def read_operation(
     connection: Connection, context: ProjectContext, operation_id: str, book: ReceiptBook
 ) -> tuple[StoredOperation, RawReceipt]:
     """No creator filter: named-project viewer status differs from replay."""
+    book._check_connection(connection)
+    book._check_live(context, "operation", operation_id)
     rows = (
         connection.execute(
             select(*_columns(connection, OPERATIONS, OPERATION_LIMITS, book.remaining))
@@ -238,6 +306,8 @@ def read_job_state(
     Cancellation compares an immutable association separately. Every decode
     still consumes the shared source-visit budget, including repeated phases.
     """
+    book._check_connection(connection)
+    book._check_live(context, "job", job_id)
     book.charge_sources(1)
     rows = (
         connection.execute(
@@ -344,6 +414,8 @@ def _descriptor(
     role: Literal["admission_config", "result"],
     book: ReceiptBook,
 ) -> tuple[ArtifactObject, RawReceipt] | None:
+    book._check_connection(connection)
+    book._check_live(context, role, job_id)
     # Candidate-first LEFT JOIN: an invalid/missing/second descriptor is never
     # filtered into a false unique success. Scope is established by read_job.
     if role not in ("admission_config", "result"):
