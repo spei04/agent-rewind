@@ -7170,7 +7170,7 @@
     ],
     "critical_path_excludes_external_waits": true,
     "revision_notes": "2026-10-20 AR-007-C reconciliation adds verified AR-009-B as a consumed graph-reader producer and C04 as a required contract; replaces its original 2 [2–3] day estimate with 6 [6–10], medium-low, for the same existing-route obligations. Future route/replay/export producers retain their tests without reverse dependencies. Historical C21/owner issuance and daily schedules remain unchanged. Reforecast after the first immutable identity/reader handoff; no calendar or staffing promise. User-requested smaller PR delivery retains the aggregate ID and graph: P1 foundation 2 [2–3], P2 integration 4 [4–7] after accepted merged P1. There are 151 aggregate tasks and 152 planned delivery PRs; all effort totals are unchanged.",
-    "independent_review": "Prior projection planning 4b0bee75 was independently accepted by A/lead; AR-006-A implementation passed PR #72 and the CI-only maintenance fix passed PR #74. Current AR-007-C scope/estimate reconciliation awaits exact-source A/lead review; no runtime acceptance is claimed.",
+    "independent_review": "Prior projection planning 4b0bee75 was independently accepted by A/lead; AR-006-A implementation passed PR #72 and the CI-only maintenance fix passed PR #74. A and lead accepted AR-007-C planning correction 839f3a7. A accepted the d5430d6 fixture correction and identified current-summary drift, corrected in the following checkpoint. P1 runtime is In progress; no runtime acceptance is claimed.",
     "contract_count": 20,
     "verification": "Two-PR reconciliation passed execution/evaluation/M1 OpenAPI validators and 296 focused tests, including 41 backlog tests with package-order, inherited-input, effort, merge-evidence, aggregate-completion and PR-count refusal cases. Ruff lint/security/format, strict checker types and whitespace passed. Aggregate DAG/effort/status, gates, historical schedules/C21/owner/API/acceptance bytes are unchanged from b42f00b. Exact-delta independent review and hosted checks remain pending; no AR-007-C runtime evidence is claimed.",
     "delivery_pr_count": 152
@@ -7262,7 +7262,7 @@
       "resolution": "Own existing routes and reusable authority in two sequential delivery PRs: P1 foundation 2 [2–3], P2 full integration 4 [4–7] after accepted merged P1; aggregate 6 [6–10] BE days, medium-low. Retain verified AR-009-B/C04 and future consumer obligations without reverse dependencies; full CT-M1-007/008/009 gates remain open."
     }
   ],
-  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. AR-007-C existing-route authority is assigned for planning/design reconciliation to B/C with A independent review from accepted main 3c60f1a; runtime remains Not started until this card/design is accepted. AR-011-C is ready but unassigned. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated.",
+  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. A and lead accepted AR-007-C planning correction 839f3a7; C implements P1 #76 with A identity/read and B transaction review. P2 #77 remains Not started until accepted merged P1; aggregate #75 is In progress. AR-011-C is ready but unassigned. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -7304,7 +7304,10 @@
       11,
       12
     ],
-    "active_child_issues": {},
+    "active_child_issues": {
+      "AR-007-C": 75,
+      "AR-007-C/P1": 76
+    },
     "closed_implementation_issues": [
       26,
       28,
@@ -7318,7 +7321,7 @@
       71
     ],
     "queued_child_issues": {
-      "AR-007-C": 75
+      "AR-007-C/P2": 77
     },
     "design_issues": {
       "RA-01-A": 47,
@@ -7327,7 +7330,7 @@
     "owner_decision_issues": {
       "RESEARCHSCOPE0": 51
     },
-    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50. Issue #51 approved by owner on 2026-10-20 and closed after accepted reconciliation; immutable overlay records exact scope. Issues #52/#53/#69 are closed for scoped accepted deliveries; #71 is closed after accepted preparatory AR-006-A in PR #72. Parent #9 is closed for its preparatory children; live integration/customer gates remain open. Issue #75 is the aggregate AR-007-C tracker for two delivery PRs; runtime remains Not started pending accepted corrected planning."
+    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50. Issue #51 approved by owner on 2026-10-20 and closed after accepted reconciliation; immutable overlay records exact scope. Issues #52/#53/#69 are closed for scoped accepted deliveries; #71 is closed after accepted preparatory AR-006-A in PR #72. Parent #9 is closed for its preparatory children; live integration/customer gates remain open. Issue #75 is the In progress aggregate AR-007-C tracker after accepted planning 839f3a7. P1 #76 is assigned to C; P2 #77 remains Not started until accepted merged P1."
   },
   "execution_capacity": {
     "lead": "Project lead",
