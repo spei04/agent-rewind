@@ -88,7 +88,7 @@
       "milestone": "M1",
       "priority": "P0",
       "objective": "Make retries safe and admission/cancellation behavior predictable.",
-      "base_effort_days": 10.0,
+      "base_effort_days": 11.0,
       "children": [
         "AR-008-A",
         "AR-008-B"
@@ -1642,7 +1642,7 @@
       "title": "Submit, operation status and cancellation routes",
       "objective": "Make retries safe and admission/cancellation behavior predictable. This task delivers submit, operation status and cancellation routes.",
       "role": "BE",
-      "effort_days": 3.0,
+      "effort_days": 4.0,
       "confidence": "medium-low",
       "dependencies": [
         "AR-008-A",
@@ -1651,23 +1651,82 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Wire exactly three M1 HTTP operations: submit native run, operation status and cancellation. Consume accepted AR-008-A service with trusted named-project authority, server-generated origin correlation, strict task limits and fixed errors; recovery resolves both identities before readiness/current configuration/storage. AR-006-B owns run list/detail/cursors",
-      "acceptance": "Accepted IDs and persisted failure origin stay stable across authorized replay/polling; invalid or revoked input never admits or exposes original identity. Cancellation preserves terminal outcome and reservations. No raw enqueue fallback or paid dispatch is reachable",
-      "tests": "CT-M1-007/008/009/010/011/012 route subsets and CT-M1-013/014: strict transport/canonical limits, unknown/foreign scope, replay after revocation, changed config/storage outage, origin versus polling IDs, cancel races and no admission before available reviewed adapter",
-      "security_reliability": "Authorize before recovery disclosure and expensive I/O; pass original trusted identity/context and generated correlation to the accepted service; no client header/body-derived origin. Keep migration-only/customer gates and AR-010-B paid-dispatch gate; no reverse dependency on that later producer",
-      "out_of_scope": "No run list/detail/cursors (AR-006-B), branch/study/export endpoints, worker dispatch, new ledger/lease fence, customer activation or paid validation",
+      "scope": "Deliver two sequential accepted-merge-gated PRs: a bounded operation status and same-Connection cancellation adapter, then exactly the frozen submit/status/cancel HTTP operations. Consume accepted AR-008-A replay/publication and named-project authority; freeze result and stored-failure producer support before runtime. AR-006-B retains run list/detail/cursors",
+      "acceptance": "Exact Accepted, Operation and Cancellation fields preserve required nulls, original IDs/correlation and integer accounting values. Unsupported result/failure evidence refuses safely; no raw error or guessed run is exposed. Cancellation binds the original operation/job association under current authority in one transaction, preserves terminal outcome/reservations, and never returns success after uncertain commit",
+      "tests": "CT-M1-007/008/009/010/011/012 route subsets and CT-M1-013/014: bounded original operation/job/ref receipts and revocation, same-Connection cancellation races/rollback/acknowledgment, exact transport limits and schemas, replay before current dependencies, original failure versus polling correlation, real migration-only zero-I/O guard and installed-package isolation; actual PostgreSQL evidence is required",
+      "security_reliability": "Identity and scoped visibility precede action and input diagnostics. No raw error/result/hash fallback or client-derived origin; unsupported producer evidence fails closed. Preserve project-first lock ordering, fresh disclosure authority and no external I/O under SQL locks. Keep migration-only/customer and later paid-dispatch gates, without a reverse worker prerequisite",
+      "out_of_scope": "No run list/detail/cursors, branch/study/export routes, generic operation framework, worker failure producer or dispatch, new ledger/lease/schema/profile, customer activation or paid validation",
       "status": "Not started",
-      "definition_of_done": "Three route contracts and required service/route tests pass at recorded reviewed source; preserve existing-route authority, safe errors, migration-only guard and later worker/activation gates. Revisit the provisional 3 [3–5] day estimate after accepted AR-008-A interfaces; full M1 behavior remains an AR-012-B integration obligation",
+      "definition_of_done": "Both packages require independent review, matching hosted checks and accepted merged-source evidence in order; aggregate verification requires the complete three-route service/HTTP and actual PostgreSQL matrix. Preserve fixed errors, existing-route behavior, historical evidence and later worker/customer/G1 gates; full M1 integration remains with AR-012-B",
       "effort_range_days": [
-        3.0,
-        5.0
+        4.0,
+        6.0
       ],
       "review_roles": [
         "TL",
         "QE"
       ],
-      "pull_request_boundary": "One HTTP integration PR after accepted aggregate AR-008-A, covering submit/status/cancel only; run list/detail/cursors remain AR-006-B",
-      "contracts_status": "C04 reviewed for development/testing. Requires accepted merged AR-008-A and Verified AR-011-B; no implementation starts on proposed interfaces. Keep actual common legacy configuration and worker enforcement obligations explicit across AR-008-A/B and AR-010-B; no unsupported legacy branch/study admission"
+      "pull_request_boundary": "Two sequential independently reviewable PRs: P1 bounded operation read/cancel adapters 2 [2\u20133] BE days, then P2 exactly three HTTP operations 2 [2\u20133] after accepted merged P1. Total 4 [4\u20136], medium-low; both inherit the aggregate entry gate and remain Not started",
+      "contracts_status": "C04 reviewed for development/testing. Both packages wait for accepted AR-008-A including P3 merge/main/candidate proof and Verified AR-011-B. OPERATION_HTTP_EXECUTION_PLAN.md freezes response and cancellation requirements; actual bounded stored-failure producer representation remains an explicit pre-runtime decision. Unsupported legacy jobs.error is not an Error envelope; no fabricated correlation, reverse worker prerequisite or ready profile",
+      "delivery_packages": [
+        {
+          "role": "BE",
+          "effort_days": 2.0,
+          "effort_range_days": [
+            2.0,
+            3.0
+          ],
+          "confidence": "medium-low",
+          "contracts": [
+            "C04"
+          ],
+          "status": "Not started",
+          "accepted_merge_commit": null,
+          "review_evidence": null,
+          "id": "AR-008-B/P1",
+          "title": "Bounded operation reads and atomic cancellation",
+          "dependencies": [
+            "AR-008-A",
+            "AR-011-B"
+          ],
+          "objective": "Provide the exact operation response and cancellation transaction boundary without HTTP wiring",
+          "scope": "Implement a bounded operation/job view with original source, config, scope and artifact descriptor receipts plus final fresh authority. Resolve non-null results through the scoped job result ref and exact run/job lineage. Review and freeze the supported stored-failure format and producer mapping before runtime; unsupported evidence refuses. Add operation cancellation with association, authority, effect and fixed audit on one Connection, preserving existing legacy cancellation behavior",
+          "out_of_scope": "No HTTP routes, worker/failure-envelope production, schema or profile changes, GET repair/migration markers, artifact hash fallback, new accounting or provider cancellation",
+          "interface_contracts": "C04 Operation ten-field and Cancellation three-field contracts; accepted AR-008-A operation/config identities and origin, AR-007-C named authority/scoped actions, bounded scoped artifact reads and AR-011-B fixed errors; OPERATION_HTTP_EXECUTION_PLAN.md producer and transaction checkpoints",
+          "acceptance": "Viewer status reads disclose only the authorized project and valid original operation/job association. Null result remains null; non-null evidence requires exact scoped ref and run lineage. Supported stored failures retain original correlation, including outcome_uncertain as data; unsupported evidence refuses. Cancellation locks and rechecks the association, preserves terminal outcomes and gross reservations, and reports only an acknowledged committed intent",
+          "tests": "SQLite and actual PostgreSQL malformed/oversized metadata and result/failure producer cases; original operation/job/config/ref drift and final revocation; viewer read versus cancel denial, foreign scope, queued/running/terminal intent, repeated cancellation, observed operation replacement and worker/member/key races, rollback and lost acknowledgment with bounded cleanup",
+          "security_reliability": "Project then organization, caller grants/key and target exclusion follows accepted ordering; no separate get-then-cancel transaction or storage under locks. Bound bodies before decoding and preserve original receipts; unsupported legacy error strings never become trusted envelopes or null success. No accounting refund or running-provider interruption claim",
+          "definition_of_done": "Independent producer/security review freezes the finite source-support and cancellation tables before implementation; bounded SQLite and actual PostgreSQL tests, matching hosted checks and accepted merged-source evidence complete P1 before P2. No HTTP availability or aggregate completion follows"
+        },
+        {
+          "role": "BE",
+          "effort_days": 2.0,
+          "effort_range_days": [
+            2.0,
+            3.0
+          ],
+          "confidence": "medium-low",
+          "contracts": [
+            "C04"
+          ],
+          "status": "Not started",
+          "accepted_merge_commit": null,
+          "review_evidence": null,
+          "id": "AR-008-B/P2",
+          "title": "Frozen submit, operation status and cancellation HTTP",
+          "dependencies": [
+            "AR-008-B/P1"
+          ],
+          "objective": "Expose exactly the three remaining frozen M1 HTTP operations through accepted services",
+          "scope": "Wire submitProjectRun, getProjectOperation and cancelProjectOperation to accepted coordinator and P1 adapters. Preserve migration/security guard, actual authentication and named visibility before manual transport validation; pass exact key hash and trusted server origin, retain replay before current dependencies, and document exact request/response/error/header schemas. Add isolated installed-package smoke and the full HTTP matrix",
+          "out_of_scope": "No list/detail changes, legacy admission fallback, new reconcile endpoint, worker/ledger/generation integration, ready profile, customer activation or provider calls",
+          "interface_contracts": "Accepted merged P1 and inherited C04; exact frozen Accepted, Operation, Cancellation and four-field Error schemas, operation IDs, path/header/body limits, CT-M1-007/008/009/010/011/012 route subsets and CT-M1-013/014",
+          "acceptance": "Raw JSON and exact Idempotency-Key validation retain duplicate detection and canonical limits after authority. Accepted replay retains IDs/config/origin despite current dependency outages; unknown commit never creates new work. Every route preserves exact status/headers/null fields, cookie and key authority, original nested failure versus fresh polling correlation, and real migration-only refusal before customer sinks",
+          "tests": "Actual cookie and scoped-key routes with two populated projects, viewer/operator and revoked/foreign precedence; duplicate headers/JSON, chunked 9 MiB and materialized 8 MiB boundaries, exact encoding/media type and schemas; eight-request replay/contention, changed defaults/storage outage, fixed uncertainty/error mapping, cancellation races, original/fresh correlation, zero prohibited sinks and isolated installed wheel/sdist smoke",
+          "security_reliability": "No eager validation before identity/visibility, collapsed duplicate headers or client-provided origin. Cookie mutations retain CSRF/exact Origin; GET remains read-only. Default required adapters refuse before readiness/storage, existing committed replay bypasses new-work dependencies, and exceptions map only through reviewed finite safe boundaries",
+          "definition_of_done": "Independent HTTP/security review, actual PostgreSQL integration, matching hosted installed-package/security/gVisor checks, accepted merge and protected-main candidate evidence establish P2 and aggregate completion. Preserve historical records, existing routes and later AR-010/AR-012-B/customer gates"
+        }
+      ]
     },
     {
       "id": "AR-009-A",
@@ -7314,7 +7373,7 @@
     "max_scheduled_delivery_days_per_role_per_day": 0.5,
     "milestone_effort_days": {
       "M0": 8.5,
-      "M1": 57.5,
+      "M1": 58.5,
       "M2": 69.0,
       "M3": 81.0,
       "M4": 82.0,
@@ -7327,12 +7386,12 @@
       "FE": 23.0,
       "RS": 66.0,
       "PL": 90.0,
-      "BE": 89.5,
+      "BE": 90.5,
       "QE": 112.5
     },
-    "base_effort_days": 456.0,
-    "upper_range_days": 771.1,
-    "effort_only_critical_path_days": 168.5,
+    "base_effort_days": 457.0,
+    "upper_range_days": 772.1,
+    "effort_only_critical_path_days": 169.5,
     "effort_only_critical_path": [
       "E0",
       "AR-005-A",
@@ -7395,11 +7454,11 @@
       "G7"
     ],
     "critical_path_excludes_external_waits": true,
-    "revision_notes": "2026-10-21 separate AR-006-B planning reconciliation replaces 2 [2–3] with two sequential packages totaling 4 [4–6] TL days. Existing aggregate prerequisites, outer graph, statuses, contracts and frozen history remain unchanged. Dedicated cursor lifecycle, finite suppression and bounded SQL receipt/work evidence precede HTTP integration; no runtime assignment or activation follows",
+    "revision_notes": "2026-10-21 separate AR-006-B planning reconciliation replaces 2 [2\u20133] with two sequential packages totaling 4 [4\u20136] TL days. Existing aggregate prerequisites, outer graph, statuses, contracts and frozen history remain unchanged. Dedicated cursor lifecycle, finite suppression and bounded SQL receipt/work evidence precede HTTP integration; no runtime assignment or activation follows. The separate 2026-10-21 AR-008-B amendment reforecasts the existing three-operation scope from 3 [3\u20135] to two sequential 2 [2\u20133] BE packages, total 4 [4\u20136]. Both remain Not started; outer edges, other tasks/statuses, gates/contracts and dated evidence are unchanged. Stored-failure producer support is an explicit pre-runtime checkpoint, not claimed availability",
     "independent_review": "A/C independently accepted admission plan 1d284ba and observability plan 9a70fdc; A accepted the final admission-history clarification f08b1ca. A independently passed 54 backlog cases and all three planning/evaluation/M1 OpenAPI validators at 9a70fdc with unchanged owned source/environment. Historical planning estimates/decisions and evidence remain auditable; no runtime authority is added by these planning checks. PR #79 reviewed source db5f992582c0d925a7921d26ae231312eaa41107 and accepted merge e117aaae0ef1f4ff4c293747482364a0791bc5d0 have identical trees. PR run 39535364867 and protected-main run 39536476328 passed 2013/2019 core tests on Python 3.11/3.12, with 9/3 expected skips and one warning per job; actual PostgreSQL, three separate gVisor tests, package/security/CI gate and main delivery passed. A accepted identity/read/mutation/UI security; B accepted C transaction consumption; C accepted interface and compatibility/OpenAPI corrections; lead integrated and verified delivery. Lead independently verified candidate 12318112434 (470334 bytes), archive/API digest, exact four files, source/manifests/package hashes; private indexed record reviewed-delivery-20261021-pr79-e117aaa.json is retained outside checkouts. P2 and aggregate AR-007-C are Verified for preparatory existing-route scope only. Customer-ready admission, full CT-M1-007/008/009, G1 and external production/funding/data gates remain open. A independently accepted status checkpoint c94b9b0 with 54 backlog passes and three validators; the one-line live admission correction is c390726. A authored AR-006-B plan 9b97a09; B independently accepted its contract, dependency and arithmetic review, and the lead accepted the plan. Tracking #86/#87/#88 does not start runtime or establish implementation acceptance. Listing P2 and aggregate AR-006-B were subsequently accepted on 2026-10-21: B audited reviewed source 5ab8984 and PR/main runs 39556621316/39558270300; lead verified accepted merge cd021542 and candidate 12327092547. The earlier plan/tracking statements remain historical; current delivery evidence is in RUN_LISTING_EXECUTION_PLAN.md and the package record. Parent AR-006 and repair AR-006-C remain open.",
     "contract_count": 20,
     "verification": "Two-PR reconciliation passed execution/evaluation/M1 OpenAPI validators and 296 focused tests, including 41 backlog tests with package-order, inherited-input, effort, merge-evidence, aggregate-completion and PR-count refusal cases. Ruff lint/security/format, strict checker types and whitespace passed. Aggregate DAG/effort/status, gates, historical schedules/C21/owner/API/acceptance bytes are unchanged from b42f00b. These are historical planning-check results; current runtime evidence and remaining acceptance gates are recorded in each delivery package and planning_status. The 2026-10-21 admission reconciliation passed the unchanged execution/evaluation/M1 OpenAPI validators and 256 focused tests, including 47 backlog cases (six new third-stage sequencing/input/effort refusals). Final 47-case backlog rerun, Ruff/format and whitespace pass. A separate comparison confirmed identical task IDs/statuses/outer dependencies, gates/contracts, historical schedules, frozen contract/research records and runtime/checker bytes; +6 base/+10 upper/+2 PRs only. Exact-source admission review was subsequently accepted by A/C at 1d284ba. The separate AR-011-C amendment passed all three validators and 263 focused backlog/evaluation/M1 tests, including seven new package producer/merge-gate cases (54 backlog cases total). Configured test lint/format and whitespace passed. A separate comparison confirmed only AR-011-C changes, exactly one added AR-010-B prerequisite, no removed edges, unchanged statuses/gates/contracts/history and frozen runtime/checker/research bytes. Generic validation is unchanged; exact-source observability review was subsequently accepted by A/C at 9a70fdc and A at clarification f08b1ca. The 2026-10-21 P2 acceptance/admission assignment reconciliation passed 54 backlog cases (1.33 seconds), all three execution/evaluation/M1 OpenAPI validators, configured checker/test lint and format, and whitespace. A historical package fixture now also resets downstream admission packages when rewinding AR-007-C; checker behavior and assertions are unchanged. Independent comparison confirms unchanged task IDs, effort, dependencies, gates/contracts, history, AR-006-B scope/estimate and runtime source; only acceptance/assignment metadata changes. The 2026-10-21 AR-006-B planning amendment passed all three execution/evaluation/M1 OpenAPI validators and the existing 54 backlog cases in 1.56 seconds, using the primary owned interpreter with PYTHONPATH unset and bytecode/cache disabled. Existing checker/test Ruff lint and format plus whitespace passed; no checker or test-source changes were needed. Separate comparison confirms identical outer dependencies, statuses, gates/contracts, historical schedules/research records and every other task, with +2 base/+3 upper/+1 delivery PR and the identical 168.5-day path. Runtime and frozen contract bytes are unchanged; independent plan review remains pending.",
-    "delivery_pr_count": 156
+    "delivery_pr_count": 157
   },
   "review_findings": [
     {
