@@ -635,3 +635,116 @@ or required ownership/evidence constraints must be reported before code, not
 silently amended or hidden in a catalog allowance. P1 acceptance still requires
 independent source/actual-dialect/package/hosted delivery and protected-main
 candidate evidence; this document supplies none of those results.
+
+## Concrete value, cursor and refusal contracts
+
+These are the exact proposed internal shapes, not additional HTTP schemas or
+callable APIs. All values are immutable after validation. `Id`, `Digest`,
+`Money` and `Time` mean the strict 32-hex, 64-hex, nonnegative signed-64-bit
+integer and canonical UTC types specified above. `Count[a,b]` is an exact
+integer in that inclusive interval. No field is omitted to represent null.
+
+`LedgerProvisioning` has exactly:
+
+| Field | Type / meaning |
+| --- | --- |
+| outcome | Literal `complete`; returned only after this invocation's acknowledged commit or verified completed replay and confirmed cleanup. |
+| installation_key | Validated installation key. |
+| revision | Literal `ar_0007_ledger`. |
+| manifest_id / manifest_digest | Id / Digest of the original accepted input. |
+| sequence | Count[0,255]. |
+| operation | Literal `initialize` or `provision`. |
+| source_digest | Digest from that manifest and durable row. |
+| account_rows | Count[0,64], newly inserted accounts for that manifest. |
+| imported_jobs | Count[0,48]; zero for provision. |
+| imported_opening_microusd | Money; total initial organization opening, zero for provision. |
+| initialized_at | Time persisted when preparing that manifest's atomic state; not a fabricated exact COMMIT timestamp. |
+
+A replay returns these original fields exactly, with no replay flag, current
+balance substitution, timestamp refresh or newly generated identity.
+
+`LedgerState` has exactly `status` (`absent|complete`), `installation_key`,
+`revision` (`ar_0006_admission|ar_0007_ledger`), `head`
+(`LedgerProvisioning|null`), `manifest_count` (Count[0,256]),
+`account_count` (Count[0,4096]) and `opening` (the validated opening cursor
+below, or null). `absent` means an exact supported ar6 predecessor with no ar7
+publication and all counts zero/head/opening null. `complete` means exact ar7,
+one complete opening record and a validated nonempty contiguous manifest chain.
+Malformed/partial/unknown state raises a refusal; it is never represented as
+absent or returned as an unvalidated `pending` status. The inspector can stream
+bounded manifest validation; it does not return their private bodies in a
+public diagnostic.
+
+The exact `ledger_manifest_<id>` cursor member set is:
+
+| Member | Type |
+| --- | --- |
+| schema_version | Integer 1. |
+| manifest | The complete strict manifest object above. |
+| manifest_digest | Digest of that object's canonical bytes. |
+| sequence | Count[0,255]. |
+| parent_manifest_digest | Digest or null; exactly equal to the manifest field and observed preceding chain head. |
+| database_role | Nonempty UTF-8 string, at most 63 bytes, no controls; actual observed database role, not input authorization. |
+| os_uid | Count[0,2^63−1], actual invoking UID. |
+| initialized_at | Time. |
+| account_projection_digest | Digest of the sorted immutable account projection specified below. |
+| account_count | Count[0,64]. |
+| imported_jobs | Count[0,48], zero for provision. |
+| imported_opening_microusd | Money, zero for provision. |
+
+Its row `source_digest` equals manifest.source_digest, `rows_verified` equals
+account_count, `status` is complete and `updated_at` equals initialized_at.
+The account projection is the ID-sorted array of exact account objects from the
+manifest with one added `opening_held_microusd` integer computed from SQL;
+held/accounted are intentionally excluded from this immutable receipt.
+Hash its existing-convention canonical bytes. Revalidate rows from native SQL
+before comparing; a digest does not hide type/cardinality/missing-row checks.
+
+The exact `ledger_opening` cursor members are `schema_version` (integer 1),
+`manifest_id` (Id), `manifest_digest` (Digest), `source_digest` (Digest),
+`initialized_at` (Time), `jobs`, `jobs_digest` (Digest), `project_totals`,
+`organization_account_id` (Id|null), `organization_opening_microusd` (Money)
+and `job_count` (Count[0,48]).
+`jobs` is an ID-sorted array of at most 48 exact objects with `job_id` (Id),
+`project_id` (Id), `budget_microusd` (Money) and
+`legacy_reserved_microusd` (Money). jobs_digest hashes that canonical array.
+`project_totals` is a project-ID-sorted array of at most 16 exact objects with
+`project_id` (Id), `account_id` (Id) and `opening_held_microusd` (Money).
+The organization account is null only for the empty account set, in which case
+all counts/totals/arrays are zero/empty. Its row source_digest equals the cursor
+source_digest and original initialize manifest; rows_verified equals job_count,
+status is complete and updated_at equals initialized_at. Each cursor still has
+its independent 64 KiB limit; duplicated bindings must agree exactly.
+
+File parsing and object validation have different information. Only
+`read_ledger_manifest` can prove original UTF-8/BOM, duplicate-member and numeric
+token grammar (including `-0`, fraction or exponent spellings). It must inspect
+those before ordinary JSON decoding discards the distinction. The
+`validate_ledger_manifest(object)` entry is for already structured trusted
+internal values: it enforces exact member/type/value/ordering/size semantics
+but cannot claim to detect a duplicate key or exponent spelling that no longer
+exists. An untrusted file must never bypass the lexical path by calling
+json.loads first. Both paths produce the same canonical validated value.
+
+The complete proposed **new** ledger-specific `MigrationRefused.code` set is:
+
+| Code | Exact boundary |
+| --- | --- |
+| invalid_ledger_manifest_file | Unsafe file or failed bounded lexical/UTF-8/duplicate/numeric-token parse. |
+| invalid_ledger_manifest | Decoded object fails exact semantic shape/type/value/order/size validation. |
+| ledger_manifest_conflict | Fresh bounded comparison proves changed immutable content under a known manifest ID, a conflicting parent/chain, or a conflicting intended account identity. Generic IntegrityError never establishes this. |
+| ledger_progress_invalid | Missing/ambiguous/malformed ar7 durable provenance, inconsistent digest/count/status/row binding or impossible chain. |
+| ledger_history_unsupported | Unsupported original job/state/scope/config association or incomplete initial coverage, without changing original rows. |
+| ledger_limit_exceeded | Ledger-specific count, retained-byte, statement or history ceiling prevents a complete proof. |
+| ledger_exposure_refused | A complete checked exposure calculation exceeds an unchanged cap/gross budget, or signed-64-bit arithmetic cannot represent that calculation. |
+| ledger_outcome_uncertain | COMMIT may have happened, ACK/cleanup failed, or disposal prevents a reliable completion classification. |
+
+Reuse existing fixed `schema_incompatible`, `migration_owner_required`,
+`writers_not_drained`, `writer_privileges_present`, `invalid_lock_timeout`,
+`migration_busy`, `migration_database_failure`, `source_digest_mismatch`,
+`source_limit_exceeded` and `invalid_source_data` at their existing semantic
+boundaries. Existing ownership/projection/legacy-inventory validators retain
+their own finite safe refusals; do not catch every refusal and recast it as a
+ledger conflict. The result/outcome table controls post-attempt uncertainty
+before any ordinary failure mapping. No code above adds an HTTP status or
+expands the frozen public Error vocabulary.
