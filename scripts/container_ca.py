@@ -230,18 +230,19 @@ def repair() -> dict[str, object]:
     source = certificates(read_file(CA_SOURCE))
     if set(source) != {BAD_ROOT}:
         raise ValueError("Unexpected distrusted source certificate")
-    config = read_file(CA_CONFIG).decode("ascii")
-    if config.splitlines().count(CA_ENTRY) != 1 or ("!" + CA_ENTRY) in config.splitlines():
+    config = read_file(CA_CONFIG)
+    entry = CA_ENTRY.encode("ascii")
+    if config.splitlines().count(entry) != 1 or (b"!" + entry) in config.splitlines():
         raise ValueError("Unexpected distrusted source configuration")
     pip = read_file(PIP_BUNDLE)
     pip_certificates = certificates(pip)
     if BAD_ROOT not in pip_certificates:
         raise ValueError("Distrusted pip root is absent")
-    config = "".join(
-        ("!" + line if line.rstrip("\r\n") == CA_ENTRY else line)
+    config = b"".join(
+        (b"!" + line if line.rstrip(b"\r\n") == entry else line)
         for line in config.splitlines(keepends=True)
     )
-    CA_CONFIG.write_text(config, encoding="ascii")
+    CA_CONFIG.write_bytes(config)
     CA_SOURCE.unlink()
     subprocess.run(["/usr/sbin/update-ca-certificates", "--fresh"], check=True)  # noqa: S603
     PIP_BUNDLE.write_bytes(pip.replace(pip_certificates[BAD_ROOT], b"", 1))

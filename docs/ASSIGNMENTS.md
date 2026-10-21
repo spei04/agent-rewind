@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Reconcile approved ledger planning with reviewed container repair | Preserve exact approved planning and source bytes; independent composition review next. |
-| Delivery reviewer | Review v6 verification and subsequent hosted delivery evidence | Earlier eeca run is functional history; repaired-image proof and protected-main candidate acceptance remain required. |
-| Planning/verification | Review planning composition; prepare private verifier v6 | Preserve ledger entry and Not started packages; bind the exact repaired source and final image marker. |
-| Lead | HTTP PR #106 delivery and dependency-ready planning integration | Primary holds reviewed 316bdc5; ledger implementation waits for accepted HTTP delivery and entry gates. |
+| Platform/security | Reconcile approved ledger planning with accepted config-byte correction | Independent composition review, then read-only P1 onboarding; implementation remains gated. |
+| Delivery reviewer | Review private verifier and corrected hosted delivery | Preserve failed 316 attempt; require actual final-image and protected-main candidate evidence. |
+| Planning/verification | Review exact planning composition and private verifier v7 | Bind corrected helper/source; preserve approved entry and Not started packages. |
+| Lead | HTTP PR #106 delivery and dependency-ready assignments | Primary holds reviewed ad6bfda; authorize implementation only after accepted HTTP delivery. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -716,3 +716,37 @@ reviews the verifier and actual hosted evidence. HTTP #95 and #93 remain In
 progress; ledger #107, #108 and #109 remain Not started. This reconciliation
 adds no ledger implementation, database execution, dependencies, model calls,
 partner data, production activation, paid resources or checkout.
+
+
+## Pinned certificate configuration correction — 2026-10-21
+
+Reviewed source 316bdc5 failed the package job in PR run
+[39677547972](https://github.com/spei04/agent-rewind/actions/runs/39677547972),
+attempt 1: Docker's repair step decoded the pinned Debian certificate
+configuration as ASCII and encountered non-ASCII bytes. The installed-package
+smoke passed, but the container did not reach final-image trust or CLI proof.
+The failure and source are retained.
+
+Platform/security owns the narrow byte-preserving configuration edit and an
+actual pinned-file regression in the reused secondary checkout.
+Planning/verification independently reviews the correction before another
+source run. The lead owns PR #106 and delivery acceptance; HTTP remains In
+progress and ledger packages remain Not started. No later repair stage,
+container acceptance or protected-main delivery is established by this fix.
+
+## Planning composition with config-byte correction — 2026-10-21
+
+Platform/security composed approved planning 41b60fc with reviewed correction
+ad6bfda in the reused secondary. The six planning files, frozen ledger entry,
+statuses, acceptance, dependencies and effort remain exact; all other source
+bytes come from ad6bfda. Only this current assignment table and appended
+checkpoint are reconciled, preserving both histories and the observed 316
+container failure above.
+
+The correction passed 97 focused tests and independent source review for hosted
+validation. Its 3,900-node collection gives forecasts of 3,886/3,897 passes plus
+14/3 skips on Python 3.11/3.12; these are not hosted results. Actual final-image
+trust, corrected-source CI and protected-main candidate acceptance remain open.
+HTTP #95/#93 remain In progress; ledger #107/#108/#109 remain Not started.
+Independent planning review and read-only P1 onboarding add no implementation,
+database work, model calls, resources or release authority.

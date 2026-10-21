@@ -299,3 +299,33 @@ def test_canonical_collision_slots_preserve_every_root(stores, monkeypatch):
     for number in (1, 2):
         (m.CAPATH / f"{number:08x}.0").rename(m.CAPATH / f"00000000.{number}")
     assert m.capath_roots("os_before") == set(stores.roots)
+
+
+def test_pinned_non_ascii_config_preserves_every_unrelated_byte(stores):
+    m = stores.module
+    original = (ROOT / "tests/fixtures/container-ca.conf").read_bytes()
+    assert any(value > 127 for value in original)
+    m.CA_CONFIG.write_bytes(original)
+    m.repair()
+    entry = m.CA_ENTRY.encode("ascii") + b"\n"
+    assert original.count(entry) == 1
+    assert m.CA_CONFIG.read_bytes() == original.replace(entry, b"!" + entry, 1)
+
+
+@pytest.mark.parametrize("mutation", ["duplicate", "disabled"])
+def test_non_ascii_config_identity_failure_precedes_every_write(stores, mutation):
+    m = stores.module
+    original = (ROOT / "tests/fixtures/container-ca.conf").read_bytes()
+    entry = m.CA_ENTRY.encode("ascii") + b"\n"
+    if mutation == "duplicate":
+        original += entry
+    else:
+        original = original.replace(entry, b"!" + entry, 1)
+    m.CA_CONFIG.write_bytes(original)
+    before = {
+        path: path.read_bytes() for path in (m.OS_BUNDLE, m.PIP_BUNDLE, m.CA_CONFIG, m.CA_SOURCE)
+    }
+    with pytest.raises(ValueError, match="source configuration"):
+        m.repair()
+    assert not stores.calls
+    assert {path: path.read_bytes() for path in before} == before
