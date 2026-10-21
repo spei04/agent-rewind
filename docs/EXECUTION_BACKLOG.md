@@ -925,6 +925,8 @@ M1 / P0 · 4 PRs · 10 engineering days · Not started · [Tracking issue #10](h
 
 #### AR-010-A — Integer ledger and hierarchical reservations
 
+Tracking: [#107](https://github.com/spei04/agent-rewind/issues/107) · Not started.
+
 - **Objective:** Deliver the scoped integer ledger, trusted fixed-period provisioning and conservative reservation/generation primitives before live worker integration.
 - **Implementation scope / PR boundary:** Two sequential accepted-merge-gated packages: exact additive ledger schema/catalog/provisioning/opening backfill, then connection-bound reservations, minimum generation fences and no-reset rollover. Preserve the three frozen ledger tables, original account triple, gross job reservations and prior outstanding exposure.
 - **Out of scope:** No public SubmitRun/native-v1 changes, automatic lifetime policy, live worker/ChatPolicy dispatch, settlement/release/transfer command, invoice ingestion, incident-latch table, production profile or spending.
@@ -944,6 +946,8 @@ M1 / P0 · 4 PRs · 10 engineering days · Not started · [Tracking issue #10](h
 
 #### AR-010-A/P1 — Ledger schema, trusted provisioning and opening backfill
 
+Tracking: [#108](https://github.com/spei04/agent-rewind/issues/108) · Not started.
+
 - **Objective:** Represent scoped accounts, logical calls and evidence-backed entries with explicit trusted provisioning and preserved historical exposure.
 - **Implementation scope:** One additive linear revision after ar6 for the three frozen ledger tables and job generation/legacy-reservation fields. Freeze and implement the exact bounded operator manifest, canonical digest, ownership/authority, replay/conflict semantics and SQL-derived opening backfill. Update both catalog inspection and migration exclusion to the exact 20-table profile; allow only reviewed PostgreSQL deferred constraints/functions, definitions and owner/security/search-path/privilege state. Preserve older literal profiles, resume/restore and migration-only compatibility.
 - **Out of scope:** No HTTP/public SubmitRun/native-v1 changes, automatic deadline policy, live worker claims/dispatch, settlement/release/transfer commands, invoice ingestion or new incident tables.
@@ -960,6 +964,8 @@ M1 / P0 · 4 PRs · 10 engineering days · Not started · [Tracking issue #10](h
 <a id="ar-010-a-p2"></a>
 
 #### AR-010-A/P2 — Integer reservations, generation fence and rollover proof
+
+Tracking: [#109](https://github.com/spei04/agent-rewind/issues/109) · Not started.
 
 - **Objective:** Provide conservative connection-bound reserve-only primitives with current generation authority, repeat-stable call identity and bounded prior-period exposure.
 - **Implementation scope:** Implement minimum claim/live-fence and existing-account reservation primitives after accepted P1. Atomically bind logical call and resource scope, three reservation entries and three account balances, while retaining the gross job counter. Check current plus prior outstanding organization/project holds under stable scope exclusion; inspect the original scoped identity after uncertain acknowledgment without granting a new dispatch opportunity.

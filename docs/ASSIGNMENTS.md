@@ -6,8 +6,8 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| A | Approved ledger backlog amendment in primary | Reconcile two packages, current forecasts and preserved history; no runtime or database work. |
-| C | Ledger schema/provisioning entry in secondary | Exact manifest, compatibility, deferred SQL and consumer decisions; no implementation before HTTP delivery and entry review. |
+| A | Ledger backlog tracking and independent entry review | Bind #107/#108/#109; review recovery and scoped-call closure; no runtime or database work. |
+| C | Frozen ledger entry f3af95ef and private PostgreSQL privilege probe | Two source clarifications and probe evidence remain required; no product implementation or entry acceptance. |
 | B | Corrected HTTP delivery and independent ledger planning review | Immutable source/inventory/hosted evidence plus bounded amendment review. |
 | Lead | HTTP integration/delivery and approved ledger planning | Preserve predecessor gate; coordinate exact entry, later issue tracking and independent review. |
 
@@ -615,3 +615,7 @@ The lead will reconcile the ledger planning amendment and assign exact manifest/
 ## Approved ledger backlog amendment — 2026-10-21
 
 A owns planning-only reconciliation in the reused primary; C owns the separate schema/provisioning entry in the secondary. B independently reviews planning and HTTP delivery, and the lead owns integration and later GitHub updates. The owner-approved 882fa139 plan fixes one finite nonrenewable execution window and AR-010-A/P1 schema/provisioning 3 [3–5] plus P2 reservations/minimum generation/rollover 3 [3–5], total 6 [6–10] BE days, medium-low. Both remain Not started/null acceptance; accepted HTTP protected-main delivery and exact manifest/interface/SQL entry review precede implementation, with accepted P1 before P2. Historical schedules, existing release evidence, frozen contracts and external spending/customer gates remain unchanged. No new checkout, runtime/schema change, database process or paid resource is used. The only test edit is the lead-authorized synthetic prerequisite setup required by the new nested ledger packages; checker and assertions are unchanged.
+
+## Ledger issue tracking — 2026-10-21
+
+The lead created and read back aggregate #107, schema/provisioning P1 #108 and reservation/concurrency P2 #109 under parent #10; all remain open/Not started with null package acceptance. Parent #10 is 10 [10–16] BE days/four PRs, including unchanged AR-010-B; existing #60 names the later historical-opening/transfer evidence obligation. A owns backlog tracking and independent entry review; B reviews HTTP delivery and the amendment; C retains frozen entry f3af95ef and the separately assigned private PostgreSQL privilege probe; the lead owns integration. Entry acceptance waits for the later-provision recovery and provider-call scoped-ownership clarifications plus probe evidence. HTTP remains In progress with failed-attempt history preserved; no runtime, estimate, dependency or gate change follows.
