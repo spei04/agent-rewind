@@ -28,6 +28,7 @@ from test_run_projection_postgres import drain
 from test_scoped_actions_postgres import wait_blocked
 
 from agent_rewind import operation_service
+from agent_rewind.admission_records import AdmissionStorageError
 from agent_rewind.errors import Fault
 from agent_rewind.migrations.admission_service import initialize_admission
 from agent_rewind.migrations.compatibility import load_release_profile
@@ -457,8 +458,30 @@ def test_postgres_secondary_ref_failure_rechecks_fresh_authority_after_release(
 ):
     f = cancel_pg
     original = f.service._cancel_disclose if after_ack else f.service._cancel_mutate
+    descriptor, check = operation_service.read_descriptor, f.service.authority.check
+    failed_connections, fresh_connections, owners = [], [], []
+
+    def observed_descriptor(connection, *args, **kwargs):
+        try:
+            return descriptor(connection, *args, **kwargs)
+        except AdmissionStorageError:
+            failed_connections.append(connection)
+            raise
+
+    def fresh_check(connection, *args, **kwargs):
+        if failed_connections and not fresh_connections:
+            assert failed_connections[0].closed
+            assert owners[0]._failed and owners[0]._active is None
+            assert connection is not failed_connections[0]
+            fresh_connections.append(connection)
+            # Only now revoke: the bounded secondary read has already failed
+            # and its original transaction/locks have been released.
+            if revoked:
+                grant_change(f, "member", f.principal)
+        return check(connection, *args, **kwargs)
 
     def change(*args, **kwargs):
+        owners.append(args[2])
         assert all(connection.closed for connection in f.connections)
         with f.engine.begin() as connection:
             connection.execute(
@@ -468,16 +491,17 @@ def test_postgres_secondary_ref_failure_rechecks_fresh_authority_after_release(
                 ),
                 {"id": JOB},
             )
-        if revoked:
-            grant_change(f, "member", f.principal)
         return original(*args, **kwargs)
 
+    monkeypatch.setattr(operation_service, "read_descriptor", observed_descriptor)
+    monkeypatch.setattr(f.service.authority, "check", fresh_check)
     monkeypatch.setattr(f.service, "_cancel_disclose" if after_ack else "_cancel_mutate", change)
     if revoked:
         with pytest.raises(ResourceNotFound):
             invoke(f)
     else:
         fault(lambda: invoke(f), "outcome_uncertain" if after_ack else "dependency_unavailable")
+    assert len(failed_connections) == len(fresh_connections) == 1
     assert state(f)[0]["cancel"] is after_ack and len(state(f)[1]) == int(after_ack)
     assert len(f.work) == 1
     released(f)
@@ -563,7 +587,9 @@ def test_postgres_project_wait_rechecks_original_association_and_current_authori
     released(f)
 
 
-@pytest.mark.parametrize("kind", ["organization", "membership", "key", "scope", "job", "operation"])
+@pytest.mark.parametrize(
+    "kind", ["organization", "membership", "key", "scope", "job", "operation", "operation_delete"]
+)
 def test_postgres_grant_target_and_operation_locks_survive_effect_until_commit(
     cancel_pg, monkeypatch, kind
 ):
@@ -599,6 +625,7 @@ def test_postgres_grant_target_and_operation_locks_survive_effect_until_commit(
         ),
         "job": "UPDATE jobs SET reserved=reserved+1 WHERE id=:job",
         "operation": "UPDATE operations SET kind=kind WHERE id=:op",
+        "operation_delete": "DELETE FROM operations WHERE id=:op",
     }
 
     def writer():
@@ -637,7 +664,7 @@ def test_postgres_grant_target_and_operation_locks_survive_effect_until_commit(
         finally:
             release.set()
         assert mutation.result(timeout=8) is None
-        if kind in {"membership", "key"}:
+        if kind in {"membership", "key", "operation_delete"}:
             denial = ActionForbidden if kind == "membership" else ResourceNotFound
             with pytest.raises(denial):
                 action.result(timeout=8)
@@ -691,3 +718,145 @@ def test_postgres_real_fresh_ar6_guard_has_zero_target_effects(pg, monkeypatch):
             == before
         )
     assert load_release_profile().model_dump() == profile
+
+
+@pytest.mark.parametrize("cleanup", ["close", "finish"])
+def test_postgres_acknowledged_rollback_cleanup_failure_remains_dependency(
+    cancel_pg, monkeypatch, cleanup
+):
+    f = cancel_pg
+    original_effect = f.service._actions._cancel_effect
+    original_rollback, original_close = Connection.rollback, Connection.close
+    staged, rollback_acks, cleanup_faults = [], [], []
+
+    def effect(*args):
+        result = original_effect(*args)
+        staged.append(result)
+        raise RuntimeError("private precommit effect failure")
+
+    def rollback(connection):
+        result = original_rollback(connection)
+        if connection.engine is f.reader_engine and staged:
+            rollback_acks.append(connection)
+        return result
+
+    def close(connection):
+        if connection.engine is f.reader_engine and staged and not cleanup_faults:
+            cleanup_faults.append(connection)
+            raise RuntimeError("private post-rollback close failure")
+        return original_close(connection)
+
+    original_mutate = f.service._cancel_mutate
+
+    def mutate(principal, context, owner, *args):
+        if cleanup == "finish":
+            original_finish = owner.work.finish
+
+            def finish():
+                original_finish()
+                if staged and not cleanup_faults:
+                    cleanup_faults.append(True)
+                    raise RuntimeError("private post-rollback finish failure")
+
+            monkeypatch.setattr(owner.work, "finish", finish)
+        return original_mutate(principal, context, owner, *args)
+
+    previous = snapshot(f)
+    monkeypatch.setattr(f.service._actions, "_cancel_effect", effect)
+    monkeypatch.setattr(f.service, "_cancel_mutate", mutate)
+    monkeypatch.setattr(Connection, "rollback", rollback)
+    if cleanup == "close":
+        monkeypatch.setattr(Connection, "close", close)
+    fault(lambda: invoke(f))
+    assert len(staged) == len(cleanup_faults) == 1 and rollback_acks
+    assert snapshot(f) == previous
+    released(f)
+
+
+@pytest.mark.parametrize("failure", ["connect", "spent_work", "finish"])
+def test_postgres_failed_fresh_recheck_after_ack_preserves_uncertainty(
+    cancel_pg, monkeypatch, failure
+):
+    from contextlib import contextmanager
+
+    from sqlalchemy.exc import SQLAlchemyError
+
+    from agent_rewind.admission_transaction import AdmissionError
+
+    f = cancel_pg
+    read_scope, scopes, injected = operation_service.operation_connection, [], []
+
+    def remove_config():
+        with f.engine.begin() as connection:
+            connection.execute(
+                text(
+                    "DELETE FROM artifact_refs WHERE owner_kind='job' "
+                    "AND owner_id=:id AND role='admission_config'"
+                ),
+                {"id": JOB},
+            )
+
+    @contextmanager
+    def connection(engine, work):
+        scopes.append(work)
+        if len(scopes) == 3:
+            injected.append(failure)
+            assert all(c.closed for c in f.connections)
+            if failure == "connect":
+
+                def unavailable():
+                    raise SQLAlchemyError("private failure-classification acquisition")
+
+                monkeypatch.setattr(engine, "connect", unavailable)
+            elif failure == "spent_work":
+                work.seconds = 10.0
+            else:
+                original_finish = work.finish
+
+                def finish():
+                    original_finish()
+                    raise AdmissionError("dependency_unavailable") from None
+
+                monkeypatch.setattr(work, "finish", finish)
+        with read_scope(engine, work) as current:
+            yield current
+
+    monkeypatch.setattr(operation_service, "operation_connection", connection)
+    before_disclosure(f, monkeypatch, remove_config)
+    fault(lambda: invoke(f), "outcome_uncertain")
+    assert injected == [failure] and len(scopes) == 3
+    assert len(f.work) == 1 and all(work is f.work[0] for work in scopes)
+    assert state(f)[0]["cancel"] is True and len(state(f)[1]) == 1
+    released(f)
+
+
+@pytest.mark.parametrize("change", ["role", "member"])
+def test_postgres_after_ack_typed_authority_denial_survives_cleanup_failure(
+    cancel_pg, monkeypatch, change
+):
+    f = cancel_pg
+    check, close = f.service.authority.check, Connection.close
+    denials, cleanup_faults = [], []
+
+    def checked(*args, **kwargs):
+        try:
+            return check(*args, **kwargs)
+        except (ActionForbidden, ResourceNotFound) as error:
+            denials.append(error)
+            raise
+
+    def failed_close(connection):
+        if connection.engine is f.reader_engine and denials and not cleanup_faults:
+            cleanup_faults.append(connection)
+            raise RuntimeError("private denial cleanup")
+        return close(connection)
+
+    monkeypatch.setattr(f.service.authority, "check", checked)
+    monkeypatch.setattr(Connection, "close", failed_close)
+    before_disclosure(f, monkeypatch, lambda: grant_change(f, change, f.principal))
+    with pytest.raises(ActionForbidden if change == "role" else ResourceNotFound) as caught:
+        invoke(f)
+    assert len(denials) == len(cleanup_faults) == 1
+    assert caught.value is denials[0]
+    assert state(f)[0]["cancel"] is True and len(state(f)[1]) == 1
+    released(f)
