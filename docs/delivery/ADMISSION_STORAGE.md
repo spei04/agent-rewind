@@ -1,6 +1,6 @@
 # Admission storage foundation
 
-AR-008-A/P2 is in progress in [PR #90](https://github.com/spei04/agent-rewind/pull/90).
+AR-008-A/P2 is **Implemented; verification pending** in [PR #90](https://github.com/spei04/agent-rewind/pull/90).
 This package adds storage constraints and connection-bound primitives for the
 later P3 coordinator. It supplies no HTTP admission, worker dispatch, budget or
 generation schema, upload coordinator or customer-ready profile. Existing
@@ -229,3 +229,8 @@ The interruption handoff passed 42 local initializer/catalog/diagnostic tests;
 all 14 PostgreSQL migration cases skipped explicitly. The exact child program
 compiles and focused lint/format/whitespace checks pass. No child PostgreSQL
 execution or successful interruption/recovery is claimed from these checks.
+
+Current delivery ownership and composed independent checks are recorded in the
+[P2 implementation checkpoint](ADMISSION_EXECUTION_PLAN.md#p2-implementation-checkpoint--2026-10-21).
+Lead owns matching hosted validation and delivery; A/B reviews are accepted and
+reviewers remain available. Aggregate AR-008-A stays In progress and P3 Not started.
