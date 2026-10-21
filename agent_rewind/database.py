@@ -23,7 +23,7 @@ from sqlalchemy import (
     true,
     update,
 )
-from sqlalchemy.engine import Connection
+from sqlalchemy.engine import Connection, make_url
 
 from .config import Settings
 from .migrations.compatibility import (
@@ -35,7 +35,7 @@ from .migrations.compatibility import (
     runtime_database_connectivity,
     runtime_schema_compatibility,
 )
-from .sqlite_ownership import owned_begin, owned_connect
+from .sqlite_ownership import create_owned_sqlite_engine, owned_begin, owned_connect
 
 metadata = MetaData()
 records = Table(
@@ -107,15 +107,32 @@ class BudgetExceeded(RuntimeError):
 class Database:
     def __init__(self, settings: Settings):
         settings.data_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
-        kwargs: dict[str, Any] = {"pool_pre_ping": True}
-        if settings.database_url.startswith("sqlite"):
-            kwargs["connect_args"] = {
-                "check_same_thread": False,
-                "timeout": CONNECT_TIMEOUT_SECONDS,
-            }
-        if ":memory:" not in settings.database_url and settings.database_url != "sqlite://":
-            kwargs["pool_timeout"] = POOL_TIMEOUT_SECONDS
-        self.engine = create_engine(settings.database_url, **kwargs)
+        url = make_url(settings.database_url)
+        if (
+            url.drivername in {"sqlite", "sqlite+pysqlite"}
+            and url.database
+            and url.database != ":memory:"
+            and not url.database.startswith("file:")
+            and not url.query
+            and all(value is None for value in (url.username, url.password, url.host, url.port))
+        ):
+            self.engine = create_owned_sqlite_engine(
+                settings.database_url,
+                connect_timeout=CONNECT_TIMEOUT_SECONDS,
+                pool_timeout=POOL_TIMEOUT_SECONDS,
+            )
+        else:
+            # Unsupported SQLite forms retain the explicit legacy path. They
+            # cannot satisfy the operation service's separate ownership gate.
+            kwargs: dict[str, Any] = {"pool_pre_ping": True}
+            if settings.database_url.startswith("sqlite"):
+                kwargs["connect_args"] = {
+                    "check_same_thread": False,
+                    "timeout": CONNECT_TIMEOUT_SECONDS,
+                }
+            if ":memory:" not in settings.database_url and settings.database_url != "sqlite://":
+                kwargs["pool_timeout"] = POOL_TIMEOUT_SECONDS
+            self.engine = create_engine(settings.database_url, **kwargs)
         configure_runtime_engine(self.engine, production=settings.mode == "production")
 
     def schema_compatibility(self) -> CompatibilityResult:
