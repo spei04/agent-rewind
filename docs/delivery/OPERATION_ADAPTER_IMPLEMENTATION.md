@@ -202,3 +202,55 @@ requirement before service composition: the current marker does not detect or
 restore an arbitrary unmarked foreign callback. No ownership mechanism,
 read/cancel service, HTTP route, schema, profile or failure producer is added
 by this correction.
+
+
+### Actual PostgreSQL first-component proof
+
+A separate test-only checkpoint exercises the f10cf23 runtime on the existing
+private PostgreSQL 16.15 instance through the opt-in synthetic fixture. The
+initial 33 cases all passed in 50.58 seconds; seven additional boundary cases
+brought the final run to 40 passed, zero skips/failures/errors, in 59.09 seconds.
+No runtime or shared fixture change was needed. The new file is
+tests/test_operation_component_postgres.py; without the opt-in connection it
+collects as 40 explicit PostgreSQL skips.
+
+The read tests use a nonsuperuser role with SELECT and without table mutation
+or schema CREATE privileges. A separate normally DML/DDL-capable nonsuperuser
+owner proves native READ ONLY refusals are SQLSTATE 25006 rather than missing
+privileges. An actual committed writer demonstrates READ COMMITTED on the same
+read transaction. Native statement cancellation (57014) and a held conflicting
+table lock (55P03) exercise remaining limits without sleep-based barriers.
+Controlled clocks retain budget across connections and verify actual 500 ms,
+250 ms and 1 ms settings, sub-millisecond refusal, and the shared 512-attempt
+allowance. The exact read/mutation/read ledger includes raw timeout setters,
+setup and native controls; pooled settings and physical connection reuse or
+replacement are checked after cleanup.
+
+Native rollback/close and accounting interruptions preserve the original typed
+denial, release the one-slot pool, and finish the work clock. Precommit expiry
+rolls back effects; post-ACK expiry and lost commit acknowledgment remain
+uncertain. A later read-phase deadline retains the shared work total. Mapping
+that failure after a successful mutation to a service-level uncertain response
+is still the future service's responsibility.
+
+The raw-receipt cases use a real initialized ar6 synthetic database and a
+SELECT-only noncreator viewer. They preserve the original 14 operation fields,
+16 job fields, seven descriptor fields and reference identity; changed receipts,
+missing/ambiguous candidates, nonfinite job values and byte overflow refuse.
+An instrumented DB result confirms CASE bounds precede Python validation.
+PostgreSQL infinity reaches the validator only as bounded text; malformed
+timestamp text is rejected by the native timestamp type (22007), rather than
+being simulated by bypassing that type. The legitimate 1200-byte VARCHAR(300)
+error boundary remains raw data, not an asserted structured Error producer.
+
+The synthetic database/role inventory exactly matched its pre-run baseline
+after teardown, with no other client backends. All consumers were closed and
+the socket-only instance was stopped. Private owner-only logs, JUnit results,
+source/test hashes and cleanup evidence are indexed outside the checkout for
+review on 2026-11-20.
+
+This is component evidence only. SQLite engine/progress provenance, actual
+operation-row lock privileges, service authority races, final compound receipt
+revalidation, effect/audit/disclosure composition and installed-package coverage
+remain later P1 obligations. No read/cancel service, HTTP route, schema/profile,
+worker/failure producer or customer activation is added by this checkpoint.
