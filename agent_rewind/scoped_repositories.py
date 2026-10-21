@@ -191,7 +191,15 @@ class _Reads:
         # Scope discovery before its count/limit. A foreign forged incoming
         # reference must neither leak nor deny access to this project's job.
         rows = self.connection.execute(
-            select(records.c.kind, records.c.id)
+            select(
+                case(
+                    (_byte_length(self.connection, records.c.kind) <= 20, records.c.kind),
+                    else_=None,
+                ).label("kind"),
+                case(
+                    (_byte_length(self.connection, records.c.id) == 32, records.c.id), else_=None
+                ).label("id"),
+            )
             .select_from(
                 records.join(
                     scopes,
@@ -208,7 +216,9 @@ class _Reads:
         ).all()
         if len(rows) > MAX_NODES:
             raise ResourceNotFound()
-        return [(row.kind, row.id) for row in rows]
+        if any(row.kind not in {"run", "study"} for row in rows):
+            raise ResourceNotFound()
+        return [(row.kind, identifier(row.id)) for row in rows]
 
     def resource(self, kind: str, resource_id: str) -> dict[str, Any]:
         if kind == "key":
