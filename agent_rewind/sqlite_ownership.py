@@ -21,11 +21,12 @@ from weakref import WeakKeyDictionary, WeakSet
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Connection, Engine, make_url
 from sqlalchemy.exc import ArgumentError, SQLAlchemyError
-from sqlalchemy.pool import ConnectionPoolEntry, PoolProxiedConnection, QueuePool
+from sqlalchemy.pool import ConnectionPoolEntry, Pool, PoolProxiedConnection, QueuePool
 
 ProgressCallback = Callable[[], int | None]
 _REGISTRY_LOCK = RLock()
 _CAPABILITIES: WeakKeyDictionary[Engine, SQLiteCapability] = WeakKeyDictionary()
+_POOLS: WeakKeyDictionary[Pool, SQLiteCapability] = WeakKeyDictionary()
 _ATTEMPT: ContextVar[CheckoutReceipt | None] = ContextVar("sqlite_checkout", default=None)
 
 
@@ -69,6 +70,7 @@ class SQLiteCapability:
 @dataclass(eq=False)
 class CheckoutReceipt:
     capability: SQLiteCapability
+    pool: Pool = field(repr=False)
     lock: RLock = field(default_factory=RLock, repr=False)
     record: ConnectionPoolEntry | None = field(default=None, repr=False)
     raw: _TrackedSQLite | None = field(default=None, repr=False)
@@ -250,9 +252,23 @@ class ProgressLease:
                 state.native_busy = False
 
 
+class _OwnedQueuePool(QueuePool):
+    def recreate(self) -> QueuePool:
+        with _REGISTRY_LOCK:
+            capability = _POOLS.get(self)
+        if capability is None:
+            raise SQLiteOwnershipError()
+        # Only an already-owned predecessor can authorize a successor. Merely
+        # disposing an unrelated replacement pool must not grant ownership.
+        # Public recreation (and any native work) stays outside registry locks.
+        successor = super().recreate()
+        with _REGISTRY_LOCK:
+            _POOLS[successor] = capability
+        return successor
+
+
 def require_owned_sqlite(engine: Engine) -> SQLiteCapability:
-    with _REGISTRY_LOCK:
-        capability = _CAPABILITIES.get(engine)
+    capability = _capability(engine)
     if capability is None:
         raise SQLiteOwnershipError()
     return capability
@@ -260,7 +276,10 @@ def require_owned_sqlite(engine: Engine) -> SQLiteCapability:
 
 def _capability(engine: Engine) -> SQLiteCapability | None:
     with _REGISTRY_LOCK:
-        return _CAPABILITIES.get(engine)
+        capability = _CAPABILITIES.get(engine)
+        if capability is not None and _POOLS.get(engine.pool) is not capability:
+            raise SQLiteOwnershipError()
+        return capability
 
 
 def _attempt(capability: SQLiteCapability, record: ConnectionPoolEntry) -> CheckoutReceipt:
@@ -327,7 +346,7 @@ def create_owned_sqlite_engine(
     capability = SQLiteCapability()
     engine = create_engine(
         parsed,
-        poolclass=QueuePool,
+        poolclass=_OwnedQueuePool,
         pool_size=pool_size,
         max_overflow=max_overflow,
         pool_timeout=pool_timeout,
@@ -415,6 +434,7 @@ def create_owned_sqlite_engine(
     event.listen(engine, "checkin", checkin)
     with _REGISTRY_LOCK:
         _CAPABILITIES[engine] = capability
+        _POOLS[engine.pool] = capability
     return engine
 
 
@@ -509,20 +529,71 @@ def _cleanup(receipt: CheckoutReceipt, connection: Connection | None) -> None:
                 raw.close()
             except BaseException as error:
                 receipt.fail(error)
+    if raw is not None:
+        with raw._ownership.lock:
+            if raw._ownership.receipt is receipt and raw._ownership.closed:
+                # A retained-raw retry may finish after logical close marked the
+                # receipt complete. Keep its actual same-generation close ACK.
+                receipt.disposal_acknowledged = True
     receipt.completed = True
+
+
+def _attest_checkout(engine: Engine, connection: Connection, receipt: CheckoutReceipt) -> None:
+    with _REGISTRY_LOCK:
+        trusted = (
+            _CAPABILITIES.get(engine) is receipt.capability
+            and engine.pool is receipt.pool
+            and _POOLS.get(receipt.pool) is receipt.capability
+        )
+    if (
+        not trusted
+        or connection.engine is not engine
+        or connection.closed
+        or connection.invalidated
+        or receipt.record is None
+        or receipt.raw is None
+        or receipt.proxy is None
+        or receipt.generation < 1
+        or receipt.failed
+        or receipt.completed
+        or receipt.returned
+    ):
+        raise SQLiteOwnershipError()
+    with receipt.capability.lock:
+        known = receipt.record in receipt.capability.records
+    if (
+        not known
+        or connection.connection is not receipt.proxy
+        or receipt.proxy.driver_connection is not receipt.raw
+        or receipt.record.driver_connection is not receipt.raw
+    ):
+        raise SQLiteOwnershipError()
+    state = receipt.raw._ownership
+    with state.lock:
+        if (
+            state.capability is not receipt.capability
+            or state.receipt is not receipt
+            or state.generation != receipt.generation
+            or not state.borrowed
+            or not _native_idle(receipt.raw)
+        ):
+            raise SQLiteOwnershipError()
 
 
 def connect_owned(engine: Engine) -> tuple[Connection, CheckoutReceipt | None]:
     capability = _capability(engine)
     if capability is None:
         return engine.connect(), None
-    receipt = CheckoutReceipt(capability)
+    receipt = CheckoutReceipt(capability, engine.pool)
     token = _ATTEMPT.set(receipt)
+    connection = None
     try:
         connection = engine.connect()
+        receipt.connection = connection
+        _attest_checkout(engine, connection, receipt)
     except BaseException as error:
         receipt.fail(error)
-        _cleanup(receipt, None)
+        _cleanup(receipt, connection)
         # No proxy: the supported QueuePool call has unwound its initial
         # allocation or returned the existing record. Physical close is separate.
         if receipt.proxy is None and (receipt.record is None or receipt.new_record):
@@ -535,7 +606,6 @@ def connect_owned(engine: Engine) -> tuple[Connection, CheckoutReceipt | None]:
         raise SQLiteOwnershipError(cleanup_snapshot(receipt)) from None
     finally:
         _ATTEMPT.reset(token)
-    receipt.connection = connection
     return connection, receipt
 
 

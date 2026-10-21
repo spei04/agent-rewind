@@ -714,3 +714,197 @@ def test_factory_input_errors_are_fixed_and_do_not_echo_values(url):
         create_owned_sqlite_engine(url)
     assert str(caught.value) == "Owned SQLite connection unavailable."
     assert caught.value.__suppress_context__ or caught.value.__context__ is None
+
+
+@pytest.mark.parametrize("context", [owned_connect, owned_begin])
+@pytest.mark.parametrize("dispose_replacement", [None, False, True])
+def test_replaced_pool_refuses_before_body_or_caller_sql(engine, context, dispose_replacement):
+    from sqlalchemy.pool import QueuePool
+
+    original_pool = engine.pool
+    statements, connections = [], []
+
+    def creator():
+        handle = sqlite3.connect(":memory:")
+        connections.append(handle)
+        handle.set_trace_callback(statements.append)
+        return handle
+
+    replacement = QueuePool(creator, pool_size=1, max_overflow=0)
+    engine.pool = replacement
+    entered = False
+    try:
+        if dispose_replacement is not None:
+            engine.dispose(close=dispose_replacement)
+        with pytest.raises(SQLiteOwnershipError), context(engine) as connection:
+            entered = True
+            connection.exec_driver_sql("SELECT 'must-not-run'")
+        assert not entered
+        assert statements == []
+        assert connections == []
+        assert engine.pool.checkedout() == 0
+        with pytest.raises(SQLiteOwnershipError):
+            require_owned_sqlite(engine)
+    finally:
+        engine.pool.dispose()
+        replacement.dispose()
+        engine.pool = original_pool
+    assert_reusable(engine)
+
+
+@pytest.mark.parametrize("close", [False, True])
+def test_supported_engine_dispose_preserves_factory_pool_generations(engine, close):
+    connection, receipt = connect_owned(engine)
+    first = raw(connection)
+    close_owned(connection, receipt)
+    old_pool = engine.pool
+    engine.dispose(close=close)
+    try:
+        assert engine.pool is not old_pool
+        require_owned_sqlite(engine)
+        assert_reusable(engine, previous=first)
+    finally:
+        old_pool.dispose()
+
+
+@pytest.mark.parametrize("close", [False, True])
+def test_dispose_keeps_outstanding_owned_checkout_and_new_pool_independent(engine, close):
+    connection, receipt = connect_owned(engine)
+    first = raw(connection)
+    lease = acquire_progress(connection, owner=object())
+    lease.install(lambda: 0, 1)
+    old_pool = engine.pool
+    engine.dispose(close=close)
+    try:
+        assert_reusable(engine, previous=first)
+        assert connection.exec_driver_sql("SELECT 1").scalar_one() == 1
+        lease.release()
+        close_owned(connection, receipt)
+        require_clean(cleanup_snapshot(receipt))
+        assert connection.closed
+        assert not receipt.proxy.is_valid
+        assert engine.pool.checkedout() == 0
+    finally:
+        old_pool.dispose()
+
+
+@pytest.mark.parametrize("state", ["transaction", "lease", "foreign", "closed", "invalidated"])
+def test_pre_yield_attestation_refuses_constructor_dirty_checkout_and_releases(engine, state):
+    handles = []
+    callbacks = []
+
+    def constructor(connection):
+        handle = raw(connection)
+        handles.append(handle)
+        if state == "transaction":
+            handle.execute("BEGIN")
+        elif state == "lease":
+            lease = acquire_progress(connection, owner=object())
+            lease.install(lambda: callbacks.append(1) or 0, 1)
+        elif state == "foreign":
+            with pytest.raises(SQLiteOwnershipError):
+                handle.set_progress_handler(lambda: 0, 1)
+        elif state == "closed":
+            connection.close()
+        else:
+            connection.invalidate()
+
+    event.listen(engine, "engine_connect", constructor)
+    entered = False
+    try:
+        with pytest.raises(SQLiteOwnershipError) as caught, owned_connect(engine):
+            entered = True
+        assert not entered
+        assert callbacks == []
+        assert caught.value.verdict.failed
+        assert caught.value.verdict.returned
+        assert engine.pool.checkedout() == 0
+        with pytest.raises(sqlite3.ProgrammingError):
+            handles[0].execute("SELECT 1")
+    finally:
+        event.remove(engine, "engine_connect", constructor)
+    if state == "closed":
+        # The constructor returned its record before attestation; cleanup must
+        # not invalidate a potentially reused record. Its closed raw is refused
+        # at the next checkout, rather than silently retried for that caller.
+        with pytest.raises(SQLiteOwnershipError):
+            connect_owned(engine)
+        assert engine.pool.checkedout() == 0
+    assert_reusable(engine, previous=handles[0])
+
+
+def test_missing_checkout_receipt_refuses_before_body_with_bounded_native_cleanup(
+    engine, monkeypatch
+):
+    # Simulate missing checkout instrumentation through the public event API.
+    # A factory-created raw handle alone must not certify a complete checkout.
+    checkout = next(iter(engine.pool.dispatch.checkout))
+    event.remove(engine, "checkout", checkout)
+    handles = []
+    close_calls = []
+    native_close = ownership._TrackedSQLite._native_close
+
+    def capture(connection):
+        handles.append(raw(connection))
+
+    def fail_once(self):
+        close_calls.append(self)
+        if len(close_calls) == 1:
+            raise RuntimeError("private-native-close")
+        native_close(self)
+
+    event.listen(engine, "engine_connect", capture)
+    monkeypatch.setattr(ownership._TrackedSQLite, "_native_close", fail_once)
+    entered = False
+    try:
+        with pytest.raises(SQLiteOwnershipError) as caught, owned_connect(engine):
+            entered = True
+        assert not entered
+        assert len(close_calls) == 2
+        assert caught.value.verdict.generation == 0
+        assert caught.value.verdict.failed
+        assert caught.value.verdict.returned
+        assert caught.value.verdict.disposal_acknowledged
+        assert engine.pool.checkedout() == 0
+        with pytest.raises(sqlite3.ProgrammingError):
+            handles[0].execute("SELECT 1")
+    finally:
+        event.remove(engine, "engine_connect", capture)
+        event.listen(engine, "checkout", checkout)
+    assert_reusable(engine, previous=handles[0])
+
+
+def test_pool_changed_during_constructor_refuses_before_body_and_closes_original_checkout(engine):
+    from sqlalchemy.pool import QueuePool
+
+    original_pool = engine.pool
+    creations = []
+    handles = []
+
+    def creator():
+        creations.append(1)
+        return sqlite3.connect(":memory:")
+
+    replacement = QueuePool(creator, pool_size=1, max_overflow=0)
+
+    def constructor(connection):
+        handles.append(raw(connection))
+        engine.pool = replacement
+
+    event.listen(engine, "engine_connect", constructor)
+    entered = False
+    try:
+        with pytest.raises(SQLiteOwnershipError) as caught, owned_connect(engine):
+            entered = True
+        assert not entered
+        assert creations == []
+        assert original_pool.checkedout() == replacement.checkedout() == 0
+        assert caught.value.verdict.failed
+        assert caught.value.verdict.returned
+        with pytest.raises(sqlite3.ProgrammingError):
+            handles[0].execute("SELECT 1")
+    finally:
+        event.remove(engine, "engine_connect", constructor)
+        replacement.dispose()
+        engine.pool = original_pool
+    assert_reusable(engine, previous=handles[0])
