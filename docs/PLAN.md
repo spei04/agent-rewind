@@ -1,6 +1,6 @@
 # Agent Rewind — enterprise product and engineering roadmap
 
-**Document owner:** spei04 · **Revision:** 2026-10-20 · **State:** Execution backlog approved; staged delivery in progress
+**Document owner:** spei04 · **Revision:** 2026-10-21 · **State:** Execution backlog approved; staged delivery in progress
 **Implementation baseline:** `8f1ae757005c95c50a789e4fa0a10aae9b3c4024` · **Delivery clock:** Day 1 begins after execution-backlog approval (E0) and staffing confirmation; runtime implementation also requires G0.
 
 This is the authoritative product/architecture roadmap and milestone progress document; the requested [execution backlog](EXECUTION_BACKLOG.md) contains assignable task cards and the validated task-level schedule. It fills the product, architecture, delivery, security, operations, and governance brief in one file. Existing technical documents describe the current release; proposed behavior below is not implemented unless explicitly marked verified. No production deployment, enterprise certification, customer adoption, or capacity benchmark is implied by this plan.
@@ -1044,3 +1044,7 @@ C's PostgreSQL evidence covers 65 distinct cases across runs: 62 initial passes,
 Composition f9172462 preserves the exact 377-file union of reviewed runtime, independent PostgreSQL tests and installed smoke. The 71d33737 package proof passes isolated service GET/cancellation, a separate untouched real migration-only guard, CLI and all 113 Git/wheel/sdist/installed runtime member comparisons. The service marker follows the service scenarios and real-guard checks; separate package and CLI evidence records the remaining checks. Final source binding and matching hosted checks remain required; older component CI does not cover this composition.
 
 The core CI job receives a bounded 30-minute scheduling window because the preceding Python 3.12 suite already took 1,106.67 seconds and this composition adds execution coverage. Product, native SQL, test wait and other job deadlines remain unchanged. A owns final installed proof, B reviews final source/CI inventory, C reviews integration evidence, and the lead owns delivery. P1 remains In progress; P2 Not started. No task status, dependency, estimate, spending or production/data gate changes.
+
+## HTTP validation checkpoint — 2026-10-21
+
+P1 remains Verified and P2 remains In progress. The three HTTP routes have reviewed runtime, 80 passing SQLite/ASGI/helper cases, five independent frozen-contract cases, 34 actual PostgreSQL passes and independently accepted 114-member installed-package proof. The lead separately passed 91 existing API/identity/contract/backlog cases. Final source composition, independent PostgreSQL evidence review, matching hosted checks, merge and protected-main candidate verification remain required. Current ownership and exact component evidence are in the [assignment log](ASSIGNMENTS.md#p2-test-and-package-checkpoint--2026-10-21); these separate results are not one combined full-suite run. No research superiority, enterprise capacity, production activation or customer-data readiness is established.
