@@ -136,8 +136,9 @@ parent, evidence binding or source digest conflicts under the same manifest ID.
 Authority is the explicit trusted operator invocation plus existing database
 owner/schema-owner/superuser checks, disabled legacy writer inventory and writer
 drain. No browser role, API key, caller string or supplied actor field can grant
-provisioning. Record the observed database role, OS UID and initialization time
-as provenance outside the canonical manifest. These are attributable observations,
+provisioning. Record PostgreSQL's observed current_user, or NULL for SQLite,
+plus the OS UID and initialization time as provenance outside the canonical
+manifest. Never invent a SQLite database role. These are attributable observations,
 not a signature or proof against a malicious trusted operator.
 
 ## Durable binding without another table
@@ -663,13 +664,22 @@ integer in that inclusive interval. No field is omitted to represent null.
 A replay returns these original fields exactly, with no replay flag, current
 balance substitution, timestamp refresh or newly generated identity.
 
+`LedgerManifestReceipt` has exactly the shared fields in the table above except
+`outcome`. It is a validated immutable projection of persisted manifest/cursor
+data, not an acknowledgment or cleanup result for the inspecting invocation.
+It adds no callable API. Only initialize_ledger adds outcome=complete after
+its own required commit/replay and cleanup boundary.
+
 `LedgerState` has exactly `status` (`absent|complete`), `installation_key`,
 `revision` (`ar_0006_admission|ar_0007_ledger`), `head`
-(`LedgerProvisioning|null`), `manifest_count` (Count[0,256]),
+(`LedgerManifestReceipt|null`), `manifest_count` (Count[0,256]),
 `account_count` (Count[0,4096]) and `opening` (the validated opening cursor
 below, or null). `absent` means an exact supported ar6 predecessor with no ar7
 publication and all counts zero/head/opening null. `complete` means exact ar7,
-one complete opening record and a validated nonempty contiguous manifest chain.
+one complete opening record and a validated nonempty contiguous manifest chain
+in the caller's current SQL snapshot. Neither status nor head claims that
+the inspector committed, closed or cleaned the caller-owned Connection; the
+caller remains responsible for that boundary before exposing a success.
 Malformed/partial/unknown state raises a refusal; it is never represented as
 absent or returned as an unvalidated `pending` status. The inspector can stream
 bounded manifest validation; it does not return their private bodies in a
@@ -684,13 +694,17 @@ The exact `ledger_manifest_<id>` cursor member set is:
 | manifest_digest | Digest of that object's canonical bytes. |
 | sequence | Count[0,255]. |
 | parent_manifest_digest | Digest or null; exactly equal to the manifest field and observed preceding chain head. |
-| database_role | Nonempty UTF-8 string, at most 63 bytes, no controls; actual observed database role, not input authorization. |
+| database_role | PostgreSQL: actual observed current_user, nonempty UTF-8 string, at most 63 bytes, no controls. SQLite: exactly null (SQL NULL observation, JSON null in this cursor). Never input authorization. |
 | os_uid | Count[0,2^63−1], actual invoking UID. |
 | initialized_at | Time. |
 | account_projection_digest | Digest of the sorted immutable account projection specified below. |
 | account_count | Count[0,64]. |
 | imported_jobs | Count[0,48], zero for provision. |
 | imported_opening_microusd | Money, zero for provision. |
+
+Validate database_role against the actual Connection dialect, not a caller
+flag: reject null on PostgreSQL and any non-null role on SQLite. Retain os_uid
+on both dialects. This adds no SQL column or invented local database identity.
 
 Its row `source_digest` equals manifest.source_digest, `rows_verified` equals
 account_count, `status` is complete and `updated_at` equals initialized_at.
