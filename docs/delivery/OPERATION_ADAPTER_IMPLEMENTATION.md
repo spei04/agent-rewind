@@ -254,3 +254,33 @@ operation-row lock privileges, service authority races, final compound receipt
 revalidation, effect/audit/disclosure composition and installed-package coverage
 remain later P1 obligations. No read/cancel service, HTTP route, schema/profile,
 worker/failure producer or customer activation is added by this checkpoint.
+
+
+### First interruption inside detach
+
+A later immutable review of f10cf23 found that detach itself replaced its saved
+interruption at each subsequent failing cleanup hook, even though the outer
+owners already preserved their first interruption. A real two-listener removal
+sequence therefore exposed a later SystemExit instead of the first
+KeyboardInterrupt when there was no body/setup primary.
+
+The separate regression-first selection adds 18 cases across read/mutation
+owners, listener-only and progress/listener/marker chains, with no primary,
+typed denial or primary interruption. Against the unchanged runtime, six
+no-primary cases failed and twelve primary-preservation controls passed in
+1.05 seconds. The real callback/listener/marker removals, exact SQL/control
+counts, physical discard, pool release, finished clock and effect/rollback
+assertions all passed before the six exception-identity failures.
+
+Only the three saved-interruption assignments in detach change: they retain
+the first non-Exception BaseException while attempting every later removal.
+An earlier ordinary cleanup failure does not hide a later first interruption;
+a body/setup primary still takes precedence. All 18 new cases pass in 0.89
+seconds. The combined selection is 250 passed, zero skips/failures/errors, in
+81.90 seconds, including the unchanged 150 admission work=None cases.
+Configured Ruff/security, two-file formatting, strict operation_work mypy,
+owned source/manifest checks and diff-check pass. This correction adds no
+ownership or service code. PostgreSQL remains stopped; the earlier 40-case
+actual PostgreSQL evidence is specifically against f10cf23, not a new run of
+this exception-ordering correction. Private regression logs and source hashes
+are indexed outside the checkout with review date 2026-11-20.

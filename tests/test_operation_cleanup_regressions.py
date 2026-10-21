@@ -403,3 +403,111 @@ def test_finish_interruption_runs_after_native_release(engine, monkeypatch, scop
         assert outcome.cleanup_failed
         assert outcome.commit_acknowledged is not primary
     assert rows(engine) == []
+
+
+@pytest.mark.parametrize("scope", ["read", "mutation"])
+@pytest.mark.parametrize("chain", ["listeners", "progress", "ordinary_progress"])
+@pytest.mark.parametrize("primary_kind", ["none", "denial", "interruption"])
+def test_detach_preserves_first_inner_interruption_after_all_removals(
+    engine, monkeypatch, scope, chain, primary_kind
+):
+    from sqlalchemy import event
+
+    work, outcome = OperationWork(), TransactionOutcome()
+    first = KeyboardInterrupt("PRIVATE-FIRST-DETACH")
+    second = SystemExit("PRIVATE-LATER-LISTENER")
+    last = GeneratorExit("PRIVATE-LATER-INFO")
+    primary = {
+        "none": None,
+        "denial": ResourceNotFound(),
+        "interruption": SystemExit("PRIMARY-BODY"),
+    }[primary_kind]
+    remove, finish, control = event.remove, work.finish, work.control_attempt
+    removed, controls, finished, progress = [], [], [], []
+    callbacks, captured, original_info = [], None, None
+    rollback, close = Connection.rollback, Connection.close
+
+    def remove_fault(target, name, callback):
+        remove(target, name, callback)  # Real listener removal before failure.
+        removed.append(name)
+        raise first if len(removed) == 1 and chain != "progress" else second
+
+    def account(kind):
+        controls.append(kind)
+        control(kind)
+
+    def finished_after_release():
+        finished.append(engine.pool.checkedout())
+        finish()
+
+    class ProgressFault:
+        def __init__(self, raw):
+            self.raw = raw
+
+        def __getattr__(self, name):
+            return getattr(self.raw, name)
+
+        def set_progress_handler(self, callback, interval):
+            self.raw.set_progress_handler(callback, interval)
+            assert callback is None and interval == 0
+            progress.append(True)
+            if chain == "progress":
+                raise first
+            raise RuntimeError("PRIVATE-EARLIER-ORDINARY")
+
+    class InfoFault:
+        def get(self, key):
+            return original_info.get(key)
+
+        def __delitem__(self, key):
+            del original_info[key]  # Real marker removal before interruption.
+            raise last
+
+    manager = (
+        operation_connection(engine, work)
+        if scope == "read"
+        else admission_transaction(engine, outcome, work=work)
+    )
+    try:
+        with monkeypatch.context() as patch:
+            patch.setattr(event, "remove", remove_fault)
+            patch.setattr(work, "control_attempt", account)
+            patch.setattr(work, "finish", finished_after_release)
+            with pytest.raises(BaseException) as caught, manager as connection:
+                captured = connection
+                raw = connection.connection.driver_connection
+                original_info = connection.info
+                callbacks = list(work._listeners)
+                connection.exec_driver_sql(
+                    "INSERT INTO proof VALUES(1)" if scope == "mutation" else "SELECT 1"
+                )
+                if chain != "listeners":
+                    work._raw = ProgressFault(raw)
+                    work._info = InfoFault()
+                if primary is not None:
+                    raise primary
+        assert removed == ["before_cursor_execute", "after_cursor_execute"]
+        assert progress == ([] if chain == "listeners" else [True])
+        assert all(not event.contains(captured, name, callback) for name, callback in callbacks)
+        assert "operation_work" not in original_info
+        assert captured.closed and engine.pool.checkedout() == 0 and finished == [0]
+        assert work._started is None and work._connection is None
+        assert work._listeners == [] and not work._progress
+        if scope == "read":
+            assert controls == ["rollback", "discard", "close"]
+            assert work.statements == 9
+        else:
+            assert controls == (
+                ["commit", "discard", "close"]
+                if primary is None
+                else ["discard", "rollback", "discard", "close"]
+            )
+            assert work.statements == 10
+            assert outcome.cleanup_failed and outcome.commit_acknowledged is (primary is None)
+        with pytest.raises(sqlite3.ProgrammingError):
+            raw.execute("SELECT 1")
+        assert rows(engine) == ([1] if scope == "mutation" and primary is None else [])
+        assert caught.value.__suppress_context__
+        assert caught.value is (first if primary is None else primary)
+    finally:
+        release_probe(captured, rollback, close)

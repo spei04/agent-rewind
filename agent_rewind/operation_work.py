@@ -186,7 +186,7 @@ class OperationWork:
                     self._raw.set_progress_handler(None, 0)
                 except BaseException as error:
                     failed = True
-                    if not isinstance(error, Exception):
+                    if interruption is None and not isinstance(error, Exception):
                         interruption = error
                 self._progress = False
             for name, callback in self._listeners:
@@ -195,7 +195,7 @@ class OperationWork:
                         event.remove(connection, name, callback)
                 except BaseException as error:
                     failed = True
-                    if not isinstance(error, Exception):
+                    if interruption is None and not isinstance(error, Exception):
                         interruption = error
             self._listeners.clear()
             try:
@@ -203,7 +203,7 @@ class OperationWork:
                     del self._info["operation_work"]
             except BaseException as error:
                 failed = True
-                if not isinstance(error, Exception):
+                if interruption is None and not isinstance(error, Exception):
                     interruption = error
         self._detached = not failed
         if failed:
