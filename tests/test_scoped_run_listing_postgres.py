@@ -178,3 +178,24 @@ def test_postgres_permission_failure_is_fixed_and_counter_regression_refuses(pg_
         writer.execute(text("UPDATE projects SET run_sequence=0"))
     with pytest.raises(Fault, match="dependency_unavailable"):
         reader.list(PRINCIPAL, PROJECT, now=NOW)
+
+
+@pytest.mark.parametrize("created", ["infinity", "-infinity", "10000-01-01 00:00:00+00"])
+def test_postgres_unrepresentable_order_cell_refuses_before_cursor_filter(pg_listing, created):
+    pg, reader = pg_listing
+    first = reader.list(PRINCIPAL, PROJECT, now=NOW, limit=1)
+    assert first.next_cursor and first.items[0]["id"] == RUN2
+    with pg["owner"].begin() as writer:
+        writer.execute(
+            text("UPDATE run_index SET created_at=CAST(:created AS TIMESTAMPTZ) WHERE run_id=:id"),
+            {"created": created, "id": RUN1},
+        )
+    with pytest.raises(Fault, match="dependency_unavailable"):
+        reader.list(PRINCIPAL, PROJECT, now=NOW, cursor=first.next_cursor)
+    with pg["owner"].begin() as writer:
+        writer.execute(
+            text("UPDATE run_index SET created_at=CAST(:created AS TIMESTAMPTZ) WHERE run_id=:id"),
+            {"created": "2023-11-14T22:13:20.125000+00:00", "id": RUN1},
+        )
+    tail = reader.list(PRINCIPAL, PROJECT, now=NOW, cursor=first.next_cursor)
+    assert [item["id"] for item in tail.items] == [RUN1] and tail.next_cursor is None

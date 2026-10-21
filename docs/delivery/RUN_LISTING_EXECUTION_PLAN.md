@@ -313,3 +313,13 @@ explicit PostgreSQL skips. Tests reuse fixture objects locally rather than
 registering unrelated test modules as global pytest plugins. Configured lint,
 security rules, format and strict typing passed. Independent source review and
 matching hosted/installed-package evidence are still pending; P2 remains gated.
+
+The continuation ordering correction additionally validates the timestamp in the
+same materialized guard before keyset exclusion. SQLite requires bounded canonical
+UTC TEXT, with explicit calendar normalization; BLOB, oversized, impossible dates,
+noncanonical fractions/offsets and NUL suffixes refuse. PostgreSQL timestamps must
+remain within the finite Python-representable UTC range. An invalid guard emits
+only the refusal marker, not candidate cells. The original BLOB continuation
+regression failed before this correction. Focused correction checks passed 108
+tests with fourteen explicit PostgreSQL skips; the three new native range cases
+remain hosted-only. Schema, profile and customer activation behavior are unchanged.

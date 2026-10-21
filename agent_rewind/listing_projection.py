@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, NoReturn
 
-from sqlalchemy import Text, and_, case, column, func, literal, select, table, text, tuple_
+from sqlalchemy import Text, and_, case, column, func, literal, or_, select, table, text, tuple_
 from sqlalchemy.engine import Connection
 
 from .artifact_metadata import ArtifactError, digest_value
@@ -88,6 +88,42 @@ def safe_columns(connection: Connection) -> list[Any]:
     return [case((safe, c), else_=None).label(c.name) for c in INDEX.c]
 
 
+def safe_created(connection: Connection) -> Any:
+    """Reject invalid ordering cells before keyset filtering can hide them."""
+    created = INDEX.c.created_at
+    if connection.dialect.name == "postgresql":
+        # Native TIMESTAMPTZ also permits infinity and dates the Python driver
+        # cannot represent. Compare in SQL without materializing those values.
+        return and_(
+            created >= datetime.min.replace(tzinfo=UTC),
+            created <= datetime.max.replace(tzinfo=UTC),
+        )
+    size = _byte_length(connection, created)
+    digits = "[0-9]"
+    seconds = f"{digits * 4}-{digits * 2}-{digits * 2}T{digits * 2}:{digits * 2}:{digits * 2}"
+    prefix = func.substr(created, 1, 19)
+    canonical = and_(
+        or_(
+            and_(size == 25, created.op("GLOB")(seconds + "+00:00")),
+            and_(
+                size == 32,
+                created.op("GLOB")(seconds + "." + digits * 6 + "+00:00"),
+                func.substr(created, 21, 6) != "000000",
+            ),
+        ),
+        func.substr(created, 1, 4) != "0000",
+        # The explicit modifier normalizes impossible calendar dates and
+        # 24:00; bare strftime can merely echo those inputs.
+        func.strftime("%Y-%m-%dT%H:%M:%S", prefix, "+0 seconds") == prefix,
+    )
+    # CASE bounds native parser work as well as returned bytes, including NUL
+    # suffixes. Invalid/NULL cells become a zero marker in the aggregate.
+    return case(
+        (and_(func.typeof(created) == "text", size.in_((25, 32))), canonical),
+        else_=False,
+    )
+
+
 def candidates(
     connection: Connection, project: str, limit: int, cursor: CursorPosition | None
 ) -> tuple[int, list[IndexEntry]]:
@@ -97,18 +133,20 @@ def candidates(
     if connection.dialect.name == "sqlite":
         safe_sequence = and_(safe_sequence, func.typeof(INDEX.c.published_seq) == "integer")
         safe_counter = and_(safe_counter, func.typeof(COUNTERS.c.run_sequence) == "integer")
-    # Filtering by the cursor watermark must not hide malformed sequences or a
+    # Watermark/keyset filters must not hide malformed ordering cells or a
     # counter behind committed rows. This project-scoped scan shares the native
     # work ceiling; LIMIT is not used as an execution-work guarantee.
     guard = (
         select(
-            func.coalesce(func.min(case((safe_sequence, 1), else_=0)), 1).label("valid"),
+            func.coalesce(
+                func.min(case((and_(safe_sequence, safe_created(connection)), 1), else_=0)), 1
+            ).label("valid"),
             func.coalesce(func.max(case((safe_sequence, INDEX.c.published_seq), else_=0)), 0).label(
                 "maximum"
             ),
         )
         .where(INDEX.c.project_id == project)
-        .cte("list_sequence_guard")
+        .cte("list_order_guard")
         .prefix_with("MATERIALIZED")
     )
     counter = (
@@ -127,7 +165,11 @@ def candidates(
     query = (
         select(*safe_columns(connection), literal(1).label("present"))
         .select_from(INDEX.join(counter, literal(True)))
-        .where(INDEX.c.project_id == project, INDEX.c.published_seq <= watermark)
+        .where(
+            INDEX.c.project_id == project,
+            INDEX.c.published_seq <= watermark,
+            counter.c.consistent == 1,
+        )
     )
     if cursor is not None:
         query = query.where(

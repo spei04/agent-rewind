@@ -148,3 +148,30 @@ def test_selected_projection_has_strict_native_types(field, value):
     row[field] = value
     with pytest.raises(Fault, match="dependency_unavailable"):
         entry(row, "2" * 32)
+
+
+@pytest.mark.parametrize(
+    "created",
+    [
+        "0001-01-01T00:00:00+00:00",
+        "9999-12-31T23:59:59.999999+00:00",
+        "2000-02-29T12:00:00+00:00",
+        "2024-02-29T23:59:59.000001+00:00",
+        "2023-11-14T22:13:20.125000+00:00",
+    ],
+)
+def test_sqlite_order_guard_accepts_canonical_calendar_boundaries(created):
+    from sqlalchemy import create_engine, select, text
+
+    from agent_rewind.listing_projection import safe_created
+
+    engine = create_engine("sqlite://")
+    try:
+        with engine.begin() as connection:
+            connection.exec_driver_sql("CREATE TABLE run_index(created_at DATETIME)")
+            connection.execute(
+                text("INSERT INTO run_index VALUES (:created)"), {"created": created}
+            )
+            assert connection.execute(select(safe_created(connection))).scalar_one() is True
+    finally:
+        engine.dispose()

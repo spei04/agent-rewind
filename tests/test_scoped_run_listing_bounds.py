@@ -284,3 +284,42 @@ def test_study_links_stop_at_remaining_edge_allowance(monkeypatch):
     with pytest.raises(Fault, match="dependency_unavailable"):
         Sources._links("study", body, 7)
     assert len(calls) == 7  # No 10,000-link transient list is materialized.
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        pytest.param(b"2023-11-14T22:13:20.125000+00:00", id="blob"),
+        pytest.param("z" * 100000, id="oversized"),
+        pytest.param("9999-02-30T00:00:00+00:00", id="february-30"),
+        pytest.param("2025-02-29T00:00:00+00:00", id="non-leap-day"),
+        pytest.param("2024-01-01T24:00:00+00:00", id="hour-24"),
+        pytest.param("9999-01-01T00:00:00.000000+00:00", id="zero-fraction"),
+        pytest.param("9999-01-01T00:00:00+01:00", id="offset"),
+        pytest.param("9999-01-01T00:00:00+00:00\0", id="nul-suffix"),
+    ],
+)
+def test_invalid_order_cell_cannot_vanish_before_continuation(listing, value):
+    _, engine, reader = listing
+    first = reader.list(PRINCIPAL, PROJECT, now=NOW, limit=1)
+    assert [row["id"] for row in first.items] == [RUN2] and first.next_cursor
+    with engine.begin() as connection:
+        original = connection.execute(
+            text("SELECT created_at FROM run_index WHERE run_id=:id"), {"id": RUN1}
+        ).scalar_one()
+        # DATETIME has no SQLite type/CHECK constraint. This mutation does not
+        # disable enforcement or alter schema, but can sort above the cursor.
+        connection.execute(
+            text("UPDATE run_index SET created_at=:value WHERE run_id=:id"),
+            {"value": value, "id": RUN1},
+        )
+    with pytest.raises(Fault, match="dependency_unavailable"):
+        reader.list(PRINCIPAL, PROJECT, now=NOW, cursor=first.next_cursor)
+    assert engine.pool.checkedout() == 0
+    with engine.begin() as connection:
+        connection.execute(
+            text("UPDATE run_index SET created_at=:value WHERE run_id=:id"),
+            {"value": original, "id": RUN1},
+        )
+    tail = reader.list(PRINCIPAL, PROJECT, now=NOW, cursor=first.next_cursor)
+    assert [row["id"] for row in tail.items] == [RUN1] and tail.next_cursor is None

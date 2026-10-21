@@ -327,3 +327,6 @@ Listing planning validation: The 2026-10-21 AR-006-B planning amendment passed a
 Progress-only admission handoff validation: all 54 execution-backlog tests and the execution/evaluation/M1 contract validators passed with the C-owned interpreter, PYTHONPATH unset and bytecode/test caches disabled. Metrics remain 151 tasks, 155 delivery PRs, 544 edges, 454 base / 768.1 upper effort days and 168.5 effort-path days. No runtime, historical contract/profile, dependency or estimate change.
 
 2026-10-21 listing integration checkpoint: A released clean cbbe5d3 for lead composition with accepted admission main 81905a5 and progress 210c932. B reviews immutable source and found a remaining malformed timestamp keyset omission; A is assigned the narrow marker correction after composition. C continues admission P2 repositories and the reviewed initializer error-mapping fix. Listing P1 remains In progress and P2 remains Not started; actual PostgreSQL and installed-package acceptance are pending.
+
+
+- AR-006-B/P1 ordering follow-up: the author reproduced the reviewer's hidden BLOB timestamp continuation, then added bounded canonical/calendar validation before keyset filtering and native PostgreSQL range cases. Focused local checks passed 108 with fourteen explicit PostgreSQL skips; independent review and hosted evidence remain required.
