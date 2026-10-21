@@ -321,6 +321,8 @@ def test_admission_three_stage_delivery_retains_all_gates(packet, variant, messa
     task = next(t for t in data["tasks"] if t["id"] == "AR-008-A")
     p1, p2, p3 = task["delivery_packages"]
     if variant == "early_p3":
+        p2["status"] = "Not started"
+        p2["accepted_merge_commit"] = p2["review_evidence"] = None
         task["status"] = p3["status"] = "In progress"
     elif variant == "skip_p2":
         p3["dependencies"] = [p1["id"]]

@@ -119,10 +119,8 @@ def listing_connection(engine: Engine, work: SQLWork) -> Iterator[Connection]:
             event.listen(connection, name, callback)
         entered = True
         yield connection
-    except Fault as error:
-        # contextlib assigns traceback on the original propagated exception;
-        # public Fault is frozen, so preserve the code in a fresh safe value.
-        raise Fault(error.code) from None
+    except Fault:
+        raise
     except (SQLAlchemyError, sqlite3.Error):
         broken = True
         raise Fault("dependency_unavailable") from None

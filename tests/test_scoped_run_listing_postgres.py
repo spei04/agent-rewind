@@ -1,5 +1,7 @@
 """Actual PostgreSQL SQL-only run summaries; no customer-ready profile."""
 
+from types import SimpleNamespace
+
 import pytest
 import test_migrations_postgres as migrations
 import test_run_projection_postgres as projection_tests
@@ -8,6 +10,7 @@ from test_run_projection_postgres import drain, preserved, source
 from test_scoped_run_listing import NOW, PRINCIPAL, PROJECT, RUN1, RUN2, settings
 from test_scoped_run_listing_bounds import add_runs
 
+from agent_rewind import listing_session
 from agent_rewind.errors import Fault
 from agent_rewind.legacy_reads import ReadBudget
 from agent_rewind.listing_projection import by_ids
@@ -144,10 +147,15 @@ def test_postgres_revocation_committed_after_receipt_query_still_refuses(pg_list
 
 
 @pytest.mark.parametrize("change", [False, True])
-def test_postgres_maximum_mixed_jsonb_source_projection_receipts(pg_listing, change):
+def test_postgres_maximum_mixed_jsonb_source_projection_receipts(pg_listing, monkeypatch, change):
     pg, reader = pg_listing
     with pg["owner"].begin() as writer:
         ids = add_runs(writer, 682, parent=RUN1)
+    # This maximum-size fixture proves receipt correctness, not wall latency.
+    # Freeze only the adapter clock: native per-statement PostgreSQL timeouts
+    # remain real. Separate session tests exercise 57014/55P03 cancellation,
+    # cumulative remaining time, final-phase exhaustion and pool cleanup.
+    monkeypatch.setattr(listing_session, "time", SimpleNamespace(monotonic=lambda: 0.0))
     work = SQLWork()
     with listing_connection(pg["app"], work) as connection:
         context = reader._context(connection, PRINCIPAL, PROJECT)
