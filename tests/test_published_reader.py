@@ -350,3 +350,53 @@ def test_all_explicit_roots_are_scoped_before_first_storage(
             CONTEXT, (RunRead(first, first_intent.root_digest), RunRead(second, digest))
         )
     reader.scoped_bytes.assert_not_called()
+
+
+@pytest.mark.parametrize("phase", ["preflight", "child", "post_io"])
+def test_initial_and_post_io_descriptors_are_sql_bounded(published, monkeypatch, phase):
+    capture, run, intent, reader = published
+    root = next(obj for obj in intent.objects if obj.digest == intent.root_digest)
+    child = next(obj for obj in intent.objects if obj.digest != intent.root_digest)
+    target = child if phase == "child" else root
+    oversized = "x" * (1024 * 1024)
+    original_parser = published_reader._object
+    original_loader = reader.repositories.artifact_loader
+    parsed_null = False
+    loaded = []
+
+    def mutate():
+        with capture.db.engine.begin() as connection:
+            connection.execute(
+                text("UPDATE artifact_objects SET created_at=:value WHERE id=:id"),
+                {"value": oversized, "id": target.id},
+            )
+
+    def inspect(row):
+        nonlocal parsed_null
+        assert not any(
+            isinstance(value, str | bytes) and len(value) > 160 for value in row.values()
+        )
+        if row["created_at"] is None:
+            parsed_null = True
+        return original_parser(row)
+
+    def loader(value):
+        loaded.append(value.id)
+        result = original_loader(value)
+        if phase == "post_io" and value.id == target.id:
+            mutate()
+        return result
+
+    if phase != "post_io":
+        mutate()
+    monkeypatch.setattr(published_reader, "_object", inspect)
+    monkeypatch.setattr(reader.repositories, "artifact_loader", loader)
+    with pytest.raises(ArtifactError, match="artifact_metadata_invalid"):
+        reader.read(CONTEXT, run, intent.root_digest)
+    assert parsed_null
+    if phase == "preflight":
+        assert loaded == []
+    elif phase == "child":
+        assert target.id not in loaded
+    else:
+        assert loaded == [root.id]

@@ -10,6 +10,7 @@ from typing import Any
 from sqlalchemy import Text, and_, case, column, select, table, text
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.sql.elements import ColumnElement
 
 from .artifact_graph import (
     MAX_BYTES,
@@ -20,7 +21,7 @@ from .artifact_graph import (
     decode,
     verify_run_graph,
 )
-from .artifact_metadata import ArtifactError, _object, digest_value, resolve_ref
+from .artifact_metadata import ArtifactError, ArtifactObject, _object, _owner, digest_value
 from .artifact_storage import ArtifactStorage
 from .models import canonical
 from .scoped_lineage import ResourceNotFound, identifier
@@ -34,6 +35,69 @@ _refs = table(
     "artifact_refs",
     *(column(name) for name in ("project_id", "owner_kind", "owner_id", "role", "artifact_id")),
 )
+
+
+def _bounded_columns(connection: Connection) -> tuple[ColumnElement[Any], ...]:
+    """Bound all descriptor cells in the body SELECT, before driver transfer."""
+    bounds = {
+        "id": 32,
+        "project_id": 32,
+        "digest": 64,
+        "locator": 160,
+        "format_version": 8,
+        "byte_count": 24,
+        "created_at": 64,
+    }
+    safe = and_(
+        *(_byte_length(connection, _objects.c[name]) <= limit for name, limit in bounds.items())
+    )
+    return tuple(case((safe, _objects.c[name]), else_=None).label(name) for name in _FIELDS)
+
+
+def _resolve_bounded(
+    connection: Connection,
+    *,
+    project_id: str,
+    owner_kind: str,
+    owner_id: str,
+    role: str,
+    digest: str,
+) -> ArtifactObject | None:
+    """Reader resolver; owner authorization still precedes this SQL-only join."""
+    _owner(project_id, owner_kind, owner_id, role)
+    digest_value(digest)
+    query = (
+        select(*_bounded_columns(connection))
+        .select_from(
+            _refs.join(
+                _objects,
+                and_(
+                    _objects.c.project_id == _refs.c.project_id,
+                    _objects.c.id == _refs.c.artifact_id,
+                ),
+            ).join(
+                scopes,
+                and_(
+                    scopes.c.project_id == _refs.c.project_id,
+                    scopes.c.resource_kind == _refs.c.owner_kind,
+                    scopes.c.resource_id == _refs.c.owner_id,
+                ),
+            )
+        )
+        .where(
+            _refs.c.project_id == project_id,
+            _refs.c.owner_kind == owner_kind,
+            _refs.c.owner_id == owner_id,
+            _refs.c.role == role,
+            _objects.c.digest == digest,
+            _objects.c.format_version == 1,
+        )
+        .limit(2)
+    )
+    rows = connection.execute(query).mappings().all()
+    if len(rows) > 1:
+        raise ArtifactError("artifact_metadata_conflict")
+    return _object(rows[0]) if rows else None
 
 
 def _identity(value: Any) -> tuple[Any, ...]:
@@ -65,7 +129,7 @@ class PublishedRunReader:
     def __init__(self, engine: Engine, storage: ArtifactStorage):
         self.engine = engine
         self.repositories = ScopedRepositories(
-            engine, artifact_resolver=resolve_ref, artifact_loader=storage.read_verified
+            engine, artifact_resolver=_resolve_bounded, artifact_loader=storage.read_verified
         )
 
     @contextmanager
@@ -179,24 +243,12 @@ class PublishedRunReader:
         else:
             raise ArtifactError("artifact_database_unsupported")
         wanted = source.columns(owner=Text, role=Text, digest=Text).cte("wanted")
-        bounds = {
-            "id": 32,
-            "project_id": 32,
-            "digest": 64,
-            "locator": 160,
-            "format_version": 8,
-            "byte_count": 24,
-            "created_at": 64,
-        }
-        safe = and_(
-            *(_byte_length(connection, _objects.c[name]) <= limit for name, limit in bounds.items())
-        )
         query = (
             select(
                 wanted.c.owner,
                 wanted.c.role,
                 wanted.c.digest.label("wanted_digest"),
-                *(case((safe, _objects.c[name]), else_=None).label(name) for name in _FIELDS),
+                *_bounded_columns(connection),
             )
             .select_from(
                 wanted.join(

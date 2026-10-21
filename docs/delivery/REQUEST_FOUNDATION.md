@@ -46,7 +46,9 @@ comparison use case. Every requested run/root is scoped before the first storage
 read. It preserves real ancestor owners and all seven immutable
 descriptor fields, and caps the combined operation at 16,000 distinct owner/ref
 identities and 64 MiB of loaded bytes. Repeated bytes still consume the combined
-budget. Per-object metadata bounds are checked before backend reads. No SQL
+budget. Shared SQL CASE descriptor bounds apply to initial, post-I/O and final lookups;
+per-object content limits are checked before backend reads. Explicit root digests
+also require their owner-scoped result ref during compound preflight. No SQL
 connection is held across storage/decryption.
 
 After all I/O, a SQL-only pass validates every graph owner and any unique-root
