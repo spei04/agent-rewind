@@ -26,20 +26,24 @@ def operation_components_smoke(root: Path) -> None:
     from cryptography.fernet import Fernet
     from pydantic import SecretStr
 
+    from agent_rewind.admission_coordinator import AdmissionCoordinator
     from agent_rewind.admission_transaction import AdmissionError
     from agent_rewind.config import Settings
     from agent_rewind.database import Database
     from agent_rewind.operation_reads import ReceiptBook
     from agent_rewind.operation_work import OperationWork, operation_connection
+    from agent_rewind.request_authority import RequestAuthority
+    from agent_rewind.request_identity import VerifiedPrincipal
+    from agent_rewind.scoped_repositories import ProjectContext
     from agent_rewind.sqlite_ownership import (
-        SQLiteOwnershipError,
         create_owned_sqlite_engine,
         owned_begin,
         owned_connect,
         require_owned_sqlite,
     )
 
-    # Package imports are necessary integration, not factory/service activation.
+    # File-backed Database uses owned connections; the real schema guard still
+    # refuses customer admission. No service/profile readiness is implied.
     ReceiptBook()
     database = Database(
         Settings(
@@ -51,12 +55,36 @@ def operation_components_smoke(root: Path) -> None:
         )
     )
     try:
+        require_owned_sqlite(database.engine)
+        database.migrate(installation_key="synthetic-owned-package")
+        observed = database.schema_compatibility()
+        if (observed.status, observed.code) != ("incompatible", "migration_only"):
+            raise RuntimeError("Owned Database changed the real migration-only guard")
+        if not database.ping():
+            raise RuntimeError("Owned Database connectivity failed")
+        record = database.add("example", {"value": "synthetic-package"})
+        if database.get(record)["value"] != "synthetic-package":
+            raise RuntimeError("Installed owned Database changed ordinary records")
+        database.audit("synthetic-package", "example.read", record)
+        principal = VerifiedPrincipal("oidc:" + "a" * 64)
+        context = ProjectContext("8" * 32, "9" * 32, principal.principal_id)
+        coordinator = AdmissionCoordinator(database.engine, RequestAuthority(database.engine))
         try:
-            require_owned_sqlite(database.engine)
-        except SQLiteOwnershipError:
-            pass
+            coordinator.reconcile(principal, context, "1" * 32, "2" * 64, "3" * 64)
+        except AdmissionError as error:
+            if error.code != "schema_incompatible":
+                raise RuntimeError("Owned factory changed customer admission refusal") from None
         else:
-            raise RuntimeError("Default Database factory activated owned SQLite")
+            raise RuntimeError("Owned factory enabled customer admission")
+        with owned_connect(database.engine) as connection:
+            if connection.exec_driver_sql("SELECT count(*) FROM jobs").scalar_one() != 0:
+                raise RuntimeError("Owned factory guard created a job")
+            if connection.exec_driver_sql("SELECT count(*) FROM audit").scalar_one() != 1:
+                raise RuntimeError("Owned factory guard changed audit")
+            if connection.exec_driver_sql("PRAGMA query_only").scalar_one() != 0:
+                raise RuntimeError("Owned inspection leaked read-only state")
+        if database.engine.pool.checkedout() != 0:
+            raise RuntimeError("Owned Database leaked a checkout")
     finally:
         database.engine.dispose()
 

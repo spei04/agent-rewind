@@ -162,3 +162,51 @@ def test_postgresql_factory_is_lazy_untracked_and_preserves_configuration(
             require_owned_sqlite(database.engine)
     finally:
         database.engine.dispose()
+
+
+def test_real_migration_guard_precedes_customer_work_and_owned_calls_reuse_pool(
+    settings, monkeypatch
+):
+    from agent_rewind.admission_coordinator import AdmissionCoordinator
+    from agent_rewind.admission_transaction import AdmissionError
+    from agent_rewind.request_authority import RequestAuthority
+    from agent_rewind.request_identity import VerifiedPrincipal
+    from agent_rewind.scoped_repositories import ProjectContext
+
+    database = Database(settings)
+    try:
+        database.migrate(installation_key="synthetic-factory-activation")
+        with owned_connect(database.engine) as connection:
+            original_raw = connection.connection.driver_connection
+            original_timeout = connection.exec_driver_sql("PRAGMA busy_timeout").scalar_one()
+        assert database.ping()
+        result = database.schema_compatibility()
+        assert (result.status, result.code) == ("incompatible", "migration_only")
+        identifier = database.add("example", {"safe": True})
+        assert database.get(identifier)["safe"] is True
+        principal = VerifiedPrincipal("oidc:" + "a" * 64)
+        context = ProjectContext("8" * 32, "9" * 32, principal.principal_id)
+        coordinator = AdmissionCoordinator(database.engine, RequestAuthority(database.engine))
+        calls = []
+
+        def forbidden(*args, **kwargs):
+            calls.append(1)
+            pytest.fail("real schema guard reached customer work")
+
+        monkeypatch.setattr(coordinator, "_locked_identities", forbidden)
+        monkeypatch.setattr(coordinator, "_new_work", forbidden)
+        with pytest.raises(AdmissionError, match="^schema_incompatible$"):
+            coordinator.reconcile(principal, context, "1" * 32, "2" * 64, "3" * 64)
+        assert calls == []
+        with owned_connect(database.engine) as connection:
+            assert connection.exec_driver_sql("SELECT count(*) FROM jobs").scalar_one() == 0
+            assert connection.exec_driver_sql("SELECT count(*) FROM audit").scalar_one() == 0
+            assert connection.exec_driver_sql("PRAGMA query_only").scalar_one() == 0
+            assert connection.connection.driver_connection is original_raw
+            assert (
+                connection.exec_driver_sql("PRAGMA busy_timeout").scalar_one() == original_timeout
+            )
+        assert database.engine.pool.checkedout() == 0
+        assert database.schema_compatibility() == result
+    finally:
+        database.engine.dispose()

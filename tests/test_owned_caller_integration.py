@@ -296,11 +296,10 @@ def test_owned_admission_commit_and_denial_preserve_effects_and_timeout(engine, 
         assert connection.exec_driver_sql("PRAGMA busy_timeout").scalar_one() == 741
 
 
-def test_database_factory_stays_untracked_but_injected_owned_callers_work(settings, engine):
+def test_database_factory_is_owned_and_injected_owned_callers_work(settings, engine):
     database = Database(settings)
     legacy = database.engine
-    with pytest.raises(SQLiteOwnershipError):
-        ownership.require_owned_sqlite(legacy)
+    ownership.require_owned_sqlite(legacy)
     database.engine = engine
     try:
         with owned_begin(engine) as connection:
