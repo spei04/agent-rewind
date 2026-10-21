@@ -1,0 +1,6111 @@
+{
+  "$postgres": {
+    "columns": [
+      [
+        "alembic_version",
+        "version_num",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "api_keys",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "api_keys",
+        "hash",
+        68,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "api_keys",
+        "role",
+        24,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "api_keys",
+        "name",
+        124,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "api_keys",
+        "expires",
+        -1,
+        "",
+        "",
+        5,
+        false,
+        null
+      ],
+      [
+        "api_keys",
+        "revoked",
+        -1,
+        "",
+        "",
+        6,
+        false,
+        null
+      ],
+      [
+        "artifact_objects",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "artifact_objects",
+        "project_id",
+        36,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "artifact_objects",
+        "digest",
+        68,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "artifact_objects",
+        "locator",
+        1028,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "artifact_objects",
+        "format_version",
+        -1,
+        "",
+        "",
+        5,
+        false,
+        null
+      ],
+      [
+        "artifact_objects",
+        "byte_count",
+        -1,
+        "",
+        "",
+        6,
+        false,
+        null
+      ],
+      [
+        "artifact_objects",
+        "created_at",
+        -1,
+        "",
+        "",
+        7,
+        false,
+        null
+      ],
+      [
+        "artifact_refs",
+        "project_id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "artifact_refs",
+        "owner_kind",
+        24,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "artifact_refs",
+        "owner_id",
+        36,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "artifact_refs",
+        "artifact_id",
+        36,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "artifact_refs",
+        "role",
+        36,
+        "",
+        "",
+        5,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "audit",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "audit",
+        "created",
+        -1,
+        "",
+        "",
+        2,
+        false,
+        null
+      ],
+      [
+        "audit",
+        "actor",
+        260,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "audit",
+        "action",
+        84,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "audit",
+        "target",
+        68,
+        "",
+        "",
+        5,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_accounts",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_accounts",
+        "organization_id",
+        36,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_accounts",
+        "scope",
+        20,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_accounts",
+        "scope_id",
+        36,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_accounts",
+        "period_start",
+        -1,
+        "",
+        "",
+        5,
+        false,
+        null
+      ],
+      [
+        "budget_accounts",
+        "period_end",
+        -1,
+        "",
+        "",
+        6,
+        false,
+        null
+      ],
+      [
+        "budget_accounts",
+        "limit_microusd",
+        -1,
+        "",
+        "",
+        7,
+        false,
+        null
+      ],
+      [
+        "budget_accounts",
+        "held_microusd",
+        -1,
+        "",
+        "",
+        8,
+        false,
+        null
+      ],
+      [
+        "budget_accounts",
+        "accounted_microusd",
+        -1,
+        "",
+        "",
+        9,
+        false,
+        null
+      ],
+      [
+        "budget_accounts",
+        "project_id",
+        36,
+        "",
+        "",
+        10,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_accounts",
+        "job_id",
+        36,
+        "",
+        "",
+        11,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_accounts",
+        "opening_held_microusd",
+        -1,
+        "",
+        "",
+        12,
+        false,
+        null
+      ],
+      [
+        "budget_entries",
+        "call_id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_entries",
+        "account_id",
+        36,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_entries",
+        "entry_kind",
+        20,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_entries",
+        "amount_microusd",
+        -1,
+        "",
+        "",
+        4,
+        false,
+        null
+      ],
+      [
+        "budget_entries",
+        "evidence_ref",
+        36,
+        "",
+        "",
+        5,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_entries",
+        "created_at",
+        -1,
+        "",
+        "",
+        6,
+        false,
+        null
+      ],
+      [
+        "budget_entries",
+        "project_id",
+        36,
+        "",
+        "",
+        7,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_entries",
+        "evidence_owner_kind",
+        24,
+        "",
+        "",
+        8,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "budget_entries",
+        "evidence_role",
+        36,
+        "",
+        "",
+        9,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "events",
+        "run_id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "events",
+        "step",
+        -1,
+        "",
+        "",
+        2,
+        false,
+        null
+      ],
+      [
+        "events",
+        "artifact",
+        68,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "events",
+        "hash",
+        68,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "installation_key",
+        68,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "singleton",
+        -1,
+        "",
+        "",
+        2,
+        false,
+        null
+      ],
+      [
+        "installation_adoptions",
+        "source_kind",
+        20,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "source_baseline",
+        44,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "schema_fingerprint",
+        68,
+        "",
+        "",
+        5,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "installed_schema_fingerprint",
+        68,
+        "",
+        "",
+        6,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "organization_id",
+        36,
+        "",
+        "",
+        7,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "project_id",
+        36,
+        "",
+        "",
+        8,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "mapping_digest",
+        68,
+        "",
+        "",
+        9,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "mapping",
+        -1,
+        "",
+        "",
+        10,
+        false,
+        null
+      ],
+      [
+        "installation_adoptions",
+        "backup_evidence_digest",
+        68,
+        "",
+        "",
+        11,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "drain_evidence_digest",
+        68,
+        "",
+        "",
+        12,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "installation_adoptions",
+        "created_at",
+        -1,
+        "",
+        "",
+        13,
+        false,
+        null
+      ],
+      [
+        "installation_adoptions",
+        "state",
+        36,
+        "",
+        "",
+        14,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "kind",
+        24,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "created",
+        -1,
+        "",
+        "",
+        3,
+        false,
+        null
+      ],
+      [
+        "jobs",
+        "payload",
+        68,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "status",
+        24,
+        "",
+        "",
+        5,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "owner",
+        68,
+        "",
+        "",
+        6,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "lease_until",
+        -1,
+        "",
+        "",
+        7,
+        false,
+        null
+      ],
+      [
+        "jobs",
+        "cancel",
+        -1,
+        "",
+        "",
+        8,
+        false,
+        null
+      ],
+      [
+        "jobs",
+        "budget",
+        -1,
+        "",
+        "",
+        9,
+        false,
+        null
+      ],
+      [
+        "jobs",
+        "reserved",
+        -1,
+        "",
+        "",
+        10,
+        false,
+        null
+      ],
+      [
+        "jobs",
+        "result",
+        68,
+        "",
+        "",
+        11,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "error",
+        304,
+        "",
+        "",
+        12,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "actor",
+        260,
+        "",
+        "",
+        13,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "payload_version",
+        -1,
+        "",
+        "",
+        14,
+        false,
+        null
+      ],
+      [
+        "jobs",
+        "execution_config_ref",
+        68,
+        "",
+        "",
+        15,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "execution_config_digest",
+        68,
+        "",
+        "",
+        16,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "jobs",
+        "lease_generation",
+        -1,
+        "",
+        "",
+        17,
+        false,
+        null
+      ],
+      [
+        "jobs",
+        "legacy_reserved_microusd",
+        -1,
+        "",
+        "",
+        18,
+        false,
+        null
+      ],
+      [
+        "migration_progress",
+        "revision",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "migration_progress",
+        "phase",
+        68,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "migration_progress",
+        "source_digest",
+        68,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "migration_progress",
+        "cursor",
+        -1,
+        "",
+        "",
+        4,
+        false,
+        null
+      ],
+      [
+        "migration_progress",
+        "rows_verified",
+        -1,
+        "",
+        "",
+        5,
+        false,
+        null
+      ],
+      [
+        "migration_progress",
+        "status",
+        20,
+        "",
+        "",
+        6,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "migration_progress",
+        "updated_at",
+        -1,
+        "",
+        "",
+        7,
+        false,
+        null
+      ],
+      [
+        "operation_keys",
+        "project_id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operation_keys",
+        "principal_id",
+        260,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operation_keys",
+        "kind",
+        24,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operation_keys",
+        "key_hash",
+        68,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operation_keys",
+        "operation_id",
+        36,
+        "",
+        "",
+        5,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operation_keys",
+        "request_digest",
+        68,
+        "",
+        "",
+        6,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operations",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operations",
+        "project_id",
+        36,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operations",
+        "principal_id",
+        260,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operations",
+        "kind",
+        24,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operations",
+        "client_operation_id",
+        36,
+        "",
+        "",
+        5,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operations",
+        "request_digest",
+        68,
+        "",
+        "",
+        6,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operations",
+        "job_id",
+        36,
+        "",
+        "",
+        7,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operations",
+        "accepted_response",
+        -1,
+        "",
+        "",
+        8,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operations",
+        "created_at",
+        -1,
+        "",
+        "",
+        9,
+        false,
+        null
+      ],
+      [
+        "operations",
+        "retain_until",
+        -1,
+        "",
+        "",
+        10,
+        false,
+        null
+      ],
+      [
+        "operations",
+        "job_resource_kind",
+        24,
+        "",
+        "",
+        11,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operations",
+        "execution_config_digest",
+        68,
+        "",
+        "",
+        12,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "operations",
+        "payload_version",
+        -1,
+        "",
+        "",
+        13,
+        false,
+        null
+      ],
+      [
+        "operations",
+        "failure_correlation_id",
+        36,
+        "",
+        "",
+        14,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "organizations",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "organizations",
+        "installation_key",
+        68,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "organizations",
+        "created_at",
+        -1,
+        "",
+        "",
+        3,
+        false,
+        null
+      ],
+      [
+        "project_memberships",
+        "project_id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "project_memberships",
+        "principal_id",
+        260,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "project_memberships",
+        "role",
+        20,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "project_memberships",
+        "revoked_at",
+        -1,
+        "",
+        "",
+        4,
+        false,
+        null
+      ],
+      [
+        "project_memberships",
+        "legacy_default",
+        -1,
+        "",
+        "",
+        5,
+        false,
+        null
+      ],
+      [
+        "projects",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "projects",
+        "organization_id",
+        36,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "projects",
+        "name",
+        124,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "projects",
+        "created_at",
+        -1,
+        "",
+        "",
+        4,
+        false,
+        null
+      ],
+      [
+        "projects",
+        "run_sequence",
+        -1,
+        "",
+        "",
+        5,
+        false,
+        null
+      ],
+      [
+        "provider_calls",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "project_id",
+        36,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "job_id",
+        36,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "logical_call_id",
+        36,
+        "",
+        "",
+        4,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "purpose",
+        24,
+        "",
+        "",
+        5,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "request_digest",
+        68,
+        "",
+        "",
+        6,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "price_version",
+        132,
+        "",
+        "",
+        7,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "state",
+        24,
+        "",
+        "",
+        8,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "reserved_microusd",
+        -1,
+        "",
+        "",
+        9,
+        false,
+        null
+      ],
+      [
+        "provider_calls",
+        "usage_estimate_microusd",
+        -1,
+        "",
+        "",
+        10,
+        false,
+        null
+      ],
+      [
+        "provider_calls",
+        "provider_request_id",
+        260,
+        "",
+        "",
+        11,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "created_at",
+        -1,
+        "",
+        "",
+        12,
+        false,
+        null
+      ],
+      [
+        "provider_calls",
+        "organization_id",
+        36,
+        "",
+        "",
+        13,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "job_resource_kind",
+        24,
+        "",
+        "",
+        14,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "lease_generation",
+        -1,
+        "",
+        "",
+        15,
+        false,
+        null
+      ],
+      [
+        "provider_calls",
+        "organization_account_id",
+        36,
+        "",
+        "",
+        16,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "project_account_id",
+        36,
+        "",
+        "",
+        17,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "provider_calls",
+        "job_account_id",
+        36,
+        "",
+        "",
+        18,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "records",
+        "id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "records",
+        "kind",
+        24,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "records",
+        "created",
+        -1,
+        "",
+        "",
+        3,
+        false,
+        null
+      ],
+      [
+        "records",
+        "data",
+        -1,
+        "",
+        "",
+        4,
+        false,
+        null
+      ],
+      [
+        "resource_scopes",
+        "resource_kind",
+        24,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "resource_scopes",
+        "resource_id",
+        36,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "resource_scopes",
+        "project_id",
+        36,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "run_index",
+        "run_id",
+        36,
+        "",
+        "",
+        1,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "run_index",
+        "project_id",
+        36,
+        "",
+        "",
+        2,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "run_index",
+        "resource_kind",
+        24,
+        "",
+        "",
+        3,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "run_index",
+        "created_at",
+        -1,
+        "",
+        "",
+        4,
+        false,
+        null
+      ],
+      [
+        "run_index",
+        "status",
+        20,
+        "",
+        "",
+        5,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "run_index",
+        "branchable",
+        -1,
+        "",
+        "",
+        6,
+        false,
+        null
+      ],
+      [
+        "run_index",
+        "parent_id",
+        36,
+        "",
+        "",
+        7,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "run_index",
+        "event_head",
+        68,
+        "",
+        "",
+        8,
+        false,
+        "pg_catalog.default"
+      ],
+      [
+        "run_index",
+        "published_seq",
+        -1,
+        "",
+        "",
+        9,
+        false,
+        null
+      ],
+      [
+        "run_index",
+        "projection_reason",
+        36,
+        "",
+        "",
+        10,
+        false,
+        "pg_catalog.default"
+      ]
+    ],
+    "constraints": [
+      [
+        "alembic_version",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (version_num)"
+      ],
+      [
+        "api_keys",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "api_keys",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (hash)"
+      ],
+      [
+        "artifact_objects",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((((locator)::text = ('objects/'::text || (digest)::text)) OR ((locator)::text = ((('objects/'::text || (project_id)::text) || '/v1/'::text) || (digest)::text))))"
+      ],
+      [
+        "artifact_objects",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((digest)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "artifact_objects",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "artifact_objects",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((length((locator)::text) >= 1) AND (length((locator)::text) <= 1024)))"
+      ],
+      [
+        "artifact_objects",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((byte_count >= 0))"
+      ],
+      [
+        "artifact_objects",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((format_version = 1))"
+      ],
+      [
+        "artifact_objects",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id) REFERENCES projects(id)"
+      ],
+      [
+        "artifact_objects",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "artifact_objects",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (project_id, digest, format_version)"
+      ],
+      [
+        "artifact_objects",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (project_id, id)"
+      ],
+      [
+        "artifact_refs",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((((owner_kind)::text = 'run'::text) OR ((owner_kind)::text = 'study'::text) OR ((owner_kind)::text = 'job'::text) OR ((owner_kind)::text = 'provider_call'::text)))"
+      ],
+      [
+        "artifact_refs",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((((role)::text <> 'budget_evidence'::text) OR ((owner_kind)::text = 'provider_call'::text)))"
+      ],
+      [
+        "artifact_refs",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((((role)::text = 'payload'::text) OR ((role)::text = 'admission_config'::text) OR ((role)::text = 'task'::text) OR ((role)::text = 'event'::text) OR ((role)::text = 'checkpoint'::text) OR ((role)::text = 'workspace'::text) OR ((role)::text = 'file_blob'::text) OR ((role)::text = 'evaluation'::text) OR ((role)::text = 'result'::text) OR ((role)::text = 'study_attachment'::text) OR ((role)::text = 'budget_evidence'::text)))"
+      ],
+      [
+        "artifact_refs",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id, artifact_id) REFERENCES artifact_objects(project_id, id)"
+      ],
+      [
+        "artifact_refs",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id, owner_kind, owner_id) REFERENCES resource_scopes(project_id, resource_kind, resource_id)"
+      ],
+      [
+        "artifact_refs",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (project_id, owner_kind, owner_id, artifact_id, role)"
+      ],
+      [
+        "audit",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((((scope)::text = 'organization'::text) AND ((scope_id)::text = (organization_id)::text) AND (project_id IS NULL) AND (job_id IS NULL)) OR (((scope)::text = 'project'::text) AND (project_id IS NOT NULL) AND ((scope_id)::text = (project_id)::text) AND (job_id IS NULL)) OR (((scope)::text = 'job'::text) AND (project_id IS NOT NULL) AND (job_id IS NOT NULL) AND ((scope_id)::text = (job_id)::text))))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((((scope)::text = 'organization'::text) OR ((scope)::text = 'project'::text) OR ((scope)::text = 'job'::text)))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((accounted_microusd <= limit_microusd) AND (held_microusd <= (limit_microusd - accounted_microusd))))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((accounted_microusd >= 0) AND (accounted_microusd <= '9223372036854775807'::bigint)))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((held_microusd >= 0) AND (held_microusd <= '9223372036854775807'::bigint)))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((job_id IS NULL) OR ((job_id)::text ~ '^[0-9a-f]{32}$'::text)))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((limit_microusd >= 0) AND (limit_microusd <= '9223372036854775807'::bigint)))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((opening_held_microusd >= 0) AND (opening_held_microusd <= '9223372036854775807'::bigint)))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((organization_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((project_id IS NULL) OR ((project_id)::text ~ '^[0-9a-f]{32}$'::text)))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((scope_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((isfinite(period_end) AND ((EXTRACT(year FROM (period_end AT TIME ZONE 'UTC'::text)) >= (1)::numeric) AND (EXTRACT(year FROM (period_end AT TIME ZONE 'UTC'::text)) <= (9999)::numeric))))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((isfinite(period_start) AND ((EXTRACT(year FROM (period_start AT TIME ZONE 'UTC'::text)) >= (1)::numeric) AND (EXTRACT(year FROM (period_start AT TIME ZONE 'UTC'::text)) <= (9999)::numeric))))"
+      ],
+      [
+        "budget_accounts",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((period_start < period_end))"
+      ],
+      [
+        "budget_accounts",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (organization_id) REFERENCES organizations(id)"
+      ],
+      [
+        "budget_accounts",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (organization_id, project_id) REFERENCES projects(organization_id, id)"
+      ],
+      [
+        "budget_accounts",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "budget_accounts",
+        "t",
+        true,
+        true,
+        true,
+        "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+      ],
+      [
+        "budget_accounts",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (job_id)"
+      ],
+      [
+        "budget_accounts",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (organization_id, scope, scope_id, period_start)"
+      ],
+      [
+        "budget_entries",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((((entry_kind)::text = 'reserve'::text) AND (evidence_ref IS NULL)) OR ((((entry_kind)::text = 'settle'::text) OR ((entry_kind)::text = 'release'::text)) AND (evidence_ref IS NOT NULL))))"
+      ],
+      [
+        "budget_entries",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((((entry_kind)::text = 'reserve'::text) OR ((entry_kind)::text = 'settle'::text) OR ((entry_kind)::text = 'release'::text)))"
+      ],
+      [
+        "budget_entries",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((account_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "budget_entries",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((amount_microusd >= 0) AND (amount_microusd <= '9223372036854775807'::bigint)))"
+      ],
+      [
+        "budget_entries",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((call_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "budget_entries",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((evidence_owner_kind)::text = 'provider_call'::text))"
+      ],
+      [
+        "budget_entries",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((evidence_ref IS NULL) OR ((evidence_ref)::text ~ '^[0-9a-f]{32}$'::text)))"
+      ],
+      [
+        "budget_entries",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((evidence_role)::text = 'budget_evidence'::text))"
+      ],
+      [
+        "budget_entries",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((project_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "budget_entries",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((isfinite(created_at) AND ((EXTRACT(year FROM (created_at AT TIME ZONE 'UTC'::text)) >= (1)::numeric) AND (EXTRACT(year FROM (created_at AT TIME ZONE 'UTC'::text)) <= (9999)::numeric))))"
+      ],
+      [
+        "budget_entries",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (account_id) REFERENCES budget_accounts(id)"
+      ],
+      [
+        "budget_entries",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (call_id) REFERENCES provider_calls(id)"
+      ],
+      [
+        "budget_entries",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id) REFERENCES projects(id)"
+      ],
+      [
+        "budget_entries",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id, call_id) REFERENCES provider_calls(project_id, id)"
+      ],
+      [
+        "budget_entries",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id, evidence_owner_kind, call_id, evidence_ref, evidence_role) REFERENCES artifact_refs(project_id, owner_kind, owner_id, artifact_id, role)"
+      ],
+      [
+        "budget_entries",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (call_id, account_id, entry_kind)"
+      ],
+      [
+        "budget_entries",
+        "t",
+        true,
+        true,
+        true,
+        "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+      ],
+      [
+        "events",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (run_id, step)"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((((source_kind)::text = 'fresh'::text) AND ((state)::text = 'prepared'::text) AND (organization_id IS NULL) AND (project_id IS NULL)) OR ((organization_id IS NOT NULL) AND (project_id IS NOT NULL))))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((((source_kind)::text = 'fresh'::text) AND (backup_evidence_digest IS NULL) AND (drain_evidence_digest IS NULL)) OR (((source_kind)::text = 'legacy'::text) AND (backup_evidence_digest IS NOT NULL) AND (drain_evidence_digest IS NOT NULL))))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((backup_evidence_digest)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((drain_evidence_digest)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((installed_schema_fingerprint)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((length((installation_key)::text) >= 1) AND (length((installation_key)::text) <= 64)))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((mapping_digest)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((organization_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((project_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((schema_fingerprint)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((source_baseline)::text ~ '^[0-9a-f]{40}$'::text))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((source_kind)::text = ANY ((ARRAY['fresh'::character varying, 'legacy'::character varying])::text[])))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((state)::text = ANY ((ARRAY['prepared'::character varying, 'ownership_complete'::character varying])::text[])))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((octet_length((mapping)::text) <= 1048576))"
+      ],
+      [
+        "installation_adoptions",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((singleton = 1))"
+      ],
+      [
+        "installation_adoptions",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (installation_key)"
+      ],
+      [
+        "installation_adoptions",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (singleton)"
+      ],
+      [
+        "jobs",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((((payload_version = 1) AND (execution_config_ref IS NULL) AND (execution_config_digest IS NULL)) OR ((execution_config_ref IS NOT NULL) AND (execution_config_digest IS NOT NULL) AND ((execution_config_ref)::text ~ '^[0-9a-f]{64}$'::text) AND ((execution_config_digest)::text ~ '^[0-9a-f]{64}$'::text) AND ((execution_config_ref)::text = (execution_config_digest)::text))))"
+      ],
+      [
+        "jobs",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((lease_generation >= 0) AND (lease_generation <= '9223372036854775807'::bigint)))"
+      ],
+      [
+        "jobs",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((legacy_reserved_microusd >= 0) AND (legacy_reserved_microusd <= '9223372036854775807'::bigint)))"
+      ],
+      [
+        "jobs",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((payload_version = ANY (ARRAY[1, 2])))"
+      ],
+      [
+        "jobs",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "jobs",
+        "t",
+        true,
+        true,
+        true,
+        "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+      ],
+      [
+        "migration_progress",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((source_digest)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "migration_progress",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'running'::character varying, 'complete'::character varying, 'blocked'::character varying])::text[])))"
+      ],
+      [
+        "migration_progress",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((octet_length((cursor)::text) <= 65536))"
+      ],
+      [
+        "migration_progress",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((rows_verified >= 0))"
+      ],
+      [
+        "migration_progress",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (revision, phase)"
+      ],
+      [
+        "operation_keys",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((key_hash)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "operation_keys",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((kind)::text = 'run'::text))"
+      ],
+      [
+        "operation_keys",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((operation_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "operation_keys",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((principal_id)::text ~ '^(oidc:[0-9a-f]{64}|api-key:[0-9a-f]{32})$'::text))"
+      ],
+      [
+        "operation_keys",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((project_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "operation_keys",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((request_digest)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "operation_keys",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id) REFERENCES projects(id)"
+      ],
+      [
+        "operation_keys",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id, principal_id, kind, operation_id) REFERENCES operations(project_id, principal_id, kind, id)"
+      ],
+      [
+        "operation_keys",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (project_id, principal_id, kind, key_hash)"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((client_operation_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((execution_config_digest)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((failure_correlation_id IS NULL) OR ((failure_correlation_id)::text ~ '^[0-9a-f]{32}$'::text)))"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((job_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((job_resource_kind)::text = 'job'::text))"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((kind)::text = 'run'::text))"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((principal_id)::text ~ '^(oidc:[0-9a-f]{64}|api-key:[0-9a-f]{32})$'::text))"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((project_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((request_digest)::text ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((accepted_response = (((('{\"job_id\":\"'::text || (job_id)::text) || '\",\"operation_id\":\"'::text) || (id)::text) || '\"}'::text)))"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((payload_version = 2))"
+      ],
+      [
+        "operations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((retain_until >= created_at))"
+      ],
+      [
+        "operations",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (job_id) REFERENCES jobs(id)"
+      ],
+      [
+        "operations",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id) REFERENCES projects(id)"
+      ],
+      [
+        "operations",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id, job_resource_kind, job_id) REFERENCES resource_scopes(project_id, resource_kind, resource_id)"
+      ],
+      [
+        "operations",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "operations",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (job_id)"
+      ],
+      [
+        "operations",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (project_id, principal_id, kind, client_operation_id)"
+      ],
+      [
+        "operations",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (project_id, principal_id, kind, id)"
+      ],
+      [
+        "organizations",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "organizations",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (installation_key) REFERENCES installation_adoptions(installation_key)"
+      ],
+      [
+        "organizations",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "organizations",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (installation_key)"
+      ],
+      [
+        "project_memberships",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((principal_id)::text ~ '^(oidc:[0-9a-f]{64}|api-key:[0-9a-f]{32})$'::text))"
+      ],
+      [
+        "project_memberships",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((role)::text = ANY ((ARRAY['viewer'::character varying, 'operator'::character varying, 'maintainer'::character varying])::text[])))"
+      ],
+      [
+        "project_memberships",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((legacy_default = ANY (ARRAY[false, true])))"
+      ],
+      [
+        "project_memberships",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id) REFERENCES projects(id)"
+      ],
+      [
+        "project_memberships",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (project_id, principal_id)"
+      ],
+      [
+        "projects",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "projects",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((length((name)::text) >= 1) AND (length((name)::text) <= 120)))"
+      ],
+      [
+        "projects",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((run_sequence >= 0))"
+      ],
+      [
+        "projects",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (organization_id) REFERENCES organizations(id)"
+      ],
+      [
+        "projects",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "projects",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (organization_id, id)"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((((purpose)::text = 'continuation'::text) OR ((purpose)::text = 'discovery'::text)))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((((state)::text = 'reserved'::text) OR ((state)::text = 'dispatching'::text) OR ((state)::text = 'observed'::text) OR ((state)::text = 'uncertain'::text) OR ((state)::text = 'reconciled'::text)))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((job_account_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((job_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((job_resource_kind)::text = 'job'::text))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((lease_generation >= 1) AND (lease_generation <= '9223372036854775807'::bigint)))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((logical_call_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((organization_account_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((organization_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((project_account_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((project_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((provider_request_id IS NULL) OR (length((provider_request_id)::text) <= 256)))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((reserved_microusd >= 0) AND (reserved_microusd <= '9223372036854775807'::bigint)))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((usage_estimate_microusd IS NULL) OR ((usage_estimate_microusd >= 0) AND (usage_estimate_microusd <= '9223372036854775807'::bigint))))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((isfinite(created_at) AND ((EXTRACT(year FROM (created_at AT TIME ZONE 'UTC'::text)) >= (1)::numeric) AND (EXTRACT(year FROM (created_at AT TIME ZONE 'UTC'::text)) <= (9999)::numeric))))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((length((price_version)::text) <= 128))"
+      ],
+      [
+        "provider_calls",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((request_digest ~ '^[0-9a-f]{64}$'::text))"
+      ],
+      [
+        "provider_calls",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (job_account_id) REFERENCES budget_accounts(id)"
+      ],
+      [
+        "provider_calls",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (job_id) REFERENCES jobs(id)"
+      ],
+      [
+        "provider_calls",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (organization_account_id) REFERENCES budget_accounts(id)"
+      ],
+      [
+        "provider_calls",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (organization_id) REFERENCES organizations(id)"
+      ],
+      [
+        "provider_calls",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (organization_id, project_id) REFERENCES projects(organization_id, id)"
+      ],
+      [
+        "provider_calls",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_account_id) REFERENCES budget_accounts(id)"
+      ],
+      [
+        "provider_calls",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id) REFERENCES projects(id)"
+      ],
+      [
+        "provider_calls",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id, job_resource_kind, job_id) REFERENCES resource_scopes(project_id, resource_kind, resource_id)"
+      ],
+      [
+        "provider_calls",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "provider_calls",
+        "t",
+        true,
+        true,
+        true,
+        "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+      ],
+      [
+        "provider_calls",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (project_id, id)"
+      ],
+      [
+        "provider_calls",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (project_id, logical_call_id)"
+      ],
+      [
+        "records",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (id)"
+      ],
+      [
+        "resource_scopes",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((resource_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "resource_scopes",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((resource_kind)::text = ANY ((ARRAY['run'::character varying, 'study'::character varying, 'job'::character varying, 'key'::character varying, 'provider_call'::character varying])::text[])))"
+      ],
+      [
+        "resource_scopes",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id) REFERENCES projects(id)"
+      ],
+      [
+        "resource_scopes",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (resource_kind, resource_id)"
+      ],
+      [
+        "resource_scopes",
+        "t",
+        true,
+        true,
+        true,
+        "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+      ],
+      [
+        "resource_scopes",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (project_id, resource_kind, resource_id)"
+      ],
+      [
+        "run_index",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((((status)::text = 'running'::text) OR ((status)::text = 'complete'::text) OR ((status)::text = 'failed'::text) OR ((status)::text = 'incomplete'::text)))"
+      ],
+      [
+        "run_index",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((branchable = false) OR ((status)::text = 'complete'::text)))"
+      ],
+      [
+        "run_index",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((event_head IS NULL) OR ((event_head)::text ~ '^[0-9a-f]{64}$'::text)))"
+      ],
+      [
+        "run_index",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((parent_id IS NULL) OR ((parent_id)::text ~ '^[0-9a-f]{32}$'::text)))"
+      ],
+      [
+        "run_index",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((project_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "run_index",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((projection_reason IS NULL) OR ((projection_reason)::text = 'unfenced_execution'::text)))"
+      ],
+      [
+        "run_index",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((resource_kind)::text = 'run'::text))"
+      ],
+      [
+        "run_index",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK (((run_id)::text ~ '^[0-9a-f]{32}$'::text))"
+      ],
+      [
+        "run_index",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((branchable = ANY (ARRAY[false, true])))"
+      ],
+      [
+        "run_index",
+        "c",
+        false,
+        false,
+        true,
+        "CHECK ((published_seq > 0))"
+      ],
+      [
+        "run_index",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id) REFERENCES projects(id)"
+      ],
+      [
+        "run_index",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id, parent_id) REFERENCES run_index(project_id, run_id)"
+      ],
+      [
+        "run_index",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (project_id, resource_kind, run_id) REFERENCES resource_scopes(project_id, resource_kind, resource_id)"
+      ],
+      [
+        "run_index",
+        "f",
+        false,
+        false,
+        true,
+        "FOREIGN KEY (run_id) REFERENCES records(id)"
+      ],
+      [
+        "run_index",
+        "p",
+        false,
+        false,
+        true,
+        "PRIMARY KEY (run_id)"
+      ],
+      [
+        "run_index",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (project_id, published_seq)"
+      ],
+      [
+        "run_index",
+        "u",
+        false,
+        false,
+        true,
+        "UNIQUE (project_id, run_id)"
+      ]
+    ],
+    "indexes": [
+      [
+        "alembic_version",
+        "CREATE UNIQUE INDEX alembic_version_pkc ON public.alembic_version USING btree (version_num)",
+        true,
+        true
+      ],
+      [
+        "api_keys",
+        "CREATE UNIQUE INDEX api_keys_hash_key ON public.api_keys USING btree (hash)",
+        true,
+        true
+      ],
+      [
+        "api_keys",
+        "CREATE UNIQUE INDEX api_keys_pkey ON public.api_keys USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "artifact_objects",
+        "CREATE UNIQUE INDEX artifact_objects_pkey ON public.artifact_objects USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "artifact_objects",
+        "CREATE UNIQUE INDEX artifact_objects_project_id_digest_format_version_key ON public.artifact_objects USING btree (project_id, digest, format_version)",
+        true,
+        true
+      ],
+      [
+        "artifact_objects",
+        "CREATE UNIQUE INDEX artifact_objects_project_id_id_key ON public.artifact_objects USING btree (project_id, id)",
+        true,
+        true
+      ],
+      [
+        "artifact_refs",
+        "CREATE UNIQUE INDEX artifact_refs_pkey ON public.artifact_refs USING btree (project_id, owner_kind, owner_id, artifact_id, role)",
+        true,
+        true
+      ],
+      [
+        "audit",
+        "CREATE UNIQUE INDEX audit_pkey ON public.audit USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "budget_accounts",
+        "CREATE UNIQUE INDEX ar7_accounts_job_window ON public.budget_accounts USING btree (job_id)",
+        true,
+        true
+      ],
+      [
+        "budget_accounts",
+        "CREATE UNIQUE INDEX ar7_accounts_pk ON public.budget_accounts USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "budget_accounts",
+        "CREATE UNIQUE INDEX ar7_accounts_scope_period ON public.budget_accounts USING btree (organization_id, scope, scope_id, period_start)",
+        true,
+        true
+      ],
+      [
+        "budget_entries",
+        "CREATE INDEX ar7_entries_account_id ON public.budget_entries USING btree (account_id)",
+        true,
+        true
+      ],
+      [
+        "budget_entries",
+        "CREATE UNIQUE INDEX ar7_entries_pk ON public.budget_entries USING btree (call_id, account_id, entry_kind)",
+        true,
+        true
+      ],
+      [
+        "events",
+        "CREATE UNIQUE INDEX events_pkey ON public.events USING btree (run_id, step)",
+        true,
+        true
+      ],
+      [
+        "installation_adoptions",
+        "CREATE UNIQUE INDEX installation_adoptions_pkey ON public.installation_adoptions USING btree (installation_key)",
+        true,
+        true
+      ],
+      [
+        "installation_adoptions",
+        "CREATE UNIQUE INDEX installation_adoptions_singleton_key ON public.installation_adoptions USING btree (singleton)",
+        true,
+        true
+      ],
+      [
+        "jobs",
+        "CREATE UNIQUE INDEX jobs_pkey ON public.jobs USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "migration_progress",
+        "CREATE UNIQUE INDEX migration_progress_pkey ON public.migration_progress USING btree (revision, phase)",
+        true,
+        true
+      ],
+      [
+        "operation_keys",
+        "CREATE UNIQUE INDEX operation_keys_pkey ON public.operation_keys USING btree (project_id, principal_id, kind, key_hash)",
+        true,
+        true
+      ],
+      [
+        "operations",
+        "CREATE UNIQUE INDEX operations_job_id_key ON public.operations USING btree (job_id)",
+        true,
+        true
+      ],
+      [
+        "operations",
+        "CREATE UNIQUE INDEX operations_pkey ON public.operations USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "operations",
+        "CREATE UNIQUE INDEX operations_project_id_principal_id_kind_client_operation_id_key ON public.operations USING btree (project_id, principal_id, kind, client_operation_id)",
+        true,
+        true
+      ],
+      [
+        "operations",
+        "CREATE UNIQUE INDEX operations_project_id_principal_id_kind_id_key ON public.operations USING btree (project_id, principal_id, kind, id)",
+        true,
+        true
+      ],
+      [
+        "organizations",
+        "CREATE UNIQUE INDEX organizations_installation_key_key ON public.organizations USING btree (installation_key)",
+        true,
+        true
+      ],
+      [
+        "organizations",
+        "CREATE UNIQUE INDEX organizations_pkey ON public.organizations USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "project_memberships",
+        "CREATE UNIQUE INDEX membership_active_legacy_default ON public.project_memberships USING btree (principal_id) WHERE ((legacy_default = true) AND (revoked_at IS NULL))",
+        true,
+        true
+      ],
+      [
+        "project_memberships",
+        "CREATE UNIQUE INDEX project_memberships_pkey ON public.project_memberships USING btree (project_id, principal_id)",
+        true,
+        true
+      ],
+      [
+        "projects",
+        "CREATE UNIQUE INDEX projects_organization_id_id_key ON public.projects USING btree (organization_id, id)",
+        true,
+        true
+      ],
+      [
+        "projects",
+        "CREATE UNIQUE INDEX projects_pkey ON public.projects USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "provider_calls",
+        "CREATE INDEX ar7_calls_job_account_id ON public.provider_calls USING btree (job_account_id)",
+        true,
+        true
+      ],
+      [
+        "provider_calls",
+        "CREATE INDEX ar7_calls_job_id ON public.provider_calls USING btree (job_id)",
+        true,
+        true
+      ],
+      [
+        "provider_calls",
+        "CREATE INDEX ar7_calls_organization_account_id ON public.provider_calls USING btree (organization_account_id)",
+        true,
+        true
+      ],
+      [
+        "provider_calls",
+        "CREATE INDEX ar7_calls_project_account_id ON public.provider_calls USING btree (project_account_id)",
+        true,
+        true
+      ],
+      [
+        "provider_calls",
+        "CREATE UNIQUE INDEX ar7_calls_logical_unique ON public.provider_calls USING btree (project_id, logical_call_id)",
+        true,
+        true
+      ],
+      [
+        "provider_calls",
+        "CREATE UNIQUE INDEX ar7_calls_pk ON public.provider_calls USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "provider_calls",
+        "CREATE UNIQUE INDEX ar7_calls_project_unique ON public.provider_calls USING btree (project_id, id)",
+        true,
+        true
+      ],
+      [
+        "records",
+        "CREATE UNIQUE INDEX records_pkey ON public.records USING btree (id)",
+        true,
+        true
+      ],
+      [
+        "resource_scopes",
+        "CREATE UNIQUE INDEX resource_scopes_pkey ON public.resource_scopes USING btree (resource_kind, resource_id)",
+        true,
+        true
+      ],
+      [
+        "resource_scopes",
+        "CREATE UNIQUE INDEX resource_scopes_project_id_resource_kind_resource_id_key ON public.resource_scopes USING btree (project_id, resource_kind, resource_id)",
+        true,
+        true
+      ],
+      [
+        "run_index",
+        "CREATE INDEX run_index_project_created_run ON public.run_index USING btree (project_id, created_at DESC, run_id DESC)",
+        true,
+        true
+      ],
+      [
+        "run_index",
+        "CREATE UNIQUE INDEX run_index_pkey ON public.run_index USING btree (run_id)",
+        true,
+        true
+      ],
+      [
+        "run_index",
+        "CREATE UNIQUE INDEX run_index_project_id_published_seq_key ON public.run_index USING btree (project_id, published_seq)",
+        true,
+        true
+      ],
+      [
+        "run_index",
+        "CREATE UNIQUE INDEX run_index_project_id_run_id_key ON public.run_index USING btree (project_id, run_id)",
+        true,
+        true
+      ]
+    ],
+    "ledger_executables": {
+      "function": {
+        "acl": [
+          [
+            "installation_table_owner",
+            "installation_table_owner",
+            "EXECUTE",
+            false
+          ]
+        ],
+        "arguments": "",
+        "binary": null,
+        "cost": 100.0,
+        "definition": "CREATE OR REPLACE FUNCTION public.ar7_ledger_constraint()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'pg_catalog', 'pg_temp'\nAS $function$\nDECLARE\n    account_row public.budget_accounts%ROWTYPE;\n    call_row public.provider_calls%ROWTYPE;\n    parent_job public.jobs%ROWTYPE;\n    org_account public.budget_accounts%ROWTYPE;\n    project_account public.budget_accounts%ROWTYPE;\n    job_account public.budget_accounts%ROWTYPE;\n    target_account text;\n    target_call text;\n    target_job text;\n    scope_project text;\n    account_candidates integer := 0;\n    entries record;\nBEGIN\n    IF TG_TABLE_SCHEMA <> 'public' OR TG_WHEN <> 'AFTER'\n       OR TG_LEVEL <> 'ROW' OR TG_NARGS <> 0\n       OR NOT (\n         (TG_NAME = 'ar7_accounts_constraint' AND TG_TABLE_NAME = 'budget_accounts'\n          AND TG_OP IN ('INSERT','UPDATE','DELETE'))\n         OR (TG_NAME = 'ar7_calls_constraint' AND TG_TABLE_NAME = 'provider_calls'\n          AND TG_OP IN ('INSERT','UPDATE','DELETE'))\n         OR (TG_NAME = 'ar7_entries_constraint' AND TG_TABLE_NAME = 'budget_entries'\n          AND TG_OP IN ('INSERT','UPDATE','DELETE'))\n         OR (TG_NAME = 'ar7_jobs_constraint' AND TG_TABLE_NAME = 'jobs'\n          AND TG_OP IN ('UPDATE','DELETE'))\n         OR (TG_NAME = 'ar7_scopes_constraint' AND TG_TABLE_NAME = 'resource_scopes'\n          AND TG_OP IN ('UPDATE','DELETE'))\n       ) THEN\n        RAISE EXCEPTION 'ledger trigger identity' USING ERRCODE = '23514';\n    END IF;\n\n    IF TG_TABLE_NAME = 'budget_accounts' THEN\n        IF TG_OP = 'DELETE' THEN\n            RAISE EXCEPTION 'immutable ledger account' USING ERRCODE = '23514';\n        END IF;\n        IF TG_OP = 'UPDATE' AND\n           ROW(OLD.id,OLD.organization_id,OLD.scope,OLD.scope_id,OLD.period_start,\n               OLD.period_end,OLD.limit_microusd,OLD.project_id,OLD.job_id,\n               OLD.opening_held_microusd)\n           IS DISTINCT FROM\n           ROW(NEW.id,NEW.organization_id,NEW.scope,NEW.scope_id,NEW.period_start,\n               NEW.period_end,NEW.limit_microusd,NEW.project_id,NEW.job_id,\n               NEW.opening_held_microusd) THEN\n            RAISE EXCEPTION 'immutable ledger account' USING ERRCODE = '23514';\n        END IF;\n        target_account := NEW.id;\n        SELECT * INTO STRICT account_row FROM public.budget_accounts\n            WHERE id = target_account LIMIT 2;\n        IF account_row.scope IN ('organization','project') AND EXISTS(\n            SELECT 1 FROM public.budget_accounts AS candidate\n            WHERE candidate.organization_id = account_row.organization_id\n              AND candidate.scope = account_row.scope\n              AND candidate.scope_id = account_row.scope_id\n              AND candidate.id <> account_row.id\n              AND candidate.period_start < account_row.period_end\n              AND account_row.period_start < candidate.period_end\n        ) THEN\n            RAISE EXCEPTION 'overlapping ledger period' USING ERRCODE = '23514';\n        END IF;\n        target_job := account_row.job_id;\n    ELSIF TG_TABLE_NAME = 'jobs' THEN\n        IF TG_OP = 'UPDATE' THEN\n            IF OLD.legacy_reserved_microusd IS DISTINCT FROM NEW.legacy_reserved_microusd\n               OR NEW.lease_generation < OLD.lease_generation THEN\n                RAISE EXCEPTION 'immutable opening or decreasing generation'\n                    USING ERRCODE = '23514';\n            END IF;\n        END IF;\n        target_job := OLD.id;\n    ELSIF TG_TABLE_NAME = 'resource_scopes' THEN\n        IF OLD.resource_kind = 'job' THEN\n            target_job := OLD.resource_id;\n        ELSIF OLD.resource_kind = 'provider_call' THEN\n            target_call := OLD.resource_id;\n        END IF;\n    ELSIF TG_TABLE_NAME = 'provider_calls' THEN\n        IF TG_OP = 'DELETE' THEN\n            RAISE EXCEPTION 'immutable ledger call' USING ERRCODE = '23514';\n        END IF;\n        IF TG_OP = 'UPDATE' AND\n           ROW(OLD.id,OLD.project_id,OLD.job_id,OLD.logical_call_id,OLD.purpose,\n               OLD.request_digest,OLD.price_version,OLD.reserved_microusd,OLD.created_at,\n               OLD.organization_id,OLD.job_resource_kind,OLD.lease_generation,\n               OLD.organization_account_id,OLD.project_account_id,OLD.job_account_id)\n           IS DISTINCT FROM\n           ROW(NEW.id,NEW.project_id,NEW.job_id,NEW.logical_call_id,NEW.purpose,\n               NEW.request_digest,NEW.price_version,NEW.reserved_microusd,NEW.created_at,\n               NEW.organization_id,NEW.job_resource_kind,NEW.lease_generation,\n               NEW.organization_account_id,NEW.project_account_id,NEW.job_account_id) THEN\n            RAISE EXCEPTION 'immutable ledger call' USING ERRCODE = '23514';\n        END IF;\n        target_call := NEW.id;\n    ELSIF TG_TABLE_NAME = 'budget_entries' THEN\n        IF TG_OP <> 'INSERT' THEN\n            RAISE EXCEPTION 'append-only ledger entry' USING ERRCODE = '23514';\n        END IF;\n        target_call := NEW.call_id;\n    END IF;\n\n    IF target_job IS NOT NULL THEN\n        FOR account_row IN\n            SELECT * FROM public.budget_accounts WHERE job_id = target_job LIMIT 2\n        LOOP\n            account_candidates := account_candidates + 1;\n            IF account_candidates > 1 THEN\n                RAISE EXCEPTION 'duplicate job account' USING ERRCODE = '23514';\n            END IF;\n            SELECT * INTO parent_job FROM public.jobs WHERE id = target_job LIMIT 2;\n            IF NOT FOUND THEN\n                RAISE EXCEPTION 'missing ledger job' USING ERRCODE = '23514';\n            END IF;\n            SELECT project_id INTO scope_project FROM public.resource_scopes\n                WHERE resource_kind = 'job' AND resource_id = target_job LIMIT 2;\n            IF NOT FOUND OR scope_project IS DISTINCT FROM account_row.project_id\n               OR account_row.limit_microusd > parent_job.budget THEN\n                RAISE EXCEPTION 'ledger job scope or cap' USING ERRCODE = '23514';\n            END IF;\n        END LOOP;\n    END IF;\n\n    IF target_call IS NOT NULL THEN\n        SELECT * INTO call_row FROM public.provider_calls WHERE id = target_call LIMIT 2;\n        IF NOT FOUND THEN\n            IF TG_TABLE_NAME = 'resource_scopes' THEN\n                RETURN NULL;\n            END IF;\n            RAISE EXCEPTION 'missing ledger call' USING ERRCODE = '23514';\n        END IF;\n        IF call_row.organization_account_id = call_row.project_account_id\n           OR call_row.organization_account_id = call_row.job_account_id\n           OR call_row.project_account_id = call_row.job_account_id THEN\n            RAISE EXCEPTION 'ledger account triple' USING ERRCODE = '23514';\n        END IF;\n        SELECT * INTO STRICT org_account FROM public.budget_accounts\n            WHERE id = call_row.organization_account_id LIMIT 2;\n        SELECT * INTO STRICT project_account FROM public.budget_accounts\n            WHERE id = call_row.project_account_id LIMIT 2;\n        SELECT * INTO STRICT job_account FROM public.budget_accounts\n            WHERE id = call_row.job_account_id LIMIT 2;\n        IF org_account.scope <> 'organization'\n           OR org_account.scope_id <> call_row.organization_id\n           OR project_account.scope <> 'project'\n           OR project_account.scope_id <> call_row.project_id\n           OR job_account.scope <> 'job' OR job_account.scope_id <> call_row.job_id\n           OR job_account.project_id <> call_row.project_id\n           OR org_account.organization_id <> call_row.organization_id\n           OR project_account.organization_id <> call_row.organization_id\n           OR job_account.organization_id <> call_row.organization_id\n           OR NOT (org_account.period_start <= call_row.created_at\n                   AND call_row.created_at < org_account.period_end)\n           OR NOT (project_account.period_start <= call_row.created_at\n                   AND call_row.created_at < project_account.period_end)\n           OR NOT (job_account.period_start <= call_row.created_at\n                   AND call_row.created_at < job_account.period_end) THEN\n            RAISE EXCEPTION 'ledger account scope or period' USING ERRCODE = '23514';\n        END IF;\n        SELECT project_id INTO scope_project FROM public.resource_scopes\n            WHERE resource_kind = 'provider_call' AND resource_id = target_call LIMIT 2;\n        IF NOT FOUND OR scope_project IS DISTINCT FROM call_row.project_id THEN\n            RAISE EXCEPTION 'ledger call scope' USING ERRCODE = '23514';\n        END IF;\n        SELECT count(*) AS total,\n               count(*) FILTER (WHERE entry_kind = 'reserve') AS reserves,\n               count(*) FILTER (WHERE entry_kind = 'settle') AS settlements,\n               count(*) FILTER (WHERE entry_kind = 'release') AS releases,\n               min(amount_microusd) FILTER (WHERE entry_kind = 'reserve') AS reserve_min,\n               max(amount_microusd) FILTER (WHERE entry_kind = 'reserve') AS reserve_max,\n               min(amount_microusd) FILTER (WHERE entry_kind = 'settle') AS settle_min,\n               max(amount_microusd) FILTER (WHERE entry_kind = 'settle') AS settle_max,\n               min(amount_microusd) FILTER (WHERE entry_kind = 'release') AS release_min,\n               max(amount_microusd) FILTER (WHERE entry_kind = 'release') AS release_max,\n               bool_and(account_id IN (\n                   call_row.organization_account_id,\n                   call_row.project_account_id,call_row.job_account_id)) AS members\n        INTO entries FROM (\n            SELECT account_id,entry_kind,amount_microusd FROM public.budget_entries\n            WHERE call_id = target_call LIMIT 10\n        ) AS cohort;\n        IF entries.total > 9 OR entries.reserves <> 3\n           OR entries.reserve_min <> call_row.reserved_microusd\n           OR entries.reserve_max <> call_row.reserved_microusd\n           OR entries.members IS DISTINCT FROM true\n           OR entries.settlements NOT IN (0,3) OR entries.releases NOT IN (0,3)\n           OR entries.settle_min IS DISTINCT FROM entries.settle_max\n           OR entries.release_min IS DISTINCT FROM entries.release_max\n           OR coalesce(entries.release_max,0) > call_row.reserved_microusd\n           OR coalesce(entries.settle_max,0) >\n              call_row.reserved_microusd - coalesce(entries.release_max,0) THEN\n            RAISE EXCEPTION 'ledger entry cohort' USING ERRCODE = '23514';\n        END IF;\n    END IF;\n    RETURN NULL;\nEND\n$function$\n",
+        "definition_sha256": "a037303b2f91b008c8175e77bb1d173d4468f8211e2d213d3c536de93e234705",
+        "kind": "f",
+        "language": "plpgsql",
+        "leakproof": false,
+        "name": "ar7_ledger_constraint",
+        "owner": "installation_table_owner",
+        "parallel": "u",
+        "result": "trigger",
+        "returns_set": false,
+        "rows": 0.0,
+        "security_definer": false,
+        "settings": [
+          "search_path=pg_catalog, pg_temp"
+        ],
+        "strict": false,
+        "support": "-",
+        "volatility": "v"
+      },
+      "triggers": [
+        {
+          "argument_count": 0,
+          "arguments": "",
+          "columns": "",
+          "condition": null,
+          "constraint_trigger": true,
+          "deferrable": true,
+          "definition": "CREATE CONSTRAINT TRIGGER ar7_accounts_constraint AFTER INSERT OR DELETE OR UPDATE ON public.budget_accounts DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION ar7_ledger_constraint()",
+          "enabled": "O",
+          "function_name": "ar7_ledger_constraint",
+          "function_schema": "public",
+          "initially_deferred": true,
+          "name": "ar7_accounts_constraint",
+          "new_table": null,
+          "old_table": null,
+          "relation": "budget_accounts",
+          "type": 29
+        },
+        {
+          "argument_count": 0,
+          "arguments": "",
+          "columns": "",
+          "condition": null,
+          "constraint_trigger": true,
+          "deferrable": true,
+          "definition": "CREATE CONSTRAINT TRIGGER ar7_calls_constraint AFTER INSERT OR DELETE OR UPDATE ON public.provider_calls DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION ar7_ledger_constraint()",
+          "enabled": "O",
+          "function_name": "ar7_ledger_constraint",
+          "function_schema": "public",
+          "initially_deferred": true,
+          "name": "ar7_calls_constraint",
+          "new_table": null,
+          "old_table": null,
+          "relation": "provider_calls",
+          "type": 29
+        },
+        {
+          "argument_count": 0,
+          "arguments": "",
+          "columns": "",
+          "condition": null,
+          "constraint_trigger": true,
+          "deferrable": true,
+          "definition": "CREATE CONSTRAINT TRIGGER ar7_entries_constraint AFTER INSERT OR DELETE OR UPDATE ON public.budget_entries DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION ar7_ledger_constraint()",
+          "enabled": "O",
+          "function_name": "ar7_ledger_constraint",
+          "function_schema": "public",
+          "initially_deferred": true,
+          "name": "ar7_entries_constraint",
+          "new_table": null,
+          "old_table": null,
+          "relation": "budget_entries",
+          "type": 29
+        },
+        {
+          "argument_count": 0,
+          "arguments": "",
+          "columns": "",
+          "condition": null,
+          "constraint_trigger": true,
+          "deferrable": true,
+          "definition": "CREATE CONSTRAINT TRIGGER ar7_jobs_constraint AFTER DELETE OR UPDATE ON public.jobs DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION ar7_ledger_constraint()",
+          "enabled": "O",
+          "function_name": "ar7_ledger_constraint",
+          "function_schema": "public",
+          "initially_deferred": true,
+          "name": "ar7_jobs_constraint",
+          "new_table": null,
+          "old_table": null,
+          "relation": "jobs",
+          "type": 25
+        },
+        {
+          "argument_count": 0,
+          "arguments": "",
+          "columns": "",
+          "condition": null,
+          "constraint_trigger": true,
+          "deferrable": true,
+          "definition": "CREATE CONSTRAINT TRIGGER ar7_scopes_constraint AFTER DELETE OR UPDATE ON public.resource_scopes DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION ar7_ledger_constraint()",
+          "enabled": "O",
+          "function_name": "ar7_ledger_constraint",
+          "function_schema": "public",
+          "initially_deferred": true,
+          "name": "ar7_scopes_constraint",
+          "new_table": null,
+          "old_table": null,
+          "relation": "resource_scopes",
+          "type": 25
+        }
+      ]
+    }
+  },
+  "alembic_version": {
+    "checks": [],
+    "columns": [
+      [
+        "version_num",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "version_num"
+    ],
+    "uniques": []
+  },
+  "api_keys": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "hash",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "role",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "name",
+        "VARCHAR(120)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "expires",
+        "DOUBLE PRECISION",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "revoked",
+        "BOOLEAN",
+        true,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "hash"
+      ]
+    ]
+  },
+  "artifact_objects": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "artifact_objects_byte_count_check",
+        "sqltext": "byte_count >= 0"
+      },
+      {
+        "comment": null,
+        "name": "artifact_objects_check",
+        "sqltext": "locator::text = ('objects/'::text || digest::text) OR locator::text = ((('objects/'::text || project_id::text) || '/v1/'::text) || digest::text)"
+      },
+      {
+        "comment": null,
+        "name": "artifact_objects_digest_check",
+        "sqltext": "digest::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "artifact_objects_format_version_check",
+        "sqltext": "format_version = 1"
+      },
+      {
+        "comment": null,
+        "name": "artifact_objects_id_check",
+        "sqltext": "id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "artifact_objects_locator_check",
+        "sqltext": "length(locator::text) >= 1 AND length(locator::text) <= 1024"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "locator",
+        "VARCHAR(1024)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "format_version",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "byte_count",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": "artifact_objects_project_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "project_id",
+        "digest",
+        "format_version"
+      ],
+      [
+        "project_id",
+        "id"
+      ]
+    ]
+  },
+  "artifact_refs": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "artifact_refs_check",
+        "sqltext": "role::text <> 'budget_evidence'::text OR owner_kind::text = 'provider_call'::text"
+      },
+      {
+        "comment": null,
+        "name": "artifact_refs_owner_kind_check",
+        "sqltext": "owner_kind::text = 'run'::text OR owner_kind::text = 'study'::text OR owner_kind::text = 'job'::text OR owner_kind::text = 'provider_call'::text"
+      },
+      {
+        "comment": null,
+        "name": "artifact_refs_role_check",
+        "sqltext": "role::text = 'payload'::text OR role::text = 'admission_config'::text OR role::text = 'task'::text OR role::text = 'event'::text OR role::text = 'checkpoint'::text OR role::text = 'workspace'::text OR role::text = 'file_blob'::text OR role::text = 'evaluation'::text OR role::text = 'result'::text OR role::text = 'study_attachment'::text OR role::text = 'budget_evidence'::text"
+      }
+    ],
+    "columns": [
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "owner_kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "owner_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "artifact_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "role",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id",
+          "artifact_id"
+        ],
+        "name": "artifact_refs_project_id_artifact_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "artifact_objects"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id",
+          "owner_kind",
+          "owner_id"
+        ],
+        "name": "artifact_refs_project_id_owner_kind_owner_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "resource_kind",
+          "resource_id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "resource_scopes"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "project_id",
+      "owner_kind",
+      "owner_id",
+      "artifact_id",
+      "role"
+    ],
+    "uniques": []
+  },
+  "audit": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created",
+        "DOUBLE PRECISION",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "actor",
+        "VARCHAR(256)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "action",
+        "VARCHAR(80)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "target",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": []
+  },
+  "budget_accounts": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "ar7_accounts_accounted",
+        "sqltext": "accounted_microusd >= 0 AND accounted_microusd <= '9223372036854775807'::bigint"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_balance",
+        "sqltext": "accounted_microusd <= limit_microusd AND held_microusd <= (limit_microusd - accounted_microusd)"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_end",
+        "sqltext": "isfinite(period_end) AND EXTRACT(year FROM (period_end AT TIME ZONE 'UTC'::text)) >= 1::numeric AND EXTRACT(year FROM (period_end AT TIME ZONE 'UTC'::text)) <= 9999::numeric"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_held",
+        "sqltext": "held_microusd >= 0 AND held_microusd <= '9223372036854775807'::bigint"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_id",
+        "sqltext": "id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_job",
+        "sqltext": "job_id IS NULL OR job_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_limit",
+        "sqltext": "limit_microusd >= 0 AND limit_microusd <= '9223372036854775807'::bigint"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_opening",
+        "sqltext": "opening_held_microusd >= 0 AND opening_held_microusd <= '9223372036854775807'::bigint"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_organization",
+        "sqltext": "organization_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_period",
+        "sqltext": "period_start < period_end"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_project",
+        "sqltext": "project_id IS NULL OR project_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_scope",
+        "sqltext": "scope::text = 'organization'::text OR scope::text = 'project'::text OR scope::text = 'job'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_scope_id",
+        "sqltext": "scope_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_shape",
+        "sqltext": "scope::text = 'organization'::text AND scope_id::text = organization_id::text AND project_id IS NULL AND job_id IS NULL OR scope::text = 'project'::text AND project_id IS NOT NULL AND scope_id::text = project_id::text AND job_id IS NULL OR scope::text = 'job'::text AND project_id IS NOT NULL AND job_id IS NOT NULL AND scope_id::text = job_id::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_accounts_start",
+        "sqltext": "isfinite(period_start) AND EXTRACT(year FROM (period_start AT TIME ZONE 'UTC'::text)) >= 1::numeric AND EXTRACT(year FROM (period_start AT TIME ZONE 'UTC'::text)) <= 9999::numeric"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "scope",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "scope_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "period_start",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "period_end",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "limit_microusd",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "held_microusd",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "accounted_microusd",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "opening_held_microusd",
+        "BIGINT",
+        false,
+        "0",
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "organization_id"
+        ],
+        "name": "ar7_accounts_organization_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "organizations"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "organization_id",
+          "project_id"
+        ],
+        "name": "ar7_accounts_project_fk",
+        "options": {},
+        "referred_columns": [
+          "organization_id",
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "job_id"
+      ],
+      [
+        "organization_id",
+        "scope",
+        "scope_id",
+        "period_start"
+      ]
+    ]
+  },
+  "budget_entries": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "ar7_entries_account",
+        "sqltext": "account_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_entries_amount",
+        "sqltext": "amount_microusd >= 0 AND amount_microusd <= '9223372036854775807'::bigint"
+      },
+      {
+        "comment": null,
+        "name": "ar7_entries_call",
+        "sqltext": "call_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_entries_created",
+        "sqltext": "isfinite(created_at) AND EXTRACT(year FROM (created_at AT TIME ZONE 'UTC'::text)) >= 1::numeric AND EXTRACT(year FROM (created_at AT TIME ZONE 'UTC'::text)) <= 9999::numeric"
+      },
+      {
+        "comment": null,
+        "name": "ar7_entries_evidence",
+        "sqltext": "evidence_ref IS NULL OR evidence_ref::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_entries_evidence_shape",
+        "sqltext": "entry_kind::text = 'reserve'::text AND evidence_ref IS NULL OR (entry_kind::text = 'settle'::text OR entry_kind::text = 'release'::text) AND evidence_ref IS NOT NULL"
+      },
+      {
+        "comment": null,
+        "name": "ar7_entries_kind",
+        "sqltext": "entry_kind::text = 'reserve'::text OR entry_kind::text = 'settle'::text OR entry_kind::text = 'release'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_entries_owner",
+        "sqltext": "evidence_owner_kind::text = 'provider_call'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_entries_project",
+        "sqltext": "project_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_entries_role",
+        "sqltext": "evidence_role::text = 'budget_evidence'::text"
+      }
+    ],
+    "columns": [
+      [
+        "call_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "account_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "entry_kind",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "amount_microusd",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "evidence_ref",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "evidence_owner_kind",
+        "VARCHAR(20)",
+        false,
+        "'provider_call'::character varying",
+        null,
+        null
+      ],
+      [
+        "evidence_role",
+        "VARCHAR(32)",
+        false,
+        "'budget_evidence'::character varying",
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "account_id"
+        ],
+        "name": "ar7_entries_account_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "budget_accounts"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "call_id"
+        ],
+        "name": "ar7_entries_call_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "provider_calls"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id",
+          "evidence_owner_kind",
+          "call_id",
+          "evidence_ref",
+          "evidence_role"
+        ],
+        "name": "ar7_entries_evidence_fk",
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "owner_kind",
+          "owner_id",
+          "artifact_id",
+          "role"
+        ],
+        "referred_schema": "public",
+        "referred_table": "artifact_refs"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id",
+          "call_id"
+        ],
+        "name": "ar7_entries_project_call_fk",
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "provider_calls"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": "ar7_entries_project_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [
+      {
+        "column_names": [
+          "account_id"
+        ],
+        "dialect_options": {
+          "postgresql_include": []
+        },
+        "name": "ar7_entries_account_id",
+        "unique": false
+      }
+    ],
+    "pk": [
+      "call_id",
+      "account_id",
+      "entry_kind"
+    ],
+    "uniques": []
+  },
+  "events": {
+    "checks": [],
+    "columns": [
+      [
+        "run_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "step",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "artifact",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "hash",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "run_id",
+      "step"
+    ],
+    "uniques": []
+  },
+  "installation_adoptions": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "installation_adoptions_backup_evidence_digest_check",
+        "sqltext": "backup_evidence_digest::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_check",
+        "sqltext": "source_kind::text = 'fresh'::text AND state::text = 'prepared'::text AND organization_id IS NULL AND project_id IS NULL OR organization_id IS NOT NULL AND project_id IS NOT NULL"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_check1",
+        "sqltext": "source_kind::text = 'fresh'::text AND backup_evidence_digest IS NULL AND drain_evidence_digest IS NULL OR source_kind::text = 'legacy'::text AND backup_evidence_digest IS NOT NULL AND drain_evidence_digest IS NOT NULL"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_drain_evidence_digest_check",
+        "sqltext": "drain_evidence_digest::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_installation_key_check",
+        "sqltext": "length(installation_key::text) >= 1 AND length(installation_key::text) <= 64"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_installed_schema_fingerprint_check",
+        "sqltext": "installed_schema_fingerprint::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_mapping_check",
+        "sqltext": "octet_length(mapping::text) <= 1048576"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_mapping_digest_check",
+        "sqltext": "mapping_digest::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_organization_id_check",
+        "sqltext": "organization_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_project_id_check",
+        "sqltext": "project_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_schema_fingerprint_check",
+        "sqltext": "schema_fingerprint::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_singleton_check",
+        "sqltext": "singleton = 1"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_source_baseline_check",
+        "sqltext": "source_baseline::text ~ '^[0-9a-f]{40}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_source_kind_check",
+        "sqltext": "source_kind::text = ANY (ARRAY['fresh'::character varying, 'legacy'::character varying]::text[])"
+      },
+      {
+        "comment": null,
+        "name": "installation_adoptions_state_check",
+        "sqltext": "state::text = ANY (ARRAY['prepared'::character varying, 'ownership_complete'::character varying]::text[])"
+      }
+    ],
+    "columns": [
+      [
+        "installation_key",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "singleton",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_kind",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_baseline",
+        "VARCHAR(40)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "schema_fingerprint",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "installed_schema_fingerprint",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "mapping_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "mapping",
+        "JSON",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "backup_evidence_digest",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "drain_evidence_digest",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "state",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "installation_key"
+    ],
+    "uniques": [
+      [
+        "singleton"
+      ]
+    ]
+  },
+  "jobs": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "ar7_jobs_generation",
+        "sqltext": "lease_generation >= 0 AND lease_generation <= '9223372036854775807'::bigint"
+      },
+      {
+        "comment": null,
+        "name": "ar7_jobs_legacy_reserved",
+        "sqltext": "legacy_reserved_microusd >= 0 AND legacy_reserved_microusd <= '9223372036854775807'::bigint"
+      },
+      {
+        "comment": null,
+        "name": "jobs_check",
+        "sqltext": "payload_version = 1 AND execution_config_ref IS NULL AND execution_config_digest IS NULL OR execution_config_ref IS NOT NULL AND execution_config_digest IS NOT NULL AND execution_config_ref::text ~ '^[0-9a-f]{64}$'::text AND execution_config_digest::text ~ '^[0-9a-f]{64}$'::text AND execution_config_ref::text = execution_config_digest::text"
+      },
+      {
+        "comment": null,
+        "name": "jobs_payload_version_check",
+        "sqltext": "payload_version = ANY (ARRAY[1, 2])"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created",
+        "DOUBLE PRECISION",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "payload",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "status",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "owner",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "lease_until",
+        "DOUBLE PRECISION",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "cancel",
+        "BOOLEAN",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "budget",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "reserved",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "result",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "error",
+        "VARCHAR(300)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "actor",
+        "VARCHAR(256)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "payload_version",
+        "INTEGER",
+        false,
+        "1",
+        null,
+        null
+      ],
+      [
+        "execution_config_ref",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "execution_config_digest",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "lease_generation",
+        "BIGINT",
+        false,
+        "0",
+        null,
+        null
+      ],
+      [
+        "legacy_reserved_microusd",
+        "BIGINT",
+        false,
+        "0",
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": []
+  },
+  "migration_progress": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "migration_progress_cursor_check",
+        "sqltext": "octet_length(cursor::text) <= 65536"
+      },
+      {
+        "comment": null,
+        "name": "migration_progress_rows_verified_check",
+        "sqltext": "rows_verified >= 0"
+      },
+      {
+        "comment": null,
+        "name": "migration_progress_source_digest_check",
+        "sqltext": "source_digest::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "migration_progress_status_check",
+        "sqltext": "status::text = ANY (ARRAY['pending'::character varying, 'running'::character varying, 'complete'::character varying, 'blocked'::character varying]::text[])"
+      }
+    ],
+    "columns": [
+      [
+        "revision",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "phase",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "cursor",
+        "JSON",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "rows_verified",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "status",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "updated_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "revision",
+      "phase"
+    ],
+    "uniques": []
+  },
+  "operation_keys": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "operation_keys_key_hash_check",
+        "sqltext": "key_hash::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "operation_keys_kind_check",
+        "sqltext": "kind::text = 'run'::text"
+      },
+      {
+        "comment": null,
+        "name": "operation_keys_operation_id_check",
+        "sqltext": "operation_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "operation_keys_principal_id_check",
+        "sqltext": "principal_id::text ~ '^(oidc:[0-9a-f]{64}|api-key:[0-9a-f]{32})$'::text"
+      },
+      {
+        "comment": null,
+        "name": "operation_keys_project_id_check",
+        "sqltext": "project_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "operation_keys_request_digest_check",
+        "sqltext": "request_digest::text ~ '^[0-9a-f]{64}$'::text"
+      }
+    ],
+    "columns": [
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "principal_id",
+        "VARCHAR(256)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "key_hash",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "operation_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "request_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": "operation_keys_project_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "projects"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id",
+          "principal_id",
+          "kind",
+          "operation_id"
+        ],
+        "name": "operation_keys_project_id_principal_id_kind_operation_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "principal_id",
+          "kind",
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "operations"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "project_id",
+      "principal_id",
+      "kind",
+      "key_hash"
+    ],
+    "uniques": []
+  },
+  "operations": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "operations_check",
+        "sqltext": "accepted_response = (((('{\"job_id\":\"'::text || job_id::text) || '\",\"operation_id\":\"'::text) || id::text) || '\"}'::text)"
+      },
+      {
+        "comment": null,
+        "name": "operations_check1",
+        "sqltext": "retain_until >= created_at"
+      },
+      {
+        "comment": null,
+        "name": "operations_client_operation_id_check",
+        "sqltext": "client_operation_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "operations_execution_config_digest_check",
+        "sqltext": "execution_config_digest::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "operations_failure_correlation_id_check",
+        "sqltext": "failure_correlation_id IS NULL OR failure_correlation_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "operations_id_check",
+        "sqltext": "id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "operations_job_id_check",
+        "sqltext": "job_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "operations_job_resource_kind_check",
+        "sqltext": "job_resource_kind::text = 'job'::text"
+      },
+      {
+        "comment": null,
+        "name": "operations_kind_check",
+        "sqltext": "kind::text = 'run'::text"
+      },
+      {
+        "comment": null,
+        "name": "operations_payload_version_check",
+        "sqltext": "payload_version = 2"
+      },
+      {
+        "comment": null,
+        "name": "operations_principal_id_check",
+        "sqltext": "principal_id::text ~ '^(oidc:[0-9a-f]{64}|api-key:[0-9a-f]{32})$'::text"
+      },
+      {
+        "comment": null,
+        "name": "operations_project_id_check",
+        "sqltext": "project_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "operations_request_digest_check",
+        "sqltext": "request_digest::text ~ '^[0-9a-f]{64}$'::text"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "principal_id",
+        "VARCHAR(256)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "client_operation_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "request_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "accepted_response",
+        "TEXT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "retain_until",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_resource_kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "execution_config_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "payload_version",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "failure_correlation_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "job_id"
+        ],
+        "name": "operations_job_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "jobs"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": "operations_project_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "projects"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id",
+          "job_resource_kind",
+          "job_id"
+        ],
+        "name": "operations_project_id_job_resource_kind_job_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "resource_kind",
+          "resource_id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "resource_scopes"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "job_id"
+      ],
+      [
+        "project_id",
+        "principal_id",
+        "kind",
+        "client_operation_id"
+      ],
+      [
+        "project_id",
+        "principal_id",
+        "kind",
+        "id"
+      ]
+    ]
+  },
+  "organizations": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "organizations_id_check",
+        "sqltext": "id::text ~ '^[0-9a-f]{32}$'::text"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "installation_key",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "installation_key"
+        ],
+        "name": "organizations_installation_key_fkey",
+        "options": {},
+        "referred_columns": [
+          "installation_key"
+        ],
+        "referred_schema": "public",
+        "referred_table": "installation_adoptions"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "installation_key"
+      ]
+    ]
+  },
+  "project_memberships": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "project_memberships_legacy_default_check",
+        "sqltext": "legacy_default = ANY (ARRAY[false, true])"
+      },
+      {
+        "comment": null,
+        "name": "project_memberships_principal_id_check",
+        "sqltext": "principal_id::text ~ '^(oidc:[0-9a-f]{64}|api-key:[0-9a-f]{32})$'::text"
+      },
+      {
+        "comment": null,
+        "name": "project_memberships_role_check",
+        "sqltext": "role::text = ANY (ARRAY['viewer'::character varying, 'operator'::character varying, 'maintainer'::character varying]::text[])"
+      }
+    ],
+    "columns": [
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "principal_id",
+        "VARCHAR(256)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "role",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "revoked_at",
+        "TIMESTAMP WITH TIME ZONE",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "legacy_default",
+        "BOOLEAN",
+        false,
+        "false",
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": "project_memberships_project_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [
+      {
+        "column_names": [
+          "principal_id"
+        ],
+        "dialect_options": {
+          "postgresql_include": [],
+          "postgresql_where": "((legacy_default = true) AND (revoked_at IS NULL))"
+        },
+        "name": "membership_active_legacy_default",
+        "unique": true
+      }
+    ],
+    "pk": [
+      "project_id",
+      "principal_id"
+    ],
+    "uniques": []
+  },
+  "projects": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "projects_id_check",
+        "sqltext": "id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "projects_name_check",
+        "sqltext": "length(name::text) >= 1 AND length(name::text) <= 120"
+      },
+      {
+        "comment": null,
+        "name": "projects_run_sequence_check",
+        "sqltext": "run_sequence >= 0"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "name",
+        "VARCHAR(120)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "run_sequence",
+        "BIGINT",
+        false,
+        "0",
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "organization_id"
+        ],
+        "name": "projects_organization_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "organizations"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "organization_id",
+        "id"
+      ]
+    ]
+  },
+  "provider_calls": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "ar7_calls_created",
+        "sqltext": "isfinite(created_at) AND EXTRACT(year FROM (created_at AT TIME ZONE 'UTC'::text)) >= 1::numeric AND EXTRACT(year FROM (created_at AT TIME ZONE 'UTC'::text)) <= 9999::numeric"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_digest",
+        "sqltext": "request_digest ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_estimate",
+        "sqltext": "usage_estimate_microusd IS NULL OR usage_estimate_microusd >= 0 AND usage_estimate_microusd <= '9223372036854775807'::bigint"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_generation",
+        "sqltext": "lease_generation >= 1 AND lease_generation <= '9223372036854775807'::bigint"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_id",
+        "sqltext": "id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_job",
+        "sqltext": "job_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_job_account",
+        "sqltext": "job_account_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_job_kind",
+        "sqltext": "job_resource_kind::text = 'job'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_logical",
+        "sqltext": "logical_call_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_org_account",
+        "sqltext": "organization_account_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_organization",
+        "sqltext": "organization_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_price",
+        "sqltext": "length(price_version::text) <= 128"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_project",
+        "sqltext": "project_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_project_account",
+        "sqltext": "project_account_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_provider_request",
+        "sqltext": "provider_request_id IS NULL OR length(provider_request_id::text) <= 256"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_purpose",
+        "sqltext": "purpose::text = 'continuation'::text OR purpose::text = 'discovery'::text"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_reserved",
+        "sqltext": "reserved_microusd >= 0 AND reserved_microusd <= '9223372036854775807'::bigint"
+      },
+      {
+        "comment": null,
+        "name": "ar7_calls_state",
+        "sqltext": "state::text = 'reserved'::text OR state::text = 'dispatching'::text OR state::text = 'observed'::text OR state::text = 'uncertain'::text OR state::text = 'reconciled'::text"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "logical_call_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "purpose",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "request_digest",
+        "CHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "price_version",
+        "VARCHAR(128)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "state",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "reserved_microusd",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "usage_estimate_microusd",
+        "BIGINT",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "provider_request_id",
+        "VARCHAR(256)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_resource_kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "lease_generation",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_account_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_account_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_account_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "job_account_id"
+        ],
+        "name": "ar7_calls_job_account_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "budget_accounts"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "job_id"
+        ],
+        "name": "ar7_calls_job_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "jobs"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id",
+          "job_resource_kind",
+          "job_id"
+        ],
+        "name": "ar7_calls_job_scope_fk",
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "resource_kind",
+          "resource_id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "resource_scopes"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "organization_account_id"
+        ],
+        "name": "ar7_calls_org_account_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "budget_accounts"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "organization_id"
+        ],
+        "name": "ar7_calls_organization_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "organizations"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "organization_id",
+          "project_id"
+        ],
+        "name": "ar7_calls_organization_project_fk",
+        "options": {},
+        "referred_columns": [
+          "organization_id",
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "projects"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_account_id"
+        ],
+        "name": "ar7_calls_project_account_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "budget_accounts"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": "ar7_calls_project_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [
+      {
+        "column_names": [
+          "job_account_id"
+        ],
+        "dialect_options": {
+          "postgresql_include": []
+        },
+        "name": "ar7_calls_job_account_id",
+        "unique": false
+      },
+      {
+        "column_names": [
+          "job_id"
+        ],
+        "dialect_options": {
+          "postgresql_include": []
+        },
+        "name": "ar7_calls_job_id",
+        "unique": false
+      },
+      {
+        "column_names": [
+          "organization_account_id"
+        ],
+        "dialect_options": {
+          "postgresql_include": []
+        },
+        "name": "ar7_calls_organization_account_id",
+        "unique": false
+      },
+      {
+        "column_names": [
+          "project_account_id"
+        ],
+        "dialect_options": {
+          "postgresql_include": []
+        },
+        "name": "ar7_calls_project_account_id",
+        "unique": false
+      }
+    ],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "project_id",
+        "id"
+      ],
+      [
+        "project_id",
+        "logical_call_id"
+      ]
+    ]
+  },
+  "records": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created",
+        "DOUBLE PRECISION",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "data",
+        "JSON",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": []
+  },
+  "resource_scopes": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "resource_scopes_resource_id_check",
+        "sqltext": "resource_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "resource_scopes_resource_kind_check",
+        "sqltext": "resource_kind::text = ANY (ARRAY['run'::character varying, 'study'::character varying, 'job'::character varying, 'key'::character varying, 'provider_call'::character varying]::text[])"
+      }
+    ],
+    "columns": [
+      [
+        "resource_kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "resource_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": "resource_scopes_project_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "resource_kind",
+      "resource_id"
+    ],
+    "uniques": [
+      [
+        "project_id",
+        "resource_kind",
+        "resource_id"
+      ]
+    ]
+  },
+  "run_index": {
+    "checks": [
+      {
+        "comment": null,
+        "name": "run_index_branchable_check",
+        "sqltext": "branchable = ANY (ARRAY[false, true])"
+      },
+      {
+        "comment": null,
+        "name": "run_index_check",
+        "sqltext": "branchable = false OR status::text = 'complete'::text"
+      },
+      {
+        "comment": null,
+        "name": "run_index_event_head_check",
+        "sqltext": "event_head IS NULL OR event_head::text ~ '^[0-9a-f]{64}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "run_index_parent_id_check",
+        "sqltext": "parent_id IS NULL OR parent_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "run_index_project_id_check",
+        "sqltext": "project_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "run_index_projection_reason_check",
+        "sqltext": "projection_reason IS NULL OR projection_reason::text = 'unfenced_execution'::text"
+      },
+      {
+        "comment": null,
+        "name": "run_index_published_seq_check",
+        "sqltext": "published_seq > 0"
+      },
+      {
+        "comment": null,
+        "name": "run_index_resource_kind_check",
+        "sqltext": "resource_kind::text = 'run'::text"
+      },
+      {
+        "comment": null,
+        "name": "run_index_run_id_check",
+        "sqltext": "run_id::text ~ '^[0-9a-f]{32}$'::text"
+      },
+      {
+        "comment": null,
+        "name": "run_index_status_check",
+        "sqltext": "status::text = 'running'::text OR status::text = 'complete'::text OR status::text = 'failed'::text OR status::text = 'incomplete'::text"
+      }
+    ],
+    "columns": [
+      [
+        "run_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "resource_kind",
+        "VARCHAR(20)",
+        false,
+        "'run'::character varying",
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "TIMESTAMP WITH TIME ZONE",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "status",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "branchable",
+        "BOOLEAN",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "parent_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "event_head",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "published_seq",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "projection_reason",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": "run_index_project_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "projects"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id",
+          "parent_id"
+        ],
+        "name": "run_index_project_id_parent_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "run_id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "run_index"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "project_id",
+          "resource_kind",
+          "run_id"
+        ],
+        "name": "run_index_project_id_resource_kind_run_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "resource_kind",
+          "resource_id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "resource_scopes"
+      },
+      {
+        "comment": null,
+        "constrained_columns": [
+          "run_id"
+        ],
+        "name": "run_index_run_id_fkey",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": "public",
+        "referred_table": "records"
+      }
+    ],
+    "indexes": [
+      {
+        "column_names": [
+          "project_id",
+          "created_at",
+          "run_id"
+        ],
+        "column_sorting": {
+          "created_at": [
+            "desc"
+          ],
+          "run_id": [
+            "desc"
+          ]
+        },
+        "dialect_options": {
+          "postgresql_include": []
+        },
+        "name": "run_index_project_created_run",
+        "unique": false
+      }
+    ],
+    "pk": [
+      "run_id"
+    ],
+    "uniques": [
+      [
+        "project_id",
+        "published_seq"
+      ],
+      [
+        "project_id",
+        "run_id"
+      ]
+    ]
+  }
+}

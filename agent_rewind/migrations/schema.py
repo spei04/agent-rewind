@@ -17,6 +17,8 @@ OWNERSHIP = "ar_0003_ownership"
 ARTIFACTS = "ar_0004_artifacts"
 PROJECTION = "ar_0005_run_index"
 ADMISSION = "ar_0006_admission"
+LEDGER = "ar_0007_ledger"
+LEDGER_TABLES = {"budget_accounts", "provider_calls", "budget_entries"}
 ADMISSION_TABLES = {"operations", "operation_keys"}
 PROJECTION_TABLES = {"run_index"}
 ARTIFACT_TABLES = {"artifact_objects", "artifact_refs"}
@@ -150,7 +152,7 @@ def _sqlite_ddl_tokens(sql: str) -> list[str]:
 
 
 def _sqlite_supported_clauses(
-    connection: Connection, tables: list[str], *, admission: bool = False
+    connection: Connection, tables: list[str], *, admission: bool = False, ledger: bool = False
 ) -> None:
     # Unindexed COLLATE and conflict policies are invisible to SQLite reflection.
     # This is a conservative supported-DDL exclusion, not a replacement SQL parser.
@@ -175,6 +177,7 @@ def _sqlite_supported_clauses(
         | ARTIFACT_TABLES
         | PROJECTION_TABLES
         | ADMISSION_TABLES
+        | (LEDGER_TABLES if ledger else set())
     ):
         size: int | None = connection.execute(
             text(
@@ -191,10 +194,16 @@ def _sqlite_supported_clauses(
         if not isinstance(sql, str):
             raise MigrationRefused("schema_incompatible")
         restricted = forbidden if table in TABLES else forbidden - {"CHECK", "AS"}
-        if table in OWNERSHIP_TABLES | ARTIFACT_TABLES | PROJECTION_TABLES | ADMISSION_TABLES:
+        if table in (
+            OWNERSHIP_TABLES
+            | ARTIFACT_TABLES
+            | PROJECTION_TABLES
+            | ADMISSION_TABLES
+            | (LEDGER_TABLES if ledger else set())
+        ):
             restricted -= {"REFERENCES", "DEFAULT"}
-        if admission and table == "jobs":
-            # Only the verified ar6 successor may extend this historical table.
+        if (admission or ledger) and table == "jobs":
+            # Only verified ar6/ar7 successors may extend this historical table.
             # Full literal-profile equality still checks every clause and column.
             restricted -= {"CHECK", "DEFAULT", "AS"}
         if restricted.intersection(_sqlite_ddl_tokens(sql)):
@@ -335,23 +344,51 @@ def _canonicalize_postgresql_enum_checks(shape: dict[str, Any]) -> None:
                 constraint[5] = native_original
 
 
+def schema_table_names(connection: Connection) -> tuple[list[str], str | None]:
+    """Bound the independent catalog and exclusion inventories before reflection."""
+    name = dialect(connection)
+    if name == "postgresql":
+        rows = connection.exec_driver_sql(
+            "SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename LIMIT 21"
+        ).all()
+    else:
+        rows = connection.exec_driver_sql(
+            "SELECT CASE WHEN length(CAST(name AS BLOB))<=128 THEN name END "
+            "FROM sqlite_master WHERE type='table' AND name NOT GLOB 'sqlite_*' "
+            "ORDER BY name LIMIT 21"
+        ).all()
+    if len(rows) > 20 or any(type(row[0]) is not str for row in rows):
+        raise MigrationRefused("schema_incompatible")
+    tables = [row[0] for row in rows]
+    revision = None
+    if "alembic_version" in tables:
+        size = (
+            "octet_length(version_num)"
+            if name == "postgresql"
+            else ("length(CAST(version_num AS BLOB))")
+        )
+        revisions = connection.exec_driver_sql(
+            f"SELECT CASE WHEN {size}<=32 THEN version_num END FROM alembic_version LIMIT 2"
+        ).all()
+        if len(revisions) == 1 and type(revisions[0][0]) is str:
+            revision = revisions[0][0]
+    if len(tables) > (20 if revision == LEDGER else 17):
+        raise MigrationRefused("schema_incompatible")
+    return tables, revision
+
+
 def catalog(connection: Connection) -> dict[str, Any]:
-    """Read structure only. Fixed public/main profile; reject non-table executable objects."""
+    """Read bounded structure and the exact revision-owned executable inventory."""
     name = dialect(connection)
     inspector = inspect(connection)
     schema = "public" if name == "postgresql" else None
-    tables = inspector.get_table_names(schema=schema)
-    if len(tables) > 17:
-        raise MigrationRefused("schema_incompatible")
+    tables, revision = schema_table_names(connection)
+    ledger = revision == LEDGER
+    executable_profile = None
     if name == "sqlite":
-        admission = False
-        if set(tables) >= ADMISSION_TABLES and "alembic_version" in tables:
-            revisions = connection.exec_driver_sql(
-                "SELECT CASE WHEN length(CAST(version_num AS BLOB))<=32 "
-                "THEN version_num END FROM alembic_version LIMIT 2"
-            ).all()
-            admission = revisions == [(ADMISSION,)]
-        _sqlite_supported_clauses(connection, tables, admission=admission)
+        _sqlite_supported_clauses(
+            connection, tables, admission=revision == ADMISSION, ledger=ledger
+        )
         extras = connection.exec_driver_sql(
             "SELECT 1 FROM sqlite_master WHERE type IN ('trigger','view') LIMIT 1"
         ).first()
@@ -378,8 +415,15 @@ def catalog(connection: Connection) -> dict[str, Any]:
                OR c.relpersistence <> 'p' OR c.relispartition) LIMIT 1
         """)
         ).first()
-        executable = connection.execute(
-            text("""
+        if ledger:
+            from .ledger_catalog import ledger_executables
+
+            executable_profile = ledger_executables(connection)
+        executable = (
+            None
+            if ledger
+            else connection.execute(
+                text("""
             SELECT 1 FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid
             JOIN pg_namespace n ON n.oid=c.relnamespace
             WHERE n.nspname='public' AND NOT t.tgisinternal
@@ -391,7 +435,8 @@ def catalog(connection: Connection) -> dict[str, Any]:
             WHERE n.nspname='public'
             LIMIT 1
         """)
-        ).first()
+            ).first()
+        )
         if extras or executable:
             raise MigrationRefused("schema_incompatible")
     result: dict[str, Any] = {}
@@ -533,6 +578,8 @@ def catalog(connection: Connection) -> dict[str, Any]:
             ],
         }
         _canonicalize_postgresql_enum_checks(result)
+        if executable_profile is not None:
+            result["$postgres"]["ledger_executables"] = executable_profile
     return result
 
 
@@ -650,7 +697,7 @@ def verify_baseline(
 
 def installed_profile(name: str, revision: str = HEAD) -> dict[str, Any]:
     """The checked-in literal profile is authority, never a value stored in the target DB."""
-    if revision not in {HEAD, OWNERSHIP, ARTIFACTS, PROJECTION, ADMISSION}:
+    if revision not in {HEAD, OWNERSHIP, ARTIFACTS, PROJECTION, ADMISSION, LEDGER}:
         raise MigrationRefused("unsupported_target_revision")
     profile_name = "postgresql16" if name == "postgresql" else "sqlite"
     if revision == OWNERSHIP:
@@ -661,6 +708,8 @@ def installed_profile(name: str, revision: str = HEAD) -> dict[str, Any]:
         profile_name += "_projection"
     elif revision == ADMISSION:
         profile_name += "_admission"
+    elif revision == LEDGER:
+        profile_name += "_ledger"
     profile_path = Path(__file__).parent / "profiles" / (profile_name + ".json")
     if not profile_path.is_file():
         raise MigrationRefused("schema_profile_unavailable")
