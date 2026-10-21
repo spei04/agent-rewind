@@ -463,3 +463,40 @@ def test_postgres_full_16000_ref_statement_matches_then_refuses_missing_row(
         assert len(observed) == before
     finally:
         event.remove(pg["app"], "before_cursor_execute", statement)
+
+
+@pytest.mark.parametrize("role", ["result", "task"])
+def test_postgres_declared_object_budget_refuses_before_target_storage(
+    pg, published_pg, monkeypatch, role
+):
+    _, run, _, reader = published_pg
+    # PostgreSQL's real descriptor columns cannot hold SQLite's oversized
+    # timestamp text. A large positive BIGINT is legal and exercises the
+    # independent declared-read budget without weakening the frozen schema.
+    with pg["owner"].begin() as connection:
+        target = connection.execute(
+            text(
+                "SELECT artifact_id FROM artifact_refs "
+                "WHERE project_id=:project AND owner_id=:owner AND role=:role"
+            ),
+            {"project": CONTEXT.project_id, "owner": run, "role": role},
+        ).scalar_one()
+        connection.execute(
+            text("UPDATE artifact_objects SET byte_count=:size WHERE id=:id"),
+            {"size": published_reader.MAX_BYTES + 1, "id": target},
+        )
+    loaded = []
+    load = reader.repositories.artifact_loader
+
+    def checked(value):
+        assert value.id != target, "Over-budget object reached storage"
+        loaded.append(value.id)
+        return load(value)
+
+    monkeypatch.setattr(reader.repositories, "artifact_loader", checked)
+    with pytest.raises(ArtifactError, match="^artifact_graph_limit$"):
+        reader.read_current(CONTEXT, run)
+    if role == "result":
+        assert loaded == []
+    else:
+        assert loaded
