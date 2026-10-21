@@ -282,6 +282,9 @@ class PublishedRunReader:
                 if root_digest is None:
                     root_digest = self._unique_root(connection, context, request.run_id)
                     discovered[request.run_id] = root_digest
+                # Explicit historical digests need the same scoped result-ref
+                # preflight as discovered roots, before either graph is loaded.
+                self.repositories._resolve(reads, "run", request.run_id, "result", root_digest)
                 resolved.append((request, root_digest))
         for request, root_digest in resolved:
             envelope = fetch(GraphRef(request.run_id, "result", root_digest), MAX_JSON_BYTES)

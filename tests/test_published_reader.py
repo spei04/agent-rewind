@@ -333,3 +333,20 @@ def test_all_compound_inputs_authorize_before_any_storage(published, task, monke
     with pytest.raises(ResourceNotFound):
         reader.read_many(CONTEXT, (RunRead(first), RunRead(other)))
     reader.scoped_bytes.assert_not_called()
+
+
+@pytest.mark.parametrize("second_digest", ["missing", "foreign_owner"])
+def test_all_explicit_roots_are_scoped_before_first_storage(
+    published, task, monkeypatch, second_digest
+):
+    capture, first, first_intent, reader = published
+    second = capture.run(task)
+    second_intent = capture.intent(second)
+    capture.publisher.publish(second_intent, capture.source)
+    digest = "f" * 64 if second_digest == "missing" else first_intent.root_digest
+    monkeypatch.setattr(reader, "scoped_bytes", Mock(side_effect=AssertionError("early storage")))
+    with pytest.raises(ResourceNotFound):
+        reader.read_many(
+            CONTEXT, (RunRead(first, first_intent.root_digest), RunRead(second, digest))
+        )
+    reader.scoped_bytes.assert_not_called()
