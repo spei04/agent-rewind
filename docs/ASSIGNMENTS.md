@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| A | Ledger readiness and lifetime review complete | Proposed entry 882fa139 accepted for planning only; awaiting semantic decision and HTTP predecessor delivery. |
-| C | HTTP composition and independent ledger challenge complete | Accepted HTTP source a304d52 and ledger proposal 882fa139 for planning only; no checkout/database hold. |
-| B | Independent installed-package and final delivery review | Installed package and 114-member parity accepted; final source inventory and hosted delivery review, with no checkout/database hold. |
-| Lead | HTTP delivery and proposed ledger entry | Secondary frozen at a304d52; reuse released primary for documentation only. Ledger implementation remains blocked. |
+| A | Diagnose the PostgreSQL compatibility-guard failure | Read-only source/fixture review; no database lifecycle ownership yet. |
+| C | Diagnose the two SQLite listing failures | Secondary a304d52 available for bounded diagnostic tests; runtime limits remain unchanged. |
+| B | Preserve and independently audit failed hosted evidence | PR run 39631674974 is not accepted; identify source and failure causes before retry. |
+| Lead | Coordinate HTTP failure diagnosis and progress | Primary for documentation; secondary diagnostic ownership with C. Merge and ledger implementation remain blocked. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -579,3 +579,17 @@ A is reassigned to a read-only readiness review of the next ledger task; its imp
 A completed actual-consumer and lifetime-policy review; C independently challenged catalog, deferred constraints, rollover and future evidence ownership. Both accepted the [readiness proposal](delivery/LEDGER_EXECUTION_PLAN.md) at 882fa139 as planning only. The lead requested the owner's choice on explicit finite authorized windows and the proposed two-package 6 [6–10] day reforecast. Current ledger statuses, estimates and dependencies remain unchanged. Exact manifest, authority, interfaces, SQL bounds and consumer entry still require review before code.
 
 B continues final hosted HTTP review for PR #106 at a304d52. The lead owns delivery and the documentation-only primary checkout; A and C have no active process or database holds. AR-010-A remains Not started until accepted AR-008-B delivery and the reviewed entry decisions. No new provider call, resource, customer data or production activation occurred.
+
+
+## P2 hosted failure and diagnostic assignments — 2026-10-21
+
+PR #106 run [39631674974](https://github.com/spei04/agent-rewind/actions/runs/39631674974), source a304d52, failed on Python 3.11: 3 failed, 3,832 passed and 14 expected skips. Python 3.12 passed 3,846 tests with 3 expected skips. Each core job reported one existing warning. The separate three-case gVisor job, package and security jobs passed. The CI gate does not permit delivery.
+
+The failures are the existing named-viewer detail response, PostgreSQL read-only compatibility guard and maximum-page listing checks. The last records 6 SQL statements, 233,000 VM instructions and 2.749 seconds against the existing 2-second work budget. That observation does not establish the other failures' causes or justify changing limits.
+
+- A: inspect PostgreSQL guard and new-test fixture interactions; source review before any database handoff.
+- C: inspect SQLite listing behavior and run bounded diagnostics in the secondary checkout.
+- B: preserve full logs and source identity, independently audit causes and any proposed correction.
+- Lead: retain the failed run, coordinate review and keep P2/aggregate In progress. No merge, repeated retry for a passing result, runtime-limit relaxation or ledger implementation follows this failure.
+
+The ledger proposal remains reviewed for planning only; the execution-window choice is pending.
