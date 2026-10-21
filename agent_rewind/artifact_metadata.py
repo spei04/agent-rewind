@@ -8,9 +8,23 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, Literal, Protocol
 
-from sqlalchemy import event, text
+from sqlalchemy import (
+    LargeBinary,
+    Text,
+    and_,
+    case,
+    cast,
+    column,
+    event,
+    func,
+    or_,
+    select,
+    table,
+    text,
+)
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.pool import ConnectionPoolEntry
+from sqlalchemy.sql.elements import ColumnElement
 
 ROLES = frozenset(
     {
@@ -192,6 +206,31 @@ def _write_constraints(connection: Connection) -> None:
         raise ArtifactError("artifact_constraints_required")
 
 
+_OBJECT_BOUNDS = {
+    "id": 32,
+    "project_id": 32,
+    "digest": 64,
+    "locator": 160,
+    "format_version": 8,
+    "byte_count": 24,
+    "created_at": 64,
+}
+_objects = table("artifact_objects", *(column(name) for name in _OBJECT_BOUNDS))
+
+
+def _verified_columns(connection: Connection) -> tuple[ColumnElement[Any], ...]:
+    # Keep malformed candidates in the OR query, but never transfer oversized
+    # cells. Byte lengths catch SQLite BLOBs, multibyte text and NUL suffixes.
+    sizes = (
+        func.octet_length(cast(field, Text))
+        if connection.dialect.name == "postgresql"
+        else func.length(cast(field, LargeBinary))
+        for field in _objects.c
+    )
+    bounded = and_(*(size <= cap for size, cap in zip(sizes, _OBJECT_BOUNDS.values(), strict=True)))
+    return tuple(case((bounded, field), else_=None).label(field.name) for field in _objects.c)
+
+
 def record_verified(connection: Connection, value: ArtifactObject) -> ArtifactObject:
     """Preparatory primitive; caller must hold a verified storage receipt.
 
@@ -223,18 +262,18 @@ def record_verified(connection: Connection, value: ArtifactObject) -> ArtifactOb
     )
     rows = (
         connection.execute(
-            text("""
-        SELECT id,project_id,digest,locator,format_version,byte_count,created_at
-        FROM artifact_objects
-        WHERE id=:id OR (project_id=:project AND digest=:digest AND format_version=:version)
-        LIMIT 2
-    """),
-            {
-                "id": value.id,
-                "project": value.project_id,
-                "digest": value.digest,
-                "version": value.format_version,
-            },
+            select(*_verified_columns(connection))
+            .where(
+                or_(
+                    _objects.c.id == value.id,
+                    and_(
+                        _objects.c.project_id == value.project_id,
+                        _objects.c.digest == value.digest,
+                        _objects.c.format_version == value.format_version,
+                    ),
+                )
+            )
+            .limit(2)
         )
         .mappings()
         .all()

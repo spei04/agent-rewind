@@ -7,10 +7,11 @@ from datetime import UTC, datetime
 from threading import Barrier
 
 import pytest
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import column, create_engine, event, select, table, text
 from sqlalchemy.exc import IntegrityError
 from test_ownership import FRESH
 
+from agent_rewind import artifact_metadata
 from agent_rewind.artifact_metadata import (
     ArtifactError,
     ArtifactObject,
@@ -224,3 +225,109 @@ def test_configure_before_first_use_enables_each_new_connection(object_db):
             assert second.exec_driver_sql("PRAGMA foreign_keys").scalar_one() == 1
     finally:
         fresh_engine.dispose()
+
+
+@pytest.mark.parametrize(
+    "field,corrupt",
+    [
+        ("id", "a" * 32 + "\0" + "x" * 1024 * 1024),
+        ("project_id", "x" * 1024 * 1024),
+        ("digest", "x" * 1024 * 1024),
+        ("locator", "x" * 1024 * 1024),
+        ("format_version", "x" * 1024 * 1024),
+        ("byte_count", "x" * 1024 * 1024),
+        ("created_at", "2026-01-01T00:00:00+00:00" + "\0" + "x" * 1024 * 1024),
+        ("created_at", b"x" * 1024 * 1024),
+    ],
+    ids=("id-nul", "project", "digest", "locator", "version", "size", "date-nul", "date-blob"),
+)
+def test_readback_bounds_every_cell_without_dropping_candidate(
+    object_db, monkeypatch, field, corrupt
+):
+    value = object_value()
+    with object_db.begin() as connection:
+        record_verified(connection, value)
+    # Model corrupt persisted metadata, including historical SQLite dynamic cells.
+    # Enforcement is restored before invoking the production write primitive.
+    with object_db.connect() as connection:
+        connection.exec_driver_sql("PRAGMA foreign_keys=OFF")
+        connection.exec_driver_sql("PRAGMA ignore_check_constraints=ON")
+        objects = table("artifact_objects", column(field))
+        connection.execute(objects.update().values({field: corrupt}))
+        connection.commit()
+        connection.exec_driver_sql("PRAGMA ignore_check_constraints=OFF")
+        connection.exec_driver_sql("PRAGMA foreign_keys=ON")
+        connection.commit()
+        assert connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one() == 1
+
+        seen = []
+        original = artifact_metadata._object
+
+        def bounded(row):
+            seen.append(dict(row))
+            assert set(row) == {
+                "id",
+                "project_id",
+                "digest",
+                "locator",
+                "format_version",
+                "byte_count",
+                "created_at",
+            }
+            assert all(item is None for item in row.values())
+            return original(row)
+
+        monkeypatch.setattr(artifact_metadata, "_object", bounded)
+        with pytest.raises(ArtifactError, match="^artifact_metadata_invalid$"):
+            record_verified(connection, value)
+        assert len(seen) == 1  # The invalid row was not filtered into apparent absence.
+        assert connection.exec_driver_sql("SELECT count(*) FROM artifact_objects").scalar_one() == 1
+        assert connection.execute(select(objects.c[field])).scalar_one() == corrupt
+
+
+@pytest.mark.parametrize("corrupt_first", [False, True])
+def test_both_id_and_scoped_content_candidates_remain_conflicts(
+    object_db, monkeypatch, corrupt_first
+):
+    expected = object_value()
+    foreign_id = replace(object_value(OTHER), id=expected.id)
+    scoped_content = replace(expected, id="f" * 32)
+    with object_db.begin() as connection:
+        record_verified(connection, foreign_id)
+        record_verified(connection, scoped_content)
+        if corrupt_first:
+            connection.execute(
+                text("UPDATE artifact_objects SET created_at=:bad WHERE id=:id"),
+                {"bad": "x" * 1024 * 1024, "id": foreign_id.id},
+            )
+
+        def unexpected_parse(row):
+            pytest.fail("Both collision candidates must survive until the cardinality check")
+
+        with monkeypatch.context() as patch:
+            patch.setattr(artifact_metadata, "_object", unexpected_parse)
+            with pytest.raises(ArtifactError, match="^artifact_metadata_conflict$"):
+                record_verified(connection, expected)
+        rows = connection.execute(
+            text("SELECT id,project_id,digest FROM artifact_objects ORDER BY id")
+        ).all()
+        assert rows == [
+            (foreign_id.id, OTHER, expected.digest),
+            (scoped_content.id, PROJECT, expected.digest),
+        ]
+        # Identical content in another project is not a scoped-content candidate.
+        assert record_verified(connection, scoped_content) == scoped_content
+
+
+@pytest.mark.parametrize(
+    "field,bad",
+    [("created_at", "not-a-timestamp"), ("created_at", b"bad"), ("byte_count", 1.5)],
+)
+def test_bounded_malformed_candidate_preserves_fixed_invalid_error(object_db, field, bad):
+    value = object_value()
+    with object_db.begin() as connection:
+        record_verified(connection, value)
+        objects = table("artifact_objects", column(field))
+        connection.execute(objects.update().values({field: bad}))
+        with pytest.raises(ArtifactError, match="^artifact_metadata_invalid$"):
+            record_verified(connection, value)
