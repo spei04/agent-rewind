@@ -459,6 +459,326 @@ def operation_service_smoke(root: Path) -> None:
     print("operation_service_installed_smoke_verified")
 
 
+def operation_http_smoke(root: Path) -> None:
+    """Installed real transport over explicit synthetic adapters; guard stays real."""
+    import asyncio
+    import hashlib
+
+    import httpx
+    from cryptography.fernet import Fernet
+    from pydantic import SecretStr
+    from sqlalchemy import text
+
+    from agent_rewind.admission_adapters import AdmissionReady, ProcessorPermission
+    from agent_rewind.admission_configuration import (
+        SEED_STRATEGY,
+        NativeConfiguration,
+        NativeRegistry,
+    )
+    from agent_rewind.admission_coordinator import AdmissionCoordinator
+    from agent_rewind.admission_journal import AdmissionJournal
+    from agent_rewind.admission_transaction import AdmissionError
+    from agent_rewind.api import create_app
+    from agent_rewind.artifact_storage import LocalArtifactStorage
+    from agent_rewind.config import Settings
+    from agent_rewind.migrations.admission_service import initialize_admission
+    from agent_rewind.migrations.artifact_service import initialize_artifacts
+    from agent_rewind.migrations.compatibility import CompatibilityResult
+    from agent_rewind.migrations.ownership_service import initialize_ownership
+    from agent_rewind.migrations.projection_service import initialize_projection
+    from agent_rewind.migrations.service import install
+    from agent_rewind.models import canonical
+    from agent_rewind.request_identity import SessionIdentity, VerifiedPrincipal, encode_v2_session
+    from agent_rewind.sqlite_ownership import owned_connect
+
+    project, organization = "9" * 32, "8" * 32
+    issuer, subject, csrf = "https://installed-operation.invalid", "synthetic", "c" * 32
+    principal = VerifiedPrincipal.oidc(issuer, subject)
+    applications = []
+
+    def application(name):
+        settings = Settings(
+            _env_file=None,
+            data_dir=root / name,
+            database_url=f"sqlite:///{root / (name + '.sqlite')}",
+            encryption_key=SecretStr(Fernet.generate_key().decode()),
+            bootstrap_key=SecretStr("synthetic-package-operation-http-bootstrap"),
+            oidc_issuer=issuer,
+        )
+        app = create_app(settings)
+        applications.append(app)
+        engine = app.state.db.engine
+        install(engine, name)
+        initialize_ownership(
+            engine,
+            {
+                "schema_version": 1,
+                "installation_key": name,
+                "organization_id": organization,
+                "project_id": project,
+                "project_name": "Synthetic HTTP package",
+                "principal_grants": [
+                    {
+                        "principal_id": principal.principal_id,
+                        "role": "maintainer",
+                        "legacy_default": False,
+                    }
+                ],
+            },
+        )
+        initialize_artifacts(engine)
+        initialize_projection(engine)
+        initialize_admission(engine)
+        token = encode_v2_session(
+            app.state.auth.cipher, SessionIdentity(principal, issuer, subject, csrf)
+        )
+        headers = {
+            "Cookie": "rewind_session=" + token,
+            "X-Rewind-CSRF": csrf,
+            "Origin": settings.public_url.rstrip("/"),
+            "Content-Type": "application/json",
+            "Idempotency-Key": "installed-http-key",
+        }
+        return app, headers
+
+    raw = canonical(
+        {
+            "client_operation_id": "7" * 32,
+            "adapter_config_id": "native-v1",
+            "seed": 0,
+            "budget_microusd": 1,
+            "task": {
+                "name": "synthetic-installed-http",
+                "instruction": "No external execution.",
+                "image": "synthetic-image",
+                "files": {"main.py": ""},
+                "evaluator_files": {"check.py": ""},
+                "evaluator_command": "true",
+            },
+        }
+    )
+
+    def response_check(response, status, code=None):
+        if response.status_code != status:
+            raise RuntimeError("Installed operation HTTP changed response status")
+        value = response.json()
+        request_id = response.headers.get("x-request-id", "")
+        if (
+            len(request_id) != 32
+            or any(char not in "0123456789abcdef" for char in request_id)
+            or response.headers.get("cache-control") != "no-store"
+        ):
+            raise RuntimeError("Installed operation HTTP lost safe response headers")
+        if code is not None and (
+            set(value) != {"code", "message", "request_id", "retryable"}
+            or value["code"] != code
+            or value["request_id"] != request_id
+        ):
+            raise RuntimeError("Installed operation HTTP changed the finite error envelope")
+        return value
+
+    async def run():
+        app, headers = application("operation-http-positive")
+        guarded, guard_headers = application("operation-http-real-guard")
+        engine = app.state.db.engine
+        base = f"/api/v1/projects/{project}"
+        guarded_paths = [
+            ("POST", base + "/runs"),
+            ("GET", base + "/operations/" + "0" * 32),
+            ("POST", base + "/operations/" + "0" * 32 + "/cancel"),
+        ]
+
+        def guard_refusal(*_args):
+            raise RuntimeError("Installed real schema guard reached an HTTP route")
+
+        guarded.state.auth.principal = guard_refusal
+
+        def guard_state():
+            with owned_connect(guarded.state.db.engine) as connection:
+                return tuple(
+                    connection.exec_driver_sql(
+                        "SELECT (SELECT count(*) FROM jobs),(SELECT count(*) FROM audit),"
+                        "(SELECT count(*) FROM operations),(SELECT count(*) FROM operation_keys),"
+                        "(SELECT count(*) FROM artifact_objects),"
+                        "(SELECT count(*) FROM artifact_refs)"
+                    ).one()
+                )
+
+        before_guard = guard_state()
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=guarded), base_url="http://package.invalid"
+        ) as client:
+            for method, path in guarded_paths:
+                observed = guarded.state.db.schema_compatibility()
+                if (observed.status, observed.code) != ("incompatible", "migration_only"):
+                    raise RuntimeError("Installed HTTP real schema guard was changed")
+                response_check(
+                    await client.request(method, path, headers=guard_headers, content=raw),
+                    503,
+                    "schema_incompatible",
+                )
+
+        for owner in (app.state.db, app.state.operation_coordinator, app.state.operation_service):
+            owner.schema_compatibility = lambda: CompatibilityResult("ready", "synthetic_http_only")
+
+        configuration_bytes = canonical(
+            {
+                "schema": 1,
+                "kind": "native-v1",
+                "image_identity": "sha256:" + "a" * 64,
+                "endpoint_profile": "synthetic-installed",
+                "endpoint_revision": "revision-1",
+                "model_revision": "model-1",
+                "adapter_digest": "b" * 64,
+                "prompt_digest": "c" * 64,
+                "tool_policy_digest": "d" * 64,
+                "configuration_digest": "e" * 64,
+                "processor_profile": "synthetic-installed",
+                "max_input_tokens": 2048,
+                "max_output_tokens": 32,
+                "reasoning_effort": "",
+                "seed_supported": False,
+                "seed_strategy": SEED_STRATEGY,
+                "price_version": "synthetic-prices-1",
+                "input_microusd_per_million_tokens": 1,
+                "output_microusd_per_million_tokens": 1,
+            }
+        )
+        configuration = NativeConfiguration(
+            configuration_bytes, expected_digest=hashlib.sha256(configuration_bytes).hexdigest()
+        )
+
+        class Policy:
+            def require_available(self):
+                return None
+
+            def permission(self, actor, context, intent, candidate):
+                if engine.pool.checkedout() or actor != principal or candidate != configuration:
+                    raise RuntimeError("Installed synthetic permission changed context")
+                return ProcessorPermission(candidate.digest, candidate.processor_profile)
+
+            def prepare(self, actor, context, intent, config):
+                if engine.pool.checkedout():
+                    raise RuntimeError("Installed policy preparation held SQL")
+                return dict(
+                    schema=1,
+                    organization_id=context.organization_id,
+                    project_id=context.project_id,
+                    principal_id=actor.principal_id,
+                    request_digest=intent.request_digest,
+                    task_digest=intent.task_digest,
+                    configuration_digest=config.digest,
+                    permitted_processor_profile=config.processor_profile,
+                    version="synthetic-installed-1",
+                    state={},
+                )
+
+            def recheck(self, connection, actor, context, intent, config, evidence):
+                value = connection.execute(
+                    text("SELECT name FROM projects WHERE id=:id"), {"id": context.project_id}
+                ).scalar_one()
+                if (
+                    value != "Synthetic HTTP package"
+                    or actor != principal
+                    or evidence["configuration_digest"] != config.digest
+                    or not connection.in_transaction()
+                ):
+                    raise AdmissionError("dependency_unavailable")
+
+        class Ready:
+            def check(self, *_args):
+                if engine.pool.checkedout():
+                    raise RuntimeError("Installed synthetic readiness held SQL")
+                return AdmissionReady(True)
+
+        journal_root = root / "operation-http-journal"
+        journal_root.mkdir(mode=0o700)
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://package.invalid"
+        ) as client:
+            response_check(
+                await client.post(base + "/runs", headers=headers, content=raw),
+                503,
+                "dependency_unavailable",
+            )
+            coordinator = AdmissionCoordinator(
+                engine,
+                app.state.authority,
+                policy=Policy(),
+                readiness=Ready(),
+                registry=NativeRegistry(configuration, ["synthetic-image"]),
+                journal=AdmissionJournal(journal_root),
+                storage=LocalArtifactStorage(
+                    app.state.auth.settings.data_dir,
+                    app.state.auth.cipher,
+                    plaintext_limit=8 * 1024 * 1024,
+                ),
+            )
+            coordinator.schema_compatibility = lambda: CompatibilityResult(
+                "ready", "synthetic_http_only"
+            )
+            app.state.operation_coordinator = coordinator
+            accepted_response = await client.post(base + "/runs", headers=headers, content=raw)
+            accepted = response_check(accepted_response, 202)
+            if set(accepted) != {"operation_id", "job_id"}:
+                raise RuntimeError("Installed submit changed Accepted fields")
+            path = base + "/operations/" + accepted["operation_id"]
+            view = response_check(await client.get(path, headers=headers), 200)
+            if view != {
+                "id": accepted["operation_id"],
+                "project_id": project,
+                "job_id": accepted["job_id"],
+                "client_operation_id": "7" * 32,
+                "status": "queued",
+                "cancel_requested": False,
+                "result_run_id": None,
+                "budget_microusd": 1,
+                "reserved_microusd": 0,
+                "error": None,
+            }:
+                raise RuntimeError("Installed operation HTTP changed required view fields")
+            cancellation = response_check(await client.post(path + "/cancel", headers=headers), 202)
+            if cancellation != {
+                "operation_id": accepted["operation_id"],
+                "cancel_requested": True,
+                "status": "cancelled",
+            }:
+                raise RuntimeError("Installed operation HTTP changed Cancellation fields")
+            unavailable = AdmissionCoordinator(engine, app.state.authority)
+            unavailable.schema_compatibility = lambda: CompatibilityResult(
+                "ready", "synthetic_http_only"
+            )
+            app.state.operation_coordinator = unavailable
+            replay = response_check(
+                await client.post(base + "/runs", headers=headers, content=raw), 202
+            )
+            if replay != accepted:
+                raise RuntimeError("Installed outage replay changed original identity")
+            with owned_connect(engine) as connection:
+                observed = connection.execute(text("SELECT count(*) FROM operations")).scalar_one()
+                origin = connection.execute(
+                    text("SELECT failure_correlation_id FROM operations")
+                ).scalar_one()
+            if observed != 1 or origin != accepted_response.headers["x-request-id"]:
+                raise RuntimeError("Installed HTTP did not retain original server correlation")
+            if engine.pool.checkedout():
+                raise RuntimeError("Installed operation HTTP retained SQL after response")
+        after_guard = guarded.state.db.schema_compatibility()
+        if (
+            (after_guard.status, after_guard.code) != ("incompatible", "migration_only")
+            or guard_state() != before_guard
+            or guarded.state.db.engine.pool.checkedout()
+        ):
+            raise RuntimeError("Synthetic HTTP instance changed the separate real guard")
+
+    try:
+        asyncio.run(run())
+    finally:
+        for app in applications:
+            app.state.db.engine.dispose()
+    print("operation_http_installed_smoke_verified")
+
+
 def repository_smoke(engine: Engine) -> None:
     repository = ScopedRepositories(engine)
     # Synthetic trusted identity matches only the explicit smoke initialization.
@@ -1078,6 +1398,7 @@ admission_foundation_smoke()
 with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporary:
     operation_components_smoke(Path(temporary))
     operation_service_smoke(Path(temporary))
+    operation_http_smoke(Path(temporary))
     database = Path(temporary) / "metadata.sqlite"
     engine = create_engine(f"sqlite:///{database}")
     configure_artifact_engine(engine)

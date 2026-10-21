@@ -1,5 +1,6 @@
 """Actual operation HTTP adapters over synthetic ar6 SQLite and real credentials."""
 
+import ast
 import asyncio
 import hashlib
 import json
@@ -812,6 +813,18 @@ def test_legacy_failure_refusal_does_not_block_terminal_cancellation(http_operat
         )
 
 
+def test_installed_http_smoke_helper_body(tmp_path, capsys):
+    source = Path(__file__).parents[1] / "scripts/ci_smoke.py"
+    module = ast.parse(source.read_text())
+    helper = next(
+        node
+        for node in module.body
+        if isinstance(node, ast.FunctionDef) and node.name == "operation_http_smoke"
+    )
+    namespace = {"Path": Path}
+    exec(compile(ast.Module(body=[helper], type_ignores=[]), "ci_smoke.py", "exec"), namespace)
+    namespace["operation_http_smoke"](tmp_path)
+    assert "operation_http_installed_smoke_verified" in capsys.readouterr().out
 
 
 @pytest.mark.parametrize(
