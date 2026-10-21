@@ -87,7 +87,26 @@ group, addressing [GHSA-h35f-9h28-mq5c](https://github.com/advisories/GHSA-h35f-
 Cryptography is locked to 50.0.2. These updates are included in the unsuppressed
 audit; a prior GitHub alert read-back is not proof of the current complete lock.
 
-## Verified external inputs (2026-10-19)
+The build tool is pinned to uv 0.13.4 to address
+[GHSA-hq85-5cpj-mr62](https://github.com/astral-sh/uv/security/advisories/GHSA-hq85-5cpj-mr62).
+The advisory affects uv's default bundled CA store before 0.13.4. Updating the
+Python dependency certifi (already locked to 2026.10.19) does not update uv's
+separate trust store. The repair uses the patched default store; custom or
+system CA overrides require their own operator review.
+
+All CI jobs verify the reviewed Linux x86_64 archive checksum. The container
+installs only the hashed 0.13.4 Linux wheels listed in
+[scripts/uv-requirements.txt](../../scripts/uv-requirements.txt), obtained from
+[official PyPI release metadata](https://pypi.org/pypi/uv/0.13.4/json).
+The package script refuses a different uv version before building. No project
+dependency or lock content changes are required. Historical candidate records
+retain their original tooling identity; they are not retroactively patched.
+The package job builds the container and runs its installed CLI with networking
+disabled on Linux x86_64. Other wheel architectures are pinned but are not
+validated by that job. The existing base image and its OS trust store are
+separate inputs; this uv update does not establish their CA-remediation status.
+
+## Verified external inputs (actions and images: 2026-10-19; uv: 2026-10-21)
 
 Action tag-to-commit associations and GitHub commit verification flags were
 read from the official repository APIs. The full immutable commits are in the
@@ -99,7 +118,7 @@ workflow; the tags below identify the release notes used for review:
 | Setup Python v7.0.0 | [Official release](https://github.com/actions/setup-python/releases/tag/v7.0.0), `5fda3b95a4ea91299a34e894583c3862153e4b97` |
 | Setup uv v10.3.0 | [Official release](https://github.com/astral-sh/setup-uv/releases/tag/v10.3.0), `1c37ad07a6a961277cf70c0d37d6f313000f5884` |
 | Upload artifact v7.0.2 | [Official release](https://github.com/actions/upload-artifact/releases/tag/v7.0.2), `cf430e030ddbb5b0abf93d22962f4752f3646cd9` |
-| uv 0.11.21 | [Official release](https://github.com/astral-sh/uv/releases/tag/0.11.21), Linux x86_64 archive SHA-256 `8c88519b0ef0af9801fcdee419bbb12116bd9e6b18e162ae093c932d8b264050` |
+| uv 0.13.4 | [Official release](https://github.com/astral-sh/uv/releases/tag/0.13.4), Linux x86_64 archive SHA-256 `2b428396f12572d4429cf210ca234dd599a33b3af0958a4d5ed569d63e3f344f` |
 | PostgreSQL 16.15/alpine3.24 | [Official image recipe](https://github.com/docker-library/postgres/tree/9d15534160ade17f2b6c455a39ee967c49b1937d/16/alpine3.24), registry index SHA-256 `721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea` |
 | gVisor 20261012.0 amd64 Debian package | [Official package index](https://storage.googleapis.com/gvisor/releases/dists/release/main/binary-amd64/Packages), [release](https://github.com/google/gvisor/releases/tag/release-20261012.0), package SHA-256 `7a440a035128a52f489b0bb76f60ac4df9cabe7cdf31dd5fd79a3e80f8a707ca` |
 

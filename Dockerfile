@@ -1,5 +1,6 @@
 FROM python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d
-RUN pip install --no-cache-dir uv==0.11.21
+COPY scripts/uv-requirements.txt /tmp/uv-requirements.txt
+RUN pip install --no-cache-dir --no-deps --only-binary=:all: --require-hashes -r /tmp/uv-requirements.txt
 WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 COPY agent_rewind ./agent_rewind

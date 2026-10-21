@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Candidate metadata must describe the tool that actually performs the build.
+case "$(uv --version)" in
+  "uv 0.13.4"|"uv 0.13.4 "*) ;;
+  *) echo "Candidate build requires uv 0.13.4" >&2; exit 1 ;;
+esac
 root="$(pwd)"
 candidate="$RUNNER_TEMP/rewind-candidate"
 runtime="$RUNNER_TEMP/rewind-runtime"

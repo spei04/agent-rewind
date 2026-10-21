@@ -1,7 +1,9 @@
 import io
 import json
+import os
 import runpy
 import stat
+import subprocess
 import tarfile
 import zipfile
 from pathlib import Path
@@ -112,6 +114,7 @@ def test_candidate_record_contains_only_package_and_source_identity(tmp_path):
     ARTIFACTS["record"](tmp_path, ROOT, "a" * 40)
     record = json.loads((tmp_path / "candidate.json").read_text())
     assert record["source_commit"] == "a" * 40
+    assert record["uv_version"] == "0.13.4"
     assert len(record["uv_lock_sha256"]) == 64
     assert set(record["files"]) == {
         "agent_rewind-0.1.0-py3-none-any.whl",
@@ -131,3 +134,20 @@ def test_candidate_rejects_unexpected_files_before_recording(tmp_path):
     with pytest.raises(ValueError, match="exactly"):
         ARTIFACTS["record"](tmp_path, ROOT, "a" * 40)
     assert not (tmp_path / "candidate.json").exists()
+
+
+@pytest.mark.parametrize("version", ["0.11.21", "0.13.40"])
+def test_candidate_refuses_unreviewed_uv_before_creating_outputs(tmp_path, version):
+    binary = tmp_path / "uv"
+    binary.write_text(f"#!/bin/sh\nprintf 'uv {version} (test)\\n'\n")
+    binary.chmod(0o700)
+    result = subprocess.run(
+        ["/bin/bash", str(ROOT / "scripts/ci_package.sh")],
+        env={**os.environ, "PATH": str(tmp_path), "RUNNER_TEMP": str(tmp_path)},
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    assert result.returncode == 1
+    assert result.stderr.strip() == "Candidate build requires uv 0.13.4"
+    assert {item.name for item in tmp_path.iterdir()} == {"uv"}
