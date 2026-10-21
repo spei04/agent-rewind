@@ -1,11 +1,15 @@
 """Original-source and bounded catalog checks before literal ar6 acceptance."""
 
+import json
+
 import pytest
 import test_run_projection_backfill as backfill_tests
 from legacy_fixture import assert_preserved_rows, read_manifest, sha256
 from sqlalchemy import inspect, text
 
+from agent_rewind import projection_source
 from agent_rewind.migrations import service
+from agent_rewind.migrations.admission_service import initialize_admission
 from agent_rewind.migrations.inputs import SOURCE_QUERIES, source_digest
 from agent_rewind.migrations.projection_service import backfill_run_index, initialize_projection
 from agent_rewind.migrations.schema import ADMISSION, COLUMNS, MigrationRefused, catalog
@@ -77,3 +81,51 @@ def test_job_extension_is_not_accepted_under_an_old_revision(legacy):
         connection.execute(text("UPDATE alembic_version SET version_num='ar_0005_run_index'"))
         with pytest.raises(MigrationRefused, match="schema_incompatible"):
             catalog(connection)
+
+
+def test_oversized_completed_cohort_returns_fixed_migration_refusal(legacy):
+    body = json.dumps("x" * (2 * 1024 * 1024 + 1))
+    _, engine, source = legacy
+    initialize_projection(engine)
+    backfill_run_index(engine, source)
+    with engine.begin() as connection:
+        connection.execute(
+            text("UPDATE records SET data=:body WHERE id=:id"), {"body": body, "id": "1" * 32}
+        )
+    with engine.connect() as connection:
+        before = catalog(connection)
+    with pytest.raises(MigrationRefused) as refused:
+        initialize_admission(engine)
+    assert refused.value.code in {"projection_source_invalid", "projection_source_limit"}
+    assert refused.value.__suppress_context__ is True
+    assert body not in str(refused.value)
+    with engine.connect() as connection:
+        assert catalog(connection) == before
+        assert (
+            connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one()
+            == "ar_0005_run_index"
+        )
+        assert (
+            connection.execute(
+                text("SELECT data FROM records WHERE id=:id"), {"id": "1" * 32}
+            ).scalar_one()
+            == body
+        )
+
+
+def test_capture_query_exhaustion_returns_fixed_refusal_without_ddl(legacy, monkeypatch):
+    _, engine, source = legacy
+    initialize_projection(engine)
+    backfill_run_index(engine, source)
+    with engine.connect() as connection:
+        before = catalog(connection), source_digest(connection)
+    monkeypatch.setattr(projection_source, "MAX_CAPTURE_QUERIES", 0)
+    with pytest.raises(MigrationRefused, match="^projection_query_limit$") as refused:
+        initialize_admission(engine)
+    assert refused.value.__suppress_context__ is True
+    with engine.connect() as connection:
+        assert (catalog(connection), source_digest(connection)) == before
+        assert (
+            connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one()
+            == "ar_0005_run_index"
+        )
