@@ -89,10 +89,11 @@ This amendment responds to the independent first-checkpoint finding that a
 clean transaction and a Connection.info marker cannot establish native callback
 ownership: sqlite3 has no progress-handler getter. It is a design prerequisite,
 not accepted implementation. B and the lead accepted exact entry 5bedede on
-2026-10-21; C independently confirmed the complete acquisition map. A is assigned
-the dormant helper and focused tests first, with Database activation and consumer
-edits excluded from that checkpoint. Caller integration and activation require
-separate reviewed checkpoints. C retains overall P1 ownership. P1 remains In
+2026-10-21; C independently confirmed the complete acquisition map. The dormant
+helper d1b7ce20 is independently accepted as a component after B/C source review,
+67 lead tests and an original/corrected pool-substitution probe. C is assigned
+complete caller integration with Database factory activation disabled. Activation
+and dependent services require separate reviewed checkpoints. C retains overall P1 ownership. P1 remains In
 progress, P2 Not started, and neither accepted-merge field changes.
 
 The bounded implementation belongs in one dependency-light internal
