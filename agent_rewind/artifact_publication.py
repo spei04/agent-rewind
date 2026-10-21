@@ -35,7 +35,8 @@ from .artifact_storage import ArtifactStorage, LocalArtifactStorage
 from .models import canonical, digest
 from .publication_journal import PublicationJournal
 from .publication_source import lock_ancestor_ref, snapshot
-from .scoped_repositories import ProjectContext, ScopedRepositories, _Reads
+from .published_reader import PublishedRunReader
+from .scoped_repositories import ProjectContext, _Reads
 
 
 @dataclass(frozen=True)
@@ -191,9 +192,8 @@ class RunPublisher:
         ):
             raise ArtifactError("publication_journal_unsafe")
         self.engine, self.storage, self.journal, self.writer = engine, storage, journal, writer
-        self.repositories = ScopedRepositories(
-            engine, artifact_resolver=resolve_ref, artifact_loader=storage.read_verified
-        )
+        self.reader = PublishedRunReader(engine, storage)
+        self.repositories = self.reader.repositories
 
     @contextmanager
     def _connection(self, *, write: bool = False) -> Iterator[Connection]:
@@ -218,36 +218,7 @@ class RunPublisher:
     def _scoped_bytes(
         self, context: ProjectContext, ref: GraphRef, limit: int
     ) -> tuple[bytes, tuple[Any, ...]]:
-        identities: list[tuple[Any, ...]] = []
-
-        def bounded(value: Any) -> bytes:
-            if type(value.byte_count) is not int or not 0 <= value.byte_count <= limit:
-                raise ArtifactError("artifact_graph_limit")
-            identities.append(
-                tuple(
-                    getattr(value, name)
-                    for name in (
-                        "id",
-                        "project_id",
-                        "digest",
-                        "locator",
-                        "format_version",
-                        "byte_count",
-                        "created_at",
-                    )
-                )
-            )
-            if self.repositories.artifact_loader is None:
-                raise ArtifactError("publication_loader_unavailable")
-            return self.repositories.artifact_loader(value)
-
-        scoped = ScopedRepositories(
-            self.engine,
-            artifact_resolver=self.repositories.artifact_resolver,
-            artifact_loader=bounded,
-        )
-        value = scoped.read_artifact(context, "run", ref.owner_id, ref.role, ref.digest)
-        return value, identities[0]
+        return self.reader.scoped_bytes(context, ref, limit)
 
     def _graph(
         self, intent: PublicationIntent, source: Callable[[GraphRef, int], bytes]
@@ -511,49 +482,5 @@ class RunPublisher:
             return intent.root_digest
 
     def read(self, context: ProjectContext, run_id: str, root_digest: str) -> VerifiedGraph:
-        def identity(value: Any) -> tuple[Any, ...]:
-            return tuple(
-                getattr(value, name)
-                for name in (
-                    "id",
-                    "project_id",
-                    "digest",
-                    "locator",
-                    "format_version",
-                    "byte_count",
-                    "created_at",
-                )
-            )
-
-        identities: dict[GraphRef, tuple[Any, ...]] = {}
-
-        def fetch(ref: GraphRef, limit: int) -> bytes:
-            value, descriptor_identity = self._scoped_bytes(context, ref, limit)
-            identities[ref] = descriptor_identity
-            return value
-
-        envelope = fetch(GraphRef(run_id, "result", root_digest), 8 * 1024 * 1024)
-        root = decode(envelope)
-        if root.get("project_id") != context.project_id or root.get("run_id") != run_id:
-            raise ArtifactError("artifact_graph_invalid")
-        graph = verify_run_graph(envelope, fetch)
-        # Recheck every descriptor/owner after all child I/O, using a SQL-only
-        # revalidation pass (READ COMMITTED is not a repeatable snapshot).
-        # This does not promise network response linearizability.
-        with self._connection() as connection:
-            self.repositories._authorize(connection, context, "read")
-            reads = _Reads(connection, context)
-            for owner in {ref.owner_id for ref in graph.refs}:
-                reads.resource("run", owner)
-            for ref in graph.refs:
-                value = resolve_ref(
-                    connection,
-                    project_id=context.project_id,
-                    owner_kind="run",
-                    owner_id=ref.owner_id,
-                    role=ref.role,
-                    digest=ref.digest,
-                )
-                if value is None or identity(value) != identities[ref]:
-                    raise ArtifactError("publication_reference_changed")
-        return graph
+        """Compatibility entry point; reading needs no journal or available writer."""
+        return self.reader.read(context, run_id, root_digest)

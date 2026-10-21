@@ -126,6 +126,42 @@ def publication_smoke(engine: Engine, root: Path) -> None:
         raise RuntimeError("Installed publication parser accepted a legacy root")
 
 
+def request_foundation_smoke(engine: Engine, root: Path) -> None:
+    from cryptography.fernet import Fernet
+
+    from agent_rewind.artifact_storage import LocalArtifactStorage
+    from agent_rewind.published_reader import PublishedRunReader
+    from agent_rewind.request_authority import RequestAuthority
+    from agent_rewind.request_identity import (
+        SessionIdentity,
+        VerifiedPrincipal,
+        decode_v2_session,
+        encode_v2_session,
+    )
+
+    issuer = "https://installed-smoke.invalid"
+    identity = SessionIdentity(
+        VerifiedPrincipal.oidc(issuer, "synthetic"), issuer, "synthetic", "c" * 32
+    )
+    cipher = Fernet(Fernet.generate_key())
+    if decode_v2_session(cipher, encode_v2_session(cipher, identity), issuer) != identity:
+        raise RuntimeError("Installed v2 session did not preserve issuer-bound identity")
+    authority = RequestAuthority(engine)
+    # A trusted synthetic authenticated principal matches the explicit smoke
+    # grant. There is deliberately no explicit default membership in this DB.
+    principal = VerifiedPrincipal("oidc:" + "a" * 64)
+    decision = authority.named(principal, "9" * 32)
+    if decision.role != "maintainer" or authority.legacy_role(principal) is not None:
+        raise RuntimeError("Installed authority inferred an unregistered default")
+    reader = PublishedRunReader(engine, LocalArtifactStorage(root, cipher, plaintext_limit=4096))
+    try:
+        reader.read_current(decision.context, "c" * 32)
+    except ResourceNotFound:
+        pass
+    else:
+        raise RuntimeError("Installed reader inferred an unpublished run root")
+
+
 def readiness_smoke(root: Path, database_url: str) -> None:
     import asyncio
     import time
@@ -238,6 +274,7 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
         artifact_smoke(engine, Path(temporary))
         projection_smoke(engine)
         publication_smoke(engine, Path(temporary))
+        request_foundation_smoke(engine, Path(temporary))
         compatibility = runtime_schema_compatibility(engine)
         if compatibility.status != "incompatible" or compatibility.code != "migration_only":
             raise RuntimeError(
