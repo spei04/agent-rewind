@@ -260,6 +260,19 @@ def record_verified(connection: Connection, value: ArtifactObject) -> ArtifactOb
             "at": at,
         },
     )
+    candidate = find_object_candidate(connection, value)
+    if candidate != value:
+        raise ArtifactError("artifact_metadata_conflict")
+    return candidate
+
+
+def find_object_candidate(connection: Connection, value: ArtifactObject) -> ArtifactObject | None:
+    """Bounded prospective-ID OR scoped-content lookup after fresh authorization.
+
+    Preserve malformed/colliding candidates; never filter one away to select a
+    seemingly valid winner. A result is metadata, not a receipt or retry grant.
+    """
+    value.__post_init__()
     rows = (
         connection.execute(
             select(*_verified_columns(connection))
@@ -278,9 +291,9 @@ def record_verified(connection: Connection, value: ArtifactObject) -> ArtifactOb
         .mappings()
         .all()
     )
-    if len(rows) != 1 or _object(rows[0]) != value:
+    if len(rows) > 1:
         raise ArtifactError("artifact_metadata_conflict")
-    return _object(rows[0])
+    return _object(rows[0]) if rows else None
 
 
 def register_ref(

@@ -1,4 +1,4 @@
-"""Private dual-locator admission evidence, unwired to SQL/new publication.
+"""Private dual-locator admission evidence for the internal coordinator.
 
 Only the two scoped locators and two derived children are opened. Locks are local,
 nonblocking and ordered; journal possession never authorizes work or proves SQL.
