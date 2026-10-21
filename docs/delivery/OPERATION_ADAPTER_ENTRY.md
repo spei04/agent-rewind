@@ -939,3 +939,93 @@ No service method, HTTP, profile, worker or failure-producer implementation is
 part of this primitive checkpoint. Actual service integration and full P1
 SQLite/PostgreSQL/hosted/delivery evidence remain subsequent gates. Task states,
 outer dependencies, package count, estimates and external authority are unchanged.
+
+## Cancellation phase entry — 2026-10-21
+
+The bounded GET primitives at `691ad661` are accepted as a component. Their strict
+receipt book must not be carried unchanged across cancellation phases. This
+entry specifies the missing cancellation-only retention seam; it adds no task,
+dependency, estimate, budget, schema, HTTP or activation change. Implementation
+starts only after the exact entry receives independent review.
+
+Use one focused internal `operation_cancellation.py` module:
+
+```python
+CancellationReceipts(
+    work: OperationWork, original_context: ProjectContext, operation_id: str
+)
+CancellationReceipts.phase() -> ContextManager[CancellationPhase]
+CancellationReceipts.original -> CancellationAssociation
+CancellationPhase.book -> ReceiptBook
+CancellationPhase.associate(
+    operation: RawReceipt, job: RawReceipt, configuration: RawReceipt
+) -> None
+CancellationPhase.verify(connection: Connection, cohort: RunCohort) -> None
+```
+
+These objects own no connection, authorization, transaction, storage or response.
+Keep ordinary GET `ReceiptBook()` and `verify_read_snapshot()` semantics intact.
+Add only the private accounting/liveness hook needed for existing bounded
+readers to consume the phase book; do not introduce another general framework.
+
+One request owns the original context/operation identity, one OperationWork,
+cumulative 256 source visits/512 edges, and at most one active phase generation.
+A nested or stale acquisition owns nothing and must leave the active phase
+untouched. Every bounded loader/query entry must validate a retained phase-book
+handle before SQL; checking only the `phase.book` property is insufficient.
+Actual active-phase failure aborts this owner without a retry or budget reset.
+
+Each phase reads fresh op14, full job16, config7/reference and a complete cohort.
+`associate()` validates the association, reserves the initial immutable snapshot
+before a potentially large cohort read, and promotes it only after final
+verification. Later phases compare against that original snapshot, including
+job.created and budget. Require the supplied cohort's exact raw receipts to
+match its active book, not merely its IDs.
+
+One exact live-retention calculation covers the original association and current
+phase rows/observations, including canonical wrapper overhead, within 4 MiB.
+Charge both retained job representations; count the union of logical
+(domain, id) identities within 259. Include the original reservation in
+`remaining` before SQL COUNT/SUM permits body transfer. Promotion must not
+temporarily retain an uncharged duplicate. Final serialized input also fits
+4 MiB. Do not add a cumulative decode-byte cap.
+
+The narrow cancellation final query reuses typed/materialized SQL for exact
+current-phase op/job/config/cohort, scopes, configuration candidate cardinality
+and by-job phantoms. Filter the admission_config role before its candidate
+LIMIT. Exclude GET result observations, result ref counts, result descriptors
+and rendering. Job16.result must remain equal within a phase; result artifact
+refs are ignored in every cancellation phase, including malformed/added refs,
+without storage access or refusal. Configuration refs remain exact.
+
+Mutation verification occurs immediately before intentional cancel/status writes
+under the retained locks. Capture the effect's three-field response then; do not
+compare the old full job16 after that deliberate write or refresh original
+receipts to hide it. Post-ACK disclosure uses a new phase and retains the captured
+response while allowing valid worker/job.result/cohort advancement. Fresh
+authority remains a separate required service check after final SQL; association
+is not authorization.
+
+A phase encloses its connection/transaction acquisition, cleanup and ACK
+observation. Closing it releases mutable buffers/live-byte charges only.
+Original association, visits, edges and the same OperationWork counters remain.
+Sealed, closed and stale handles cannot resume SQL; stale close cannot release a
+later phase. Pure phase cleanup preserves primary exceptions. The service and
+transaction outcome classify post-ACK uncertainty and typed denials; the receipt
+owner does not claim that responsibility.
+
+Before cancellation service wiring, prove on SQLite and actual PostgreSQL:
+
+- Three 84-root phases succeed at 255 visits/504 edges; three 85-root phases
+  refuse before the third cohort's bodies transfer, without reset or refund.
+- Valid new runs and worker/job.result progress between phases succeed.
+  Within-phase job/result/cohort changes refuse; result artifact ref changes
+  alone remain ignored. Original association and config scope/count/descriptor
+  drift refuse.
+- Original-plus-phase canonical byte/identity limits, expansion, promotion,
+  release and reuse obey the same caps while cumulative work never decreases.
+- Retained stale books, nested acquisition and failed-phase reuse cause zero
+  SQL, preserve the active owner and retain the original exception.
+- Maximum matching cases and scoped/foreign distractors retain the existing
+  SQL/VM/time/bind bounds. Later lock/authority/effect/ACK/disclosure tests remain
+  required for the service; this helper checkpoint does not replace them.
