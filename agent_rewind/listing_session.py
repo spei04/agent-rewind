@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 import time
 from collections.abc import Iterator
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from typing import Any
 
@@ -168,6 +168,12 @@ def listing_connection(engine: Engine, work: SQLWork) -> Iterator[Connection]:
                         connection.close()
                     except Exception:
                         failed = True
+                        # A pre-close failure may retain a checkout. One bounded
+                        # discard/reclose attempt, never a success claim if it fails.
+                        with suppress(Exception):
+                            connection.invalidate()
+                        with suppress(Exception):
+                            connection.close()
             # Successful execute/fetch is insufficient if the last parse or
             # final authority phase spent the remaining shared work budget.
             if failed or exhausted:

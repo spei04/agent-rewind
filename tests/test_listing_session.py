@@ -4,6 +4,7 @@ import sqlite3
 
 import pytest
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Connection
 from sqlalchemy.pool import QueuePool
 
 from agent_rewind.errors import Fault
@@ -12,7 +13,9 @@ from agent_rewind.listing_session import SQLWork, listing_connection
 
 @pytest.fixture
 def engine(tmp_path):
-    value = create_engine(f"sqlite:///{tmp_path}/work.sqlite", poolclass=QueuePool, pool_size=1)
+    value = create_engine(
+        f"sqlite:///{tmp_path}/work.sqlite", poolclass=QueuePool, pool_size=1, max_overflow=0
+    )
     with value.begin() as connection:
         connection.exec_driver_sql("CREATE TABLE sample (id INTEGER)")
         connection.exec_driver_sql("INSERT INTO sample VALUES (1)")
@@ -123,7 +126,9 @@ def test_unsupported_sqlite_mode_discards_physical_connection(tmp_path, mode):
         captured.append(raw)
         return raw
 
-    engine = create_engine("sqlite://", creator=creator, poolclass=QueuePool, pool_size=1)
+    engine = create_engine(
+        "sqlite://", creator=creator, poolclass=QueuePool, pool_size=1, max_overflow=0
+    )
     try:
         with (
             pytest.raises(Fault, match="dependency_unavailable"),
@@ -210,7 +215,9 @@ def test_native_settings_failures_are_safe_and_replace_pool(tmp_path, stage):
         captured.append(raw)
         return raw
 
-    engine = create_engine("sqlite://", creator=creator, poolclass=QueuePool, pool_size=1)
+    engine = create_engine(
+        "sqlite://", creator=creator, poolclass=QueuePool, pool_size=1, max_overflow=0
+    )
     try:
         with (
             pytest.raises(Fault, match="dependency_unavailable") as result,
@@ -225,3 +232,29 @@ def test_native_settings_failures_are_safe_and_replace_pool(tmp_path, stage):
         assert len(captured) == 2
     finally:
         engine.dispose()
+
+
+def test_preclose_failure_discards_without_retaining_checkout(engine, monkeypatch):
+    real_close = Connection.close
+    captured = []
+
+    def once(connection):
+        if not captured:
+            captured.append(connection.connection.driver_connection)
+            raise RuntimeError("private-close-canary")
+        real_close(connection)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Connection, "close", once)
+        with (
+            pytest.raises(Fault, match="dependency_unavailable") as failure,
+            listing_connection(engine, SQLWork()) as c,
+        ):
+            assert c.exec_driver_sql("SELECT 1").scalar_one() == 1
+        assert "canary" not in str(failure.value)
+    assert engine.pool.checkedout() == 0
+    with pytest.raises(sqlite3.ProgrammingError):
+        captured[0].execute("SELECT 1")
+    with listing_connection(engine, SQLWork()) as c:
+        assert c.connection.driver_connection is not captured[0]
+        assert c.exec_driver_sql("SELECT 1").scalar_one() == 1
