@@ -571,3 +571,60 @@ Only operation_sources.py is added to the distribution allowlist. It is a
 required emitted module, with no new entry point or dependency. Full installed
 package/service/hosted acceptance remains a later composed gate; exact focused
 test/static and synthetic PostgreSQL evidence is bound to the immutable handoff.
+
+
+## GET vertical slice — author checkpoint
+
+The focused operation_service.py implements the independently accepted
+[GET entry](OPERATION_GET_ENTRY.md). It adds no route or cancellation method.
+Its real compatibility inspection runs separately before customer reads;
+SQLite ownership is required before that first acquisition. A per-instance
+synthetic ready response is used only by tests. Packaged ar6 remains
+migration-only.
+
+Two read-only operation_connection scopes share one OperationWork and strict
+GET ReceiptBook. Preflight retains operation14/job16/config7/ref/result0-or1
+and the complete cohort; final verification uses the unchanged single
+relational statement and fresh authority as the last protected SQL.
+Constant-only primary checks retain original operation/project and actual
+original job/scope visibility without joining a changed operation.job_id or
+charging another source-body visit. Reassociation is a receipt mismatch.
+No hidden repository Lineage queries or current-default selection are used.
+
+The optional verified loader runs once with no connection held, using the
+4,096-byte descriptor bound. Returned bytes are checked again for exact
+length/digest and decoded to a UTF-8 string before duplicate-safe JSON parsing.
+This avoids the generic byte parser's UTF-16/32 autodetection. NULL result
+does no load or ID inference, even when a valid optional reference exists.
+Supported status/error and exact ten response fields remain the entry table.
+
+Secondary loader ResourceNotFound is translated only at the loader boundary.
+The shared failure handler waits for SQL cleanup, then performs one fresh
+same-context authority/primary check with the original remaining work; an
+authorized missing secondary is503 and a revoked caller remains404. It never
+runs on an aborted PostgreSQL transaction, masks an original authority denial
+or resets the budget. Unexpected programming errors remain outside finite
+dependency translation.
+
+Author SQLite/component checks passed 312 cases with 19 explicit PostgreSQL
+skips (104.59 seconds). The new GET module contributes 85 SQLite cases. Full
+post-cleanup OIDC/API-key traces measured 40/48 charged attempts; the 255-root
+case used 101,000 VM instructions without distractors and 177,000 with 4,000
+same-project/foreign distractors. Zero-match distractors used 81,000; final
+receipt-refusal cases asserted 50 attempts including the fresh authority
+recheck. These are synthetic bounded observations, not general throughput
+claims. Runtime lint/security, format, strict typing and pinned offline lock
+checks passed. Exact evidence is private and source-bound.
+
+The first test draft omitted its encrypted-storage root (26 fixture failures);
+the expanded draft exposed an incorrect key-table import, FK-protected scope
+delete setup and an overcounted failure-path expectation. Those fixtures were
+corrected without weakening product constraints. A separate self-review test
+reproduced authorized loader ResourceNotFound escaping as404 (one failure,
+one revoked-caller control pass); the narrow loader translation then passed
+both cases, preserving the same remaining work and fresh revocation check.
+
+PostgreSQL cases are prepared but explicitly skip until A releases the existing
+synthetic instance; no skipped case is execution evidence. Installed-package and full P1 delivery acceptance remain
+pending. The only new package member is operation_service.py; no dependency,
+entry point, schema, profile, worker or failure producer changes.

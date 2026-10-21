@@ -77,6 +77,7 @@
     "agent_rewind/migrations/versions/__init__.py",
     "agent_rewind/models.py",
     "agent_rewind/operation_reads.py",
+    "agent_rewind/operation_service.py",
     "agent_rewind/operation_sources.py",
     "agent_rewind/operation_work.py",
     "agent_rewind/ownership.py",
