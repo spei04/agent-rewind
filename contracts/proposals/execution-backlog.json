@@ -1478,7 +1478,7 @@
         "QE"
       ],
       "pull_request_boundary": "Three sequential independently reviewable PRs under one aggregate task and estimate: P1 2 [2–3], P2 2 [2–3], P3 3 [3–5]. All paths remain preparatory until later integration gates pass",
-      "contracts_status": "C04 and entry AR-007-C/AR-009-B are Verified for development scope. AR-008-A/P1 is Implemented; verification pending. C authored parser 4c6a558, configuration 0e6cb05, envelope 1dde230 and packaging/guide e699394; lead integrated unchanged file contents as 7ea387f/3f74d69/d0448d4/02424e0 onto reviewed c390726. B independently accepted each runtime component for source and test design. Author validation passed 230 focused admission/package-helper/workflow/contract/model/legacy/artifact-metadata tests in 10.37 seconds, strict types, lint/security lint, formatting and whitespace. Final independent composed execution, actual installed wheel/sdist smoke, hosted checks, accepted merge and protected-main candidate remain required. No SQL/HTTP/storage/worker activation or provider call occurred; P2/P3 remain Not started. The pure preparation modules do not make admission/recovery available; CT-M1-008/010/011/012 full service evidence still requires P2/P3 and later HTTP/worker integration.",
+      "contracts_status": "C04 and entry AR-007-C/AR-009-B remain Verified for development scope. AR-008-A/P1 is Verified after accepted PR #85 merge 81905a5 and matching PR/main checks plus candidate verification. C owns AR-008-A/P2 (#82) additive schema and bounded repositories in the retained checkout; P3 (#83) remains Not started until accepted merged P2. Aggregate #80 and parent #8 remain open. A independently authors AR-006-B/P1 in PR #89; its unmerged plan/packages/estimates are not imported into this branch. B reviews admission contracts/security; A reviews preservation/boundary evidence as available; lead owns integration and delivery. No coordinator, HTTP/worker wiring, ledger/generation schema, provider call or customer-ready activation follows. CT-M1-008/010/011/012 service acceptance remains with P3 and later integration.",
       "delivery_packages": [
         {
           "id": "AR-008-A/P1",
@@ -1505,9 +1505,9 @@
           "security_reliability": "No API-side Docker, provider discovery or credential persistence; validate all bounds before materialization and preserve source text. Server-generated correlation never comes from body/header/actor/config digest",
           "definition_of_done": "Independent reviewer acceptance, matching hosted checks and a recorded accepted merge are required before the next package starts; preserve migration-only and external gates",
           "interface_contracts": "C04 SubmitRun/TaskDefinition and canonical revision m1-review-2; bounded 64 KiB common configuration; explicit registry mutation/representation checkpoint; planned typed frozen configuration/envelope and trusted origin input",
-          "status": "Implemented; verification pending",
-          "accepted_merge_commit": null,
-          "review_evidence": null,
+          "status": "Verified",
+          "accepted_merge_commit": "81905a5ace65823c91196771f7cd2474a9117306",
+          "review_evidence": "docs/delivery/ADMISSION_EXECUTION_PLAN.md#accepted-p1-delivery--2026-10-21; A independent 228 tests plus 128 probes and three validators; B component/package/composition review; PR 39539994853 and main 39541051449 passed; lead verified candidate 12320076132",
           "tracking_issue": "https://github.com/spei04/agent-rewind/issues/81"
         },
         {
@@ -1534,7 +1534,7 @@
           "security_reliability": "No runtime DDL; one accepted linear predecessor and explicit operator commands; fixed bounded failures and no relaxed catalog profiles. New trusted failure-origin metadata must not repurpose legacy jobs.error or fabricate an original request ID",
           "definition_of_done": "Independent reviewer acceptance, matching hosted checks and a recorded accepted merge are required before the next package starts; preserve migration-only and external gates",
           "interface_contracts": "Accepted P1 identities/config association; C04 operations/operation_keys plus payload_version/execution_config job extension and operation failure_correlation_id; migration-only compatibility and immutable historical bytes",
-          "status": "Not started",
+          "status": "In progress",
           "accepted_merge_commit": null,
           "review_evidence": null,
           "tracking_issue": "https://github.com/spei04/agent-rewind/issues/82"
@@ -7435,7 +7435,7 @@
       "resolution": "Separate reviewed reconciliation retains AR-011-C identity and adds AR-010-B before both sequential packages: P1 bounded actual HTTP/readiness foundation, P2 accepted admission-origin/worker integration, 4 [4–6] PL days. No early package exception, new metric vocabulary, schema duplication or reverse AR-012-B edge"
     }
   ],
-  "planning_status": "Approved engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-A/B/C and preparatory AR-009-A/B are Verified. Existing-route P2/aggregate/parent issues #77/#75/#7 closed after PR #79/main/candidate acceptance. AR-008-A #80 remains In progress; P1 #81 is Implemented; verification pending after C author checks and B component source review. P2 #82/P3 #83 remain Not started and accepted-merge-gated. A owns the separate AR-006-B listing-plan amendment in primary; no listing runtime is assigned. Lead owns P1 composition/delivery in the C checkout, B independent final review. AR-011-C and AR-006-C remain blocked on AR-010-B. No customer, production, paid/held-out evaluation or external data gate changes.",
+  "planning_status": "Approved engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-A/B/C and preparatory AR-009-A/B remain Verified. AR-008-A/P1 is Verified after accepted PR #85 merge 81905a5 and matching PR/main checks plus candidate verification. C owns AR-008-A/P2 (#82) additive schema and bounded repositories in the retained checkout; P3 (#83) remains Not started until accepted merged P2. Aggregate #80 and parent #8 remain open. A independently authors AR-006-B/P1 in PR #89; its unmerged plan/packages/estimates are not imported into this branch. B reviews admission contracts/security; A reviews preservation/boundary evidence as available; lead owns integration and delivery. AR-011-C and AR-006-C remain blocked on AR-010-B. No customer, production, paid/held-out evaluation or external data gate changes.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -7507,7 +7507,7 @@
     "owner_decision_issues": {
       "RESEARCHSCOPE0": 51
     },
-    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50; #51 closed after approved reconciliation with immutable owner overlay. Issues #52/#53/#69/#71 remain closed for scoped accepted deliveries. P1 #76 closed after PR #78/main candidate at 51a2b1f; P2 #77, aggregate #75 and parent #7 are CLOSED with current bodies and lead read-back on 2026-10-21 after accepted PR #79/main candidate at e117aaae0ef1f4ff4c293747482364a0791bc5d0. Parent #9 remains closed for preparatory artifacts. Parents #6/#8/#10/#11/#12 remain open; current-route acceptance does not close full CT/G1, live admission/publication or customer/production gates. Lead created and read back AR-008-A #80 and P1/P2/P3 #81/#82/#83; C is dispatched for P1 only, with P2/P3 Not started and accepted-merge-gated. AR-006-B remains unassigned for runtime."
+    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50; #51 closed after approved reconciliation with immutable owner overlay. Issues #52/#53/#69/#71 remain closed for scoped accepted deliveries. P1 #76 closed after PR #78/main candidate at 51a2b1f; P2 #77, aggregate #75 and parent #7 are CLOSED with current bodies and lead read-back on 2026-10-21 after accepted PR #79/main candidate at e117aaae0ef1f4ff4c293747482364a0791bc5d0. Parent #9 remains closed for preparatory artifacts. Parents #6/#8/#10/#11/#12 remain open; current-route acceptance does not close full CT/G1, live admission/publication or customer/production gates. AR-008-A #80 and parent #8 remain open; lead closes P1 #81 after PR #85/main/candidate acceptance, dispatches C for P2 #82, and retains P3 #83 Not started behind accepted merged P2. A owns separate AR-006-B/P1 PR #89; its unmerged planning changes are excluded here."
   },
   "execution_capacity": {
     "lead": "Project lead",
@@ -7817,6 +7817,6 @@
     "unscheduled_approved_queue": [
       "AR-006-B"
     ],
-    "unscheduled_queue_policy": "AR-007-C/P1/P2 are Verified with accepted PR/main/candidate evidence. C is assigned AR-008-A/P1 only (#80/#81); P2/P3 (#82/#83) retain accepted-merge predecessor gates. AR-006-B has verified direct prerequisites but remains Not started without a calendar allocation; A completed its read-only cursor audit and will author a separate planning amendment after this reconciliation is reviewed, without runtime assignment. B reconciles acceptance then independently reviews; lead integrates and owns delivery. Both AR-011-C packages and AR-006-C remain blocked on AR-010-B. Historical daily allocations do not schedule current assignments or authorize external gates."
+    "unscheduled_queue_policy": "AR-008-A/P1 is Verified after accepted PR #85 merge 81905a5 and matching PR/main checks plus candidate verification. C owns AR-008-A/P2 (#82) additive schema and bounded repositories in the retained checkout; P3 (#83) remains Not started until accepted merged P2. Aggregate #80 and parent #8 remain open. A independently authors AR-006-B/P1 in PR #89; its unmerged plan/packages/estimates are not imported into this branch. B reviews admission contracts/security; A reviews preservation/boundary evidence as available; lead owns integration and delivery. Both AR-011-C packages and AR-006-C remain blocked on AR-010-B. Historical daily allocations do not schedule current assignments or authorize external gates."
   }
 }
