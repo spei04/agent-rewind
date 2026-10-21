@@ -151,6 +151,19 @@ def run_listing_smoke(engine: Engine) -> None:
         app.state.db.schema_compatibility = lambda: CompatibilityResult(
             "ready", "synthetic_installed_route_smoke"
         )
+        # The instance-only fixture must not make a separately constructed app ready.
+        guarded_app = create_app(settings)
+        guarded_client = TestClient(guarded_app)
+        try:
+            guarded_response = guarded_client.get(base)
+            if (
+                guarded_response.status_code != 503
+                or guarded_response.json()["code"] != "schema_incompatible"
+            ):
+                raise RuntimeError("Synthetic installed route guard leaked across app instances")
+        finally:
+            guarded_client.close()
+            guarded_app.state.db.engine.dispose()
         cookie = {"Cookie": "rewind_session=" + encode_v2_session(app.state.auth.cipher, identity)}
         response = client.get(base, headers=cookie)
         if response.status_code != 200 or response.json() != {"items": [], "next_cursor": None}:
