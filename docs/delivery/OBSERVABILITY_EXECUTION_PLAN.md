@@ -68,9 +68,13 @@ Mock collector calls or zero worker counters alone cannot close P2 or the
 aggregate. No live provider, paid execution, SLO claim, paging rota, production
 activation or external gate is authorized by this plan.
 
-The separate admission reconciliation remains auditable at 1d284ba. With this
-additional producer edge and estimate, computed totals are 151 aggregate tasks,
+The separate admission reconciliation remains auditable at 1d284ba. At the
+historical 9a70fdc producer/estimate checkpoint, computed totals were 151 aggregate tasks,
 155 planned delivery PRs, 544 acyclic edges, 454 base days, 768.1 summed upper
 days and a 168.5-day effort-only path. The alternate 25% allowance is 567.5 days;
 these uncertainty views are not additive. M1 is 55.5 days and PL 90 days.
 Historical schedules, C21/owner decisions and frozen contract bytes remain intact.
+
+Later reconciliations are recorded in the current [roadmap](../PLAN.md) and
+[machine ledger](../../contracts/proposals/execution-backlog.json); the figures
+above retain that observability checkpoint rather than override current totals.
