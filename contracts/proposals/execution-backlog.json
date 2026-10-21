@@ -76,7 +76,7 @@
       "milestone": "M1",
       "priority": "P0",
       "objective": "Prevent cross-project access through both legacy and new paths.",
-      "base_effort_days": 5.5,
+      "base_effort_days": 9.5,
       "children": [
         "AR-007-A",
         "AR-007-B",
@@ -1192,7 +1192,7 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Implement scoped list/detail v1 routes with opaque bound cursors, stable tie ordering and fixed page limits; apply bounded conservative current-job status/branchability suppression at read time without mutating the projection or scanning artifacts",
+      "scope": "Implement scoped list/detail v1 routes with opaque bound cursors, stable tie ordering and fixed page limits; apply bounded conservative current-job status/branchability suppression at read time without mutating the projection or scanning artifacts; use AR-007-C trusted named-project authority for new v1 list/detail and cursor access; reauthorize before returning any stored result after revocation",
       "acceptance": "Traversal has no duplicate/missing rows on fixed corpus; foreign/modified cursor rejected; indexed query plan; stale/expired/terminal job evidence cannot expose an unsafe branchable result, and listing does not persist repairs",
       "tests": "M1-005/006, concurrent insert semantics, invalid limit and missing/foreign run cases; current-job changes between publication and read conservatively suppress branchability without source/projection writes or blob I/O",
       "security_reliability": "Authorize before loading body; no payload in cursor/errors",
@@ -1208,7 +1208,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement scoped list/detail v1 routes with opaque bound cursors, stable tie ordering and fixed page limits; apply bounded conservative current-job status/branchability suppression at read time without mutating the projection or scanning artifacts. Read-only query/API slice; AR-006-C separately persists fenced repair and restricted audit.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied. CT-M1-007/008 read/cursor coverage joins later durable replay evidence; no cookie-role or default-project substitute."
     },
     {
       "id": "AR-006-C",
@@ -1337,35 +1337,37 @@
       "parent": "AR-007",
       "milestone": "M1",
       "priority": "P0",
-      "title": "Legacy and v1 authorization enforcement",
-      "objective": "Prevent cross-project access through both legacy and new paths. This task delivers legacy and v1 authorization enforcement.",
+      "title": "Existing-route authorization and reusable project authority",
+      "objective": "Prevent cross-project access in every existing route and supply the trusted authority boundary for later route producers.",
       "role": "BE",
-      "effort_days": 2.0,
-      "confidence": "medium",
+      "effort_days": 6.0,
+      "confidence": "medium-low",
       "dependencies": [
         "AR-007-B",
-        "AR-011-B"
+        "AR-011-B",
+        "AR-009-B"
       ],
       "contracts": [
+        "C04",
         "C05"
       ],
-      "scope": "Route all legacy and v1 reads/writes, exports, cancellation and key use through scoped checks",
-      "acceptance": "Revocation immediately applies to idempotent replay and in-flight API access; bypass inventory empty",
-      "tests": "M1-007/009 route matrix, legacy aliases, cookie CSRF and scoped API keys",
-      "security_reliability": "Keep second-project feature disabled until full route deny suite passes",
-      "out_of_scope": "No session redesign or customer IdP provisioning",
+      "scope": "Upgrade to issuer-bound v2 sessions; implement fresh explicit default/named-project authority with 401/404/403 distinctions; adapt every existing data route to scoped repository and verified published-graph/ref reads without raw-hash fallback; commit scoped cancellation and human-maintainer key issuance/revocation with fresh authority and audit atomically; wire work creation to a required unavailable admission adapter",
+      "acceptance": "Exhaustive existing-route inventory has no unscoped data bypass; inaccessible/default-ambiguous resources return 404 and insufficient action rights in an accessible project return 403; v1 cookies are rejected; identity-only me/logout remain usable after project revocation without exposing project/resource IDs; revocation prevents protected return/mutation; cancel and key changes are atomic; unavailable admission causes no artifact, secret, job or audit writes. CT-M1-007/009 current-route subsets alone cannot close the full cases; CT-M1-008 remains planned for durable replay producers",
+      "tests": "Existing-route/alias matrix; v2 issuer collision and old-cookie refusal; missing/ambiguous default, named/cross-project and shared-object probes; CSRF/exact Origin; me/logout after revocation and DB failure; real PostgreSQL revocation-before-return and mutation races, cancel/key rollback and terminal cancellation; unavailable adapter fails before all writes/provider access; actual schema guard still denies customer routes",
+      "security_reliability": "Keep migration-only schema guard and customer/second-project activation gates; authorize before expensive I/O and reauthorize before return/commit; project-before-job lock hierarchy; token role intersects current membership and never grants key administration; no client-selected legacy scope, raw artifact fallback or raw enqueue",
+      "out_of_scope": "No new v1/debugger/study/export routes, session infrastructure or IdP provisioning, historical artifact adoption, customer-ready schema profile, live publication, or actual work admission. The required C04 v2 session format upgrade is included; durable admission/replay/frozen config and worker integration remain with AR-008-A/B and AR-010-B",
       "status": "Not started",
-      "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
+      "definition_of_done": "All existing-route acceptance and tests pass at a recorded commit with A security/auth/read review, B transaction review and lead integration; four commit checkpoints form one coherent preparatory PR. Record partial coverage against CT-M1-007/009 and keep CT-M1-008/full future-route gates planned. No customer activation, full M1 acceptance or later producer completion is implied.",
       "effort_range_days": [
-        2.0,
-        3.0
+        6.0,
+        10.0
       ],
       "review_roles": [
         "TL",
         "QE"
       ],
-      "pull_request_boundary": "Route all legacy and v1 reads/writes, exports, cancellation and key use through scoped checks. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "pull_request_boundary": "One coherent preparatory PR with four reviewable commits: identity/context, verified existing-route readers/renderers, atomic cancel/key plus unavailable admission boundary, and exhaustive integration/compatibility tests. Reforecast after the first immutable identity/reader handoff (about 1.5–2 engineering days); do not mark partial route authority Verified.",
+      "contracts_status": "C04/C05 and AR-007-B/011-B/009-B are reviewed and Verified prerequisites. This planning reconciliation is pending exact-source review; implementation is Not started. CT-M1-007/009 remain planned overall, with only the existing-route subset assigned here; CT-M1-008 awaits AR-008-A/B and AR-012-B. Later consumers retain the full requirements."
     },
     {
       "id": "AR-008-A",
@@ -1384,7 +1386,7 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Implement operation/key alias constraints, default materialization and transactional job/scope/audit publication after upload",
+      "scope": "Implement operation/key alias constraints, default materialization and transactional job/scope/audit publication after upload; consume AR-007-C authority for new admission and recovery lookup; bind job/scope/audit/common frozen configuration atomically and reauthorize before disclosing original operation identity",
       "acceptance": "Concurrent same key or client ID creates one job; new key aliases original; changed request conflicts",
       "tests": "M1-010/012 concurrency, altered source whitespace, canonical defaults, alias conflict and crash after upload",
       "security_reliability": "Reauthorize retries; preserve exact source text; no network inside DB transaction",
@@ -1400,7 +1402,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement operation/key alias constraints, default materialization and transactional job/scope/audit publication after upload. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied. CT-M1-008 actual accepted-request replay after revocation and CT-M1-009 new legacy-job configuration remain required; the unavailable adapter in AR-007-C is not this evidence."
     },
     {
       "id": "AR-008-B",
@@ -1419,7 +1421,7 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Expose five M1 operations with task limits, stable errors and atomic cancel intent",
+      "scope": "Expose five M1 operations with task limits, stable errors and atomic cancel intent; integrate the required admission adapter only after AR-008-A; apply trusted named-project authority to submission, operation polling and cancellation, preserving the legacy authority contract",
       "acceptance": "Accepted IDs stable; invalid inputs never enqueue; cancellation preserves terminal outcomes",
       "tests": "M1-013/014 path traversal, byte/count limits, cancel races, unauthenticated requests",
       "security_reliability": "Bound payload processing; cancellation denies new work even if result delivery delayed",
@@ -1435,7 +1437,7 @@
         "QE"
       ],
       "pull_request_boundary": "Expose five M1 operations with task limits, stable errors and atomic cancel intent. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied. Execute CT-M1-007/008/009 route subsets against actual durable admission; no legacy raw-enqueue fallback or paid dispatch before AR-010-B."
     },
     {
       "id": "AR-009-A",
@@ -1567,7 +1569,7 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Require valid owner/lease/cancel state before issuing permit; expose ledger diagnostics without prompt bodies",
+      "scope": "Require valid owner/lease/cancel state before issuing permit; expose ledger diagnostics without prompt bodies; validate scoped immutable common configuration and generation/cancel authority before dispatch for all newly admitted jobs; integrate the required admission/publication fence without enabling historical redispatch",
       "acceptance": "Stale owner, cancelled job or DB outage cannot obtain new permit; reconciliation requires evidence",
       "tests": "M1-019/021 stale token, repeated release, missing DB, terminal job and cancel race; simultaneous reservation, publication and cancellation using the documented shared lock hierarchy",
       "security_reliability": "No automatic timeout refund; prevent privileged bypass of budget hierarchy. Use the common C04 lock hierarchy for publication, cancellation and source mutation; never enter a project lock while retaining a conflicting job lock",
@@ -1583,7 +1585,7 @@
         "QE"
       ],
       "pull_request_boundary": "Require valid owner/lease/cancel state before issuing permit; expose ledger diagnostics without prompt bodies. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied. CT-M1-009 worker configuration checks and live permit evidence remain required before work activation."
     },
     {
       "id": "AR-011-A",
@@ -1773,7 +1775,7 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Wire PostgreSQL/object-backed required checks for all 24 M1 cases and upgrade/legacy compatibility; independently validate AR-006-C live stale-projection repair and restricted audit integration",
+      "scope": "Wire PostgreSQL/object-backed required checks for all 24 M1 cases and upgrade/legacy compatibility; independently validate AR-006-C live stale-projection repair and restricted audit integration; verify the deferred v1, durable replay and common-config consumer obligations from AR-007-C against their actual producers; preparatory route subsets do not satisfy all CT-M1-007/008/009 cases",
       "acceptance": "G1 evidence records commit, runtime and every pass/fail; no fixture-only substitute for concurrency tests",
       "tests": "Execute all M1 cases plus old-reader compatibility and fail-closed startup; actual generation/cancel races and atomic idempotent repair/audit under PostgreSQL; mixed admission/publication/cancellation and overlapping parent/child operations verify the common account/project/job lock order",
       "security_reliability": "Tests isolate projects and contain no real model credentials",
@@ -1789,7 +1791,7 @@
         "domain owner"
       ],
       "pull_request_boundary": "Wire PostgreSQL/object-backed required checks for all 24 M1 cases and upgrade/legacy compatibility; independently validate AR-006-C live stale-projection repair and restricted audit integration. This task verifies producer implementation; it does not implement deferred repair.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied. No partial route matrix or injected unavailable adapter substitutes for integrated revocation/replay/dispatch evidence."
     },
     {
       "id": "AR-013-A",
@@ -3429,7 +3431,7 @@
       "contracts": [
         "C11"
       ],
-      "scope": "Implement paged timeline/files, idempotent branch admission and bounded comparison from immutable lineage",
+      "scope": "Implement paged timeline/files, idempotent branch admission and bounded comparison from immutable lineage; consume AR-007-C trusted project authority and reauthorize bounded timeline/files/branch/compare results; no raw-hash lookup after an initial scope check",
       "acceptance": "Parent stays unchanged; rejected restore returns reason; large history never loads all content",
       "tests": "API contract, project denial, pagination, branch retry and compare bound tests",
       "security_reliability": "Apply permissions before file access; branch budget and cancellation use existing permits",
@@ -3445,7 +3447,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement paged timeline/files, idempotent branch admission and bounded comparison from immutable lineage. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied. Later debugger-route tests are required here, not claimed by the preparatory existing-route matrix."
     },
     {
       "id": "AR-027-C",
@@ -3641,7 +3643,7 @@
       "contracts": [
         "C12"
       ],
-      "scope": "Expose scoped idempotent study commands, paged trial status and recomputable report/export",
+      "scope": "Expose scoped idempotent study commands, paged trial status and recomputable report/export; consume AR-007-C trusted project authority for new study/report/export routes and reauthorize after artifact I/O",
       "acceptance": "API matches persisted state and ledger; export includes missing outcomes and protocol/version hashes",
       "tests": "Contract cases, concurrent cancel/reconcile, foreign project and report tampering",
       "security_reliability": "Reauthorize exports; no raw prompt or secrets in summary",
@@ -3657,7 +3659,7 @@
         "QE"
       ],
       "pull_request_boundary": "Expose scoped idempotent study commands, paged trial status and recomputable report/export. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied. Later export/replay denial coverage remains producer-owned."
     },
     {
       "id": "AR-029-C",
@@ -3965,7 +3967,7 @@
       "contracts": [
         "C13"
       ],
-      "scope": "Implement bounded evidence export, authenticated deletion intent and hold-protected tombstones",
+      "scope": "Implement bounded evidence export, authenticated deletion intent and hold-protected tombstones; consume AR-007-C trusted project authority for bounded lifecycle export/delete and reauthorize at effect/return boundaries",
       "acceptance": "Held/referenced evidence not physically removed; exports authorized and hash-verifiable",
       "tests": "Concurrent export/delete, denied deletion, broken ref and hold race tests",
       "security_reliability": "No public artifact URLs; tombstone propagation before reclamation",
@@ -3981,7 +3983,7 @@
         "QE"
       ],
       "pull_request_boundary": "Implement bounded evidence export, authenticated deletion intent and hold-protected tombstones. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied. Later lifecycle route coverage remains producer-owned."
     },
     {
       "id": "AR-032-C",
@@ -7014,14 +7016,14 @@
     "task_count": 151,
     "parent_count": 52,
     "gate_count": 27,
-    "edge_count": 542,
+    "edge_count": 543,
     "dag_acyclic": true,
     "contract_producers_available_before_consumers": true,
     "schedule_no_predecessor_violations_conditional_on_stated_approvals": true,
     "max_scheduled_delivery_days_per_role_per_day": 0.5,
     "milestone_effort_days": {
       "M0": 8.5,
-      "M1": 43.5,
+      "M1": 47.5,
       "M2": 69.0,
       "M3": 81.0,
       "M4": 82.0,
@@ -7034,12 +7036,12 @@
       "FE": 23.0,
       "RS": 66.0,
       "PL": 88.0,
-      "BE": 79.5,
+      "BE": 83.5,
       "QE": 112.5
     },
-    "base_effort_days": 442.0,
-    "upper_range_days": 748.1,
-    "effort_only_critical_path_days": 154.5,
+    "base_effort_days": 446.0,
+    "upper_range_days": 755.1,
+    "effort_only_critical_path_days": 160.5,
     "effort_only_critical_path": [
       "E0",
       "AR-005-A",
@@ -7052,6 +7054,7 @@
       "AR-011-B",
       "AR-009-A",
       "AR-009-B",
+      "AR-007-C",
       "AR-008-A",
       "AR-008-B",
       "AR-010-A",
@@ -7101,10 +7104,10 @@
       "G7"
     ],
     "critical_path_excludes_external_waits": true,
-    "revision_notes": "2026-10-20 projection refinement adds the accepted AR-009-B producer edge to AR-006-A and assigns the existing C04 repair/audit requirement to AR-006-C (2 base, 2–3.5 range) after AR-010-B and before AR-012-B. Original issue #51 issuance metrics remain immutable historical evidence. The ten-day foundation/RA tables are historical scenarios; current capacity is C implementation with A/B review, not a new calendar promise.",
-    "independent_review": "Engineer A and lead independently accepted exact planning commit 4b0bee75a8ec040aa4a00ad45f36d269befe11db: metrics, original-edge preservation, cards/status/schedule, immutable C21/API/owner record and retained repair boundary verified. Draft PR #72 tracks integration; hosted checks and run-projection implementation evidence remain pending.",
+    "revision_notes": "2026-10-20 AR-007-C reconciliation adds verified AR-009-B as a consumed graph-reader producer and C04 as a required contract; replaces its original 2 [2–3] day estimate with 6 [6–10], medium-low, for the same existing-route obligations. Future route/replay/export producers retain their tests without reverse dependencies. Historical C21/owner issuance and daily schedules remain unchanged. Reforecast after the first immutable identity/reader handoff; no calendar or staffing promise.",
+    "independent_review": "Prior projection planning 4b0bee75 was independently accepted by A/lead; AR-006-A implementation passed PR #72 and the CI-only maintenance fix passed PR #74. Current AR-007-C scope/estimate reconciliation awaits exact-source A/lead review; no runtime acceptance is claimed.",
     "contract_count": 20,
-    "verification": "Local execution/evaluation/M1 OpenAPI validators and 287 focused planning/contract tests passed; immutable owner/C21/API bytes unchanged and all original dependencies retained. A/lead exact planning review accepted at 4b0bee75. No runtime projection acceptance; hosted checks pending."
+    "verification": "Execution/evaluation/M1 OpenAPI validators and 278 focused planning/contract tests passed locally with primary-owned interpreter/source provenance, bytecode/cache disabled. Historical C21/owner/API/acceptance records and schedules are unchanged; only AR-009-B→AR-007-C was added. Exact-source independent review and hosted checks for this planning composition remain pending. Baseline protected-main 3c60f1a run 39502360493 passed 1630/1634 core tests, three gVisor cases, all required gates and verified candidate 12302746247; this is not AR-007-C runtime evidence."
   },
   "review_findings": [
     {
@@ -7125,7 +7128,7 @@
     {
       "id": "REV-04",
       "finding": "42–50 week GA and 28–34 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff.",
-      "resolution": "Retire dated windows. 442 base engineering days; 154.5-day effort-only longest path excludes role contention and external waits. Reforecast at integration gates using actual throughput; no committed launch date."
+      "resolution": "Retire dated windows. 446 base engineering days; 160.5-day effort-only longest path excludes role contention and external waits. Reforecast at integration gates using actual throughput; no committed launch date."
     },
     {
       "id": "REV-05",
@@ -7186,9 +7189,14 @@
       "id": "REV-16",
       "finding": "C04 required stale-projection repair with restricted audit, but no independently estimated implementation card owned it.",
       "resolution": "AR-006-A owns initial projection, reusable rules and preparatory publication composition; AR-006-B suppresses unsafe reads without writes; AR-006-C owns bounded fenced repair/audit after AR-010-B, before AR-012-B verification. Add 2 base / 3.5 upper days; preserve source history and existing external gates."
+    },
+    {
+      "id": "REV-17",
+      "finding": "AR-007-C promised absent future v1/replay/export routes and excluded the C04 session upgrade; two days omitted renderer and transaction integration.",
+      "resolution": "Own existing routes and reusable authority in one preparatory PR, four reviewable commits, 6 BE base days / 6–10 range / medium-low confidence. Add verified AR-009-B and C04; retain future consumer obligations without reverse dependencies, with full CT-M1-007/008/009 gates still open."
     }
   ],
-  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-007-B, AR-009-A and preparatory AR-009-B are Verified. AR-006-A is In progress with C and A/B review from accepted main 7c0571b; AR-007-C/011-C are ready but unassigned. AR-006-C explicitly retains C04 repair/audit after AR-006-A and AR-010-B, before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data access and production remain separately gated.",
+  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. AR-007-C existing-route authority is assigned for planning/design reconciliation to B/C with A independent review from accepted main 3c60f1a; runtime remains Not started until this card/design is accepted. AR-011-C is ready but unassigned. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -7230,9 +7238,7 @@
       11,
       12
     ],
-    "active_child_issues": {
-      "AR-006-A": 71
-    },
+    "active_child_issues": {},
     "closed_implementation_issues": [
       26,
       28,
@@ -7242,7 +7248,8 @@
       41,
       52,
       53,
-      69
+      69,
+      71
     ],
     "queued_child_issues": {},
     "design_issues": {
@@ -7252,7 +7259,7 @@
     "owner_decision_issues": {
       "RESEARCHSCOPE0": 51
     },
-    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50. Issue #51 approved by owner on 2026-10-20 and closed after accepted reconciliation; immutable overlay records exact scope. Issues #52/#53/#69 are closed for scoped accepted deliveries; #71 tracks active AR-006-A. Parent #9 is closed for its preparatory children; live integration/customer gates remain open."
+    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50. Issue #51 approved by owner on 2026-10-20 and closed after accepted reconciliation; immutable overlay records exact scope. Issues #52/#53/#69 are closed for scoped accepted deliveries; #71 is closed after accepted preparatory AR-006-A in PR #72. Parent #9 is closed for its preparatory children; live integration/customer gates remain open."
   },
   "execution_capacity": {
     "lead": "Project lead",
@@ -7563,6 +7570,6 @@
       "AR-007-C",
       "AR-011-C"
     ],
-    "unscheduled_queue_policy": "Verified direct inputs, no date or new assignment. AR-006-A is assigned separately to C with A/B review; reuse the same three contributor slots after measured progress."
+    "unscheduled_queue_policy": "Both tasks have Verified direct inputs and no calendar commitment. AR-007-C has B planning/C design/A review allocation only; runtime remains Not started pending accepted card/design. Reuse the same three contributor slots for C implementation, A security/auth/read review and B transaction review after that handoff. AR-011-C remains unassigned; historical daily tables are not current allocations."
   }
 }
