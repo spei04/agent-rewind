@@ -1,21 +1,20 @@
 # Scoped run listing and detail execution plan
 
-This is the AR-006-B preparatory implementation boundary. P1 is **Verified**;
-its accepted foundation does not complete route integration or activate customers.
+This is the AR-006-B preparatory implementation boundary. Both packages and the
+aggregate are **Verified** after their own accepted PR/main/candidate evidence.
 The [task cards](../EXECUTION_BACKLOG.md#ar-006-b) and
 [machine ledger](../../contracts/proposals/execution-backlog.json) retain the
-aggregate identity and prerequisites: Verified AR-006-A, AR-007-C and AR-011-B,
-consuming C04. The aggregate remains **In progress**; P2 is **Implemented; verification pending**
-in draft [PR #91](https://github.com/spei04/agent-rewind/pull/91), under lead delivery after independent source review.
+aggregate identity, C04 and Verified AR-006-A, AR-007-C and AR-011-B prerequisites.
 
-A authored exact plan `9b97a09`; B independently accepted its contract, dependency
-and arithmetic review, and the lead accepted the plan. Tracking: aggregate
-[#86](https://github.com/spei04/agent-rewind/issues/86), P1
-[#87](https://github.com/spei04/agent-rewind/issues/87), P2
-[#88](https://github.com/spei04/agent-rewind/issues/88). P1 [PR #89](https://github.com/spei04/agent-rewind/pull/89) merged as
-`ed0d6c48b8db3533c1bb20a75df93d7efc89fc7c`; successful PR/main checks and
-verified candidate 12323231309 establish the [accepted P1 delivery](#accepted-p1-delivery--2026-10-21).
-Issue #87 is closed; #88 remains open pending delivery verification and aggregate #86 remains open.
+A authored plan `9b97a09`; B independently accepted its contract, dependency
+and arithmetic review, and the lead accepted it. P1 [#87](https://github.com/spei04/agent-rewind/issues/87)
+merged in [PR #89](https://github.com/spei04/agent-rewind/pull/89) as
+`ed0d6c48b8db3533c1bb20a75df93d7efc89fc7c`; see [accepted P1 delivery](#accepted-p1-delivery--2026-10-21).
+P2 [#88](https://github.com/spei04/agent-rewind/issues/88) merged in
+[PR #91](https://github.com/spei04/agent-rewind/pull/91) as
+`cd021542981aadf5d8d0e2be280e2e19068b80c9`; see [accepted P2 delivery](#accepted-p2-delivery--2026-10-21).
+Issues #87/#88 and aggregate [#86](https://github.com/spei04/agent-rewind/issues/86)
+are closed. Parent #6 and AR-006-C repair remain open.
 No customer-ready profile or production activation follows.
 
 C04, the frozen OpenAPI/logical schema and CT-M1-005/006 remain authoritative.
@@ -438,3 +437,29 @@ admission branch and released the primary checkout; C owns independent execution
 B reviews, and lead owns fresh hosted checks and delivery. P2 remains
 Implemented; verification pending. No accepted merge, candidate or activation is
 claimed by this correction.
+
+## Accepted P2 delivery — 2026-10-21
+
+Reviewed source `5ab8984b13622f3d9a9363f5fe303d71b8a80529` was accepted and
+merged as `cd021542981aadf5d8d0e2be280e2e19068b80c9` in
+[PR #91](https://github.com/spei04/agent-rewind/pull/91).
+B independently audited the exact source and completed
+[PR run 39556621316](https://github.com/spei04/agent-rewind/actions/runs/39556621316)
+and [protected-main run 39558270300](https://github.com/spei04/agent-rewind/actions/runs/39558270300).
+Each run passed 2,620 tests on Python 3.11 and 2,628 on Python 3.12, with
+11/3 expected skips and one existing warning respectively. Actual PostgreSQL,
+installed-package/security checks, three gVisor cases and required gates passed;
+protected-main delivery also succeeded. These completed results supersede the
+pending acceptance statements in the dated checkpoints above, while preserving
+failed run 39553977500 and its correction history.
+
+Lead verified candidate `12327092547` (547,434 bytes), its exact four-file set,
+source/tree/direct-parent identity and manifest/package/archive hashes.
+The indexed private record `reviewed-delivery-20261021-pr91-cd02154.json`
+is retained outside disposable checkouts, with review date 2026-11-20.
+Lead closed #88 and #86 and verified the GitHub bodies/state by read-back.
+
+P2 and aggregate AR-006-B are Verified for the two scoped, SQL-only list/detail
+operations. Parent #6, AR-006-C repair, later replay/admission/worker integration,
+G1 and customer/production gates remain open. No schema, frozen contract,
+estimate, dependency, runtime limit or activation policy changed in this acceptance.
