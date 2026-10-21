@@ -151,38 +151,47 @@ def _delivery_packet(packet):
     data, markdown, plan = deepcopy(packet)
     import re
 
-    task = next(t for t in data["tasks"] if t["id"] == "AR-007-C")
-    # Refusal fixtures must not inherit the live delivery's progress.
-    task["status"] = "In progress"
-    for package in task["delivery_packages"]:
-        package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
-    start = markdown.index("#### AR-007-C —")
-    end = markdown.index("\n#### ", start + 5)
-    body = re.sub(
-        r"(?m)^- \*\*Progress:\*\* .*$",
-        "- **Progress:** In progress; synthetic test fixture.",
-        markdown[start:end],
-    )
-    markdown = markdown[:start] + body + markdown[end:]
-    markdown = _sync_package_cards(markdown, task["delivery_packages"])
-    # Rewinding the producer also rewinds its now-active admission consumer.
-    admission = next(t for t in data["tasks"] if t["id"] == "AR-008-A")
-    admission["status"] = "Not started"
-    for package in admission["delivery_packages"]:
-        package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
-    markdown = _sync_package_cards(markdown, admission["delivery_packages"])
-    # Operation adapters likewise cannot retain progress without admission.
-    operation = next(t for t in data["tasks"] if t["id"] == "AR-008-B")
-    operation["status"] = "Not started"
-    for package in operation["delivery_packages"]:
-        package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
-    markdown = _sync_package_cards(markdown, operation["delivery_packages"])
-    # Listing also consumes the rewound authority producer.
-    listing = next(t for t in data["tasks"] if t["id"] == "AR-006-B")
-    listing["status"] = "Not started"
-    for package in listing["delivery_packages"]:
-        package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
-    markdown = _sync_package_cards(markdown, listing["delivery_packages"])
+    tasks = {task["id"]: task for task in data["tasks"]}
+    task = tasks["AR-007-C"]
+    # Sequencing fixtures rewind the producer and its packaged consumers,
+    # including a ledger assignment that may be active in the live packet.
+    rewound = ["AR-007-C", "AR-008-A", "AR-008-B", "AR-006-B", "AR-010-A"]
+    for key in rewound:
+        current = tasks[key]
+        current["status"] = "In progress" if key == "AR-007-C" else "Not started"
+        for package in current["delivery_packages"]:
+            package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
+        markdown = _sync_package_cards(markdown, current["delivery_packages"])
+        heading = re.search(rf"^#{{3,4}} {re.escape(key)} — .+$", markdown, re.M)
+        assert heading is not None
+        following = re.search(r"^#{1,4} ", markdown[heading.end() :], re.M)
+        end = heading.end() + following.start() if following else len(markdown)
+        body, count = re.subn(
+            r"(?m)^(- \*\*(?:Progress|Status):\*\* ).*$",
+            lambda match, status=current["status"]: match[1]
+            + status
+            + "; synthetic sequencing fixture.",
+            markdown[heading.end() : end],
+        )
+        assert count == 1
+        markdown = markdown[: heading.end()] + body + markdown[end:]
+
+    # Keep parent rollups and their roadmap rows consistent with the copied tasks.
+    lines = plan.splitlines()
+    for parent_id in {tasks[key]["parent"] for key in rewound}:
+        parent = data["parents"][parent_id]
+        states = {tasks[key]["status"] for key in parent["children"]}
+        parent["status"] = next(iter(states)) if len(states) == 1 else "In progress"
+        displayed = "NS" if parent["status"] == "Not started" else parent["status"]
+        matches = 0
+        for index, line in enumerate(lines):
+            cells = line.split("|")
+            if len(cells) == 8 and cells[1].strip() == parent_id:
+                cells[-2] = f" {displayed} "
+                lines[index] = "|".join(cells)
+                matches += 1
+        assert matches == 1
+    plan = "\n".join(lines) + "\n"
     return data, markdown, plan, task, task["delivery_packages"]
 
 
@@ -288,9 +297,56 @@ def test_accepted_merged_foundation_allows_p2_without_completing_aggregate(packe
     assert task["status"] == "In progress"
 
 
-@pytest.mark.parametrize("variant", ["scope", "pr_count", "parent_count", "stored_count"])
-def test_delivery_package_prose_and_pr_counts_are_checked(packet, variant):
-    data, markdown, plan, task, packages = _delivery_packet(packet)
+def test_delivery_fixture_rewinds_started_ledger_with_http(packet):
+    data, markdown, plan = deepcopy(packet)
+    tasks = {task["id"]: task for task in data["tasks"]}
+    operation = tasks["AR-008-B"]
+    operation["status"] = "Verified"
+    for package in operation["delivery_packages"]:
+        package.update(
+            status="Verified",
+            accepted_merge_commit="a" * 40,
+            review_evidence="Synthetic completed HTTP prerequisite",
+        )
+    data["parents"]["AR-008"]["status"] = "Verified"
+    ledger = tasks["AR-010-A"]
+    ledger["status"] = ledger["delivery_packages"][0]["status"] = "In progress"
+    data["parents"]["AR-010"]["status"] = "In progress"
+
+    data, markdown, plan, _, _ = _delivery_packet((data, markdown, plan))
+    ledger = next(task for task in data["tasks"] if task["id"] == "AR-010-A")
+    assert ledger["status"] == data["parents"]["AR-010"]["status"] == "Not started"
+    assert all(
+        package["status"] == "Not started"
+        and package["accepted_merge_commit"] is None
+        and package["review_evidence"] is None
+        for package in ledger["delivery_packages"]
+    )
+    CHECK.check_cards(data, markdown, plan)
+    assert (
+        CHECK.check_delivery_packages(data, markdown, plan)
+        == data["validation"]["delivery_pr_count"]
+    )
+
+
+@pytest.mark.parametrize(
+    "variant,message",
+    [
+        ("scope", "Delivery package card differs: AR-007-C/P1/out_of_scope"),
+        ("pr_count", "Roadmap delivery PR count differs"),
+        ("parent_count", "Backlog parent delivery PR count differs"),
+        ("stored_count", "Stored metric differs: delivery_pr_count"),
+    ],
+)
+def test_delivery_package_prose_and_pr_counts_are_checked(packet, variant, message):
+    data, markdown, plan = deepcopy(packet)
+    # These full-validator cases start valid, without a synthetic producer rewind.
+    assert (
+        CHECK.validate(data, markdown, plan)["delivery_pr_count"]
+        == data["validation"]["delivery_pr_count"]
+    )
+    task = next(task for task in data["tasks"] if task["id"] == "AR-007-C")
+    packages = task["delivery_packages"]
     if variant == "scope":
         marker = markdown.index("#### AR-007-C/P1")
         markdown = markdown[:marker] + markdown[marker:].replace(
@@ -302,12 +358,13 @@ def test_delivery_package_prose_and_pr_counts_are_checked(packet, variant):
             "[AR-007](EXECUTION_BACKLOG.md#ar-007): 3 PRs.",
         )
     elif variant == "parent_count":
-        markdown = markdown.replace(
-            "4 PRs across 3 aggregate tasks", "3 PRs across 3 aggregate tasks"
+        marker = markdown.index("### AR-007 —")
+        markdown = markdown[:marker] + markdown[marker:].replace(
+            "4 PRs across 3 aggregate tasks", "3 PRs across 3 aggregate tasks", 1
         )
     else:
-        data["validation"]["delivery_pr_count"] = 151
-    with pytest.raises(ValueError):
+        data["validation"]["delivery_pr_count"] -= 1
+    with pytest.raises(ValueError, match=message):
         CHECK.validate(data, markdown, plan)
 
 
@@ -389,23 +446,26 @@ def test_observability_successor_requires_accepted_merge_and_all_aggregate_input
     data, markdown, plan = deepcopy(packet)
     task = next(t for t in data["tasks"] if t["id"] == "AR-011-C")
     p1, p2 = task["delivery_packages"]
-    # Isolate package policy: full graph validation separately checks producer ancestry.
-    for row in data["tasks"]:
-        if row["id"] in task["dependencies"]:
-            row["status"] = "Verified"
-            packages = row.get("delivery_packages", [])
-            if packages:
-                # Accepted producers include their packages and aggregate inputs.
-                for prerequisite in data["tasks"]:
-                    if prerequisite["id"] in row["dependencies"]:
-                        prerequisite["status"] = "Verified"
-            for index, package in enumerate(packages, start=1):
-                package.update(
-                    status="Verified",
-                    accepted_merge_commit=f"{index:040x}",
-                    review_evidence="Synthetic accepted worker producer package",
-                )
-            markdown = _sync_package_cards(markdown, packages)
+    # Complete only the synthetic prerequisite closure; real delivery states are untouched.
+    by_id = {row["id"]: row for row in data["tasks"]}
+    pending = list(task["dependencies"])
+    completed = set()
+    while pending:
+        prerequisite_id = pending.pop()
+        if prerequisite_id in completed or prerequisite_id not in by_id:
+            continue
+        completed.add(prerequisite_id)
+        prerequisite = by_id[prerequisite_id]
+        pending.extend(prerequisite["dependencies"])
+        prerequisite["status"] = "Verified"
+        packages = prerequisite.get("delivery_packages", [])
+        for index, package in enumerate(packages, start=1):
+            package.update(
+                status="Verified",
+                accepted_merge_commit=f"{index:040x}",
+                review_evidence="Synthetic accepted prerequisite package",
+            )
+        markdown = _sync_package_cards(markdown, packages)
     task["status"] = "In progress"
     p1.update(
         status="Verified",

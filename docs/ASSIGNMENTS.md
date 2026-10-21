@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Fixture isolation accepted at a42b6608; next planning composition | Preserve the approved ledger amendment and all failed delivery histories. |
-| Delivery reviewer | Failed-attempt audit complete; verifier v8 and next hosted delivery | Independent verifier review, fresh PR/main checks and candidate acceptance remain required. |
-| Planning/verification | Fixture source accepted; independently review verifier v8 | Keep source, actual test results and narrow failed-attempt evidence distinct. |
-| Lead | Corrected HTTP source integration and inventory | Reuse primary; ledger implementation waits for accepted HTTP protected-main delivery. |
+| Platform/security | AR-010-A/P1 #108 runtime in secondary work/ledger-schema from 9f6ea6e | First manifest/progress and explicit ar7 DDL/catalog checkpoint; full P1 product proof still required. Sole coordinated PostgreSQL slot. |
+| Delivery reviewer | Independent ledger source/integration/delivery review | HTTP exact PR/main/candidate audit is accepted; P1 delivery remains unaccepted. |
+| Planning/verification | Primary progress reconciliation, then independent ledger tests | Test authoring waits for accepted progress, stable runtime interfaces and explicit file ownership. No current QE implementation or PostgreSQL slot. |
+| Lead | Ledger P1 assigned; #107/#108/#10 In progress and #109 Not started read back | Own integration, publication and acceptance; keep P2 and worker prerequisites intact. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -49,11 +49,11 @@ The managed checkout tool could not operate on the cloud repository from this lo
 ## Current management checkpoint
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
-- **Verified delta:** AR-006-A preparatory run projection is Verified in PR #72 at reviewed source 46639c49502995870eb19faaea218b84a02a95ec. Hosted run 39497717028 passed 1596 tests on Python 3.11 and 1600 on Python 3.12, including all 21 new actual PostgreSQL backfill/publication cases. Three core Docker skips are covered by three passing gVisor cases; four sqlite3 transaction-mode cases are Python-3.12-only. Lint, formatting, strict types, contract/planning validation, dependency security audit, isolated package smoke and CI gate passed. A/B accepted the scoped runtime, transaction, catalog, test and diagnostic corrections. Frozen history, interrupted process recovery, backup/restore/resume, project serialization and publication rollback/retry have synthetic execution evidence. Live generation-aware publication, API listing, mutable repair/audit, customer admission and production acceptance remain gated. No model calls, new paid resources or partner data were used.
-- **Contributor checkpoint:** AR-007-C/P1/P2 and parent #7 are Verified for preparatory existing-route scope. PR #79 reviewed source db5f992582c0d925a7921d26ae231312eaa41107 and accepted merge e117aaae0ef1f4ff4c293747482364a0791bc5d0 have identical trees. PR run 39535364867 and protected-main run 39536476328 passed 2013/2019 core tests on Python 3.11/3.12, with 9/3 expected skips and one warning per job; actual PostgreSQL, three separate gVisor tests, package/security/CI gate and main delivery passed. A accepted identity/read/mutation/UI security; B accepted C transaction consumption; C accepted interface and compatibility/OpenAPI corrections; lead integrated and verified delivery. Lead independently verified candidate 12318112434 (470334 bytes), archive/API digest, exact four files, source/manifests/package hashes; private indexed record reviewed-delivery-20261021-pr79-e117aaa.json is retained outside checkouts. P2 and aggregate AR-007-C are Verified for preparatory existing-route scope only. Customer-ready admission, full CT-M1-007/008/009, G1 and external production/funding/data gates remain open. Planning reviews: A/C accepted admission 1d284ba and observability 9a70fdc; A accepted final prose f08b1ca and independently passed 54 backlog cases plus all three execution/evaluation/M1 OpenAPI validators. Dated failing and pending checkpoints remain historical.
+- **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
+- **Contributor checkpoint:** HTTP delivery and candidate are accepted. Ledger entry 51af77dc and backlog fixture correction dbec08b are independently accepted. Platform/security now owns P1 runtime; planning/verification owns the primary progress patch and later independent tests after interface/ownership release. The lead integrates and the delivery reviewer independently reviews. No ledger package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** The three frozen HTTP routes in AR-008-B/P2 #95. P1 #94 is Verified/closed after [PR #105](https://github.com/spei04/agent-rewind/pull/105), matching PR/main checks and verified candidate 12355648523; see [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p1-delivery--2026-10-21). P2 and aggregate #93 remain In progress. HTTP/worker/G1/customer gates remain open.
-- **Current storage and consumers:** A released the primary after final PostgreSQL validation; the exact database/role baseline is restored and the server stopped. The lead owns the secondary for integration. A and C now review read-only. B completed independent installed-package review and released all temporary-runtime consumers; the lead removed that runtime. Two independently owned matching-lock environments remain and no new checkout was created. Completed P1 cleanup separately recovered 126,427,136 bytes from the package runtime and 19,304,448 bytes from lead-only fixtures; retained private evidence stays outside the checkouts. Both working checkouts are needed for P2.
+- **Next evidence-producing milestone:** AR-010-A/P1 #108 immutable manifest/progress and explicit ar7 DDL/literal SQLite/PostgreSQL catalogs, then the full provisioning/opening/constraint/privilege/bounds/recovery matrix. P2 #109 remains Not started until accepted P1 and its own reservation/fence entry. Parser-only completion cannot waive those gates.
+- **Current storage and consumers:** The existing primary checkout is owned by planning for progress reconciliation; the existing secondary is owned by platform/security for P1 runtime. Each retains its own matching-lock environment. Platform/security holds the sole coordinated PostgreSQL slot; planning performs no database work. Private evidence stays outside checkouts, and no new checkout or resource was created.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -612,6 +612,24 @@ The owner approved the [reviewed ledger plan](https://github.com/spei04/agent-re
 
 The lead will reconcile the ledger planning amendment and assign exact manifest/interface/SQL entry work. Ledger implementation still waits for accepted HTTP protected-main delivery and entry review. Existing spending authorization, migration-only compatibility, later worker and settlement gates remain unchanged. Earlier dated pending-decision checkpoints remain historical.
 
+## Approved ledger backlog amendment — 2026-10-21
+
+A owns planning-only reconciliation in the reused primary; C owns the separate schema/provisioning entry in the secondary. B independently reviews planning and HTTP delivery, and the lead owns integration and later GitHub updates. The owner-approved 882fa139 plan fixes one finite nonrenewable execution window and AR-010-A/P1 schema/provisioning 3 [3–5] plus P2 reservations/minimum generation/rollover 3 [3–5], total 6 [6–10] BE days, medium-low. Both remain Not started/null acceptance; accepted HTTP protected-main delivery and exact manifest/interface/SQL entry review precede implementation, with accepted P1 before P2. Historical schedules, existing release evidence, frozen contracts and external spending/customer gates remain unchanged. No new checkout, runtime/schema change, database process or paid resource is used. The only test edit is the lead-authorized synthetic prerequisite setup required by the new nested ledger packages; checker and assertions are unchanged.
+
+## Ledger issue tracking — 2026-10-21
+
+The lead created and read back aggregate #107, schema/provisioning P1 #108 and reservation/concurrency P2 #109 under parent #10; all remain open/Not started with null package acceptance. Parent #10 is 10 [10–16] BE days/four PRs, including unchanged AR-010-B; existing #60 names the later historical-opening/transfer evidence obligation. A owns backlog tracking and independent entry review; B reviews HTTP delivery and the amendment; C retains frozen entry f3af95ef and the separately assigned private PostgreSQL privilege probe; the lead owns integration. Entry acceptance waits for the later-provision recovery and provider-call scoped-ownership clarifications plus probe evidence. HTTP remains In progress with failed-attempt history preserved; no runtime, estimate, dependency or gate change follows.
+
+## Ledger P1 entry review accepted — 2026-10-21
+
+AR-008-B/P2 remains In progress at reviewed HTTP source a439bce in PR #106. Corrected run 39638999615/attempt1 completed successfully on both Python versions, with package/security, three gVisor tests and CI gate; independent final log audit is being completed. A newly verified uv advisory requires a narrow pinned/checksummed toolchain repair before final delivery. Prior failed run 39631674974 remains preserved and its causes unproven. Owner-approved ledger aggregate #107 and P1/P2 #108/#109 remain Not started. A/lead accepted exact P1 entry 51af77dc; B/lead independently accepted the separate 24-case synthetic PostgreSQL privilege probe. Actual product schema/trigger/catalog/capacity/recovery proof and patched HTTP protected-main delivery remain required; P2's exact reservation/fence entry follows accepted P1.
+
+A accepted the complete entry and both clarification rounds; the lead independently reviewed the schema/interface/authority/lock/recovery policy and final composition. C authored the entry and ran only the separately assigned synthetic privilege probe. B verified all 24 probe cases, 30 indexed evidence files and 7 immutable source bindings; the probe covers one deferred UPDATE trigger over two synthetic tables, not the five product triggers or full C04. The exact original 3-database/15-role baseline was restored and stopped; private evidence remains outside the reused checkouts. P1 entry source 51af77dc has document SHA-256 8677521af4c3dc9c9340e4ec3e466e5eb122bdaa16b43c4c5f65f99ee1ee9c0a. No runtime task status, spending gate or production claim changes.
+
+## Build-tool CA repair assigned — 2026-10-21
+
+The lead verified [GHSA-hq85-5cpj-mr62](https://github.com/astral-sh/uv/security/advisories/GHSA-hq85-5cpj-mr62): uv versions before 0.13.4 using their default bundled CAs are affected. C / platform_security owns a narrow official pinned/checksummed repair in the existing secondary, starting from a439; the accepted ledger design branch is preserved. B / delivery_audit completes the passing a439 audit and independently reviews the repair. The lead preserves the primary planning composition and owns integration. The shared uv0.11.21 executable and other projects are unchanged. This is a new security prerequisite to final delivery, not an explanation for the earlier test failures. No new resource, provider request, spending or customer activation is authorized.
+
 
 ## Patched toolchain delivery assignments — 2026-10-21
 
@@ -622,6 +640,28 @@ Corrected HTTP source a439bce passed complete PR run [39638999615](https://githu
 The delivery reviewer independently audits the repair. Planning/verification owns a separately reviewed private verifier update, preserving earlier failed and successful run identities. Platform/security next binds the final source collection; the lead owns PR, protected-main and candidate acceptance. The existing Docker base and shared host trust store are separate inputs; this uv repair does not claim to remediate them. Local Docker remains unavailable, so actual container validation must come from hosted CI.
 
 The approved ledger amendment and accepted schema/provisioning entry are published on [work/ledger-backlog-amendment](https://github.com/spei04/agent-rewind/blob/work/ledger-backlog-amendment/docs/ASSIGNMENTS.md). They establish design readiness only. Ledger #107, #108 and #109 remain Not started; HTTP #95 and #93 remain In progress until the required delivery evidence is accepted. No new paid resources, provider calls, partner data or production activation were used.
+
+
+## Planning composition with patched HTTP delivery — 2026-10-21
+
+Platform/security reused the secondary checkout to compose approved planning
+source 0f32d8ca with exact HTTP source eeca4e5. The only conflict is resolved in
+this assignment log: both branches' dated historical entries are preserved and
+the current owner table reflects this handoff. The ledger schema/provisioning
+entry, task and package statuses, acceptance, dependencies and estimates remain
+unchanged. The previously approved synthetic backlog-test prerequisite setup is
+preserved; the patched HTTP runtime, tests and toolchain are otherwise unchanged.
+
+At this checkpoint, patched-source PR run
+[39672365195](https://github.com/spei04/agent-rewind/actions/runs/39672365195)
+has passed package (including the container build and offline CLI smoke),
+security and isolation; both core jobs remain pending. The earlier failed
+39631674974 and successful but unpatched 39638999615 attempts remain separate
+historical evidence. HTTP delivery has not been accepted, and ledger #107,
+#108 and #109 remain Not started. Independent review of this composition and
+actual accepted HTTP protected-main/candidate evidence precede implementation.
+No database execution, new dependencies, provider calls or paid resources are
+part of this planning reconciliation.
 
 
 ## Container trust maintenance assignments — 2026-10-21
@@ -647,6 +687,37 @@ remain Not started, and HTTP #95 and #93 remain In progress. No shared host trus
 mutation, provider call, production change, partner data or new paid resource
 is part of this maintenance.
 
+## Planning composition with container trust repair — 2026-10-21
+
+Platform/security reused the secondary checkout to compose published approved
+planning source b8d922d with reviewed HTTP/container source 316bdc5. The six
+approved planning files, including the frozen schema/provisioning entry and the
+previously accepted synthetic backlog-test setup, remain byte-identical to
+b8d922d. All other runtime, build and test source comes exactly from 316bdc5.
+Only this assignment log is reconciled: both branches' historical sections are
+preserved, the current owner table is updated, and this checkpoint is appended.
+Task and package statuses, acceptance, dependencies, effort and release gates
+remain unchanged.
+
+Historical eeca4e5 run
+[39672365195](https://github.com/spei04/agent-rewind/actions/runs/39672365195)
+completed with 3,841 passes and 14 expected skips on Python 3.11, and 3,852 passes
+and 3 expected skips on Python 3.12. Those results establish earlier functional
+evidence, not acceptance of the subsequent container trust repair. Independent
+source review accepted 316bdc5 for hosted validation. Its local focused checks
+passed 94 cases; collection found 3,897 nodes. The corresponding 3,883/3,894
+passes plus 14/3 skips remain forecasts until actual hosted execution confirms
+them. The final image trust marker, reviewed private verifier v6, full-source CI
+and protected-main candidate acceptance remain required.
+
+The lead owns PR #106 and final delivery. Planning/verification independently
+reviews this exact composition and the private verifier; the delivery reviewer
+reviews the verifier and actual hosted evidence. HTTP #95 and #93 remain In
+progress; ledger #107, #108 and #109 remain Not started. This reconciliation
+adds no ledger implementation, database execution, dependencies, model calls,
+partner data, production activation, paid resources or checkout.
+
+
 ## Pinned certificate configuration correction — 2026-10-21
 
 Reviewed source 316bdc5 failed the package job in PR run
@@ -663,6 +734,22 @@ source run. The lead owns PR #106 and delivery acceptance; HTTP remains In
 progress and ledger packages remain Not started. No later repair stage,
 container acceptance or protected-main delivery is established by this fix.
 
+## Planning composition with config-byte correction — 2026-10-21
+
+Platform/security composed approved planning 41b60fc with reviewed correction
+ad6bfda in the reused secondary. The six planning files, frozen ledger entry,
+statuses, acceptance, dependencies and effort remain exact; all other source
+bytes come from ad6bfda. Only this current assignment table and appended
+checkpoint are reconciled, preserving both histories and the observed 316
+container failure above.
+
+The correction passed 97 focused tests and independent source review for hosted
+validation. Its 3,900-node collection gives forecasts of 3,886/3,897 passes plus
+14/3 skips on Python 3.11/3.12; these are not hosted results. Actual final-image
+trust, corrected-source CI and protected-main candidate acceptance remain open.
+HTTP #95/#93 remain In progress; ledger #107/#108/#109 remain Not started.
+Independent planning review and read-only P1 onboarding add no implementation,
+database work, model calls, resources or release authority.
 
 ## Container test isolation — 2026-10-21
 
@@ -691,3 +778,64 @@ the delivery reviewer owns the next exact-source run and additive v8 failure
 history, with independent planning/verification review. HTTP remains In
 progress and ledger packages remain Not started until protected-main and
 candidate acceptance. No failed attempt is retried or relabeled as acceptance.
+
+## Planning composition with fixture isolation — 2026-10-21
+
+Platform/security composed approved planning 35df1b9 with final reviewed HTTP
+source 065df8c in the reused secondary checkout. The six approved planning files,
+including the frozen ledger entry and backlog tests, remain byte-identical to
+35df1b9; all other source comes exactly from 065df8c. Only this assignment table
+and appended history are reconciled. Statuses, acceptance, dependencies, effort
+and release gates remain unchanged.
+
+Failed ad6bfdaa run 39678917428 and the accepted tests-only isolation at a42b6608
+remain distinct in the preceding checkpoint. Its 3,907-node collection is an
+inventory, not new hosted success. Fresh exact-source CI, protected-main and
+candidate acceptance remain required. HTTP #95/#93 remain In progress; ledger
+#107/#108/#109 remain Not started. This composition adds no runtime or ledger
+implementation, database work, model calls, paid resources or checkout.
+
+
+## Protected HTTP merge and backlog test correction — 2026-10-21
+
+[PR #106](https://github.com/spei04/agent-rewind/pull/106) merged through strict
+main protection as cefd222230c800eb2e90c49a3b3c411b394d0393 from reviewed
+source 065df8c. The source tree is unchanged. Independent review accepted PR
+run 39683408934 attempt 1: Python 3.11 had 3,893 passes and 14 expected skips;
+Python 3.12 had 3,904 passes and three expected skips. Actual PostgreSQL,
+installed-package and container trust, security, three gVisor cases, and the
+CI gate passed. Main run 39686498691 attempt 1 and final candidate verification
+remain pending; HTTP remains In progress and ledger packages remain Not started.
+
+Platform composed the accepted planning tree with the actual main merge at
+a1029f6. Independent planning review confirmed the exact ancestry and zero file
+changes; all approved scope, status, estimate and entry bytes were preserved.
+
+Planning/verification then owned a separate test-only correction at dbec08b.
+Four backlog negative tests previously rejected an unrelated AR-034-A
+prerequisite before checking their intended mutations. Each now first validates
+the unchanged live baseline, then asserts the intended refusal. The synthetic
+package-sequencing fixture also rewinds future ledger progress when it rewinds
+HTTP, with a new regression control and coherent cards and parent rollups.
+This fixture remains scoped to package/card tests, rather than a full dependency
+graph. Platform independently accepted the single-file correction after 55
+passing tests, four exact-refusal probes and three additional ledger-rewind
+states. The checker, actual plan, estimates, statuses and runtime did not change.
+
+Lead retains integration ownership. Both cloud checkouts are clean and reusable;
+no additional checkout, database process, provider call or resource was created.
+
+## Accepted HTTP delivery and progress reconciliation — 2026-10-21
+
+AR-008-B/P2 #95 and aggregate #93 are Verified after reviewed source 065df8c89da384d6e502cf0c15bf174e380c53c7, protected merge cefd222230c800eb2e90c49a3b3c411b394d0393, matching PR/main runs 39683408934/39686498691 (attempt 1) and verified candidate 12387716715. P1 #94 retains accepted merge 03a8e074b51dca7c03d69295e0c18ca0f22dc1da and candidate 12355648523. Parent #8 is Verified/closed. [Exact delivery evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21) records the successful source-bound PR/main and candidate checks. The delivery reviewer independently audited hosted results; the lead accepted the candidate and read back issue closures. Planning/verification owns this primary-checkout metadata reconciliation. Ledger implementation is not assigned by this first ordered checkpoint; the already accepted entry permits the next explicit handoff. Earlier dated assignments, failures and pending checkpoints remain history.
+
+## Ledger P1 runtime and independent-test assignment — 2026-10-21
+
+| Owner | Assigned scope | Handoff and limit |
+| --- | --- | --- |
+| Platform/security | AR-010-A/P1 #108 runtime | Existing secondary work/ledger-schema from 9f6ea6e; accepted HTTP cefd222 and entry 51af77dc. First manifest/progress plus explicit ar7 DDL/catalog checkpoint; sole coordinated PostgreSQL slot. |
+| Planning/verification | Progress reconciliation, then independent owned tests | Existing primary; no QE code until this progress is accepted and runtime interfaces are stable. Fixtures, adversarial inputs, bounds, provisioning, constraints, catalog and recovery coverage remain independently owned. |
+| Delivery reviewer | Independent source/integration/delivery review | Review actual P1 proof; no acceptance based solely on parser or design evidence. |
+| Lead | Integration and public tracking | Read back #107/#108/#10 In progress and #109 Not started; authorize subsequent handoffs only after their producer evidence. |
+
+P1 and aggregate AR-010-A are In progress with null delivery acceptance; P2 remains Not started/null acceptance. Current totals are 30 Verified / 1 In progress / 120 Not started tasks and 9 Verified / 1 In progress / 5 Not started packages. The owner-approved finite window, six-day ledger estimate, frozen entry, 544 dependencies and 159 PRs are unchanged. This assignment makes no provider calls, paid-resource or customer-data commitment.
