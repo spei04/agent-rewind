@@ -529,3 +529,8 @@ C's PostgreSQL evidence covers 65 distinct cases across runs: 62 initial passes,
 Composition f9172462 preserves the exact 377-file union of reviewed runtime, independent PostgreSQL tests and installed smoke. The 71d33737 package proof passes isolated service GET/cancellation, a separate untouched real migration-only guard, CLI and all 113 Git/wheel/sdist/installed runtime member comparisons. The service marker follows the service scenarios and real-guard checks; separate package and CLI evidence records the remaining checks. Final source binding and matching hosted checks remain required; older component CI does not cover this composition.
 
 The core CI job receives a bounded 30-minute scheduling window because the preceding Python 3.12 suite already took 1,106.67 seconds and this composition adds execution coverage. Product, native SQL, test wait and other job deadlines remain unchanged. A owns final installed proof, B reviews final source/CI inventory, C reviews integration evidence, and the lead owns delivery. P1 remains In progress; P2 Not started. No task status, dependency, estimate, spending or production/data gate changes.
+
+
+### 2026-10-21 — core workflow timeout guard correction
+
+Engineer A owns the narrow test correction for final CI run 39612054532: allow the reviewed 30-minute ceiling only for the core job, retaining the existing 20-minute ceiling for every other job and all workflow trust assertions. Engineer C independently reviews the frozen correction; Engineer B audits the exact failed and final CI runs; the lead owns integration and delivery. The workflow, runtime and pinned manifests remain unchanged. P1 remains In progress; P2 Not started.
