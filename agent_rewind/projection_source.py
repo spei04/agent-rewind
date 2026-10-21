@@ -24,7 +24,7 @@ from .scoped_lineage import ResourceNotFound
 from .scoped_repositories import _byte_length, _Reads
 from .scoped_repositories import projects as project_table
 from .scoped_repositories import scopes as scope_table
-from .sqlite_ownership import owned_connect
+from .sqlite_ownership import owned_connect, owned_receipt, quarantine_owned
 
 MAX_PROJECTS = 128
 MAX_RECORD_BYTES = 2 * 1024 * 1024
@@ -59,7 +59,9 @@ def readonly_source(engine: Engine, budget: QueryBudget) -> Iterator[Connection]
     """One consistent SQL snapshot; it is closed before any operator byte reader."""
     _secure_engine(engine)
     with owned_connect(engine) as connection:
+        receipt = owned_receipt(connection)
         previous: int | None = None
+        primary: BaseException | None = None
         try:
             if connection.dialect.name == "sqlite":
                 raw = connection.connection.driver_connection
@@ -88,11 +90,39 @@ def readonly_source(engine: Engine, budget: QueryBudget) -> Iterator[Connection]
                 connection.exec_driver_sql("SET LOCAL search_path TO public, pg_temp")
             with budget.observe(connection):
                 yield connection
+        except BaseException as error:
+            primary = error
+            raise
         finally:
-            connection.rollback()
-            if previous is not None:
-                connection.exec_driver_sql(f"PRAGMA query_only={int(previous)}")
+            if receipt is None:
+                # Explicit legacy/PG cleanup policy is unchanged.
                 connection.rollback()
+                if previous is not None:
+                    connection.exec_driver_sql(f"PRAGMA query_only={int(previous)}")
+                    connection.rollback()
+            else:
+                cleanup_error: BaseException | None = None
+                interruption: BaseException | None = None
+                # Restore failure cannot skip the final rollback or erase the
+                # body's primary failure. Pure quarantine survives failed native
+                # disposal and is consumed by the outer owned close boundary.
+                for phase in (0, 1, 2) if previous is not None else (0,):
+                    try:
+                        if phase == 1 and previous is not None:
+                            connection.exec_driver_sql(f"PRAGMA query_only={int(previous)}")
+                        else:
+                            connection.rollback()
+                    except BaseException as error:
+                        quarantine_owned(receipt)
+                        if cleanup_error is None:
+                            cleanup_error = error
+                        if interruption is None and not isinstance(error, Exception):
+                            interruption = error
+                if primary is None:
+                    if interruption is not None:
+                        raise interruption from None
+                    if cleanup_error is not None:
+                        raise cleanup_error from None
 
 
 @dataclass(frozen=True)

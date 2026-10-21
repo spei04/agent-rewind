@@ -22,7 +22,7 @@ from sqlalchemy.engine import Connection, Dialect, Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import ConnectionPoolEntry
 
-from ..sqlite_ownership import optional_progress, owned_connect
+from ..sqlite_ownership import optional_progress, owned_connect, owned_receipt, quarantine_owned
 from .schema import (
     ADMISSION,
     ARTIFACTS,
@@ -252,7 +252,8 @@ def _inspection(connection: Connection) -> Iterator[None]:
             cursor.execute(f"SET LOCAL statement_timeout = '{milliseconds}ms'")
             cursor.execute(f"SET LOCAL lock_timeout = '{min(milliseconds, 250)}ms'")
 
-    # A failed nested lease owns no cleanup rights on the outer session.
+    # Capture before effects; failed nested acquisition owns no cleanup rights.
+    receipt = owned_receipt(connection)
     lease = optional_progress(connection, owner=object())
     progress = False
     listener = False
@@ -320,6 +321,7 @@ def _inspection(connection: Connection) -> Iterator[None]:
         except BaseException as error:
             failed(error)
         if cleanup_error is not None:
+            quarantine_owned(receipt)
             try:
                 connection.invalidate()
             except BaseException as error:

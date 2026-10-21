@@ -395,3 +395,41 @@ helper imports the components, exercises owned read-only work against synthetic
 SQL, and asserts Database still uses its untracked default factory. The exact
 helper body passes locally; isolated wheel/sdist execution is recorded separately
 when complete. Completed-service smoke remains later P1 work.
+
+### Restoration quarantine correction
+
+Independent review found two restoration paths that could refuse the current
+call yet recycle changed native settings: compatibility inspection after a
+restore/listener failure combined with pre-action invalidation failure, and
+projection snapshots after query_only restoration failure. Their original eight
+one-slot regression cases failed against 27c9405 (1.18 s); the raw connection
+remained open despite the failed restoration.
+
+Both scopes now capture a checked owned_receipt before native effects. Capture
+proves the original Connection/proxy/generation while idle, returns None only for
+a genuinely unregistered engine, and never reacquires an invalidated connection.
+The retained receipt is quarantined before attempted native disposal; no later
+pool occupant is consulted. A failed nested capture owns no cleanup rights.
+The projection owned path independently attempts its rollback/restore/rollback
+sequence, retaining a body/setup primary or otherwise the first cleanup
+interruption. Explicit untracked and PostgreSQL cleanup policies are unchanged.
+
+Retained capture permits an outstanding checkout after normal engine disposal
+only when both predecessor and current successor pools are registered to the
+same capability. New acquisition still requires the exact current pool. Two
+dispose controls initially failed; the corrected controls preserve both active
+generations independently, while a foreign replacement still refuses without
+poisoning the original owner. A test initially used the discarded predecessor's
+pool counter, which becomes negative after dispose(close=True) resets overflow
+accounting; it now proves the original closed Connection, invalid original proxy
+and returned generation verdict, plus zero active successor checkouts.
+
+The fifteen correction cases cover both restoration paths, listener removal,
+failed invalidation, typed body denials, multiple cleanup interruptions, and
+capture after close/invalidation. They require old-raw disposal, zero checked-out
+slots, and a fresh writable connection with default native settings. Together
+with existing helper/caller, projection, schema, admission and listing cases,
+249 tests pass (one existing Starlette warning); static/package evidence is
+reported against the frozen correction separately. The prior isolated package
+proof remains historical evidence at 27c9405 until rerun at the corrected source.
+Factory activation and operation services remain outside this checkpoint.

@@ -610,11 +610,18 @@ def finish_owned(
     require_clean(cleanup_snapshot(receipt))
 
 
-def _attest_checkout(engine: Engine, connection: Connection, receipt: CheckoutReceipt) -> None:
+def _attest_checkout(
+    engine: Engine,
+    connection: Connection,
+    receipt: CheckoutReceipt,
+    *,
+    retained: bool = False,
+) -> None:
     with _REGISTRY_LOCK:
         trusted = (
             _CAPABILITIES.get(engine) is receipt.capability
-            and engine.pool is receipt.pool
+            and _POOLS.get(engine.pool) is receipt.capability
+            and (retained or engine.pool is receipt.pool)
             and _POOLS.get(receipt.pool) is receipt.capability
         )
     if (
@@ -650,6 +657,30 @@ def _attest_checkout(engine: Engine, connection: Connection, receipt: CheckoutRe
             or not _native_idle(receipt.raw)
         ):
             raise SQLiteOwnershipError()
+
+
+def owned_receipt(connection: Connection) -> CheckoutReceipt | None:
+    """Capture the exact idle checkout before effects; never acquire/revalidate.
+
+    Unregistered engines have no receipt. A known owned engine must still prove
+    its original Connection, proxy and generation. Retain this value through
+    cleanup; never look up a pool's later occupant after returning the slot.
+    """
+    if _capability(connection.engine) is None:
+        return None
+    if connection.closed or connection.invalidated:
+        raise SQLiteOwnershipError()
+    raw = connection.connection.driver_connection
+    if not isinstance(raw, _TrackedSQLite):
+        raise SQLiteOwnershipError()
+    receipt = raw._ownership.receipt
+    if receipt is None or receipt.connection is not connection:
+        raise SQLiteOwnershipError()
+    # Normal disposal can replace the pool while this checkout stays owned.
+    # Acquisition remains stricter; retained capture requires both pools to
+    # belong to the same factory capability and retains every checkout check.
+    _attest_checkout(connection.engine, connection, receipt, retained=True)
+    return receipt
 
 
 def connect_owned(
