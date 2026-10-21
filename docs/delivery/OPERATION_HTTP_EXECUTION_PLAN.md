@@ -22,8 +22,9 @@ edges, 52 parents, 27 gates and 20 contracts: **461 base / 779.1 upper / 576.25
 alternative allowance / 173.5 effort-path days**, with M1 62.5 and BE 94.5.
 Parent AR-008 totals 13 days. Earlier checkpoint totals above remain history.
 B/lead accepted ownership entry **5bedede** and C independently confirmed the
-acquisition map. A is assigned the dormant helper and focused tests; consumer
-integration and factory activation require separate reviewed checkpoints.
+acquisition map. The dormant helper d1b7ce20 is independently accepted as a
+component; C is assigned complete caller integration with factory activation
+disabled. Activation and dependent services require separate review.
 Current task/package statuses and later gates are unchanged.
 
 ## Frozen responses and actual producer seams
@@ -118,4 +119,4 @@ No code, schema, profile, frozen contract, historical schedule, task dependency,
 
 ## P1 implementation assignment — 2026-10-21
 
-Engineer C retains P1 #94 ownership. B independently reviews cumulative work accounting, optional transaction work and raw receipts before dependent read/cancel services. B/lead accepted ownership entry 5bedede; C independently confirmed its acquisition map. A is assigned the dormant ownership helper and focused tests in the reused primary checkout, with Database activation and consumer edits excluded. C completed 40 actual PostgreSQL component cases at e490a27; the existing synthetic instance is stopped with baseline state restored. B/lead accepted the separate detach correction 97ef62c after source review and 18 independent regression passes. The helper, caller integration and factory activation remain separately reviewed checkpoints before dependent services. The initial failure table remains fail-closed: no stored-failure producer is invented. The entry audit found no additional producer prerequisite. Actual PostgreSQL, hosted/package checks, independent source review and accepted delivery are still required. P2 remains Not started; no HTTP/schema/profile/worker/provider/customer activation is included.
+Engineer C retains P1 #94 ownership. B independently reviews cumulative work accounting, optional transaction work and raw receipts before dependent read/cancel services. B/lead accepted ownership entry 5bedede; C independently confirmed its acquisition map. A completed dormant helper d1b7ce20, accepted by B/C source review and 67 lead tests plus an original/corrected pool-substitution probe. C is assigned complete caller integration in the reused secondary checkout with Database factory activation disabled. C completed 40 actual PostgreSQL component cases at e490a27; the existing synthetic instance is stopped with baseline state restored. B/lead accepted the separate detach correction 97ef62c after source review and 18 independent regression passes. The helper, caller integration and factory activation remain separately reviewed checkpoints before dependent services. The initial failure table remains fail-closed: no stored-failure producer is invented. The entry audit found no additional producer prerequisite. Actual PostgreSQL, hosted/package checks, independent source review and accepted delivery are still required. P2 remains Not started; no HTTP/schema/profile/worker/provider/customer activation is included.

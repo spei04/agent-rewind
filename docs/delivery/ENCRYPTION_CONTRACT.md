@@ -258,3 +258,7 @@ Primary references checked for this design:
 [service-account guidance](https://docs.cloud.google.com/iam/docs/best-practices-service-accounts),
 [pinned AESGCM](https://cryptography.io/en/50.0.2/hazmat/primitives/aead/),
 and [Fernet memory/compatibility](https://cryptography.io/en/50.0.2/fernet/).
+
+## Accepted offline delivery — 2026-10-21
+
+AR-016-A offline C07 is Verified after reviewed source db9a1855620674a2ad615dba340f471384fad8f3 merged in PR #102 as 2bb75695b69ae62f4f69acd4c3df5876652b3095 with an identical tree. PR run 39584005704 and protected-main run 39586072558 passed 2970/2980 tests on Python 3.11/3.12 with 13/3 expected skips and one existing warning each; all 33 publication and 26 recovery PostgreSQL cases ran on both versions. Package/security/CI gate, three gVisor cases and main delivery passed. A authored the contract, C independently accepted the corrected schema and B accepted composition and both CI runs. Lead verified candidate 12341062437 (585234 bytes), exact four files, source/parent/tree, pinned manifests and package/archive hashes; indexed private release record reviewed-delivery-20261021-pr102-2bb7569.json is retained outside checkouts. C07 is available for development contract consumption; format-2 runtime, live KMS/IAM, migration/rotation/deployment and external gates remain open.
