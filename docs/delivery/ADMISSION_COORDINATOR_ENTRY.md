@@ -2,10 +2,10 @@
 
 Planning only, pinned to reviewed storage source `a7caf0f478fb91805a1b194023ef9de1fa9d0307`.
 This records the bounded resolution of four AR-008-A/P3 entry findings; it implements nothing.
-P3 remains **Not started** until accepted merged P2 and explicit assignment.
+P3 entry requires accepted merged P2 and explicit assignment. Those prerequisites are now satisfied; see [accepted P2 delivery and P3 assignment](ADMISSION_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P3 is **In progress**, not accepted.
 The [execution plan](ADMISSION_EXECUTION_PLAN.md), C04 and CT-M1-008/010/011/012
 remain authoritative. Estimates, dependencies, schemas, routes, profiles and
-spending/data authority are unchanged. Independent B design review is required.
+spending/data authority are unchanged. B and C accepted the entry design; B accepted the subsequent required-adapter availability clarification. Runtime acceptance remains separate.
 
 ## Service and authority boundary
 

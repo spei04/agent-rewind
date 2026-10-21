@@ -1,10 +1,10 @@
 # Admission execution plan
 
-2026-10-21 · Planning reconciliation of existing AR-008-A/B and reviewed C04 obligations. AR-008-A/P1 is Verified, with pure parser/configuration/envelope modules described in [ADMISSION_FOUNDATION.md](ADMISSION_FOUNDATION.md). P2 is Implemented; verification pending after merged PR #90, with protected-main/candidate acceptance pending under lead delivery; P3 and AR-008-B remain Not started. The pure registry prepares explicit immutable values; no deployed registry, admission service, accepted migration, customer-ready profile or spending authority is supplied.
+2026-10-21 · Planning reconciliation of existing AR-008-A/B and reviewed C04 obligations. AR-008-A/P1 and P2 are Verified; see [accepted P2 delivery](#accepted-p2-delivery--2026-10-21). P3 is In progress after that gate, while AR-008-B remains Not started. These preparatory deliveries supply no deployed registry, available new-work admission, customer-ready profile or spending authority.
 
 ## Entry and delivery boundaries
 
-AR-008-A retains direct prerequisites AR-007-C and AR-009-B, both Verified for their preparatory scope. AR-007-C completed accepted PR #79/main/candidate gates; see [P2 evidence](EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21). AR-008-A [#80](https://github.com/spei04/agent-rewind/issues/80) remains In progress; P1 [#81](https://github.com/spei04/agent-rewind/issues/81) is Verified after accepted PR #85 merge 81905a5 and matching PR/main/candidate evidence; P2 [#82](https://github.com/spei04/agent-rewind/issues/82) is Implemented; verification pending after merged [PR #90](https://github.com/spei04/agent-rewind/pull/90) and passing PR checks, while P3 [#83](https://github.com/spei04/agent-rewind/issues/83) remains Not started until protected-main/candidate acceptance of that predecessor. A merge alone does not satisfy this gate. P1 inherits both prerequisites and C04; P2 requires accepted merged P1 and P3 requires accepted merged P2. The aggregate cannot be Verified until all three and the full service matrix pass. AR-008-B retains AR-008-A and AR-011-B. No outer dependency is removed or added.
+AR-008-A retains direct prerequisites AR-007-C and AR-009-B, both Verified for their preparatory scope. AR-007-C completed accepted PR #79/main/candidate gates; see [route evidence](EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21). AR-008-A [#80](https://github.com/spei04/agent-rewind/issues/80) remains In progress; P1 #81 and P2 [#82](https://github.com/spei04/agent-rewind/issues/82) are Verified and closed. P3 [#83](https://github.com/spei04/agent-rewind/issues/83) is assigned In progress after [accepted P2 delivery](#accepted-p2-delivery--2026-10-21). A merge alone does not satisfy this gate. P1 inherits both prerequisites and C04; P2 requires accepted merged P1 and P3 requires accepted merged P2. The aggregate cannot be Verified until all three and the full service matrix pass. AR-008-B retains AR-008-A and AR-011-B. No outer dependency is removed or added.
 
 | Delivery | Scope | Base / planning range | Handoff |
 | --- | --- | --- | --- |
@@ -37,7 +37,7 @@ The common configuration invariant applies to every future new legacy run/branch
 
 ## Publication and recovery
 
-The planning-only [P3 entry checkpoint](ADMISSION_COORDINATOR_ENTRY.md) fixes same-submit restart routing, immutable linked attempts, phase-specific errors and the policy/lock interface. It adds no runtime or authority; P3 remains Not started until accepted merged P2 and explicit assignment.
+The planning-only [P3 entry checkpoint](ADMISSION_COORDINATOR_ENTRY.md) fixes same-submit restart routing, immutable linked attempts, phase-specific errors and the policy/lock interface. Its accepted-merged-P2 and explicit-assignment prerequisites are now satisfied; the document itself adds no runtime or authority. P3 implementation and independent review remain subject to the full acceptance matrix.
 
 1. Authenticate and resolve the trusted original project context; authorize the action and resolve **both** scoped client-operation and key-alias identities before readiness, mutable registry lookup or storage.
 2. For a matching existing operation, reauthorize before disclosure and atomically bind any legitimate new alias. Return the original accepted IDs and stored configuration identity even if current defaults change or storage is unavailable. Changed canonical intent or an alias bound elsewhere conflicts; changing service-key principal is not recovery.
@@ -120,3 +120,39 @@ validators passed. Listing P2 #88 remains Implemented; verification pending in
 draft PR #91. Lead owns delivery; A/B reviews are available and C releases primary
 after this docs-only reconciliation. No runtime, estimates, dependencies, frozen
 history or activation changes.
+
+## Accepted P2 delivery — 2026-10-21
+
+[PR #90](https://github.com/spei04/agent-rewind/pull/90) reviewed source
+`4135c6fd1376cb630bf9b94e7c958c70e996a023` merged as
+`41759bb240d7aac0f17bd1c113e6b66d11e06b8b` with the same tree.
+[PR checks](https://github.com/spei04/agent-rewind/actions/runs/39550589433) and
+[protected-main checks](https://github.com/spei04/agent-rewind/actions/runs/39552010828)
+passed 2571/2579 core tests on Python 3.11/3.12 with 11/3 expected skips and one
+existing warning per job. A independently audited both completed runs: the
+quiet-PostgreSQL setup marker was present, all 36 new admission PostgreSQL cases
+ran (two schema, 20 repository, 14 migration/recovery including three SIGKILL
+cases), and there were no new PostgreSQL skips or catalog-capture markers.
+Three gVisor cases, installed-package smoke, security, gate and main delivery passed.
+A/B source, preservation, catalog and test-design reviews remain scoped evidence.
+
+Lead verified candidate **12324805344** (**544761 bytes**), its exact four files
+and all source, manifest, package and archive hashes. The indexed private record
+`release-records/reviewed-delivery-20261021-pr90-41759bb.json` remains outside
+checkouts. P2 is **Verified**, issue #82 is closed, and aggregate #80/parent #8
+remain open. This accepts the additive schema/repository delivery, not a
+coordinator, HTTP admission, worker dispatch or customer activation.
+
+P3 #83 is **In progress** in C's retained checkout from accepted `41759bb`.
+C authors runtime/unit/fault tests; B independently reviews security/source;
+A independently authors the separate PostgreSQL suite after an immutable stable
+interface handoff; lead integrates. The first checkpoint covers frozen-envelope
+restoration, SQL-only creator recovery/alias and fresh disclosure. Required
+new-work adapters remain unavailable. The complete contention, rollback,
+process-death, lost-acknowledgment, journal, policy/revocation and zero-I/O-under-locks
+matrix remains required before P3 or aggregate acceptance.
+
+Listing P2 #88 remains **Implemented; verification pending** in PR #91.
+At this checkpoint, run 39552811585 at `9b1473f` has package/security/isolation
+success with core jobs pending; no listing accepted merge or candidate is claimed.
+The admission release proof does not satisfy listing's separate delivery gates.

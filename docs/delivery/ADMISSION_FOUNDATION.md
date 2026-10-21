@@ -3,11 +3,11 @@
 AR-008-A/P1 is Verified after [accepted PR #85/main/candidate evidence](ADMISSION_EXECUTION_PLAN.md#accepted-p1-delivery--2026-10-21) and provides pure preparation for a new native-run operation. It performs
 no SQL, artifact upload/read, HTTP admission, readiness probe, image discovery or
 provider call. Existing routes and migration-only profiles are unchanged.
-P2's additive durable schema is Implemented; verification pending after merged PR #90;
-protected-main/candidate acceptance remains with lead delivery. See the
-[current P2 checkpoint](ADMISSION_EXECUTION_PLAN.md#p2-merged-verification-pending--2026-10-21).
-P3 remains Not started and owns authorized recovery, receipt verification and
-atomic publication. This foundation does not establish either later package's verification.
+P2's additive durable schema is Verified after the separate
+[accepted P2 delivery](ADMISSION_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21).
+P3 is In progress and owns authorized recovery, receipt verification and atomic
+publication. This pure foundation supplies no available coordinator or new-work
+adapter; P3's complete acceptance matrix remains required.
 
 ## Request and task identity
 
