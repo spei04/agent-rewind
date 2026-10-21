@@ -90,6 +90,17 @@ full issuer-bound principal, not an OIDC subject alone or cookie role. Watermark
 is an integer in 0..2^63-1; last ID is 32 lowercase hex and timestamp is canonical
 UTC with microseconds. Freeze the finite payload grammar in P1 tests.
 
+The P1 codec uses exactly `v`, `project`, `principal`, `filters`, `limit`,
+`watermark`, `last_created_at`, `last_id` and `expires_at`. Version is integer 1;
+expiry is integral Unix seconds from an explicit trusted UTC clock. Timestamps
+use canonical `+00:00` and six fractional digits. The domain is
+`agent-rewind:run-list:v1` followed by NUL; signing covers domain then payload.
+No SQL, environment or clock lookup occurs in the codec. Lazy configuration
+validation constructs it after LIST authority; optional Settings accepts an
+unusable key without breaking other surfaces. HTTP duplicate-parameter handling
+remains P2. The codec/config checkpoint passed 74 focused cases and configured
+lint/security/format/strict typing; this is not SQL, hosted or route evidence.
+
 The first request defaults to 50 or accepts an integer 1–200. A continuation with
 omitted limit uses its signed limit; an explicit different limit refuses. Repeated
 cursor/limit query parameters refuse rather than choosing one. The initial expiry
