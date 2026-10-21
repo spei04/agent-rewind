@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Correct pinned certificate-config byte handling | Preserve unrelated config bytes; verify actual pinned-file regression before independent review. |
-| Delivery reviewer | Preserve failed hosted container attempt and review corrected delivery | Final image trust proof and protected-main candidate acceptance remain required. |
-| Planning/verification | Independently review config-byte correction and private verifier | Bind corrected source and actual final-image evidence; preserve earlier attempts. |
-| Lead | HTTP integration and approved ledger handoff | Reuse primary; ledger implementation waits for accepted HTTP protected-main delivery. |
+| Platform/security | Fixture isolation accepted at a42b6608; next planning composition | Preserve the approved ledger amendment and all failed delivery histories. |
+| Delivery reviewer | Failed-attempt audit complete; verifier v8 and next hosted delivery | Independent verifier review, fresh PR/main checks and candidate acceptance remain required. |
+| Planning/verification | Fixture source accepted; independently review verifier v8 | Keep source, actual test results and narrow failed-attempt evidence distinct. |
+| Lead | Corrected HTTP source integration and inventory | Reuse primary; ledger implementation waits for accepted HTTP protected-main delivery. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -662,3 +662,32 @@ Planning/verification independently reviews the correction before another
 source run. The lead owns PR #106 and delivery acceptance; HTTP remains In
 progress and ledger packages remain Not started. No later repair stage,
 container acceptance or protected-main delivery is established by this fix.
+
+
+## Container test isolation — 2026-10-21
+
+PR run [39678917428](https://github.com/spei04/agent-rewind/actions/runs/39678917428),
+attempt 1 at ad6bfdaa, is retained as failed. Python 3.11 reported 8 failed,
+3878 passed and 14 skipped; Python 3.12 reported 8 failed, 3889 passed and
+3 skipped. Both failed the same eight certificate tests. Package, security,
+gVisor and actual final-container trust checks passed; the CI gate failed and
+candidate delivery was skipped. The logs do not identify which global pip
+configuration file existed.
+
+Platform/security isolated the two remaining host-global config probes in the
+test fixture at a42b6608. The actual helper, runtime, workflow, image and
+pinned dependencies are unchanged. Each of the two controlled pre-fix host
+configurations reproduced the same eight failures. All 51 focused tests pass
+normally and under either simulated host configuration; independent review
+also passed all 51 with both present together and no host-global probes.
+Six explicit config-presence controls preserve refusal before every write.
+
+The collection contains 3907 unique nodes: one prior config case is replaced
+by six cases, and two host-isolation controls are added. Two existing expiry
+parameter timestamps differ only at collection time; their source bytes are
+unchanged and raw deltas are retained. This is inventory evidence, not a
+successful full-suite result. The lead owns the final source/log composition;
+the delivery reviewer owns the next exact-source run and additive v8 failure
+history, with independent planning/verification review. HTTP remains In
+progress and ledger packages remain Not started until protected-main and
+candidate acceptance. No failed attempt is retried or relabeled as acceptance.
