@@ -93,8 +93,10 @@ def test_tested_python_versions_and_pinned_external_inputs():
     for job in WORKFLOW["jobs"].values():
         for step in job["steps"]:
             if step.get("uses", "").startswith("astral-sh/setup-uv@"):
-                assert step["with"]["version"] == "0.11.21"
-                assert re.fullmatch(r"[0-9a-f]{64}", step["with"]["checksum"])
+                assert step["with"]["version"] == "0.13.4"
+                assert step["with"]["checksum"] == (
+                    "2b428396f12572d4429cf210ca234dd599a33b3af0958a4d5ed569d63e3f344f"
+                )
                 assert step["with"]["enable-cache"] is False
 
 
@@ -104,3 +106,28 @@ def test_every_frozen_consumer_checks_manifest_lock_consistency_first():
         consumers = [i for i, command in enumerate(commands) if "uv sync --frozen" in command]
         for index in consumers:
             assert "uv lock --check --offline" in commands[:index]
+
+
+def test_package_job_validates_container_installer_and_offline_cli():
+    steps = WORKFLOW["jobs"]["package"]["steps"]
+    commands = "\n".join(step.get("run", "") for step in steps)
+    assert "docker build --tag agent-rewind-ci:${{ github.sha }} ." in commands
+    assert (
+        "docker run --rm --network none agent-rewind-ci:${{ github.sha }} rewind --help" in commands
+    )
+    dockerfile = (ROOT / "Dockerfile").read_text()
+    assert "COPY scripts/uv-requirements.txt /tmp/uv-requirements.txt" in dockerfile
+    assert (
+        "pip install --no-cache-dir --no-deps --only-binary=:all: --require-hashes "
+        "-r /tmp/uv-requirements.txt" in dockerfile
+    )
+
+
+def test_container_trust_repair_precedes_network_bootstrap_and_final_check_is_offline():
+    dockerfile = (ROOT / "Dockerfile").read_text()
+    assert dockerfile.index("container_ca.py --repair") < dockerfile.index("pip install")
+    commands = "\n".join(step.get("run", "") for step in WORKFLOW["jobs"]["package"]["steps"])
+    assert (
+        "docker run --rm --network none agent-rewind-ci:${{ github.sha }} "
+        "/app/.venv/bin/python -I /opt/agent-rewind/container_ca.py --check"
+    ) in commands

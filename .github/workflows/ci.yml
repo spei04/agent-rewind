@@ -40,8 +40,8 @@ jobs:
           python-version: '${{ matrix.python }}'
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
-          version: '0.11.21'
-          checksum: '8c88519b0ef0af9801fcdee419bbb12116bd9e6b18e162ae093c932d8b264050'
+          version: '0.13.4'
+          checksum: '2b428396f12572d4429cf210ca234dd599a33b3af0958a4d5ed569d63e3f344f'
           enable-cache: false
       # Only the disposable service is quieted; operator-supplied databases are untouched.
       - name: Verify quiet PostgreSQL service for migration tests
@@ -74,8 +74,8 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
-          version: '0.11.21'
-          checksum: '8c88519b0ef0af9801fcdee419bbb12116bd9e6b18e162ae093c932d8b264050'
+          version: '0.13.4'
+          checksum: '2b428396f12572d4429cf210ca234dd599a33b3af0958a4d5ed569d63e3f344f'
           enable-cache: false
       - run: uv lock --check --offline
       - run: uv sync --frozen --group dev
@@ -108,8 +108,8 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
-          version: '0.11.21'
-          checksum: '8c88519b0ef0af9801fcdee419bbb12116bd9e6b18e162ae093c932d8b264050'
+          version: '0.13.4'
+          checksum: '2b428396f12572d4429cf210ca234dd599a33b3af0958a4d5ed569d63e3f344f'
           enable-cache: false
       - run: uv lock --check --offline
       - run: uv sync --frozen --group dev --group security
@@ -131,13 +131,18 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
-          version: '0.11.21'
-          checksum: '8c88519b0ef0af9801fcdee419bbb12116bd9e6b18e162ae093c932d8b264050'
+          version: '0.13.4'
+          checksum: '2b428396f12572d4429cf210ca234dd599a33b3af0958a4d5ed569d63e3f344f'
           enable-cache: false
       - run: uv lock --check --offline
       - run: uv sync --frozen --group build
       - name: Inspect package allowlist and smoke isolated runtime
         run: bash scripts/ci_package.sh
+      - name: Build container and smoke installed CLI without network
+        run: |
+          docker build --tag agent-rewind-ci:${{ github.sha }} .
+          docker run --rm --network none agent-rewind-ci:${{ github.sha }} /app/.venv/bin/python -I /opt/agent-rewind/container_ca.py --check
+          docker run --rm --network none agent-rewind-ci:${{ github.sha }} rewind --help
   ci-gate:
     name: CI gate
     if: ${{ always() }}
@@ -167,8 +172,8 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
-          version: '0.11.21'
-          checksum: '8c88519b0ef0af9801fcdee419bbb12116bd9e6b18e162ae093c932d8b264050'
+          version: '0.13.4'
+          checksum: '2b428396f12572d4429cf210ca234dd599a33b3af0958a4d5ed569d63e3f344f'
           enable-cache: false
       - run: uv lock --check --offline
       - run: uv sync --frozen --group build

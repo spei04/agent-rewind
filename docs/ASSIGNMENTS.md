@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| A | Final installed GET/cancellation package proof | Rebind the independently verified 71d33737 smoke and 113 runtime members to the final integrated source. |
-| C | Independent composition and progress review | PostgreSQL 65-case assembled proof complete; database restored/stopped and checkout released. |
-| B | Independent smoke, pool-control and delivery review | Rebind source/skip inventory and verify matching hosted checks. |
-| Lead | Integration, evidence, progress and delivery | Exact f9172462 composition; 68 independent SQLite passes. P1 In progress; P2 Not started. |
+| Platform/security | Fixture isolation accepted at a42b6608; next planning composition | Preserve the approved ledger amendment and all failed delivery histories. |
+| Delivery reviewer | Failed-attempt audit complete; verifier v8 and next hosted delivery | Independent verifier review, fresh PR/main checks and candidate acceptance remain required. |
+| Planning/verification | Fixture source accepted; independently review verifier v8 | Keep source, actual test results and narrow failed-attempt evidence distinct. |
+| Lead | Corrected HTTP source integration and inventory | Reuse primary; ledger implementation waits for accepted HTTP protected-main delivery. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -52,8 +52,8 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - **Verified delta:** AR-006-A preparatory run projection is Verified in PR #72 at reviewed source 46639c49502995870eb19faaea218b84a02a95ec. Hosted run 39497717028 passed 1596 tests on Python 3.11 and 1600 on Python 3.12, including all 21 new actual PostgreSQL backfill/publication cases. Three core Docker skips are covered by three passing gVisor cases; four sqlite3 transaction-mode cases are Python-3.12-only. Lint, formatting, strict types, contract/planning validation, dependency security audit, isolated package smoke and CI gate passed. A/B accepted the scoped runtime, transaction, catalog, test and diagnostic corrections. Frozen history, interrupted process recovery, backup/restore/resume, project serialization and publication rollback/retry have synthetic execution evidence. Live generation-aware publication, API listing, mutable repair/audit, customer admission and production acceptance remain gated. No model calls, new paid resources or partner data were used.
 - **Contributor checkpoint:** AR-007-C/P1/P2 and parent #7 are Verified for preparatory existing-route scope. PR #79 reviewed source db5f992582c0d925a7921d26ae231312eaa41107 and accepted merge e117aaae0ef1f4ff4c293747482364a0791bc5d0 have identical trees. PR run 39535364867 and protected-main run 39536476328 passed 2013/2019 core tests on Python 3.11/3.12, with 9/3 expected skips and one warning per job; actual PostgreSQL, three separate gVisor tests, package/security/CI gate and main delivery passed. A accepted identity/read/mutation/UI security; B accepted C transaction consumption; C accepted interface and compatibility/OpenAPI corrections; lead integrated and verified delivery. Lead independently verified candidate 12318112434 (470334 bytes), archive/API digest, exact four files, source/manifests/package hashes; private indexed record reviewed-delivery-20261021-pr79-e117aaa.json is retained outside checkouts. P2 and aggregate AR-007-C are Verified for preparatory existing-route scope only. Customer-ready admission, full CT-M1-007/008/009, G1 and external production/funding/data gates remain open. Planning reviews: A/C accepted admission 1d284ba and observability 9a70fdc; A accepted final prose f08b1ca and independently passed 54 backlog cases plus all three execution/evaluation/M1 OpenAPI validators. Dated failing and pending checkpoints remain historical.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Final source-bound package, full hosted validation and accepted P1 delivery in [PR #105](https://github.com/spei04/agent-rewind/pull/105). The same-Connection service is implemented and independently reviewed; 68 SQLite cases and 65 distinct PostgreSQL cases across source-bound runs pass. Earlier 5e1766d CI is not evidence for later service code. P1 stays In progress, P2 Not started; HTTP/worker/G1/customer gates remain open.
-- **Current storage and consumers:** The lead reuses the secondary checkout for final composition; A receives the primary for final package proof after explicit handoff. C released all PostgreSQL/source/interpreter consumers; the existing synthetic database is restored and stopped. B/C review immutable source. Two independently owned matching-lock environments remain; no new checkout. One temporary isolated package runtime remains only until final proof and cleanup. Earlier lead-only fixture cleanup recovered 78,655,488 measured bytes; both working checkouts remain needed.
+- **Next evidence-producing milestone:** The three frozen HTTP routes in AR-008-B/P2 #95. P1 #94 is Verified/closed after [PR #105](https://github.com/spei04/agent-rewind/pull/105), matching PR/main checks and verified candidate 12355648523; see [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p1-delivery--2026-10-21). P2 and aggregate #93 remain In progress. HTTP/worker/G1/customer gates remain open.
+- **Current storage and consumers:** A released the primary after final PostgreSQL validation; the exact database/role baseline is restored and the server stopped. The lead owns the secondary for integration. A and C now review read-only. B completed independent installed-package review and released all temporary-runtime consumers; the lead removed that runtime. Two independently owned matching-lock environments remain and no new checkout was created. Completed P1 cleanup separately recovered 126,427,136 bytes from the package runtime and 19,304,448 bytes from lead-only fixtures; retained private evidence stays outside the checkouts. Both working checkouts are needed for P2.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -534,3 +534,160 @@ The core CI job receives a bounded 30-minute scheduling window because the prece
 ### 2026-10-21 — core workflow timeout guard correction
 
 Engineer A owns the narrow test correction for final CI run 39612054532: allow the reviewed 30-minute ceiling only for the core job, retaining the existing 20-minute ceiling for every other job and all workflow trust assertions. Engineer C independently reviews the frozen correction; Engineer B audits the exact failed and final CI runs; the lead owns integration and delivery. The workflow, runtime and pinned manifests remain unchanged. P1 remains In progress; P2 Not started.
+
+## P1 accepted delivery — 2026-10-21
+
+P1 #94 is Verified/closed at merge 03a8e074 from reviewed source 1b0d1fe4. B accepted both complete hosted runs; the lead verified candidate 12355648523 and the indexed private record. [Accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p1-delivery--2026-10-21) records source identities, counts, package hashes and remaining gates. Earlier failed/pending checkpoints remain historical.
+
+## P2 dispatch — 2026-10-21
+
+- C: freeze the HTTP entry, then implement exactly submit/status/cancel and SQLite/ASGI tests after independent entry acceptance.
+- A: independently review the entry and design disjoint actual PostgreSQL HTTP tests; implement only after explicit primary/database handoff.
+- B: review security, exact contract consumption and progress consistency, then review immutable runtime/test/delivery evidence.
+- Lead: reconcile roadmap/backlog/issues, compose accepted work, verify delivery and assign only dependency-ready successors.
+
+P1 acceptance satisfies P2's predecessor gate. The entry review remains before P2 runtime; P2 accepted-merge/review fields stay null. Aggregate #93 and parent #8 remain open. No new paid resources, provider calls, partner data or production activation.
+
+## P2 entry accepted and implementation assigned — 2026-10-21
+
+A, B and the lead accepted corrected entry 9f4f9a34 after fixing the migration-only status/reason description; no runtime guard changed. Composition 9692e706 preserves the exact reviewed five-file progress delta and entry document. C now implements the three routes and SQLite/ASGI tests in the reused secondary checkout. A owns disjoint actual PostgreSQL HTTP tests after immutable runtime handoff; B reviews runtime security and metadata. Primary/database handoff remains explicit and the existing synthetic instance stays stopped until A receives it. No new checkout, dependency installation, provider call or paid resource is required.
+
+## P2 independent contract review and PostgreSQL handoff — 2026-10-21
+
+B completed independent frozen-contract and existing-metadata tests at 41bfed8; A accepted the test source and indexed sensitivity evidence. Before HTTP implementation the tests gave four expected missing-route/security failures and one preservation pass. At composed runtime 341dda0 they exposed one genuine metadata omission: GET lacked explicit false cookie-CSRF metadata. C corrected it in acd5ebc without changing route behavior. The lead verified the exact composition at 1fa397d and all five independent contract cases passed in 1.37 seconds; the failed checkpoint is retained.
+
+B accepted initial runtime acd5ebc as a component. C's 15 initial HTTP cases pass at the preceding behavioral source; the expanded transport suite and installed smoke remain in progress. A now receives the primary checkout and exclusive existing synthetic PostgreSQL lifecycle for independently authored HTTP concurrency, authority and commit-uncertainty tests. Eight-way admission tests must observe all requests crossing the real guard before releasing coordinator contention; early guard-capacity refusal is separate coverage. C keeps the secondary and coordinates any runtime correction before either checkout advances. No HTTP release or aggregate acceptance follows from these component results.
+
+## P2 test and package checkpoint — 2026-10-21
+
+C froze 80 passing HTTP/ASGI/helper cases at 24bf739; B accepted the transport, real ar6 migration-only guard and installed-smoke source. Tests retain literal retryability expectations and real streamed/materialized size boundaries. Original fixture failures remain in private indexed evidence. C released all secondary consumers; the lead composed exact reviewed runtime/test/smoke bytes with B's independent contract tests at be9f3dd.
+
+The lead built and installed that source offline into an independent Python 3.12.3 environment outside both checkouts. The complete installed smoke and CLI passed, including the new HTTP marker exactly once; all 114 runtime members match Git, wheel, sdist and installed bytes. B independently verified the package/evidence and released all runtime consumers. The lead removed the temporary environment: 126,451,712 allocated bytes removed and 126,197,760 bytes of measured filesystem space recovered; required evidence remains private. This local evidence covers Python 3.12.3 only and is separate from required hosted checks.
+
+A continues actual PostgreSQL HTTP tests in the primary checkout and owns the existing database lifecycle. C is reassigned to independently review A's frozen tests and evidence. The lead owns integration, progress and final delivery in the reused secondary. P2 remains In progress; no accepted merge, production readiness, new resources or provider spending is claimed.
+
+B accepted all 114 installed member comparisons, exact distribution file sets and all 40 installed dependency identities against the lockfile. The lead's integrated check passed 91 existing API, identity, contract and backlog tests in 12.43 seconds; full runtime types, formatting, lint/security rules and all three planning/contract validators passed. One validator command used an incorrect filename initially; the corrected command passed and the original invocation is retained. A's final 34-case PostgreSQL run passed with zero skips in 124.06 seconds; immutable source, independent review and database restoration remain the next gates.
+
+## P2 final source review and delivery assignment — 2026-10-21
+
+C independently accepted A's test-only d6be3ba and all 43 indexed evidence files plus 15 source bindings. The single final PostgreSQL run passed all 34 cases with no skips; the exact three-database/fifteen-role baseline was restored, with zero other clients and the server stopped. Initial fixture failures and the superseded descriptor false-positive oracle remain explicitly retained. The lead composed exact test bytes at 907946c; runtime and package inputs remain identical to accepted installed proof be9f3dd.
+
+A is reassigned to a read-only readiness review of the next ledger task; its implementation stays blocked on accepted P2 delivery. B owns final source-bound collection/skip inventory and hosted delivery review. C owns final source composition and preservation review. The lead owns the reused secondary, PR and candidate verification. The released primary is retained for the dependency-ready successor; no third checkout or temporary runtime remains. P2 remains In progress until matching hosted checks, accepted merge and protected-main candidate verification.
+
+## P2 hosted failure and diagnostic assignments — 2026-10-21
+
+PR #106 run [39631674974](https://github.com/spei04/agent-rewind/actions/runs/39631674974), source a304d52, failed on Python 3.11: 3 failed, 3,832 passed and 14 expected skips. Python 3.12 passed 3,846 tests with 3 expected skips. Each core job reported one existing warning. The separate three-case gVisor job, package and security jobs passed. The CI gate does not permit delivery.
+
+The failures are the existing named-viewer detail response, PostgreSQL read-only compatibility guard and maximum-page listing checks. The last records 6 SQL statements, 233,000 VM instructions and 2.749 seconds against the existing 2-second work budget. That observation does not establish the other failures' causes or justify changing limits.
+
+- A: inspect PostgreSQL guard and new-test fixture interactions; source review before any database handoff.
+- C: inspect SQLite listing behavior and run bounded diagnostics in the secondary checkout.
+- B: preserve full logs and source identity, independently audit causes and any proposed correction.
+- Lead: retain the failed run, coordinate review and keep P2/aggregate In progress. No merge, repeated retry for a passing result, runtime-limit relaxation or ledger implementation follows this failure.
+
+The ledger proposal remains reviewed for planning only; the execution-window choice is pending.
+
+
+## P2 diagnostic result and correction assignment — 2026-10-21
+
+A's single guard check passed on local Python 3.12.3 and temporary 3.11.15 with the existing two-second inspection budget; observed inspection times were 0.281 and 0.216 seconds across 71 SQL statements. C's new-HTTP-then-listing sequences each passed 87 cases on those versions. Deliberate work-exhaustion controls still refused and cleaned up. Hosted Python 3.11.17 was unavailable from the pinned installer, so these are supporting diagnostics, not exact reproduction of the hosted interpreter. The original three failures remain unexplained.
+
+C separately demonstrated a test application retention defect: three process-global callable-classification caches in pinned FastAPI 0.142.2 retained nine completed applications and disposed engines after full garbage collection. Clearing those caches at a test boundary and collecting released all nine. This establishes the retention mechanism, not causality for all three hosted failures.
+
+- C now owns a narrow test-only helper and teardown in the three new HTTP test modules, plus a behavioral weak-reference regression. Existing runtime limits, assertions and production code remain unchanged.
+- B independently reviews the immutable correction and its red/green evidence, then the new source-bound inventory and hosted checks.
+- A completed the guard diagnosis, exact baseline restoration and independent review of the private delivery verifier.
+- The lead integrates reviewed changes, preserves failed evidence and keeps P2/aggregate In progress until full delivery acceptance.
+
+The delivery verifier now binds explicit PR and protected-main attempt numbers and complete job sets, records the immutable failed first attempt, and refuses mixed/latest-attempt evidence. This private verification-tool change grants no runtime or production authority. No unchanged-source retry was dispatched.
+
+## P2 cleanup component accepted for delivery review — 2026-10-21
+
+AR-008-B/P2 remains In progress: PR #106 run 39631674974 failed on Python 3.11. The independently reviewed test-only application-cache correction a992425 preserves runtime limits and existing assertions; 94 targeted cases passed on each local interpreter. Corrected-source hosted checks, protected-main delivery and candidate verification remain required. The original hosted failure causes are not established. The finite-window, two-package ledger plan is owner-approved; implementation remains gated by P2 acceptance and exact manifest/interface/SQL entry review. The primary checkout is reused on work/operation-http-final; the separately published ledger proposal remains on work/ledger-entry. Both existing checkouts own their environments. No provider calls, production changes, partner data or new paid resources were used.
+
+
+## Ledger owner decision — 2026-10-21
+
+The owner approved the [reviewed ledger plan](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md): one finite job execution window supplied by trusted provisioning; retries, claims and restarts cannot extend it; expiry prevents new paid work while retaining obligations. The schema/provisioning then reservation/concurrency split and provisional 6–10 engineering-day estimate are approved. The original owner message and its exact proposal context were verified and recorded privately.
+
+The lead will reconcile the ledger planning amendment and assign exact manifest/interface/SQL entry work. Ledger implementation still waits for accepted HTTP protected-main delivery and entry review. Existing spending authorization, migration-only compatibility, later worker and settlement gates remain unchanged. Earlier dated pending-decision checkpoints remain historical.
+
+
+## Patched toolchain delivery assignments — 2026-10-21
+
+Corrected HTTP source a439bce passed complete PR run [39638999615](https://github.com/spei04/agent-rewind/actions/runs/39638999615): Python 3.11 recorded 3,838 passes and 14 expected skips; Python 3.12 recorded 3,849 passes and 3 expected skips. Package, security, three isolation tests and CI gate passed. This is functional evidence using the former uv pin, not acceptance of a patched build.
+
+[GHSA-hq85-5cpj-mr62](https://github.com/astral-sh/uv/security/advisories/GHSA-hq85-5cpj-mr62) requires a build-tool update before delivery. Platform/security prepared 6c54c3c with uv 0.13.4, verified official archive/wheel hashes, candidate provenance and version refusal, and added a hosted container build/offline CLI smoke gate. All 53 focused cases and static checks passed; the isolated package smoke passed and 114 runtime members matched Git, wheel, sdist and installation. Project dependencies and runtime bytes are unchanged.
+
+The delivery reviewer independently audits the repair. Planning/verification owns a separately reviewed private verifier update, preserving earlier failed and successful run identities. Platform/security next binds the final source collection; the lead owns PR, protected-main and candidate acceptance. The existing Docker base and shared host trust store are separate inputs; this uv repair does not claim to remediate them. Local Docker remains unavailable, so actual container validation must come from hosted CI.
+
+The approved ledger amendment and accepted schema/provisioning entry are published on [work/ledger-backlog-amendment](https://github.com/spei04/agent-rewind/blob/work/ledger-backlog-amendment/docs/ASSIGNMENTS.md). They establish design readiness only. Ledger #107, #108 and #109 remain Not started; HTTP #95 and #93 remain In progress until the required delivery evidence is accepted. No new paid resources, provider calls, partner data or production activation were used.
+
+
+## Container trust maintenance assignments — 2026-10-21
+
+The uv-patched HTTP source eeca4e5 is bound to functional run
+[39672365195](https://github.com/spei04/agent-rewind/actions/runs/39672365195).
+Its package, security and isolation jobs passed at the recorded checkpoint;
+the core jobs were still running at that checkpoint. That earlier container
+build did not check all CA stores and cannot establish acceptance of this repair.
+
+Verified immutable Linux x86_64 base layers still contain emSign ECC Root CA-G3
+in both OS and base pip trust. Platform/security owns a container-only repair on
+work/container-ca-repair, reusing the secondary checkout. The repair preserves
+the base digest, dependency lock, application runtime and unrelated roots.
+Planning/verification accepted the bounded design and independently reviews the
+source and negative controls. The lead owns the subsequent private verifier
+revision, source-bound collection, full hosted checks and protected-main
+candidate acceptance. Those gates remain open; no earlier run is relabeled as
+proof of the new repair.
+
+The published ledger planning branch is preserved. Ledger #107, #108 and #109
+remain Not started, and HTTP #95 and #93 remain In progress. No shared host trust
+mutation, provider call, production change, partner data or new paid resource
+is part of this maintenance.
+
+## Pinned certificate configuration correction — 2026-10-21
+
+Reviewed source 316bdc5 failed the package job in PR run
+[39677547972](https://github.com/spei04/agent-rewind/actions/runs/39677547972),
+attempt 1: Docker's repair step decoded the pinned Debian certificate
+configuration as ASCII and encountered non-ASCII bytes. The installed-package
+smoke passed, but the container did not reach final-image trust or CLI proof.
+The failure and source are retained.
+
+Platform/security owns the narrow byte-preserving configuration edit and an
+actual pinned-file regression in the reused secondary checkout.
+Planning/verification independently reviews the correction before another
+source run. The lead owns PR #106 and delivery acceptance; HTTP remains In
+progress and ledger packages remain Not started. No later repair stage,
+container acceptance or protected-main delivery is established by this fix.
+
+
+## Container test isolation — 2026-10-21
+
+PR run [39678917428](https://github.com/spei04/agent-rewind/actions/runs/39678917428),
+attempt 1 at ad6bfdaa, is retained as failed. Python 3.11 reported 8 failed,
+3878 passed and 14 skipped; Python 3.12 reported 8 failed, 3889 passed and
+3 skipped. Both failed the same eight certificate tests. Package, security,
+gVisor and actual final-container trust checks passed; the CI gate failed and
+candidate delivery was skipped. The logs do not identify which global pip
+configuration file existed.
+
+Platform/security isolated the two remaining host-global config probes in the
+test fixture at a42b6608. The actual helper, runtime, workflow, image and
+pinned dependencies are unchanged. Each of the two controlled pre-fix host
+configurations reproduced the same eight failures. All 51 focused tests pass
+normally and under either simulated host configuration; independent review
+also passed all 51 with both present together and no host-global probes.
+Six explicit config-presence controls preserve refusal before every write.
+
+The collection contains 3907 unique nodes: one prior config case is replaced
+by six cases, and two host-isolation controls are added. Two existing expiry
+parameter timestamps differ only at collection time; their source bytes are
+unchanged and raw deltas are retained. This is inventory evidence, not a
+successful full-suite result. The lead owns the final source/log composition;
+the delivery reviewer owns the next exact-source run and additive v8 failure
+history, with independent planning/verification review. HTTP remains In
+progress and ledger packages remain Not started until protected-main and
+candidate acceptance. No failed attempt is retried or relabeled as acceptance.
