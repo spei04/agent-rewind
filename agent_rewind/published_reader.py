@@ -222,12 +222,16 @@ class PublishedRunReader:
         connection: Connection,
         context: ProjectContext,
         identities: dict[GraphRef, tuple[Any, ...]],
+        *,
+        owner_kind: str = "run",
     ) -> None:
         """Re-read the entire bounded expected ref set in one statement snapshot.
 
         This prevents an earlier checked ref from escaping a later compound
         recheck. It needs SELECT privileges only, without holding writer locks.
         """
+        if owner_kind not in {"run", "job"}:
+            raise ArtifactError("publication_reference_changed")
         if not 1 <= len(identities) <= MAX_OBJECTS:
             raise ArtifactError("artifact_graph_limit")
         expected = []
@@ -286,7 +290,7 @@ class PublishedRunReader:
                     _refs,
                     and_(
                         _refs.c.project_id == context.project_id,
-                        _refs.c.owner_kind == "run",
+                        _refs.c.owner_kind == owner_kind,
                         _refs.c.owner_id == wanted.c.owner,
                         _refs.c.role == wanted.c.role,
                         _refs.c.artifact_id == wanted.c.artifact_id,
@@ -305,7 +309,7 @@ class PublishedRunReader:
                     scopes,
                     and_(
                         scopes.c.project_id == context.project_id,
-                        scopes.c.resource_kind == "run",
+                        scopes.c.resource_kind == owner_kind,
                         scopes.c.resource_id == wanted.c.owner,
                     ),
                 )

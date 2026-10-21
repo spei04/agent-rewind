@@ -9,7 +9,16 @@ const state = {
   step: 1,
   view: "runs",
   busy: false,
+  identityGeneration: 0,
+  viewGeneration: 0,
 };
+class SupersededRequest extends Error {}
+function checkIdentity(generation) {
+  if (generation !== state.identityGeneration) throw new SupersededRequest();
+}
+function checkView(generation) {
+  if (generation !== state.viewGeneration) throw new SupersededRequest();
+}
 function element(tag, text, className) {
   const e = document.createElement(tag);
   if (text !== undefined) e.textContent = text;
@@ -22,24 +31,41 @@ function notice(message) {
 }
 function guard(fn) {
   return async (...args) => {
+    const generation = state.identityGeneration;
     try {
       await fn(...args);
     } catch (error) {
-      notice(error.message);
+      if (
+        generation === state.identityGeneration &&
+        !(error instanceof SupersededRequest)
+      )
+        notice(error.message);
     }
   };
 }
 async function api(path, body, method) {
+  const generation = state.identityGeneration;
+  // Own identity/CSRF remains available independently of protected data access.
+  const viewGeneration = path === "/me" ? null : state.viewGeneration;
   const headers = {};
   if (state.token) headers.Authorization = `Bearer ${state.token}`;
   if (state.csrf) headers["X-Rewind-CSRF"] = state.csrf;
   if (body !== undefined) headers["Content-Type"] = "application/json";
-  const response = await fetch(`/api${path}`, {
-    method: method || (body === undefined ? "GET" : "POST"),
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  const data = await response.json();
+  let response, data;
+  try {
+    response = await fetch(`/api${path}`, {
+      method: method || (body === undefined ? "GET" : "POST"),
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    data = await response.json();
+  } catch (error) {
+    checkIdentity(generation);
+    if (viewGeneration !== null) checkView(viewGeneration);
+    throw error;
+  }
+  checkIdentity(generation);
+  if (viewGeneration !== null) checkView(viewGeneration);
   if (!response.ok)
     throw new Error(
       typeof data.detail === "string"
@@ -71,33 +97,109 @@ function showView(view) {
     jobs: "Execution jobs",
   }[view];
 }
+function canOperate() {
+  return ["operator", "maintainer"].includes(state.user?.role);
+}
+function requireOperator() {
+  if (!canOperate())
+    throw new Error("A current operator or maintainer grant is required.");
+}
+function clearProtectedState() {
+  // Authority loss must also invalidate older reads under the same credentials.
+  state.viewGeneration += 1;
+  state.runs = [];
+  state.run = null;
+  for (const id of [
+    "run-list",
+    "studies-list",
+    "jobs-list",
+    "file-list",
+    "timeline",
+    "ancestry",
+  ])
+    $(id).replaceChildren();
+  for (const id of [
+    "file-content",
+    "compare-output",
+    "action-output",
+    "tool-output",
+    "changed-files",
+    "evaluation",
+  ])
+    $(id).textContent = "";
+  $("run-detail").classList.add("hidden");
+  $("run-empty").classList.remove("hidden");
+  for (const id of [
+    "branch",
+    "investigate",
+    "new-run",
+    "empty-record",
+    "task-submit",
+    "study-submit",
+  ])
+    $(id).disabled = true;
+  for (const id of ["task-dialog", "study-dialog", "compare-dialog"])
+    $(id).close();
+  document.querySelectorAll("[data-project-action]").forEach((button) => {
+    button.disabled = true;
+  });
+}
 async function authenticate() {
-  state.user = await api("/me");
-  state.csrf = state.user.csrf;
-  $("identity").textContent = `${state.user.subject} · ${state.user.role}`;
-  $("connection").textContent = "Connected";
-  $("logout").classList.remove("hidden");
-  $("login-panel").classList.add("hidden");
-  showView(state.view);
+  // An old poll must neither block this lookup nor publish under new credentials.
+  state.identityGeneration += 1;
+  state.busy = false;
+  state.user = null;
+  state.csrf = "";
+  clearProtectedState();
   await refresh();
 }
 async function refresh() {
-  if (!state.user || state.busy) return;
+  if (state.busy) return;
+  const generation = state.identityGeneration;
   state.busy = true;
   try {
+    // Manual refresh and polling must refresh the role hint too. A prior page
+    // grant is never permission to retain actions after access has changed.
+    const user = await api("/me");
+    checkIdentity(generation);
+    if (user.subject !== state.user?.subject || user.role !== state.user?.role)
+      clearProtectedState();
+    state.user = user;
+    state.csrf = user.csrf;
+    $("identity").textContent = `${user.subject} · ${user.role || "no project access"}`;
+    for (const id of ["new-run", "empty-record", "task-submit", "study-submit"])
+      $(id).disabled = !canOperate();
+    $("connection").textContent = "Connected";
+    $("logout").classList.remove("hidden");
+    $("login-panel").classList.add("hidden");
+    showView(state.view);
+    const viewGeneration = state.viewGeneration;
     const [runs, studies, jobs] = await Promise.all([
       api("/runs"),
       api("/studies"),
       api("/jobs"),
     ]);
+    checkIdentity(generation);
+    checkView(viewGeneration);
     state.runs = runs;
     renderRuns();
     renderStudies(studies);
     renderJobs(jobs);
     if (state.run && state.run.status === "running")
       await selectRun(state.run.id, false);
+  } catch (error) {
+    checkIdentity(generation);
+    if (error instanceof SupersededRequest) throw error;
+    // Preserve the caller's own CSRF/logout even when data access fails, but
+    // require another successful refresh before offering privileged actions.
+    if (state.user) {
+      state.user = { ...state.user, role: null };
+      $("identity").textContent = `${state.user.subject} · project access unavailable`;
+    }
+    clearProtectedState();
+    throw error;
   } finally {
-    state.busy = false;
+    if (generation === state.identityGeneration) state.busy = false;
   }
 }
 function renderRuns() {
@@ -126,7 +228,12 @@ function renderRuns() {
   });
 }
 async function selectRun(id, reset = true) {
-  state.run = await api(`/runs/${id}`);
+  const generation = state.identityGeneration;
+  const viewGeneration = state.viewGeneration;
+  const run = await api(`/runs/${id}`);
+  checkIdentity(generation);
+  checkView(viewGeneration);
+  state.run = run;
   if (reset) state.step = 1;
   state.step = Math.min(state.step, state.run.events.length || 1);
   $("run-empty").classList.add("hidden");
@@ -172,7 +279,7 @@ async function selectRun(id, reset = true) {
     null,
     2,
   );
-  const operator = state.user.role !== "viewer";
+  const operator = canOperate();
   $("branch").disabled =
     !operator || !state.run.branchable || state.run.status !== "complete";
   $("investigate").disabled =
@@ -218,10 +325,14 @@ function resetReplacement() {
     );
 }
 async function loadFiles() {
+  const generation = state.identityGeneration;
+  const viewGeneration = state.viewGeneration;
   const runId = state.run.id,
     step = state.step;
   const files = await api(`/runs/${runId}/files/${step}`);
-  if (runId !== state.run.id || step !== state.step) return;
+  checkIdentity(generation);
+  checkView(viewGeneration);
+  if (runId !== state.run?.id || step !== state.step) return;
   $("file-list").replaceChildren();
   files.forEach((file) => {
     const b = element("button", file.path);
@@ -229,7 +340,9 @@ async function loadFiles() {
       const f = await api(
         `/runs/${runId}/files/${step}?path=${encodeURIComponent(file.path)}`,
       );
-      if (runId === state.run.id && step === state.step)
+      checkIdentity(generation);
+      checkView(viewGeneration);
+      if (runId === state.run?.id && step === state.step)
         $("file-content").textContent =
           f.content + (f.truncated ? "\n[truncated]" : "");
     });
@@ -237,7 +350,12 @@ async function loadFiles() {
   });
 }
 async function queued(path, body) {
+  requireOperator();
+  const generation = state.identityGeneration;
+  const viewGeneration = state.viewGeneration;
   const result = await api(path, body);
+  checkIdentity(generation);
+  checkView(viewGeneration);
   notice(`Job ${result.job_id.slice(0, 12)} queued. A worker will execute it.`);
   await refresh();
 }
@@ -404,8 +522,10 @@ function renderJobs(jobs) {
       row.append(b);
     } else if (["queued", "running"].includes(job.status)) {
       const b = element("button", "Cancel", "quiet");
-      b.disabled = state.user.role === "viewer";
+      b.dataset.projectAction = "cancel";
+      b.disabled = !canOperate();
       b.onclick = guard(async () => {
+        requireOperator();
         await api(`/jobs/${job.id}/cancel`, {});
         await refresh();
       });
@@ -414,18 +534,25 @@ function renderJobs(jobs) {
     $("jobs-list").append(row);
   });
 }
-$("login-form").onsubmit = guard(async (e) => {
+$("login-form").onsubmit = (e) => {
   e.preventDefault();
   state.token = $("api-key").value.trim();
   $("api-key").value = "";
-  try {
-    await authenticate();
-    notice("");
-  } catch (error) {
-    state.token = "";
-    throw error;
-  }
-});
+  const authentication = authenticate();
+  const generation = state.identityGeneration;
+  // Capture the new generation, rather than the credential state being replaced.
+  return guard(async () => {
+    try {
+      await authentication;
+      checkIdentity(generation);
+      notice("");
+    } catch (error) {
+      checkIdentity(generation);
+      state.token = "";
+      throw error;
+    }
+  })();
+};
 $("logout").onclick = guard(async () => {
   if (!state.token)
     await fetch("/auth/logout", {
@@ -440,8 +567,8 @@ document
   .forEach((b) => (b.onclick = () => showView(b.dataset.view)));
 for (const id of ["new-run", "empty-record"])
   $(id).onclick = () => {
-    if (!state.user) {
-      notice("Connect with a service API key or organization login first.");
+    if (!canOperate()) {
+      notice("A current operator or maintainer grant is required.");
       return;
     }
     $("task-dialog").showModal();
@@ -458,11 +585,13 @@ $("task-upload").onchange = guard(async () => {
 });
 $("task-form").onsubmit = guard(async (e) => {
   e.preventDefault();
+  requireOperator();
   await queued("/runs", JSON.parse($("task-json").value));
   $("task-dialog").close();
 });
 $("intervention-kind").onchange = resetReplacement;
 $("branch").onclick = guard(async () => {
+  requireOperator();
   const kind = $("intervention-kind").value;
   const intervention = {
     step: state.step,
@@ -479,9 +608,13 @@ $("branch").onclick = guard(async () => {
     budget_usd: Number($("branch-budget").value),
   });
 });
-$("investigate").onclick = () => $("study-dialog").showModal();
+$("investigate").onclick = guard(async () => {
+  requireOperator();
+  $("study-dialog").showModal();
+});
 $("study-form").onsubmit = guard(async (e) => {
   e.preventDefault();
+  requireOperator();
   await queued("/investigations", {
     run_id: state.run.id,
     screening_trials: Number($("screen-trials").value),
@@ -523,9 +656,13 @@ setInterval(() => {
 }, 4000);
 
 $("compare").onclick = guard(async () => {
+  const generation = state.identityGeneration;
+  const viewGeneration = state.viewGeneration;
   const result = await api(
     `/compare?left=${state.run.parent_id}&right=${state.run.id}`,
   );
+  checkIdentity(generation);
+  checkView(viewGeneration);
   $("compare-output").textContent = JSON.stringify(result, null, 2);
   $("compare-dialog").showModal();
 });

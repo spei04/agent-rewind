@@ -1,8 +1,9 @@
 # Existing-route request foundation (AR-007-C/P1)
 
-This package is preparatory. HTTP authentication, session issuance, routes, UI,
-cancel/key mutations and admission are unchanged. P2 must integrate the complete
-route matrix after this package is independently accepted and merged. All release
+This document records the P1 foundation boundary. At P1 delivery, HTTP
+authentication, session issuance, routes, UI,
+cancel/key mutations and admission were unchanged. The subsequent existing-route
+integration is described in [EXISTING_ROUTE_INTEGRATION.md](EXISTING_ROUTE_INTEGRATION.md). All release
 profiles remain migration-only; no helper is an admission or publication bypass.
 
 ## Identity and current project authority

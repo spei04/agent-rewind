@@ -1357,7 +1357,7 @@
       "security_reliability": "Keep migration-only schema guard and customer/second-project activation gates; authorize before expensive I/O and reauthorize before return/commit; project-before-job lock hierarchy; token role intersects current membership and never grants key administration; no client-selected legacy scope, raw artifact fallback or raw enqueue",
       "out_of_scope": "No new v1/debugger/study/export routes, session infrastructure or IdP provisioning, historical artifact adoption, customer-ready schema profile, live publication, or actual work admission. The required C04 v2 session format upgrade is included; durable admission/replay/frozen config and worker integration remain with AR-008-A/B and AR-010-B",
       "status": "In progress",
-      "definition_of_done": "P1 and P2 each have independent review, matching checks and a recorded accepted merge. Aggregate completion additionally requires the full P2 existing-route/transaction matrix with A security/auth/read review, B transaction review and lead integration. Only partial coverage of CT-M1-007/009 is attributed here; CT-M1-008 and future-route gates remain planned. No customer activation or full M1 acceptance follows.",
+      "definition_of_done": "P1 and P2 each have independent review, matching checks and a recorded accepted merge. Aggregate completion additionally requires the full P2 existing-route/transaction matrix. A independently reviews identity/read/security and B's mutation implementation; B independently reviews C's transaction consumption; C checks action-interface integration; lead integrates. Only partial coverage of CT-M1-007/009 is attributed here; CT-M1-008 and future-route gates remain planned. No customer activation or full M1 acceptance follows.",
       "effort_range_days": [
         6.0,
         10.0
@@ -1367,7 +1367,7 @@
         "QE"
       ],
       "pull_request_boundary": "Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days, then AR-007-C/P2 full existing-route integration 4 [4–7] days after accepted merged P1. P1 does not wire Auth/session issuance, routes, UI, mutations or admission. Aggregate AR-007-C remains unverified until P2 and the full existing-route matrix are accepted.",
-      "contracts_status": "C04/C05 and AR-007-B/011-B/009-B are Verified prerequisites. P1 runtime 8be6316 (C source 8222644) and fixture correction dbfbae0 have A/B source acceptance. Lead integration passed 314 focused tests with 53 explicit local PG skips and static/planning checks; A independently passed 61 reader/publication cases. Final matching hosted execution, including all 46 new PG cases, and accepted merge remain required. P2 #77 remains Not started; CT-M1-007/009 remain planned overall and CT-M1-008 awaits actual durable replay producers.",
+      "contracts_status": "C04/C05 and AR-007-B/011-B/009-B are Verified prerequisites. P1 #76 is Verified at accepted merge 51a2b1f after independent review, matching PR/main checks and candidate verification. P2 #77 is Implemented; verification pending in PR #79 after independent A/B/C scope reviews and 159 combined route/UI/guard passes at 26f55b5. Initial hosted run 39533947726 failed on an obsolete test hook now corrected; final matching checks, accepted merge and protected-main candidate remain required. CT-M1-007/009 remain planned overall and CT-M1-008 awaits durable replay producers.",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/75",
       "delivery_packages": [
         {
@@ -1377,9 +1377,9 @@
             "C04",
             "C05"
           ],
-          "status": "Implemented; verification pending",
-          "accepted_merge_commit": null,
-          "review_evidence": null,
+          "status": "Verified",
+          "accepted_merge_commit": "51a2b1fefc40fc871426a47e3f3865fcbeef5bec",
+          "review_evidence": "PR #78 source 923647d85ac8acc68f5334c2edcad40c6638d59a accepted by A for identity/read security and B for authority/SQL semantics; merge 51a2b1fefc40fc871426a47e3f3865fcbeef5bec has the identical reviewed tree. PR run 39528447469 and protected-main run 39529350057 passed 1789 tests on Python 3.11 and 1793 on Python 3.12, including all 46 new PostgreSQL cases; package/security and three gVisor tests passed. Candidate 12314568373 archive, exact four-file set, source/pinned manifests and package/SHA256SUMS hashes independently verified. Private release record is indexed outside disposable checkouts. https://github.com/spei04/agent-rewind/actions/runs/39529350057",
           "id": "AR-007-C/P1",
           "title": "Identity, authority and verified-reader foundation",
           "effort_days": 2.0,
@@ -1409,7 +1409,7 @@
             "C04",
             "C05"
           ],
-          "status": "Not started",
+          "status": "Implemented; verification pending",
           "accepted_merge_commit": null,
           "review_evidence": null,
           "id": "AR-007-C/P2",
@@ -1429,7 +1429,7 @@
           "acceptance": "All existing routes use fresh scoped authority and verified evidence with no raw-hash/raw-enqueue fallback; current revoked users can use identity-only me/logout safely; cancel/key effects and restricted audit are atomic; explicit role gates UI actions; unavailable admission refuses before readiness probes/storage/enqueue; the full current-route matrix passes before aggregate completion",
           "tests": "Exhaustive route/alias 401/403/404 and legacy-shape matrix; old-cookie refusal and v2 issuance, CSRF/exact Origin, me/logout revoked/default/DB-error cases; real PostgreSQL revocation-before-return, mutation races, terminal cancel and rollback at each stage; key/default/secret one-time handling; shared-object cross-project probes; zero readiness/storage/enqueue/provider calls with unavailable adapter; real migration guard refusal",
           "security_reliability": "P2 starts only after accepted merged P1; fresh authorization before I/O and effect/return; account/project/job lock discipline; no service-key escalation or cookie-role fallback; all customer/live/external gates unchanged",
-          "definition_of_done": "Independent A security/auth/read and B transaction review, matching hosted full current-route/PG matrix and accepted merge recorded. Lead may then verify aggregate AR-007-C for preparatory scope only; CT-M1-007/009 remain partial overall and CT-M1-008 remains planned until later actual producers pass",
+          "definition_of_done": "A independently reviews identity/read/security and B's mutation implementation; B independently reviews C's transaction consumption; C checks action-interface integration; lead integrates. Matching hosted full current-route/PG matrix and accepted merge must be recorded. Lead may then verify aggregate AR-007-C for preparatory scope only; CT-M1-007/009 remain partial overall and CT-M1-008 remains planned until later actual producers pass.",
           "tracking_issue": "https://github.com/spei04/agent-rewind/issues/77"
         }
       ]
@@ -7170,9 +7170,9 @@
     ],
     "critical_path_excludes_external_waits": true,
     "revision_notes": "2026-10-20 AR-007-C reconciliation adds verified AR-009-B as a consumed graph-reader producer and C04 as a required contract; replaces its original 2 [2–3] day estimate with 6 [6–10], medium-low, for the same existing-route obligations. Future route/replay/export producers retain their tests without reverse dependencies. Historical C21/owner issuance and daily schedules remain unchanged. Reforecast after the first immutable identity/reader handoff; no calendar or staffing promise. User-requested smaller PR delivery retains the aggregate ID and graph: P1 foundation 2 [2–3], P2 integration 4 [4–7] after accepted merged P1. There are 151 aggregate tasks and 152 planned delivery PRs; all effort totals are unchanged.",
-    "independent_review": "Prior projection planning 4b0bee75 was independently accepted by A/lead; AR-006-A implementation passed PR #72 and the CI-only maintenance fix passed PR #74. A and lead accepted AR-007-C planning correction 839f3a7. A accepted the d5430d6 fixture correction and identified current-summary drift, corrected in the following checkpoint. P1 runtime is In progress; no runtime acceptance is claimed.",
+    "independent_review": "A/lead accepted planning correction 839f3a7. P1 source 923647d was independently accepted by A/B, merged as 51a2b1f and verified through matching PR/main/candidate evidence. P2 component reviews by A/B/C are accepted at their recorded immutable handoffs; combined local 26f55b5 checks passed. Final matching hosted/merge/candidate acceptance remains pending; aggregate AR-007-C remains In progress.",
     "contract_count": 20,
-    "verification": "Two-PR reconciliation passed execution/evaluation/M1 OpenAPI validators and 296 focused tests, including 41 backlog tests with package-order, inherited-input, effort, merge-evidence, aggregate-completion and PR-count refusal cases. Ruff lint/security/format, strict checker types and whitespace passed. Aggregate DAG/effort/status, gates, historical schedules/C21/owner/API/acceptance bytes are unchanged from b42f00b. Exact-delta independent review and hosted checks remain pending; no AR-007-C runtime evidence is claimed.",
+    "verification": "Two-PR reconciliation passed execution/evaluation/M1 OpenAPI validators and 296 focused tests, including 41 backlog tests with package-order, inherited-input, effort, merge-evidence, aggregate-completion and PR-count refusal cases. Ruff lint/security/format, strict checker types and whitespace passed. Aggregate DAG/effort/status, gates, historical schedules/C21/owner/API/acceptance bytes are unchanged from b42f00b. These are historical planning-check results; current runtime evidence and remaining acceptance gates are recorded in each delivery package and planning_status.",
     "delivery_pr_count": 152
   },
   "review_findings": [
@@ -7262,7 +7262,7 @@
       "resolution": "Own existing routes and reusable authority in two sequential delivery PRs: P1 foundation 2 [2–3], P2 full integration 4 [4–7] after accepted merged P1; aggregate 6 [6–10] BE days, medium-low. Retain verified AR-009-B/C04 and future consumer obligations without reverse dependencies; full CT-M1-007/008/009 gates remain open."
     }
   ],
-  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. A and lead accepted AR-007-C planning correction 839f3a7; P1 #76 is implemented in draft PR #78 at reviewed source 8be6316, with matching hosted checks and accepted merge pending. P2 #77 remains Not started until accepted merged P1; aggregate #75 is In progress. AR-011-C is ready but unassigned. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated.",
+  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. AR-007-C/P1 #76 is Verified in PR #78 at accepted merge 51a2b1f, protected-main run 39529350057 and independently verified candidate delivery. P2 #77 is Implemented; verification pending in PR #79 after independent component review and combined local checks; aggregate #75 remains In progress until matching hosted/merge/candidate acceptance. AR-011-C is ready but unassigned. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -7306,7 +7306,7 @@
     ],
     "active_child_issues": {
       "AR-007-C": 75,
-      "AR-007-C/P1": 76
+      "AR-007-C/P2": 77
     },
     "closed_implementation_issues": [
       26,
@@ -7318,11 +7318,10 @@
       52,
       53,
       69,
-      71
+      71,
+      76
     ],
-    "queued_child_issues": {
-      "AR-007-C/P2": 77
-    },
+    "queued_child_issues": {},
     "design_issues": {
       "RA-01-A": 47,
       "RA-01-B": 48
@@ -7330,7 +7329,7 @@
     "owner_decision_issues": {
       "RESEARCHSCOPE0": 51
     },
-    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50. Issue #51 approved by owner on 2026-10-20 and closed after accepted reconciliation; immutable overlay records exact scope. Issues #52/#53/#69 are closed for scoped accepted deliveries; #71 is closed after accepted preparatory AR-006-A in PR #72. Parent #9 is closed for its preparatory children; live integration/customer gates remain open. Issue #75 is the In progress aggregate AR-007-C tracker after accepted planning 839f3a7. P1 #76 is assigned to C; P2 #77 remains Not started until accepted merged P1."
+    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50. Issue #51 approved by owner on 2026-10-20 and closed after accepted reconciliation; immutable overlay records exact scope. Issues #52/#53/#69 are closed for scoped accepted deliveries; #71 is closed after accepted preparatory AR-006-A in PR #72. Parent #9 is closed for its preparatory children; live integration/customer gates remain open. Issue #75 is the In progress aggregate AR-007-C tracker after accepted planning 839f3a7. P1 #76 is closed after accepted PR #78/main candidate at merge 51a2b1f. P2 #77 is Implemented; verification pending in PR #79, with independent A identity/read/mutation/UI, B transaction-consumption and C final compatibility/schema correction reviews accepted; lead owns matching hosted and merge/candidate verification."
   },
   "execution_capacity": {
     "lead": "Project lead",
@@ -7640,6 +7639,6 @@
     "unscheduled_approved_queue": [
       "AR-011-C"
     ],
-    "unscheduled_queue_policy": "AR-011-C has Verified direct inputs and remains unassigned, with no calendar commitment. AR-007-C/P1 is assigned to C after accepted planning 839f3a7, with A identity/read and B transaction review; P2 waits for accepted merged P1. Reuse the same three contributor slots. Historical daily tables are not current allocations."
+    "unscheduled_queue_policy": "AR-007-C/P1 #76 is Verified at accepted merge 51a2b1f with matching main candidate evidence. P2 #77 is Implemented; verification pending in PR #79 after independent reviews. Lead owns matching hosted checks, accepted merge and protected-main candidate; A prepares AR-008-A planning read-only while its aggregate AR-007-C prerequisite remains unverified. AR-011-C remains ready but unassigned; AR-006-C waits for AR-010-B. Historical daily allocations do not schedule these current assignments or authorize external gates."
   }
 }

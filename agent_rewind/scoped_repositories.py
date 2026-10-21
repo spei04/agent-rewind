@@ -1,4 +1,4 @@
-"""Preparatory project-scoped reads; routes and customer admission remain disabled."""
+"""Project-scoped reads; release compatibility and admission remain separate guards."""
 
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ members = table(
 class ProjectContext:
     """Identity already verified by a trusted authenticator, never request role claims.
 
-    Construction is not authentication. AR-007-C must translate only verified
+    Construction is not authentication. HTTP authority translates only verified
     issuer-bound OIDC identities or verified API-key identities into this context.
     """
 
@@ -126,6 +126,9 @@ class _Reads:
     def __init__(self, connection: Connection, context: _ProjectScope):
         self.connection, self.context = connection, context
 
+    def remember(self, kind: str, row: dict[str, Any]) -> None:
+        """Optional request-scoped source receipt; default reads retain nothing."""
+
     def record(self, kind: str, resource_id: str) -> dict[str, Any]:
         row = (
             self.connection.execute(
@@ -142,6 +145,7 @@ class _Reads:
         )
         if row is None:
             raise ResourceNotFound()
+        self.remember(kind, dict(row))
         try:
             data = json.loads(
                 row["body"], object_pairs_hook=_object, parse_constant=_invalid_constant
@@ -165,6 +169,7 @@ class _Reads:
         )
         if row is None:
             raise ResourceNotFound()
+        self.remember("job", dict(row))
         return _json_row(dict(row))
 
     def key(self, resource_id: str, *, require_unrevoked: bool = False) -> dict[str, Any]:
@@ -191,7 +196,15 @@ class _Reads:
         # Scope discovery before its count/limit. A foreign forged incoming
         # reference must neither leak nor deny access to this project's job.
         rows = self.connection.execute(
-            select(records.c.kind, records.c.id)
+            select(
+                case(
+                    (_byte_length(self.connection, records.c.kind) <= 20, records.c.kind),
+                    else_=None,
+                ).label("kind"),
+                case(
+                    (_byte_length(self.connection, records.c.id) == 32, records.c.id), else_=None
+                ).label("id"),
+            )
             .select_from(
                 records.join(
                     scopes,
@@ -208,7 +221,9 @@ class _Reads:
         ).all()
         if len(rows) > MAX_NODES:
             raise ResourceNotFound()
-        return [(row.kind, row.id) for row in rows]
+        if any(row.kind not in {"run", "study"} for row in rows):
+            raise ResourceNotFound()
+        return [(row.kind, identifier(row.id)) for row in rows]
 
     def resource(self, kind: str, resource_id: str) -> dict[str, Any]:
         if kind == "key":
@@ -220,7 +235,7 @@ class ScopedRepositories:
     """SQL ownership and fresh authorization, with explicit scope on every call.
 
     This interface does not replace the release revision guard or authenticate
-    callers. It is deliberately not wired into legacy or v1 routes in this slice.
+    callers. Existing HTTP views compose it; future routes must do the same.
     """
 
     def __init__(

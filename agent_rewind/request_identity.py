@@ -1,4 +1,4 @@
-"""Strict v2 identity/session helpers, not yet wired to HTTP authentication.
+"""Strict issuer-bound v2 identity/session helpers used by HTTP authentication.
 
 Principal construction is not credential verification. Only a trusted
 authenticator may call the factories after the documented OIDC/token checks.
@@ -24,7 +24,7 @@ SESSION_SECONDS = 900
 
 
 class IdentityInvalid(ValueError):
-    """Authentication failure, mapped to a fixed 401 by the later HTTP consumer."""
+    """Authentication failure, mapped to a fixed 401 by the HTTP boundary."""
 
     def __init__(self) -> None:
         super().__init__("Authentication required.")

@@ -1,10 +1,6 @@
 # Existing-route authority — AR-007-C
 
-Planning/design reconciliation, 2026-10-20. Source inspected:
-3c60f1a4b5e6d16504b2209dadd4b735d57037ce. P1 implementation is **Implemented; verification pending** at independently reviewed runtime 8be6316 after accepted planning correction 839f3a7; P2 remains **Not started** until accepted merged P1;
-this record is not route acceptance or permission to enable customer admission.
-The lead and A accepted the exact planning composition. Runtime source review is accepted; matching hosted checks and an accepted merge
-remain pending.
+Planning/design reconciliation, 2026-10-20. Original inspected source: 3c60f1a4b5e6d16504b2209dadd4b735d57037ce. P1 is **Verified** in [PR #78](https://github.com/spei04/agent-rewind/pull/78), accepted merge 51a2b1fefc40fc871426a47e3f3865fcbeef5bec, after independent A/B review, matching PR/main checks and candidate verification. P2 is **Implemented; verification pending** in [PR #79](https://github.com/spei04/agent-rewind/pull/79) after that gate; aggregate AR-007-C remains In progress. This does not accept route behavior or enable customer admission.
 
 ## Entry, ownership and estimate
 
@@ -13,8 +9,10 @@ verified publication reader are Verified. C04 and C05 are required contracts.
 The new direct AR-009-B edge records an actual consumed interface. No reverse
 dependency on future route or admission producers is introduced.
 
-C owns implementation, A reviews authentication/security/read behavior,
-B reviews transactions, and the lead integrates. [Issue #75](https://github.com/spei04/agent-rewind/issues/75)
+For P2, C owns route/auth/read/UI integration and B owns atomic scoped mutations.
+A independently reviews identity/read/security and B's mutation implementation;
+B independently reviews C's transaction consumption; C checks action-interface
+integration, and the lead integrates. [Issue #75](https://github.com/spei04/agent-rewind/issues/75)
 tracks aggregate AR-007-C. The user requested smaller PRs; use two independently
 reviewable delivery packages with their own cards in the execution backlog:
 
@@ -77,7 +75,7 @@ changed route must receive an explicit disposition before this PR is accepted.
 
 | Existing route | Required boundary |
 | --- | --- |
-| GET /api/runs, /api/runs/{run_id}, /api/runs/{run_id}/files/{step} | Fresh default-project authority, scoped repository/lineage and accepted published graph/ref reader; verify owner/role/digest and reauthorize before return. |
+| GET /api/runs, /api/runs/{run_id}, /api/runs/{run_id}/files/{step} | Fresh default-project authority, scoped repository/lineage and accepted published graph/ref reader; verify owner/role/digest and reauthorize before return. Successful run-detail access retains its existing fixed run.read audit through a short scoped transaction after verified rendering; the graph reader remains read-only. |
 | GET /api/compare | Authorize both roots and all nested refs in the same project. Replace raw compare/artifact reads with a bounded verified adapter. |
 | GET /api/studies, /api/studies/{study_id}, /api/jobs | Scope list/detail and nested run/result references before body access; use verified refs or safely refuse unsupported/unpublished evidence. No historical raw-hash fallback after a preliminary scope check. |
 | POST /api/runs, /api/branches, /api/studies, /api/investigations | Fresh default-project action authority, then refuse the unavailable required admission adapter before readiness probes or storage. When a future adapter is available, existing readiness policy still applies before admission. Refuse before artifact upload, credential creation, job/scope/audit writes or provider access. No raw enqueue fallback. |
@@ -96,11 +94,11 @@ may use explicit test-only fixtures; guard-denial tests must use the real guard.
 The UI enables privileged actions only for an explicit current operator or
 maintainer role, never merely "not viewer" or a truthy stale value.
 
-The current implementation still calls raw record/artifact helpers in run,
+The inspected pre-P2 implementation called raw record/artifact helpers in run,
 files, compare and job rendering and unscoped enqueue/cancel/key mutations.
-An initial scope check does not make those consumers safe. Replace those
-paths or refuse unsupported evidence. Preserve supported response shapes;
-do not silently advertise complete history for data lacking scoped refs.
+P2 replaces those consumers with scoped verified reads and atomic actions, or
+refuses unsupported evidence. An initial scope check alone is insufficient.
+Metadata views do not certify complete history for data lacking scoped refs.
 
 ## Mutation and admission contracts
 
@@ -163,8 +161,12 @@ Verified for the aggregate only after accepted merged P1 and P2 and the complete
 live publication, production readiness and external funding/data gates remain
 open.
 
-Current assignment: C implements [P1 #76](https://github.com/spei04/agent-rewind/issues/76), A reviews identity/read security, B reviews authority/transactions, and the lead integrates. [P2 #77](https://github.com/spei04/agent-rewind/issues/77) remains dependency-gated. Planning validation is not runtime acceptance.
+Current assignment: C owns [P2 #77](https://github.com/spei04/agent-rewind/issues/77) Auth/v2 integration, existing routes/verified renderers/UI and their tests; B owns scoped atomic cancel/key actions and dedicated unit/PostgreSQL tests; A independently reviews identity/security/read and mutation boundaries; lead integrates and maintains planning records. [P1 #76](https://github.com/spei04/agent-rewind/issues/76) is Verified at accepted merge 51a2b1f. P2 requires the complete current-route matrix, independent exact-source review and accepted merged evidence.
 
 2026-10-20 P1 hosted correction: final run [39526088575](https://github.com/spei04/agent-rewind/actions/runs/39526088575) at e7442b5 failed one PostgreSQL fixture before the maximum-reference reader query: repeated project parameters inferred conflicting text/varchar types. Python 3.11 passed 1778 with seven skips; Python 3.12 passed 1782 with three skips; each had one failure and one existing warning. The other 45 new PostgreSQL cases, package/security and three gVisor tests passed. B delivered fixture-only dbfbae0, preserving all 16,000 rows and assertions; A accepted the exact fixture correction and the lead owns matching hosted verification. P1 remains Implemented; verification pending, P2 Not started and aggregate #75 In progress. B/C completed read-only P2 interface and test preparation; the accepted 4 [4–7] engineering-day estimate and prerequisite gate remain. No new checkout, model call, paid resource or partner data was used.
 
 2026-10-20 P1 query correction: C delivered 8222644, integrated as 8be6316, after a bounded SQLite probe found repeated JSON rowset scans. A/B accepted materialized, exact-object-ID matching with the original single-statement snapshot, complete descriptor/ownership checks and input/result bounds retained. A independently verified 16,000 matching refs within about 4.21 million VM instructions under a 20-million ceiling, plus foreign/substituted/missing refusals; 61 reader/publication tests passed. Unsupported SQLite versions refuse before storage. Lead integration passed 314 focused tests with 53 explicit local PostgreSQL skips, lint/format/security rules, strict types and all planning/contract validators. PostgreSQL fixture correction dbfbae0 remains included. These results do not establish PostgreSQL performance: final matching hosted execution, package checks and accepted merge remain required. P1 is Implemented; verification pending; P2 remains Not started and aggregate #75 In progress. No new checkout, dependency installation, paid call or partner data was used.
+
+2026-10-20 P1 accepted delivery: PR #78 source 923647d85ac8acc68f5334c2edcad40c6638d59a accepted by A for identity/read security and B for authority/SQL semantics; merge 51a2b1fefc40fc871426a47e3f3865fcbeef5bec has the identical reviewed tree. PR run 39528447469 and protected-main run 39529350057 passed 1789 tests on Python 3.11 and 1793 on Python 3.12, including all 46 new PostgreSQL cases; package/security and three gVisor tests passed. Candidate 12314568373 archive, exact four-file set, source/pinned manifests and package/SHA256SUMS hashes independently verified. Private release record is indexed outside disposable checkouts. P1 is Verified; P2 #77 is In progress after this prerequisite, with the full current-route/transaction matrix still required before aggregate #75 can close. Customer, production, research-execution and spending gates are unchanged.
+
+2026-10-20 retained compatibility boundary: baseline GET run-detail run.read auditing remains an AR-007 obligation. P2 calls record_run_read only after successful verified rendering, with the original context, fresh read/lineage authorization and a fixed principal/action/target audit transaction before return. No storage or network work occurs under those locks; denied, unsupported or failed rendering produces no success audit. Audit failure prevents a successful protected response. This does not add audits to other reads or claim response/audit delivery linearizability. Full P2 evidence remains pending.

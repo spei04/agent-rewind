@@ -2,6 +2,7 @@
 
 import json
 import time
+import warnings
 from dataclasses import FrozenInstanceError
 
 import pytest
@@ -207,6 +208,9 @@ def test_sqlite_budget_interrupts_expensive_inspection(prepared, monkeypatch):
         ("/auth/login", "get"),
         ("/auth/callback", "get"),
         ("/auth/logout", "post"),
+        ("/api/me/lookalike", "get"),
+        ("/auth/logout/lookalike", "post"),
+        ("/api/schema/lookalike", "get"),
     ],
 )
 def test_all_customer_routes_refuse_before_auth_or_artifacts(settings, path, method, monkeypatch):
@@ -217,8 +221,11 @@ def test_all_customer_routes_refuse_before_auth_or_artifacts(settings, path, met
         pytest.fail("Customer data or auth reached before compatibility refusal")
 
     monkeypatch.setattr(app.state.auth, "principal", forbidden)
-    monkeypatch.setattr(app.state.artifacts, "put_json", forbidden)
-    monkeypatch.setattr(app.state.artifacts, "json", forbidden)
+    monkeypatch.setattr(app.state.auth, "session", forbidden)
+    monkeypatch.setattr(app.state.auth, "login", forbidden)
+    monkeypatch.setattr(app.state.auth, "callback", forbidden)
+    monkeypatch.setattr(app.state.admission, "admit", forbidden)
+    monkeypatch.setattr(app.state.reader.repositories, "artifact_loader", forbidden)
     with TestClient(app) as client:
         response = getattr(client, method)(path)
     assert response.status_code == 503
@@ -540,3 +547,22 @@ def test_legacy_health_checks_connectivity_without_claiming_schema_readiness(set
         assert client.head("/livez").status_code == 200
         assert client.get("/livez").json() == {"status": "live"}
     app.state.db.engine.dispose()
+
+
+def test_probe_methods_have_distinct_openapi_operation_ids(settings):
+    app = create_app(settings)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("error", message="Duplicate Operation ID")
+        schema = app.openapi()
+    methods = {"get", "head", "post", "put", "patch", "delete", "options", "trace"}
+    identifiers = [
+        operation["operationId"]
+        for path in schema["paths"].values()
+        for method, operation in path.items()
+        if method in methods
+    ]
+    assert len(identifiers) == len(set(identifiers))
+    for path in ("/readyz", "/livez", "/healthz"):
+        operations = schema["paths"][path]
+        assert set(operations) == {"get", "head"}
+        assert operations["get"]["operationId"] != operations["head"]["operationId"]

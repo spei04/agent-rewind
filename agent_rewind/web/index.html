@@ -263,7 +263,9 @@ Select a file to inspect the saved contents.</pre
           The image must already exist on the worker and be allowed by its
           administrator.
         </p>
-        <button class="primary" type="submit">Queue recording →</button>
+        <button id="task-submit" class="primary" type="submit" disabled>
+          Queue recording →
+        </button>
       </form>
     </dialog>
     <dialog id="study-dialog">
@@ -305,7 +307,7 @@ Select a file to inspect the saved contents.</pre
           A pair includes an unchanged control and an intervention branch. Model
           seeds are advisory when supported. Incomplete trials remain visible.
         </p>
-        <button class="primary" type="submit">
+        <button id="study-submit" class="primary" type="submit" disabled>
           Start intervention study →
         </button>
       </form>
