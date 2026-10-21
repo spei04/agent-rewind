@@ -4,7 +4,8 @@ P3 #83 and aggregate #80 are **Verified/closed** after
 [accepted PR #92/main/candidate evidence](ADMISSION_EXECUTION_PLAN.md#accepted-p3-delivery--2026-10-21).
 All 33 publication and 26 recovery PostgreSQL cases executed on both supported
 Python versions; independent source/hosted review and candidate verification
-passed. Parent #8 remains open and AR-008-B remains Not started.
+passed. Parent #8 remains open; AR-008-B and P1 are In progress with engineer C, while
+P2 remains Not started until accepted merged P1.
 
 AR-008-A/P3 now composes pure frozen restoration, SQL-only winner recovery and
 an internal new-work path requiring explicit policy, readiness, registry, journal

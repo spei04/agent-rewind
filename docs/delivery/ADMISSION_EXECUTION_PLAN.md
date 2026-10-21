@@ -1,6 +1,6 @@
 # Admission execution plan
 
-2026-10-21 · AR-008-A/P1, P2, P3 and aggregate A are Verified; see [accepted P3 delivery](#accepted-p3-delivery--2026-10-21). Issues #80/#81/#82/#83 are closed. AR-008-B remains Not started. These preparatory services supply no deployed registry, available new-work HTTP admission, customer-ready profile or spending authority.
+2026-10-21 · AR-008-A/P1, P2, P3 and aggregate A are Verified; see [accepted P3 delivery](#accepted-p3-delivery--2026-10-21). Issues #80/#81/#82/#83 are closed. AR-008-B/P1 is In progress with engineer C; P2 remains Not started. These preparatory services supply no deployed registry, available new-work HTTP admission, customer-ready profile or spending authority.
 
 ## Entry and delivery boundaries
 
@@ -14,7 +14,7 @@ AR-008-A retains direct prerequisites AR-007-C and AR-009-B, both Verified for t
 | AR-008-B/P1 | Bounded Operation reads and same-Connection cancellation | 2 / 2–3 BE days | Accepted A and reviewed producer/cancellation checkpoint |
 | AR-008-B/P2 | Exactly submit, status and cancellation HTTP operations | 2 / 2–3 BE days | Accepted merged B/P1 and full three-route evidence |
 
-A retains 7 [7–11] days. The separate [operation HTTP plan](OPERATION_HTTP_EXECUTION_PLAN.md) replaces B's provisional 3 [3–5] with two sequential 2 [2–3] BE packages, total 4 [4–6], medium-low confidence. B remains Not started; its accepted-A prerequisite, including P3 merge/main/candidate evidence, is now satisfied. This re-estimates approved status/cancellation and three-route work; it adds no feature, calendar, staffing, data or spending authority. Review the explicit stored-failure producer decision and same-Connection cancellation boundary before B runtime. The original historical schedules and immutable C21/owner decisions remain unchanged. Three contributor slots are not six human FTEs.
+A retains 7 [7–11] days. The separate [operation HTTP plan](OPERATION_HTTP_EXECUTION_PLAN.md) replaces B's provisional 3 [3–5] with two sequential 2 [2–3] BE packages, total 4 [4–6], medium-low confidence. B/P1 is In progress after its accepted-A and AR-011-B prerequisites and independent entry review; P2 remains Not started until accepted merged P1. This re-estimates approved status/cancellation and three-route work; it adds no feature, calendar, staffing, data or spending authority. Review the explicit stored-failure producer decision and same-Connection cancellation boundary before B runtime. The original historical schedules and immutable C21/owner decisions remain unchanged. Three contributor slots are not six human FTEs.
 
 The admission-only checkpoint 1d284ba retained 151 aggregate tasks and 543 outer edges, with 154 planned PRs: 452 base days, 765.1 summed upper days, an alternative 565-day allowance at 25%, and a 166.5-day effort-only path. Those are historical checkpoint totals. The subsequent [observability reconciliation](OBSERVABILITY_EXECUTION_PLAN.md) changes the current portfolio totals recorded in the [roadmap](../PLAN.md) and [execution ledger](../../contracts/proposals/execution-backlog.json). External waits and role contention remain outside the effort path.
 
