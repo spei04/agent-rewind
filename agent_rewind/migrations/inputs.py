@@ -30,7 +30,10 @@ SOURCE_QUERIES = {
     "events": "SELECT * FROM events ORDER BY run_id,step",
     # Keep the original thirteen-column value/header projection after ar6 adds
     # nullable configuration columns. Additive metadata is not source history.
-    "jobs": "SELECT " + ",".join(c[0] for c in COLUMNS["jobs"]) + " FROM jobs ORDER BY id",
+    "jobs": (
+        "SELECT id,kind,created,payload,status,owner,lease_until,cancel,budget,reserved,"
+        "result,error,actor FROM jobs ORDER BY id"
+    ),
     "records": "SELECT id,kind,created,CAST(data AS TEXT) AS data FROM records ORDER BY id",
 }
 
