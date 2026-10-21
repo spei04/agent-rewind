@@ -1,6 +1,6 @@
 # Existing-route authority — AR-007-C
 
-Planning/design reconciliation, 2026-10-20. Original inspected source: 3c60f1a4b5e6d16504b2209dadd4b735d57037ce. P1 is **Verified** in [PR #78](https://github.com/spei04/agent-rewind/pull/78), accepted merge 51a2b1fefc40fc871426a47e3f3865fcbeef5bec, after independent A/B review, matching PR/main checks and candidate verification. P2 is **In progress** after that gate; aggregate AR-007-C remains In progress. This does not accept route behavior or enable customer admission.
+Planning/design reconciliation, 2026-10-20. Original inspected source: 3c60f1a4b5e6d16504b2209dadd4b735d57037ce. P1 is **Verified** in [PR #78](https://github.com/spei04/agent-rewind/pull/78), accepted merge 51a2b1fefc40fc871426a47e3f3865fcbeef5bec, after independent A/B review, matching PR/main checks and candidate verification. P2 is **Implemented; verification pending** in [PR #79](https://github.com/spei04/agent-rewind/pull/79) after that gate; aggregate AR-007-C remains In progress. This does not accept route behavior or enable customer admission.
 
 ## Entry, ownership and estimate
 
@@ -94,11 +94,11 @@ may use explicit test-only fixtures; guard-denial tests must use the real guard.
 The UI enables privileged actions only for an explicit current operator or
 maintainer role, never merely "not viewer" or a truthy stale value.
 
-The current implementation still calls raw record/artifact helpers in run,
+The inspected pre-P2 implementation called raw record/artifact helpers in run,
 files, compare and job rendering and unscoped enqueue/cancel/key mutations.
-An initial scope check does not make those consumers safe. Replace those
-paths or refuse unsupported evidence. Preserve supported response shapes;
-do not silently advertise complete history for data lacking scoped refs.
+P2 replaces those consumers with scoped verified reads and atomic actions, or
+refuses unsupported evidence. An initial scope check alone is insufficient.
+Metadata views do not certify complete history for data lacking scoped refs.
 
 ## Mutation and admission contracts
 
