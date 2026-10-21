@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| A | Ledger backlog tracking and independent entry review | Bind #107/#108/#109; review recovery and scoped-call closure; no runtime or database work. |
-| C | Frozen ledger entry f3af95ef and private PostgreSQL privilege probe | Two source clarifications and probe evidence remain required; no product implementation or entry acceptance. |
-| B | Corrected HTTP delivery and independent ledger planning review | Immutable source/inventory/hosted evidence plus bounded amendment review. |
-| Lead | HTTP integration/delivery and approved ledger planning | Preserve predecessor gate; coordinate exact entry, later issue tracking and independent review. |
+| A | Completed backlog/tracking and independent P1 entry review | Available for independent implementation tests after accepted HTTP delivery; no active writer or database hold. |
+| C / platform_security | Narrow pinned/checksummed uv security repair in reused secondary | Preserve ledger design branch and shared tooling; independent review and fresh matching delivery evidence required. |
+| B / delivery_audit | Final a439 HTTP evidence audit, then independent uv repair review | Preserve passing and failed attempts separately; no final acceptance of the affected toolchain. |
+| Lead | HTTP delivery and accepted ledger planning composition | Verify remaining PR/main/candidate evidence, publish coherent entry/tracking, then assign P1 implementation. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -619,3 +619,13 @@ A owns planning-only reconciliation in the reused primary; C owns the separate s
 ## Ledger issue tracking — 2026-10-21
 
 The lead created and read back aggregate #107, schema/provisioning P1 #108 and reservation/concurrency P2 #109 under parent #10; all remain open/Not started with null package acceptance. Parent #10 is 10 [10–16] BE days/four PRs, including unchanged AR-010-B; existing #60 names the later historical-opening/transfer evidence obligation. A owns backlog tracking and independent entry review; B reviews HTTP delivery and the amendment; C retains frozen entry f3af95ef and the separately assigned private PostgreSQL privilege probe; the lead owns integration. Entry acceptance waits for the later-provision recovery and provider-call scoped-ownership clarifications plus probe evidence. HTTP remains In progress with failed-attempt history preserved; no runtime, estimate, dependency or gate change follows.
+
+## Ledger P1 entry review accepted — 2026-10-21
+
+AR-008-B/P2 remains In progress at reviewed HTTP source a439bce in PR #106. Corrected run 39638999615/attempt1 completed successfully on both Python versions, with package/security, three gVisor tests and CI gate; independent final log audit is being completed. A newly verified uv advisory requires a narrow pinned/checksummed toolchain repair before final delivery. Prior failed run 39631674974 remains preserved and its causes unproven. Owner-approved ledger aggregate #107 and P1/P2 #108/#109 remain Not started. A/lead accepted exact P1 entry 51af77dc; B/lead independently accepted the separate 24-case synthetic PostgreSQL privilege probe. Actual product schema/trigger/catalog/capacity/recovery proof and patched HTTP protected-main delivery remain required; P2's exact reservation/fence entry follows accepted P1.
+
+A accepted the complete entry and both clarification rounds; the lead independently reviewed the schema/interface/authority/lock/recovery policy and final composition. C authored the entry and ran only the separately assigned synthetic privilege probe. B verified all 24 probe cases, 30 indexed evidence files and 7 immutable source bindings; the probe covers one deferred UPDATE trigger over two synthetic tables, not the five product triggers or full C04. The exact original 3-database/15-role baseline was restored and stopped; private evidence remains outside the reused checkouts. P1 entry source 51af77dc has document SHA-256 8677521af4c3dc9c9340e4ec3e466e5eb122bdaa16b43c4c5f65f99ee1ee9c0a. No runtime task status, spending gate or production claim changes.
+
+## Build-tool CA repair assigned — 2026-10-21
+
+The lead verified [GHSA-hq85-5cpj-mr62](https://github.com/astral-sh/uv/security/advisories/GHSA-hq85-5cpj-mr62): uv versions before 0.13.4 using their default bundled CAs are affected. C / platform_security owns a narrow official pinned/checksummed repair in the existing secondary, starting from a439; the accepted ledger design branch is preserved. B / delivery_audit completes the passing a439 audit and independently reviews the repair. The lead preserves the primary planning composition and owns integration. The shared uv0.11.21 executable and other projects are unchanged. This is a new security prerequisite to final delivery, not an explanation for the earlier test failures. No new resource, provider request, spending or customer activation is authorized.

@@ -2,7 +2,7 @@
 
 2026-10-21 · Readiness review against HTTP source `a304d52b52667b882c70e922b73d7070d714efb0`.
 
-**State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md) on 2026-10-21, including the finite execution-window interpretation and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. This planning amendment reconciles the approved task ledger; AR-010-A and both packages remain Not started with null acceptance. Implementation waits for AR-008-B accepted protected-main delivery and independently reviewed exact manifest/interface/SQL entry. No runtime, public/native-v1 contract, compatibility profile or external gate changes follow.
+**State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md) on 2026-10-21, including the finite execution-window interpretation and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. This planning amendment reconciles the approved task ledger; AR-010-A and both packages remain Not started with null acceptance. P1 entry policy is independently accepted at 51af77dc; implementation still waits for AR-008-B accepted protected-main delivery. P2's exact reservation/fence entry remains a separate review after accepted P1. No runtime, public/native-v1 contract, compatibility profile or external gate changes follow.
 
 ## Problem and intended result
 
@@ -89,3 +89,13 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 The first-fortnight historical schedules and opening conditions remain unchanged. No ledger implementation receives a calendar allocation before accepted HTTP and exact entry review. Three contributor slots are not six staffed roles, and no staffing or elapsed-time conversion follows from the effort totals.
 
 Before assigning implementation, verify accepted AR-008-B delivery; reviewed exact provisioning manifest, authority, cardinality/byte bounds and replay/conflict semantics; schema/profile/deferred SQL and lock-order/restore decisions; existing consumer interfaces and finite outcomes; synchronized planning records and independent entry acceptance. Worker dispatch remains AR-010-B; authentic settlement/opening/transfer producers remain AR-023-A/C. No public API, runtime migration, provider request, paid resource or task-status advance is made by this amendment.
+
+## Accepted P1 entry policy — 2026-10-21
+
+A and the lead accepted the [exact schema/provisioning entry](LEDGER_SCHEMA_ENTRY.md) at source 51af77dc2bf3527e496f0123c6bee17882f56b4a. B and the lead independently accepted the 24-case PostgreSQL 16.15 privilege feasibility evidence bound to original design source f3af95ef. It proves only the tested two-table/one-trigger invoker seam. Installed triggers executed for the no-EXECUTE control; table/column privileges and invoker SELECT are the supported DML controls. No runtime revocation claim relies on function EXECUTE. The exact database/role baseline was restored and the instance stopped.
+
+Return values, cursor/native types and fixed refusals are explicit. Non-owning inspection returns a persisted receipt without claiming commit/cleanup, while initialize_ledger returns complete only after its own acknowledged/replayed result and confirmed cleanup. Initial and later-provision uncertainty have separate bounded absence proofs, and each call requires its own same-project scope at commit. All actual product constraints/catalogs/max-state bounds/outcome/restore evidence remain implementation gates. P1/P2 and aggregate remain Not started/null acceptance pending accepted HTTP delivery; no new approval, spending or customer-data authority is inferred.
+
+## Current predecessor security gate — 2026-10-21
+
+The corrected HTTP PR matrix passed at a439, but [GHSA-hq85-5cpj-mr62](https://github.com/astral-sh/uv/security/advisories/GHSA-hq85-5cpj-mr62) requires updating the pinned uv build tool and verifying its official checksum/provenance. Ledger implementation still waits for reviewed patched HTTP delivery, matching protected-main checks and candidate acceptance. This does not reopen the approved finite-window decision or the accepted P1 entry policy.
