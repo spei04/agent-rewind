@@ -8,6 +8,7 @@ from test_operation_cancellation import (
     association,
     canonical_expansion,
     capture,
+    caught_active_failure,
     distractor_phases,
     extra_config,
     ignored_results,
@@ -123,3 +124,8 @@ def test_postgres_canonical_expansion_refuses(source_pg):
 @pytest.mark.parametrize("stage", ["success", "before_commit", "after_ack"])
 def test_postgres_phase_preserves_real_transaction_outcomes(source_pg, monkeypatch, stage):
     transaction_outcomes(source_pg, source_pg.pg["app"], monkeypatch, stage)
+
+
+@pytest.mark.parametrize("kind", ["operation", "job", "config", "cohort"])
+def test_postgres_caught_active_failure_cannot_repair_and_retry(source_pg, kind):
+    caught_active_failure(source_pg, source_pg.pg["app"], kind)

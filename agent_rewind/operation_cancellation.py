@@ -152,6 +152,13 @@ class CancellationPhase:
         if self._owner.work._connection is not connection:
             raise invalid()
 
+    def fail(self) -> None:
+        # Pure, idempotent notification: never replace the original exception or
+        # mutate another generation when an outer attempt unwinds.
+        owner = self._owner
+        if not self._closed and owner._active is self and owner._generation == self._generation:
+            owner._failed = True
+
     def charge(self, count: int, edges: int) -> None:
         self.check()
         owner = self._owner

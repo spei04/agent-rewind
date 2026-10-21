@@ -9,7 +9,8 @@ comparison; they are not reconstructed from a second read or storage bytes.
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Any, Literal, Protocol
 
@@ -109,6 +110,8 @@ class _ReceiptScope(Protocol):
 
     def connection(self, connection: Connection) -> None: ...
 
+    def fail(self) -> None: ...
+
     def charge(self, count: int, edges: int) -> None: ...
 
     def remaining(self, book: ReceiptBook) -> int: ...
@@ -148,6 +151,28 @@ class ReceiptBook:
         self._check_live()
         if self._scope is not None:
             self._scope.before_cohort()
+
+    @contextmanager
+    def _attempt(
+        self,
+        connection: Connection,
+        context: ProjectContext,
+        domain: Domain,
+        identity: str,
+    ) -> Iterator[None]:
+        # Refused stale/nested/context/connection entry owns no attempt. Only a
+        # failure after these checks can poison this active phase generation.
+        self._check_connection(connection)
+        self._check_live(context, domain, identity)
+        scope = self._scope
+        if scope is None:
+            yield
+            return
+        try:
+            yield
+        except BaseException:
+            scope.fail()
+            raise
 
     def charge_sources(self, count: int, *, edges: int = 0) -> None:
         self._check_live()
@@ -269,33 +294,35 @@ def read_operation(
     connection: Connection, context: ProjectContext, operation_id: str, book: ReceiptBook
 ) -> tuple[StoredOperation, RawReceipt]:
     """No creator filter: named-project viewer status differs from replay."""
-    book._check_connection(connection)
-    book._check_live(context, "operation", operation_id)
-    rows = (
-        connection.execute(
-            select(*_columns(connection, OPERATIONS, OPERATION_LIMITS, book.remaining))
-            .where(OPERATIONS.c.project_id == context.project_id, OPERATIONS.c.id == operation_id)
-            .limit(2)
+    with book._attempt(connection, context, "operation", operation_id):
+        rows = (
+            connection.execute(
+                select(*_columns(connection, OPERATIONS, OPERATION_LIMITS, book.remaining))
+                .where(
+                    OPERATIONS.c.project_id == context.project_id, OPERATIONS.c.id == operation_id
+                )
+                .limit(2)
+            )
+            .mappings()
+            .all()
         )
-        .mappings()
-        .all()
-    )
-    if not rows:
-        raise ResourceNotFound()
-    if len(rows) != 1:
-        raise invalid()
-    value = operation_value(dict(rows[0]))
-    if value.id != operation_id or value.project_id != context.project_id:
-        raise invalid()
-    receipt = book.remember("operation", value.id, tuple(OPERATION_LIMITS), dict(rows[0]))
-    return value, receipt
+        if not rows:
+            raise ResourceNotFound()
+        if len(rows) != 1:
+            raise invalid()
+        value = operation_value(dict(rows[0]))
+        if value.id != operation_id or value.project_id != context.project_id:
+            raise invalid()
+        receipt = book.remember("operation", value.id, tuple(OPERATION_LIMITS), dict(rows[0]))
+        return value, receipt
 
 
 def read_job(
     connection: Connection, context: ProjectContext, job_id: str, book: ReceiptBook
 ) -> RawReceipt:
-    value = read_job_state(connection, context, job_id, book)
-    return book.remember("job", job_id, value.fields, value.row())
+    with book._attempt(connection, context, "job", job_id):
+        value = read_job_state(connection, context, job_id, book)
+        return book.remember("job", job_id, value.fields, value.row())
 
 
 def read_job_state(
@@ -306,33 +333,32 @@ def read_job_state(
     Cancellation compares an immutable association separately. Every decode
     still consumes the shared source-visit budget, including repeated phases.
     """
-    book._check_connection(connection)
-    book._check_live(context, "job", job_id)
-    book.charge_sources(1)
-    rows = (
-        connection.execute(
-            select(*_columns(connection, JOBS, JOB_LIMITS, min(MAX_JOB_BYTES, book.remaining)))
-            .select_from(
-                JOBS.join(
-                    scopes,
-                    and_(
-                        scopes.c.project_id == context.project_id,
-                        scopes.c.resource_kind == "job",
-                        scopes.c.resource_id == JOBS.c.id,
-                    ),
+    with book._attempt(connection, context, "job", job_id):
+        book.charge_sources(1)
+        rows = (
+            connection.execute(
+                select(*_columns(connection, JOBS, JOB_LIMITS, min(MAX_JOB_BYTES, book.remaining)))
+                .select_from(
+                    JOBS.join(
+                        scopes,
+                        and_(
+                            scopes.c.project_id == context.project_id,
+                            scopes.c.resource_kind == "job",
+                            scopes.c.resource_id == JOBS.c.id,
+                        ),
+                    )
                 )
+                .where(JOBS.c.id == job_id)
+                .limit(2)
             )
-            .where(JOBS.c.id == job_id)
-            .limit(2)
+            .mappings()
+            .all()
         )
-        .mappings()
-        .all()
-    )
-    if not rows:
-        raise ResourceNotFound()
-    if len(rows) != 1:
-        raise invalid()
-    return validate_job_row(dict(rows[0]), job_id)
+        if not rows:
+            raise ResourceNotFound()
+        if len(rows) != 1:
+            raise invalid()
+        return validate_job_row(dict(rows[0]), job_id)
 
 
 def validate_job_row(row: Mapping[str, Any], job_id: str) -> RawReceipt:
@@ -392,19 +418,21 @@ def read_descriptor(
     role: Literal["admission_config", "result"],
     book: ReceiptBook,
 ) -> tuple[ArtifactObject, RawReceipt]:
-    value = _descriptor(connection, context, job_id, role, book)
-    if value is None:
-        raise invalid()
-    return value
+    with book._attempt(connection, context, role, job_id):
+        value = _descriptor(connection, context, job_id, role, book)
+        if value is None:
+            raise invalid()
+        return value
 
 
 def observe_result(
     connection: Connection, context: ProjectContext, job_id: str, book: ReceiptBook
 ) -> tuple[ArtifactObject, RawReceipt] | None:
     """Observe zero/one valid candidates even when SQL jobs.result is NULL."""
-    value = _descriptor(connection, context, job_id, "result", book)
-    book.observe("result_count", job_id, (int(value is not None),))
-    return value
+    with book._attempt(connection, context, "result", job_id):
+        value = _descriptor(connection, context, job_id, "result", book)
+        book.observe("result_count", job_id, (int(value is not None),))
+        return value
 
 
 def _descriptor(

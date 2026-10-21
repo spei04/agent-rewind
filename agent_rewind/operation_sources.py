@@ -98,70 +98,74 @@ def cohort_query(
     book._check_connection(connection)
     book._check_live(context, "job", job_id)
     book._before_cohort()
-    hexadecimal(job_id, 32)
-    remaining = 256 - book.source_visits
-    if remaining < 0:
-        raise invalid()
-    # Keep native type evidence before any SQLite cast. PostgreSQL JSON is
-    # necessarily native JSON; its textual representation is the raw receipt.
-    native = (
-        and_(
-            func.typeof(records.c.data) == "text",
-            func.typeof(records.c.id) == "text",
-            func.typeof(records.c.kind) == "text",
-            func.typeof(records.c.created).in_(("integer", "real")),
+    with book._attempt(connection, context, "job", job_id):
+        hexadecimal(job_id, 32)
+        remaining = 256 - book.source_visits
+        if remaining < 0:
+            raise invalid()
+        # Keep native type evidence before any SQLite cast. PostgreSQL JSON is
+        # necessarily native JSON; its textual representation is the raw receipt.
+        native = (
+            and_(
+                func.typeof(records.c.data) == "text",
+                func.typeof(records.c.id) == "text",
+                func.typeof(records.c.kind) == "text",
+                func.typeof(records.c.created).in_(("integer", "real")),
+            )
+            if connection.dialect.name == "sqlite"
+            else literal_column("true")
         )
-        if connection.dialect.name == "sqlite"
-        else literal_column("true")
-    )
-    candidates = (
-        _discovery(context, job_id)
-        .add_columns(native.label("native"))
-        .limit(remaining + 1)
-        .cte("cohort_candidates")
-        .prefix_with("MATERIALIZED")
-    )
-    lengths = [
-        func.coalesce(_byte_length(connection, candidates.c[name]), 0) for name in RECORD_FIELDS
-    ]
-    stats = (
-        select(
-            func.count().label("count"),
-            func.coalesce(func.sum(sum(lengths, literal_column("0"))), 0).label("bytes"),
-            func.coalesce(
-                func.min(
-                    case(
-                        (
-                            and_(
-                                candidates.c.native,
-                                _byte_length(connection, candidates.c.id) == 32,
-                                _byte_length(connection, candidates.c.kind) <= 20,
-                                _byte_length(connection, candidates.c.created) <= 64,
-                                _byte_length(connection, candidates.c.body) <= MAX_BODY_BYTES,
+        candidates = (
+            _discovery(context, job_id)
+            .add_columns(native.label("native"))
+            .limit(remaining + 1)
+            .cte("cohort_candidates")
+            .prefix_with("MATERIALIZED")
+        )
+        lengths = [
+            func.coalesce(_byte_length(connection, candidates.c[name]), 0) for name in RECORD_FIELDS
+        ]
+        stats = (
+            select(
+                func.count().label("count"),
+                func.coalesce(func.sum(sum(lengths, literal_column("0"))), 0).label("bytes"),
+                func.coalesce(
+                    func.min(
+                        case(
+                            (
+                                and_(
+                                    candidates.c.native,
+                                    _byte_length(connection, candidates.c.id) == 32,
+                                    _byte_length(connection, candidates.c.kind) <= 20,
+                                    _byte_length(connection, candidates.c.created) <= 64,
+                                    _byte_length(connection, candidates.c.body) <= MAX_BODY_BYTES,
+                                ),
+                                1,
                             ),
-                            1,
-                        ),
-                        else_=0,
-                    )
-                ),
-                1,
-            ).label("valid"),
+                            else_=0,
+                        )
+                    ),
+                    1,
+                ).label("valid"),
+            )
+            .cte("cohort_stats")
+            .prefix_with("MATERIALIZED")
         )
-        .cte("cohort_stats")
-        .prefix_with("MATERIALIZED")
-    )
-    safe = and_(
-        stats.c.count <= remaining,
-        stats.c.bytes <= book.remaining,
-        stats.c.valid == 1,
-    )
-    return (
-        select(
-            *(case((safe, candidates.c[name]), else_=None).label(name) for name in RECORD_FIELDS)
+        safe = and_(
+            stats.c.count <= remaining,
+            stats.c.bytes <= book.remaining,
+            stats.c.valid == 1,
         )
-        .select_from(candidates.join(stats, literal_column("true")))
-        .order_by(candidates.c.kind, candidates.c.id)
-    )
+        return (
+            select(
+                *(
+                    case((safe, candidates.c[name]), else_=None).label(name)
+                    for name in RECORD_FIELDS
+                )
+            )
+            .select_from(candidates.join(stats, literal_column("true")))
+            .order_by(candidates.c.kind, candidates.c.id)
+        )
 
 
 def read_run_cohort(
@@ -172,70 +176,74 @@ def read_run_cohort(
 ) -> RunCohort:
     book._check_connection(connection)
     book._check_live(context, "job", job.identity)
-    if job.domain != "job" or job.fields != tuple(JOB_LIMITS) or job.row()["kind"] != "run":
-        raise invalid()
-    rows = (
-        connection.execute(cohort_query(connection, context, job.identity, book)).mappings().all()
-    )
-    book.charge_sources(len(rows), edges=2 * len(rows))
-    cached: dict[tuple[str, str], dict[str, Any]] = {}
-    original: list[RawReceipt] = []
-    for row in rows:
-        identifier = row["id"]
-        hexadecimal(identifier, 32)
-        if (
-            row["kind"] != "run"
-            or type(row["body"]) is not str
-            or type(row["created"]) not in (int, float)
-            or not math.isfinite(row["created"])
-        ):
+    book._before_cohort()
+    with book._attempt(connection, context, "job", job.identity):
+        if job.domain != "job" or job.fields != tuple(JOB_LIMITS) or job.row()["kind"] != "run":
             raise invalid()
+        rows = (
+            connection.execute(cohort_query(connection, context, job.identity, book))
+            .mappings()
+            .all()
+        )
+        book.charge_sources(len(rows), edges=2 * len(rows))
+        cached: dict[tuple[str, str], dict[str, Any]] = {}
+        original: list[RawReceipt] = []
+        for row in rows:
+            identifier = row["id"]
+            hexadecimal(identifier, 32)
+            if (
+                row["kind"] != "run"
+                or type(row["body"]) is not str
+                or type(row["created"]) not in (int, float)
+                or not math.isfinite(row["created"])
+            ):
+                raise invalid()
+            try:
+                value = json.loads(
+                    row["body"],
+                    object_pairs_hook=_object,
+                    parse_constant=_invalid_constant,
+                )
+            except (ValueError, TypeError, RecursionError, ResourceNotFound):
+                raise invalid() from None
+            if (
+                not isinstance(value, dict)
+                or value.get("job_id") != job.identity
+                or "parent_id" not in value
+                or value["parent_id"] is not None
+            ):
+                raise invalid()
+            key = "run", identifier
+            if key in cached:
+                raise invalid()
+            cached[key] = {**value, "id": identifier, "created": row["created"]}
+            original.append(book.remember("run", identifier, RECORD_FIELDS, dict(row)))
+        ids = tuple(row.identity for row in original)
+        book.observe("cohort", job.identity, ids)
+
+        def record(kind: str, identity: str) -> dict[str, Any]:
+            try:
+                return cached[kind, identity]
+            except KeyError:
+                raise ResourceNotFound() from None
+
+        def owner(identity: str) -> dict[str, Any]:
+            if identity != job.identity:
+                raise ResourceNotFound()
+            return job.row()
+
+        def members(identity: str) -> list[tuple[str, str]]:
+            if identity != job.identity:
+                raise ResourceNotFound()
+            return [("run", item) for item in ids]
+
+        # Existing lineage rules, with no hidden SQL and no expansion beyond the
+        # complete run-only cohort. Two edges/member and one job were charged once.
         try:
-            value = json.loads(
-                row["body"],
-                object_pairs_hook=_object,
-                parse_constant=_invalid_constant,
-            )
-        except (ValueError, TypeError, RecursionError, ResourceNotFound):
+            Lineage(record, owner, members).validate("job", job.identity)
+        except ResourceNotFound:
             raise invalid() from None
-        if (
-            not isinstance(value, dict)
-            or value.get("job_id") != job.identity
-            or "parent_id" not in value
-            or value["parent_id"] is not None
-        ):
-            raise invalid()
-        key = "run", identifier
-        if key in cached:
-            raise invalid()
-        cached[key] = {**value, "id": identifier, "created": row["created"]}
-        original.append(book.remember("run", identifier, RECORD_FIELDS, dict(row)))
-    ids = tuple(row.identity for row in original)
-    book.observe("cohort", job.identity, ids)
-
-    def record(kind: str, identity: str) -> dict[str, Any]:
-        try:
-            return cached[kind, identity]
-        except KeyError:
-            raise ResourceNotFound() from None
-
-    def owner(identity: str) -> dict[str, Any]:
-        if identity != job.identity:
-            raise ResourceNotFound()
-        return job.row()
-
-    def members(identity: str) -> list[tuple[str, str]]:
-        if identity != job.identity:
-            raise ResourceNotFound()
-        return [("run", item) for item in ids]
-
-    # Existing lineage rules, with no hidden SQL and no expansion beyond the
-    # complete run-only cohort. Two edges/member and one job were charged once.
-    try:
-        Lineage(record, owner, members).validate("job", job.identity)
-    except ResourceNotFound:
-        raise invalid() from None
-    return RunCohort(job.identity, tuple(original))
+        return RunCohort(job.identity, tuple(original))
 
 
 def validate_result_member(cohort: RunCohort, run_id: str) -> None:
@@ -317,228 +325,232 @@ def _matching_query(
     *,
     cancellation: bool,
 ) -> tuple[Any, dict[str, str]]:
-    book._check_connection(connection)
-    book._check_live(context, "job", cohort.job_id)
-    rows = {(r.domain, r.identity): r for r in book.receipts}
-    operations = [r for r in book.receipts if r.domain == "operation"]
-    if len(operations) != 1:
-        raise invalid()
-    try:
-        job = rows["job", cohort.job_id]
-        config = rows["admission_config", cohort.job_id]
-        result_count = (0,) if cancellation else book.observations["result_count", cohort.job_id]
-    except KeyError:
-        raise invalid() from None
-    validate_association(operations[0], job, config)
-    result = rows.get(("result", cohort.job_id))
-    if (
-        not cancellation
-        and job.row()["result"] is not None
-        and (result is None or result.row()["digest"] != job.row()["result"])
-    ):
-        raise invalid()
-    if (
-        result_count not in ((0,), (1,))
-        or book.observations.get(("cohort", cohort.job_id)) != cohort.ids
-        or set(rows)
-        != {
-            ("operation", operations[0].identity),
-            ("job", cohort.job_id),
-            ("admission_config", cohort.job_id),
-            *(("run", identity) for identity in cohort.ids),
-            *({("result", cohort.job_id)} if result_count == (1,) else set()),
+    with book._attempt(connection, context, "job", cohort.job_id):
+        rows = {(r.domain, r.identity): r for r in book.receipts}
+        operations = [r for r in book.receipts if r.domain == "operation"]
+        if len(operations) != 1:
+            raise invalid()
+        try:
+            job = rows["job", cohort.job_id]
+            config = rows["admission_config", cohort.job_id]
+            result_count = (
+                (0,) if cancellation else book.observations["result_count", cohort.job_id]
+            )
+        except KeyError:
+            raise invalid() from None
+        validate_association(operations[0], job, config)
+        result = rows.get(("result", cohort.job_id))
+        if (
+            not cancellation
+            and job.row()["result"] is not None
+            and (result is None or result.row()["digest"] != job.row()["result"])
+        ):
+            raise invalid()
+        if (
+            result_count not in ((0,), (1,))
+            or book.observations.get(("cohort", cohort.job_id)) != cohort.ids
+            or set(rows)
+            != {
+                ("operation", operations[0].identity),
+                ("job", cohort.job_id),
+                ("admission_config", cohort.job_id),
+                *(("run", identity) for identity in cohort.ids),
+                *({("result", cohort.job_id)} if result_count == (1,) else set()),
+            }
+        ):
+            raise invalid()
+        if cancellation and set(book.observations) != {("cohort", cohort.job_id)}:
+            raise invalid()
+        fields = {
+            "operation": tuple(OPERATION_LIMITS),
+            "job": tuple(JOB_LIMITS),
+            "run": RECORD_FIELDS,
+            "admission_config": (*DESCRIPTOR_FIELDS, "reference_id"),
+            "result": (*DESCRIPTOR_FIELDS, "reference_id"),
         }
-    ):
-        raise invalid()
-    if cancellation and set(book.observations) != {("cohort", cohort.job_id)}:
-        raise invalid()
-    fields = {
-        "operation": tuple(OPERATION_LIMITS),
-        "job": tuple(JOB_LIMITS),
-        "run": RECORD_FIELDS,
-        "admission_config": (*DESCRIPTOR_FIELDS, "reference_id"),
-        "result": (*DESCRIPTOR_FIELDS, "reference_id"),
-    }
-    if any(receipt.fields != fields[receipt.domain] for receipt in book.receipts):
-        raise invalid()
-    encoded = book.encoded().decode()
-    wanted = _expected(connection)
-    job_types = {
-        "created": Float(),
-        "lease_until": Float(),
-        "budget": BigInteger(),
-        "reserved": BigInteger(),
-        "cancel": Boolean(),
-        "payload_version": BigInteger(),
-    }
-    op_query = (
-        select(wanted.c.domain, wanted.c.id)
-        .select_from(wanted.join(OPERATIONS, OPERATIONS.c.id == wanted.c.id))
-        .where(
-            wanted.c.domain == "operation",
-            OPERATIONS.c.project_id == context.project_id,
-            *_matches(
-                connection,
-                wanted,
-                OPERATIONS,
-                tuple(OPERATION_LIMITS),
-                {"payload_version": BigInteger()},
-            ),
-        )
-    )
-    job_query = (
-        select(wanted.c.domain, wanted.c.id)
-        .select_from(
-            wanted.join(JOBS, JOBS.c.id == wanted.c.id).join(
-                scopes,
-                _scope(context, literal_column("'job'"), wanted.c.id),
-            )
-        )
-        .where(
-            wanted.c.domain == "job",
-            *_matches(connection, wanted, JOBS, tuple(JOB_LIMITS), job_types),
-        )
-    )
-    # Untyped native columns avoid JSON/Boolean result processors. SQLite BLOB
-    # and integer/real changes must survive final comparison, not just rereads.
-    raw_records = table("records", column("id"), column("kind"), column("created"), column("data"))
-    record_values = select(
-        raw_records.c.id,
-        raw_records.c.kind,
-        raw_records.c.created,
-        (
-            cast(raw_records.c.data, Text)
-            if connection.dialect.name == "postgresql"
-            else raw_records.c.data
-        ).label("body"),
-    ).subquery("raw_sources")
-    record_query = (
-        select(wanted.c.domain, wanted.c.id)
-        .select_from(
-            wanted.join(
-                record_values,
-                and_(
-                    record_values.c.id == wanted.c.id,
-                    record_values.c.kind == wanted.c.domain,
-                ),
-            ).join(scopes, _scope(context, wanted.c.domain, wanted.c.id))
-        )
-        .where(
-            wanted.c.domain == "run",
-            *_matches(connection, wanted, record_values, RECORD_FIELDS, {"created": Float()}),
-        )
-    )
-    refs = (
-        select(
-            _refs.c.project_id,
-            _refs.c.owner_kind,
-            _refs.c.owner_id,
-            _refs.c.role,
-            _refs.c.artifact_id,
-        )
-        .where(
-            _refs.c.project_id == context.project_id,
-            _refs.c.owner_kind == "job",
-            _refs.c.owner_id == cohort.job_id,
-            (_refs.c.role == "admission_config")
-            if cancellation
-            else _refs.c.role.in_(("admission_config", "result")),
-        )
-        .limit(2 if cancellation else 3)
-        .cte("observed_refs")
-        .prefix_with("MATERIALIZED")
-    )
-    descriptors = (
-        select(
-            *(_objects.c[name] for name in DESCRIPTOR_FIELDS),
-            refs.c.artifact_id.label("reference_id"),
-            refs.c.owner_id,
-            refs.c.role,
-        )
-        .select_from(
-            refs.outerjoin(
-                _objects,
-                and_(
-                    _objects.c.project_id == refs.c.project_id, _objects.c.id == refs.c.artifact_id
+        if any(receipt.fields != fields[receipt.domain] for receipt in book.receipts):
+            raise invalid()
+        encoded = book.encoded().decode()
+        wanted = _expected(connection)
+        job_types = {
+            "created": Float(),
+            "lease_until": Float(),
+            "budget": BigInteger(),
+            "reserved": BigInteger(),
+            "cancel": Boolean(),
+            "payload_version": BigInteger(),
+        }
+        op_query = (
+            select(wanted.c.domain, wanted.c.id)
+            .select_from(wanted.join(OPERATIONS, OPERATIONS.c.id == wanted.c.id))
+            .where(
+                wanted.c.domain == "operation",
+                OPERATIONS.c.project_id == context.project_id,
+                *_matches(
+                    connection,
+                    wanted,
+                    OPERATIONS,
+                    tuple(OPERATION_LIMITS),
+                    {"payload_version": BigInteger()},
                 ),
             )
         )
-        .cte("observed_descriptors")
-        .prefix_with("MATERIALIZED")
-    )
-    descriptor_query = (
-        select(wanted.c.domain, wanted.c.id)
-        .select_from(
-            wanted.join(
-                descriptors,
-                and_(
-                    descriptors.c.owner_id == wanted.c.id,
-                    descriptors.c.role == wanted.c.domain,
-                ),
-            ),
-        )
-        .where(
-            wanted.c.domain.in_(("admission_config", "result")),
-            *_matches(
-                connection,
-                wanted,
-                descriptors,
-                (*DESCRIPTOR_FIELDS, "reference_id"),
-                {"format_version": BigInteger(), "byte_count": BigInteger()},
-            ),
-        )
-    )
-    current = (
-        _discovery(context, cohort.job_id)
-        .with_only_columns(
-            records.c.id,
-            records.c.kind,
-        )
-        .limit(256)
-        .cte("current_members")
-        .prefix_with("MATERIALIZED")
-    )
-    unknown = (
-        select(current.c.id)
-        .select_from(
-            current.outerjoin(
-                wanted,
-                and_(wanted.c.domain == current.c.kind, wanted.c.id == current.c.id),
+        job_query = (
+            select(wanted.c.domain, wanted.c.id)
+            .select_from(
+                wanted.join(JOBS, JOBS.c.id == wanted.c.id).join(
+                    scopes,
+                    _scope(context, literal_column("'job'"), wanted.c.id),
+                )
+            )
+            .where(
+                wanted.c.domain == "job",
+                *_matches(connection, wanted, JOBS, tuple(JOB_LIMITS), job_types),
             )
         )
-        .where(wanted.c.id.is_(None))
-        .exists()
-    )
-    config_count = (
-        select(func.count())
-        .select_from(refs)
-        .where(
-            refs.c.role == "admission_config",
+        # Untyped native columns avoid JSON/Boolean result processors. SQLite BLOB
+        # and integer/real changes must survive final comparison, not just rereads.
+        raw_records = table(
+            "records", column("id"), column("kind"), column("created"), column("data")
         )
-        .scalar_subquery()
-    )
-    results = (
-        select(func.count())
-        .select_from(refs)
-        .where(
-            refs.c.role == "result",
+        record_values = select(
+            raw_records.c.id,
+            raw_records.c.kind,
+            raw_records.c.created,
+            (
+                cast(raw_records.c.data, Text)
+                if connection.dialect.name == "postgresql"
+                else raw_records.c.data
+            ).label("body"),
+        ).subquery("raw_sources")
+        record_query = (
+            select(wanted.c.domain, wanted.c.id)
+            .select_from(
+                wanted.join(
+                    record_values,
+                    and_(
+                        record_values.c.id == wanted.c.id,
+                        record_values.c.kind == wanted.c.domain,
+                    ),
+                ).join(scopes, _scope(context, wanted.c.domain, wanted.c.id))
+            )
+            .where(
+                wanted.c.domain == "run",
+                *_matches(connection, wanted, record_values, RECORD_FIELDS, {"created": Float()}),
+            )
         )
-        .scalar_subquery()
-    )
-    matches = union_all(op_query, job_query, record_query, descriptor_query).cte("matches")
-    query = (
-        select(matches.c.domain, matches.c.id)
-        .where(
-            ~unknown,
-            config_count == 1,
-            *(() if cancellation else (results == result_count[0],)),
+        refs = (
+            select(
+                _refs.c.project_id,
+                _refs.c.owner_kind,
+                _refs.c.owner_id,
+                _refs.c.role,
+                _refs.c.artifact_id,
+            )
+            .where(
+                _refs.c.project_id == context.project_id,
+                _refs.c.owner_kind == "job",
+                _refs.c.owner_id == cohort.job_id,
+                (_refs.c.role == "admission_config")
+                if cancellation
+                else _refs.c.role.in_(("admission_config", "result")),
+            )
+            .limit(2 if cancellation else 3)
+            .cte("observed_refs")
+            .prefix_with("MATERIALIZED")
         )
-        .limit(len(rows) + 1)
-    )
-    # Bound actual compiled parameter cardinality, including SQLAlchemy constants.
-    if len(query.compile(dialect=connection.dialect).params) > 64:
-        raise invalid()
-    return query, {"receipts": encoded}
+        descriptors = (
+            select(
+                *(_objects.c[name] for name in DESCRIPTOR_FIELDS),
+                refs.c.artifact_id.label("reference_id"),
+                refs.c.owner_id,
+                refs.c.role,
+            )
+            .select_from(
+                refs.outerjoin(
+                    _objects,
+                    and_(
+                        _objects.c.project_id == refs.c.project_id,
+                        _objects.c.id == refs.c.artifact_id,
+                    ),
+                )
+            )
+            .cte("observed_descriptors")
+            .prefix_with("MATERIALIZED")
+        )
+        descriptor_query = (
+            select(wanted.c.domain, wanted.c.id)
+            .select_from(
+                wanted.join(
+                    descriptors,
+                    and_(
+                        descriptors.c.owner_id == wanted.c.id,
+                        descriptors.c.role == wanted.c.domain,
+                    ),
+                ),
+            )
+            .where(
+                wanted.c.domain.in_(("admission_config", "result")),
+                *_matches(
+                    connection,
+                    wanted,
+                    descriptors,
+                    (*DESCRIPTOR_FIELDS, "reference_id"),
+                    {"format_version": BigInteger(), "byte_count": BigInteger()},
+                ),
+            )
+        )
+        current = (
+            _discovery(context, cohort.job_id)
+            .with_only_columns(
+                records.c.id,
+                records.c.kind,
+            )
+            .limit(256)
+            .cte("current_members")
+            .prefix_with("MATERIALIZED")
+        )
+        unknown = (
+            select(current.c.id)
+            .select_from(
+                current.outerjoin(
+                    wanted,
+                    and_(wanted.c.domain == current.c.kind, wanted.c.id == current.c.id),
+                )
+            )
+            .where(wanted.c.id.is_(None))
+            .exists()
+        )
+        config_count = (
+            select(func.count())
+            .select_from(refs)
+            .where(
+                refs.c.role == "admission_config",
+            )
+            .scalar_subquery()
+        )
+        results = (
+            select(func.count())
+            .select_from(refs)
+            .where(
+                refs.c.role == "result",
+            )
+            .scalar_subquery()
+        )
+        matches = union_all(op_query, job_query, record_query, descriptor_query).cte("matches")
+        query = (
+            select(matches.c.domain, matches.c.id)
+            .where(
+                ~unknown,
+                config_count == 1,
+                *(() if cancellation else (results == result_count[0],)),
+            )
+            .limit(len(rows) + 1)
+        )
+        # Bound actual compiled parameter cardinality, including SQLAlchemy constants.
+        if len(query.compile(dialect=connection.dialect).params) > 64:
+            raise invalid()
+        return query, {"receipts": encoded}
 
 
 def verify_read_snapshot(
@@ -547,12 +559,13 @@ def verify_read_snapshot(
     book: ReceiptBook,
     cohort: RunCohort,
 ) -> None:
-    query, parameters = matching_query(connection, context, book, cohort)
-    rows = connection.execute(query, parameters).all()
-    keys = {(row.domain, row.id) for row in rows}
-    expected = {(row.domain, row.identity) for row in book.receipts}
-    if len(rows) != len(keys) or keys != expected:
-        raise invalid()
+    with book._attempt(connection, context, "job", cohort.job_id):
+        query, parameters = matching_query(connection, context, book, cohort)
+        rows = connection.execute(query, parameters).all()
+        keys = {(row.domain, row.id) for row in rows}
+        expected = {(row.domain, row.identity) for row in book.receipts}
+        if len(rows) != len(keys) or keys != expected:
+            raise invalid()
 
 
 def _verify_cancellation_snapshot(
@@ -562,9 +575,10 @@ def _verify_cancellation_snapshot(
     cohort: RunCohort,
 ) -> None:
     """Phase-local equality only; no result artifacts or cancellation effect."""
-    query, parameters = _matching_query(connection, context, book, cohort, cancellation=True)
-    rows = connection.execute(query, parameters).all()
-    keys = {(row.domain, row.id) for row in rows}
-    expected = {(row.domain, row.identity) for row in book.receipts}
-    if len(rows) != len(keys) or keys != expected:
-        raise invalid()
+    with book._attempt(connection, context, "job", cohort.job_id):
+        query, parameters = _matching_query(connection, context, book, cohort, cancellation=True)
+        rows = connection.execute(query, parameters).all()
+        keys = {(row.domain, row.id) for row in rows}
+        expected = {(row.domain, row.identity) for row in book.receipts}
+        if len(rows) != len(keys) or keys != expected:
+            raise invalid()

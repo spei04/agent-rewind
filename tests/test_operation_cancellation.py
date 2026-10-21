@@ -1,5 +1,6 @@
 """Cancellation phase ownership only; no effect, service or HTTP acceptance."""
 
+import json
 from dataclasses import replace
 
 import pytest
@@ -18,6 +19,7 @@ from agent_rewind.artifact_metadata import configure_artifact_engine, register_r
 from agent_rewind.operation_cancellation import CancellationReceipts, _association_rows
 from agent_rewind.operation_reads import (
     MAX_RECEIPT_BYTES,
+    ReceiptBook,
     observe_result,
     read_descriptor,
     read_job,
@@ -26,6 +28,7 @@ from agent_rewind.operation_reads import (
     receipt_bytes,
 )
 from agent_rewind.operation_sources import (
+    RunCohort,
     _matching_query,
     cohort_query,
     matching_query,
@@ -394,6 +397,7 @@ def canonical_expansion(f, engine):
         operation_connection(engine, owner.work) as connection,
     ):
         job = association(f, phase, connection)
+        book = phase.book
         assert all(
             row.body is not None
             for row in connection.execute(cohort_query(connection, f.context, JOB, phase.book))
@@ -402,8 +406,22 @@ def canonical_expansion(f, engine):
             read_run_cohort(connection, f.context, job, phase.book)
         finally:
             # Only fully charged rows are retained when expansion refuses.
-            assert phase.book.remaining >= 0
-            assert phase.book._wire_bytes == len(phase.book.encoded())
+            assert (
+                len(
+                    receipt_bytes(
+                        {
+                            "original": _association_rows(phase._association),
+                            "phase": book._payload(),
+                        },
+                        MAX_RECEIPT_BYTES,
+                    )
+                )
+                <= MAX_RECEIPT_BYTES
+            )
+            assert book._wire_bytes == len(receipt_bytes(book._payload(), MAX_RECEIPT_BYTES))
+            assert owner._failed
+            with pytest.raises(AdmissionStorageError):
+                _ = phase.book
 
 
 def test_identity_union_and_wrapper_size_are_exact(cancellation):
@@ -570,3 +588,166 @@ def test_phase_encloses_transaction_outcome_without_reclassifying_it(
     cancellation, monkeypatch, stage
 ):
     transaction_outcomes(*cancellation, monkeypatch, stage)
+
+
+def caught_active_failure(f, engine, kind):
+    """Real malformed SQL rows cannot be repaired into success in one phase."""
+    with f.engine.begin() as connection:
+        if kind == "operation":
+            original = connection.execute(
+                text("SELECT retain_until FROM operations WHERE id=:id"), {"id": OPERATION}
+            ).scalar_one()
+            connection.execute(
+                text("UPDATE operations SET retain_until=created_at WHERE id=:id"),
+                {"id": OPERATION},
+            )
+            repair = text("UPDATE operations SET retain_until=:value WHERE id=:id")
+            parameters = {"id": OPERATION, "value": original}
+        elif kind in ("job", "job_bound"):
+            field = "status" if kind == "job" else "error"
+            statements = {
+                "status": (
+                    "SELECT status FROM jobs WHERE id=:id",
+                    "UPDATE jobs SET status=:value WHERE id=:id",
+                ),
+                "error": (
+                    "SELECT error FROM jobs WHERE id=:id",
+                    "UPDATE jobs SET error=:value WHERE id=:id",
+                ),
+            }
+            original = connection.execute(text(statements[field][0]), {"id": JOB}).scalar_one()
+            repair = text(statements[field][1])
+            connection.execute(
+                repair, {"id": JOB, "value": "malformed" if kind == "job" else "x" * 1201}
+            )
+            parameters = {"id": JOB, "value": original}
+        elif kind == "config":
+            original = connection.execute(
+                text(
+                    "SELECT artifact_id FROM artifact_refs "
+                    "WHERE owner_id=:id AND role='admission_config'"
+                ),
+                {"id": JOB},
+            ).scalar_one()
+            connection.execute(
+                text("DELETE FROM artifact_refs WHERE owner_id=:id AND role='admission_config'"),
+                {"id": JOB},
+            )
+        else:
+            original = None
+    if kind == "cohort":
+        ids = roots(f, 1)
+        with f.engine.begin() as connection:
+            original = connection.execute(
+                text("SELECT CAST(data AS TEXT) FROM records WHERE id=:id"), {"id": ids[0]}
+            ).scalar_one()
+            body = json.loads(original)
+            body["parent_id"] = "f" * 32
+            update = "UPDATE records SET data=CAST(:value AS JSON) WHERE id=:id"
+            if connection.dialect.name == "sqlite":
+                update = "UPDATE records SET data=:value WHERE id=:id"
+            repair = text(update)
+            connection.execute(repair, {"id": ids[0], "value": json.dumps(body)})
+            parameters = {"id": ids[0], "value": original}
+    owner = CancellationReceipts(OperationWork(), f.context, OPERATION)
+    seen = []
+    with pytest.raises(AdmissionStorageError), owner.phase() as phase:
+        book = phase.book
+        with (
+            pytest.raises(AdmissionStorageError) as caught,
+            operation_connection(engine, owner.work) as connection,
+        ):
+            try:
+                capture(f, phase, connection)
+            except AdmissionStorageError as error:
+                seen.append(error)
+                raise
+        assert caught.value is seen[0]
+        assert owner.work._started is None
+        with f.engine.begin() as connection:
+            if kind == "config":
+                register_ref(
+                    connection,
+                    project_id=PROJECT,
+                    owner_kind="job",
+                    owner_id=JOB,
+                    role="admission_config",
+                    artifact_id=original,
+                )
+            else:
+                connection.execute(repair, parameters)
+        assert owner._failed
+        # Retain the old book deliberately: property-only fencing is insufficient.
+        with operation_connection(engine, owner.work) as connection:
+            before = owner.work.statements
+            calls = [
+                lambda: read_operation(connection, f.context, OPERATION, book),
+                lambda: read_job(connection, f.context, JOB, book),
+                lambda: read_descriptor(connection, f.context, JOB, "admission_config", book),
+                lambda: cohort_query(connection, f.context, JOB, book),
+                lambda: phase.verify(connection, RunCohort(JOB, ())),
+                lambda: owner.original,
+                lambda: phase.book,
+            ]
+            for call in calls:
+                with pytest.raises(AdmissionStorageError):
+                    call()
+            assert owner.work.statements == before
+        with pytest.raises(AdmissionStorageError), owner.phase():
+            pytest.fail("aborted owner started another phase")
+    assert owner._failed and owner._active is None
+    with pytest.raises(AdmissionStorageError), owner.phase():
+        pytest.fail("aborted owner survived phase cleanup")
+
+
+@pytest.mark.parametrize("kind", ["operation", "job", "job_bound", "config", "cohort"])
+def test_caught_active_failure_cannot_repair_and_retry(cancellation, kind):
+    caught_active_failure(*cancellation, kind)
+
+
+@pytest.mark.parametrize("stage", ["operation", "job_retention", "cohort_retention"])
+@pytest.mark.parametrize("interruption", [False, True])
+def test_active_failure_preserves_exact_exception_and_get_stays_unscoped(
+    cancellation, monkeypatch, stage, interruption
+):
+    import agent_rewind.operation_reads as reads
+
+    f, engine = cancellation
+    roots(f, 1)
+    error = (
+        KeyboardInterrupt("private")
+        if interruption
+        else AdmissionStorageError("admission_metadata_invalid")
+    )
+    owner = CancellationReceipts(OperationWork(), f.context, OPERATION)
+    with (
+        pytest.raises(AdmissionStorageError),
+        owner.phase() as phase,
+        operation_connection(engine, owner.work) as connection,
+    ):
+        book = phase.book
+        target = "operation_value" if stage == "operation" else "remember"
+        obj = reads if stage == "operation" else book
+        original = getattr(obj, target)
+
+        def fail(*args, **kwargs):
+            if stage == "operation" or args[0] == ("job" if stage == "job_retention" else "run"):
+                raise error
+            return original(*args, **kwargs)
+
+        with monkeypatch.context() as patch:
+            patch.setattr(obj, target, fail)
+            with pytest.raises(type(error)) as caught:
+                capture(f, phase, connection)
+        assert caught.value is error and owner._failed
+    # The same optional hook must be a no-op for a normal GET receipt book.
+    with operation_connection(engine, OperationWork()) as connection:
+        book = ReceiptBook()
+        original = reads.operation_value
+        with monkeypatch.context() as patch:
+            patch.setattr(reads, "operation_value", lambda *_: (_ for _ in ()).throw(error))
+            with pytest.raises(type(error)) as caught:
+                read_operation(connection, f.context, OPERATION, book)
+        assert caught.value is error
+        assert reads.operation_value is original
+        assert read_operation(connection, f.context, OPERATION, book)[0].id == OPERATION

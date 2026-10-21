@@ -628,3 +628,31 @@ and the corrected results remain in private source-bound evidence. The reused
 PostgreSQL instance was restored to its exact original inventory and stopped
 before lifecycle handoff. Only operation_cancellation.py is added to the
 distribution allowlist; installed and hosted composition remain later gates.
+
+### Active-read failure latch correction
+
+Independent review found that a caller could catch an admitted read failure,
+repair its SQL row after cleanup, and resume the same phase. Each complete
+bounded read/query/verification now enters a private receipt attempt after
+liveness, context and connection checks. An escaping body failure, including
+decoder, missing-candidate or retention failure, permanently aborts that active
+generation while preserving the exact exception. Pure stale/nested/sealed and
+wrong-context/connection entry refusals remain outside this latch. A normal GET
+book has an explicit unscoped pass-through. Constructor validation, SQL, limits,
+transaction outcome handling and service boundaries are unchanged.
+
+Eleven new SQLite and four actual SELECT-only PostgreSQL regressions failed
+against d8975224 before correction. They cover schema-legal insufficient
+operation retention, malformed/oversized job cells, missing configuration refs,
+invalid root ancestry, and decoder/retention interruptions. Repair cannot
+resume a poisoned book, verification, original-association access or a later
+phase, and retained-book reader calls issue no SQL. Existing stale/nested and
+ordinary GET controls still pass. Across the full affected runs and narrowly
+repeated test-call repairs, 134 SQLite and 40 actual PostgreSQL cases passed
+(54/22 dedicated phase cases plus 80/18 existing primitive cases). The only
+changed existing test function retains its private book for the exact canonical
+byte oracle after failure and separately asserts that public live access fails.
+All other prior test function bodies are preserved. SQL/decoder function-body
+preservation was checked after normalizing only the added attempt guards.
+Before/after failures, transient test-edit diagnostics, source hashes, native
+baseline restoration and stopped-instance proof remain in private evidence.
