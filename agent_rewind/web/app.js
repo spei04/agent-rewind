@@ -74,6 +74,10 @@ function showView(view) {
 function canOperate() {
   return ["operator", "maintainer"].includes(state.user?.role);
 }
+function requireOperator() {
+  if (!canOperate())
+    throw new Error("A current operator or maintainer grant is required.");
+}
 function clearProtectedState() {
   state.runs = [];
   state.run = null;
@@ -81,8 +85,17 @@ function clearProtectedState() {
     $(id).replaceChildren();
   $("run-detail").classList.add("hidden");
   $("run-empty").classList.remove("hidden");
-  for (const id of ["branch", "investigate", "new-run", "empty-record"])
+  for (const id of [
+    "branch",
+    "investigate",
+    "new-run",
+    "empty-record",
+    "task-submit",
+    "study-submit",
+  ])
     $(id).disabled = true;
+  for (const id of ["task-dialog", "study-dialog", "compare-dialog"])
+    $(id).close();
   document.querySelectorAll("[data-project-action]").forEach((button) => {
     button.disabled = true;
   });
@@ -91,21 +104,26 @@ async function authenticate() {
   state.user = null;
   state.csrf = "";
   clearProtectedState();
-  state.user = await api("/me");
-  state.csrf = state.user.csrf;
-  $("identity").textContent = `${state.user.subject} · ${state.user.role || "no project access"}`;
-  for (const id of ["new-run", "empty-record"])
-    $(id).disabled = !canOperate();
-  $("connection").textContent = "Connected";
-  $("logout").classList.remove("hidden");
-  $("login-panel").classList.add("hidden");
-  showView(state.view);
   await refresh();
 }
 async function refresh() {
-  if (!state.user || state.busy) return;
+  if (state.busy) return;
   state.busy = true;
   try {
+    // Manual refresh and polling must refresh the role hint too. A prior page
+    // grant is never permission to retain actions after access has changed.
+    const user = await api("/me");
+    if (user.subject !== state.user?.subject || user.role !== state.user?.role)
+      clearProtectedState();
+    state.user = user;
+    state.csrf = user.csrf;
+    $("identity").textContent = `${user.subject} · ${user.role || "no project access"}`;
+    for (const id of ["new-run", "empty-record", "task-submit", "study-submit"])
+      $(id).disabled = !canOperate();
+    $("connection").textContent = "Connected";
+    $("logout").classList.remove("hidden");
+    $("login-panel").classList.add("hidden");
+    showView(state.view);
     const [runs, studies, jobs] = await Promise.all([
       api("/runs"),
       api("/studies"),
@@ -117,6 +135,15 @@ async function refresh() {
     renderJobs(jobs);
     if (state.run && state.run.status === "running")
       await selectRun(state.run.id, false);
+  } catch (error) {
+    // Preserve the caller's own CSRF/logout even when data access fails, but
+    // require another successful refresh before offering privileged actions.
+    if (state.user) {
+      state.user = { ...state.user, role: null };
+      $("identity").textContent = `${state.user.subject} · project access unavailable`;
+    }
+    clearProtectedState();
+    throw error;
   } finally {
     state.busy = false;
   }
@@ -258,6 +285,7 @@ async function loadFiles() {
   });
 }
 async function queued(path, body) {
+  requireOperator();
   const result = await api(path, body);
   notice(`Job ${result.job_id.slice(0, 12)} queued. A worker will execute it.`);
   await refresh();
@@ -428,6 +456,7 @@ function renderJobs(jobs) {
       b.dataset.projectAction = "cancel";
       b.disabled = !canOperate();
       b.onclick = guard(async () => {
+        requireOperator();
         await api(`/jobs/${job.id}/cancel`, {});
         await refresh();
       });
@@ -480,11 +509,13 @@ $("task-upload").onchange = guard(async () => {
 });
 $("task-form").onsubmit = guard(async (e) => {
   e.preventDefault();
+  requireOperator();
   await queued("/runs", JSON.parse($("task-json").value));
   $("task-dialog").close();
 });
 $("intervention-kind").onchange = resetReplacement;
 $("branch").onclick = guard(async () => {
+  requireOperator();
   const kind = $("intervention-kind").value;
   const intervention = {
     step: state.step,
@@ -501,9 +532,13 @@ $("branch").onclick = guard(async () => {
     budget_usd: Number($("branch-budget").value),
   });
 });
-$("investigate").onclick = () => $("study-dialog").showModal();
+$("investigate").onclick = guard(async () => {
+  requireOperator();
+  $("study-dialog").showModal();
+});
 $("study-form").onsubmit = guard(async (e) => {
   e.preventDefault();
+  requireOperator();
   await queued("/investigations", {
     run_id: state.run.id,
     screening_trials: Number($("screen-trials").value),

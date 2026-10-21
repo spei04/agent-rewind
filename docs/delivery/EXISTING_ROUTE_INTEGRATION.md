@@ -19,7 +19,11 @@ cookie itself, its CSRF token and exact Origin, regardless of a bearer header.
 current explicit-default effective role. Missing/revoked/ambiguous default yields
 null; genuine database failure remains 503. This lets a revoked member reload and
 log out. `/api/schema` remains default-scoped. The UI treats only operator and
-maintainer as action-capable; null or unknown roles clear earlier privileged state.
+maintainer as action-capable. Manual refresh and polling re-read the current role;
+null/unknown roles or a failed data refresh clear earlier protected state, close
+privileged dialogs and disable actions while preserving own CSRF/logout. Submission
+handlers recheck the role hint, and a later successful operator refresh restores
+actions. The server remains the authority for every request.
 
 All resources are scoped before action decisions: inaccessible/missing/invalid
 resources return fixed 404; an accessible resource with a denied action returns
