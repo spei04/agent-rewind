@@ -10,10 +10,14 @@ const state = {
   view: "runs",
   busy: false,
   identityGeneration: 0,
+  viewGeneration: 0,
 };
-class SupersededIdentity extends Error {}
+class SupersededRequest extends Error {}
 function checkIdentity(generation) {
-  if (generation !== state.identityGeneration) throw new SupersededIdentity();
+  if (generation !== state.identityGeneration) throw new SupersededRequest();
+}
+function checkView(generation) {
+  if (generation !== state.viewGeneration) throw new SupersededRequest();
 }
 function element(tag, text, className) {
   const e = document.createElement(tag);
@@ -33,7 +37,7 @@ function guard(fn) {
     } catch (error) {
       if (
         generation === state.identityGeneration &&
-        !(error instanceof SupersededIdentity)
+        !(error instanceof SupersededRequest)
       )
         notice(error.message);
     }
@@ -41,6 +45,8 @@ function guard(fn) {
 }
 async function api(path, body, method) {
   const generation = state.identityGeneration;
+  // Own identity/CSRF remains available independently of protected data access.
+  const viewGeneration = path === "/me" ? null : state.viewGeneration;
   const headers = {};
   if (state.token) headers.Authorization = `Bearer ${state.token}`;
   if (state.csrf) headers["X-Rewind-CSRF"] = state.csrf;
@@ -55,9 +61,11 @@ async function api(path, body, method) {
     data = await response.json();
   } catch (error) {
     checkIdentity(generation);
+    if (viewGeneration !== null) checkView(viewGeneration);
     throw error;
   }
   checkIdentity(generation);
+  if (viewGeneration !== null) checkView(viewGeneration);
   if (!response.ok)
     throw new Error(
       typeof data.detail === "string"
@@ -97,10 +105,28 @@ function requireOperator() {
     throw new Error("A current operator or maintainer grant is required.");
 }
 function clearProtectedState() {
+  // Authority loss must also invalidate older reads under the same credentials.
+  state.viewGeneration += 1;
   state.runs = [];
   state.run = null;
-  for (const id of ["run-list", "studies-list", "jobs-list"])
+  for (const id of [
+    "run-list",
+    "studies-list",
+    "jobs-list",
+    "file-list",
+    "timeline",
+    "ancestry",
+  ])
     $(id).replaceChildren();
+  for (const id of [
+    "file-content",
+    "compare-output",
+    "action-output",
+    "tool-output",
+    "changed-files",
+    "evaluation",
+  ])
+    $(id).textContent = "";
   $("run-detail").classList.add("hidden");
   $("run-empty").classList.remove("hidden");
   for (const id of [
@@ -147,12 +173,14 @@ async function refresh() {
     $("logout").classList.remove("hidden");
     $("login-panel").classList.add("hidden");
     showView(state.view);
+    const viewGeneration = state.viewGeneration;
     const [runs, studies, jobs] = await Promise.all([
       api("/runs"),
       api("/studies"),
       api("/jobs"),
     ]);
     checkIdentity(generation);
+    checkView(viewGeneration);
     state.runs = runs;
     renderRuns();
     renderStudies(studies);
@@ -161,6 +189,7 @@ async function refresh() {
       await selectRun(state.run.id, false);
   } catch (error) {
     checkIdentity(generation);
+    if (error instanceof SupersededRequest) throw error;
     // Preserve the caller's own CSRF/logout even when data access fails, but
     // require another successful refresh before offering privileged actions.
     if (state.user) {
@@ -200,8 +229,10 @@ function renderRuns() {
 }
 async function selectRun(id, reset = true) {
   const generation = state.identityGeneration;
+  const viewGeneration = state.viewGeneration;
   const run = await api(`/runs/${id}`);
   checkIdentity(generation);
+  checkView(viewGeneration);
   state.run = run;
   if (reset) state.step = 1;
   state.step = Math.min(state.step, state.run.events.length || 1);
@@ -295,10 +326,12 @@ function resetReplacement() {
 }
 async function loadFiles() {
   const generation = state.identityGeneration;
+  const viewGeneration = state.viewGeneration;
   const runId = state.run.id,
     step = state.step;
   const files = await api(`/runs/${runId}/files/${step}`);
   checkIdentity(generation);
+  checkView(viewGeneration);
   if (runId !== state.run?.id || step !== state.step) return;
   $("file-list").replaceChildren();
   files.forEach((file) => {
@@ -308,6 +341,7 @@ async function loadFiles() {
         `/runs/${runId}/files/${step}?path=${encodeURIComponent(file.path)}`,
       );
       checkIdentity(generation);
+      checkView(viewGeneration);
       if (runId === state.run?.id && step === state.step)
         $("file-content").textContent =
           f.content + (f.truncated ? "\n[truncated]" : "");
@@ -318,8 +352,10 @@ async function loadFiles() {
 async function queued(path, body) {
   requireOperator();
   const generation = state.identityGeneration;
+  const viewGeneration = state.viewGeneration;
   const result = await api(path, body);
   checkIdentity(generation);
+  checkView(viewGeneration);
   notice(`Job ${result.job_id.slice(0, 12)} queued. A worker will execute it.`);
   await refresh();
 }
@@ -621,10 +657,12 @@ setInterval(() => {
 
 $("compare").onclick = guard(async () => {
   const generation = state.identityGeneration;
+  const viewGeneration = state.viewGeneration;
   const result = await api(
     `/compare?left=${state.run.parent_id}&right=${state.run.id}`,
   );
   checkIdentity(generation);
+  checkView(viewGeneration);
   $("compare-output").textContent = JSON.stringify(result, null, 2);
   $("compare-dialog").showModal();
 });

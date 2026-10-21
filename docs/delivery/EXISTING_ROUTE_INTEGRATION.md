@@ -26,7 +26,11 @@ handlers recheck the role hint, and a later successful operator refresh restores
 actions. Switching credentials advances an in-memory identity generation: obsolete
 refresh/selection responses, failures and completion handlers cannot restore old
 identity/data, clear new credentials or release the new lookup's busy state. No
-token persistence is added. The server remains the authority for every request.
+token persistence is added. Clearing protected state also advances a separate view
+generation, so a previously requested detail/file/comparison cannot repopulate
+cleared data after same-credential authority loss or data failure. Own identity,
+CSRF, logout and subsequent authorized recovery remain independent. The server
+remains the authority for every request.
 
 All resources are scoped before action decisions: inaccessible/missing/invalid
 resources return fixed 404; an accessible resource with a denied action returns
