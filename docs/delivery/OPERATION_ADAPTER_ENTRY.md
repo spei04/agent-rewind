@@ -840,3 +840,41 @@ The current viewer's identity is authorization context, not a replacement for
 the creator. Bounded cell and descriptor primitives alone do not establish
 these associations. These constraints add no new producer, outer dependency,
 resource authority or wider runtime support.
+
+## Factory activation entry review — 2026-10-21
+
+A audited the immutable caller checkpoint 27c9405 against entry b5d6335. The
+minimal constructor change stays inside Database.__init__: parse the SQLAlchemy
+URL and select the owned factory only for sqlite or sqlite+pysqlite with a
+nonempty file path, no :memory: path, no file: URI, no query and no authority
+components. Pass the existing connection and pool timeout constants. Keep
+PostgreSQL construction and configure_runtime_engine unchanged; separately
+constructed operator/probe engines and unsupported legacy memory/custom/URI
+paths stay explicitly untracked. This adds no Settings flag, profile, dependency
+or authority to certify injected engines. The future operation service still
+requires ownership before its first SQLite acquisition.
+
+Activation must keep the shared file-backed Settings/Database fixtures owned.
+Adapt Database-backed setup and readback acquisitions to owned contexts rather
+than opting the regression suite out. Affected categories include publication
+and route fixtures, schema-compatibility snapshots, API/Auth/storage/engine tests,
+and capture-based publication/projection/reader/legacy suites, including helpers
+that receive a Database engine indirectly. Preserve assertions and explicit
+untracked component controls, native transaction-mode and permission negatives.
+A provenance refusal must not silently replace the behavior a test was meant
+to exercise. This mechanical fixture adaptation is a separately reviewable
+checkpoint within the existing P1 scope.
+
+The installed smoke must change its dormant-default assertion only with the
+reviewed activation. Prove owned construction, real migration-only compatibility,
+ordinary Database operations, callback cleanup and pool reuse, with customer
+admission still unavailable. Also prove constructor laziness, the supported URL
+matrix, unchanged PostgreSQL behavior and no automatic certification of injected
+engines. The offline operator engine used by the existing migration smoke may
+remain untracked.
+
+Correct and independently accept both caller restoration findings before any
+activation implementation. Then review constructor/new activation tests and the
+existing-fixture adaptation independently before combining them. This entry
+review does not itself activate the factory, implement services, advance P1,
+widen budgets or change outer dependencies.
