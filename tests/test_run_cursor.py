@@ -8,6 +8,7 @@ from dataclasses import FrozenInstanceError, replace
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from pydantic import SecretStr
 
 from agent_rewind.config import Settings
 from agent_rewind.cursor_config import cursor_codec
@@ -218,3 +219,19 @@ def test_signature_is_verified_before_json(monkeypatch):
 
     monkeypatch.setattr("agent_rewind.run_cursor.json.loads", forbidden)
     invalid(token[:-43] + encoded(b"z" * 32))
+
+
+@pytest.mark.parametrize("padding", ["", "="])
+def test_bootstrap_reuse_is_lazy_list_only(padding):
+    configured = settings(encoded(KEY))
+    configured.bootstrap_key = SecretStr(encoded(KEY) + padding)
+    assert configured.mode == "development"
+    with pytest.raises(Fault, match="dependency_unavailable"):
+        cursor_codec(configured)
+
+
+@pytest.mark.parametrize("bootstrap", ["é" * 32, "opaque-unrelated-secret" * 2, encoded(b"b" * 32)])
+def test_unrelated_bootstrap_keeps_dedicated_cursor_key(bootstrap):
+    configured = settings(encoded(KEY))
+    configured.bootstrap_key = SecretStr(bootstrap)
+    assert cursor_codec(configured) == CODEC

@@ -31,4 +31,14 @@ def cursor_codec(settings: Settings) -> CursorCodec:
         or hmac.compare_digest(key, encryption)
     ):
         raise Fault("dependency_unavailable")
+    bootstrap = settings.bootstrap_key
+    bootstrap_value = None if bootstrap is None else bootstrap.get_secret_value()
+    if bootstrap_value is not None and re.fullmatch(r"[A-Za-z0-9_-]{43}=?", bootstrap_value):
+        candidate = base64.b64decode(
+            bootstrap_value.rstrip("=") + "=", altchars=b"-_", validate=True
+        )
+        if base64.urlsafe_b64encode(candidate).decode().rstrip("=") == bootstrap_value.rstrip(
+            "="
+        ) and hmac.compare_digest(candidate, key):
+            raise Fault("dependency_unavailable")
     return CursorCodec(key)
