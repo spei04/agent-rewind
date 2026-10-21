@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | AR-010-A/P1 #108 runtime in secondary work/ledger-schema from 9f6ea6e | First manifest/progress and explicit ar7 DDL/catalog checkpoint; full P1 product proof still required. Sole coordinated PostgreSQL slot. |
-| Delivery reviewer | Independent ledger source/integration/delivery review | HTTP exact PR/main/candidate audit is accepted; P1 delivery remains unaccepted. |
-| Planning/verification | Primary progress reconciliation, then independent ledger tests | Test authoring waits for accepted progress, stable runtime interfaces and explicit file ownership. No current QE implementation or PostgreSQL slot. |
-| Lead | Ledger P1 assigned; #107/#108/#10 In progress and #109 Not started read back | Own integration, publication and acceptance; keep P2 and worker prerequisites intact. |
+| Platform/security | Revise ledger operator startup/cleanup accounting | Schema checkpoint accepted; operator code awaits the narrow design correction and review. |
+| Delivery reviewer | Protected-main planning run and operator design review | Planning PR #110 merged at b304da1; matching main/candidate acceptance remains pending. |
+| Planning/verification | Independent operator fault-test matrix | First schema checkpoint accepted at b2e19be; no current source writer or PostgreSQL slot. |
+| Lead | Schema/planning composition, progress log and next code handoff | P1 #108 remains In progress; P2 #109 stays Not started with null acceptance. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -50,10 +50,10 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** HTTP delivery and candidate are accepted. Ledger entry 51af77dc and backlog fixture correction dbec08b are independently accepted. Platform/security now owns P1 runtime; planning/verification owns the primary progress patch and later independent tests after interface/ownership release. The lead integrates and the delivery reviewer independently reviews. No ledger package is Verified.
+- **Contributor checkpoint:** First ledger schema checkpoint b2e19be is independently accepted: 65 native independent passes, 107 combined schema passes and 18 deliberate dialect skips. Four reviewed scope-reversal failures are repaired with original red evidence retained. Platform/security revises two operator accounting gaps, delivery reviews its design and hosted planning evidence, and planning prepares fault controls. No ledger package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
 - **Next evidence-producing milestone:** AR-010-A/P1 #108 immutable manifest/progress and explicit ar7 DDL/literal SQLite/PostgreSQL catalogs, then the full provisioning/opening/constraint/privilege/bounds/recovery matrix. P2 #109 remains Not started until accepted P1 and its own reservation/fence entry. Parser-only completion cannot waive those gates.
-- **Current storage and consumers:** The existing primary checkout is owned by planning for progress reconciliation; the existing secondary is owned by platform/security for P1 runtime. Each retains its own matching-lock environment. Platform/security holds the sole coordinated PostgreSQL slot; planning performs no database work. Private evidence stays outside checkouts, and no new checkout or resource was created.
+- **Current storage and consumers:** The lead owns the existing primary for integration; the clean secondary is retained for the next runtime assignment. Each retains its own matching-lock environment. PostgreSQL is restored/stopped with no active slot owner. Private evidence stays outside both checkouts; no new checkout or paid resource was created.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -839,3 +839,21 @@ AR-008-B/P2 #95 and aggregate #93 are Verified after reviewed source 065df8c89da
 | Lead | Integration and public tracking | Read back #107/#108/#10 In progress and #109 Not started; authorize subsequent handoffs only after their producer evidence. |
 
 P1 and aggregate AR-010-A are In progress with null delivery acceptance; P2 remains Not started/null acceptance. Current totals are 30 Verified / 1 In progress / 120 Not started tasks and 9 Verified / 1 In progress / 5 Not started packages. The owner-approved finite window, six-day ledger estimate, frozen entry, 544 dependencies and 159 PRs are unchanged. This assignment makes no provider calls, paid-resource or customer-data commitment.
+
+
+## Schema checkpoint accepted and operator review assigned — 2026-10-21
+
+Platform/security repaired four independently reproduced scope reversals at
+1ec7202 and recaptured only the changed native function definition/digest.
+Planning/verification added fourteen membership/window/metadata cases and
+accepted combined source b2e19be after 65 independent passes (107 combined
+passes, 18 deliberate dialect skips). The lead verified source, evidence and
+all 121 local packaged runtime members, then composed planning main b304da1
+without a source-tree change. The 209 prior migration regressions also pass.
+
+Operator review identified unobserved cold-start SQL and a missing callback
+retry in cleanup accounting. Platform/security owns the bounded design
+correction; delivery reviews it while monitoring main CI; planning prepares
+independent fault controls. The lead owns integration and the next code handoff.
+P1 remains In progress and P2 Not started. No provider calls, customer data,
+production activation or new paid resources were used.

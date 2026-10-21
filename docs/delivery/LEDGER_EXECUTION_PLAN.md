@@ -4,6 +4,35 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. P1 has no accepted product delivery yet; P2 #109 remains **Not started**, waiting for accepted P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
+## First schema checkpoint — 2026-10-21
+
+Independent review accepted source `b2e19beaf8ca195c74a69871817ef96004f73444`.
+Pure manifest/history verification previously passed 190 independent cases.
+The actual schema run passed all 65 independent PostgreSQL cases; together with
+the authored schema module, it recorded 107 passes and 18 explicit dialect
+skips. The four scope-change/reversal bypasses found during review now refuse
+at COMMIT, while no-op and unrelated-scope controls still pass. The original
+failed evidence remains retained.
+
+The corrected PostgreSQL capture changes only the constraint function body and
+digest. Old literal profiles remain unchanged; all 209 prior migration
+regressions pass. The local wheel and source archive match all 121 runtime
+files. Native metadata tests prove refusal at 103,233 aggregate bytes while
+every individual object stays below its limit; this is a rejection test, not
+a capacity or performance result. PostgreSQL returned to its verified
+three-database/fifteen-role baseline and was stopped after each exclusive slot.
+
+The lead composed accepted planning merge `b304da1` with this checkpoint without
+changing its source tree. Operator design review then found that cold database
+startup bypasses ordinary SQL listeners and a callback-release retry was absent
+from the proposed cleanup count. Platform/security revises those two bounds;
+delivery reviews the source-based accounting and planning prepares fault tests.
+No operator implementation is assigned until that internal review passes.
+
+The full operator, 245000 opening/backfill, replay, concurrency, recovery,
+maximum-state inspection and hosted delivery gates remain required. P1 stays
+In progress, P2 stays Not started, and both delivery acceptance records stay null.
+
 ## Problem and intended result
 
 New paid work needs one durable integer reservation at organization, project and job levels. A retry must recover the original logical call without granting another dispatch opportunity. Uncertain old obligations must continue to constrain new admission.
@@ -81,8 +110,8 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- Planning/verification: finish independently reviewed progress reconciliation, then author the separately owned fixture/adversarial/limits/provisioning/constraint/catalog/recovery tests after runtime interfaces are stable and the lead releases ownership.
-- Platform/security: own P1 runtime in the existing secondary checkout, work/ledger-schema, from accepted planning 9f6ea6e; first produce immutable bounded manifest/progress parsing plus explicit ar7 DDL and literal SQLite/PostgreSQL catalog evidence. Retain the sole coordinated PostgreSQL slot until baseline restoration and process release are proved.
+- Planning/verification: first schema checkpoint independently accepted; prepare operator fault controls, then author the next separately owned tests after stable interfaces and an explicit checkout handoff.
+- Platform/security: first runtime checkpoint and scope correction are reviewed; revise the two operator accounting gaps before the next implementation assignment in the reused secondary. PostgreSQL is stopped and unassigned until an explicit exclusive handoff.
 - Delivery reviewer: independently review ledger source, integration and actual delivery evidence; accepted HTTP audit remains predecessor evidence.
 - Lead: integrate reviewed runtime/tests, coordinate checkout and PostgreSQL ownership, maintain issue read-back and require the full P1 acceptance matrix before P2 handoff.
 
