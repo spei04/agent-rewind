@@ -663,7 +663,9 @@ class AdmissionCoordinator:
                 or (outcome.rollback_attempted and not outcome.rollback_acknowledged)
             ):
                 raise AdmissionError("outcome_uncertain") from None
-            raise
+            # Fixed dependency/policy errors must not expose a caller's active
+            # exception or an adapter's private cause outside the journal path.
+            raise error from None
         except Exception:
             if not opened and self.journal is not None:
                 # Busy, corrupt, partial and unreadable journals provide no absence
