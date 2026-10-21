@@ -6,9 +6,9 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Exact-image OS and pip trust repair | Narrow container helper and regression checks; independent source review and final hosted image proof remain required. |
-| Delivery reviewer | Container repair and hosted delivery audit | Verify source, complete run attempts and final container trust evidence. |
-| Planning/verification | Ledger amendment accepted; container repair review | Preserve old release records; review the next private verifier revision and exact-image proof. |
+| Platform/security | Correct pinned certificate-config byte handling | Preserve unrelated config bytes; verify actual pinned-file regression before independent review. |
+| Delivery reviewer | Preserve failed hosted container attempt and review corrected delivery | Final image trust proof and protected-main candidate acceptance remain required. |
+| Planning/verification | Independently review config-byte correction and private verifier | Bind corrected source and actual final-image evidence; preserve earlier attempts. |
 | Lead | HTTP integration and approved ledger handoff | Reuse primary; ledger implementation waits for accepted HTTP protected-main delivery. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
@@ -646,3 +646,19 @@ The published ledger planning branch is preserved. Ledger #107, #108 and #109
 remain Not started, and HTTP #95 and #93 remain In progress. No shared host trust
 mutation, provider call, production change, partner data or new paid resource
 is part of this maintenance.
+
+## Pinned certificate configuration correction — 2026-10-21
+
+Reviewed source 316bdc5 failed the package job in PR run
+[39677547972](https://github.com/spei04/agent-rewind/actions/runs/39677547972),
+attempt 1: Docker's repair step decoded the pinned Debian certificate
+configuration as ASCII and encountered non-ASCII bytes. The installed-package
+smoke passed, but the container did not reach final-image trust or CLI proof.
+The failure and source are retained.
+
+Platform/security owns the narrow byte-preserving configuration edit and an
+actual pinned-file regression in the reused secondary checkout.
+Planning/verification independently reviews the correction before another
+source run. The lead owns PR #106 and delivery acceptance; HTTP remains In
+progress and ledger packages remain Not started. No later repair stage,
+container acceptance or protected-main delivery is established by this fix.
