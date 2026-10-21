@@ -4,15 +4,16 @@ This is the AR-006-B implementation boundary for independent review, not runtime
 acceptance or a customer-ready release. The [task cards](../EXECUTION_BACKLOG.md#ar-006-b)
 and [machine ledger](../../contracts/proposals/execution-backlog.json) retain the
 aggregate identity and existing prerequisites: Verified AR-006-A, AR-007-C and
-AR-011-B, consuming reviewed C04. Both delivery packages remain **Not started**;
-a planning assignment does not start their runtime work.
+AR-011-B, consuming reviewed C04. P1 and the aggregate are **In progress** with A
+in the primary checkout; P2 remains **Not started** until accepted merged P1.
 
 A authored exact plan `9b97a09`; B independently accepted its contract, dependency
 and arithmetic review, and the lead accepted the plan. Tracking: aggregate
 [#86](https://github.com/spei04/agent-rewind/issues/86), P1
 [#87](https://github.com/spei04/agent-rewind/issues/87), P2
-[#88](https://github.com/spei04/agent-rewind/issues/88). Runtime remains unassigned;
-planning acceptance does not satisfy either delivery package.
+[#88](https://github.com/spei04/agent-rewind/issues/88). Lead dispatched P1 in
+[draft PR #89](https://github.com/spei04/agent-rewind/pull/89); B independently reviews
+and the lead integrates. No HTTP wiring or package acceptance follows from dispatch.
 
 C04, the frozen OpenAPI/logical schema and CT-M1-005/006 remain authoritative.
 This plan elaborates their implementation without changing their bytes. Read/cursor
