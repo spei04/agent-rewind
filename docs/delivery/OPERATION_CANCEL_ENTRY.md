@@ -192,7 +192,9 @@ A typed denial from the original operation is preserved directly.
 | --- | --- |
 | Real migration-only/incompatible guard | schema_incompatible; zero customer sinks |
 | Known precommit failure, confirmed rollback and clean release | dependency_unavailable |
-| Commit attempted/lost acknowledgement, uncertain rollback or cleanup | Existing admission outcome_uncertain mapping; never retry effect |
+| Commit attempted/lost acknowledgement, or attempted rollback without acknowledgement | Existing admission outcome_uncertain mapping; never retry effect |
+| Ordinary cleanup failure before commit with acknowledged rollback | Existing dependency_unavailable mapping; cleanup failure alone does not imply an uncertain mutation |
+| Cleanup failure after a possible or acknowledged effect | Existing outcome_uncertain mapping; never retry effect |
 | Acknowledged effect followed by dependency, association or late-growth disclosure failure | outcome_uncertain |
 | Fresh typed identity/project/action denial | Preserve IdentityInvalid, ResourceNotFound or ActionForbidden |
 | Fresh classification cannot run within remaining SQL budget | Preserve dependency before effect or uncertainty after possible effect; do not fabricate visibility |
