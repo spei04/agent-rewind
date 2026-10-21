@@ -78,6 +78,8 @@ The only static-rule exceptions are attached to individual source lines:
 `S311` for reproducible randomized trial order (no secret generation), `S108`
 for the container's private bounded `/tmp` tmpfs (no host temp path), and `S608`
 for identifiers from the validated frozen synthetic SQLite schema vocabulary.
+S603 covers the container helper's fixed certificate-regeneration and subject-hash
+commands; they accept no caller-controlled argv and run only on reviewed trust inputs.
 Do not expand these to directory-wide ignores. Remove an exception if its
 assumption stops being true; changes require the same review as runtime code.
 Runtime assertion guards remain active when Python optimization is enabled.
@@ -103,8 +105,38 @@ dependency or lock content changes are required. Historical candidate records
 retain their original tooling identity; they are not retroactively patched.
 The package job builds the container and runs its installed CLI with networking
 disabled on Linux x86_64. Other wheel architectures are pinned but are not
-validated by that job. The existing base image and its OS trust store are
-separate inputs; this uv update does not establish their CA-remediation status.
+validated by that job. The pinned base retains the affected emSign ECC Root CA-G3 in both its OS
+and pip-vendored stores. Updating uv alone does not repair these stores.
+
+Before any network bootstrap, the container-only
+[scripts/container_ca.py](../../scripts/container_ca.py) helper verifies the
+reviewed original trust sets and removes only DER SHA-256
+86a1ecba089c4a8d3bbe2734c612ba341d813e043cf9e8a862cd5c57a36bbe6b.
+It disables the exact Debian source entry, removes that source certificate,
+regenerates the OS bundle and hashed directory, and removes the same certificate
+from base pip's separate bundle. It checks every hashed alias's subject hash,
+collision sequence and resolved target. All identity, path, configuration and
+PEM checks precede mutation; any mismatch stops the build before pip downloads.
+TLS remains enabled and active CA, pip-configuration and OpenSSL configuration
+overrides are rejected.
+
+The final offline container check verifies four distinct stores: the OS bundle,
+OpenSSL's actual hashed default directory, base pip's pinned vendored bundle, and
+the installed application interpreter's certifi bundle. Versioned expected sets
+require exactly 149, 149, 150 and 120 retained roots respectively. Set identities
+are SHA-256 over sorted lowercase DER-SHA256 values joined by ASCII LF without a
+terminal LF. The JSON container_final_ca_trust_verified marker binds these
+identities, root counts, affected fingerprint and resolved store paths. The
+candidate verifier must check this actual hosted image evidence; a passing source
+test or prior uv-only build is insufficient.
+
+This is an exact-image workaround, scoped to the tested Linux x86_64 build.
+The immutable Python base and the separate gVisor isolation image remain
+unchanged; the isolation fixture does not inherit this application-image repair.
+No host trust store is modified. Remove the helper only after a reviewed immutable
+upstream image fixes both OS and base pip trust, with explicit comparison of all
+added/removed roots and final hosted-image verification. The inspected upstream
+replacement removed another root while retaining G3 in pip, so it was unsuitable.
 
 ## Verified external inputs (actions and images: 2026-10-19; uv: 2026-10-21)
 

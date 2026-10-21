@@ -6,9 +6,9 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Patched uv repair complete; final inventory next | Independent source review and hosted container validation remain required. |
-| Delivery reviewer | Immutable repair and hosted delivery audit | Verify source, complete run attempts and candidate evidence. |
-| Planning/verification | Ledger amendment accepted; private verifier update | Preserve old release records; require patched toolchain and container proof. |
+| Platform/security | Exact-image OS and pip trust repair | Narrow container helper and regression checks; independent source review and final hosted image proof remain required. |
+| Delivery reviewer | Container repair and hosted delivery audit | Verify source, complete run attempts and final container trust evidence. |
+| Planning/verification | Ledger amendment accepted; container repair review | Preserve old release records; review the next private verifier revision and exact-image proof. |
 | Lead | HTTP integration and approved ledger handoff | Reuse primary; ledger implementation waits for accepted HTTP protected-main delivery. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
@@ -622,3 +622,27 @@ Corrected HTTP source a439bce passed complete PR run [39638999615](https://githu
 The delivery reviewer independently audits the repair. Planning/verification owns a separately reviewed private verifier update, preserving earlier failed and successful run identities. Platform/security next binds the final source collection; the lead owns PR, protected-main and candidate acceptance. The existing Docker base and shared host trust store are separate inputs; this uv repair does not claim to remediate them. Local Docker remains unavailable, so actual container validation must come from hosted CI.
 
 The approved ledger amendment and accepted schema/provisioning entry are published on [work/ledger-backlog-amendment](https://github.com/spei04/agent-rewind/blob/work/ledger-backlog-amendment/docs/ASSIGNMENTS.md). They establish design readiness only. Ledger #107, #108 and #109 remain Not started; HTTP #95 and #93 remain In progress until the required delivery evidence is accepted. No new paid resources, provider calls, partner data or production activation were used.
+
+
+## Container trust maintenance assignments — 2026-10-21
+
+The uv-patched HTTP source eeca4e5 is bound to functional run
+[39672365195](https://github.com/spei04/agent-rewind/actions/runs/39672365195).
+Its package, security and isolation jobs passed at the recorded checkpoint;
+the core jobs were still running at that checkpoint. That earlier container
+build did not check all CA stores and cannot establish acceptance of this repair.
+
+Verified immutable Linux x86_64 base layers still contain emSign ECC Root CA-G3
+in both OS and base pip trust. Platform/security owns a container-only repair on
+work/container-ca-repair, reusing the secondary checkout. The repair preserves
+the base digest, dependency lock, application runtime and unrelated roots.
+Planning/verification accepted the bounded design and independently reviews the
+source and negative controls. The lead owns the subsequent private verifier
+revision, source-bound collection, full hosted checks and protected-main
+candidate acceptance. Those gates remain open; no earlier run is relabeled as
+proof of the new repair.
+
+The published ledger planning branch is preserved. Ledger #107, #108 and #109
+remain Not started, and HTTP #95 and #93 remain In progress. No shared host trust
+mutation, provider call, production change, partner data or new paid resource
+is part of this maintenance.
