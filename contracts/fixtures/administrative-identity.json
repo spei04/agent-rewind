@@ -1,0 +1,320 @@
+{
+  "schema_version": 1,
+  "contract": "C15",
+  "synthetic": true,
+  "behavior_status": "planned-not-executed",
+  "source_baseline": "0b8f99c70f0b203adfc7eed062704b2c43ecdcf1",
+  "examples": [
+    {
+      "schema": "ProjectInput",
+      "value": {
+        "name": "Synthetic project"
+      }
+    },
+    {
+      "schema": "MembershipInput",
+      "value": {
+        "role": "viewer",
+        "legacy_default": false
+      }
+    },
+    {
+      "schema": "KeyInput",
+      "value": {
+        "name": "Synthetic CI",
+        "role": "operator",
+        "days": 30
+      }
+    },
+    {
+      "schema": "ProjectPage",
+      "value": {
+        "items": [
+          {
+            "id": "11111111111111111111111111111111",
+            "organization_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "name": "Synthetic project"
+          }
+        ],
+        "next_cursor": null
+      }
+    },
+    {
+      "schema": "MembershipPage",
+      "value": {
+        "items": [
+          {
+            "project_id": "11111111111111111111111111111111",
+            "principal_id": "oidc:f03b9b3ca5992d3aee959a7a87f2f25bed880b802f217acb698a8ba4bf90e16c",
+            "role": "viewer",
+            "revoked": true,
+            "legacy_default": true
+          }
+        ],
+        "next_cursor": null
+      }
+    },
+    {
+      "schema": "KeyPage",
+      "value": {
+        "items": [
+          {
+            "id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "project_id": "11111111111111111111111111111111",
+            "name": "Synthetic CI",
+            "role": "operator",
+            "expires_at": "2026-11-20T00:00:00Z",
+            "revoked": false
+          }
+        ],
+        "next_cursor": null
+      }
+    },
+    {
+      "schema": "IssuedKey",
+      "value": {
+        "id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "project_id": "11111111111111111111111111111111",
+        "role": "viewer",
+        "token": "SYNTHETIC_NOT_A_CREDENTIAL_00000000",
+        "expires_at": "2026-11-20T00:00:00Z"
+      }
+    },
+    {
+      "schema": "Acknowledged",
+      "value": {
+        "ok": true
+      }
+    },
+    {
+      "schema": "Fault",
+      "value": {
+        "error": {
+          "code": "forbidden",
+          "message": "Action not permitted.",
+          "request_id": "dddddddddddddddddddddddddddddddd",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "schema": "InstallationMapping",
+      "value": {
+        "version": 1,
+        "installation_key": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "organization_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "issuer": "https://idp.example.invalid/tenant",
+        "administrators": [
+          {
+            "principal_id": "oidc:0fd90d1d25b139a4306a90c0da5344780e8cdf727d48a525edcdd48484507d49",
+            "subject": "admin-a"
+          },
+          {
+            "principal_id": "oidc:5544be655e7b271d8f571e74b10b9ecc01be13c3f5bb2c8009d904ffa26d72b9",
+            "subject": "admin-b"
+          }
+        ],
+        "group_claim": "groups",
+        "group_rules": [
+          {
+            "group": "qa",
+            "project_id": "11111111111111111111111111111111",
+            "role": "viewer"
+          },
+          {
+            "group": "operators",
+            "project_id": "22222222222222222222222222222222",
+            "role": "operator"
+          }
+        ]
+      }
+    },
+    {
+      "schema": "VerifiedGroupSnapshot",
+      "value": {
+        "issuer": "https://idp.example.invalid/tenant",
+        "subject": "reader",
+        "mapping_digest": "e38df1a6b11ef2eb5fd195463c9407a8cb74b31af3b672e5a5663fae032394f4",
+        "groups": [
+          "qa"
+        ]
+      }
+    },
+    {
+      "schema": "RecoveryRequest",
+      "value": {
+        "version": 1,
+        "operation_id": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "installation_key": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "expected_mapping_digest": "e38df1a6b11ef2eb5fd195463c9407a8cb74b31af3b672e5a5663fae032394f4",
+        "replacement_administrators": [
+          {
+            "principal_id": "oidc:2e0106dda6c9442ca258dc91826f086938c8b09d09d9251548191ef1af82c258",
+            "subject": "recovery-admin"
+          }
+        ],
+        "reason": "last_admin_lockout"
+      }
+    }
+  ],
+  "authorization_vectors": [
+    {
+      "id": "missing_identity",
+      "action": "admin-list",
+      "credential": "none",
+      "role": "none",
+      "visible": false,
+      "status": 401,
+      "code": "unauthenticated"
+    },
+    {
+      "id": "project_maintainer",
+      "action": "admin-list",
+      "credential": "cookie",
+      "role": "maintainer",
+      "visible": false,
+      "status": 403,
+      "code": "forbidden"
+    },
+    {
+      "id": "project_operator",
+      "action": "admin-list",
+      "credential": "cookie",
+      "role": "operator",
+      "visible": false,
+      "status": 403,
+      "code": "forbidden"
+    },
+    {
+      "id": "service_key",
+      "action": "admin-list",
+      "credential": "bearer",
+      "role": "operator",
+      "visible": false,
+      "status": 401,
+      "code": "unauthenticated"
+    },
+    {
+      "id": "mixed_credentials",
+      "action": "admin-list",
+      "credential": "mixed",
+      "role": "organization_admin",
+      "visible": false,
+      "status": 401,
+      "code": "unauthenticated"
+    },
+    {
+      "id": "admin_visible_project",
+      "action": "admin-list",
+      "credential": "cookie",
+      "role": "organization_admin",
+      "visible": true,
+      "status": 200,
+      "code": null
+    },
+    {
+      "id": "admin_foreign_project",
+      "action": "admin-list",
+      "credential": "cookie",
+      "role": "organization_admin",
+      "visible": false,
+      "status": 404,
+      "code": "not_found"
+    },
+    {
+      "id": "admin_no_data_grant",
+      "action": "data-read",
+      "credential": "cookie",
+      "role": "organization_admin",
+      "visible": false,
+      "status": 404,
+      "code": "not_found"
+    }
+  ],
+  "required_scenarios": {
+    "membership_revocation": {
+      "sequence": [
+        "authenticated operator",
+        "revoke committed",
+        "fresh me role=null with own CSRF",
+        "data 404",
+        "cookie CSRF+Origin logout succeeds"
+      ],
+      "owner": "AR-034-B",
+      "proof": "API/browser with actual current grants"
+    },
+    "stale_browser_response": {
+      "sequence": [
+        "old read pending",
+        "authority loss clears protected state",
+        "old success/error ignored",
+        "later current grant recovers actions"
+      ],
+      "owner": "AR-034-B",
+      "proof": "actual UI handlers"
+    },
+    "last_admin_race": {
+      "sequence": [
+        "two configured administrators",
+        "both removals use same expected mapping digest",
+        "one ACK",
+        "other stale digest refusal",
+        "at least one configured human remains"
+      ],
+      "owner": "AR-034-B",
+      "proof": "concurrent real storage; not IdP account usability"
+    },
+    "external_lockout": {
+      "sequence": [
+        "IdP disables all mapped humans",
+        "no claimed online detection",
+        "explicit operator evidence",
+        "same installation expected digest",
+        "durable audit and new mapping ACK"
+      ],
+      "owner": "AR-034-B + AR-034-C",
+      "proof": "operator procedure and permitted IDP0 exercise"
+    },
+    "recovery_uncertainty": {
+      "sequence": [
+        "mapping commit attempted",
+        "ACK lost",
+        "no repeat replacement",
+        "same operation ID checks durable result",
+        "changed body refuses"
+      ],
+      "owner": "AR-034-B",
+      "proof": "restart/uncertain-commit with protected audit"
+    },
+    "group_revocation": {
+      "sequence": [
+        "verified complete groups snapshot",
+        "reconcile only mapping-owned grants",
+        "preserve explicit manual grants",
+        "no claim that logout or absent claims revoked groups"
+      ],
+      "owner": "AR-034-B + AR-034-C",
+      "proof": "provenance + real IdP freshness bound"
+    },
+    "key_revocation": {
+      "sequence": [
+        "key scoped member active",
+        "key and membership revoked atomically",
+        "new bearer lookup 401",
+        "already resolved request freshly refuses authority"
+      ],
+      "owner": "AR-034-B",
+      "proof": "real connection and both transaction schedules"
+    },
+    "key_ack": {
+      "sequence": [
+        "key/scope/member/audit staged",
+        "commit ACK unknown",
+        "no raw secret disclosed",
+        "no automatic reissue"
+      ],
+      "owner": "AR-034-B",
+      "proof": "commit/cleanup fault"
+    }
+  }
+}
