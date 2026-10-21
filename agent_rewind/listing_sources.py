@@ -173,15 +173,22 @@ class Sources:
             self.members[job_id] = values
 
     @staticmethod
-    def _links(kind: str, data: dict[str, Any]) -> list[tuple[str, str]]:
-        links = [("job", identifier(data.get("job_id")))]
+    def _links(kind: str, data: dict[str, Any], remaining: int) -> list[tuple[str, str]]:
+        links: list[tuple[str, str]] = []
+
+        def add(target_kind: str, target_id: Any) -> None:
+            if len(links) >= remaining:
+                fail()
+            links.append((target_kind, identifier(target_id)))
+
+        add("job", data.get("job_id"))
         if kind == "run":
             if "parent_id" not in data:
                 fail()
             if data["parent_id"] is not None:
-                links.append(("run", identifier(data["parent_id"])))
+                add("run", data["parent_id"])
         elif kind == "study":
-            links.append(("run", identifier(data.get("source_run"))))
+            add("run", data.get("source_run"))
             candidates, confirmation = data.get("candidates"), data.get("confirmation")
             if type(candidates) is not list or (
                 confirmation is not None and type(confirmation) is not dict
@@ -195,7 +202,7 @@ class Sources:
                         fail()
                     for key in ("control_run", "treatment_run"):
                         if key in pair:
-                            links.append(("run", identifier(pair[key])))
+                            add("run", pair[key])
         else:
             fail()
         return links
@@ -215,7 +222,7 @@ class Sources:
             following: set[tuple[str, str]] = set()
             for key in record_keys:
                 try:
-                    links = self._links(key[0], self.records[key])
+                    links = self._links(key[0], self.records[key], MAX_EDGES - edges)
                 except ResourceNotFound:
                     fail()
                 edges += len(links)

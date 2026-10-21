@@ -274,3 +274,42 @@ finite suppression table, initial traversal/receipt changes and existing scoped/
 receipt regressions. Maximum page/cohort and post-watermark work fixtures, actual
 PostgreSQL, packaging and independent final review are still pending. This is a
 source checkpoint, not package or route acceptance.
+
+The next bounded correction preserves a same-statement invalid-sequence/counter
+marker before watermark exclusion: malformed SQLite sequences and a project
+counter behind committed rows fail instead of producing an apparently empty
+page. This adds project-scoped scan work under the existing native ceiling; it
+does not claim that LIMIT bounds that work. Study-link accumulation now stops
+at the remaining shared edge allowance.
+
+The SQLite maximum fixture uses 682 projection receipts plus 683 source runs and
+683 jobs (2,048 identities), including shared ancestry. Initial source loading
+used 1,249,000 VM instructions; initial plus final checks used 1,605,000, 11 SQL
+statements, 52 final binds and 1,217,273 input bytes. The public 200-row page plus
+lookahead also succeeds within the proposed ceilings. These fixtures establish
+bounded SQLite work on the tested version, not general PostgreSQL latency.
+Missing scope, changed original source and new by-job membership refuse at the
+same maximum. A late-publication fixture verifies old watermarks and rollback,
+and a reduced native instruction allowance demonstrates refusal and pool reuse.
+
+Valid oversized foreign metadata is outside the selected cohort. Malformed
+foreign SQLite JSON can nevertheless be evaluated by the existing final SQL
+anti-join; this unsupported database state produces a bounded fixed dependency
+failure, not a partial page. Join text is not a portable guarantee about expression
+evaluation order. Same-project malformed/oversized incoming records also refuse.
+
+The hosted reader matrix adds eleven opt-in PostgreSQL cases for real timestamp
+keysets, SELECT-only access, maximum pages/deep traversal/late publication,
+original receipts and post-query revocation, maximum JSONB composition and
+permission/counter refusal. C's seventeen native-session cases separately cover
+transaction modes, native timeouts and physical pool cleanup. Local skips are
+explicit; hosted execution remains required. Six new runtime modules are added
+to the exact distribution allowlist, and installed smoke exercises the real codec
+and scoped empty-list/missing-detail paths after explicit synthetic migrations.
+
+Final local checkpoint selection: 304 passed and 33 explicitly skipped without
+a PostgreSQL service; subsequent test-fixture localization passed 35 with eleven
+explicit PostgreSQL skips. Tests reuse fixture objects locally rather than
+registering unrelated test modules as global pytest plugins. Configured lint,
+security rules, format and strict typing passed. Independent source review and
+matching hosted/installed-package evidence are still pending; P2 remains gated.

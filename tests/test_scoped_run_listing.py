@@ -5,6 +5,7 @@ import json
 from datetime import UTC, datetime, timedelta
 
 import pytest
+import test_run_projection_backfill as projection_tests
 from pydantic import SecretStr
 from sqlalchemy import event, text
 from test_run_projection_backfill import preserved
@@ -17,7 +18,7 @@ from agent_rewind.request_identity import IdentityInvalid, VerifiedPrincipal
 from agent_rewind.scoped_lineage import ResourceNotFound
 from agent_rewind.scoped_run_listing import ScopedRunReader
 
-pytest_plugins = ["test_run_projection_backfill"]
+legacy = projection_tests.legacy
 
 NOW = datetime(2026, 1, 1, tzinfo=UTC)
 PROJECT = "9" * 32

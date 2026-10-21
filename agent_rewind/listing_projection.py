@@ -92,9 +92,33 @@ def candidates(
     connection: Connection, project: str, limit: int, cursor: CursorPosition | None
 ) -> tuple[int, list[IndexEntry]]:
     """Counter and candidate rows share one statement, including an empty page."""
-    safe_counter = _byte_length(connection, COUNTERS.c.run_sequence) <= 32
+    safe_sequence = and_(INDEX.c.published_seq >= 1, INDEX.c.published_seq <= MAX_SEQUENCE)
+    safe_counter = and_(COUNTERS.c.run_sequence >= 0, COUNTERS.c.run_sequence <= MAX_SEQUENCE)
+    if connection.dialect.name == "sqlite":
+        safe_sequence = and_(safe_sequence, func.typeof(INDEX.c.published_seq) == "integer")
+        safe_counter = and_(safe_counter, func.typeof(COUNTERS.c.run_sequence) == "integer")
+    # Filtering by the cursor watermark must not hide malformed sequences or a
+    # counter behind committed rows. This project-scoped scan shares the native
+    # work ceiling; LIMIT is not used as an execution-work guarantee.
+    guard = (
+        select(
+            func.coalesce(func.min(case((safe_sequence, 1), else_=0)), 1).label("valid"),
+            func.coalesce(func.max(case((safe_sequence, INDEX.c.published_seq), else_=0)), 0).label(
+                "maximum"
+            ),
+        )
+        .where(INDEX.c.project_id == project)
+        .cte("list_sequence_guard")
+        .prefix_with("MATERIALIZED")
+    )
     counter = (
-        select(case((safe_counter, COUNTERS.c.run_sequence), else_=None).label("current"))
+        select(
+            case((safe_counter, COUNTERS.c.run_sequence), else_=None).label("current"),
+            case(
+                (and_(guard.c.valid == 1, guard.c.maximum <= COUNTERS.c.run_sequence), 1), else_=0
+            ).label("consistent"),
+        )
+        .select_from(COUNTERS.join(guard, literal(True)))
         .where(COUNTERS.c.id == project)
         .cte("list_counter")
         .prefix_with("MATERIALIZED")
@@ -121,7 +145,7 @@ def candidates(
         .cte("page")
     )
     rows = connection.execute(
-        select(counter.c.current, *page.c)
+        select(counter.c.current, counter.c.consistent, *page.c)
         .select_from(counter.outerjoin(page, literal(True)))
         .order_by(page.c.created_at.desc(), page.c.run_id.desc())
     ).mappings()
@@ -129,7 +153,7 @@ def candidates(
     result = []
     for row in rows:
         observed = row["current"]
-        if type(observed) is not int or not 0 <= observed <= MAX_SEQUENCE:
+        if type(observed) is not int or not 0 <= observed <= MAX_SEQUENCE or row["consistent"] != 1:
             fail()
         current = observed
         if cursor is not None and current < cursor.watermark:
