@@ -730,3 +730,55 @@ The caught-active-read blocker is closed at 9f73448d. B accepted exact source an
 The lead composed exact GET 28d47cc9, corrected helper 9f73448d and accepted cancellation entry b65d38f7 at 950a4160. B verified 372 unchanged union paths, the exact guide append union and 113-member distribution allowlist. Independent lead GET execution passed 85 SQLite cases in 57.59s; C passed 19 actual PostgreSQL cases without skips in 61.07s. Completed GET traces remain 40/48 SQLite and 50/62 PostgreSQL attempts for OIDC/API-key callers. The exact synthetic database baseline was restored with zero other clients and the server stopped. Installed proof at 28d47cc9 remains distinct from this composition; a final 113-member service package and hosted delivery are still required.
 
 A is assigned cancellation runtime/effect extraction and SQLite tests in the reused primary checkout. C is assigned independent actual PostgreSQL service tests in the reused secondary checkout and coordinates the sole existing database lifecycle. B independently reviews both deliveries; the lead owns composition, evidence and delivery. The [cancellation service entry](OPERATION_CANCEL_ENTRY.md) freezes three phases, original associations, the stable 85-root pre-effect refusal, malformed-ID authority ordering and phase-specific uncertainty mapping. No helper or GET support-table expansion is authorized. P1 remains In progress; P2 Not started. No task status, dependency, estimate, spending or production/data gate changes.
+
+
+## Cancellation service composition — 2026-10-21
+
+The service slice adds `OperationService.cancel_operation` and a private
+same-Connection `ScopedActions._cancel_effect`. The legacy public cancellation
+method retains its transaction, authority and instance-level audit dispatch.
+The new service checks original project visibility before cancel permission,
+uses one shared work/receipt owner across read-only preflight, locked mutation
+and fresh disclosure, and returns the three-field response captured by the
+effect. All five native statuses are supported; queued becomes cancelled.
+Cancellation neither parses legacy error text nor reads result artifact refs
+or storage.
+
+The mutation holds the original project/grants, original job scope/job and
+original scoped operation row. It verifies the current phase before its one
+update and fixed audit. A pure remaining-visits/edges check refuses stable
+85-root requests before effect/audit/commit; 84 roots fit. Worker progress
+between phases is allowed, while original operation/configuration/job-created
+changes refuse. A later disclosure overflow cannot cause a repeated effect.
+
+Malformed IDs have only a project-read authority scope after identity,
+ownership and the real schema guard. Secondary failures finish their SQL
+scope before a same-work authority/independent-primary-visibility check;
+they never revive a failed receipt owner. Possible/acknowledged commit
+retains outcome_uncertain even when this fresh check cannot acquire, finish
+or fit the remaining work. Typed denials and interruptions preserve their
+identity. Confirmed precommit rollback remains dependency_unavailable even
+if ordinary cleanup subsequently fails.
+
+Author SQLite evidence covers 68 new service cases and 206 unchanged GET,
+phase-helper, legacy-action and transaction cases: 274 passed, no skips, in
+140.20 seconds. Six of the service cases were then strengthened to observe the
+actual descriptor/cohort refusal and closed original Connection before
+membership revocation on the fresh classification scope; their separate
+result is recorded with the final source evidence. The first draft test run
+had fixture failures: a reused GET pool omitted the existing artifact-engine
+foreign-key configuration needed by mutation, and one OIDC witness was
+noncanonical. Those fixtures were corrected without changing the runtime
+guards or weakening assertions; the original log is retained.
+
+Complete post-cleanup SQLite traces are 88 OIDC / 106 API-key attempts for
+0 or 84 roots, including 84 roots plus 4,000 nonmatching rows. The largest
+observed VM total in that matrix is 315,000. The request caps remain
+512 attempts / 10 SQL-active seconds / 20 million SQLite VM instructions
+and cumulative 256 visits / 512 edges. These are finite fixture observations,
+not an end-to-end latency or arbitrary-dataset claim.
+
+C independently owns the separate actual PostgreSQL service tests and instance
+lifecycle; this author checkpoint claims no new PostgreSQL, installed-package,
+hosted, HTTP or complete-P1 delivery proof. GET/private helper APIs, packaged
+schema profiles, frozen contracts, dependencies and worker behavior are unchanged.
