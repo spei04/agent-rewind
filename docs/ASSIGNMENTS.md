@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Reconcile approved ledger planning with patched HTTP source in reused secondary | Preserve exact reviewed source union and frozen entry; hand off to independent planning review. |
-| Delivery reviewer | Audit patched-source PR run 39672365195 and later protected-main delivery | Package, security and isolation passed; both core jobs and final delivery evidence remain pending. |
-| Planning reviewer | Independent planning composition and entry-preservation review | Ledger packages remain Not started until accepted HTTP protected-main and candidate evidence. |
-| Lead | HTTP delivery, final planning integration and dependency-ready assignments | Primary remains frozen at eeca4e5; approve implementation only after its predecessor and entry gates pass. |
+| Platform/security | Reconcile approved ledger planning with reviewed container repair | Preserve exact approved planning and source bytes; independent composition review next. |
+| Delivery reviewer | Review v6 verification and subsequent hosted delivery evidence | Earlier eeca run is functional history; repaired-image proof and protected-main candidate acceptance remain required. |
+| Planning/verification | Review planning composition; prepare private verifier v6 | Preserve ledger entry and Not started packages; bind the exact repaired source and final image marker. |
+| Lead | HTTP PR #106 delivery and dependency-ready planning integration | Primary holds reviewed 316bdc5; ledger implementation waits for accepted HTTP delivery and entry gates. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -662,3 +662,57 @@ historical evidence. HTTP delivery has not been accepted, and ledger #107,
 actual accepted HTTP protected-main/candidate evidence precede implementation.
 No database execution, new dependencies, provider calls or paid resources are
 part of this planning reconciliation.
+
+
+## Container trust maintenance assignments — 2026-10-21
+
+The uv-patched HTTP source eeca4e5 is bound to functional run
+[39672365195](https://github.com/spei04/agent-rewind/actions/runs/39672365195).
+Its package, security and isolation jobs passed at the recorded checkpoint;
+the core jobs were still running at that checkpoint. That earlier container
+build did not check all CA stores and cannot establish acceptance of this repair.
+
+Verified immutable Linux x86_64 base layers still contain emSign ECC Root CA-G3
+in both OS and base pip trust. Platform/security owns a container-only repair on
+work/container-ca-repair, reusing the secondary checkout. The repair preserves
+the base digest, dependency lock, application runtime and unrelated roots.
+Planning/verification accepted the bounded design and independently reviews the
+source and negative controls. The lead owns the subsequent private verifier
+revision, source-bound collection, full hosted checks and protected-main
+candidate acceptance. Those gates remain open; no earlier run is relabeled as
+proof of the new repair.
+
+The published ledger planning branch is preserved. Ledger #107, #108 and #109
+remain Not started, and HTTP #95 and #93 remain In progress. No shared host trust
+mutation, provider call, production change, partner data or new paid resource
+is part of this maintenance.
+
+## Planning composition with container trust repair — 2026-10-21
+
+Platform/security reused the secondary checkout to compose published approved
+planning source b8d922d with reviewed HTTP/container source 316bdc5. The six
+approved planning files, including the frozen schema/provisioning entry and the
+previously accepted synthetic backlog-test setup, remain byte-identical to
+b8d922d. All other runtime, build and test source comes exactly from 316bdc5.
+Only this assignment log is reconciled: both branches' historical sections are
+preserved, the current owner table is updated, and this checkpoint is appended.
+Task and package statuses, acceptance, dependencies, effort and release gates
+remain unchanged.
+
+Historical eeca4e5 run
+[39672365195](https://github.com/spei04/agent-rewind/actions/runs/39672365195)
+completed with 3,841 passes and 14 expected skips on Python 3.11, and 3,852 passes
+and 3 expected skips on Python 3.12. Those results establish earlier functional
+evidence, not acceptance of the subsequent container trust repair. Independent
+source review accepted 316bdc5 for hosted validation. Its local focused checks
+passed 94 cases; collection found 3,897 nodes. The corresponding 3,883/3,894
+passes plus 14/3 skips remain forecasts until actual hosted execution confirms
+them. The final image trust marker, reviewed private verifier v6, full-source CI
+and protected-main candidate acceptance remain required.
+
+The lead owns PR #106 and final delivery. Planning/verification independently
+reviews this exact composition and the private verifier; the delivery reviewer
+reviews the verifier and actual hosted evidence. HTTP #95 and #93 remain In
+progress; ledger #107, #108 and #109 remain Not started. This reconciliation
+adds no ledger implementation, database execution, dependencies, model calls,
+partner data, production activation, paid resources or checkout.

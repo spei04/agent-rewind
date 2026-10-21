@@ -121,3 +121,13 @@ def test_package_job_validates_container_installer_and_offline_cli():
         "pip install --no-cache-dir --no-deps --only-binary=:all: --require-hashes "
         "-r /tmp/uv-requirements.txt" in dockerfile
     )
+
+
+def test_container_trust_repair_precedes_network_bootstrap_and_final_check_is_offline():
+    dockerfile = (ROOT / "Dockerfile").read_text()
+    assert dockerfile.index("container_ca.py --repair") < dockerfile.index("pip install")
+    commands = "\n".join(step.get("run", "") for step in WORKFLOW["jobs"]["package"]["steps"])
+    assert (
+        "docker run --rm --network none agent-rewind-ci:${{ github.sha }} "
+        "/app/.venv/bin/python -I /opt/agent-rewind/container_ca.py --check"
+    ) in commands

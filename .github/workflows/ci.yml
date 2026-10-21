@@ -141,6 +141,7 @@ jobs:
       - name: Build container and smoke installed CLI without network
         run: |
           docker build --tag agent-rewind-ci:${{ github.sha }} .
+          docker run --rm --network none agent-rewind-ci:${{ github.sha }} /app/.venv/bin/python -I /opt/agent-rewind/container_ca.py --check
           docker run --rm --network none agent-rewind-ci:${{ github.sha }} rewind --help
   ci-gate:
     name: CI gate
