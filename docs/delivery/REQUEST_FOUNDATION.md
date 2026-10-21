@@ -53,9 +53,15 @@ connection is held across storage/decryption.
 
 After all I/O, a SQL-only pass validates every graph owner and any unique-root
 selection, then reads the entire expected ref set in one statement. The JSON rowset
-is capped at 4 MiB; one JSON bind carries all refs, with a fixed number of additional predicate/limit
-binds (at most 64 SQLite positional slots), regardless of graph size. This uses SQLite's already-required JSON functions or
-PostgreSQL 16 builtin JSONB, without an extension. The result has a maximum of expected refs plus one row;
+is capped at 4 MiB; one JSON bind carries all refs, with a fixed number of additional
+predicate/limit binds (at most 64 SQLite positional slots), regardless of graph size.
+The bounded input is materialized once and includes the already-verified object ID,
+so each ref joins on its full primary key before complete descriptor comparison.
+This requires SQLite 3.35+ with JSON functions (for MATERIALIZED CTE support), or
+PostgreSQL 16 builtin JSONB, without an extension. An older or unknown SQLite version
+refuses with fixed `artifact_database_unsupported` during SQL-only preflight, before
+graph storage I/O; no fallback weakens the check. The result has a maximum of
+expected refs plus one row;
 SQL CASE bounds each descriptor's text representation (384 bytes across its seven
 fields) before driver materialization. Fixed-width expected owner/role/digest
 fields add at most 106 bytes per row. Fresh authority is checked again at the end,
@@ -71,3 +77,10 @@ Historical adoption/backfill does not publish artifact refs. Such unregistered
 evidence remains inaccessible. The live generation/DB-time publication adapter is
 still unavailable; this reader does not supply one. Actual PostgreSQL revocation
 and installed-distribution evidence are required in hosted CI before P1 acceptance.
+
+A matching-set regression executes all 16,000 same-owner/role refs on SQLite under
+an explicit 20-million-VM-instruction budget, with missing and substituted identity
+negatives. This bounds the test's work without a wall-time threshold. It guards
+against repeated JSON rowset scans observed in the former query; it is not a
+PostgreSQL performance claim. Hosted PostgreSQL must execute its maximum matching
+set and concurrent-change cases on the exact delivered query.

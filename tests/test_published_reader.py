@@ -271,7 +271,15 @@ def test_full_supported_ref_set_fits_one_actual_sqlite_statement(published):
     from agent_rewind.artifact_graph import GraphRef
 
     identities = {
-        GraphRef("f" * 32, "file_blob", f"{n:064x}"): ()
+        GraphRef("f" * 32, "file_blob", f"{n:064x}"): (
+            f"{n:032x}",
+            CONTEXT.project_id,
+            f"{n:064x}",
+            f"objects/{CONTEXT.project_id}/v1/{n:064x}",
+            1,
+            0,
+            datetime(2026, 1, 1, tzinfo=UTC),
+        )
         for n in range(published_reader.MAX_OBJECTS)
     }
     # No fake SQL runner: the max-sized JSON rowset executes against the actual
@@ -400,3 +408,120 @@ def test_initial_and_post_io_descriptors_are_sql_bounded(published, monkeypatch,
         assert target.id not in loaded
     else:
         assert loaded == [root.id]
+
+
+def test_full_matching_ref_set_has_bounded_sqlite_work(published):
+    capture, run, _, reader = published
+    from agent_rewind.artifact_graph import GraphRef
+
+    count = published_reader.MAX_OBJECTS
+    assert count == 16000
+    created = datetime(2026, 1, 1, tzinfo=UTC)
+    objects = [
+        (
+            f"feedface{n:024x}",
+            CONTEXT.project_id,
+            f"{n:064x}",
+            f"objects/{CONTEXT.project_id}/v1/{n:064x}",
+            1,
+            0,
+            created.isoformat(),
+        )
+        for n in range(1, count + 1)
+    ]
+    with capture.db.engine.begin() as connection:
+        connection.exec_driver_sql("INSERT INTO artifact_objects VALUES (?,?,?,?,?,?,?)", objects)
+        connection.exec_driver_sql(
+            "INSERT INTO artifact_refs VALUES (?,?,?,?,?)",
+            [(CONTEXT.project_id, "run", run, row[0], "file_blob") for row in objects],
+        )
+    identities = {GraphRef(run, "file_blob", row[2]): (*row[:6], created) for row in objects}
+    observed = []
+
+    def statement(connection, cursor, sql, parameters, context, many):
+        if sql.startswith("WITH wanted"):
+            observed.append((sql, parameters))
+
+    def verify(expected):
+        # Bound VM work rather than elapsed time. This generous ceiling permits
+        # indexed lookup/CASE work but interrupts the old repeated JSON scans.
+        instructions = 0
+
+        def progress():
+            nonlocal instructions
+            instructions += 1000
+            return instructions > 20_000_000
+
+        with capture.db.engine.connect() as connection:
+            raw = connection.connection.driver_connection
+            raw.set_progress_handler(progress, 1000)
+            try:
+                reader._final_refs(connection, CONTEXT, expected)
+            finally:
+                raw.set_progress_handler(None, 0)
+        assert instructions <= 20_000_000
+
+    event.listen(capture.db.engine, "before_cursor_execute", statement)
+    try:
+        verify(identities)
+        assert len(observed) == 1
+        sql, parameters = observed[0]
+        assert "AS MATERIALIZED" in sql and len(parameters) <= 64
+        rowset = next(p for p in parameters if isinstance(p, str) and p.startswith("[{"))
+        assert len(rowset.encode()) <= published_reader.MAX_REF_INPUT_BYTES
+        # A different existing object ID cannot replace the same digest/owner.
+        changed = dict(identities)
+        ref = next(iter(changed))
+        changed[ref] = (objects[1][0], *changed[ref][1:])
+        with pytest.raises(ArtifactError, match="^publication_reference_changed$"):
+            verify(changed)
+        with capture.db.engine.begin() as connection:
+            connection.execute(
+                text("DELETE FROM artifact_refs WHERE owner_id=:owner AND artifact_id=:id"),
+                {"owner": run, "id": objects[-1][0]},
+            )
+        with pytest.raises(ArtifactError, match="^publication_reference_changed$"):
+            verify(identities)
+    finally:
+        event.remove(capture.db.engine, "before_cursor_execute", statement)
+
+
+@pytest.mark.parametrize("field", range(7))
+def test_final_ref_keeps_every_descriptor_field_comparison(published, field):
+    capture, run, intent, reader = published
+    from agent_rewind.artifact_graph import GraphRef
+
+    root = next(obj for obj in intent.objects if obj.digest == intent.root_digest)
+    identity = list(published_reader._identity(root))
+    alternatives = [
+        "f" * 32,
+        "f" * 32,
+        "f" * 64,
+        "objects/" + root.digest,
+        2,
+        root.byte_count + 1,
+        root.created_at + timedelta(seconds=1),
+    ]
+    assert identity[field] != alternatives[field]
+    identity[field] = alternatives[field]
+    with (
+        capture.db.engine.connect() as connection,
+        pytest.raises(ArtifactError, match="^publication_reference_changed$"),
+    ):
+        reader._final_refs(
+            connection,
+            CONTEXT,
+            {GraphRef(run, "result", intent.root_digest): tuple(identity)},
+        )
+
+
+@pytest.mark.parametrize("version", [None, (3, 34, 1)])
+def test_unsupported_sqlite_materialization_refuses_before_storage(published, monkeypatch, version):
+    capture, run, intent, reader = published
+    monkeypatch.setattr(capture.db.engine.dialect, "server_version_info", version)
+    monkeypatch.setattr(
+        reader.repositories, "artifact_loader", Mock(side_effect=AssertionError("early storage"))
+    )
+    with pytest.raises(ArtifactError, match="^artifact_database_unsupported$"):
+        reader.read(CONTEXT, run, intent.root_digest)
+    reader.repositories.artifact_loader.assert_not_called()

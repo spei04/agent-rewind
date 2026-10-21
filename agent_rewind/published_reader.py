@@ -121,7 +121,7 @@ class PublishedRunReader:
     No journal, SQL writer, migration, root publication or legacy hash fallback.
     Compound reads allow at most two graphs, 16,000 distinct scoped refs and
     64 MiB of loaded bytes across both graphs. Final metadata uses a <=4 MiB
-    JSON rowset and constant bind count. Supported DBs are SQLite with its
+    JSON rowset and constant bind count. Supported DBs are SQLite 3.35+ with its
     already-required JSON functions and PostgreSQL 16 with builtin JSONB.
     No extension or additional writer privilege is required.
     """
@@ -136,6 +136,13 @@ class PublishedRunReader:
     def _connection(self) -> Iterator[Connection]:
         try:
             with self.engine.connect() as connection:
+                # Refuse unsupported CTE syntax during SQL-only preflight,
+                # before a graph can trigger storage/decryption work.
+                version = connection.dialect.server_version_info
+                if connection.dialect.name == "sqlite" and (
+                    version is None or version < (3, 35, 0)
+                ):
+                    raise ArtifactError("artifact_database_unsupported")
                 yield connection
         except SQLAlchemyError:
             raise ArtifactError("publication_database_unavailable") from None
@@ -221,28 +228,52 @@ class PublishedRunReader:
         This prevents an earlier checked ref from escaping a later compound
         recheck. It needs SELECT privileges only, without holding writer locks.
         """
-        expected = [{"owner": r.owner_id, "role": r.role, "digest": r.digest} for r in identities]
+        if not 1 <= len(identities) <= MAX_OBJECTS:
+            raise ArtifactError("artifact_graph_limit")
+        expected = []
+        for ref, identity in identities.items():
+            if len(identity) != len(_FIELDS):
+                raise ArtifactError("publication_reference_changed")
+            try:
+                identifier(identity[0])
+            except ResourceNotFound:
+                raise ArtifactError("publication_reference_changed") from None
+            expected.append(
+                {
+                    "owner": ref.owner_id,
+                    "role": ref.role,
+                    "digest": ref.digest,
+                    "artifact_id": identity[0],
+                }
+            )
         # One JSON bind carries all refs. SQLAlchemy's fixed predicates/limits
         # add a constant number of binds independent of graph size.
-        if not 1 <= len(expected) <= MAX_OBJECTS:
-            raise ArtifactError("artifact_graph_limit")
         encoded = canonical(expected)
         if len(encoded) > MAX_REF_INPUT_BYTES:
             raise ArtifactError("artifact_graph_limit")
         if connection.dialect.name == "sqlite":
             source = text(
-                "SELECT json_extract(value,'$.owner') AS owner,"
+                "SELECT json_extract(value,'$.artifact_id') AS artifact_id,"
+                "json_extract(value,'$.owner') AS owner,"
                 "json_extract(value,'$.role') AS role,json_extract(value,'$.digest') AS digest "
                 "FROM json_each(:expected)"
             )
         elif connection.dialect.name == "postgresql":
             source = text(
-                "SELECT owner,role,digest FROM jsonb_to_recordset(CAST(:expected AS jsonb)) "
-                "AS w(owner TEXT,role TEXT,digest TEXT)"
+                "SELECT owner,role,digest,artifact_id "
+                "FROM jsonb_to_recordset(CAST(:expected AS jsonb)) "
+                "AS w(owner TEXT,role TEXT,digest TEXT,artifact_id TEXT)"
             )
         else:
             raise ArtifactError("artifact_database_unsupported")
-        wanted = source.columns(owner=Text, role=Text, digest=Text).cte("wanted")
+        # Without materialization SQLite can rescan json_each for every ref.
+        # The expected ID also makes the reference join a full primary-key match
+        # instead of pairing every same-owner/role ref before filtering digest.
+        wanted = (
+            source.columns(owner=Text, role=Text, digest=Text, artifact_id=Text)
+            .cte("wanted")
+            .prefix_with("MATERIALIZED")
+        )
         query = (
             select(
                 wanted.c.owner,
@@ -258,6 +289,7 @@ class PublishedRunReader:
                         _refs.c.owner_kind == "run",
                         _refs.c.owner_id == wanted.c.owner,
                         _refs.c.role == wanted.c.role,
+                        _refs.c.artifact_id == wanted.c.artifact_id,
                     ),
                 )
                 .join(
