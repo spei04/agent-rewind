@@ -6,9 +6,9 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| A | Diagnose the PostgreSQL compatibility-guard failure | Read-only source/fixture review; no database lifecycle ownership yet. |
-| C | Diagnose the two SQLite listing failures | Secondary a304d52 available for bounded diagnostic tests; runtime limits remain unchanged. |
-| B | Preserve and independently audit failed hosted evidence | PR run 39631674974 is not accepted; identify source and failure causes before retry. |
+| A | Guard diagnosis and delivery-verifier review complete | Both bounded guard diagnostics passed; exact database baseline restored and stopped. No active holds. |
+| C | Correct HTTP test application retention | Secondary checkout; narrowly scoped test-module cleanup and weak-reference regression after reviewed diagnostic evidence. |
+| B | Independently review the test cleanup and corrected delivery | Failed run preserved; attempt-bound verifier reviewed. Exact corrected source and inventory required before hosted checks. |
 | Lead | Coordinate HTTP failure diagnosis and progress | Primary for documentation; secondary diagnostic ownership with C. Merge and ledger implementation remain blocked. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
@@ -593,3 +593,17 @@ The failures are the existing named-viewer detail response, PostgreSQL read-only
 - Lead: retain the failed run, coordinate review and keep P2/aggregate In progress. No merge, repeated retry for a passing result, runtime-limit relaxation or ledger implementation follows this failure.
 
 The ledger proposal remains reviewed for planning only; the execution-window choice is pending.
+
+
+## P2 diagnostic result and correction assignment — 2026-10-21
+
+A's single guard check passed on local Python 3.12.3 and temporary 3.11.15 with the existing two-second inspection budget; observed inspection times were 0.281 and 0.216 seconds across 71 SQL statements. C's new-HTTP-then-listing sequences each passed 87 cases on those versions. Deliberate work-exhaustion controls still refused and cleaned up. Hosted Python 3.11.17 was unavailable from the pinned installer, so these are supporting diagnostics, not exact reproduction of the hosted interpreter. The original three failures remain unexplained.
+
+C separately demonstrated a test application retention defect: three process-global callable-classification caches in pinned FastAPI 0.142.2 retained nine completed applications and disposed engines after full garbage collection. Clearing those caches at a test boundary and collecting released all nine. This establishes the retention mechanism, not causality for all three hosted failures.
+
+- C now owns a narrow test-only helper and teardown in the three new HTTP test modules, plus a behavioral weak-reference regression. Existing runtime limits, assertions and production code remain unchanged.
+- B independently reviews the immutable correction and its red/green evidence, then the new source-bound inventory and hosted checks.
+- A completed the guard diagnosis, exact baseline restoration and independent review of the private delivery verifier.
+- The lead integrates reviewed changes, preserves failed evidence and keeps P2/aggregate In progress until full delivery acceptance.
+
+The delivery verifier now binds explicit PR and protected-main attempt numbers and complete job sets, records the immutable failed first attempt, and refuses mixed/latest-attempt evidence. This private verification-tool change grants no runtime or production authority. No unchanged-source retry was dispatched.
