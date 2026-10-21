@@ -19,10 +19,9 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Literal
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, update
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.sql import Select
 
 from .artifact_metadata import ArtifactError
 from .database import audit, jobs, keys
@@ -30,13 +29,12 @@ from .publication_source import _lock_closure
 from .request_authority import RequestAuthority
 from .request_identity import VerifiedPrincipal
 from .scoped_lineage import ResourceNotFound, identifier
+from .scoped_locks import lock_authority
 from .scoped_repositories import (
     ProjectContext,
     RepositoryUnavailable,
     _Reads,
     members,
-    organizations,
-    projects,
     scopes,
 )
 
@@ -122,12 +120,6 @@ class ScopedActions:
                 "outcome_uncertain" if commit_attempted else "action_unavailable"
             ) from None
 
-    @staticmethod
-    def _lock(connection: Connection, statement: Select[tuple[str]], *, shared: bool) -> None:
-        row = connection.execute(statement.with_for_update(read=shared)).first()
-        if row is None:
-            raise ResourceNotFound()
-
     def _locks(
         self,
         connection: Connection,
@@ -136,77 +128,7 @@ class ScopedActions:
         kind: str | None,
         resource_id: str | None,
     ) -> None:
-        # No cached role or changed default is substituted for the original
-        # context. Visibility comes before action classification, including for
-        # a viewer addressing a foreign/missing target.
-        self.authority.check(
-            connection, principal, context, resource_kind=kind, resource_id=resource_id
-        )
-        self._lock(
-            connection,
-            select(projects.c.id).where(
-                projects.c.id == context.project_id,
-                projects.c.organization_id == context.organization_id,
-            ),
-            shared=False,
-        )
-        self._lock(
-            connection,
-            select(organizations.c.id).where(organizations.c.id == context.organization_id),
-            shared=True,
-        )
-        self._lock(
-            connection,
-            select(members.c.principal_id).where(
-                members.c.project_id == context.project_id,
-                members.c.principal_id == principal.principal_id,
-            ),
-            shared=True,
-        )
-        if principal.principal_id.startswith("api-key:"):
-            self._resource_locks(
-                connection, context, "key", principal.principal_id[8:], shared=True
-            )
-        if kind is not None and resource_id is not None:
-            self._resource_locks(connection, context, kind, resource_id, shared=False)
-            if kind == "key":
-                # Revoked/expired keys stay visible for revocation. A missing
-                # key membership is not repaired or synthesized.
-                connection.execute(
-                    select(members.c.principal_id)
-                    .where(
-                        members.c.project_id == context.project_id,
-                        members.c.principal_id == "api-key:" + resource_id,
-                    )
-                    .with_for_update()
-                ).first()
-
-    def _resource_locks(
-        self,
-        connection: Connection,
-        context: ProjectContext,
-        kind: str,
-        resource_id: str,
-        *,
-        shared: bool,
-    ) -> None:
-        # Freeze ownership before locking the target, so a changed foreign
-        # scope cannot make this transaction lock another project's resource.
-        self._lock(
-            connection,
-            select(scopes.c.resource_id).where(
-                scopes.c.resource_kind == kind,
-                scopes.c.resource_id == resource_id,
-                scopes.c.project_id == context.project_id,
-            ),
-            shared=True,
-        )
-        source = keys if kind == "key" else jobs
-        self._lock(
-            connection,
-            select(source.c.id).where(source.c.id == resource_id),
-            shared=shared,
-        )
+        lock_authority(self.authority, connection, principal, context, kind, resource_id)
 
     @staticmethod
     def _audit(

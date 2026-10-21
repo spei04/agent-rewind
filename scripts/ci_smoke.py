@@ -249,6 +249,7 @@ def admission_foundation_smoke() -> None:
         ArtifactBinding,
         OriginCorrelation,
         prepare_admission,
+        restore_admission,
     )
     from agent_rewind.admission_request import AdmissionPreparationError, parse_submit
     from agent_rewind.artifact_metadata import ArtifactObject, object_locator
@@ -336,6 +337,19 @@ def admission_foundation_smoke() -> None:
         configuration_binding=configuration,
         permitted_processor_profile="fixture",
     )
+    restored = restore_admission(
+        intent,
+        frozen_configuration=config_bytes,
+        expected_configuration_digest=config.digest,
+        expected_envelope_digest=result.envelope_digest,
+        project_id=project,
+        job_id=job,
+        origin=result.origin,
+        task_binding=task,
+        configuration_binding=configuration,
+    )
+    if restored != result:
+        raise RuntimeError("Installed frozen restoration changed original identities")
     payload = result.bind_payload(metadata(result.envelope_bytes, "c" * 32))
     envelope = json.loads(payload.plaintext)
     if (
@@ -359,8 +373,10 @@ def admission_foundation_smoke() -> None:
 def admission_storage_smoke(engine: Engine) -> None:
     from sqlalchemy import text
 
+    from agent_rewind.admission_coordinator import AdmissionCoordinator
     from agent_rewind.admission_records import verify_job_configuration
     from agent_rewind.admission_repository import AdmissionRepository
+    from agent_rewind.admission_transaction import AdmissionError
     from agent_rewind.migrations.admission_service import initialize_admission
     from agent_rewind.request_authority import RequestAuthority
     from agent_rewind.request_identity import VerifiedPrincipal
@@ -374,6 +390,14 @@ def admission_storage_smoke(engine: Engine) -> None:
     principal = VerifiedPrincipal("oidc:" + "a" * 64)
     context = authority.named(principal, "9" * 32).context
     repository = AdmissionRepository(authority)
+    coordinator = AdmissionCoordinator(engine, authority)
+    try:
+        coordinator.reconcile(principal, context, "1" * 32, "2" * 64, "3" * 64)
+    except AdmissionError as error:
+        if error.code != "schema_incompatible":
+            raise RuntimeError("Installed coordinator schema refusal changed") from None
+    else:
+        raise RuntimeError("Installed coordinator bypassed migration-only guard")
     with engine.connect() as connection:
         empty = repository.resolve_identities(
             connection,

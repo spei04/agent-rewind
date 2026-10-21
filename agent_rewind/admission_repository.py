@@ -42,6 +42,13 @@ from .scoped_lineage import ResourceNotFound
 from .scoped_repositories import ProjectContext
 
 
+class AdmissionIdentityConflict(AdmissionStorageError):
+    """A compared scoped SQL identity disagrees; not a generic constraint error."""
+
+    def __init__(self) -> None:
+        super().__init__("admission_conflict")
+
+
 @dataclass(frozen=True)
 class IdentityResolution:
     operation: StoredOperation | None
@@ -207,7 +214,7 @@ class AdmissionRepository:
                 if by_key is None or alias["request_digest"] != by_key.request_digest:
                     raise AdmissionStorageError("admission_metadata_invalid")
             if by_client is not None and by_key is not None and by_client != by_key:
-                raise AdmissionStorageError("admission_conflict")
+                raise AdmissionIdentityConflict()
             operation = by_client or by_key
             if operation is not None:
                 if (
@@ -215,7 +222,7 @@ class AdmissionRepository:
                     or operation.request_digest != request_digest
                     or operation.principal_id != context.principal_id
                 ):
-                    raise AdmissionStorageError("admission_conflict")
+                    raise AdmissionIdentityConflict()
                 self._verify(connection, principal, context, operation, "record")
             self.authority.check(connection, principal, context, "record")
             return IdentityResolution(operation, operation is not None and alias is None)
