@@ -186,26 +186,41 @@ class AdmissionCoordinator:
         try:
             self._schema()
             with admission_transaction(self.engine, outcome) as connection:
-                original = self._locked_winner(
+                resolved = self._locked_identities(
                     connection, principal, context, client_operation_id, key_hash, request_digest
                 )
+                original = resolved.operation
                 if original is None:
                     if allow_absent:
                         return None
                     raise AdmissionError(
                         "outcome_uncertain" if reconcile else "dependency_unavailable"
                     )
+                original = self._complete_winner(
+                    connection,
+                    principal,
+                    context,
+                    client_operation_id,
+                    key_hash,
+                    request_digest,
+                    resolved,
+                )
             # SQL is released before fresh original-context disclosure. No lookup
             # through get_operation: its viewer status permission is insufficient.
             return self._disclose(
                 principal, context, original, client_operation_id, key_hash, request_digest
             )
         except AdmissionError as error:
-            if error.code == "dependency_unavailable" and (reconcile or outcome.commit_attempted):
+            # Before a locked, verified winner or SQL absence, a prior commit
+            # cannot be ruled out. Known alias rollback and dependencies reached
+            # after proven absence retain their established precommit phase.
+            if error.code == "dependency_unavailable" and (
+                (allow_absent and original is None) or reconcile or outcome.commit_attempted
+            ):
                 raise AdmissionError("outcome_uncertain") from None
             raise
 
-    def _locked_winner(
+    def _locked_identities(
         self,
         connection: Connection,
         principal: VerifiedPrincipal,
@@ -213,7 +228,7 @@ class AdmissionCoordinator:
         client_operation_id: str,
         key_hash: str,
         request_digest: str,
-    ) -> StoredOperation | None:
+    ) -> IdentityResolution:
         first = self._resolve(
             connection, principal, context, client_operation_id, key_hash, request_digest
         )
@@ -223,7 +238,7 @@ class AdmissionCoordinator:
         )
         original = locked.operation
         if original is None:
-            return None
+            return locked
         if first.operation is not None and first.operation != original:
             raise AdmissionError("outcome_uncertain")
         lock_resource(connection, context, "job", original.job_id, shared=True)
@@ -231,6 +246,21 @@ class AdmissionCoordinator:
             connection, principal, context, client_operation_id, key_hash, request_digest
         )
         if verified.operation != original:
+            raise AdmissionError("outcome_uncertain")
+        return verified
+
+    def _complete_winner(
+        self,
+        connection: Connection,
+        principal: VerifiedPrincipal,
+        context: ProjectContext,
+        client_operation_id: str,
+        key_hash: str,
+        request_digest: str,
+        verified: IdentityResolution,
+    ) -> StoredOperation:
+        original = verified.operation
+        if original is None:
             raise AdmissionError("outcome_uncertain")
         if verified.needs_alias:
             self.repository.bind_alias(
@@ -247,6 +277,24 @@ class AdmissionCoordinator:
         if final.operation != original or final.needs_alias:
             raise AdmissionError("outcome_uncertain")
         return original
+
+    def _locked_winner(
+        self,
+        connection: Connection,
+        principal: VerifiedPrincipal,
+        context: ProjectContext,
+        client_operation_id: str,
+        key_hash: str,
+        request_digest: str,
+    ) -> StoredOperation | None:
+        verified = self._locked_identities(
+            connection, principal, context, client_operation_id, key_hash, request_digest
+        )
+        if verified.operation is None:
+            return None
+        return self._complete_winner(
+            connection, principal, context, client_operation_id, key_hash, request_digest, verified
+        )
 
     def _disclose(
         self,

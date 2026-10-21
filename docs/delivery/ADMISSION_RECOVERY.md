@@ -17,7 +17,15 @@ Both return only the original stored `operation_id`/`job_id` pair through
 creator; a viewer status read never substitutes for current record permission.
 With default dependencies, new submit without a SQL winner refuses with
 `dependency_unavailable`. Reconciliation without one, or unable to establish one,
-is `outcome_uncertain`. SQL winner/reconcile paths never invoke registry,
+is `outcome_uncertain`. A submit that cannot establish a locked verified winner
+or SQL absence also returns
+`outcome_uncertain`, including its initial lookup and the lookup under journal
+locks; journal existence is never inspected without fresh SQL authority. Once
+absence is established, known precommit adapter/storage failures retain
+`dependency_unavailable`. A verified winner with acknowledged alias rollback
+also retains that dependency result; any commit attempt remains uncertain.
+Typed authority denials and explicit
+`schema_incompatible` remain unchanged. SQL winner/reconcile paths never invoke registry,
 policy/readiness, journal or storage. Optional keyword dependencies are internal
 composition only; no route or product activation switch is added.
 
