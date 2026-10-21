@@ -98,7 +98,7 @@ After the first two weeks, use dependency-ready milestone scheduling. The former
 | Milestone | Base effort | Scheduling after Day 10 | Explicit exit / integration checkpoint |
 | --- | ---: | --- | --- |
 | M0 | 8.5 days | Internal development freeze verified; external production conditions remain separate | [G0](#g0): M0 accepted; schemas and initial migration scope reviewed. |
-| M1 | 55.5 days | Projection and P1 #76 Verified; P2 #77 Implemented; verification pending after accepted P1/main candidate | [G1](#g1): Historical identities, 24 behavioral cases, scope/lease/budget compatibility, required CI and installable main candidate evidence pass. |
+| M1 | 55.5 days | Preparatory projection and AR-007-C/P1/P2 Verified; C implements AR-008-A/P1 after accepted entry prerequisites; A completed read-only AR-006-B planning, with separate amendment pending and no runtime assigned | [G1](#g1): Historical identities, 24 behavioral cases, scope/lease/budget compatibility, required CI and installable main candidate evidence pass. |
 | M2 | 69 days | Start each task after its foundation inputs; joins G1 plus early staging | [G2](#g2): Real gVisor isolation/restore/cleanup, cloud store/key rotation, fail-closed lease and accounted live smoke verified. |
 | M3 | 81 days | Includes 4 base days of RA-01 design before C08/C09 producers; runtime follows its original prerequisites and G2 | [G3](#g3): Resumable distributed studies preserve frozen protocol, missingness and all call accounting; reports independently recompute. |
 | M4 | 82 days | Early IaC after G0; UI/SDK after producer APIs; complete after G3 | [G4](#g4): Independent full browser/SDK workflow and fresh install pass with real IdP/GCS/KMS/gVisor and selected adapter. |
@@ -125,7 +125,7 @@ The table preserves the conditional foundation scenario from the issue #51 decis
 | Delivery Day 9 | Review, contingency and integration; no new base allocation | Reserve for measured rework and hosted verification; reforecast the ready M1 queue only after actual acceptance. |
 | Delivery Day 10 | Review, contingency and integration; no new base allocation | Reserve for measured rework and hosted verification; reforecast the ready M1 queue only after actual acceptance. |
 
-The historical 2–3 day scenario ranges left days 6–7 for contingency; those rows do not allocate the current wave. AR-009-B and AR-006-A are Verified for preparatory scope in PR #70/#72. P1 #76 is Verified in PR #78 at merge 51a2b1f after matching PR/main checks and candidate verification. P2 #77 is Implemented; verification pending after C route/auth/read/UI and B mutation handoffs, independent review and combined local checks; lead owns final hosted/merge/candidate evidence. P1 foundation 2 [2–3] and P2 integration 4 [4–7] day packages still total 6 [6–10] days. Reforecast at the first immutable P2 handoffs; this is not a new fortnight or launch calendar. AR-011-C is Not started and blocked on AR-010-B; both sequential packages inherit that producer gate, with no early foundation start; AR-006-C waits for AR-010-B. Research implementation stays behind original runtime prerequisites; M3 remains 81 and M5 50 base days with external execution gates.
+The historical 2–3 day scenario ranges left days 6–7 for contingency; those rows do not allocate the current wave. AR-009-B and AR-006-A are Verified for preparatory scope in PR #70/#72. AR-007-C/P1/P2 and parent #7 are Verified after PR #78/#79, matching PR/main checks and candidate verification; [accepted P2 evidence](delivery/EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21). AR-008-A [#80](https://github.com/spei04/agent-rewind/issues/80) and P1 [#81](https://github.com/spei04/agent-rewind/issues/81) are In progress with C; P2 [#82](https://github.com/spei04/agent-rewind/issues/82) and P3 [#83](https://github.com/spei04/agent-rewind/issues/83) remain Not started until accepted merged predecessors. A completed read-only AR-006-B cursor planning; its separate amendment/review is pending, runtime remains unassigned and its current estimate is unchanged here. AR-011-C and AR-006-C wait for AR-010-B. Research implementation remains behind original runtime prerequisites; M3 stays 81 and M5 50 base days with external execution gates. This is not a new fortnight or launch calendar.
 
 ### Historical RA-01 conditional design schedule — 2026-10-20
 
@@ -616,7 +616,7 @@ M1 / P0 · 3 PRs · 7 engineering days · In progress · [Tracking issue #6](htt
 
 ### AR-007 — Prevent cross-project access through both legacy and new paths
 
-M1 / P0 · 4 PRs across 3 aggregate tasks · 9.5 engineering days · In progress
+M1 / P0 · 4 PRs across 3 aggregate tasks · 9.5 engineering days · Verified
 
 <a id="ar-007-a"></a>
 
@@ -667,7 +667,7 @@ M1 / P0 · 4 PRs across 3 aggregate tasks · 9.5 engineering days · In progress
 - **Effort / confidence:** 6 engineering days; planning range 6–10; medium-low confidence. Reforecast after the first immutable identity/reader handoff at about 1.5–2 engineering days.
 - **Responsible role:** BE; C owns Auth/routes/verified views/UI, B owns atomic scoped mutations; A independently reviews identity/read/security and B's mutation implementation; B independently reviews C's transaction consumption; C checks action-interface integration; lead integrates.
 - **Definition of done:** P1 and P2 each have independent review, matching checks and a recorded accepted merge. Aggregate completion additionally requires the full P2 existing-route/transaction matrix. A independently reviews identity/read/security and B's mutation implementation; B independently reviews C's transaction consumption; C checks action-interface integration; lead integrates. Only partial coverage of CT-M1-007/009 is attributed here; CT-M1-008 and future-route gates remain planned. No customer activation or full M1 acceptance follows.
-- **Progress:** In progress; [aggregate #75](https://github.com/spei04/agent-rewind/issues/75). P1 is Verified at merge 51a2b1f after independent review, matching PR/main checks and candidate verification. P2 #77 is Implemented; verification pending in PR #79; full existing-route/transaction delivery acceptance remains required. CT-M1-007/008/009 are not accepted overall.
+- **Progress:** Verified for preparatory existing-route scope in PR #79 at reviewed db5f992 / accepted merge e117aaa, matching PR/main checks and candidate 12318112434; [accepted P2 evidence](delivery/EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21). CT-M1-007/009 remain partial overall and CT-M1-008/G1/customer gates remain open.
 
 Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days, then AR-007-C/P2 full existing-route integration 4 [4–7] days after accepted merged P1. P1 does not wire Auth/session issuance, routes, UI, mutations or admission. Aggregate AR-007-C remains unverified until P2 and the full existing-route matrix are accepted.
 
@@ -703,13 +703,13 @@ Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days
 - **Effort / confidence:** 4 engineering days; planning range 4–7; medium-low confidence.
 - **Responsible role:** BE; C owns Auth/routes/verified views/UI, B owns atomic scoped mutations; A independently reviews identity/read/security and B's mutation implementation; B independently reviews C's transaction consumption; C checks action-interface integration; lead integrates.
 - **Definition of done:** A independently reviews identity/read/security and B's mutation implementation; B independently reviews C's transaction consumption; C checks action-interface integration; lead integrates. Matching hosted full current-route/PG matrix and accepted merge must be recorded. Lead may then verify aggregate AR-007-C for preparatory scope only; CT-M1-007/009 remain partial overall and CT-M1-008 remains planned until later actual producers pass.
-- **Progress:** Implemented; verification pending in [PR #79](https://github.com/spei04/agent-rewind/pull/79), [issue #77](https://github.com/spei04/agent-rewind/issues/77). A/B/C independent component reviews accepted; lead 159 combined route/UI/guard passes at 26f55b5. Initial hosted failure is recorded and corrected; matching final hosted checks, accepted merge and protected-main candidate remain required. No partial activation or full M1 acceptance.
+- **Progress:** Verified; accepted merge e117aaae0ef1f4ff4c293747482364a0791bc5d0, independent component/integration reviews, PR/main runs 39535364867/39536476328 and lead-verified candidate 12318112434; [accepted P2 evidence](delivery/EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21).
 
 <a id="ar-008"></a>
 
 ### AR-008 — Make retries safe and admission/cancellation behavior predictable
 
-M1 / P0 · 4 PRs · 10 engineering days · Not started · [Tracking issue #8](https://github.com/spei04/agent-rewind/issues/8)
+M1 / P0 · 4 PRs · 10 engineering days · In progress · [Tracking issue #8](https://github.com/spei04/agent-rewind/issues/8)
 
 <a id="ar-008-a"></a>
 
@@ -724,9 +724,9 @@ M1 / P0 · 4 PRs · 10 engineering days · Not started · [Tracking issue #8](ht
 - **Required automated tests:** CT-M1-008/010/011/012: eight concurrent winners, alias and composite-FK conflicts, canonical defaults and altered source whitespace, changed configuration/storage-outage recovery, revocation and nondisclosure, rollback and process death before/after commit; additive migration/restore preserves all 14 original rows, 18 ciphertext objects, hash heads and 245000 historical reservation units.
 - **Security and reliability:** Preserve source bytes, integer money and original trusted correlation; no storage/network or provider I/O inside SQL. Lock project before grants/caller/targets and recheck current authority plus both unique identities before commit. Preserve old profiles and nondispatchable historical v1 NULL configuration; never infer legacy defaults or use upload-journal evidence as committed identity.
 - **Effort / confidence:** 7 engineering days; planning range 7–11; medium-low confidence.
-- **Responsible role:** BE; named runtime implementer pending prerequisite acceptance; A scope/estimate review, C dependency/contract review, lead integration.
+- **Responsible role:** BE; C implements P1 only; B independent contract/security review and A boundary-test review after its planning handoff, lead integration/delivery.
 - **Definition of done:** Each of P1/P2/P3 has independent review, matching required checks and accepted merged-source evidence before its successor starts. Aggregate completion requires the complete synthetic admission/recovery, preservation, PostgreSQL race and commit-uncertainty matrix. Record remaining HTTP/worker/activation gates; no external or production gate is satisfied.
-- **Progress:** Not started; planning reconciliation only, no implementation/activation authority beyond existing approved scope.
+- **Progress:** In progress in [#80](https://github.com/spei04/agent-rewind/issues/80); P1 [#81](https://github.com/spei04/agent-rewind/issues/81) dispatched after Verified AR-007-C/009-B and reviewed design. P2/P3 remain Not started and accepted-merge-gated; no aggregate completion or admission activation.
 
 Three delivery PRs: P1 2 [2–3], P2 2 [2–3], P3 3 [3–5] BE days. Each successor waits for its accepted merged predecessor; aggregate AR-008-A remains unverified until all three and the complete service matrix pass.
 
@@ -743,9 +743,9 @@ Three delivery PRs: P1 2 [2–3], P2 2 [2–3], P3 3 [3–5] BE days. Each succe
 - **Required automated tests:** Canonical default/Unicode/source-whitespace/file-mode vectors; duplicate JSON and strict type/path/size negatives; image/profile mismatch and secret exclusion; exact envelope/config association and trusted-correlation separation.
 - **Security and reliability:** No API-side Docker, provider discovery or credential persistence; validate all bounds before materialization and preserve source text. Server-generated correlation never comes from body/header/actor/config digest.
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium-low confidence.
-- **Responsible role:** BE; implementer assigned only after prerequisites; A scope/security and C dependency/contract review, lead integration.
+- **Responsible role:** BE; C implements the pure parser/immutable registry/envelope foundation; B contract/security and A boundary-test review, lead integration.
 - **Definition of done:** Independent reviewer acceptance, matching hosted checks and a recorded accepted merge are required before the next package starts; preserve migration-only and external gates.
-- **Progress:** Not started; no accepted merge or implementation claim.
+- **Progress:** In progress in [#81](https://github.com/spei04/agent-rewind/issues/81) from f08b1ca after accepted entry prerequisites/design; no accepted merge or completion claim.
 
 <a id="ar-008-a-p2"></a>
 
@@ -762,7 +762,7 @@ Three delivery PRs: P1 2 [2–3], P2 2 [2–3], P3 3 [3–5] BE days. Each succe
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium-low confidence.
 - **Responsible role:** BE; implementer assigned only after prerequisites; A scope/security and C dependency/contract review, lead integration.
 - **Definition of done:** Independent reviewer acceptance, matching hosted checks and a recorded accepted merge are required before the next package starts; preserve migration-only and external gates.
-- **Progress:** Not started; no accepted merge or implementation claim.
+- **Progress:** Not started in [#82](https://github.com/spei04/agent-rewind/issues/82); waits for accepted merged P1; no accepted merge or implementation claim.
 
 <a id="ar-008-a-p3"></a>
 
@@ -779,7 +779,7 @@ Three delivery PRs: P1 2 [2–3], P2 2 [2–3], P3 3 [3–5] BE days. Each succe
 - **Effort / confidence:** 3 engineering days; planning range 3–5; medium-low confidence.
 - **Responsible role:** BE; implementer assigned only after prerequisites; A scope/security and C dependency/contract review, lead integration.
 - **Definition of done:** Independent reviewer acceptance, matching hosted checks and a recorded accepted merge are required before the next package starts; preserve migration-only and external gates; aggregate acceptance additionally requires the complete admission/recovery matrix.
-- **Progress:** Not started; no accepted merge or implementation claim.
+- **Progress:** Not started in [#83](https://github.com/spei04/agent-rewind/issues/83); waits for accepted merged P2; no accepted merge or implementation claim.
 
 <a id="ar-008-b"></a>
 
@@ -3325,9 +3325,9 @@ No question above asks to reapprove accepted architecture or issue #51 choices. 
 
 ## Dependency review, progress and maintenance
 
-Current dependency validation, 2026-10-20: **151 tasks, 52 parents, 542 acyclic edges, 27 gates and 20 contracts**. Base **442 days**, upper **748.1**, alternate 25% allowance **552.5**; M1 **43.5**, M3 **81**, RS **66**, BE **79.5**, QE **112.5**. The effort-only path is **154.5 days**. Run the execution checker for task/card/parent/schedule and producer ancestry, and the evaluation-design checker for the immutable historical proposal plus actual approval overlay. Neither proves runtime behavior or independent statistical approval.
+Current dependency validation, 2026-10-21: **151 aggregate tasks, 155 planned delivery PRs, 52 parents, 544 acyclic edges, 27 gates and 20 contracts**. Base **454 days**, upper **768.1**, alternate 25% allowance **567.5**; M1 **55.5**, M3 **81**, RS **66**, PL **90**, BE **89.5**, QE **112.5**. The effort-only path is **168.5 days**. Run the execution checker for task/card/parent/schedule and producer ancestry, and the evaluation-design checker for the immutable historical proposal plus actual approval overlay. Neither proves runtime behavior or independent statistical approval.
 
-Issues #1–5 and #9 are closed for their recorded internal/preparatory scope; parent #6–8 and #10–12 remain open. Implementation issues #26/#28/#30/#37/#40/#41/#52/#53/#69 are closed. Active [#71](https://github.com/spei04/agent-rewind/issues/71) tracks AR-006-A; AR-006-C is blocked and unassigned. RA-01-A is Verified in closed [#47](https://github.com/spei04/agent-rewind/issues/47) after PR #49; RA-01-B is Verified for its design scope in [PR #50](https://github.com/spei04/agent-rewind/pull/50), which closed [#48](https://github.com/spei04/agent-rewind/issues/48). [#51](https://github.com/spei04/agent-rewind/issues/51) is closed after PR #56 accepted the reconciliation and linked eleven blocked/unassigned implementation issues; [#52](https://github.com/spei04/agent-rewind/issues/52) is closed after verified AR-007-B in PR #54; [#53](https://github.com/spei04/agent-rewind/issues/53) is closed after verified AR-009-A in PR #55. Ownership/readiness are Verified, but scoped route enforcement and the rest of M1 remain pending. The original 19 coarse package edges were removed; exact task/gate dependencies remain authoritative.
+Issues #1–5, #7 and #9 are closed for their recorded internal/preparatory scope; parent #6/#8 and #10–12 remain open. Implementation #26/#28/#30/#37/#40/#41/#52/#53/#69/#71/#75/#76/#77 are closed. AR-007-C/P2 acceptance is recorded in [accepted P2 evidence](delivery/EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21). AR-008-A [#80](https://github.com/spei04/agent-rewind/issues/80) and P1 [#81](https://github.com/spei04/agent-rewind/issues/81) are In progress with C; P2 [#82](https://github.com/spei04/agent-rewind/issues/82) and P3 [#83](https://github.com/spei04/agent-rewind/issues/83) remain Not started until accepted merged predecessors. AR-006-C and both AR-011-C packages wait for AR-010-B; A completed read-only AR-006-B planning but its runtime is unassigned. RA-01-A/B remain Verified in closed #47/#48 after PR #49/#50; #51 is closed after approved reconciliation with eleven blocked implementation issues. The original 19 coarse parent edges remain historical; exact task/gate dependencies are authoritative. Full M1/customer/production gates remain open.
 
 Update procedure for each completed PR: update task status and evidence in the machine-readable ledger and this card; recalculate parent/milestone effort/status and dependency changes; update PLAN Section 10/14 and the matching issue; rerun ID/required-field/DAG/contract-availability/first-fortnight allocation checks; verify local links and draft OpenAPI structure. Any added edge, new gate or changed estimate requires schedule revalidation. Do not mark a task Verified without applicable commit/environment evidence, reviewer disposition and explicit limitations.
 
@@ -3451,3 +3451,5 @@ The aggregate graph and effort stay 151 tasks, 543 edges, 446 base / 755.1 upper
 2026-10-21 P2 implementation complete: A independently accepted final UI source 6565555 with 38 shipped-JS passes, including credential-switch and same-credential access-loss races, own CSRF/logout and later recovery. B accepted route transaction consumption; C independently accepted boundary-test correction 3420314 and distinct GET/HEAD OpenAPI IDs 291efaf. Lead integrated UI as e2621c7/26f55b5; 159 combined route/UI/guard tests passed, one opt-in PostgreSQL case skipped, one existing TestClient warning (29.68 seconds). Earlier full local ee528e1 passed 1,770 with 219 opt-in skips and four warnings. Initial hosted run 39533947726 at 72c0606 failed both core jobs on the obsolete artifact-test hook; 1,975/1,981 passed, one failed each, nine/three skipped, while package/security and three actual gVisor tests passed. That failure is retained as historical evidence. P2 is Implemented; verification pending in PR #79. Final matching hosted checks, accepted merge, protected-main checks and candidate verification remain required; aggregate #75 remains In progress. No new checkout, dependency installation, paid call, partner data or production activation.
 
 2026-10-21 observability producer reconciliation: [AR-011-C plan](delivery/OBSERVABILITY_EXECUTION_PLAN.md) retains the approved correlation/five-metric scope as two sequential PRs, 4 [4–6] PL days. Both packages inherit AR-010-B alongside AR-011-B/AR-005-C; P2 also waits for accepted merged P1. No early foundation assignment or reverse AR-012-B edge is allowed. A/C independently accepted the preceding admission plan at 1d284ba; the separate observability source awaits their review. Current computed totals: 151 tasks, 155 delivery PRs, 544 acyclic edges, 454 base / 768.1 upper / 567.5 alternate allowance and 168.5 effort-path days; M1 55.5, PL 90. Historical schedules/decisions/contracts remain unchanged. P2/AR-007-C stays verification pending; this is planning only, with no runtime, funding or activation claim.
+
+2026-10-21 acceptance/status reconciliation: [accepted P2 evidence](delivery/EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21) closes #7/#75/#77 for preparatory existing-route scope. C starts admission P1 #81 under aggregate #80, after Verified AR-007-C/009-B; #82/#83 remain Not started and merge-gated. A completed read-only AR-006-B planning; a separate amendment follows independent review of this checkpoint, with no runtime assignment or estimate change here. B reconciles current status then reviews contracts/security; lead owns integration. Planning 1d284ba/9a70fdc was accepted by A/C and f08b1ca by A, with 54 independent backlog passes and three validators. Task IDs, estimates, dependencies, frozen contracts/gates and historical schedules remain unchanged.

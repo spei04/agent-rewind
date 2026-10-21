@@ -165,6 +165,12 @@ def _delivery_packet(packet):
     )
     markdown = markdown[:start] + body + markdown[end:]
     markdown = _sync_package_cards(markdown, task["delivery_packages"])
+    # Rewinding the producer also rewinds its now-active admission consumer.
+    admission = next(t for t in data["tasks"] if t["id"] == "AR-008-A")
+    admission["status"] = "Not started"
+    for package in admission["delivery_packages"]:
+        package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
+    markdown = _sync_package_cards(markdown, admission["delivery_packages"])
     return data, markdown, plan, task, task["delivery_packages"]
 
 
