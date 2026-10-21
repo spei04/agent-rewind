@@ -63,7 +63,9 @@ def listing_connection(engine: Engine, work: SQLWork) -> Iterator[Connection]:
     connection: Connection | None = None
     raw: Any = None
     previous: tuple[int, int] | None = None
-    listeners = False
+    listeners: list[tuple[str, Any]] = []
+    entered = False
+    broken = False
     dialect = engine.dialect.name
 
     def before(conn: Any, cursor: Any, *args: Any) -> None:
@@ -107,25 +109,42 @@ def listing_connection(engine: Engine, work: SQLWork) -> Iterator[Connection]:
         else:
             connection.invalidate()
             raise Fault("dependency_unavailable")
-        event.listen(connection, "before_cursor_execute", before)
-        event.listen(connection, "after_cursor_execute", work.after)
-        listeners = True
+        for name, callback in (
+            ("before_cursor_execute", before),
+            ("after_cursor_execute", work.after),
+        ):
+            # Track before registration: an injected/driver failure may happen
+            # after a listener has already been attached.
+            listeners.append((name, callback))
+            event.listen(connection, name, callback)
+        entered = True
         yield connection
     except Fault as error:
         # contextlib assigns traceback on the original propagated exception;
         # public Fault is frozen, so preserve the code in a fresh safe value.
         raise Fault(error.code) from None
-    except SQLAlchemyError:
+    except (SQLAlchemyError, sqlite3.Error):
+        broken = True
         raise Fault("dependency_unavailable") from None
+    except Exception:
+        if not entered:
+            broken = True
+            raise Fault("dependency_unavailable") from None
+        raise
     finally:
         if connection is not None:
-            if listeners:
-                event.remove(connection, "before_cursor_execute", before)
-                event.remove(connection, "after_cursor_execute", work.after)
-            # A failed statement never releases its spent work budget.
+            failed = False
+            # Keep cleanup unconditional even after partial event registration.
+            for name, callback in listeners:
+                try:
+                    if event.contains(connection, name, callback):
+                        event.remove(connection, name, callback)
+                except Exception:
+                    failed = True
             if work.started is not None:
                 work.seconds += time.monotonic() - work.started
                 work.started = None
+            exhausted = work.remaining() <= 0
             try:
                 if not connection.invalidated:
                     if dialect == "sqlite" and previous is not None:
@@ -137,7 +156,19 @@ def listing_connection(engine: Engine, work: SQLWork) -> Iterator[Connection]:
                         raw.execute(f"PRAGMA query_only={previous[0]}")
                         raw.execute(f"PRAGMA busy_timeout={previous[1]}")
             except Exception:
-                connection.invalidate()
-                raise Fault("dependency_unavailable") from None
+                failed = True
             finally:
-                connection.close()
+                try:
+                    if broken or failed:
+                        connection.invalidate()
+                except Exception:
+                    failed = True
+                finally:
+                    try:
+                        connection.close()
+                    except Exception:
+                        failed = True
+            # Successful execute/fetch is insufficient if the last parse or
+            # final authority phase spent the remaining shared work budget.
+            if failed or exhausted:
+                raise Fault("dependency_unavailable") from None

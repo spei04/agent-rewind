@@ -137,3 +137,91 @@ def test_unsupported_sqlite_mode_discards_physical_connection(tmp_path, mode):
         assert len(captured) == 2
     finally:
         engine.dispose()
+
+
+def test_final_fetch_parse_tail_cannot_return_over_budget(engine, monkeypatch):
+    clock = [0.0]
+    monkeypatch.setattr("agent_rewind.listing_session.time.monotonic", lambda: clock[0])
+    work = SQLWork()
+    with (
+        pytest.raises(Fault, match="dependency_unavailable"),
+        listing_connection(engine, work) as c,
+    ):
+        assert c.exec_driver_sql("SELECT 1").scalar_one() == 1
+        clock[0] = 3.0
+    assert work.seconds == 3.0 and work.started is None
+    with engine.connect() as c:
+        assert c.exec_driver_sql("PRAGMA query_only").scalar_one() == 0
+
+
+@pytest.mark.parametrize("stage", ["register_first", "register_second", "remove"])
+def test_listener_failure_always_closes_and_discards_connection(engine, monkeypatch, stage):
+    from sqlalchemy import event
+
+    captured = []
+    real_listen, real_remove = event.listen, event.remove
+
+    def listen(connection, name, callback):
+        captured.append(connection.connection.driver_connection)
+        real_listen(connection, name, callback)
+        if (stage == "register_first" and name == "before_cursor_execute") or (
+            stage == "register_second" and name == "after_cursor_execute"
+        ):
+            raise RuntimeError("private-event-setup-canary")
+
+    def remove(connection, name, callback):
+        real_remove(connection, name, callback)
+        if stage == "remove":
+            raise RuntimeError("private-event-cleanup-canary")
+
+    with monkeypatch.context() as patch:
+        patch.setattr("agent_rewind.listing_session.event.listen", listen)
+        patch.setattr("agent_rewind.listing_session.event.remove", remove)
+        with (
+            pytest.raises(Fault, match="dependency_unavailable") as result,
+            listing_connection(engine, SQLWork()) as c,
+        ):
+            c.exec_driver_sql("SELECT 1")
+        assert "canary" not in str(result.value)
+    with pytest.raises(sqlite3.ProgrammingError):
+        captured[0].execute("SELECT 1")
+    with listing_connection(engine, SQLWork()) as c:
+        assert c.connection.driver_connection is not captured[0]
+        assert c.exec_driver_sql("SELECT 1").scalar_one() == 1
+
+
+@pytest.mark.parametrize("stage", ["setup", "restore"])
+def test_native_settings_failures_are_safe_and_replace_pool(tmp_path, stage):
+    captured = []
+
+    class Failing(sqlite3.Connection):
+        def execute(self, sql, *args, **kwargs):
+            if (stage == "setup" and sql == "PRAGMA query_only") or (
+                stage == "restore" and sql == "PRAGMA query_only=0"
+            ):
+                raise sqlite3.OperationalError("private-native-canary")
+            return super().execute(sql, *args, **kwargs)
+
+    def creator():
+        raw = sqlite3.connect(
+            str(tmp_path / "cleanup.sqlite"),
+            factory=Failing if not captured else sqlite3.Connection,
+        )
+        captured.append(raw)
+        return raw
+
+    engine = create_engine("sqlite://", creator=creator, poolclass=QueuePool, pool_size=1)
+    try:
+        with (
+            pytest.raises(Fault, match="dependency_unavailable") as result,
+            listing_connection(engine, SQLWork()) as c,
+        ):
+            c.exec_driver_sql("SELECT 1")
+        assert "canary" not in str(result.value)
+        with pytest.raises(sqlite3.ProgrammingError):
+            captured[0].execute("SELECT 1")
+        with listing_connection(engine, SQLWork()) as c:
+            assert c.exec_driver_sql("SELECT 1").scalar_one() == 1
+        assert len(captured) == 2
+    finally:
+        engine.dispose()
