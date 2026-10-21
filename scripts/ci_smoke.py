@@ -371,12 +371,19 @@ def admission_foundation_smoke() -> None:
 
 
 def admission_storage_smoke(engine: Engine) -> None:
+    from pathlib import Path
+    from tempfile import TemporaryDirectory
+
     from sqlalchemy import text
 
     from agent_rewind.admission_coordinator import AdmissionCoordinator
+    from agent_rewind.admission_envelope import OriginCorrelation
+    from agent_rewind.admission_journal import AdmissionJournal
+    from agent_rewind.admission_journal_state import JournalIdentity
     from agent_rewind.admission_records import verify_job_configuration
     from agent_rewind.admission_repository import AdmissionRepository
     from agent_rewind.admission_transaction import AdmissionError
+    from agent_rewind.artifact_metadata import ArtifactError
     from agent_rewind.migrations.admission_service import initialize_admission
     from agent_rewind.request_authority import RequestAuthority
     from agent_rewind.request_identity import VerifiedPrincipal
@@ -398,6 +405,26 @@ def admission_storage_smoke(engine: Engine) -> None:
             raise RuntimeError("Installed coordinator schema refusal changed") from None
     else:
         raise RuntimeError("Installed coordinator bypassed migration-only guard")
+    # Exercise only private journal binding/refusal, never preparation/publication.
+    with TemporaryDirectory(prefix="admission-journal-") as folder:
+        journal = AdmissionJournal(Path(folder))
+        identity = JournalIdentity(
+            context.organization_id,
+            context.project_id,
+            principal.principal_id,
+            "1" * 32,
+            "2" * 64,
+            "3" * 64,
+        )
+        with journal.open(identity) as session:
+            if session.route != "new":
+                raise RuntimeError("Installed journal fresh routing changed")
+            session.bind(OriginCorrelation("4" * 32))
+        try:
+            with journal.open(identity):
+                raise RuntimeError("Installed journal inferred missing attempt absence")
+        except ArtifactError:
+            pass
     with engine.connect() as connection:
         empty = repository.resolve_identities(
             connection,
