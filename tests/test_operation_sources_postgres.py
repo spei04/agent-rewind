@@ -4,6 +4,7 @@ import pytest
 import test_admission_repository_postgres as repository_pg
 import test_migrations_postgres as migrations
 from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
 from test_admission_repository import insert
 from test_admission_schema import JOB, PROJECT
 from test_artifact_metadata import OTHER
@@ -154,3 +155,54 @@ def test_postgres_timestamp_text_refusal_not_driver_datetime_decode(source_pg, t
         pytest.raises(ArtifactError),
     ):
         observe_result(connection, f.context, JOB, ReceiptBook())
+
+
+@pytest.mark.parametrize("project", [PROJECT, OTHER])
+def test_postgres_reassigned_member_respects_original_project_snapshot(source_pg, project):
+    f = source_pg
+    original_ids = roots(f, 1)
+    incoming = roots(f, 1, start=2, project=project, job="e" * 32)[0]
+    work = OperationWork()
+    with operation_connection(f.pg["app"], work) as connection:
+        book, cohort, *_ = snapshot(f, connection)
+        original = book.encoded()
+        assert cohort.ids == tuple(original_ids)
+    with f.engine.begin() as connection:
+        connection.execute(
+            text("UPDATE records SET data=CAST(:body AS JSON) WHERE id=:id"),
+            {
+                "body": '{"job_id":"' + JOB + '","parent_id":null,"source":"preserved"}',
+                "id": incoming,
+            },
+        )
+    with operation_connection(f.pg["app"], work) as connection:
+        raw = connection.connection.driver_connection
+        if project == PROJECT:
+            with pytest.raises(AdmissionStorageError):
+                verify_read_snapshot(connection, f.context, book, cohort)
+        else:
+            verify_read_snapshot(connection, f.context, book, cohort)
+    assert book.encoded() == original
+    assert cohort.ids == tuple(original_ids)
+    assert work._started is None and connection.closed and raw.closed
+
+
+def test_postgres_select_role_denies_real_mutations_then_reads_cleanly(source_pg):
+    f = source_pg
+    roots(f, 1)
+    statements = (
+        "UPDATE jobs SET cancel=TRUE WHERE id=:id",
+        "UPDATE operations SET kind='run' WHERE job_id=:id",
+    )
+    for statement in statements:
+        with pytest.raises(DBAPIError) as caught, f.pg["app"].begin() as denied:
+            denied_raw = denied.connection.driver_connection
+            denied.execute(text(statement), {"id": JOB})
+        assert caught.value.orig.sqlstate == "42501"
+        assert denied.closed and denied_raw.closed
+        with operation_connection(f.pg["app"], OperationWork()) as connection:
+            raw = connection.connection.driver_connection
+            book, cohort, _, job, _ = snapshot(f, connection)
+            assert job.row()["cancel"] is False
+            verify_read_snapshot(connection, f.context, book, cohort)
+        assert connection.closed and raw.closed
