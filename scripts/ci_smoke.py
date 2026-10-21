@@ -81,6 +81,44 @@ def projection_smoke(engine: Engine) -> None:
         raise RuntimeError("Installed empty projection retry changed progress")
 
 
+def run_listing_smoke(engine: Engine) -> None:
+    import base64
+    from datetime import UTC, datetime
+
+    from cryptography.fernet import Fernet
+    from pydantic import SecretStr
+
+    from agent_rewind.config import Settings
+    from agent_rewind.cursor_config import cursor_codec
+    from agent_rewind.request_identity import VerifiedPrincipal
+    from agent_rewind.run_cursor import CursorPosition, initial_expiry
+    from agent_rewind.scoped_run_listing import ScopedRunReader
+
+    settings = Settings(
+        _env_file=None,
+        encryption_key=SecretStr(Fernet.generate_key().decode()),
+        bootstrap_key=SecretStr("synthetic-package-bootstrap-not-a-cursor-key"),
+        cursor_signing_key=SecretStr(base64.urlsafe_b64encode(b"c" * 32).decode().rstrip("=")),
+    )
+    principal = VerifiedPrincipal("oidc:" + "a" * 64)
+    now = datetime(2026, 1, 1, tzinfo=UTC)
+    codec = cursor_codec(settings)
+    position = CursorPosition(50, 0, now, "1" * 32, initial_expiry(now))
+    token = codec.encode("9" * 32, principal.principal_id, position, now=now)
+    if codec.decode(token, "9" * 32, principal.principal_id, now=now) != position:
+        raise RuntimeError("Installed run cursor did not round trip")
+    reader = ScopedRunReader(engine, settings)
+    page = reader.list(principal, "9" * 32, now=now)
+    if page.items or page.next_cursor is not None:
+        raise RuntimeError("Installed scoped list changed the empty projection")
+    try:
+        reader.detail(principal, "9" * 32, "1" * 32)
+    except ResourceNotFound:
+        pass
+    else:
+        raise RuntimeError("Installed scoped detail invented an unpublished run")
+
+
 def publication_smoke(engine: Engine, root: Path) -> None:
     from cryptography.fernet import Fernet
 
@@ -481,6 +519,7 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
         repository_smoke(engine)
         artifact_smoke(engine, Path(temporary))
         projection_smoke(engine)
+        run_listing_smoke(engine)
         publication_smoke(engine, Path(temporary))
         request_foundation_smoke(engine, Path(temporary))
         existing_routes_smoke(engine, Path(temporary))

@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///.rewind/metadata.sqlite"
     data_dir: Path = Path(".rewind")
     encryption_key: SecretStr
+    cursor_signing_key: SecretStr | None = None
     bootstrap_key: SecretStr | None = None
     public_url: str = "http://127.0.0.1:8080"
     storage: Literal["local", "s3"] = "local"

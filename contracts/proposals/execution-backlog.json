@@ -64,7 +64,7 @@
       "milestone": "M1",
       "priority": "P0",
       "objective": "Make large run histories queryable through bounded authorized requests.",
-      "base_effort_days": 7.0,
+      "base_effort_days": 9.0,
       "children": [
         "AR-006-A",
         "AR-006-B",
@@ -1182,8 +1182,8 @@
       "title": "Stable cursor listing and run summaries",
       "objective": "Make large run histories queryable through bounded authorized requests. This task delivers stable cursor listing and run summaries.",
       "role": "TL",
-      "effort_days": 2.0,
-      "confidence": "medium",
+      "effort_days": 4.0,
+      "confidence": "medium-low",
       "dependencies": [
         "AR-006-A",
         "AR-007-C",
@@ -1192,23 +1192,86 @@
       "contracts": [
         "C04"
       ],
-      "scope": "Implement scoped list/detail v1 routes with opaque bound cursors, stable tie ordering and fixed page limits; apply bounded conservative current-job status/branchability suppression at read time without mutating the projection or scanning artifacts; use AR-007-C trusted named-project authority for new v1 list/detail and cursor access; reauthorize before returning any stored result after revocation",
-      "acceptance": "Traversal has no duplicate/missing rows on fixed corpus; foreign/modified cursor rejected; indexed query plan; stale/expired/terminal job evidence cannot expose an unsafe branchable result, and listing does not persist repairs",
-      "tests": "M1-005/006, concurrent insert semantics, invalid limit and missing/foreign run cases; current-job changes between publication and read conservatively suppress branchability without source/projection writes or blob I/O",
-      "security_reliability": "Authorize before loading body; no payload in cursor/errors",
-      "out_of_scope": "No full history download or arbitrary search engine or mutable reconciliation/audit (AR-006-C)",
-      "status": "Not started",
-      "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
+      "scope": "Deliver two sequential accepted-merge-gated PRs: dedicated signed-cursor configuration and bounded scoped projection reader, then exactly the frozen v1 GET list/detail routes. Apply conservative current-job suppression and original source/projection/job receipt checks without repairs or artifact/event I/O; consume trusted named-project authority and reauthorize before return",
+      "acceptance": "Fixed-corpus traversal has no duplicate or missing rows; initial commit-ordered watermark excludes later backfills, including old timestamps. Strict principal/project/limit/filter-bound cursors refuse tampering and expiry; actual indexed query work is bounded or safely refused. Complete success=false remains complete, while redacted or incompatible current-job evidence never becomes unsafe branchable output",
+      "tests": "CT-M1-005/006: ties and exact UTC timestamps, fixed limits and cursor expiry/rotation/omitted-limit policy, reversed publication and late backfills; finite suppression matrix, malformed selected metadata before transfer, whole-request receipt and revocation races, zero blob/event I/O, actual PostgreSQL SELECT-only plans/work limits and native timeout cleanup; exact HTTP schemas/headers and migration-only guard",
+      "security_reliability": "Fresh identity and named-project visibility precede cursor/key details. LIST-only signing key is independent of artifact encryption; no secret/source/cursor in diagnostics. Set-oriented bounded reads retain original metadata and final SQL receipts; no N+1 default, automatic retry, partial page or abandoned timeout thread. Query ceilings are provisional until P1 fixture review; no global engine behavior changes",
+      "out_of_scope": "No submit/status/cancel, rich legacy route changes, event/workspace/artifact reads, arbitrary filters, persistent repair/audit (AR-006-C), worker fence, schema/profile migration, customer activation or paid execution",
+      "status": "In progress",
+      "definition_of_done": "Both packages require independent review, matching checks and accepted merged-source evidence in order; aggregate completion requires the full scoped read/cursor/suppression and actual PostgreSQL matrix. Preserve historical bytes, migration-only admission and remaining CT-M1-007/008/G1 gates",
       "effort_range_days": [
-        2.0,
-        3.0
+        4.0,
+        6.0
       ],
       "review_roles": [
         "BE",
         "QE"
       ],
-      "pull_request_boundary": "Implement scoped list/detail v1 routes with opaque bound cursors, stable tie ordering and fixed page limits; apply bounded conservative current-job status/branchability suppression at read time without mutating the projection or scanning artifacts. Read-only query/API slice; AR-006-C separately persists fenced repair and restricted audit.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied. CT-M1-007/008 read/cursor coverage joins later durable replay evidence; no cookie-role or default-project substitute."
+      "pull_request_boundary": "Two sequential independently reviewable PRs under the existing task: P1 2 [2–3] TL days for cursor and bounded SQL reader; P2 2 [2–3] for frozen list/detail HTTP integration after accepted merged P1. Total 4 [4–6], medium-low; no runtime starts from planning assignment alone",
+      "contracts_status": "C04 and direct prerequisites AR-006-A/AR-007-C/AR-011-B are Verified for development scope. The listing execution plan freezes the finite suppression/key/receipt design before runtime and requires measured review of proposed query ceilings. P1 is In progress with A after accepted planning; P2 remains Not started; no reverse admission/worker edge, customer activation or full CT-M1-007/008 acceptance is implied",
+      "delivery_packages": [
+        {
+          "role": "TL",
+          "effort_days": 2.0,
+          "effort_range_days": [
+            2.0,
+            3.0
+          ],
+          "confidence": "medium-low",
+          "contracts": [
+            "C04"
+          ],
+          "status": "In progress",
+          "accepted_merge_commit": null,
+          "review_evidence": null,
+          "id": "AR-006-B/P1",
+          "title": "Signed cursors and bounded scoped projection reads",
+          "objective": "Implement the frozen cursor and SQL-only run-summary boundary without HTTP activation",
+          "dependencies": [
+            "AR-006-A",
+            "AR-007-C",
+            "AR-011-B"
+          ],
+          "scope": "Implement dedicated optional cursor key configuration and strict versioned HMAC codec; bounded named-project projection/source/job reads, finite conservative suppression and original single-statement receipt rechecks. Review actual source-field mapping and measure proposed query ceilings at the first design checkpoint; reuse set-oriented scoped helpers and native cleanup",
+          "out_of_scope": "No HTTP wiring, legacy route changes, artifact/event I/O, source/projection writes, mutable repair/audit, schema/index migration, worker integration or customer-ready profile",
+          "acceptance": "Cursor grammar and principal/project/filter/limit/watermark/expiry binding are exact; missing key affects only authorized list reads. Selected malformed metadata refuses before unsafe materialization; complete failure/redaction and unfenced partial states follow the reviewed finite table. Fixed-corpus traversal and bounded native SQL cleanup are demonstrated on SQLite and actual PostgreSQL",
+          "tests": "Cursor size/signature/duplicate-member/expiry/rotation and omitted-limit vectors; exact timestamp ties, commit-order rollback and old-timestamp backfills; source/job/scope changes, malformed dynamic cells and max-page shared ancestry; deterministic SQLite VM limits plus actual PostgreSQL plans/timeouts, connection cleanup and zero storage/event reads",
+          "security_reliability": "No derived or automatically generated signing key; authority precedes cursor/config diagnostics. Preserve original receipts across reads and reauthorize at the end; no silent malformed-row omission or snapshot-based revocation claim. Proposed resource ceilings require fixture evidence and remain local to this adapter",
+          "definition_of_done": "Independent interface/security review, meaningful SQLite and actual PostgreSQL evidence, matching hosted checks and accepted merge are required before P2; aggregate remains unverified",
+          "interface_contracts": "C04 signed cursor and RunSummary; accepted AR-006-A projection/commit sequence, AR-007-C named authority and AR-011-B safe errors; reviewed RUN_LISTING_EXECUTION_PLAN.md key lifecycle, finite suppression and provisional query-work proof",
+          "tracking_issue": "https://github.com/spei04/agent-rewind/issues/87"
+        },
+        {
+          "role": "TL",
+          "effort_days": 2.0,
+          "effort_range_days": [
+            2.0,
+            3.0
+          ],
+          "confidence": "medium-low",
+          "contracts": [
+            "C04"
+          ],
+          "status": "Not started",
+          "accepted_merge_commit": null,
+          "review_evidence": null,
+          "id": "AR-006-B/P2",
+          "title": "Frozen v1 run list and detail integration",
+          "objective": "Expose exactly the frozen scoped v1 list and detail operations through the accepted read boundary",
+          "dependencies": [
+            "AR-006-B/P1"
+          ],
+          "scope": "Wire only the two frozen v1 GET list/detail routes to accepted P1 and fresh named-project authority; preserve exact RunSummary/errors/request-ID/no-store contracts, conservative current-job suppression and final response reauthorization. Add installed-package smoke and full route tests while retaining the unchanged migration-only guard",
+          "out_of_scope": "No submit/status/cancel ownership, rich legacy representation or audit changes, new profile/schema, artifact/event access, persistent repair, worker fences or production/customer activation",
+          "acceptance": "Both actual routes satisfy CT-M1-005/006 with authority-before-cursor errors, LIST-only key dependence, strict limits and continuation, fixed summary shape and fresh revocation refusal. Detail does not require the signing key; current migration-only schemas still refuse before customer sinks",
+          "tests": "Actual list/detail response and 401/404/403/422/503 precedence, duplicate query parameters and omitted continuation limit; principal/project/key binding and revocation during reads, full finite suppression matrix, zero blob/event/repair access, real schema guard and isolated installed-package smoke",
+          "security_reliability": "No raw database or hash fallback, broad guard exception or customer-ready profile. Errors are fixed and bounded; no partial response after source/authority drift. Existing legacy run.read audit remains with its accepted route, not a new unscoped v1 side effect",
+          "definition_of_done": "Independent route/security review, matching hosted and protected-main evidence and accepted merge establish both packages and the complete list/detail matrix; aggregate completion does not close future replay, repair or G1 gates",
+          "interface_contracts": "Accepted merged P1 and inherited C04; exact frozen GET list/detail OpenAPI and seven-field RunSummary, CT-M1-005/006 plus the scoped read contribution to CT-M1-007/008",
+          "tracking_issue": "https://github.com/spei04/agent-rewind/issues/88"
+        }
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/86"
     },
     {
       "id": "AR-006-C",
@@ -7251,7 +7314,7 @@
     "max_scheduled_delivery_days_per_role_per_day": 0.5,
     "milestone_effort_days": {
       "M0": 8.5,
-      "M1": 55.5,
+      "M1": 57.5,
       "M2": 69.0,
       "M3": 81.0,
       "M4": 82.0,
@@ -7260,15 +7323,15 @@
       "M7": 30.0
     },
     "role_effort_days": {
-      "TL": 73.0,
+      "TL": 75.0,
       "FE": 23.0,
       "RS": 66.0,
       "PL": 90.0,
       "BE": 89.5,
       "QE": 112.5
     },
-    "base_effort_days": 454.0,
-    "upper_range_days": 768.1,
+    "base_effort_days": 456.0,
+    "upper_range_days": 771.1,
     "effort_only_critical_path_days": 168.5,
     "effort_only_critical_path": [
       "E0",
@@ -7332,11 +7395,11 @@
       "G7"
     ],
     "critical_path_excludes_external_waits": true,
-    "revision_notes": "2026-10-21 separate AR-011-C reconciliation adds the actual worker producer AR-010-B, with two sequential accepted-merge-gated packages totaling 4 [4–6] PL days. Both wait for every aggregate prerequisite. Admission reconciliation 1d284ba remains a separate commit. No runtime, new metric vocabulary, funding gate, historical schedule or immutable C21/owner decision changed",
-    "independent_review": "A/C independently accepted admission plan 1d284ba and observability plan 9a70fdc; A accepted the final admission-history clarification f08b1ca. A independently passed 54 backlog cases and all three planning/evaluation/M1 OpenAPI validators at 9a70fdc with unchanged owned source/environment. Historical planning estimates/decisions and evidence remain auditable; no runtime authority is added by these planning checks. PR #79 reviewed source db5f992582c0d925a7921d26ae231312eaa41107 and accepted merge e117aaae0ef1f4ff4c293747482364a0791bc5d0 have identical trees. PR run 39535364867 and protected-main run 39536476328 passed 2013/2019 core tests on Python 3.11/3.12, with 9/3 expected skips and one warning per job; actual PostgreSQL, three separate gVisor tests, package/security/CI gate and main delivery passed. A accepted identity/read/mutation/UI security; B accepted C transaction consumption; C accepted interface and compatibility/OpenAPI corrections; lead integrated and verified delivery. Lead independently verified candidate 12318112434 (470334 bytes), archive/API digest, exact four files, source/manifests/package hashes; private indexed record reviewed-delivery-20261021-pr79-e117aaa.json is retained outside checkouts. P2 and aggregate AR-007-C are Verified for preparatory existing-route scope only. Customer-ready admission, full CT-M1-007/008/009, G1 and external production/funding/data gates remain open. P1 admission component source checkpoints 4c6a558/0e6cb05/1dde230 are independently accepted by B; composed execution/packaging/hosted acceptance remains pending and no package is Verified.",
+    "revision_notes": "2026-10-21 separate AR-006-B planning reconciliation replaces 2 [2–3] with two sequential packages totaling 4 [4–6] TL days. Existing aggregate prerequisites, outer graph, statuses, contracts and frozen history remain unchanged. Dedicated cursor lifecycle, finite suppression and bounded SQL receipt/work evidence precede HTTP integration; no runtime assignment or activation follows",
+    "independent_review": "A/C independently accepted admission plan 1d284ba and observability plan 9a70fdc; A accepted the final admission-history clarification f08b1ca. A independently passed 54 backlog cases and all three planning/evaluation/M1 OpenAPI validators at 9a70fdc with unchanged owned source/environment. Historical planning estimates/decisions and evidence remain auditable; no runtime authority is added by these planning checks. PR #79 reviewed source db5f992582c0d925a7921d26ae231312eaa41107 and accepted merge e117aaae0ef1f4ff4c293747482364a0791bc5d0 have identical trees. PR run 39535364867 and protected-main run 39536476328 passed 2013/2019 core tests on Python 3.11/3.12, with 9/3 expected skips and one warning per job; actual PostgreSQL, three separate gVisor tests, package/security/CI gate and main delivery passed. A accepted identity/read/mutation/UI security; B accepted C transaction consumption; C accepted interface and compatibility/OpenAPI corrections; lead integrated and verified delivery. Lead independently verified candidate 12318112434 (470334 bytes), archive/API digest, exact four files, source/manifests/package hashes; private indexed record reviewed-delivery-20261021-pr79-e117aaa.json is retained outside checkouts. P2 and aggregate AR-007-C are Verified for preparatory existing-route scope only. Customer-ready admission, full CT-M1-007/008/009, G1 and external production/funding/data gates remain open. A independently accepted status checkpoint c94b9b0 with 54 backlog passes and three validators; the one-line live admission correction is c390726. A authored AR-006-B plan 9b97a09; B independently accepted its contract, dependency and arithmetic review, and the lead accepted the plan. Tracking #86/#87/#88 does not start runtime or establish implementation acceptance.",
     "contract_count": 20,
-    "verification": "Two-PR reconciliation passed execution/evaluation/M1 OpenAPI validators and 296 focused tests, including 41 backlog tests with package-order, inherited-input, effort, merge-evidence, aggregate-completion and PR-count refusal cases. Ruff lint/security/format, strict checker types and whitespace passed. Aggregate DAG/effort/status, gates, historical schedules/C21/owner/API/acceptance bytes are unchanged from b42f00b. These are historical planning-check results; current runtime evidence and remaining acceptance gates are recorded in each delivery package and planning_status. The 2026-10-21 admission reconciliation passed the unchanged execution/evaluation/M1 OpenAPI validators and 256 focused tests, including 47 backlog cases (six new third-stage sequencing/input/effort refusals). Final 47-case backlog rerun, Ruff/format and whitespace pass. A separate comparison confirmed identical task IDs/statuses/outer dependencies, gates/contracts, historical schedules, frozen contract/research records and runtime/checker bytes; +6 base/+10 upper/+2 PRs only. Exact-source admission review was subsequently accepted by A/C at 1d284ba. The separate AR-011-C amendment passed all three validators and 263 focused backlog/evaluation/M1 tests, including seven new package producer/merge-gate cases (54 backlog cases total). Configured test lint/format and whitespace passed. A separate comparison confirmed only AR-011-C changes, exactly one added AR-010-B prerequisite, no removed edges, unchanged statuses/gates/contracts/history and frozen runtime/checker/research bytes. Generic validation is unchanged; exact-source observability review was subsequently accepted by A/C at 9a70fdc and A at clarification f08b1ca. The 2026-10-21 P2 acceptance/admission assignment reconciliation passed 54 backlog cases (1.33 seconds), all three execution/evaluation/M1 OpenAPI validators, configured checker/test lint and format, and whitespace. A historical package fixture now also resets downstream admission packages when rewinding AR-007-C; checker behavior and assertions are unchanged. Independent comparison confirms unchanged task IDs, effort, dependencies, gates/contracts, history, AR-006-B scope/estimate and runtime source; only acceptance/assignment metadata changes.",
-    "delivery_pr_count": 155
+    "verification": "Two-PR reconciliation passed execution/evaluation/M1 OpenAPI validators and 296 focused tests, including 41 backlog tests with package-order, inherited-input, effort, merge-evidence, aggregate-completion and PR-count refusal cases. Ruff lint/security/format, strict checker types and whitespace passed. Aggregate DAG/effort/status, gates, historical schedules/C21/owner/API/acceptance bytes are unchanged from b42f00b. These are historical planning-check results; current runtime evidence and remaining acceptance gates are recorded in each delivery package and planning_status. The 2026-10-21 admission reconciliation passed the unchanged execution/evaluation/M1 OpenAPI validators and 256 focused tests, including 47 backlog cases (six new third-stage sequencing/input/effort refusals). Final 47-case backlog rerun, Ruff/format and whitespace pass. A separate comparison confirmed identical task IDs/statuses/outer dependencies, gates/contracts, historical schedules, frozen contract/research records and runtime/checker bytes; +6 base/+10 upper/+2 PRs only. Exact-source admission review was subsequently accepted by A/C at 1d284ba. The separate AR-011-C amendment passed all three validators and 263 focused backlog/evaluation/M1 tests, including seven new package producer/merge-gate cases (54 backlog cases total). Configured test lint/format and whitespace passed. A separate comparison confirmed only AR-011-C changes, exactly one added AR-010-B prerequisite, no removed edges, unchanged statuses/gates/contracts/history and frozen runtime/checker/research bytes. Generic validation is unchanged; exact-source observability review was subsequently accepted by A/C at 9a70fdc and A at clarification f08b1ca. The 2026-10-21 P2 acceptance/admission assignment reconciliation passed 54 backlog cases (1.33 seconds), all three execution/evaluation/M1 OpenAPI validators, configured checker/test lint and format, and whitespace. A historical package fixture now also resets downstream admission packages when rewinding AR-007-C; checker behavior and assertions are unchanged. Independent comparison confirms unchanged task IDs, effort, dependencies, gates/contracts, history, AR-006-B scope/estimate and runtime source; only acceptance/assignment metadata changes. The 2026-10-21 AR-006-B planning amendment passed all three execution/evaluation/M1 OpenAPI validators and the existing 54 backlog cases in 1.56 seconds, using the primary owned interpreter with PYTHONPATH unset and bytecode/cache disabled. Existing checker/test Ruff lint and format plus whitespace passed; no checker or test-source changes were needed. Separate comparison confirms identical outer dependencies, statuses, gates/contracts, historical schedules/research records and every other task, with +2 base/+3 upper/+1 delivery PR and the identical 168.5-day path. Runtime and frozen contract bytes are unchanged; independent plan review remains pending.",
+    "delivery_pr_count": 156
   },
   "review_findings": [
     {
@@ -7357,7 +7420,7 @@
     {
       "id": "REV-04",
       "finding": "42–50 week GA and 28–34 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff.",
-      "resolution": "Retire dated windows. 452 base engineering days; 166.5-day effort-only longest path excludes role contention and external waits. Reforecast at integration gates using actual throughput; no committed launch date."
+      "resolution": "Retire dated windows. 456 base engineering days; 168.5-day effort-only longest path excludes role contention and external waits. Reforecast at integration gates using actual throughput; no committed launch date."
     },
     {
       "id": "REV-05",
@@ -7433,9 +7496,14 @@
       "id": "REV-19",
       "finding": "The current ready queue treated AR-011-C as a wholly available task although durable origin and worker/ledger transitions have later producers.",
       "resolution": "Separate reviewed reconciliation retains AR-011-C identity and adds AR-010-B before both sequential packages: P1 bounded actual HTTP/readiness foundation, P2 accepted admission-origin/worker integration, 4 [4–6] PL days. No early package exception, new metric vocabulary, schema duplication or reverse AR-012-B edge"
+    },
+    {
+      "id": "REV-20",
+      "finding": "The two-day listing estimate assumed a customer cursor key and bounded projection reader that do not exist; LIMIT alone does not bound late-backfill query work",
+      "resolution": "Retain AR-006-B identity, C04 and prerequisites; two sequential TL packages of 2 [2–3] days each separate cursor/SQL foundation from exactly two GET routes. Review finite suppression and original receipt semantics plus measured native SQL ceilings before code; no runtime assignment, schema/profile mutation or reverse worker dependency"
     }
   ],
-  "planning_status": "Approved engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-A/B/C and preparatory AR-009-A/B remain Verified. AR-008-A/P1 is Verified after accepted PR #85 merge 81905a5 and matching PR/main checks plus candidate verification. C owns AR-008-A/P2 (#82) additive schema and bounded repositories in the retained checkout; P3 (#83) remains Not started until accepted merged P2. Aggregate #80 and parent #8 remain open. A independently authors AR-006-B/P1 in PR #89; its unmerged plan/packages/estimates are not imported into this branch. B reviews admission contracts/security; A reviews preservation/boundary evidence as available; lead owns integration and delivery. AR-011-C and AR-006-C remain blocked on AR-010-B. No customer, production, paid/held-out evaluation or external data gate changes.",
+  "planning_status": "Approved engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-A/B/C and preparatory AR-009-A/B remain Verified. AR-008-A/P1 #81 is Verified after accepted PR #85 merge 81905a5 and matching PR/main checks plus candidate verification. C owns AR-008-A/P2 #82 additive schema and bounded repositories in draft PR #90; P3 #83 remains Not started until accepted merged P2. Aggregate #80 and parent #8 remain open. AR-006-B aggregate #86 and P1 #87 are In progress under accepted plan 9b97a09, draft PR #89; A authored frozen cbbe5d3, B independently reviews, and lead integrates. P2 #88 remains Not started until accepted merged P1. AR-011-C and AR-006-C remain blocked on AR-010-B. No customer, production, paid/held-out evaluation or external data gate changes.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -7479,7 +7547,9 @@
     ],
     "active_child_issues": {
       "AR-008-A": 80,
-      "AR-008-A/P1": 81
+      "AR-008-A/P2": 82,
+      "AR-006-B": 86,
+      "AR-006-B/P1": 87
     },
     "closed_implementation_issues": [
       26,
@@ -7494,11 +7564,12 @@
       71,
       75,
       76,
-      77
+      77,
+      81
     ],
     "queued_child_issues": {
-      "AR-008-A/P2": 82,
-      "AR-008-A/P3": 83
+      "AR-008-A/P3": 83,
+      "AR-006-B/P2": 88
     },
     "design_issues": {
       "RA-01-A": 47,
@@ -7507,7 +7578,7 @@
     "owner_decision_issues": {
       "RESEARCHSCOPE0": 51
     },
-    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50; #51 closed after approved reconciliation with immutable owner overlay. Issues #52/#53/#69/#71 remain closed for scoped accepted deliveries. P1 #76 closed after PR #78/main candidate at 51a2b1f; P2 #77, aggregate #75 and parent #7 are CLOSED with current bodies and lead read-back on 2026-10-21 after accepted PR #79/main candidate at e117aaae0ef1f4ff4c293747482364a0791bc5d0. Parent #9 remains closed for preparatory artifacts. Parents #6/#8/#10/#11/#12 remain open; current-route acceptance does not close full CT/G1, live admission/publication or customer/production gates. AR-008-A #80 and parent #8 remain open; lead closes P1 #81 after PR #85/main/candidate acceptance, dispatches C for P2 #82, and retains P3 #83 Not started behind accepted merged P2. A owns separate AR-006-B/P1 PR #89; its unmerged planning changes are excluded here."
+    "design_issue_disposition": "RA-01-A/B closed after PR #49/#50; #51 closed after approved reconciliation with immutable owner overlay. Issues #52/#53/#69/#71 remain closed for scoped accepted deliveries. P1 #76 closed after PR #78/main candidate at 51a2b1f; P2 #77, aggregate #75 and parent #7 are CLOSED with current bodies and lead read-back on 2026-10-21 after accepted PR #79/main candidate at e117aaae0ef1f4ff4c293747482364a0791bc5d0. Parent #9 remains closed for preparatory artifacts. Parents #6/#8/#10/#11/#12 remain open; current-route acceptance does not close full CT/G1, live admission/publication or customer/production gates. P1 #81 is closed after accepted PR #85/main/candidate evidence; aggregate #80 and parent #8 remain open, C owns P2 #82 in draft PR #90, and P3 #83 remains Not started. Listing aggregate #86/P1 #87 are In progress in draft PR #89; P2 #88 remains Not started."
   },
   "execution_capacity": {
     "lead": "Project lead",
@@ -7814,9 +7885,7 @@
     "max_delivery_days_per_contributor_per_day": 0.5,
     "conditions": "B independently reviews both interfaces; A/C cross-review without acting as separate human approval. Review acceptance and hosted checks must actually pass.",
     "contingency": "Upper ranges may need two extra half-day allocations per task in days6–7. Days8–10 retain integration/reforecast capacity. Do not start any dependent on a planned date alone.",
-    "unscheduled_approved_queue": [
-      "AR-006-B"
-    ],
-    "unscheduled_queue_policy": "AR-008-A/P1 is Verified after accepted PR #85 merge 81905a5 and matching PR/main checks plus candidate verification. C owns AR-008-A/P2 (#82) additive schema and bounded repositories in the retained checkout; P3 (#83) remains Not started until accepted merged P2. Aggregate #80 and parent #8 remain open. A independently authors AR-006-B/P1 in PR #89; its unmerged plan/packages/estimates are not imported into this branch. B reviews admission contracts/security; A reviews preservation/boundary evidence as available; lead owns integration and delivery. Both AR-011-C packages and AR-006-C remain blocked on AR-010-B. Historical daily allocations do not schedule current assignments or authorize external gates."
+    "unscheduled_approved_queue": [],
+    "unscheduled_queue_policy": "Approved engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-A/B/C and preparatory AR-009-A/B remain Verified. AR-008-A/P1 #81 is Verified after accepted PR #85 merge 81905a5 and matching PR/main checks plus candidate verification. C owns AR-008-A/P2 #82 additive schema and bounded repositories in draft PR #90; P3 #83 remains Not started until accepted merged P2. Aggregate #80 and parent #8 remain open. AR-006-B aggregate #86 and P1 #87 are In progress under accepted plan 9b97a09, draft PR #89; A authored frozen cbbe5d3, B independently reviews, and lead integrates. P2 #88 remains Not started until accepted merged P1. AR-011-C and AR-006-C remain blocked on AR-010-B. No customer, production, paid/held-out evaluation or external data gate changes. Historical daily allocations do not schedule current assignments."
   }
 }

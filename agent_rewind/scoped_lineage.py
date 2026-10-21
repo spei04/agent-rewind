@@ -48,7 +48,13 @@ class Lineage:
         self.jobs: dict[str, dict[str, Any]] = {}
 
     def validate(self, kind: str, resource_id: str) -> dict[str, Any]:
-        pending = [(kind, identifier(resource_id))]
+        return self.validate_many([(kind, resource_id)])[0]
+
+    def validate_many(self, roots: list[tuple[str, str]]) -> list[dict[str, Any]]:
+        """Verify a bounded shared closure once, with no additional SQL policy."""
+        if not roots or len(roots) > MAX_NODES:
+            raise ResourceNotFound()
+        pending = [(kind, identifier(resource_id)) for kind, resource_id in roots]
         parents: dict[str, str | None] = {}
         run_jobs: dict[str, str] = {}
         studies: dict[str, tuple[str, str]] = {}
@@ -157,4 +163,7 @@ class Lineage:
                 seen.add(current)
                 current = parents[current]
                 depth += 1
-        return self.jobs[resource_id] if kind == "job" else self.records[(kind, resource_id)]
+        return [
+            self.jobs[resource_id] if kind == "job" else self.records[(kind, resource_id)]
+            for kind, resource_id in roots
+        ]
