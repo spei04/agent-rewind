@@ -333,5 +333,6 @@ def test_generic_select_integrity_failure_is_not_an_identity_conflict(
         raise AdmissionStorageError("admission_conflict")
 
     monkeypatch.setattr(service.repository, "resolve_identities", broken)
-    with pytest.raises(AdmissionError, match="^dependency_unavailable$"):
+    # No verified SQL winner or absence: never claim a retryable dependency or 409.
+    with pytest.raises(AdmissionError, match="^outcome_uncertain$"):
         submit(service, repository)

@@ -28,8 +28,8 @@ from agent_rewind.artifact_storage import LocalArtifactStorage
 from agent_rewind.migrations.compatibility import CompatibilityResult
 from agent_rewind.models import canonical
 from agent_rewind.publication_journal import JournalSession
-from agent_rewind.request_authority import RequestAuthority
-from agent_rewind.request_identity import VerifiedPrincipal
+from agent_rewind.request_authority import ActionForbidden, RequestAuthority
+from agent_rewind.request_identity import IdentityInvalid, VerifiedPrincipal
 from agent_rewind.scoped_lineage import ResourceNotFound
 
 admission_engine = fixtures.admission_engine
@@ -656,3 +656,122 @@ def test_journal_close_failure_preserves_commit_uncertainty_or_typed_denial(
             == 1
         )
     assert f.engine.pool.checkedout() == 0
+
+
+def freeze_pending(f, monkeypatch):
+    original = admission_coordinator.publish_rows
+
+    def interrupted(*args, **kwargs):
+        raise SystemExit("before publication")
+
+    monkeypatch.setattr(admission_coordinator, "publish_rows", interrupted)
+    with pytest.raises(SystemExit):
+        submit(f)
+    monkeypatch.setattr(admission_coordinator, "publish_rows", original)
+    with f.journal.open(identity(f)) as session:
+        assert session.route == "reconcile" and session.states[0].commit_pending
+    return snapshot(f)
+
+
+@pytest.mark.parametrize("failure", ["schema", "connect", "read", "second_read"])
+def test_pending_submit_sql_unavailability_is_uncertain_before_new_work(
+    publication, monkeypatch, failure
+):
+    f = publication
+    before = freeze_pending(f, monkeypatch)
+    calls = len(f.storage.calls)
+    journal_before = {
+        p.relative_to(f.root): p.read_bytes() for p in f.root.rglob("*") if p.is_file()
+    }
+    opened = []
+    original_open, original_recover = f.journal.open, f.service._recover
+    lookups = []
+
+    def observed_open(*args, **kwargs):
+        opened.append(True)
+        return original_open(*args, **kwargs)
+
+    def observed_recover(*args, **kwargs):
+        lookups.append(True)
+        return original_recover(*args, **kwargs)
+
+    def denied_read(_connection, _cursor, statement, *_):
+        if "FROM operations" in statement and (failure == "read" or len(lookups) == 2):
+            raise RuntimeError("PRIVATE-DATABASE")
+
+    def unavailable(*args, **kwargs):
+        raise RuntimeError("PRIVATE-CONNECT")
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Unproven SQL absence reached a new-work dependency")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(f.journal, "open", observed_open)
+        patch.setattr(f.service, "_recover", observed_recover)
+        for target, name in (
+            (f.policy, "require_available"),
+            (f.ready, "check"),
+            (f.storage, "put_verified"),
+        ):
+            patch.setattr(target, name, forbidden)
+        if failure == "schema":
+            patch.setattr(
+                f.service,
+                "schema_compatibility",
+                lambda: CompatibilityResult("unavailable", "schema_unavailable"),
+            )
+        elif failure == "connect":
+            patch.setattr(f.engine, "connect", unavailable)
+        else:
+            event.listen(f.engine, "before_cursor_execute", denied_read)
+        try:
+            with pytest.raises(AdmissionError, match="^outcome_uncertain$"):
+                submit(f)
+        finally:
+            if failure in {"read", "second_read"}:
+                event.remove(f.engine, "before_cursor_execute", denied_read)
+    assert len(opened) == (1 if failure == "second_read" else 0)
+    assert len(f.storage.calls) == calls and snapshot(f) == before
+    assert {
+        p.relative_to(f.root): p.read_bytes() for p in f.root.rglob("*") if p.is_file()
+    } == journal_before
+    assert f.engine.pool.checkedout() == 0
+
+
+@pytest.mark.parametrize("denial", ["identity", "scope", "action", "schema"])
+def test_pending_submit_preserves_typed_denial_and_explicit_schema_refusal(
+    publication, monkeypatch, denial
+):
+    f = publication
+    freeze_pending(f, monkeypatch)
+    expected = dict(
+        identity=IdentityInvalid,
+        scope=ResourceNotFound,
+        action=ActionForbidden,
+        schema=AdmissionError,
+    )[denial]
+    if denial in {"scope", "action"}:
+        with f.engine.begin() as connection:
+            connection.exec_driver_sql(
+                "UPDATE project_memberships SET revoked_at='2026-01-01'"
+                if denial == "scope"
+                else "UPDATE project_memberships SET role='viewer'"
+            )
+    elif denial == "schema":
+        monkeypatch.setattr(
+            f.service,
+            "schema_compatibility",
+            lambda: CompatibilityResult("incompatible", "migration_only"),
+        )
+    before = snapshot(f)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Denied submit reached journal or new work")
+
+    monkeypatch.setattr(f.journal, "open", forbidden)
+    monkeypatch.setattr(f.policy, "require_available", forbidden)
+    with pytest.raises(expected) as caught:
+        submit(f, **({"principal": None} if denial == "identity" else {}))
+    if denial == "schema":
+        assert caught.value.code == "schema_incompatible"
+    assert snapshot(f) == before and len(f.storage.calls) == 3 and f.ready.calls == 1
