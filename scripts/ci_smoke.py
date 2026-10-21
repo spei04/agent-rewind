@@ -334,6 +334,7 @@ def admission_foundation_smoke() -> None:
         ArtifactBinding,
         OriginCorrelation,
         prepare_admission,
+        restore_admission,
     )
     from agent_rewind.admission_request import AdmissionPreparationError, parse_submit
     from agent_rewind.artifact_metadata import ArtifactObject, object_locator
@@ -421,6 +422,19 @@ def admission_foundation_smoke() -> None:
         configuration_binding=configuration,
         permitted_processor_profile="fixture",
     )
+    restored = restore_admission(
+        intent,
+        frozen_configuration=config_bytes,
+        expected_configuration_digest=config.digest,
+        expected_envelope_digest=result.envelope_digest,
+        project_id=project,
+        job_id=job,
+        origin=result.origin,
+        task_binding=task,
+        configuration_binding=configuration,
+    )
+    if restored != result:
+        raise RuntimeError("Installed frozen restoration changed original identities")
     payload = result.bind_payload(metadata(result.envelope_bytes, "c" * 32))
     envelope = json.loads(payload.plaintext)
     if (
@@ -442,10 +456,21 @@ def admission_foundation_smoke() -> None:
 
 
 def admission_storage_smoke(engine: Engine) -> None:
+    from pathlib import Path
+    from tempfile import TemporaryDirectory
+
     from sqlalchemy import text
 
+    from agent_rewind.admission_adapters import UnavailableAdmissionPolicy
+    from agent_rewind.admission_coordinator import AdmissionCoordinator
+    from agent_rewind.admission_envelope import OriginCorrelation
+    from agent_rewind.admission_journal import AdmissionJournal
+    from agent_rewind.admission_journal_state import JournalIdentity
+    from agent_rewind.admission_publication import select_descriptor
     from agent_rewind.admission_records import verify_job_configuration
     from agent_rewind.admission_repository import AdmissionRepository
+    from agent_rewind.admission_transaction import AdmissionError
+    from agent_rewind.artifact_metadata import ArtifactError, ArtifactObject, object_locator
     from agent_rewind.migrations.admission_service import initialize_admission
     from agent_rewind.request_authority import RequestAuthority
     from agent_rewind.request_identity import VerifiedPrincipal
@@ -459,7 +484,56 @@ def admission_storage_smoke(engine: Engine) -> None:
     principal = VerifiedPrincipal("oidc:" + "a" * 64)
     context = authority.named(principal, "9" * 32).context
     repository = AdmissionRepository(authority)
+    coordinator = AdmissionCoordinator(engine, authority)
+    try:
+        UnavailableAdmissionPolicy().require_available()
+    except AdmissionError as error:
+        if error.code != "dependency_unavailable":
+            raise RuntimeError("Installed default admission policy refusal changed") from None
+    else:
+        raise RuntimeError("Installed default admission policy enabled work")
+    try:
+        coordinator.reconcile(principal, context, "1" * 32, "2" * 64, "3" * 64)
+    except AdmissionError as error:
+        if error.code != "schema_incompatible":
+            raise RuntimeError("Installed coordinator schema refusal changed") from None
+    else:
+        raise RuntimeError("Installed coordinator bypassed migration-only guard")
+    # Exercise only private journal binding/refusal, never preparation/publication.
+    with TemporaryDirectory(prefix="admission-journal-") as folder:
+        journal = AdmissionJournal(Path(folder))
+        identity = JournalIdentity(
+            context.organization_id,
+            context.project_id,
+            principal.principal_id,
+            "1" * 32,
+            "2" * 64,
+            "3" * 64,
+        )
+        with journal.open(identity) as session:
+            if session.route != "new":
+                raise RuntimeError("Installed journal fresh routing changed")
+            session.bind(OriginCorrelation("4" * 32))
+        try:
+            with journal.open(identity):
+                raise RuntimeError("Installed journal inferred missing attempt absence")
+        except ArtifactError:
+            pass
     with engine.connect() as connection:
+        from datetime import UTC, datetime
+
+        authority.check(connection, principal, context, "record")
+        prospective = ArtifactObject(
+            "7" * 32,
+            context.project_id,
+            "8" * 64,
+            object_locator(context.project_id, "8" * 64),
+            1,
+            0,
+            datetime(2026, 1, 1, tzinfo=UTC),
+        )
+        if select_descriptor(connection, prospective) != prospective:
+            raise RuntimeError("Installed bounded descriptor selection changed")
         empty = repository.resolve_identities(
             connection,
             principal,

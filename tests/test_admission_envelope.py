@@ -14,6 +14,7 @@ from agent_rewind.admission_envelope import (
     ArtifactBinding,
     OriginCorrelation,
     prepare_admission,
+    restore_admission,
 )
 from agent_rewind.admission_request import AdmissionPreparationError, parse_submit
 from agent_rewind.artifact_metadata import ArtifactObject, object_locator
@@ -249,3 +250,82 @@ def test_same_client_content_is_project_scoped_without_changing_request_identity
     assert first.envelope_digest != second.envelope_digest
     assert first.task_binding.descriptor.id != second.task_binding.descriptor.id
     assert first.task_binding.descriptor.locator != second.task_binding.descriptor.locator
+
+
+def restoration_arguments(value):
+    return dict(
+        intent=value.intent,
+        frozen_configuration=value.configuration.canonical_bytes,
+        expected_configuration_digest=value.configuration.digest,
+        expected_envelope_digest=value.envelope_digest,
+        project_id=value.project_id,
+        job_id=value.job_id,
+        origin=value.origin,
+        task_binding=value.task_binding,
+        configuration_binding=value.configuration_binding,
+    )
+
+
+def test_frozen_restoration_preserves_original_bytes_descriptors_and_origin(monkeypatch):
+    original = prepare_admission(**arguments())
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("restoration consulted current registry")
+
+    monkeypatch.setattr(NativeRegistry, "resolve_new", forbidden)
+    restored = restore_admission(**restoration_arguments(original))
+    assert restored == original
+    assert restored.configuration is not original.configuration
+    assert restored.envelope_bytes == original.envelope_bytes
+    assert restored.origin.correlation_id == "6" * 32
+    assert restored.job_id == JOB
+    for name in ("task_binding", "configuration_binding"):
+        assert getattr(restored, name).descriptor == getattr(original, name).descriptor
+    assert restored.bind_payload(descriptor(original.envelope_bytes, object_id="5" * 32)) == (
+        original.bind_payload(descriptor(original.envelope_bytes, object_id="5" * 32))
+    )
+
+
+@pytest.mark.parametrize(
+    "field",
+    ["config-bytes", "config-digest", "envelope", "task", "project", "job", "role", "duplicate-id"],
+)
+def test_restoration_rejects_changed_frozen_associations(field):
+    original = prepare_admission(**arguments())
+    args = restoration_arguments(original)
+    if field == "config-bytes":
+        args["frozen_configuration"] = b'{"schema":1,"schema":1}'
+    elif field == "config-digest":
+        args["expected_configuration_digest"] = "0" * 64
+    elif field == "envelope":
+        args["expected_envelope_digest"] = "0" * 64
+    elif field == "task":
+        raw = submission()
+        raw["seed"] += 1
+        args["intent"] = parse_submit(canonical(raw))
+    elif field in {"project", "job"}:
+        args[field + "_id"] = "9" * 32
+    else:
+        args["configuration_binding"] = binding(
+            original.configuration.canonical_bytes,
+            role="payload" if field == "role" else "admission_config",
+            object_id="3" * 32 if field == "duplicate-id" else "4" * 32,
+        )
+    with pytest.raises(AdmissionPreparationError):
+        restore_admission(**args)
+
+
+def test_restoration_rejects_oversized_configuration_before_parsing():
+    args = restoration_arguments(prepare_admission(**arguments()))
+    args["frozen_configuration"] = b"x" * (64 * 1024 + 1)
+    with pytest.raises(AdmissionPreparationError, match="^admission_configuration_limit$"):
+        restore_admission(**args)
+
+
+def test_restoration_does_not_turn_frozen_processor_into_a_new_preparation_grant():
+    args = arguments()
+    original = prepare_admission(**args)
+    assert restore_admission(**restoration_arguments(original)) == original
+    args["permitted_processor_profile"] = None
+    with pytest.raises(AdmissionPreparationError, match="^admission_configuration_unavailable$"):
+        prepare_admission(**args)

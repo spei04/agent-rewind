@@ -7,6 +7,7 @@ import os
 import stat
 from collections.abc import Iterator
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +22,33 @@ MAX_JOURNAL_BYTES = 32 * 1024 * 1024
 MAX_RECORDS = 100000
 
 
+@dataclass(frozen=True)
+class JournalLimits:
+    """Optional tighter consumer bounds, checked before file reads/retention."""
+
+    intent_bytes: int
+    records: int
+    total_bytes: int
+
+    def __post_init__(self) -> None:
+        for value, minimum, maximum in (
+            (self.intent_bytes, 1, MAX_INTENT_BYTES),
+            (self.records, 0, MAX_RECORDS),
+            (self.total_bytes, 1, MAX_JOURNAL_BYTES),
+        ):
+            if type(value) is not int or not minimum <= value <= maximum:
+                raise ArtifactError("publication_journal_limit")
+
+
+def _limits(limits: JournalLimits | None) -> JournalLimits:
+    if limits is None:
+        return JournalLimits(MAX_INTENT_BYTES, MAX_RECORDS, MAX_JOURNAL_BYTES)
+    if type(limits) is not JournalLimits:
+        raise ArtifactError("publication_journal_limit")
+    limits.__post_init__()
+    return limits
+
+
 def _private(fd: int, *, folder: bool) -> None:
     info = os.fstat(fd)
     if (
@@ -32,15 +60,16 @@ def _private(fd: int, *, folder: bool) -> None:
 
 
 class JournalSession:
-    def __init__(self, fd: int):
+    def __init__(self, fd: int, *, limits: JournalLimits | None = None):
+        self.limits = _limits(limits)
         self.fd = fd
         names: list[str] = []
         with os.scandir(fd) as entries:
             for entry in entries:
-                if len(names) >= MAX_RECORDS + 2:
+                if len(names) >= self.limits.records + 2:
                     raise ArtifactError("publication_journal_limit")
                 names.append(entry.name)
-        if len(names) > MAX_RECORDS + 2 or any(
+        if len(names) > self.limits.records + 2 or any(
             name not in {"lock", "intent.json"}
             and (len(name) != 16 or not name[:11].isdigit() or not name.endswith(".json"))
             for name in names
@@ -53,7 +82,7 @@ class JournalSession:
         self.records: list[dict[str, Any]] = []
         self.intent: dict[str, Any] | None = None
         if "intent.json" in names:
-            self.intent = self._read("intent.json", MAX_INTENT_BYTES)
+            self.intent = self._read("intent.json", self.limits.intent_bytes)
         elif sequence:
             raise ArtifactError("publication_journal_invalid")
         for index, name in enumerate(sequence):
@@ -81,6 +110,7 @@ class JournalSession:
             self.records.append(record)
 
     def _read(self, name: str, limit: int) -> dict[str, Any]:
+        limit = min(limit, self.limits.total_bytes - self.total)
         with regular_reader(name, dir_fd=self.fd, limit=limit) as stream:
             _private(stream.fileno(), folder=False)
             data = read_ciphertext(stream, limit=limit)
@@ -88,13 +118,13 @@ class JournalSession:
             # Recovery validates and durably flushes retained evidence first.
             os.fsync(stream.fileno())
         self.total += len(data)
-        if self.total > MAX_JOURNAL_BYTES:
+        if self.total > self.limits.total_bytes:
             raise ArtifactError("publication_journal_limit")
         return decode(data)
 
     def _write(self, name: str, value: dict[str, Any], limit: int) -> None:
         data = canonical(value)
-        if len(data) > limit or self.total + len(data) > MAX_JOURNAL_BYTES:
+        if len(data) > limit or self.total + len(data) > self.limits.total_bytes:
             raise ArtifactError("publication_journal_limit")
         # A failed/partial file remains as evidence. It is never rewritten or
         # silently removed; subsequent sessions reject its truncated contents.
@@ -116,7 +146,7 @@ class JournalSession:
             if canonical(self.intent) != canonical(intent):
                 raise ArtifactError("publication_intent_conflict")
             return
-        self._write("intent.json", intent, MAX_INTENT_BYTES)
+        self._write("intent.json", intent, self.limits.intent_bytes)
         self.intent = intent
 
     def append(self, kind: str, data: dict[str, Any]) -> None:
@@ -129,7 +159,7 @@ class JournalSession:
             "commit_unknown",
         }:
             raise ArtifactError("publication_journal_invalid")
-        if self.intent is None or len(self.records) >= MAX_RECORDS:
+        if self.intent is None or len(self.records) >= self.limits.records:
             raise ArtifactError("publication_journal_limit")
         record = {"sequence": len(self.records), "kind": kind, "data": data}
         self._write(f"{len(self.records):011d}.json", record, MAX_RECORD_BYTES)
@@ -148,8 +178,11 @@ class PublicationJournal:
         self.root = root
 
     @contextmanager
-    def open(self, publication_id: str) -> Iterator[JournalSession]:
+    def open(
+        self, publication_id: str, *, limits: JournalLimits | None = None
+    ) -> Iterator[JournalSession]:
         identifier(publication_id)
+        limits = _limits(limits)
         try:
             with directory(self.root, create=False, create_root=False) as root_fd:
                 _private(root_fd, folder=True)
@@ -168,7 +201,7 @@ class PublicationJournal:
                         except BlockingIOError:
                             raise ArtifactError("publication_in_progress") from None
                         os.fsync(fd)
-                        session = JournalSession(fd)
+                        session = JournalSession(fd, limits=limits)
                         os.fsync(fd)
                         yield session
                     finally:
