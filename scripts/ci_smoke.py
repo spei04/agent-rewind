@@ -22,6 +22,443 @@ from agent_rewind.run_projection import utc_created
 from agent_rewind.scoped_repositories import ProjectContext, ResourceNotFound, ScopedRepositories
 
 
+def operation_components_smoke(root: Path) -> None:
+    from cryptography.fernet import Fernet
+    from pydantic import SecretStr
+
+    from agent_rewind.admission_coordinator import AdmissionCoordinator
+    from agent_rewind.admission_transaction import AdmissionError
+    from agent_rewind.config import Settings
+    from agent_rewind.database import Database
+    from agent_rewind.operation_reads import ReceiptBook
+    from agent_rewind.operation_work import OperationWork, operation_connection
+    from agent_rewind.request_authority import RequestAuthority
+    from agent_rewind.request_identity import VerifiedPrincipal
+    from agent_rewind.scoped_repositories import ProjectContext
+    from agent_rewind.sqlite_ownership import (
+        create_owned_sqlite_engine,
+        owned_begin,
+        owned_connect,
+        require_owned_sqlite,
+    )
+
+    # File-backed Database uses owned connections; the real schema guard still
+    # refuses customer admission. No service/profile readiness is implied.
+    ReceiptBook()
+    database = Database(
+        Settings(
+            _env_file=None,
+            data_dir=root / "default",
+            database_url=f"sqlite:///{root / 'default.sqlite'}",
+            encryption_key=SecretStr(Fernet.generate_key().decode()),
+            bootstrap_key=SecretStr("synthetic-package-bootstrap-default-factory"),
+        )
+    )
+    try:
+        require_owned_sqlite(database.engine)
+        database.migrate(installation_key="synthetic-owned-package")
+        observed = database.schema_compatibility()
+        if (observed.status, observed.code) != ("incompatible", "migration_only"):
+            raise RuntimeError("Owned Database changed the real migration-only guard")
+        if not database.ping():
+            raise RuntimeError("Owned Database connectivity failed")
+        record = database.add("example", {"value": "synthetic-package"})
+        if database.get(record)["value"] != "synthetic-package":
+            raise RuntimeError("Installed owned Database changed ordinary records")
+        database.audit("synthetic-package", "example.read", record)
+        principal = VerifiedPrincipal("oidc:" + "a" * 64)
+        context = ProjectContext("8" * 32, "9" * 32, principal.principal_id)
+        coordinator = AdmissionCoordinator(database.engine, RequestAuthority(database.engine))
+        try:
+            coordinator.reconcile(principal, context, "1" * 32, "2" * 64, "3" * 64)
+        except AdmissionError as error:
+            if error.code != "schema_incompatible":
+                raise RuntimeError("Owned factory changed customer admission refusal") from None
+        else:
+            raise RuntimeError("Owned factory enabled customer admission")
+        with owned_connect(database.engine) as connection:
+            if connection.exec_driver_sql("SELECT count(*) FROM jobs").scalar_one() != 0:
+                raise RuntimeError("Owned factory guard created a job")
+            if connection.exec_driver_sql("SELECT count(*) FROM audit").scalar_one() != 1:
+                raise RuntimeError("Owned factory guard changed audit")
+            if connection.exec_driver_sql("PRAGMA query_only").scalar_one() != 0:
+                raise RuntimeError("Owned inspection leaked read-only state")
+        if database.engine.pool.checkedout() != 0:
+            raise RuntimeError("Owned Database leaked a checkout")
+    finally:
+        database.engine.dispose()
+
+    engine = create_owned_sqlite_engine(
+        f"sqlite:///{root / 'owned.sqlite'}", pool_size=1, max_overflow=0
+    )
+    try:
+        with owned_begin(engine) as connection:
+            connection.exec_driver_sql("CREATE TABLE proof (id INTEGER)")
+            connection.exec_driver_sql("INSERT INTO proof VALUES(1)")
+        work = OperationWork()
+        with operation_connection(engine, work) as connection:
+            if connection.exec_driver_sql("SELECT id FROM proof").scalar_one() != 1:
+                raise RuntimeError("Installed owned read changed synthetic data")
+        if work.statements <= 0 or work._started is not None:
+            raise RuntimeError("Installed operation work lost accounting or cleanup")
+        try:
+            with operation_connection(engine, OperationWork()) as connection:
+                connection.exec_driver_sql("INSERT INTO proof VALUES(2)")
+        except AdmissionError as error:
+            if error.code != "dependency_unavailable":
+                raise RuntimeError("Installed read-only refusal changed") from None
+        else:
+            raise RuntimeError("Installed operation read allowed a write")
+        with owned_connect(engine) as connection:
+            if connection.exec_driver_sql("SELECT count(*) FROM proof").scalar_one() != 1:
+                raise RuntimeError("Installed denied read scope changed data")
+    finally:
+        engine.dispose()
+
+
+def operation_service_smoke(root: Path) -> None:
+    """Synthetic installed service behavior; no HTTP or customer-ready profile."""
+    import hashlib
+    from datetime import UTC, datetime
+
+    from cryptography.fernet import Fernet
+    from sqlalchemy import text
+
+    from agent_rewind.artifact_metadata import (
+        ArtifactObject,
+        configure_artifact_engine,
+        object_locator,
+        record_verified,
+        register_ref,
+    )
+    from agent_rewind.artifact_storage import LocalArtifactStorage
+    from agent_rewind.database import records
+    from agent_rewind.errors import Fault
+    from agent_rewind.migrations.admission_service import initialize_admission
+    from agent_rewind.migrations.artifact_service import initialize_artifacts
+    from agent_rewind.migrations.compatibility import CompatibilityResult
+    from agent_rewind.migrations.ownership_service import initialize_ownership
+    from agent_rewind.migrations.projection_service import initialize_projection
+    from agent_rewind.migrations.service import install
+    from agent_rewind.models import canonical
+    from agent_rewind.operation_service import OperationService
+    from agent_rewind.request_authority import ActionForbidden, RequestAuthority
+    from agent_rewind.request_identity import VerifiedPrincipal
+    from agent_rewind.scoped_repositories import ResourceNotFound
+    from agent_rewind.sqlite_ownership import (
+        create_owned_sqlite_engine,
+        owned_begin,
+        owned_connect,
+    )
+
+    project, job, operation, run = "9" * 32, "2" * 32, "3" * 32, "4" * 32
+    principal = VerifiedPrincipal("oidc:" + "a" * 64)
+    viewer = VerifiedPrincipal("oidc:" + "b" * 64)
+    engines = []
+
+    def database(name):
+        engine = create_owned_sqlite_engine(
+            f"sqlite:///{root / (name + '.sqlite')}", pool_size=1, max_overflow=0
+        )
+        engines.append(engine)
+        configure_artifact_engine(engine)
+        install(engine, name)
+        initialize_ownership(
+            engine,
+            {
+                "schema_version": 1,
+                "installation_key": name,
+                "organization_id": "8" * 32,
+                "project_id": project,
+                "project_name": "Synthetic installed operation service",
+                "principal_grants": [
+                    {
+                        "principal_id": principal.principal_id,
+                        "role": "maintainer",
+                        "legacy_default": False,
+                    }
+                ],
+            },
+        )
+        initialize_artifacts(engine)
+        initialize_projection(engine)
+        initialize_admission(engine)
+        return engine
+
+    def descriptor(content, identifier):
+        digest = hashlib.sha256(content).hexdigest()
+        return ArtifactObject(
+            identifier,
+            project,
+            digest,
+            object_locator(project, digest),
+            1,
+            len(content),
+            datetime(2026, 10, 21, tzinfo=UTC),
+        )
+
+    def fixed_failure(call, code):
+        try:
+            call()
+        except Fault as error:
+            if (
+                error.code != code
+                or str(error) != code
+                or not error.__suppress_context__
+                or error.__cause__ is not None
+            ):
+                raise RuntimeError("Installed service changed fixed failure") from None
+        else:
+            raise RuntimeError("Installed service unexpectedly accepted refused evidence")
+
+    try:
+        engine = database("operation-positive")
+        guard_engine = database("operation-real-guard")
+        authority = RequestAuthority(engine)
+        context = authority.named(principal, project).context
+        guard_authority = RequestAuthority(guard_engine)
+        guard_context = guard_authority.named(principal, project).context
+        guarded = OperationService(guard_engine, guard_authority)
+
+        def forbidden_loader(_value):
+            raise RuntimeError("Installed cancellation or guard attempted artifact I/O")
+
+        guarded.artifact_loader = forbidden_loader
+
+        def real_guard():
+            observed = guarded.schema_compatibility()
+            if (observed.status, observed.code) != ("incompatible", "migration_only"):
+                raise RuntimeError("Installed operation guard is not real migration-only")
+            for method in (guarded.read_operation, guarded.cancel_operation):
+                fixed_failure(
+                    lambda method=method: method(principal, guard_context, operation),
+                    "schema_incompatible",
+                )
+            with owned_connect(guard_engine) as connection:
+                counts = connection.exec_driver_sql(
+                    "SELECT (SELECT count(*) FROM jobs),(SELECT count(*) FROM audit)"
+                ).one()
+            if tuple(counts) != (0, 0) or guard_engine.pool.checkedout() != 0:
+                raise RuntimeError("Installed guarded service changed rows or retained a checkout")
+
+        real_guard()
+        service = OperationService(engine, authority)
+        # Only this instance accepts the explicitly seeded synthetic row shape.
+        # The descriptor is metadata evidence, not a new-work admission proof.
+        service.schema_compatibility = lambda: CompatibilityResult("ready", "ready")
+        service.artifact_loader = forbidden_loader
+        configuration = descriptor(canonical({"synthetic": "configuration"}), "5" * 32)
+        with owned_begin(engine) as connection:
+            connection.execute(
+                text(
+                    "INSERT INTO jobs(id,kind,created,payload,status,owner,lease_until,cancel,"
+                    "budget,reserved,result,error,actor,payload_version,execution_config_ref,"
+                    "execution_config_digest) VALUES(:job,'run',1700000000.125,:payload,'queued',"
+                    "'preserved-worker',1900000000,false,7,:reserved,NULL,NULL,:actor,2,:config,:config)"
+                ),
+                {
+                    "job": job,
+                    "payload": "6" * 64,
+                    "reserved": 2**53 + 1,
+                    "actor": principal.principal_id,
+                    "config": configuration.digest,
+                },
+            )
+            connection.execute(
+                text("INSERT INTO resource_scopes VALUES('job',:job,:project)"),
+                {"job": job, "project": project},
+            )
+            record_verified(connection, configuration)
+            register_ref(
+                connection,
+                project_id=project,
+                owner_kind="job",
+                owner_id=job,
+                role="admission_config",
+                artifact_id=configuration.id,
+            )
+            connection.execute(
+                text(
+                    "INSERT INTO operations(id,project_id,principal_id,kind,client_operation_id,"
+                    "request_digest,job_id,accepted_response,created_at,retain_until,"
+                    "job_resource_kind,execution_config_digest,payload_version,"
+                    "failure_correlation_id) VALUES(:operation,:project,:principal,'run',:client,"
+                    ":request,:job,:accepted,'2026-10-21T00:00:00+00:00',"
+                    "'2027-01-21T00:00:00+00:00','job',:config,2,:origin)"
+                ),
+                {
+                    "operation": operation,
+                    "project": project,
+                    "principal": principal.principal_id,
+                    "client": "7" * 32,
+                    "request": "8" * 64,
+                    "job": job,
+                    "accepted": canonical({"operation_id": operation, "job_id": job}).decode(),
+                    "config": configuration.digest,
+                    "origin": "a" * 32,
+                },
+            )
+            connection.execute(
+                text(
+                    "INSERT INTO project_memberships VALUES(:project,:viewer,'viewer',NULL,false)"
+                ),
+                {"project": project, "viewer": viewer.principal_id},
+            )
+        viewer_context = authority.named(viewer, project).context
+
+        def snapshot():
+            with owned_connect(engine) as connection:
+                row = dict(connection.exec_driver_sql("SELECT * FROM jobs").mappings().one())
+                original = dict(
+                    connection.exec_driver_sql("SELECT * FROM operations").mappings().one()
+                )
+                audits = connection.exec_driver_sql(
+                    "SELECT actor,action,target FROM audit ORDER BY id"
+                ).all()
+            return row, original, [tuple(item) for item in audits]
+
+        before = snapshot()
+        expected = {
+            "id": operation,
+            "project_id": project,
+            "job_id": job,
+            "client_operation_id": "7" * 32,
+            "status": "queued",
+            "cancel_requested": False,
+            "result_run_id": None,
+            "budget_microusd": 7,
+            "reserved_microusd": 2**53 + 1,
+            "error": None,
+        }
+        observed = service.read_operation(viewer, viewer_context, operation)
+        if (
+            observed != expected
+            or observed["cancel_requested"] is not False
+            or type(observed["budget_microusd"]) is not int
+            or type(observed["reserved_microusd"]) is not int
+        ):
+            raise RuntimeError("Installed viewer GET changed required nulls, false or integers")
+        try:
+            service.cancel_operation(viewer, viewer_context, operation)
+        except ActionForbidden:
+            pass
+        else:
+            raise RuntimeError("Installed viewer cancelled an operation")
+        if snapshot() != before:
+            raise RuntimeError("Installed GET or denied cancellation mutated metadata")
+        cancelled = {"operation_id": operation, "cancel_requested": True, "status": "cancelled"}
+        for _ in range(2):
+            response = service.cancel_operation(principal, context, operation)
+            if response != cancelled or response["cancel_requested"] is not True:
+                raise RuntimeError("Installed cancellation changed its captured response")
+        after = snapshot()
+        if after != (
+            {**before[0], "cancel": 1, "status": "cancelled"},
+            before[1],
+            [(principal.principal_id, "job.cancel", job)] * 2,
+        ):
+            raise RuntimeError("Installed cancellation changed preserved rows or repeated audit")
+
+        body = canonical({"run_id": run})
+        result = descriptor(body, "b" * 32)
+        storage_root = root / "operation-encrypted"
+        storage_root.mkdir(mode=0o700)
+        storage = LocalArtifactStorage(
+            storage_root, Fernet(Fernet.generate_key()), plaintext_limit=4096
+        )
+        storage.put_verified(result, body)
+        with owned_begin(engine) as connection:
+            connection.execute(
+                records.insert(),
+                {
+                    "id": run,
+                    "kind": "run",
+                    "created": 1700000000.125,
+                    "data": {"job_id": job, "parent_id": None, "success": False},
+                },
+            )
+            connection.execute(
+                text("INSERT INTO resource_scopes VALUES('run',:run,:project)"),
+                {"run": run, "project": project},
+            )
+            record_verified(connection, result)
+            register_ref(
+                connection,
+                project_id=project,
+                owner_kind="job",
+                owner_id=job,
+                role="result",
+                artifact_id=result.id,
+            )
+            connection.execute(
+                text("UPDATE jobs SET status='succeeded',result=:result WHERE id=:job"),
+                {"result": result.digest, "job": job},
+            )
+        loads = []
+
+        def load(value):
+            if engine.pool.checkedout() != 0 or value != result:
+                raise RuntimeError("Installed GET loaded under SQL or changed descriptor")
+            loads.append(value)
+            return storage.read_verified(value)
+
+        service.artifact_loader = load
+        published = snapshot()
+        if (
+            service.read_operation(principal, context, operation)
+            != {
+                **expected,
+                "status": "succeeded",
+                "cancel_requested": True,
+                "result_run_id": run,
+            }
+            or loads != [result]
+            or snapshot() != published
+        ):
+            raise RuntimeError("Installed verified result GET changed execution status or metadata")
+        with owned_begin(engine) as connection:
+            connection.execute(text("UPDATE jobs SET error='private-legacy-canary'"))
+        fixed_failure(
+            lambda: service.read_operation(principal, context, operation), "dependency_unavailable"
+        )
+        if loads != [result]:
+            raise RuntimeError("Installed unsupported failure loaded result bytes")
+        service.artifact_loader = forbidden_loader
+        terminal = snapshot()
+        if service.cancel_operation(principal, context, operation) != {
+            **cancelled,
+            "status": "succeeded",
+        }:
+            raise RuntimeError("Installed terminal cancellation changed status")
+        if snapshot() != (
+            terminal[0],
+            terminal[1],
+            [(principal.principal_id, "job.cancel", job)] * 3,
+        ):
+            raise RuntimeError("Installed terminal cancellation changed legacy outcome")
+        with owned_begin(engine) as connection:
+            connection.execute(
+                text(
+                    "UPDATE project_memberships SET revoked_at='2026-10-21T00:00:00+00:00' "
+                    "WHERE principal_id=:viewer"
+                ),
+                {"viewer": viewer.principal_id},
+            )
+        try:
+            service.read_operation(viewer, viewer_context, operation)
+        except ResourceNotFound:
+            pass
+        else:
+            raise RuntimeError("Installed GET retained revoked viewer authority")
+        if engine.pool.checkedout() != 0:
+            raise RuntimeError("Installed operation service leaked a checkout")
+        real_guard()  # The synthetic instance did not alter another instance's guard.
+    finally:
+        for engine in engines:
+            engine.dispose()
+    print("operation_service_installed_smoke_verified")
+
+
 def repository_smoke(engine: Engine) -> None:
     repository = ScopedRepositories(engine)
     # Synthetic trusted identity matches only the explicit smoke initialization.
@@ -639,6 +1076,8 @@ if importlib.metadata.version("agent-rewind") != "0.1.0":
     raise RuntimeError("Unexpected installed package identity")
 admission_foundation_smoke()
 with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporary:
+    operation_components_smoke(Path(temporary))
+    operation_service_smoke(Path(temporary))
     database = Path(temporary) / "metadata.sqlite"
     engine = create_engine(f"sqlite:///{database}")
     configure_artifact_engine(engine)

@@ -8,6 +8,7 @@ from test_ownership import FRESH
 
 from agent_rewind.api import create_app
 from agent_rewind.request_identity import SessionIdentity, VerifiedPrincipal, encode_v2_session
+from agent_rewind.sqlite_ownership import owned_begin
 
 ISSUER = "https://route-fixture.invalid"
 SUBJECT = "route-human"
@@ -20,7 +21,7 @@ def prepared_app(settings):
     settings.oidc_issuer = ISSUER
     app = create_app(settings)
     prepare(app.state.db.engine)
-    with app.state.db.engine.begin() as connection:
+    with owned_begin(app.state.db.engine) as connection:
         connection.execute(
             text(
                 "INSERT INTO project_memberships"
@@ -49,7 +50,7 @@ def cookie_headers(app):
 def source_run(app):
     """Trusted scope metadata only; explicitly not a published run graph."""
     run_id, job_id = "1" * 32, "2" * 32
-    with app.state.db.engine.begin() as connection:
+    with owned_begin(app.state.db.engine) as connection:
         connection.execute(
             text(
                 "INSERT INTO jobs(id,kind,created,payload,status,cancel,budget,reserved) "

@@ -21,6 +21,7 @@ from .ownership import allows_project_action
 from .scoped_artifacts import ArtifactLoader, ArtifactObject, ArtifactResolver
 from .scoped_lineage import MAX_NODES, Lineage, encoded_size, identifier
 from .scoped_lineage import ResourceNotFound as ResourceNotFound
+from .sqlite_ownership import owned_connect
 
 MAX_RECORD_BYTES = 2 * 1024 * 1024
 MAX_LIST_BYTES = 8 * 1024 * 1024
@@ -302,7 +303,7 @@ class ScopedRepositories:
     @contextmanager
     def _session(self, context: ProjectContext, action: str) -> Iterator[_Reads]:
         try:
-            with self.engine.connect() as connection:
+            with owned_connect(self.engine) as connection:
                 self._authorize(connection, context, action)
                 yield _Reads(connection, context)
         except SQLAlchemyError:

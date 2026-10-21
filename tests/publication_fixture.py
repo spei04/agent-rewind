@@ -20,6 +20,7 @@ from agent_rewind.engine import Engine
 from agent_rewind.models import digest
 from agent_rewind.publication_journal import PublicationJournal
 from agent_rewind.scoped_repositories import ProjectContext
+from agent_rewind.sqlite_ownership import owned_begin
 from agent_rewind.workspace import File
 
 CONTEXT = ProjectContext(
@@ -109,7 +110,7 @@ class SQLFixtureWriter:
 
 
 def install_future_contract(engine):
-    with engine.begin() as c:
+    with owned_begin(engine) as c:
         c.exec_driver_sql(
             "CREATE TABLE publication_fences(job_id VARCHAR(32) PRIMARY KEY "
             "REFERENCES jobs(id),generation INTEGER NOT NULL)"
@@ -166,7 +167,7 @@ class Capture:
     def run(self, task, *args, **kwargs):
         if args:
             job_id = uuid4().hex
-            with self.db.engine.begin() as c:
+            with owned_begin(self.db.engine) as c:
                 c.execute(
                     insert(jobs).values(
                         id=job_id,
@@ -190,7 +191,7 @@ class Capture:
                 self.db, self.artifacts, CaptureRunner(), FixturePolicy(), job_id, WORKER
             )
         run = self.engine.run(task, *args, **kwargs)
-        with self.db.engine.begin() as c:
+        with owned_begin(self.db.engine) as c:
             c.execute(
                 text("INSERT INTO resource_scopes VALUES('run',:run,:project)"),
                 {"run": run, "project": CONTEXT.project_id},

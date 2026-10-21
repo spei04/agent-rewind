@@ -16,6 +16,7 @@ from sqlalchemy.engine import Connection, Dialect, Engine
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.pool import ConnectionPoolEntry
 
+from ..sqlite_ownership import SQLiteOwnershipError, owned_connect
 from .inputs import AdoptionMapping, source_digest, validate_legacy_rows, validate_mapping
 from .schema import (
     ADMISSION,
@@ -142,7 +143,7 @@ def migration_transaction(engine: Engine, timeout_seconds: int = 5) -> Iterator[
         raise MigrationRefused("invalid_lock_timeout")
     _secure_engine(engine)
     try:
-        with engine.connect() as connection:
+        with owned_connect(engine) as connection:
             try:
                 if dialect(connection) == "sqlite":
                     raw = connection.connection.driver_connection
@@ -198,6 +199,8 @@ def migration_transaction(engine: Engine, timeout_seconds: int = 5) -> Iterator[
             except BaseException:
                 connection.rollback()
                 raise
+    except SQLiteOwnershipError:
+        raise MigrationRefused("migration_database_failure") from None
     except DBAPIError as error:
         state = getattr(error.orig, "sqlstate", None)
         locked = state in {"55P03", "57014"} or getattr(error.orig, "sqlite_errorcode", None) in {
@@ -333,7 +336,7 @@ def schema_status(engine: Engine, *, include_source_digest: bool = False) -> dic
         return {"revision": None, "state": "empty", "customer_ready": False}
     _secure_engine(engine)
     try:
-        with engine.connect() as connection:
+        with owned_connect(engine) as connection:
             if dialect(connection) == "postgresql":
                 if (
                     getattr(connection.connection.driver_connection, "autocommit", None)
@@ -359,7 +362,7 @@ def schema_status(engine: Engine, *, include_source_digest: bool = False) -> dic
             if include_source_digest:
                 result["source_dataset_digest"] = source_digest(connection)
             return result
-    except DBAPIError:
+    except (DBAPIError, SQLiteOwnershipError):
         raise MigrationRefused("schema_unavailable") from None
 
 

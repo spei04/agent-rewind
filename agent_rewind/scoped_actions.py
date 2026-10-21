@@ -37,6 +37,7 @@ from .scoped_repositories import (
     members,
     scopes,
 )
+from .sqlite_ownership import owned_connect
 
 ActionCode = Literal["action_invalid_input", "action_unavailable", "outcome_uncertain"]
 KeyRole = Literal["viewer", "operator"]
@@ -80,7 +81,7 @@ class ScopedActions:
     def _transaction(self) -> Iterator[Connection]:
         commit_attempted = False
         try:
-            with self.engine.connect() as connection:
+            with owned_connect(self.engine) as connection:
                 raw = connection.connection.driver_connection
                 dialect = connection.dialect.name
                 if not (
@@ -160,11 +161,24 @@ class ScopedActions:
             self.authority.check(
                 connection, principal, context, "cancel", resource_kind="job", resource_id=job_id
             )
-            values: dict[str, str | bool] = {"cancel": True}
-            if current["status"] == "queued":
-                values["status"] = "cancelled"
-            connection.execute(update(jobs).where(jobs.c.id == job_id).values(**values))
-            self._audit(connection, audit_id, principal, "job.cancel", job_id)
+            self._cancel_effect(connection, principal, job_id, current["status"], audit_id)
+
+    def _cancel_effect(
+        self,
+        connection: Connection,
+        principal: VerifiedPrincipal,
+        job_id: str,
+        status: str,
+        audit_id: str,
+    ) -> str:
+        """Apply an already authorized, locked, bounded job intent on this connection."""
+        values: dict[str, str | bool] = {"cancel": True}
+        captured = "cancelled" if status == "queued" else status
+        if status == "queued":
+            values["status"] = captured
+        connection.execute(update(jobs).where(jobs.c.id == job_id).values(**values))
+        self._audit(connection, audit_id, principal, "job.cancel", job_id)
+        return captured
 
     def issue_key(
         self,

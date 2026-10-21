@@ -4,6 +4,7 @@ from sqlalchemy import update
 from agent_rewind.database import events
 from agent_rewind.engine import read_events
 from agent_rewind.models import Action, Intervention
+from agent_rewind.sqlite_ownership import owned_begin
 
 
 def test_result_intervention_changes_future_policy_without_mutating_parent(engine, task):
@@ -61,7 +62,7 @@ def test_chain_tampering_is_detected(engine, task):
     original = engine.run(task)
     event = engine.events(original)[0]
     event["actual_result"]["output"] = "forged"
-    with engine.db.engine.begin() as connection:
+    with owned_begin(engine.db.engine) as connection:
         connection.execute(
             update(events)
             .where(events.c.run_id == original, events.c.step == 1)

@@ -840,3 +840,196 @@ The current viewer's identity is authorization context, not a replacement for
 the creator. Bounded cell and descriptor primitives alone do not establish
 these associations. These constraints add no new producer, outer dependency,
 resource authority or wider runtime support.
+
+## Factory activation entry review — 2026-10-21
+
+A audited the immutable caller checkpoint 27c9405 against entry b5d6335. The
+minimal constructor change stays inside Database.__init__: parse the SQLAlchemy
+URL and select the owned factory only for sqlite or sqlite+pysqlite with a
+nonempty file path, no :memory: path, no file: URI, no query and no authority
+components. Pass the existing connection and pool timeout constants. Keep
+PostgreSQL construction and configure_runtime_engine unchanged; separately
+constructed operator/probe engines and unsupported legacy memory/custom/URI
+paths stay explicitly untracked. This adds no Settings flag, profile, dependency
+or authority to certify injected engines. The future operation service still
+requires ownership before its first SQLite acquisition.
+
+Activation must keep the shared file-backed Settings/Database fixtures owned.
+Adapt Database-backed setup and readback acquisitions to owned contexts rather
+than opting the regression suite out. Affected categories include publication
+and route fixtures, schema-compatibility snapshots, API/Auth/storage/engine tests,
+and capture-based publication/projection/reader/legacy suites, including helpers
+that receive a Database engine indirectly. Preserve assertions and explicit
+untracked component controls, native transaction-mode and permission negatives.
+A provenance refusal must not silently replace the behavior a test was meant
+to exercise. This mechanical fixture adaptation is a separately reviewable
+checkpoint within the existing P1 scope.
+
+The installed smoke must change its dormant-default assertion only with the
+reviewed activation. Prove owned construction, real migration-only compatibility,
+ordinary Database operations, callback cleanup and pool reuse, with customer
+admission still unavailable. Also prove constructor laziness, the supported URL
+matrix, unchanged PostgreSQL behavior and no automatic certification of injected
+engines. The offline operator engine used by the existing migration smoke may
+remain untracked.
+
+Correct and independently accept both caller restoration findings before any
+activation implementation. Then review constructor/new activation tests and the
+existing-fixture adaptation independently before combining them. This entry
+review does not itself activate the factory, implement services, advance P1,
+widen budgets or change outer dependencies.
+
+
+## Bounded primitive checkpoint — accepted entry, 2026-10-21
+
+B and the lead accepted C's concrete handoff against a2220eb and ced548b after
+the composed factory/fixture component passed at 97d39edf. C owns the narrow
+operation_reads factoring and a focused operation_sources module; A independently
+reviews security/test design. This checkpoint precedes service orchestration.
+
+Factor the existing all-16-field job decoder without changing read_job's strict
+receipt behavior. Record optional result candidates as an observed zero or one
+valid scoped descriptor with exact owner/role/cardinality. A SQL NULL result
+permits that observation with no artifact load or inferred result ID; a non-NULL
+result requires one matching descriptor and the existing bounded verified loader.
+The final GET statement must preserve observed absence/cardinality as well as
+all operation/job/source/descriptor fields, scope and by-job discovery.
+
+The accepted schema-2 run envelope has no admission source-run ancestry. The
+existing Lineage rules require every run-job cohort member to be a run with an
+explicit null parent; study and non-null-parent members are already invalid.
+Load the complete same-project by-job cohort, preserve multiple root runs, and
+require the exact returned result ID to belong to it. Foreign incoming aliases
+remain excluded by the existing scoped rules. This equivalence needs executable
+negative controls before it is relied on in services.
+
+One job plus 255 cohort records consumes 256 source visits and 510 edges;
+operation/config/result identities bring the maximum to 259. Materialize at
+most remaining_visits+1 SQL candidates, then gate COUNT and aggregate raw
+returned-cell bytes before projecting bodies. Overcount, malformed or oversized
+candidates produce small explicit refusal markers; they must never be filtered
+or trimmed into success. Preserve the exact canonical 4 MiB retention cap after
+the raw-transfer gate. The single final typed relational comparison must include
+native types, original scope, candidate counts and by-job anti-joins within the
+existing 64-bind/260-row limits.
+
+Cancellation retains a separate immutable operation/config/job association:
+all original operation/config fields and refs, plus job id, kind, created,
+payload, budget, actor, payload_version and config reference/digest. Preserve
+native type distinctions and large integer accounting without float conversion;
+reserved greater than budget remains a valid accounting value.
+Fresh all-16-field job validation must not overwrite it, and strict GET mutable
+job/result/ref equality must not be carried across commit acknowledgment.
+Legitimate worker progress may change status, result/ref, reservation or lease
+without replacing the captured cancellation response. Shared visits do not reset
+between phases: three full validations allow at most 84 roots per phase, rather
+than 255. Proposed 74 GET/162 cancellation charged-attempt figures are design
+estimates requiring actual traces; the existing ceiling remains 512.
+
+First freeze: pure association/observation factoring, cohort and final-query
+primitives, and focused SQLite/PostgreSQL tests. Require maximum matching
+capacity, overflow and aggregate-before-transfer controls, native types, extra
+malformed refs, absent-to-present refs and by-job phantoms. Existing schema has no
+by-job JSON or project-scope index: test substantial nonmatching same-project and
+foreign records under the same VM/time limits. Small result size alone does not
+establish scan cost or enterprise throughput. An unmet measured requirement is a
+review finding; this entry authorizes no index, migration or wider budget.
+
+No service method, HTTP, profile, worker or failure-producer implementation is
+part of this primitive checkpoint. Actual service integration and full P1
+SQLite/PostgreSQL/hosted/delivery evidence remain subsequent gates. Task states,
+outer dependencies, package count, estimates and external authority are unchanged.
+
+## Cancellation phase entry — 2026-10-21
+
+The bounded GET primitives at `691ad661` are accepted as a component. Their strict
+receipt book must not be carried unchanged across cancellation phases. This
+entry specifies the missing cancellation-only retention seam; it adds no task,
+dependency, estimate, budget, schema, HTTP or activation change. Implementation
+starts only after the exact entry receives independent review.
+
+Use one focused internal `operation_cancellation.py` module:
+
+```python
+CancellationReceipts(
+    work: OperationWork, original_context: ProjectContext, operation_id: str
+)
+CancellationReceipts.phase() -> ContextManager[CancellationPhase]
+CancellationReceipts.original -> CancellationAssociation
+CancellationPhase.book -> ReceiptBook
+CancellationPhase.associate(
+    operation: RawReceipt, job: RawReceipt, configuration: RawReceipt
+) -> None
+CancellationPhase.verify(connection: Connection, cohort: RunCohort) -> None
+```
+
+These objects own no connection, authorization, transaction, storage or response.
+Keep ordinary GET `ReceiptBook()` and `verify_read_snapshot()` semantics intact.
+Add only the private accounting/liveness hook needed for existing bounded
+readers to consume the phase book; do not introduce another general framework.
+
+One request owns the original context/operation identity, one OperationWork,
+cumulative 256 source visits/512 edges, and at most one active phase generation.
+A nested or stale acquisition owns nothing and must leave the active phase
+untouched. Every bounded loader/query entry must validate a retained phase-book
+handle before SQL; checking only the `phase.book` property is insufficient.
+Actual active-phase failure aborts this owner without a retry or budget reset.
+
+Each phase reads fresh op14, full job16, config7/reference and a complete cohort.
+`associate()` validates the association, reserves the initial immutable snapshot
+before a potentially large cohort read, and promotes it only after final
+verification. Later phases compare against that original snapshot, including
+job.created and budget. Require the supplied cohort's exact raw receipts to
+match its active book, not merely its IDs.
+
+One exact live-retention calculation covers the original association and current
+phase rows/observations, including canonical wrapper overhead, within 4 MiB.
+Charge both retained job representations; count the union of logical
+(domain, id) identities within 259. Include the original reservation in
+`remaining` before SQL COUNT/SUM permits body transfer. Promotion must not
+temporarily retain an uncharged duplicate. Final serialized input also fits
+4 MiB. Do not add a cumulative decode-byte cap.
+
+The narrow cancellation final query reuses typed/materialized SQL for exact
+current-phase op/job/config/cohort, scopes, configuration candidate cardinality
+and by-job phantoms. Filter the admission_config role before its candidate
+LIMIT. Exclude GET result observations, result ref counts, result descriptors
+and rendering. Job16.result must remain equal within a phase; result artifact
+refs are ignored in every cancellation phase, including malformed/added refs,
+without storage access or refusal. Configuration refs remain exact.
+
+Mutation verification occurs immediately before intentional cancel/status writes
+under the retained locks. Capture the effect's three-field response then; do not
+compare the old full job16 after that deliberate write or refresh original
+receipts to hide it. Post-ACK disclosure uses a new phase and retains the captured
+response while allowing valid worker/job.result/cohort advancement. Fresh
+authority remains a separate required service check after final SQL; association
+is not authorization.
+
+A phase encloses its connection/transaction acquisition, cleanup and ACK
+observation. Closing it releases mutable buffers/live-byte charges only.
+Original association, visits, edges and the same OperationWork counters remain.
+Sealed, closed and stale handles cannot resume SQL; stale close cannot release a
+later phase. Pure phase cleanup preserves primary exceptions. The service and
+transaction outcome classify post-ACK uncertainty and typed denials; the receipt
+owner does not claim that responsibility.
+
+Before cancellation service wiring, prove on SQLite and actual PostgreSQL:
+
+- Three 84-root phases succeed at 255 visits/504 edges; three 85-root phases
+  refuse before the third cohort's bodies transfer, without reset or refund.
+- Valid new runs and worker/job.result progress between phases succeed.
+  Within-phase job/result/cohort changes refuse; result artifact ref changes
+  alone remain ignored. Original association and config scope/count/descriptor
+  drift refuse.
+- Original-plus-phase canonical byte/identity limits, expansion, promotion,
+  release and reuse obey the same caps while cumulative work never decreases.
+- Retained stale books, nested acquisition and failed-phase reuse cause zero
+  SQL, preserve the active owner and retain the original exception.
+- Maximum matching cases and scoped/foreign distractors retain the existing
+  SQL/VM/time/bind bounds. Later lock/authority/effect/ACK/disclosure tests remain
+  required for the service; this helper checkpoint does not replace them.
+
+B accepted this exact entry at 5e1766d after A’s independent design review.
+A is assigned the focused phase helper and dedicated SQLite/PostgreSQL proof;
+service orchestration requires its separate reviewed checkpoint.

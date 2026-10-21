@@ -15,6 +15,7 @@ from agent_rewind.database import Database
 from agent_rewind.migrations import compatibility as guard
 from agent_rewind.migrations import service
 from agent_rewind.migrations.schema import HEAD
+from agent_rewind.sqlite_ownership import owned_begin, owned_connect
 from agent_rewind.worker import work_once
 
 
@@ -70,7 +71,7 @@ def test_adoption_cannot_be_enabled_by_an_injected_profile(prepared, mode):
     forged = profile.model_copy(
         update={"revisions": (profile.revisions[0].model_copy(update={"mode": mode}),)}
     )
-    with prepared.engine.connect() as connection:
+    with owned_connect(prepared.engine) as connection:
         result = guard.check_schema_compatibility(connection, forged)
     assert (result.status, result.code) == ("incompatible", "release_profile_invalid")
 
@@ -90,7 +91,7 @@ def test_adoption_cannot_be_enabled_by_an_injected_profile(prepared, mode):
 )
 def test_metadata_drift_refuses_without_writing_or_reusing_previous_result(prepared, mutation):
     assert prepared.schema_compatibility().code == "migration_only"
-    with prepared.engine.begin() as connection:
+    with owned_begin(prepared.engine) as connection:
         connection.exec_driver_sql(mutation)
     before = snapshot(prepared.engine)
     result = prepared.schema_compatibility()
@@ -100,7 +101,7 @@ def test_metadata_drift_refuses_without_writing_or_reusing_previous_result(prepa
 
 
 def snapshot(engine):
-    with engine.connect() as connection:
+    with owned_connect(engine) as connection:
         return tuple(
             connection.exec_driver_sql("SELECT name,type,sql FROM sqlite_master ORDER BY name")
         ), tuple(connection.exec_driver_sql("SELECT * FROM alembic_version"))
@@ -117,13 +118,13 @@ def test_missing_database_stays_absent(settings):
 @pytest.mark.parametrize("ddl", [None, "CREATE TABLE foreign_metadata (secret TEXT)"])
 def test_empty_or_partial_database_is_never_initialized(settings, ddl):
     db = Database(settings)
-    with db.engine.begin() as connection:
+    with owned_begin(db.engine) as connection:
         if ddl:
             connection.exec_driver_sql(ddl)
-    with db.engine.connect() as connection:
+    with owned_connect(db.engine) as connection:
         before = tuple(connection.exec_driver_sql("SELECT * FROM sqlite_master"))
     assert db.schema_compatibility().status == "incompatible"
-    with db.engine.connect() as connection:
+    with owned_connect(db.engine) as connection:
         assert tuple(connection.exec_driver_sql("SELECT * FROM sqlite_master")) == before
     db.engine.dispose()
 
@@ -136,7 +137,7 @@ def test_required_backfill_checked_and_complete_still_cannot_activate(prepared, 
     ]
     profile = guard.ReleaseProfile.model_validate_json(json.dumps(document))
     if status:
-        with prepared.engine.begin() as connection:
+        with owned_begin(prepared.engine) as connection:
             connection.execute(
                 text(
                     "INSERT INTO migration_progress VALUES "
@@ -149,7 +150,7 @@ def test_required_backfill_checked_and_complete_still_cannot_activate(prepared, 
                     "updated": "2026-10-20T00:00:00+00:00",
                 },
             )
-    with prepared.engine.connect() as connection:
+    with owned_connect(prepared.engine) as connection:
         result = guard.check_schema_compatibility(connection, profile)
     assert result.status == "incompatible"
     assert result.code == ("migration_only" if status == "complete" else "backfill_incomplete")
@@ -171,11 +172,11 @@ def test_inspection_is_read_only_and_restores_sqlite_controls(prepared, monkeypa
     def attempt_write(connection):
         connection.exec_driver_sql("CREATE TABLE guard_must_not_write (value TEXT)")
 
-    with prepared.engine.connect() as connection:
+    with owned_connect(prepared.engine) as connection:
         connection.exec_driver_sql("PRAGMA busy_timeout=1234")
     monkeypatch.setattr(guard, "catalog", attempt_write)
     assert prepared.schema_compatibility().status == "unavailable"
-    with prepared.engine.connect() as connection:
+    with owned_connect(prepared.engine) as connection:
         assert connection.exec_driver_sql("PRAGMA query_only").scalar_one() == 0
         assert connection.exec_driver_sql("PRAGMA busy_timeout").scalar_one() == 1234
         assert not connection.exec_driver_sql(
@@ -260,7 +261,7 @@ def test_claim_and_worker_leave_queued_and_expired_jobs_unchanged(storage, setti
     db, artifacts = storage
     queued = db.enqueue("run", "a" * 64, 1, "synthetic")
     expired = db.enqueue("run", "b" * 64, 1, "synthetic")
-    with db.engine.begin() as connection:
+    with owned_begin(db.engine) as connection:
         connection.execute(
             text("UPDATE jobs SET status='running',owner='old-worker',lease_until=0 WHERE id=:id"),
             {"id": expired},
@@ -360,7 +361,7 @@ def test_budget_is_shared_across_many_catalog_queries(prepared, monkeypatch):
 
 
 def test_existing_transaction_is_not_committed_or_rolled_back_by_guard(prepared):
-    with prepared.engine.begin() as connection:
+    with owned_begin(prepared.engine) as connection:
         connection.exec_driver_sql("UPDATE installation_adoptions SET installation_key='pending'")
         result = guard.check_schema_compatibility(connection, guard.load_release_profile())
         assert result.status == "incompatible"
@@ -538,7 +539,7 @@ def test_legacy_health_checks_connectivity_without_claiming_schema_readiness(set
             client.get("/api/runs").json()["detail"]
             == "Service schema is not compatible with this release."
         )
-        with app.state.db.engine.begin() as connection:
+        with owned_begin(app.state.db.engine) as connection:
             connection.exec_driver_sql("UPDATE alembic_version SET version_num='ar_future'")
         # Legacy health is connectivity only, even when admission is incompatible.
         assert client.get("/healthz").status_code == 200

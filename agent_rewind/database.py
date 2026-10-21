@@ -23,7 +23,7 @@ from sqlalchemy import (
     true,
     update,
 )
-from sqlalchemy.engine import Connection
+from sqlalchemy.engine import Connection, make_url
 
 from .config import Settings
 from .migrations.compatibility import (
@@ -35,6 +35,7 @@ from .migrations.compatibility import (
     runtime_database_connectivity,
     runtime_schema_compatibility,
 )
+from .sqlite_ownership import create_owned_sqlite_engine, owned_begin, owned_connect
 
 metadata = MetaData()
 records = Table(
@@ -106,15 +107,32 @@ class BudgetExceeded(RuntimeError):
 class Database:
     def __init__(self, settings: Settings):
         settings.data_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
-        kwargs: dict[str, Any] = {"pool_pre_ping": True}
-        if settings.database_url.startswith("sqlite"):
-            kwargs["connect_args"] = {
-                "check_same_thread": False,
-                "timeout": CONNECT_TIMEOUT_SECONDS,
-            }
-        if ":memory:" not in settings.database_url and settings.database_url != "sqlite://":
-            kwargs["pool_timeout"] = POOL_TIMEOUT_SECONDS
-        self.engine = create_engine(settings.database_url, **kwargs)
+        url = make_url(settings.database_url)
+        if (
+            url.drivername in {"sqlite", "sqlite+pysqlite"}
+            and url.database
+            and url.database != ":memory:"
+            and not url.database.startswith("file:")
+            and not url.query
+            and all(value is None for value in (url.username, url.password, url.host, url.port))
+        ):
+            self.engine = create_owned_sqlite_engine(
+                settings.database_url,
+                connect_timeout=CONNECT_TIMEOUT_SECONDS,
+                pool_timeout=POOL_TIMEOUT_SECONDS,
+            )
+        else:
+            # Unsupported SQLite forms retain the explicit legacy path. They
+            # cannot satisfy the operation service's separate ownership gate.
+            kwargs: dict[str, Any] = {"pool_pre_ping": True}
+            if settings.database_url.startswith("sqlite"):
+                kwargs["connect_args"] = {
+                    "check_same_thread": False,
+                    "timeout": CONNECT_TIMEOUT_SECONDS,
+                }
+            if ":memory:" not in settings.database_url and settings.database_url != "sqlite://":
+                kwargs["pool_timeout"] = POOL_TIMEOUT_SECONDS
+            self.engine = create_engine(settings.database_url, **kwargs)
         configure_runtime_engine(self.engine, production=settings.mode == "production")
 
     def schema_compatibility(self) -> CompatibilityResult:
@@ -134,14 +152,14 @@ class Database:
 
     def add(self, kind: str, data: dict[str, Any], record_id: str | None = None) -> str:
         record_id = record_id or identifier()
-        with self.engine.begin() as db:
+        with owned_begin(self.engine) as db:
             db.execute(
                 insert(records).values(id=record_id, kind=kind, created=time.time(), data=data)
             )
         return record_id
 
     def get(self, record_id: str, kind: str | None = None) -> dict[str, Any]:
-        with self.engine.connect() as db:
+        with owned_connect(self.engine) as db:
             query = select(records).where(records.c.id == record_id)
             if kind:
                 query = query.where(records.c.kind == kind)
@@ -151,7 +169,7 @@ class Database:
         return {"id": row["id"], "created": row["created"], **row["data"]}
 
     def list_records(self, kind: str, limit: int = 100) -> list[dict[str, Any]]:
-        with self.engine.connect() as db:
+        with owned_connect(self.engine) as db:
             rows = db.execute(
                 select(records)
                 .where(records.c.kind == kind)
@@ -180,21 +198,21 @@ class Database:
     def save_event(
         self, job_id: str, owner: str, run_id: str, step: int, artifact: str, event_hash: str
     ) -> None:
-        with self.engine.begin() as db:
+        with owned_begin(self.engine) as db:
             self._fence(db, job_id, owner)
             db.execute(
                 insert(events).values(run_id=run_id, step=step, artifact=artifact, hash=event_hash)
             )
 
     def event_refs(self, run_id: str) -> list[dict[str, Any]]:
-        with self.engine.connect() as db:
+        with owned_connect(self.engine) as db:
             rows = db.execute(
                 select(events).where(events.c.run_id == run_id).order_by(events.c.step)
             ).mappings()
             return [dict(row) for row in rows]
 
     def finish_run(self, job_id: str, owner: str, run_id: str, data: dict[str, Any]) -> None:
-        with self.engine.begin() as db:
+        with owned_begin(self.engine) as db:
             self._fence(
                 db, job_id, owner, allow_cancelled=data.get("status") in {"failed", "incomplete"}
             )
@@ -202,7 +220,7 @@ class Database:
 
     def enqueue(self, kind: str, payload: str, budget_usd: float, actor: str) -> str:
         job_id = identifier()
-        with self.engine.begin() as db:
+        with owned_begin(self.engine) as db:
             db.execute(
                 insert(jobs).values(
                     id=job_id,
@@ -224,7 +242,7 @@ class Database:
         if compatibility.status != "ready":
             raise SchemaNotReady(compatibility)
         now = time.time()
-        with self.engine.begin() as db:
+        with owned_begin(self.engine) as db:
             # A lost job is not silently retried: model calls may already have been billed.
             db.execute(
                 update(jobs)
@@ -252,13 +270,13 @@ class Database:
             return dict(row) if result.rowcount == 1 else None
 
     def heartbeat(self, job_id: str, owner: str) -> None:
-        with self.engine.begin() as db:
+        with owned_begin(self.engine) as db:
             self._fence(db, job_id, owner)
 
     def reserve(self, job_id: str, owner: str, amount: int) -> None:
         if amount < 0:
             raise ValueError("Budget reservations cannot be negative.")
-        with self.engine.begin() as db:
+        with owned_begin(self.engine) as db:
             self._fence(db, job_id, owner)
             result = db.execute(
                 update(jobs)
@@ -269,7 +287,7 @@ class Database:
                 raise BudgetExceeded("Insufficient remaining budget for the next model call.")
 
     def complete_job(self, job_id: str, owner: str, result: str | None, error: str | None) -> None:
-        with self.engine.begin() as db:
+        with owned_begin(self.engine) as db:
             row = (
                 db.execute(select(jobs).where(jobs.c.id == job_id).with_for_update())
                 .mappings()
@@ -289,14 +307,14 @@ class Database:
             )
 
     def job(self, job_id: str) -> dict[str, Any]:
-        with self.engine.connect() as db:
+        with owned_connect(self.engine) as db:
             row = db.execute(select(jobs).where(jobs.c.id == job_id)).mappings().first()
         if row is None:
             raise KeyError("Job not found.")
         return dict(row)
 
     def list_jobs(self) -> list[dict[str, Any]]:
-        with self.engine.connect() as db:
+        with owned_connect(self.engine) as db:
             return [
                 dict(row)
                 for row in db.execute(
@@ -305,7 +323,7 @@ class Database:
             ]
 
     def cancel(self, job_id: str, actor: str) -> None:
-        with self.engine.begin() as db:
+        with owned_begin(self.engine) as db:
             db.execute(update(jobs).where(jobs.c.id == job_id).values(cancel=True))
             db.execute(
                 update(jobs)
@@ -322,12 +340,12 @@ class Database:
         )
 
     def audit(self, actor: str, action: str, target: str) -> None:
-        with self.engine.begin() as db:
+        with owned_begin(self.engine) as db:
             self._audit(db, actor, action, target)
 
     def issue_key(self, token: str, role: str, name: str, expires: float, actor: str) -> str:
         key_id = identifier()
-        with self.engine.begin() as db:
+        with owned_begin(self.engine) as db:
             db.execute(
                 insert(keys).values(
                     id=key_id,
@@ -342,7 +360,7 @@ class Database:
         return key_id
 
     def lookup_key(self, token: str) -> dict[str, Any] | None:
-        with self.engine.connect() as db:
+        with owned_connect(self.engine) as db:
             row = (
                 db.execute(
                     select(keys).where(
@@ -357,6 +375,6 @@ class Database:
             return dict(row) if row else None
 
     def revoke_key(self, key_id: str, actor: str) -> None:
-        with self.engine.begin() as db:
+        with owned_begin(self.engine) as db:
             db.execute(update(keys).where(keys.c.id == key_id).values(revoked=True))
             self._audit(db, actor, "key.revoke", key_id)

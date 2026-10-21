@@ -15,6 +15,7 @@ from agent_rewind.models import Intervention
 from agent_rewind.projection_publication import ProjectionPublicationWriter
 from agent_rewind.projection_rows import insert_projection, read_index
 from agent_rewind.run_projection import RunProjection
+from agent_rewind.sqlite_ownership import owned_begin, owned_connect
 
 
 @pytest.fixture
@@ -30,7 +31,7 @@ def capture(settings):
 
 
 def counts(engine):
-    with engine.connect() as connection:
+    with owned_connect(engine) as connection:
         return tuple(
             connection.execute(text("SELECT count(*) FROM " + table)).scalar_one()
             for table in ("artifact_objects", "artifact_refs", "publication_roots", "run_index")
@@ -41,7 +42,7 @@ def test_actual_graph_refs_root_projection_and_retry_share_one_commit(capture, t
     parent = capture.run(task)
     intent = capture.intent(parent)
     capture.publisher.publish(intent, capture.source)
-    with capture.db.engine.connect() as connection:
+    with owned_connect(capture.db.engine) as connection:
         first = read_index(connection, limit=3)
         assert first[0]["run_id"] == parent and first[0]["published_seq"] == 1
         assert first[0]["event_head"] == capture.db.get(parent, "run")["head"]
@@ -52,7 +53,7 @@ def test_actual_graph_refs_root_projection_and_retry_share_one_commit(capture, t
         task, parent, Intervention(step=2, kind="tool_result", result={"output": "changed"})
     )
     child_root = capture.publisher.publish(capture.intent(child), capture.source)
-    with capture.db.engine.connect() as connection:
+    with owned_connect(capture.db.engine) as connection:
         rows = read_index(connection, limit=3)
         by_id = {row["run_id"]: row for row in rows}
         assert by_id[parent] == first[0]
@@ -78,7 +79,7 @@ def test_projection_failure_rolls_back_all_refs_root_and_counter(capture, task, 
     with pytest.raises(ArtifactError, match="synthetic_projection_stop"):
         capture.publisher.publish(intent, capture.source)
     assert counts(capture.db.engine) == (0, 0, 0, 0)
-    with capture.db.engine.connect() as connection:
+    with owned_connect(capture.db.engine) as connection:
         assert connection.execute(text("SELECT run_sequence FROM projects")).scalar_one() == 0
     monkeypatch.setattr(module, "insert_projection", original)
     capture.publisher.publish(intent, capture.source)
@@ -108,16 +109,16 @@ def test_initial_projection_primitive_preserves_exact_sequence_and_refuses_chang
         None,
         "unfenced_execution",
     )
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         assert insert_projection(connection, value) == 1
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         assert insert_projection(connection, value) == 1
     with (
         pytest.raises(ArtifactError, match="projection_conflict"),
-        capture.db.engine.begin() as connection,
+        owned_begin(capture.db.engine) as connection,
     ):
         insert_projection(connection, replace(value, status="failed"))
-    with capture.db.engine.connect() as connection:
+    with owned_connect(capture.db.engine) as connection:
         assert connection.execute(text("SELECT run_sequence FROM projects")).scalar_one() == 1
 
 
@@ -126,14 +127,15 @@ def test_sqlite_fk_off_and_effective_autocommit_refuse_initial_writes(capture, t
     value = RunProjection(
         run, CONTEXT.project_id, datetime(2020, 1, 1, tzinfo=UTC), "failed", False, None, None, None
     )
-    with capture.db.engine.connect() as connection:
+    with owned_connect(capture.db.engine) as connection:
         connection.exec_driver_sql("PRAGMA foreign_keys=OFF")
         with pytest.raises(ArtifactError, match="projection_constraints_required"):
             insert_projection(connection, value)
         connection.rollback()
         connection.exec_driver_sql("PRAGMA foreign_keys=ON")
     with (
-        capture.db.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as connection,
+        owned_connect(capture.db.engine) as connection,
+        connection.execution_options(isolation_level="AUTOCOMMIT"),
         connection.begin(),
         pytest.raises(ArtifactError, match="projection_transaction_required"),
     ):
@@ -147,7 +149,7 @@ def test_equivalent_instants_persist_utc_and_sql_orders_by_time(capture, task):
     first = capture.run(task)
     # Distinct scoped run identity; this primitive test does not claim graph publication.
     second = "e" * 32
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         connection.execute(
             text(
                 "INSERT INTO records SELECT :id,kind,created,data FROM records WHERE id=:original"
@@ -169,10 +171,10 @@ def test_equivalent_instants_persist_utc_and_sql_orders_by_time(capture, task):
         None,
     )
     later = replace(earlier, run_id=second, created_at=datetime(2026, 1, 1, tzinfo=UTC))
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         assert insert_projection(connection, earlier) == 1
         assert insert_projection(connection, later) == 2
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         assert (
             insert_projection(
                 connection, replace(earlier, created_at=earlier.created_at.astimezone(UTC))
@@ -190,13 +192,13 @@ def test_exact_commit_retry_refuses_corrupt_counter_without_upload_or_repair(cap
     run = capture.run(task)
     intent = capture.intent(run)
     capture.publisher.publish(intent, capture.source)
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         connection.execute(text("UPDATE projects SET run_sequence=0"))
     before = counts(capture.db.engine)
     with pytest.raises(ArtifactError, match="publication_root_conflict"):
         capture.publisher.publish(intent, lambda *_: pytest.fail("corrupt retry performed I/O"))
     assert counts(capture.db.engine) == before
-    with capture.db.engine.connect() as connection:
+    with owned_connect(capture.db.engine) as connection:
         assert connection.execute(text("SELECT run_sequence FROM projects")).scalar_one() == 0
 
 
@@ -223,5 +225,5 @@ def test_project_lock_precedes_delegate_and_failed_fence_consumes_no_sequence(
     with pytest.raises(ArtifactError, match="publication_fence_lost"):
         capture.publisher.publish(intent, capture.source)
     assert counts(capture.db.engine) == (0, 0, 0, 0)
-    with capture.db.engine.connect() as connection:
+    with owned_connect(capture.db.engine) as connection:
         assert connection.execute(text("SELECT run_sequence FROM projects")).scalar_one() == 0

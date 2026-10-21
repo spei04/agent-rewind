@@ -10,6 +10,7 @@ from sqlalchemy import text
 from agent_rewind.api import create_app
 from agent_rewind.models import Action
 from agent_rewind.scoped_repositories import RepositoryUnavailable
+from agent_rewind.sqlite_ownership import owned_begin, owned_connect
 
 pytestmark = pytest.mark.usefixtures("legacy_behavior_schema")
 
@@ -106,7 +107,7 @@ def test_revoked_member_recovers_csrf_and_logs_out_without_data(settings):
     with TestClient(app) as client:
         client.cookies.set("rewind_session", cookie(app))
         assert client.get("/api/me").json()["role"] == "maintainer"
-        with app.state.db.engine.begin() as connection:
+        with owned_begin(app.state.db.engine) as connection:
             connection.execute(
                 text(
                     "UPDATE project_memberships SET revoked_at='2026-01-01' WHERE principal_id=:id"
@@ -173,7 +174,7 @@ def test_admission_refuses_before_readiness_storage_or_writes(settings, task, mo
     run = "1" * 32
     # Trusted synthetic SQL source only; no accepted work creation is claimed.
     job_id = "2" * 32
-    with app.state.db.engine.begin() as connection:
+    with owned_begin(app.state.db.engine) as connection:
         connection.execute(
             text(
                 "INSERT INTO jobs(id,kind,created,payload,status,cancel,budget,reserved) "
@@ -208,12 +209,12 @@ def test_admission_refuses_before_readiness_storage_or_writes(settings, task, mo
         ),
         ("/api/investigations", {"run_id": run}),
     ]
-    with app.state.db.engine.connect() as connection:
+    with owned_connect(app.state.db.engine) as connection:
         before = connection.exec_driver_sql("SELECT count(*) FROM audit").scalar_one()
     with TestClient(app) as client:
         for path, body in bodies:
             assert client.post(path, json=body, headers=cookie_headers(app)).status_code == 503
-    with app.state.db.engine.connect() as connection:
+    with owned_connect(app.state.db.engine) as connection:
         assert connection.exec_driver_sql("SELECT count(*) FROM audit").scalar_one() == before
         assert connection.exec_driver_sql("SELECT count(*) FROM jobs").scalar_one() == 1
     forbidden.assert_not_called()
