@@ -104,7 +104,14 @@ OpenAPI carries the finite wire shapes and byte extensions; the document adds
 semantic/work constraints that JSON Schema alone cannot enforce. Aggregate
 bounds apply even when each field individually fits. Encoded sizes use existing
 sorted compact ensure_ascii canonical JSON. The fixture token and names are
-fabricated, not reusable credentials.
+fabricated, not reusable credentials. New complete-string patterns use the
+ECMAScript-compatible `(?![\s\S])` end assertion rather than `$`, which may match
+before a terminal LF. Control exclusions therefore apply at every position,
+including the final character, under JSON Schema search semantics. The offline
+oracle uses search too; it does not conceal schema gaps with Python fullmatch.
+The copied frozen C04 Error schema remains unchanged. AR-034-B must preserve
+these checks with a compatible schema validator or equivalent explicit checks;
+this proposal does not add lookaround to an existing runtime regex engine.
 
 AR-034-B owns pre-materialization SQL type/byte CASE checks and bounded
 candidate-first reads. Malformed selected rows remain candidates and refuse;
@@ -142,6 +149,12 @@ capability. The default implementation is unavailable until AR-034-B provides
 an authenticated, bounded, versioned installation mapping and same-Connection
 validation seam. Neither a schema-valid dict, arbitrary processor/role string,
 ProjectDecision nor a caller boolean can supply administrative trust.
+Conversely, an AdministrativeDecision must never be converted to ProjectDecision,
+a maintainer role or a bypass of ScopedActions' existing project authority check.
+New admin mutations use separate fresh administrative authority and its own
+transaction; only reviewed lower-level effects may be shared. An explicit audited
+self-membership grant remains legitimate and must subsequently pass the normal
+project authority checks.
 
 The mapping contains exactly one issuer, organization and installation; its
 administrators are exact human subject/principal pairs. Recompute each principal
@@ -159,11 +172,16 @@ hierarchy. Revalidate mapping version and caller/target ownership after waits
 and immediately before effects. Preserve each action's original target and
 principal. A direct administrative DML revoker must conflict with held grant
 rows; project locks alone are insufficient proof. Project creation needs an
-explicit organization/installation-first creation exception, limited to a
-provably new project ID; it must never later lock an existing project. An ID
-collision rolls back rather than entering an existing-project path. No fictitious
-absent-project or job lock substitutes for that boundary. Operator mapping/recovery
-transactions are installation-only: they do not later acquire project locks.
+explicit organization/installation-first creation exception that attempts only
+a new project ID and never later explicitly locks an existing project. A pre-insert
+absence observation is not proof of uniqueness: PostgreSQL INSERT can wait on
+implicit foreign-key or uniqueness locks, including an uncommitted colliding ID.
+The AR-034-B transaction review and actual PostgreSQL tests must account for those
+waits within the same remaining native timeout/work budget, prove bounded rollback
+on collision/timeout, and show no existing-project fallback or mutation. Include
+both committed and concurrent uncommitted ID collisions and foreign-key waits.
+No fictitious absent-project or job lock substitutes for that boundary. Operator
+mapping/recovery transactions are installation-only: they do not later acquire project locks.
 Selected-project actions acquire all existing projects first, then organization,
 current mapping/version, grants/keys and targets. Mapping CAS may serialize on
 installation state because it never waits for existing projects while holding it.

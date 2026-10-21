@@ -105,6 +105,7 @@ def validate(schema, value):
         require("\0" not in value)
         require(schema.get("minLength", 0) <= len(value) <= schema.get("maxLength", 10_000))
         if "pattern" in schema:
+            # JSON Schema searches; fullmatch here would hide bad exported anchors.
             require(re.search(schema["pattern"], value) is not None)
         if "x-max-utf8-bytes" in schema:
             require(len(encoded) <= schema["x-max-utf8-bytes"])
@@ -246,7 +247,10 @@ def test_frozen_error_vocabulary_and_credentials_are_preserved():
                 if "$ref" in response:
                     response = API["components"]["responses"][response["$ref"].split("/")[-1]]
                 assert response["headers"]["Cache-Control"]["schema"]["const"] == "no-store"
-                assert response["headers"]["X-Request-ID"]["schema"]["pattern"] == "^[0-9a-f]{32}$"
+                assert (
+                    response["headers"]["X-Request-ID"]["schema"]["pattern"]
+                    == SCHEMAS["Identifier"]["pattern"]
+                )
                 if code not in {"200", "201"}:
                     assert response["content"]["application/json"]["schema"] == {
                         "$ref": "#/components/schemas/Fault"
@@ -303,6 +307,57 @@ def test_negative_schema_vectors_refuse_without_coercion(schema, patch):
     value.update(patch)
     with pytest.raises(ValueError):
         validate(SCHEMAS[schema], value)
+
+
+@pytest.mark.parametrize(
+    "schema,path,valid",
+    [
+        ("ProjectInput", ("properties", "name"), "valid"),
+        ("KeyInput", ("properties", "name"), "valid"),
+        ("InstallationMapping", ("properties", "group_claim"), "groups"),
+        ("GroupRule", ("properties", "group"), "qa"),
+        ("VerifiedGroupSnapshot", ("properties", "groups", "items"), "qa"),
+        ("Identifier", (), "1" * 32),
+        ("HumanPrincipal", (), "oidc:" + "1" * 64),
+        ("Principal", (), "api-key:" + "1" * 32),
+        ("IssuedKey", ("properties", "token"), "A" * 43),
+    ],
+)
+def test_new_patterns_reject_controls_with_json_schema_search_semantics(schema, path, valid):
+    field = SCHEMAS[schema]
+    for part in path:
+        field = field[part]
+    validate(field, valid)
+    # Probe the published regex itself: min/max length or the oracle's NUL
+    # check must not conceal an end-anchor mismatch in a schema consumer.
+    for control in ("\n", "\r", "\t", "\0", "\x1f", "\x7f", "\r\n"):
+        for malformed in (control + valid, valid[:1] + control + valid[1:], valid + control):
+            assert re.search(field["pattern"], malformed) is None
+            with pytest.raises(ValueError):
+                validate(field, malformed)
+
+
+@pytest.mark.parametrize("field", ["group_claim", "group_rules"])
+def test_mapping_semantics_refuse_terminal_controls_without_normalization(field):
+    for control in ("\n", "\r", "\t", "\0", "\x1f", "\x7f", "\r\n"):
+        value = sample("InstallationMapping")
+        if field == "group_claim":
+            value[field] += control
+        else:
+            value[field][0]["group"] += control
+        with pytest.raises(ValueError):
+            mapping_check(value)
+
+
+def test_group_snapshot_refuses_terminal_control_but_preserves_exact_valid_space():
+    mapping = sample("InstallationMapping")
+    snapshot = sample("VerifiedGroupSnapshot")
+    for control in ("\n", "\r", "\t", "\0", "\x1f", "\x7f", "\r\n"):
+        with pytest.raises(ValueError):
+            snapshot_check(mapping, {**snapshot, "groups": ["qa" + control]})
+    for value in (" qa", "qa ", "\u00e9", "e\u0301"):
+        assert snapshot_check(mapping, {**snapshot, "groups": [value]}) == {}
+        validate(SCHEMAS["ProjectInput"], {"name": value})
 
 
 def test_missing_null_and_unknown_fields_cannot_satisfy_mutations():
