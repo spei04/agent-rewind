@@ -61,6 +61,41 @@ def original_rows(connection):
     assert connection.exec_driver_sql("SELECT sum(reserved) FROM jobs").scalar_one() == 245000
 
 
+def assert_additive_catalog(previous, shape):
+    old_tables = set(previous) - {"$postgres"}
+    tables = set(shape) - {"$postgres"}
+    assert len(tables) == 17
+    assert tables - old_tables == {"operations", "operation_keys"}
+    assert all(shape[name] == previous[name] for name in old_tables if name != "jobs")
+    assert shape["jobs"]["columns"][:13] == previous["jobs"]["columns"]
+    assert len(shape["jobs"]["columns"]) == 16
+    old_fields = {field[0] for field in COLUMNS["jobs"]}
+    assert set(shape["$postgres"]) == set(previous["$postgres"])
+    for section, old_rows in previous["$postgres"].items():
+        new_rows = shape["$postgres"][section]
+        # Native metadata is one catalog-wide aggregate. Preserve every prior
+        # non-job row, then allow only the three job columns/two checks.
+        assert [row for row in new_rows if row[0] in old_tables - {"jobs"}] == [
+            row for row in old_rows if row[0] != "jobs"
+        ]
+        old_job = [row for row in old_rows if row[0] == "jobs"]
+        new_job = [row for row in new_rows if row[0] == "jobs"]
+        if section == "columns":
+            assert [row for row in new_job if row[1] in old_fields] == old_job
+            assert {row[1] for row in new_job if row[1] not in old_fields} == {
+                "payload_version",
+                "execution_config_ref",
+                "execution_config_digest",
+            }
+            assert len(new_job) == len(old_job) + 3
+        elif section == "constraints":
+            assert all(row in new_job for row in old_job)
+            assert len(new_job) == len(old_job) + 2
+            assert all(row[1] == "c" for row in new_job if row not in old_job)
+        else:
+            assert section == "indexes" and new_job == old_job
+
+
 def test_postgres_admission_profile_requires_independent_freeze(projected_legacy):
     state = projected_legacy
     engine = state["owner"]
@@ -75,10 +110,7 @@ def test_postgres_admission_profile_requires_independent_freeze(projected_legacy
         original = source_digest(connection)
         service._alembic(connection, "upgrade", ADMISSION)
         shape = catalog(connection)
-        assert len(shape) == 17
-        assert set(shape) - set(previous) == {"operations", "operation_keys"}
-        assert all(shape[name] == previous[name] for name in previous if name != "jobs")
-        assert shape["jobs"]["columns"][:13] == previous["jobs"]["columns"]
+        assert_additive_catalog(previous, shape)
         assert source_digest(connection) == original
         with QueryBudget().observe(connection):
             assert read_cohort(connection).identity == identity
