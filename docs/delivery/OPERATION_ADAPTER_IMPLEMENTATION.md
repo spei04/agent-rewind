@@ -147,3 +147,58 @@ rules, five-file format check, strict mypy on all three changed runtime modules
 and diff-check passed. No PostgreSQL server was started or queried. Package
 allowlist/installed smoke and all service-level/actual-PG evidence remain later
 P1 work, not acceptance claimed by this component.
+
+
+### Independent cleanup/type findings and correction
+
+Independent review of a59e074 confirmed A-OP-01/02/03. The separate test
+checkpoint 09dd1e8 freezes 17 regressions against that runtime: all 17 failed
+in 2.46 seconds. They reproduce accounting that skipped native read cleanup,
+cleanup KeyboardInterrupt replacing a body denial/interruption and leaking a
+one-slot pool checkout, and identical SQLite timestamp bytes stored as BLOB
+being accepted as an unchanged descriptor. Failed probes explicitly release
+their captured connections in a test finally block.
+
+Cleanup accounting now records its failure separately from every native action.
+Rollback, discard, restoration, close, bounded reclose and finish continue after
+BaseException. Body/setup failures remain primary. Without a body/setup failure,
+the first cleanup interruption is rethrown after cleanup even when an earlier
+ordinary cleanup error occurred; ordinary errors retain the existing finite
+dependency/commit-uncertainty mapping. The mutation outcome records cleanup
+failure and sets rollback acknowledgment only when native rollback returns.
+An acknowledged commit is not reclassified as retryable after cleanup failure.
+
+An interrupted native discard has one additional attempt per phase. The read
+path remains within eight reserved attempts (rollback, up to two restorations,
+two ordinary discard sites, close/reclose, and that one extra discard); the
+existing six-attempt mutation chain takes seven when the extra discard is used.
+Setup disposal with work attached now runs through the outer owner after detach,
+so it cannot replace the original setup failure. Finish is attempted after
+native close even when earlier cleanup is interrupted. These are bounded
+attempts, not a promise that a permanently failing driver can be repaired.
+
+Descriptor timestamps are converted to bounded SQL text on PostgreSQL only,
+before psycopg timestamp decoding. SQLite retains its native value type, so a
+BLOB cannot become the original TEXT receipt through a cast. Both an existing
+receipt book and a fresh book reject that change without replacing an original
+receipt. Candidate cardinality, all seven descriptor fields, and byte bounds
+remain unchanged.
+
+Two additional draft cleanup cases initially failed in both scopes (four
+failures): interrupted discard needed its bounded retry, and an ordinary
+cleanup failure hid a later interruption. The final regression module has 29
+passing cases, including setup-primary preservation, multiple interruptions
+inside the reserved allowance, and finish after pool release. The complete
+selection is 232 passed, zero skips, 79.21 seconds: the three operation modules
+plus the unchanged admission transaction/coordinator/submit/repository tests.
+The four existing admission modules retain all 150 work=None regression cases.
+Configured Ruff/security, six-file format check, strict mypy on three runtime
+modules, pinned offline lock validation and diff-check passed using the owned
+secondary Python 3.12.3 with PYTHONPATH unset and bytecode/cache disabled.
+
+No PostgreSQL server was started or queried for this correction. Application
+engine/native progress-handler provenance remains a separate reviewed entry
+requirement before service composition: the current marker does not detect or
+restore an arbitrary unmarked foreign callback. No ownership mechanism,
+read/cancel service, HTTP route, schema, profile or failure producer is added
+by this correction.

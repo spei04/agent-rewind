@@ -76,10 +76,9 @@ def _discard(connection: Connection) -> None:
 
 def _begin(connection: Connection, work: TransactionWork | None = None) -> int | None:
     def discard_setup() -> None:
-        try:
-            if work is not None:
-                work.control_attempt("discard")
-        finally:
+        # The work owner detaches first, then records/discards in its finally.
+        # Do not let a setup disposal fault replace the original setup error.
+        if work is None:
             _discard(connection)
 
     raw = connection.connection.driver_connection
@@ -139,31 +138,42 @@ def admission_transaction(
     previous_timeout = None
     primary: BaseException | None = None
     attached = False
+    cleanup_interruption: BaseException | None = None
+    discard_retry_used = False
+
+    def cleanup_failure(error: BaseException) -> None:
+        nonlocal primary, cleanup_interruption
+        outcome.cleanup_failed = True
+        if cleanup_interruption is None and not isinstance(error, Exception):
+            cleanup_interruption = error
+        if primary is None:
+            primary = error
 
     def cleanup_attempt(kind: Literal["rollback", "close", "discard", "restore"]) -> None:
-        nonlocal primary
+        # Accounting is an observation, never permission to omit native cleanup.
         if work is not None:
             try:
                 work.control_attempt(kind)
-            except Exception as error:
-                outcome.cleanup_failed = True
-                if primary is None:
-                    primary = error
+            except BaseException as error:
+                cleanup_failure(error)
 
     def discard() -> None:
-        nonlocal primary
+        nonlocal discard_retry_used
         if connection is None:
-            return
-        if work is None:
-            _discard(connection)
             return
         cleanup_attempt("discard")
         try:
             connection.invalidate()
-        except Exception as error:
-            outcome.cleanup_failed = True
-            if primary is None:
-                primary = error
+        except BaseException as error:
+            cleanup_failure(error)
+            # One extra native discard attempt per phase, not per failure.
+            if not discard_retry_used:
+                discard_retry_used = True
+                cleanup_attempt("discard")
+                try:
+                    connection.invalidate()
+                except BaseException as error:
+                    cleanup_failure(error)
 
     try:
         if work is not None:
@@ -188,50 +198,57 @@ def admission_transaction(
     except BaseException as error:
         primary = error
     finally:
-        # An exhausted VM/deadline callback must not interrupt rollback/restore.
+        had_primary = primary is not None
+        # Every phase remains bounded and independent, even after interruption.
+        # The first body/setup failure stays primary through disposal failures.
         if attached and work is not None:
             try:
                 work.detach()
             except BaseException as error:
-                outcome.cleanup_failed = True
-                if primary is None:
-                    primary = error
-                if connection is not None:
-                    discard()
+                cleanup_failure(error)
+                discard()
         if connection is not None:
             if work is not None and not outcome.begun and not connection.invalidated:
                 discard()
             if primary is not None and outcome.begun and not outcome.commit_acknowledged:
                 outcome.rollback_attempted = True
+                cleanup_attempt("rollback")
                 try:
-                    cleanup_attempt("rollback")
                     if connection.invalidated:
                         raise AdmissionError("outcome_uncertain")
                     connection.rollback()
                     outcome.rollback_acknowledged = True
-                except Exception:
+                except BaseException as error:
+                    cleanup_failure(error)
                     discard()
-            try:
-                if previous_timeout is not None and not connection.invalidated:
+            if previous_timeout is not None and not connection.invalidated:
+                cleanup_attempt("restore")
+                try:
                     raw = connection.connection.driver_connection
                     if raw is None:
                         raise AdmissionError("outcome_uncertain")
-                    cleanup_attempt("restore")
                     raw.execute(f"PRAGMA busy_timeout={previous_timeout}")
-                cleanup_attempt("close")
+                except BaseException as error:
+                    cleanup_failure(error)
+                    discard()
+            cleanup_attempt("close")
+            try:
                 connection.close()
-            except Exception:
-                outcome.cleanup_failed = True
+            except BaseException as error:
+                cleanup_failure(error)
                 discard()
-                with suppress(Exception):
-                    cleanup_attempt("close")
+                cleanup_attempt("close")
+                try:
                     connection.close()
+                except BaseException as error:
+                    cleanup_failure(error)
         if attached and work is not None:
             try:
                 work.finish()
-            except Exception as error:
-                if primary is None:
-                    primary = error
+            except BaseException as error:
+                cleanup_failure(error)
+    if not had_primary and cleanup_interruption is not None:
+        raise cleanup_interruption from None
     if primary is not None and (
         not isinstance(primary, Exception)
         or isinstance(primary, IdentityInvalid | ResourceNotFound | ActionForbidden)

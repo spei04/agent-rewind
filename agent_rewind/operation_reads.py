@@ -257,7 +257,9 @@ def read_descriptor(
                     case(
                         (
                             size <= book.remaining,
-                            cast(value, Text) if name == "created_at" else value,
+                            cast(value, Text)
+                            if name == "created_at" and connection.dialect.name == "postgresql"
+                            else value,
                         ),
                         else_=None,
                     ).label(name)

@@ -14,7 +14,7 @@ from __future__ import annotations
 import math
 import sqlite3
 from collections.abc import Iterator
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from time import perf_counter
 from typing import Any, Literal
 
@@ -243,6 +243,38 @@ def operation_connection(engine: Engine, work: OperationWork) -> Iterator[Connec
     attached = False
     cleanup_failed = False
     setup_ok = False
+    cleanup_interruption: BaseException | None = None
+    discard_retry_used = False
+
+    def cleanup_failure(error: BaseException) -> None:
+        nonlocal cleanup_failed, cleanup_interruption
+        cleanup_failed = True
+        if cleanup_interruption is None and not isinstance(error, Exception):
+            cleanup_interruption = error
+
+    def cleanup_attempt(kind: Literal["rollback", "close", "discard", "restore"]) -> None:
+        try:
+            work.control_attempt(kind)
+        except BaseException as error:
+            cleanup_failure(error)
+
+    def discard() -> None:
+        nonlocal discard_retry_used
+        if connection is None:
+            return
+        cleanup_attempt("discard")
+        try:
+            connection.invalidate()
+        except BaseException as error:
+            cleanup_failure(error)
+            if not discard_retry_used:
+                discard_retry_used = True
+                cleanup_attempt("discard")
+                try:
+                    connection.invalidate()
+                except BaseException as error:
+                    cleanup_failure(error)
+
     try:
         connection = engine.connect()
         attached = True
@@ -295,39 +327,49 @@ def operation_connection(engine: Engine, work: OperationWork) -> Iterator[Connec
             try:
                 work.detach()
             except BaseException as error:
-                cleanup_failed = True
-                if primary is None:
-                    primary = error
+                cleanup_failure(error)
         if connection is not None:
+            # Failed accounting cannot skip the native action. Failed native
+            # cleanup cannot skip later discard, close, reclose or finish.
+            cleanup_attempt("rollback")
             try:
-                work.control_attempt("rollback")
                 connection.rollback()
-                if cleanup_failed or not setup_ok:
-                    work.control_attempt("discard")
-                    connection.invalidate()
-                elif original is not None and not connection.invalidated:
+            except BaseException as error:
+                cleanup_failure(error)
+            if cleanup_failed or not setup_ok:
+                discard()
+            elif original is not None and not connection.invalidated:
+                try:
                     raw = connection.connection.driver_connection
                     if raw is None:
                         raise AdmissionError("dependency_unavailable")
-                    work.control_attempt("restore")
+                    cleanup_attempt("restore")
                     raw.execute(f"PRAGMA query_only={original[0]}")
-                    work.control_attempt("restore")
+                    cleanup_attempt("restore")
                     raw.execute(f"PRAGMA busy_timeout={original[1]}")
-                work.control_attempt("close")
+                except BaseException as error:
+                    cleanup_failure(error)
+                    discard()
+            cleanup_attempt("close")
+            try:
                 connection.close()
-            except Exception:
-                cleanup_failed = True
-                with suppress(Exception):
-                    work.control_attempt("discard")
-                    connection.invalidate()
-                with suppress(Exception):
-                    work.control_attempt("close")
+            except BaseException as error:
+                cleanup_failure(error)
+                discard()
+                cleanup_attempt("close")
+                try:
                     connection.close()
+                except BaseException as error:
+                    cleanup_failure(error)
         if attached:
             try:
                 work.finish()
-            except Exception:
-                cleanup_failed = True
+            except BaseException as error:
+                cleanup_failure(error)
+    if primary is None and cleanup_interruption is not None:
+        # No body failure exists: delay the first cleanup interruption until
+        # every owned cleanup stage has been attempted.
+        raise cleanup_interruption from None
     if primary is not None and (
         not isinstance(primary, Exception)
         or isinstance(primary, IdentityInvalid | ResourceNotFound | ActionForbidden)

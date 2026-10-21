@@ -191,3 +191,215 @@ def test_sqlite_timestamp_blob_cannot_equal_original_descriptor_receipt(stored, 
         read_descriptor(connection, stored.context, JOB, "admission_config", selected)
     assert book.receipts == (original,)
     assert selected.receipts == ((original,) if reuse_book else ())
+
+
+@pytest.mark.parametrize("scope", ["read", "mutation"])
+def test_discard_interruption_is_retried_without_skipping_close_or_finish(
+    engine, monkeypatch, scope
+):
+    from sqlalchemy import event
+
+    work = OperationWork()
+    outcome = TransactionOutcome()
+    expected = ResourceNotFound()
+    invalidate, remove = Connection.invalidate, event.remove
+    rollback, close = Connection.rollback, Connection.close
+    captured = None
+    attempts = []
+
+    def bad_remove(target, name, callback):
+        remove(target, name, callback)
+        raise RuntimeError("PRIVATE-DETACH")
+
+    def interrupted(connection, *args, **kwargs):
+        attempts.append(connection)
+        if len(attempts) == 1:
+            raise KeyboardInterrupt("PRIVATE-DISCARD")
+        return invalidate(connection, *args, **kwargs)
+
+    monkeypatch.setattr(event, "remove", bad_remove)
+    monkeypatch.setattr(Connection, "invalidate", interrupted)
+    manager = (
+        operation_connection(engine, work)
+        if scope == "read"
+        else admission_transaction(engine, outcome, work=work)
+    )
+    try:
+        with pytest.raises(BaseException) as caught, manager as connection:
+            captured = connection
+            raw = connection.connection.driver_connection
+            raise expected
+        assert caught.value is expected and caught.value.__suppress_context__
+        assert len(attempts) >= 2
+        assert captured.closed and engine.pool.checkedout() == 0
+        assert work._started is None
+        with pytest.raises(sqlite3.ProgrammingError):
+            raw.execute("SELECT 1")
+        assert rows(engine) == []
+    finally:
+        release_probe(captured, rollback, close)
+
+
+@pytest.mark.parametrize("scope", ["read", "mutation"])
+def test_cleanup_interruption_after_ordinary_cleanup_error_is_not_swallowed(
+    engine, monkeypatch, scope
+):
+    work = OperationWork()
+    outcome = TransactionOutcome()
+    expected = KeyboardInterrupt("PRIVATE-STOP")
+    control, close = work.control_attempt, Connection.close
+    rollback = Connection.rollback
+    captured = None
+    failed = []
+
+    def accounting(kind):
+        control(kind)
+        if kind == "close":
+            raise RuntimeError("PRIVATE-ACCOUNT")
+
+    def interrupted(connection):
+        if not failed:
+            failed.append(True)
+            raise expected
+        return close(connection)
+
+    monkeypatch.setattr(work, "control_attempt", accounting)
+    monkeypatch.setattr(Connection, "close", interrupted)
+    manager = (
+        operation_connection(engine, work)
+        if scope == "read"
+        else admission_transaction(engine, outcome, work=work)
+    )
+    try:
+        with pytest.raises(BaseException) as caught, manager as connection:
+            captured = connection
+        assert caught.value is expected and caught.value.__suppress_context__
+        assert captured.closed and engine.pool.checkedout() == 0
+        assert work._started is None
+        assert rows(engine) == []
+    finally:
+        release_probe(captured, rollback, close)
+
+
+@pytest.mark.parametrize("scope", ["read", "mutation"])
+def test_setup_primary_survives_interrupted_discard(engine, monkeypatch, scope):
+    from sqlalchemy import event
+
+    expected = ResourceNotFound()
+    work = OperationWork()
+    outcome = TransactionOutcome()
+    invalidate = Connection.invalidate
+    interrupted = []
+    touched = []
+
+    def setup_fault(_connection, _cursor, statement, *_args):
+        if statement == "PRAGMA busy_timeout=3000":
+            touched.append(statement)
+            raise expected
+
+    def disposal_fault(connection, *args, **kwargs):
+        if not interrupted:
+            interrupted.append(True)
+            raise KeyboardInterrupt("PRIVATE-SETUP-DISPOSAL")
+        return invalidate(connection, *args, **kwargs)
+
+    event.listen(engine, "after_cursor_execute", setup_fault)
+    monkeypatch.setattr(Connection, "invalidate", disposal_fault)
+    manager = (
+        operation_connection(engine, work)
+        if scope == "read"
+        else admission_transaction(engine, outcome, work=work)
+    )
+    try:
+        with pytest.raises(BaseException) as caught, manager:
+            pytest.fail("failed setup reached body")
+        assert caught.value is expected and caught.value.__suppress_context__
+        assert touched and interrupted
+        assert engine.pool.checkedout() == 0 and work._started is None
+        assert not outcome.begun and not outcome.commit_attempted
+    finally:
+        event.remove(engine, "after_cursor_execute", setup_fault)
+    assert rows(engine) == []
+
+
+@pytest.mark.parametrize("scope", ["read", "mutation"])
+def test_multiple_cleanup_interruptions_fit_reserved_attempts(engine, monkeypatch, scope):
+    from sqlalchemy import event
+
+    work = OperationWork()
+    outcome = TransactionOutcome()
+    expected = ResourceNotFound()
+    remove, invalidate, close = event.remove, Connection.invalidate, Connection.close
+    invalidations, closes = [], []
+
+    def detach_fault(target, name, callback):
+        remove(target, name, callback)
+        raise RuntimeError("PRIVATE-DETACH")
+
+    def discard_fault(connection, *args, **kwargs):
+        invalidations.append(connection)
+        if len(invalidations) == 1:
+            raise KeyboardInterrupt("PRIVATE-FIRST-DISCARD")
+        return invalidate(connection, *args, **kwargs)
+
+    def close_fault(connection):
+        closes.append(connection)
+        if len(closes) == 1:
+            raise SystemExit("PRIVATE-FIRST-CLOSE")
+        return close(connection)
+
+    monkeypatch.setattr(event, "remove", detach_fault)
+    monkeypatch.setattr(Connection, "invalidate", discard_fault)
+    monkeypatch.setattr(Connection, "close", close_fault)
+    manager = (
+        operation_connection(engine, work)
+        if scope == "read"
+        else admission_transaction(engine, outcome, work=work)
+    )
+    with pytest.raises(BaseException) as caught, manager as connection:
+        raw = connection.connection.driver_connection
+        # Exhaust the ordinary allowance after real setup/body, like the
+        # accepted worst-chain fixture; cleanup retains its own eight slots.
+        connection.exec_driver_sql("SELECT 1")
+        work.statements = 504
+        raise expected
+    assert caught.value is expected and caught.value.__suppress_context__
+    assert work.statements <= 512
+    assert len(closes) == 2 and len(invalidations) >= 2
+    assert engine.pool.checkedout() == 0 and work._started is None
+    with pytest.raises(sqlite3.ProgrammingError):
+        raw.execute("SELECT 1")
+    assert rows(engine) == []
+
+
+@pytest.mark.parametrize("scope", ["read", "mutation"])
+@pytest.mark.parametrize("primary", [False, True])
+def test_finish_interruption_runs_after_native_release(engine, monkeypatch, scope, primary):
+    work = OperationWork()
+    outcome = TransactionOutcome()
+    expected = ResourceNotFound()
+    interrupted = KeyboardInterrupt("PRIVATE-FINISH")
+    finish = work.finish
+    observed = []
+
+    def finish_fault():
+        observed.append(engine.pool.checkedout())
+        finish()
+        raise interrupted
+
+    monkeypatch.setattr(work, "finish", finish_fault)
+    manager = (
+        operation_connection(engine, work)
+        if scope == "read"
+        else admission_transaction(engine, outcome, work=work)
+    )
+    with pytest.raises(BaseException) as caught, manager:
+        if primary:
+            raise expected
+    assert caught.value is (expected if primary else interrupted)
+    assert caught.value.__suppress_context__
+    assert observed == [0] and work._started is None
+    if scope == "mutation":
+        assert outcome.cleanup_failed
+        assert outcome.commit_acknowledged is not primary
+    assert rows(engine) == []
