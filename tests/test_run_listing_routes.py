@@ -5,6 +5,7 @@ import json
 import re
 import time
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
@@ -587,3 +588,45 @@ def test_populated_projects_keep_lists_and_details_disjoint(http_listing):
             assert detail.status_code == 200 and detail.json() == item
         foreign = other_ids[0] if project == PROJECT else RUN1
         error(client.get(base + "/" + foreign, headers=headers(app)), 404, "not_found")
+
+
+@pytest.mark.parametrize("suffix", ["", "/" + RUN1])
+def test_final_sql_phase_exhaustion_is_fixed_503_without_partial_response(
+    http_listing, monkeypatch, suffix
+):
+    from agent_rewind import listing_session
+
+    app, client, _ = http_listing
+    reader = app.state.run_listing
+    clock, stages = [0.0], []
+    monkeypatch.setattr(listing_session, "time", SimpleNamespace(monotonic=lambda: clock[0]))
+    original_receipts, original_check = reader._receipts, reader.authority.check
+
+    def receipts(*args, **kwargs):
+        result = original_receipts(*args, **kwargs)
+        stages.append("receipts")
+        return result
+
+    def checked(*args, **kwargs):
+        result = original_check(*args, **kwargs)
+        if stages:
+            stages.append("final-authority")
+            # Exhaust only after real final SQL/authority, before returning a page.
+            clock[0] = listing_session.MAX_SQL_SECONDS + 0.001
+        return result
+
+    with monkeypatch.context() as patch:
+        patch.setattr(reader, "_receipts", receipts)
+        patch.setattr(reader.authority, "check", checked)
+        response = client.get(BASE + suffix, headers=headers(app))
+    assert stages == ["receipts", "final-authority"]
+    error(response, 503, "dependency_unavailable")
+    assert response.json()["retryable"] is True
+    assert "items" not in response.json() and "event_head" not in response.json()
+    assert reader.engine.pool.checkedout() == 0
+    with reader.engine.connect() as connection:
+        assert connection.exec_driver_sql("PRAGMA query_only").scalar_one() == 0
+        assert not connection.connection.driver_connection.in_transaction
+    # The next independent read remains usable after the failed final phase.
+    clock[0] = 0.0
+    assert client.get(BASE + suffix, headers=headers(app)).status_code == 200

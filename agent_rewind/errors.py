@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import logging
 import secrets
-from dataclasses import dataclass
 from typing import Literal, TextIO
 
 from fastapi.exceptions import RequestValidationError
@@ -54,13 +53,16 @@ RULES: dict[ErrorCode, tuple[int, str, bool]] = {
 }
 
 
-@dataclass(frozen=True)
 class Fault(Exception):
-    code: ErrorCode
+    """Read-only public code with normal mutable exception propagation metadata."""
 
-    def __post_init__(self) -> None:
-        if type(self.code) is not str or self.code not in RULES:
-            object.__setattr__(self, "code", "internal_error")
+    def __init__(self, code: ErrorCode):
+        self._code: ErrorCode = code if type(code) is str and code in RULES else "internal_error"
+        super().__init__(self._code)
+
+    @property
+    def code(self) -> ErrorCode:
+        return self._code
 
 
 def error_response(scope: Scope, code: ErrorCode, *, body_limit: bool = False) -> JSONResponse:

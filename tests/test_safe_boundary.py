@@ -1,6 +1,7 @@
 import io
 import json
 import re
+from contextlib import contextmanager
 
 import pytest
 from fastapi import HTTPException
@@ -358,3 +359,60 @@ def test_global_logger_handlers_cannot_receive_or_reformat_diagnostic(
     assert (
         json.loads(diagnostic_output.getvalue())["request_id"] == response.headers["X-Request-ID"]
     )
+
+
+def test_fault_propagates_unchanged_through_nested_generators():
+    @contextmanager
+    def passthrough():
+        yield
+
+    fault = Fault(code="dependency_unavailable")
+    cause, context = RuntimeError(CANARY), ValueError(CANARY)
+    with pytest.raises(Fault) as caught, passthrough(), passthrough():
+        try:
+            raise context
+        except ValueError:
+            raise fault from cause
+    assert caught.value is fault
+    assert fault.__cause__ is cause and fault.__context__ is context
+    assert fault.__traceback__ is not None
+    assert fault.with_traceback(fault.__traceback__) is fault
+    fault.add_note(CANARY)  # Standard exception metadata remains writable.
+    assert fault.__notes__ == [CANARY]
+    assert fault.code == "dependency_unavailable"
+    with pytest.raises(AttributeError):
+        fault.code = "internal_error"
+
+
+@pytest.mark.parametrize("code", [CANARY, None, {}])
+def test_fault_normalizes_unknown_input_without_retaining_it(code):
+    fault = Fault(code)
+    assert fault.code == "internal_error"
+    assert fault.args == ("internal_error",)
+    assert str(fault) == "internal_error"
+
+
+def test_nested_fault_keeps_http_classification_without_private_context(
+    boundary_app, diagnostic_output
+):
+    @contextmanager
+    def passthrough():
+        yield
+
+    @boundary_app.get("/api/v1/nested-fault")
+    def nested_fault():
+        with passthrough(), passthrough():
+            raise Fault("dependency_unavailable") from RuntimeError(CANARY)
+
+    with TestClient(boundary_app) as client:
+        response = client.get("/api/v1/nested-fault")
+    assert response.status_code == 503
+    assert response.json() == {
+        "code": "dependency_unavailable",
+        "message": RULES["dependency_unavailable"][1],
+        "request_id": response.headers["X-Request-ID"],
+        "retryable": True,
+    }
+    assert response.headers["Cache-Control"] == "no-store"
+    assert re.fullmatch("[0-9a-f]{32}", response.headers["X-Request-ID"])
+    assert CANARY not in response.text + diagnostic_output.getvalue()
