@@ -24,7 +24,9 @@ def add_runs(connection, count, *, first=1000, created=1700000100.0, parent=None
     This tests query work/ordering only, not new capture or publication integrity.
     """
     original = json.loads(
-        connection.execute(text("SELECT data FROM records WHERE id=:id"), {"id": RUN1}).scalar_one()
+        connection.execute(
+            text("SELECT CAST(data AS TEXT) FROM records WHERE id=:id"), {"id": RUN1}
+        ).scalar_one()
     )
     original_job = dict(
         connection.execute(text("SELECT * FROM jobs WHERE id=:id"), {"id": original["job_id"]})
