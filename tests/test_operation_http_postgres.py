@@ -18,6 +18,7 @@ import httpx
 import pytest
 import test_migrations_postgres as migrations
 from fastapi.testclient import TestClient
+from http_app_cleanup import http_application_cache_cleanup as http_application_cache_cleanup
 from postgres_control import wait_for_database_drain
 from sqlalchemy import event, text
 from sqlalchemy.engine import Connection

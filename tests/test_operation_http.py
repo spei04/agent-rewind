@@ -12,6 +12,7 @@ from unittest.mock import Mock
 import httpx
 import pytest
 from fastapi.testclient import TestClient
+from http_app_cleanup import http_application_cache_cleanup as http_application_cache_cleanup
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from test_admission_envelope import descriptor

@@ -12,6 +12,7 @@ from copy import deepcopy
 from pathlib import Path
 
 import pytest
+from http_app_cleanup import http_application_cache_cleanup as http_application_cache_cleanup
 
 from agent_rewind.api import create_app
 
