@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| A | Guard diagnostics and delivery-verifier review complete | Bounded guard checks passed; database restored/stopped; no active holds. |
-| C | HTTP test application cleanup complete | a992425: 94 targeted cases passed on each local interpreter; no runtime-limit or existing-assertion changes. |
-| B | Corrected source inventory and hosted delivery audit | Review immutable source, complete run attempts and candidate evidence. |
-| Lead | Corrected HTTP integration and approved ledger planning | Primary owns final HTTP composition; secondary retained for delivery corrections. Ledger code waits for accepted HTTP and exact entry review. |
+| A | Approved ledger backlog amendment in primary | Reconcile two packages, current forecasts and preserved history; no runtime or database work. |
+| C | Ledger schema/provisioning entry in secondary | Exact manifest, compatibility, deferred SQL and consumer decisions; no implementation before HTTP delivery and entry review. |
+| B | Corrected HTTP delivery and independent ledger planning review | Immutable source/inventory/hosted evidence plus bounded amendment review. |
+| Lead | HTTP integration/delivery and approved ledger planning | Preserve predecessor gate; coordinate exact entry, later issue tracking and independent review. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -611,3 +611,7 @@ AR-008-B/P2 remains In progress: PR #106 run 39631674974 failed on Python 3.11. 
 The owner approved the [reviewed ledger plan](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md): one finite job execution window supplied by trusted provisioning; retries, claims and restarts cannot extend it; expiry prevents new paid work while retaining obligations. The schema/provisioning then reservation/concurrency split and provisional 6–10 engineering-day estimate are approved. The original owner message and its exact proposal context were verified and recorded privately.
 
 The lead will reconcile the ledger planning amendment and assign exact manifest/interface/SQL entry work. Ledger implementation still waits for accepted HTTP protected-main delivery and entry review. Existing spending authorization, migration-only compatibility, later worker and settlement gates remain unchanged. Earlier dated pending-decision checkpoints remain historical.
+
+## Approved ledger backlog amendment — 2026-10-21
+
+A owns planning-only reconciliation in the reused primary; C owns the separate schema/provisioning entry in the secondary. B independently reviews planning and HTTP delivery, and the lead owns integration and later GitHub updates. The owner-approved 882fa139 plan fixes one finite nonrenewable execution window and AR-010-A/P1 schema/provisioning 3 [3–5] plus P2 reservations/minimum generation/rollover 3 [3–5], total 6 [6–10] BE days, medium-low. Both remain Not started/null acceptance; accepted HTTP protected-main delivery and exact manifest/interface/SQL entry review precede implementation, with accepted P1 before P2. Historical schedules, existing release evidence, frozen contracts and external spending/customer gates remain unchanged. No new checkout, runtime/schema change, database process or paid resource is used. The only test edit is the lead-authorized synthetic prerequisite setup required by the new nested ledger packages; checker and assertions are unchanged.

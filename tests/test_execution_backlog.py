@@ -389,23 +389,26 @@ def test_observability_successor_requires_accepted_merge_and_all_aggregate_input
     data, markdown, plan = deepcopy(packet)
     task = next(t for t in data["tasks"] if t["id"] == "AR-011-C")
     p1, p2 = task["delivery_packages"]
-    # Isolate package policy: full graph validation separately checks producer ancestry.
-    for row in data["tasks"]:
-        if row["id"] in task["dependencies"]:
-            row["status"] = "Verified"
-            packages = row.get("delivery_packages", [])
-            if packages:
-                # Accepted producers include their packages and aggregate inputs.
-                for prerequisite in data["tasks"]:
-                    if prerequisite["id"] in row["dependencies"]:
-                        prerequisite["status"] = "Verified"
-            for index, package in enumerate(packages, start=1):
-                package.update(
-                    status="Verified",
-                    accepted_merge_commit=f"{index:040x}",
-                    review_evidence="Synthetic accepted worker producer package",
-                )
-            markdown = _sync_package_cards(markdown, packages)
+    # Complete only the synthetic prerequisite closure; real delivery states are untouched.
+    by_id = {row["id"]: row for row in data["tasks"]}
+    pending = list(task["dependencies"])
+    completed = set()
+    while pending:
+        prerequisite_id = pending.pop()
+        if prerequisite_id in completed or prerequisite_id not in by_id:
+            continue
+        completed.add(prerequisite_id)
+        prerequisite = by_id[prerequisite_id]
+        pending.extend(prerequisite["dependencies"])
+        prerequisite["status"] = "Verified"
+        packages = prerequisite.get("delivery_packages", [])
+        for index, package in enumerate(packages, start=1):
+            package.update(
+                status="Verified",
+                accepted_merge_commit=f"{index:040x}",
+                review_evidence="Synthetic accepted prerequisite package",
+            )
+        markdown = _sync_package_cards(markdown, packages)
     task["status"] = "In progress"
     p1.update(
         status="Verified",
