@@ -476,3 +476,94 @@ skips or warnings (3.34 s). Exact activation package evidence belongs to the
 immutable handoff; composed existing-fixture evidence remains a separate gate.
 No operation read/cancel service, schema/profile readiness, HTTP, worker, failure
 producer or customer activation is implemented by this factory change.
+
+### Bounded source primitives — AR-008-B/P1 #94
+
+Engineer C owns this component on work/operation-service-primitives, based on
+the accepted composed factory checkpoint 97d39edf. It adds no OperationService,
+HTTP, schema/index/profile, worker or failure producer. The unchanged 512 SQL
+attempts, 10 seconds and 20 million SQLite instructions bound execution; no
+extra cumulative decode-byte threshold is introduced.
+
+operation_reads now separates validate_job_row(row, job_id) and
+read_job_state(connection, context, job_id, book) from strict read_job retention.
+The pure decoder enforces all sixteen fields, native scalar types, individual
+SQL cell limits and the 4096-byte raw-row bound. Every fresh job read consumes a
+source visit. read_job still remembers its full original receipt. A
+CancellationAssociation captures the fourteen operation fields, seven descriptor
+fields plus configuration ref, and immutable job id/kind/created/payload/budget/
+actor/version/config identities. require_matches first validates the fresh
+sixteen-field job, then compares only that immutable association. Valid worker
+status/owner/lease/cancel/reservation/result/error progress does not overwrite
+the original GET receipt or establish a new captured cancellation response.
+Integer accounting remains exact, including 2**53+1 and reserved above budget.
+
+observe_result records zero or one valid scoped descriptor plus original result
+candidate cardinality, even when jobs.result is NULL. Missing, foreign, malformed
+or extra candidates cannot disappear into a unique success. A NULL result
+triggers no storage or inferred run ID in these primitives. A non-NULL result
+must match the descriptor digest; the later service still owns verified loading,
+strict payload parsing and fresh authority.
+
+operation_sources.read_run_cohort(connection, context, job, book) loads the whole
+same-project by-job cohort in one materialized SQL candidate set. It does not
+filter away study/unknown-kind or parent-bearing candidates. remaining_visits+1
+bounds selected rows; COUNT, native-type/cell validity and SUM of returned raw
+cell bytes gate body projection before the driver materializes the result list.
+Refusal rows contain only NULL markers. Exact canonical receipt retention is
+checked afterward, retaining original JSON whitespace/type identity. The cache
+is validated by the existing Lineage rules without additional SQL; every run
+has an explicit null parent, multiple roots remain legal, and foreign incoming
+aliases are excluded under the existing scoped semantics. validate_result_member
+requires exact membership rather than choosing a first/latest root.
+
+One job plus 255 records uses 256 visits and 510 edges; operation/config/result
+bring retained identities to 259. ReceiptBook also retains cohort and zero/one
+result observations within the same 4 MiB canonical input ceiling. Unchanged
+receipts are not recharged; repeated visits and execution work never reset.
+Fresh mutable cancellation state is bounded separately, not fed back into a
+strict GET receipt equality check. Three full source phases can therefore fit
+at most 84 roots each under the unchanged visit ceiling; no service-level
+three-phase capacity is claimed by this component.
+
+matching_query and verify_read_snapshot perform one final relational observation
+over all original operation14/job16/source/descriptor/ref values, exact scopes,
+configuration/result counts and a by-job anti-join. SQLite compares native typeof
+as well as null-safe values, including identical TEXT/BLOB and integer/real
+representations; PostgreSQL uses native bigint/bool/double and bounded timestamp
+text. Input is at most 4 MiB, the query compiles to 22 binds on both dialects,
+and output is at most 260 fixed domain/id pairs. No current row replaces an
+original expectation. The caller must reauthorize the original project after
+this statement. It is a GET comparison; cancellation disclosure must not reuse
+its strict original mutable job/result observations across acknowledgment.
+
+The source tests exercise 255 matching roots, zero matches, overflow, aggregate
+raw-body refusal before transfer, canonical escaping overflow, malformed
+lineage/native types, extra invalid refs, optional-ref transitions and source/
+scope/by-job phantoms. The integer/real control reaches the final SQL itself
+after both representations pass pure decoding. Distractor fixtures contain
+2,000 same-project other-job and 2,000 foreign rows plus oversized nonmembers.
+SQLite measured 101,000 instructions for the maximum clean cohort, and 177,000
+including discovery/final comparison with distractors (zero-match: 81,000).
+The SELECT-only PostgreSQL matrix measured 26 charged attempts including its
+privilege probe/setup/cleanup, with no UPDATE or schema CREATE grant. These
+are synthetic measured capacities, not an index-independent throughput promise:
+the schema has no by-job JSON or project-scope index and arbitrary global table
+growth can still exhaust unchanged work bounds. The remaining-budget regression
+proves fixed refusal and clean owned-pool reuse when prior work leaves too little
+SQLite VM budget. Proposed whole-service 74/162 traces remain unmeasured.
+
+Development checks exposed fixture assumptions before final proof: an initial
+escaping example did not exceed canonical 4 MiB; legacy Lineage casts SQLite
+BLOB JSON and therefore needed an explicit stronger new-type oracle; a second
+result fixture reused an existing digest under a different metadata ID; and
+corruption fixtures initially hit normal FK/CHECK enforcement before reaching
+the intended malformed-candidate read. The fixtures now construct those cases
+deliberately without weakening production constraints. One real draft exception
+gap in duplicate-key JSON handling is translated narrowly to the existing fixed
+metadata refusal, outside any principal/project authority boundary.
+
+Only operation_sources.py is added to the distribution allowlist. It is a
+required emitted module, with no new entry point or dependency. Full installed
+package/service/hosted acceptance remains a later composed gate; exact focused
+test/static and synthetic PostgreSQL evidence is bound to the immutable handoff.

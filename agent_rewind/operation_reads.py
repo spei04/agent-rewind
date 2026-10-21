@@ -65,12 +65,19 @@ DESCRIPTOR_FIELDS = (
     "byte_count",
     "created_at",
 )
-Domain = Literal["operation", "job", "admission_config", "result"]
+Domain = Literal["operation", "job", "admission_config", "result", "run"]
 Scalar = str | int | float | bool | None
 
 
 def invalid() -> AdmissionStorageError:
     return AdmissionStorageError("admission_metadata_invalid")
+
+
+def receipt_bytes(value: Any, limit: int) -> bytes:
+    try:
+        return bounded_canonical(value, limit=limit, limit_code="admission_body_limit")
+    except (AdmissionPreparationError, ValueError, TypeError, UnicodeError):
+        raise invalid() from None
 
 
 @dataclass(frozen=True)
@@ -90,6 +97,50 @@ class ReceiptBook:
     def __init__(self) -> None:
         self._receipts: dict[tuple[Domain, str], RawReceipt] = {}
         self.byte_count = 2  # canonical array brackets
+        self.source_visits = 0
+        self.edges = 0
+        self.observations: dict[tuple[str, str], tuple[Scalar, ...]] = {}
+
+    def charge_sources(self, count: int, *, edges: int = 0) -> None:
+        if (
+            type(count) is not int
+            or type(edges) is not int
+            or count < 0
+            or edges < 0
+            or self.source_visits + count > 256
+            or self.edges + edges > 512
+        ):
+            raise invalid()
+        self.source_visits += count
+        self.edges += edges
+
+    def observe(self, kind: str, identity: str, values: tuple[Scalar, ...]) -> None:
+        hexadecimal(identity, 32)
+        key = kind, identity
+        previous = self.observations.get(key)
+        if previous is not None:
+            if previous != values or tuple(map(type, previous)) != tuple(map(type, values)):
+                raise invalid()
+            return
+        encoded = receipt_bytes([kind, identity, list(values)], self.remaining)
+        if self.byte_count + len(encoded) + 1 > MAX_RECEIPT_BYTES:
+            raise invalid()
+        self.byte_count += len(encoded) + 1
+        self.observations[key] = values
+
+    def encoded(self) -> bytes:
+        return receipt_bytes(
+            {
+                "rows": [
+                    [r.domain, r.identity, list(r.fields), list(r.values)] for r in self.receipts
+                ],
+                "observations": [
+                    [kind, identity, list(values)]
+                    for (kind, identity), values in self.observations.items()
+                ],
+            },
+            MAX_RECEIPT_BYTES,
+        )
 
     @property
     def remaining(self) -> int:
@@ -175,6 +226,19 @@ def read_operation(
 def read_job(
     connection: Connection, context: ProjectContext, job_id: str, book: ReceiptBook
 ) -> RawReceipt:
+    value = read_job_state(connection, context, job_id, book)
+    return book.remember("job", job_id, value.fields, value.row())
+
+
+def read_job_state(
+    connection: Connection, context: ProjectContext, job_id: str, book: ReceiptBook
+) -> RawReceipt:
+    """Fresh bounded state, without overwriting a GET's original receipt.
+
+    Cancellation compares an immutable association separately. Every decode
+    still consumes the shared source-visit budget, including repeated phases.
+    """
+    book.charge_sources(1)
     rows = (
         connection.execute(
             select(*_columns(connection, JOBS, JOB_LIMITS, min(MAX_JOB_BYTES, book.remaining)))
@@ -198,7 +262,27 @@ def read_job(
         raise ResourceNotFound()
     if len(rows) != 1:
         raise invalid()
-    row = dict(rows[0])
+    return validate_job_row(dict(rows[0]), job_id)
+
+
+def validate_job_row(row: Mapping[str, Any], job_id: str) -> RawReceipt:
+    """Pure strict sixteen-field validation; no authorization or retention."""
+
+    if set(row) != set(JOB_LIMITS) or any(
+        type(value) not in (str, int, float, bool, type(None)) for value in row.values()
+    ):
+        raise invalid()
+    try:
+        sizes = [0 if value is None else len(str(value).encode("utf-8")) for value in row.values()]
+    except (ValueError, UnicodeError):
+        raise invalid() from None
+    if (
+        any(type(value) not in (str, int, float, bool, type(None)) for value in row.values())
+        or any(size > JOB_LIMITS[name] for (name, _), size in zip(row.items(), sizes, strict=True))
+        or sum(sizes) > MAX_JOB_BYTES
+    ):
+        raise invalid()
+    hexadecimal(job_id, 32)
     if (
         row["id"] != job_id
         or row["kind"] != "run"
@@ -228,7 +312,7 @@ def read_job(
             hexadecimal(row[name], 64)
     if row["actor"] is not None:
         principal_value(row["actor"])
-    return book.remember("job", job_id, tuple(JOB_LIMITS), row)
+    return RawReceipt("job", job_id, tuple(JOB_LIMITS), tuple(row[k] for k in JOB_LIMITS))
 
 
 def read_descriptor(
@@ -238,6 +322,28 @@ def read_descriptor(
     role: Literal["admission_config", "result"],
     book: ReceiptBook,
 ) -> tuple[ArtifactObject, RawReceipt]:
+    value = _descriptor(connection, context, job_id, role, book)
+    if value is None:
+        raise invalid()
+    return value
+
+
+def observe_result(
+    connection: Connection, context: ProjectContext, job_id: str, book: ReceiptBook
+) -> tuple[ArtifactObject, RawReceipt] | None:
+    """Observe zero/one valid candidates even when SQL jobs.result is NULL."""
+    value = _descriptor(connection, context, job_id, "result", book)
+    book.observe("result_count", job_id, (int(value is not None),))
+    return value
+
+
+def _descriptor(
+    connection: Connection,
+    context: ProjectContext,
+    job_id: str,
+    role: Literal["admission_config", "result"],
+    book: ReceiptBook,
+) -> tuple[ArtifactObject, RawReceipt] | None:
     # Candidate-first LEFT JOIN: an invalid/missing/second descriptor is never
     # filtered into a false unique success. Scope is established by read_job.
     if role not in ("admission_config", "result"):
@@ -290,6 +396,8 @@ def read_descriptor(
         .mappings()
         .all()
     )
+    if not rows:
+        return None
     if len(rows) != 1:
         raise invalid()
     row = dict(rows[0])
@@ -302,3 +410,96 @@ def read_descriptor(
     ):
         raise invalid()
     return value, book.remember(role, job_id, (*DESCRIPTOR_FIELDS, "reference_id"), row)
+
+
+IMMUTABLE_JOB_FIELDS = (
+    "id",
+    "kind",
+    "created",
+    "payload",
+    "actor",
+    "payload_version",
+    "execution_config_ref",
+    "execution_config_digest",
+    "budget",
+)
+
+
+def validate_association(
+    operation: RawReceipt,
+    job: RawReceipt,
+    configuration: RawReceipt,
+) -> None:
+    """Retain the existing version/config/original-creator rules without SQL."""
+    if (
+        operation.domain != "operation"
+        or operation.fields != tuple(OPERATION_LIMITS)
+        or job.domain != "job"
+        or job.fields != tuple(JOB_LIMITS)
+        or configuration.domain != "admission_config"
+        or configuration.fields != (*DESCRIPTOR_FIELDS, "reference_id")
+    ):
+        raise invalid()
+    op = operation_value(operation.row())
+    values = validate_job_row(job.row(), job.identity).row()
+    config = _object(configuration.row())
+    if (
+        op.job_id != job.identity
+        or configuration.identity != job.identity
+        or values["payload_version"] != 2
+        or values["execution_config_ref"] != values["execution_config_digest"]
+        or values["execution_config_digest"] != op.execution_config_digest
+        or values["actor"] != op.principal_id
+        or config.project_id != op.project_id
+        or config.digest != op.execution_config_digest
+        or configuration.row()["reference_id"] != config.id
+        or config.locator != object_locator(op.project_id, config.digest)
+        or config.byte_count > 65536
+    ):
+        raise invalid()
+
+
+@dataclass(frozen=True)
+class CancellationAssociation:
+    """Original immutable linkage, never a substitute for current authority."""
+
+    operation: RawReceipt
+    job: RawReceipt
+    configuration: RawReceipt
+
+    @classmethod
+    def capture(
+        cls,
+        operation: RawReceipt,
+        job: RawReceipt,
+        configuration: RawReceipt,
+    ) -> CancellationAssociation:
+        validate_association(operation, job, configuration)
+        values = job.row()
+        return cls(
+            operation,
+            RawReceipt(
+                "job",
+                job.identity,
+                IMMUTABLE_JOB_FIELDS,
+                tuple(values[k] for k in IMMUTABLE_JOB_FIELDS),
+            ),
+            configuration,
+        )
+
+    def require_matches(
+        self,
+        operation: RawReceipt,
+        job: RawReceipt,
+        configuration: RawReceipt,
+    ) -> None:
+        fresh = self.capture(operation, job, configuration)
+        for original, current in (
+            (self.operation, fresh.operation),
+            (self.job, fresh.job),
+            (self.configuration, fresh.configuration),
+        ):
+            if original != current or tuple(map(type, original.values)) != tuple(
+                map(type, current.values)
+            ):
+                raise invalid()
