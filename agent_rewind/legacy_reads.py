@@ -64,16 +64,23 @@ class ReadBudget:
         self.receipts[key] = value
 
     def final(self, connection: Connection, context: ProjectContext) -> None:
-        """One SELECT statement compares the original entire relational closure.
-
-        Input <=4 MiB/2048 identities; output contains only those bounded input
-        identities, never source bodies. SQL body/row bounds remain predicates.
-        The same statement also detects new by-job members. Fresh authority is
-        checked by the caller afterward; this is optimistic READ COMMITTED
-        revalidation, not response linearizability or a writer lock.
-        """
+        """Compare the original entire relational closure in one SELECT."""
         if not self.receipts:
             return
+        query, parameters = self.matching_query(connection, context)
+        rows = connection.execute(query, parameters).all()
+        current = {(row.kind, row.id) for row in rows}
+        if len(rows) != len(current) or current != self.receipts.keys():
+            raise ResourceNotFound()
+
+    def matching_query(
+        self, connection: Connection, context: ProjectContext
+    ) -> tuple[Any, dict[str, str]]:
+        """Compose original source receipts with another bounded receipt domain.
+
+        Input <=4 MiB/2048 identities; only bounded input IDs are returned.
+        Caller compares exact identity/cardinality and freshly reauthorizes.
+        """
         if len(self.receipts) > MAX_NODES or self.receipt_bytes > MAX_RECEIPT_BYTES:
             raise ResourceNotFound()
         expected = list(self.receipts.values())
@@ -192,10 +199,7 @@ class ReadBudget:
             )
         )
         query = union_all(record_query, job_query).limit(len(expected) + 1)
-        rows = connection.execute(query, {"receipts": encoded.decode()}).all()
-        current = {(row.kind, row.id) for row in rows}
-        if len(rows) != len(current) or current != self.receipts.keys():
-            raise ResourceNotFound()
+        return query, {"receipts": encoded.decode()}
 
     def row(self, value: dict[str, Any]) -> dict[str, Any]:
         created = value.get("created")

@@ -261,3 +261,16 @@ PRs, unchanged 544 acyclic outer edges, 456 base days, 771.1 summed upper days a
 remains 168.5 days; M1 is 57.5 days and TL 75 days. The extra two base/three upper
 days replace the prior listing estimate. Historical schedules, C21, owner
 decisions and frozen contracts remain unchanged.
+
+## Initial SQL source checkpoint
+
+The initial reader batches scoped source frontiers, verifies the shared relational
+closure in memory, and composes original projection/source/job receipts into one
+final SQL statement before fresh authority. LIST validates every selected candidate,
+including lookahead; DETAIL has no signing-key dependency. The shared lineage and
+receipt helpers retain existing legacy caller behavior. Local selection passed
+187 tests with five explicit PostgreSQL skips, covering the literal legacy corpus,
+finite suppression table, initial traversal/receipt changes and existing scoped/mixed
+receipt regressions. Maximum page/cohort and post-watermark work fixtures, actual
+PostgreSQL, packaging and independent final review are still pending. This is a
+source checkpoint, not package or route acceptance.
