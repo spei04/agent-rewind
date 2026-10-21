@@ -207,6 +207,52 @@ class MetadataCollision:
         return dict(expected=descriptor(self.expected), winner=descriptor(self.winner))
 
 
+def validate_policy(
+    policy: dict[str, Any],
+    identity: JournalIdentity,
+    task_digest: str,
+    configuration: NativeConfiguration,
+) -> dict[str, Any]:
+    """Validate and detach policy shape/bindings; never establishes actual permission."""
+    encode(policy, MAX_POLICY_BYTES)
+    if type(policy) is not dict or set(policy) != {
+        "schema",
+        "organization_id",
+        "project_id",
+        "principal_id",
+        "request_digest",
+        "task_digest",
+        "configuration_digest",
+        "permitted_processor_profile",
+        "version",
+        "state",
+    }:
+        invalid()
+    expected = dict(
+        schema=1,
+        organization_id=identity.organization_id,
+        project_id=identity.project_id,
+        principal_id=identity.principal_id,
+        request_digest=identity.request_digest,
+        task_digest=task_digest,
+        configuration_digest=configuration.digest,
+        permitted_processor_profile=configuration.processor_profile,
+    )
+    if (
+        type(policy["schema"]) is not int
+        or any(policy[k] != v for k, v in expected.items())
+        or type(policy["version"]) is not str
+        or re.fullmatch(r"[A-Za-z0-9_.-]{1,128}", policy["version"]) is None
+        or type(policy["state"]) is not dict
+    ):
+        invalid()
+    return decode_object(
+        encode(policy, MAX_POLICY_BYTES),
+        limit=MAX_POLICY_BYTES,
+        limit_code="admission_binding_invalid",
+    )
+
+
 @dataclass(frozen=True)
 class AttemptSnapshot:
     encoded: bytes
@@ -253,39 +299,7 @@ class AttemptSnapshot:
             digest_value(value[name])
         config_bytes = encode(value["configuration"], MAX_CONFIG_BYTES)
         config = NativeConfiguration(config_bytes, expected_digest=value["configuration_digest"])
-        policy = value["policy"]
-        encode(policy, MAX_POLICY_BYTES)
-        if type(policy) is not dict or set(policy) != {
-            "schema",
-            "organization_id",
-            "project_id",
-            "principal_id",
-            "request_digest",
-            "task_digest",
-            "configuration_digest",
-            "permitted_processor_profile",
-            "version",
-            "state",
-        }:
-            invalid()
-        expected = dict(
-            schema=1,
-            organization_id=identity.organization_id,
-            project_id=identity.project_id,
-            principal_id=identity.principal_id,
-            request_digest=identity.request_digest,
-            task_digest=value["task_digest"],
-            configuration_digest=config.digest,
-            permitted_processor_profile=config.processor_profile,
-        )
-        if (
-            type(policy["schema"]) is not int
-            or any(policy[k] != v for k, v in expected.items())
-            or type(policy["version"]) is not str
-            or re.fullmatch(r"[A-Za-z0-9_.-]{1,128}", policy["version"]) is None
-            or type(policy["state"]) is not dict
-        ):
-            invalid()
+        validate_policy(value["policy"], identity, value["task_digest"], config)
         items = value["descriptors"]
         if type(items) is not dict or set(items) != set(ROLES):
             invalid()

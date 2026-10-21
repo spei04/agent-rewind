@@ -461,14 +461,16 @@ def admission_storage_smoke(engine: Engine) -> None:
 
     from sqlalchemy import text
 
+    from agent_rewind.admission_adapters import UnavailableAdmissionPolicy
     from agent_rewind.admission_coordinator import AdmissionCoordinator
     from agent_rewind.admission_envelope import OriginCorrelation
     from agent_rewind.admission_journal import AdmissionJournal
     from agent_rewind.admission_journal_state import JournalIdentity
+    from agent_rewind.admission_publication import select_descriptor
     from agent_rewind.admission_records import verify_job_configuration
     from agent_rewind.admission_repository import AdmissionRepository
     from agent_rewind.admission_transaction import AdmissionError
-    from agent_rewind.artifact_metadata import ArtifactError
+    from agent_rewind.artifact_metadata import ArtifactError, ArtifactObject, object_locator
     from agent_rewind.migrations.admission_service import initialize_admission
     from agent_rewind.request_authority import RequestAuthority
     from agent_rewind.request_identity import VerifiedPrincipal
@@ -483,6 +485,13 @@ def admission_storage_smoke(engine: Engine) -> None:
     context = authority.named(principal, "9" * 32).context
     repository = AdmissionRepository(authority)
     coordinator = AdmissionCoordinator(engine, authority)
+    try:
+        UnavailableAdmissionPolicy().require_available()
+    except AdmissionError as error:
+        if error.code != "dependency_unavailable":
+            raise RuntimeError("Installed default admission policy refusal changed") from None
+    else:
+        raise RuntimeError("Installed default admission policy enabled work")
     try:
         coordinator.reconcile(principal, context, "1" * 32, "2" * 64, "3" * 64)
     except AdmissionError as error:
@@ -511,6 +520,20 @@ def admission_storage_smoke(engine: Engine) -> None:
         except ArtifactError:
             pass
     with engine.connect() as connection:
+        from datetime import UTC, datetime
+
+        authority.check(connection, principal, context, "record")
+        prospective = ArtifactObject(
+            "7" * 32,
+            context.project_id,
+            "8" * 64,
+            object_locator(context.project_id, "8" * 64),
+            1,
+            0,
+            datetime(2026, 1, 1, tzinfo=UTC),
+        )
+        if select_descriptor(connection, prospective) != prospective:
+            raise RuntimeError("Installed bounded descriptor selection changed")
         empty = repository.resolve_identities(
             connection,
             principal,
