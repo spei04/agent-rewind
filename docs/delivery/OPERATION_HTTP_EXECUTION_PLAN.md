@@ -1,8 +1,8 @@
 # Operation HTTP execution plan
 
-2026-10-21 · Planning amendment for the existing AR-008-B scope, originally prepared against source 5d3ff3096d81f159a457870a1f4fa57590a06cc2. AR-008-B and P1 are **In progress** with A completing final installed-package proof, C reviewing integration evidence and B reviewing source and hosted checks after accepted prerequisites and independent entry review; P2 remains **Not started** until accepted merged P1. AR-008-A/P3 and aggregate A are now Verified after [accepted PR/main/candidate evidence](ADMISSION_EXECUTION_PLAN.md#accepted-p3-delivery--2026-10-21). This plan does not implement routes or enable customer admission.
+2026-10-21 · Planning amendment for the existing AR-008-B scope, originally prepared against source 5d3ff3096d81f159a457870a1f4fa57590a06cc2. P1 is **Verified** at merge 03a8e074 after [accepted delivery](#accepted-p1-delivery--2026-10-21); aggregate AR-008-B and P2 are **In progress**. C owns P2 entry/implementation, A independent tests, B security/contract review and the lead integration. HTTP runtime follows separate entry review. AR-008-A/P3 and aggregate A remain Verified after [accepted PR/main/candidate evidence](ADMISSION_EXECUTION_PLAN.md#accepted-p3-delivery--2026-10-21). Default adapters/customer admission remain unavailable.
 
-The design-only [P1 adapter entry checkpoint](OPERATION_ADAPTER_ENTRY.md) proposes concrete APIs, cumulative bounds and the initial unavailable-failure support table. Tracking is aggregate [#93](https://github.com/spei04/agent-rewind/issues/93), P1 [#94](https://github.com/spei04/agent-rewind/issues/94), P2 [#95](https://github.com/spei04/agent-rewind/issues/95); aggregate/P1 are In progress; P2 remains Not started.
+The design-only [P1 adapter entry checkpoint](OPERATION_ADAPTER_ENTRY.md) proposes concrete APIs, cumulative bounds and the initial unavailable-failure support table. Tracking is aggregate [#93](https://github.com/spei04/agent-rewind/issues/93), P1 [#94](https://github.com/spei04/agent-rewind/issues/94), P2 [#95](https://github.com/spei04/agent-rewind/issues/95); P1 is Verified/closed; aggregate and P2 are In progress.
 
 ## Entry and delivery boundaries
 
@@ -22,10 +22,10 @@ edges, 52 parents, 27 gates and 20 contracts: **461 base / 779.1 upper / 576.25
 alternative allowance / 173.5 effort-path days**, with M1 62.5 and BE 94.5.
 Parent AR-008 totals 13 days. Earlier checkpoint totals above remain history.
 B/lead accepted ownership entry **5bedede** and C independently confirmed the
-acquisition map. The dormant helper d1b7ce20 is independently accepted as a
-component; C is assigned complete caller integration with factory activation
-disabled. Activation and dependent services require separate review.
-Current task/package statuses and later gates are unchanged.
+acquisition map. The complete caller, factory and service implementation is now
+accepted at **03a8e074**, including full hosted and candidate proof below.
+P2 HTTP entry and implementation have separate review and delivery gates.
+Aggregate #93, parent #8 and all later customer/production gates remain open.
 
 ## Frozen responses and actual producer seams
 
@@ -165,3 +165,20 @@ C's PostgreSQL evidence covers 65 distinct cases across runs: 62 initial passes,
 Composition f9172462 preserves the exact 377-file union of reviewed runtime, independent PostgreSQL tests and installed smoke. The 71d33737 package proof passes isolated service GET/cancellation, a separate untouched real migration-only guard, CLI and all 113 Git/wheel/sdist/installed runtime member comparisons. The service marker follows the service scenarios and real-guard checks; separate package and CLI evidence records the remaining checks. Final source binding and matching hosted checks remain required; older component CI does not cover this composition.
 
 The core CI job receives a bounded 30-minute scheduling window because the preceding Python 3.12 suite already took 1,106.67 seconds and this composition adds execution coverage. Product, native SQL, test wait and other job deadlines remain unchanged. A owns final installed proof, B reviews final source/CI inventory, C reviews integration evidence, and the lead owns delivery. P1 remains In progress; P2 Not started. No task status, dependency, estimate, spending or production/data gate changes.
+
+## Accepted P1 delivery — 2026-10-21
+
+P1 is **Verified** and [#94](https://github.com/spei04/agent-rewind/issues/94) is closed. [PR #105](https://github.com/spei04/agent-rewind/pull/105) merged reviewed source `1b0d1fe4b9555848c8c5445c9c857df477fd5cf9` as `03a8e074b51dca7c03d69295e0c18ca0f22dc1da` through the normal strict CI gate. Reviewed source and accepted merge share tree `680fef3a103292276d8a6a9a9a04dbdabe5ffbd5`; the first parent is `ec65cb7fa6af8489dd003f6d388784cfc4563ffb`. The PR tested merge `5f916c071fecaa70fb6640aafe60e66a507a09cd` has the expected base/source parents and the same tree.
+
+| Evidence | Python 3.11 | Python 3.12 | Other required checks |
+| --- | --- | --- | --- |
+| [PR run 39616207090](https://github.com/spei04/agent-rewind/actions/runs/39616207090) | 3,716 passed, 14 expected skips | 3,727 passed, 3 expected skips | Actual PostgreSQL, 3 gVisor cases, package, security and CI gate passed |
+| [Protected-main run 39620379652](https://github.com/spei04/agent-rewind/actions/runs/39620379652) | 3,716 passed, 14 expected skips | 3,727 passed, 3 expected skips | Actual PostgreSQL, 3 gVisor cases, package, security, CI gate and delivery passed |
+
+Each core job collected 3,730 tests and reported one existing warning. B independently audited all required logs, flags, exact skip inventories and source identity; the lead verified the indexed evidence. The installed service marker appears once per package/delivery job; full-smoke and CLI results remain separate evidence. The 65 distinct cancellation/legacy PostgreSQL cases are assembled component evidence (62 initial passes, one corrected fixture and two QueuePool controls), separate from the complete hosted matrix and 68 independent SQLite cases. The 113-member local Git/wheel/sdist/installed proof is also separate from hosted archive verification.
+
+The lead independently verified candidate **12355648523**, named `candidate-03a8e074b51dca7c03d69295e0c18ca0f22dc1da-1`: exactly four files, archive **640,524 bytes**, archive SHA-256 `a50b3abba6489541d01fc16edba45d8c6405483397c901d9e166737847c24e70`. Source, parent, tree, pinned manifests, package manifests, SHA256SUMS and API/archive digests agree. Wheel SHA-256 is `06e60d4d6fe16b9a971c8e44954fa162ace70dd157443e30efc6c50ba63d9eb6`; source archive SHA-256 is `80807d362d9eba7fc7b6d76427c952ca1b0f56e36993d05609581bbea0d75ba1`. The private indexed release record `reviewed-delivery-20261021-pr105-03a8e07.json` has SHA-256 `d97078681c5e3f2736679fd04a5fb80e39ba21b72aa308aa5e4cf2e3cf434f1b` and is retained outside disposable checkouts with owner-only permissions.
+
+Failed run **39612054532** remains recorded. Its sole core failure on each Python version was the stale universal 20-minute workflow assertion. The narrow test correction permits 30 minutes only for core, keeps other jobs at 20 and preserves all security assertions; 50 relevant local tests passed before the successful final PR run. Runtime bounds remain unchanged.
+
+Acceptance unlocks only **AR-008-B/P2 #95**, now In progress under the separate HTTP entry review. C owns entry/implementation, A independent tests and later the existing PostgreSQL lifecycle, B security/contract review, and the lead composition/progress/delivery. Aggregate #93 and parent #8 remain open. Totals remain 151 aggregate tasks (29 Verified, 1 In progress, 121 Not started), 158 planned PRs, 544 edges, 52 parents, 27 gates and 20 contracts. Package totals are 8 Verified, 1 In progress and 4 Not started. Estimates and external gates are unchanged; default adapters and customer-ready admission remain unavailable.
