@@ -278,10 +278,10 @@ The two retained cloud checkouts remain independently needed; measured filesyste
 
 | Engineer | Current assignment | Review checkpoint |
 | --- | --- | --- |
-| C | Admission P3 uncertainty correction and remaining coordinator matrix | Runtime stays preparatory; defaults unavailable. Full P3 acceptance remains required. |
-| B | Independent P3 security/source/test review | Reviews A's PostgreSQL publication suite and C's corrections; listing source and final PR/main evidence audited. |
-| A | Separate PostgreSQL publication suite and listing acceptance records in primary | 32 new PostgreSQL cases collect with explicit local skips; independent runtime selection passed 157. Actual PostgreSQL publication proof remains hosted. |
-| Lead | Admission integration and accepted-delivery verification | Listing P2/aggregate Verified and #88/#86 closed; admission P3/aggregate #80 and parent #6 remain open. |
+| C | P3 runtime, matrix and progress handoffs complete; available for hosted findings | Source and interpreter consumers released. Defaults stay unavailable; final publication proof remains pending. |
+| B | Final source/status review and hosted CI audit | Runtime, corrected PostgreSQL suite and exact source composition reviewed; final publication CI remains required. |
+| A | PostgreSQL suite and listing records complete; next HTTP entry audit delivered | 32 new PostgreSQL cases explicitly skip locally; independent runtime selection passed 157. No HTTP implementation has started. |
+| Lead | Owns primary integration, final checks and accepted-delivery verification | Combined source passed 530 with 94 PostgreSQL skips. Listing #88/#86 closed; admission #83/#80/#8 and listing parent #6 remain open. |
 
 2026-10-20 P2 authenticator coverage: Lead assigned B a bounded real-PostgreSQL check of Auth.principal at integrated 6058f91; the existing PostgreSQL suites constructed VerifiedPrincipal directly and did not execute this lookup. B added nine cases in tests/test_http_identity_postgres.py using the existing disposable fixture, actual credential SELECT and a column-restricted read-only app role: finite expiry/revocation, committed changes, missing/malformed identity, bounded selected fields and fixed permission failure. A independently reviews the immutable test delta; lead owns hosted execution and integration. Local checks: 10 existing HTTP identity tests passed, nine PostgreSQL cases explicitly skipped without the opt-in service; Ruff/format and whitespace passed with primary source provenance. No runtime edits, dependency installation, customer activation or P2 verification claim.
 
