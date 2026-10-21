@@ -393,8 +393,12 @@ operation_work.py and operation_reads.py: setuptools already emits all three,
 and normal callers now import the ownership helper. The added installed smoke
 helper imports the components, exercises owned read-only work against synthetic
 SQL, and asserts Database still uses its untracked default factory. The exact
-helper body passes locally; isolated wheel/sdist execution is recorded separately
-when complete. Completed-service smoke remains later P1 work.
+corrected component at 55b3950 passed offline wheel/sdist and isolated installed
+smoke on Python 3.12.3. Both archives' 110 runtime members matched that commit;
+B independently verified the indexed private source/provenance/artifact record.
+The disposable runtime was removed after proof. This is dormant-component
+acceptance, not factory activation, Python 3.11/hosted evidence or completed
+service acceptance. Completed-service smoke remains later P1 work.
 
 ### Restoration quarantine correction
 
@@ -429,7 +433,46 @@ failed invalidation, typed body denials, multiple cleanup interruptions, and
 capture after close/invalidation. They require old-raw disposal, zero checked-out
 slots, and a fresh writable connection with default native settings. Together
 with existing helper/caller, projection, schema, admission and listing cases,
-249 tests pass (one existing Starlette warning); static/package evidence is
-reported against the frozen correction separately. The prior isolated package
-proof remains historical evidence at 27c9405 until rerun at the corrected source.
-Factory activation and operation services remain outside this checkpoint.
+249 tests pass (one existing Starlette warning). Full Ruff/security, format,
+strict typing, pinned lock and provenance checks passed. The corrected 55b3950
+isolated package proof described above supersedes the historical 27c9405 proof
+for this component. Factory activation and operation services remain outside
+that restoration checkpoint.
+
+### File-backed Database factory activation
+
+Engineer C owns the constructor/new-test/installed-smoke slice of AR-008-B/P1
+#94. The constructor checkpoint is 902cb51; engineer A separately owns adaptation
+of existing Database-backed fixtures. These pieces require independent review
+and composition before activation acceptance.
+
+Database.__init__ parses the SQLAlchemy URL and selects the owned factory only
+for exact sqlite or sqlite+pysqlite, a nonempty file path other than :memory:,
+no file: URI, no query and no username/password/host/port. It forwards the existing
+3-second connection and 1-second pool timeout constants. Construction remains
+lazy, including the existing data-directory creation. The legacy URL branch,
+PostgreSQL constructor and configure_runtime_engine call remain intact.
+Unsupported memory/URI/query/custom-driver forms and independently injected
+engines gain no ownership capability; operation services still require the
+separate capability gate before their first acquisition.
+
+The new 25-case constructor selection proves actual file-engine laziness,
+native initial timeout, relative paths, unsupported-form dispatch, unchanged
+PostgreSQL configuration without a server connection, and refusal to certify an
+injected engine. The real migration-only control additionally exercises owned
+initialization, ordinary Database records, sequential inspection and the public
+coordinator refusal before identity/new-work sinks. It preserves the original
+post-migration raw connection and native timeout: an initial assertion incorrectly
+expected the constructor's 3000 ms after the existing migration policy had
+selected 5000 ms. The corrected oracle compares the actual pre-inspection value,
+without changing either policy.
+
+The installed component helper now requires the default file-backed Database
+to be owned, runs real migration-only compatibility and customer-admission
+refusal, verifies ordinary record/audit behavior and zero job creation, checks
+query_only restoration/pool release, and retains the separate bounded read/write
+denial checks. Other installed helper bodies remain unchanged. The constructor/caller/helper/restoration selection passes 150 cases with no
+skips or warnings (3.34 s). Exact activation package evidence belongs to the
+immutable handoff; composed existing-fixture evidence remains a separate gate.
+No operation read/cancel service, schema/profile readiness, HTTP, worker, failure
+producer or customer activation is implemented by this factory change.
