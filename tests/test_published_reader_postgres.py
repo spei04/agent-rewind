@@ -385,8 +385,9 @@ def test_postgres_full_16000_ref_statement_matches_then_refuses_missing_row(
             text(
                 "INSERT INTO artifact_objects "
                 "(id,project_id,digest,locator,format_version,byte_count,created_at) "
-                "SELECT 'feedface'||lpad(to_hex(n),24,'0'),:project,"
-                "lpad(to_hex(n),64,'0'),'objects/'||:project||'/v1/'||lpad(to_hex(n),64,'0'),"
+                "SELECT 'feedface'||lpad(to_hex(n),24,'0'),CAST(:project AS VARCHAR(32)),"
+                "lpad(to_hex(n),64,'0'),'objects/'||CAST(:project AS VARCHAR(32))"
+                "||'/v1/'||lpad(to_hex(n),64,'0'),"
                 "1,0,:created FROM generate_series(1,:count) AS n"
             ),
             {"project": CONTEXT.project_id, "created": created, "count": count},
