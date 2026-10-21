@@ -5,9 +5,10 @@ no SQL, artifact upload/read, HTTP admission, readiness probe, image discovery o
 provider call. Existing routes and migration-only profiles are unchanged.
 P2's additive durable schema is Verified after the separate
 [accepted P2 delivery](ADMISSION_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21).
-P3 is In progress and owns authorized recovery, receipt verification and atomic
-publication. This pure foundation supplies no available coordinator or new-work
-adapter; P3's complete acceptance matrix remains required.
+P3 is Verified for authorized recovery, receipt verification and atomic
+publication after [accepted service evidence](ADMISSION_EXECUTION_PLAN.md#accepted-p3-delivery--2026-10-21).
+This pure foundation supplies no HTTP admission or available new-work adapter;
+later integration and customer activation remain gated.
 
 ## Request and task identity
 

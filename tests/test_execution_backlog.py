@@ -171,6 +171,12 @@ def _delivery_packet(packet):
     for package in admission["delivery_packages"]:
         package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
     markdown = _sync_package_cards(markdown, admission["delivery_packages"])
+    # Operation adapters likewise cannot retain progress without admission.
+    operation = next(t for t in data["tasks"] if t["id"] == "AR-008-B")
+    operation["status"] = "Not started"
+    for package in operation["delivery_packages"]:
+        package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
+    markdown = _sync_package_cards(markdown, operation["delivery_packages"])
     # Listing also consumes the rewound authority producer.
     listing = next(t for t in data["tasks"] if t["id"] == "AR-006-B")
     listing["status"] = "Not started"
@@ -320,6 +326,9 @@ def test_admission_three_stage_delivery_retains_all_gates(packet, variant, messa
     data, markdown, plan = deepcopy(packet)
     task = next(t for t in data["tasks"] if t["id"] == "AR-008-A")
     p1, p2, p3 = task["delivery_packages"]
+    # Construct the pre-acceptance fixture independently of live delivery progress.
+    task["status"] = p3["status"] = "In progress"
+    p3["accepted_merge_commit"] = p3["review_evidence"] = None
     if variant == "early_p3":
         p2["status"] = "Not started"
         p2["accepted_merge_commit"] = p2["review_evidence"] = None
@@ -384,6 +393,19 @@ def test_observability_successor_requires_accepted_merge_and_all_aggregate_input
     for row in data["tasks"]:
         if row["id"] in task["dependencies"]:
             row["status"] = "Verified"
+            packages = row.get("delivery_packages", [])
+            if packages:
+                # Accepted producers include their packages and aggregate inputs.
+                for prerequisite in data["tasks"]:
+                    if prerequisite["id"] in row["dependencies"]:
+                        prerequisite["status"] = "Verified"
+            for index, package in enumerate(packages, start=1):
+                package.update(
+                    status="Verified",
+                    accepted_merge_commit=f"{index:040x}",
+                    review_evidence="Synthetic accepted worker producer package",
+                )
+            markdown = _sync_package_cards(markdown, packages)
     task["status"] = "In progress"
     p1.update(
         status="Verified",

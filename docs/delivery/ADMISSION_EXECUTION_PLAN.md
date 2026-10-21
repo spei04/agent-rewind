@@ -1,19 +1,20 @@
 # Admission execution plan
 
-2026-10-21 · Planning reconciliation of existing AR-008-A/B and reviewed C04 obligations. AR-008-A/P1 and P2 are Verified; see [accepted P2 delivery](#accepted-p2-delivery--2026-10-21). P3 is Implemented; verification pending in [draft PR #92](https://github.com/spei04/agent-rewind/pull/92); see the [current handoff](#p3-implemented-verification-pending--2026-10-21). AR-008-B remains Not started. These preparatory deliveries supply no deployed registry, available new-work admission, customer-ready profile or spending authority.
+2026-10-21 · AR-008-A/P1, P2, P3 and aggregate A are Verified; see [accepted P3 delivery](#accepted-p3-delivery--2026-10-21). Issues #80/#81/#82/#83 are closed. AR-008-B/P1 is In progress with engineer C; P2 remains Not started. These preparatory services supply no deployed registry, available new-work HTTP admission, customer-ready profile or spending authority.
 
 ## Entry and delivery boundaries
 
-AR-008-A retains direct prerequisites AR-007-C and AR-009-B, both Verified for their preparatory scope. AR-007-C completed accepted PR #79/main/candidate gates; see [route evidence](EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21). AR-008-A [#80](https://github.com/spei04/agent-rewind/issues/80) remains In progress; P1 #81 and P2 [#82](https://github.com/spei04/agent-rewind/issues/82) are Verified and closed. P3 [#83](https://github.com/spei04/agent-rewind/issues/83) is Implemented; verification pending after [accepted P2 delivery](#accepted-p2-delivery--2026-10-21); its accepted-merge/review-evidence fields remain null. A merge alone does not satisfy this gate. P1 inherits both prerequisites and C04; P2 requires accepted merged P1 and P3 requires accepted merged P2. The aggregate cannot be Verified until all three and the full service matrix pass. AR-008-B retains AR-008-A and AR-011-B. No outer dependency is removed or added.
+AR-008-A retains direct prerequisites AR-007-C and AR-009-B, both Verified for their preparatory scope. All three sequential packages and the full internal service matrix passed independent review, matching PR/main checks and candidate verification. Their accepted merge and review evidence are recorded in the ledger. Parent #8 stays open for AR-008-B, which retains AR-008-A and AR-011-B. No outer dependency is removed or added.
 
 | Delivery | Scope | Base / planning range | Handoff |
 | --- | --- | --- | --- |
 | AR-008-A/P1 | Strict client intent/defaults, immutable configuration registry/interface and versioned envelope | 2 / 2–3 BE days | Accepted typed identities, canonical vectors and concrete registry/ref design |
 | AR-008-A/P2 | Additive admission migration, constraints and bounded identity repositories | 2 / 2–3 BE days | Accepted literal profiles, preservation/restore and SQL identities |
 | AR-008-A/P3 | Reusable admission/publication/recovery coordinator | 3 / 3–5 BE days | Accepted contention, crash, revocation and uncertain-commit behavior |
-| AR-008-B | Three HTTP operations: submit, status and cancellation | 3 / 3–5 BE days, provisional | Route integration after accepted A; reforecast from its actual interface |
+| AR-008-B/P1 | Bounded Operation reads and same-Connection cancellation | 2 / 2–3 BE days | Accepted A and reviewed producer/cancellation checkpoint |
+| AR-008-B/P2 | Exactly submit, status and cancellation HTTP operations | 2 / 2–3 BE days | Accepted merged B/P1 and full three-route evidence |
 
-A replaces 2 [2–3] with 7 [7–11] days; B provisionally replaces 2 [2–3] with 3 [3–5]. Both estimates have medium-low confidence. This is re-estimation of already approved work, not additional feature, calendar, staffing, data or paid-execution approval. Reforecast at the first concrete P1 interface and before B assignment. The original historical schedules and immutable C21/owner decisions remain unchanged. Three contributor slots are not six human FTEs.
+A retains 7 [7–11] days. The separate [operation HTTP plan](OPERATION_HTTP_EXECUTION_PLAN.md) replaces B's provisional 3 [3–5] with two sequential 2 [2–3] BE packages, total 4 [4–6], medium-low confidence. B/P1 is In progress after its accepted-A and AR-011-B prerequisites and independent entry review; P2 remains Not started until accepted merged P1. This re-estimates approved status/cancellation and three-route work; it adds no feature, calendar, staffing, data or spending authority. Review the explicit stored-failure producer decision and same-Connection cancellation boundary before B runtime. The original historical schedules and immutable C21/owner decisions remain unchanged. Three contributor slots are not six human FTEs.
 
 The admission-only checkpoint 1d284ba retained 151 aggregate tasks and 543 outer edges, with 154 planned PRs: 452 base days, 765.1 summed upper days, an alternative 565-day allowance at 25%, and a 166.5-day effort-only path. Those are historical checkpoint totals. The subsequent [observability reconciliation](OBSERVABILITY_EXECUTION_PLAN.md) changes the current portfolio totals recorded in the [roadmap](../PLAN.md) and [execution ledger](../../contracts/proposals/execution-backlog.json). External waits and role contention remain outside the effort path.
 
@@ -37,7 +38,7 @@ The common configuration invariant applies to every future new legacy run/branch
 
 ## Publication and recovery
 
-The planning-only [P3 entry checkpoint](ADMISSION_COORDINATOR_ENTRY.md) fixes same-submit restart routing, immutable linked attempts, phase-specific errors and the policy/lock interface. Its accepted-merged-P2 and explicit-assignment prerequisites are now satisfied; the document itself adds no runtime or authority. P3 implementation/source review is complete; final hosted verification and acceptance remain subject to the full matrix.
+The planning-only [P3 entry checkpoint](ADMISSION_COORDINATOR_ENTRY.md) fixes same-submit restart routing, immutable linked attempts, phase-specific errors and the policy/lock interface. Its accepted-merged-P2 and explicit-assignment prerequisites are now satisfied; the document itself adds no runtime or authority. P3 implementation/source review and final hosted/main/candidate acceptance are complete for the internal service matrix.
 
 1. Authenticate and resolve the trusted original project context; authorize the action and resolve **both** scoped client-operation and key-alias identities before readiness, mutable registry lookup or storage.
 2. For a matching existing operation, reauthorize before disclosure and atomically bind any legitimate new alias. Return the original accepted IDs and stored configuration identity even if current defaults change or storage is unavailable. Changed canonical intent or an alias bound elsewhere conflicts; changing service-key principal is not recovery.
@@ -51,7 +52,7 @@ Unreferenced uploads are acknowledged as orphans with actual confirmed/uncertain
 
 The service matrix includes CT-M1-008/010/011/012: eight concurrent identical requests yielding one job/operation/creation audit; same client/body plus new key alias; conflicting key/client/canonical body; changed source whitespace versus equivalent defaults; revoked caller nondisclosure; configuration change plus storage-outage recovery; SQL rollback; and process death before/after commit with original-identity recovery. Prove current membership/token exclusion and final authorization, scoped constraint failures, fixed errors and no returned success after ambiguous commit. Local PostgreSQL skips never count as hosted execution.
 
-AR-008-B wires exactly three of the five frozen M1 HTTP operations: submit, operation status and cancellation. AR-006-B owns run list/detail/cursors. B adds strict transport limits and stable errors, passes trusted context/correlation, preserves terminal cancellation and verifies HTTP replay before readiness/config/storage. The unavailable WorkAdmission boundary remains in force until the required integration is accepted; no raw enqueue fallback is allowed.
+AR-008-B first supplies the bounded operation read/cancel adapters, then wires exactly three of the five frozen M1 HTTP operations: submit, operation status and cancellation. Its [execution plan](OPERATION_HTTP_EXECUTION_PLAN.md) separates unsupported legacy error text from a validated stored failure envelope; no GET invents historical correlation or a producer. AR-006-B owns run list/detail/cursors. B adds strict transport limits and stable errors, passes trusted context/correlation, preserves terminal cancellation and verifies HTTP replay before readiness/config/storage. The unavailable WorkAdmission boundary remains in force until the required integration is accepted; no raw enqueue fallback is allowed.
 
 AR-010-A/B still own budget/generation/permit and worker dispatch. Adding them as reverse prerequisites would cycle through AR-008-B; instead retain disabled preparatory interfaces and later integration acceptance. AR-012-B closes the full M1 behavior matrix. AR-008-A introduces no HTTP, worker, paid execution, customer-ready profile or activation. All production, spending and data gates remain unchanged.
 
@@ -192,3 +193,48 @@ Lead owns delivery, with A/B reviewers available and C releasing the reused
 checkout after this progress handoff. Accepted listing records remain unchanged.
 No HTTP/worker/ledger/generation wiring, customer-ready profile, provider call,
 paid resource or activation follows.
+
+## Accepted P3 delivery — 2026-10-21
+
+P3 #83 and aggregate #80 are **Verified/closed**. Reviewed source
+`a09e26d422b9aa379c2bd27f188c8a468122517d` merged through the strict gate in
+[PR #92](https://github.com/spei04/agent-rewind/pull/92) as
+`4c86c52a14e45fee6a27f8b4410310ced064cf31`. Their identical source tree is
+`8486a757d18b3a70020912113aedb4252e074e26`.
+
+[PR run 39574109747](https://github.com/spei04/agent-rewind/actions/runs/39574109747)
+and [protected-main run 39576754575](https://github.com/spei04/agent-rewind/actions/runs/39576754575)
+both passed. Python 3.11 ran 2860 passes/13 skips and Python 3.12 ran
+2870 passes/3 skips, each with one warning. All 33 publication and 26 recovery
+PostgreSQL cases executed on both versions. Ten skips are Python-3.12-only
+SQLite transaction cases; three Docker cases are covered separately by three
+passing gVisor cases in each run (3.37s PR, 3.08s main). Security, installed
+wheel/sdist smoke, the strict CI gate and main candidate delivery passed.
+B independently audited exact source identity, PostgreSQL opt-ins and expected
+skip accounting.
+
+Lead verified candidate `12335133060` (585266 bytes) in memory: exactly the
+wheel, source archive, candidate manifest and SHA256SUMS; source/parent/tree,
+pinned manifests and package hashes match. Archive SHA-256:
+`16bf27c304e967324d5baf6660092a25ad8949ca126b422b772b4e066d836ad8`.
+Private owner-readable evidence is indexed outside checkouts as
+`release-records/reviewed-delivery-20261021-pr92-4c86c52.json`.
+
+A reproduced the old migration-guard fixture failure on actual PostgreSQL
+16.15, split clean original-adoption and restricted-policy cases in `350a702`,
+and passed all 59 publication/recovery cases with zero skips in 184.69s.
+A/C independently checked the correction; runtime guards, grants, profiles and
+historical fixtures were not weakened. The instance is stopped and has no
+remaining disposable databases or roles.
+
+Earlier runs `39569954081` and `39562014839` remain failed evidence: respectively
+2858/2868 passes with one failure per version, and 2828/2838 passes with 19 shared
+failures. Indexed diagnostics retain those failures and their corrections.
+Earlier pending sections above are dated history, superseded by this acceptance.
+
+The internal CT-M1-008/010/011/012 admission/recovery service matrix is accepted.
+AR-008-B #93/#94/#95 and worker #96/#97/#98 remain Not started; parent #8 stays
+open. HTTP integration, worker/ledger/generation, full M1 integration, G1,
+customer data, provider execution and production activation retain their
+separate gates. No effort, dependency, historical contract or spending change
+is made by this acceptance.

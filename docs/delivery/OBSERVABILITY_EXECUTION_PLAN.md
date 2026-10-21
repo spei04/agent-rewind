@@ -49,8 +49,15 @@ The server-generated request/poll ID is distinct from the write-once trusted
 operation/job origin. Consume AR-008-A/B's persisted origin without overwriting
 it on replay, deriving it from client headers/body/configuration or reusing
 legacy jobs.error. Historical missing origins use only the producer's explicit
-migration-marker contract, never a fabricated original request. AR-011-C does
-not own admission or ledger schema changes.
+migration-marker contract, never a fabricated original request. AR-010-B/P1
+owns the chosen bounded Error/version/provenance/parser and operator-only
+idempotent historical-marker/consumer handoff, preserving original rows, audit
+and ciphertexts; P2 integrates both live completion and conditional lease
+expiry. Any needed storage migration decision and evidence belong in that P1,
+not in telemetry. Both AR-011-C packages continue to wait for accepted whole
+AR-010-B, not merely its preparatory P1. AR-011-C does not own admission,
+worker-failure or ledger schema changes, and AR-012-B verifies the producers
+rather than filling their implementation gap.
 
 Diagnostics use allowlisted restricted fields and bounded local drop state.
 Drops must remain observable locally, including sink/buffer failure, without a
