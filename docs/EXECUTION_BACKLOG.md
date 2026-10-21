@@ -938,6 +938,8 @@ M1 / P0 · 3 PRs · 7 engineering days · Not started · [Tracking issue #10](ht
 
 #### AR-010-B — Lease-fenced admission permits and cancellation accounting
 
+Tracking: [#96](https://github.com/spei04/agent-rewind/issues/96) · Not started.
+
 - **Objective:** Enforce budget limits before every potentially paid action. This task delivers lease-fenced admission permits and cancellation accounting.
 - **Implementation scope / PR boundary:** Deliver two sequential accepted-merge-gated PRs: bounded structured worker-failure persistence, authentic origin and historical-marker/consumer handoff, then live permit/configuration/cancellation and both completion/lease-expiry producer integrations. Require current owner/lease/generation/cancel authority before new paid work or normal completion; expiry uses a database-time conditional transition of the observed generation. Preserve scoped immutable common configuration and historical non-dispatchability.
 - **Out of scope:** No distributed study scheduling, automatic paid replay, provider retry/refund without evidence, telemetry/exporter vocabulary, API feature or reverse AR-008-B prerequisite; no production/customer activation or paid validation.
@@ -957,6 +959,8 @@ M1 / P0 · 3 PRs · 7 engineering days · Not started · [Tracking issue #10](ht
 
 #### AR-010-B/P1 — Bounded worker failure persistence and provenance
 
+Tracking: [#97](https://github.com/spei04/agent-rewind/issues/97) · Not started.
+
 - **Objective:** Implement the complete chosen bounded stored-failure representation and consumer handoff before wiring either live worker failure path.
 - **Implementation scope:** Freeze version/encoding, allowlisted safe code/message and phase-specific retryability mappings, exact byte/native-type/work bounds, authentic originating correlation and immutable job/operation association. Implement persistence/parser helpers and the bounded AR-008-B consumer extension using original receipts and fresh authority. Define and implement an operator-only idempotent historical migration-marker path that preserves original job rows/bytes, audit, ciphertexts and hash history; a marker never promotes raw legacy text into a trusted Error. Before code, decide whether existing storage suffices; any additive DDL requires explicit migration owner/revision, captured catalogs and preservation/rollback/restore proof within P1, with reforecast if broader.
 - **Out of scope:** No live completion/expiry wiring, paid dispatch, guessed schema/version, automatic legacy-text conversion, GET-triggered markers, new Error fields/metrics, history rewrite or production activation.
@@ -973,6 +977,8 @@ M1 / P0 · 3 PRs · 7 engineering days · Not started · [Tracking issue #10](ht
 <a id="ar-010-b-p2"></a>
 
 #### AR-010-B/P2 — Live permit and completion/expiry failure integration
+
+Tracking: [#98](https://github.com/spei04/agent-rewind/issues/98) · Not started.
 
 - **Objective:** Integrate the accepted bounded failure producer with live permits, cancellation and both worker terminal transitions.
 - **Implementation scope:** Require scoped immutable common configuration and current generation/cancel authority before dispatch for all newly admitted jobs. Integrate permit/reservation/publication fences and diagnostics without prompt bodies. Route normal worker completion/failure through accepted P1 persistence under a current owner/generation/live-lease fence. Replace the lease-expiry failure producer with a database-time conditional transition of the observed generation under shared project-first exclusion; it must not require an expired worker permit or overwrite a new generation/completion. Persist corresponding outcome/correlation evidence atomically and retain evidence-based cancellation/reconciliation.

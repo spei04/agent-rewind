@@ -1906,7 +1906,8 @@
           "acceptance": "Only supported bounded versioned/provenance-checked failure evidence is returned as nested Error, including outcome_uncertain as HTTP 200 data with stable original correlation and a fresh poll header. Unknown provider outcome retains its hold and retryable=false; evaluator false is not a worker failure. Missing/malformed/unsupported evidence remains safe 503. Historical markers are explicit, operator-only, repeat-stable and additive to preserved evidence; neither a poll ID nor an exception string proves origin",
           "tests": "SQLite and restricted actual PostgreSQL storage/parser vectors for both producer inputs, native type/byte overflow and pre-materialization bounds; all allowlisted mappings and secret canaries; stable original correlation across polls, evaluator false and provider uncertainty; operator authorization, repeated/interrupted marker application, exact old rows/audit/ciphertexts/hash preservation and backup/restore. If DDL is chosen, prove linear upgrade, frozen predecessor profiles, rollback and restart with captured catalog checks",
           "security_reliability": "Current VARCHAR(300) is a representation constraint, not a complete encoding/provenance fit proof: PostgreSQL rejects overflow while SQLite width is not enforcement, and the current producer does not truncate. Freeze actual canonical size and native bounds before persistence; no raw exception/provider/SQL/source/token payload. No inferred authentic origin, mutable overwrite or client/poll-derived marker. Preserve scoped receipts, visibility/action errors and current authority in the consumer",
-          "definition_of_done": "Independent entry review accepts the complete representation, producer mapping, marker and bounded consumer design before code, including explicit migration ownership/evidence if needed. Implement that chosen P1 boundary and pass SQLite/actual PostgreSQL, package/security and preservation checks at reviewed source; accepted merged P1 is required before P2. Reforecast instead of hiding broader DDL or migration work in P2"
+          "definition_of_done": "Independent entry review accepts the complete representation, producer mapping, marker and bounded consumer design before code, including explicit migration ownership/evidence if needed. Implement that chosen P1 boundary and pass SQLite/actual PostgreSQL, package/security and preservation checks at reviewed source; accepted merged P1 is required before P2. Reforecast instead of hiding broader DDL or migration work in P2",
+          "tracking_issue": "https://github.com/spei04/agent-rewind/issues/97"
         },
         {
           "role": "BE",
@@ -1936,9 +1937,11 @@
           "acceptance": "Stale owner/generation, expired normal worker lease, cancellation or DB failure prevents a new permit and stale publication. Conditional expiry affects only the observed still-expired generation and preserves any newer terminal result. Both actual producers commit safe failure/correlation with their intended terminal state; acknowledgment loss stays uncertain without automatic replay/refund. Historical rows remain non-dispatchable; accepted evidence reaches the Operation consumer and later telemetry without invented origin",
           "tests": "Actual SQLite and PostgreSQL producer paths plus bounded observed races: stale/live owner and generation, worker completion versus DB-time expiry, reclaim/new completion versus stale expiry, simultaneous reservation/publication/cancel, repeated release and DB outage. Inject failure at outcome/correlation/audit/commit boundaries and verify rollback, acknowledgment uncertainty and restart; exercise CT-M1-009/019/021/022 correlation/canary/unknown-hold controls and original history preservation with no paid provider calls",
           "security_reliability": "Acquire affected project exclusions before organization/grants/target locks according to C04; no job-to-project inversion. Normal completion and expiry have different authority proofs; never require the already-expired worker's live permit for expiry or accept a stale observed generation. Preserve gross reservations and unknown holds, no automatic timeout refund or privileged budget bypass, and no raw errors or prompt bodies in diagnostics",
-          "definition_of_done": "Independent review and matching hosted SQLite/actual PostgreSQL race, atomicity, recovery, package/security and full permit/configuration/cancellation evidence establish accepted merged P2 and aggregate completion. Both packages and all inherited prerequisites must be accepted before AR-011-C or AR-012-B claims integrated producer evidence; full M1/customer/funding gates remain separate"
+          "definition_of_done": "Independent review and matching hosted SQLite/actual PostgreSQL race, atomicity, recovery, package/security and full permit/configuration/cancellation evidence establish accepted merged P2 and aggregate completion. Both packages and all inherited prerequisites must be accepted before AR-011-C or AR-012-B claims integrated producer evidence; full M1/customer/funding gates remain separate",
+          "tracking_issue": "https://github.com/spei04/agent-rewind/issues/98"
         }
-      ]
+      ],
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/96"
     },
     {
       "id": "AR-011-A",
@@ -7700,7 +7703,10 @@
     "queued_child_issues": {
       "AR-008-B": 93,
       "AR-008-B/P1": 94,
-      "AR-008-B/P2": 95
+      "AR-008-B/P2": 95,
+      "AR-010-B": 96,
+      "AR-010-B/P1": 97,
+      "AR-010-B/P2": 98
     },
     "design_issues": {
       "RA-01-A": 47,

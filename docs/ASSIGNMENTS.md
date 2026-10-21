@@ -395,3 +395,20 @@ C owns the reused secondary from clean 8805626 for the approved C04 handoff; A r
 Lead owns PR #92 delivery; A now owns primary for the remaining test-only guard-fixture correction, B preserves hosted evidence. Corrected run 39569954081 is not accepted: both cores failed that precondition (2858/2868 passed, 13/3 skipped); 31/32 publication and 26/26 recovery PostgreSQL cases passed. Lead retains the full failure chronology.
 
 All three existing validators pass: 151 tasks/158 PRs/544 outer edges/459 base/775.1 upper/573.75 alternate/171.5 effort-path days, M1 60.5 and BE 92.5; other totals are unchanged. The first backlog run had 53 passes/one synthetic-fixture failure: Verified AR-010-B lacked accepted child packages. Lead authorized setup of package merge/review evidence, aggregate inputs and existing card sync; original assertions/checker are unchanged. The corrected run passed 54/54, zero skips, in 1.95s; Ruff lint/format and whitespace pass. Owned Python 3.12.3/imports and unchanged manifest/lock hashes were verified, with all 57 installed packages compatible. Preservation checks retain all 150 other tasks, existing statuses/outer edges/gates/contracts/schedules/tracking/dated history and runtime/profile/frozen-contract/checker bytes. Only the authorized fixture setup differs outside seven planning files. C releases all consumers after the immutable handoff; no push, issue write, runtime or activation occurred.
+
+### 2026-10-21 — Worker-producer planning tracking
+
+B independently accepted 0a19185's substantive plan/fixture/metrics with 54
+backlog passes (1.74s), all three validators and provenance/preservation checks;
+lead accepted the one-blank-line rendering correction at 543671f and published
+that exact planning head to work/operation-http-plan with read-back. Lead
+created aggregate [#96](https://github.com/spei04/agent-rewind/issues/96), P1
+[#97](https://github.com/spei04/agent-rewind/issues/97) and P2
+[#98](https://github.com/spei04/agent-rewind/issues/98), all open/Not started,
+and synchronized parent #10 to three PRs/seven [7–10.5] days. C owns this
+secondary tracking-only reconciliation; only three tracking URLs, queued-map
+entries and matching backlog links are added. Statuses, acceptance fields,
+scope/efforts/dependencies/gates, previous records and runtime remain unchanged.
+Lead retains PR #92 delivery; primary remains reserved for A's correction.
+
+Tracking validation: 54 backlog tests passed with zero skips in 1.76s; the execution validator and whitespace check passed. Deep comparison permits only the three URLs/queued entries, matching backlog links and this appended record; all task/package statuses, estimates, prerequisites, gates, history, tests and runtime are unchanged. Owned source/interpreter and unchanged manifest/lock provenance were rechecked. C releases the clean immutable checkpoint and all consumers for lead review; no push or GitHub write by C.
