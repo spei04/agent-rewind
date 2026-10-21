@@ -449,8 +449,8 @@ and composition before activation acceptance.
 Database.__init__ parses the SQLAlchemy URL and selects the owned factory only
 for exact sqlite or sqlite+pysqlite, a nonempty file path other than :memory:,
 no file: URI, no query and no username/password/host/port. It forwards the existing
-3-second connection and 1-second pool timeout constants. Construction remains
-lazy, including the existing data-directory creation. The legacy URL branch,
+3-second connection and 1-second pool timeout constants. Database connections
+remain lazy; existing data-directory creation is eager. The legacy URL branch,
 PostgreSQL constructor and configure_runtime_engine call remain intact.
 Unsupported memory/URI/query/custom-driver forms and independently injected
 engines gain no ownership capability; operation services still require the
