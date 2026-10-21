@@ -320,6 +320,9 @@ def test_admission_three_stage_delivery_retains_all_gates(packet, variant, messa
     data, markdown, plan = deepcopy(packet)
     task = next(t for t in data["tasks"] if t["id"] == "AR-008-A")
     p1, p2, p3 = task["delivery_packages"]
+    # Construct the pre-acceptance fixture independently of live delivery progress.
+    task["status"] = p3["status"] = "In progress"
+    p3["accepted_merge_commit"] = p3["review_evidence"] = None
     if variant == "early_p3":
         p2["status"] = "Not started"
         p2["accepted_merge_commit"] = p2["review_evidence"] = None

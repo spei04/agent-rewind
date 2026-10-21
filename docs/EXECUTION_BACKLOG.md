@@ -761,11 +761,11 @@ M1 / P0 · 5 PRs · 11 engineering days · In progress · [Tracking issue #8](ht
 - **Required automated tests:** CT-M1-008/010/011/012: eight concurrent winners, alias and composite-FK conflicts, canonical defaults and altered source whitespace, changed configuration/storage-outage recovery, revocation and nondisclosure, rollback and process death before/after commit; additive migration/restore preserves all 14 original rows, 18 ciphertext objects, hash heads and 245000 historical reservation units.
 - **Security and reliability:** Preserve source bytes, integer money and original trusted correlation; no storage/network or provider I/O inside SQL. Lock project before grants/caller/targets and recheck current authority plus both unique identities before commit. Preserve old profiles and nondispatchable historical v1 NULL configuration; never infer legacy defaults or use upload-journal evidence as committed identity.
 - **Effort / confidence:** 7 engineering days; planning range 7–11; medium-low confidence.
-- **Responsible role:** BE; C completed P3 runtime/unit/fault implementation after accepted P1/P2; B accepted source/test design and A authored the separate PostgreSQL suite. Lead owns final delivery; A/B reviewers remain available.
+- **Responsible role:** BE; C implemented the service, A authored and corrected the PostgreSQL suite, A/C accepted the correction, B independently audited source and hosted evidence, and lead completed merge/main/candidate delivery.
 - **Definition of done:** Each of P1/P2/P3 has independent review, matching required checks and accepted merged-source evidence before its successor starts. Aggregate completion requires the complete synthetic admission/recovery, preservation, PostgreSQL race and commit-uncertainty matrix. Record remaining HTTP/worker/activation gates; no external or production gate is satisfied.
-- **Progress:** In progress in [#80](https://github.com/spei04/agent-rewind/issues/80); P1 #81 and P2 #82 are Verified. See [accepted P2 evidence](delivery/ADMISSION_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P3 #83 is Implemented; verification pending in draft PR #92. See the [P3 handoff](delivery/ADMISSION_EXECUTION_PLAN.md#p3-implemented-verification-pending--2026-10-21) for source/local evidence and outstanding hosted publication/crash proof. Lead owns final delivery; aggregate acceptance and admission activation remain outstanding.
+- **Progress:** Verified; [#80](https://github.com/spei04/agent-rewind/issues/80) and P1/P2/P3 #81/#82/#83 are closed. [Accepted P3 evidence](delivery/ADMISSION_EXECUTION_PLAN.md#accepted-p3-delivery--2026-10-21) records PR #92 source, merge, actual PostgreSQL matrix, protected-main checks and candidate verification. HTTP integration and admission activation remain separate gates.
 
-Three delivery PRs: P1 2 [2–3], P2 2 [2–3], P3 3 [3–5] BE days. Each successor waits for its accepted merged predecessor; aggregate AR-008-A remains unverified until all three and the complete service matrix pass.
+Three delivery PRs: P1 2 [2–3], P2 2 [2–3], P3 3 [3–5] BE days. All three accepted-merge gates and the complete internal admission/recovery service matrix passed. AR-008-B retains its own integration and accepted-delivery requirements.
 
 <a id="ar-008-a-p1"></a>
 
@@ -814,9 +814,9 @@ Three delivery PRs: P1 2 [2–3], P2 2 [2–3], P3 3 [3–5] BE days. Each succe
 - **Required automated tests:** CT-M1-008/010/011/012 service matrix: eight-way contention, same-client/new-key race, key-to-other-client conflict, altered canonical body, changed config/storage outage, revocation before return/commit, rollback and actual process death before/after commit, confirmed-orphan upload receipts and safe uncertain outcome.
 - **Security and reliability:** Project-before-grant/caller/job lock hierarchy; current authority and both unique identities rechecked under the owned transaction; no I/O while locked. Unreferenced uploads are not committed jobs, receipts are not authority, and caller changes cannot recover another principal's operation.
 - **Effort / confidence:** 3 engineering days; planning range 3–5; medium-low confidence.
-- **Responsible role:** BE; C completed runtime/unit/fault implementation, A authored the separate PostgreSQL suite and B accepted source/test design. Lead owns final delivery, with A/B reviewers available.
+- **Responsible role:** BE; C implemented runtime/unit/fault coverage, A authored and corrected the PostgreSQL suite, A/C reviewed the correction, B accepted final source and hosted proof, and lead completed protected delivery.
 - **Definition of done:** Independent reviewer acceptance, matching hosted checks and a recorded accepted merge are required before the next package starts; preserve migration-only and external gates; aggregate acceptance additionally requires the complete admission/recovery matrix.
-- **Progress:** Implemented; verification pending in [#83](https://github.com/spei04/agent-rewind/issues/83) / [draft PR #92](https://github.com/spei04/agent-rewind/pull/92). B accepted runtime 302571f/4440ee3, e5a75ec's ten residual cases and A's corrected 32-case PostgreSQL suite 458c1114. Lead's composed edf85ae selection passed 530 tests with 94 explicit PostgreSQL skips; static/lock/three-validator checks passed. The earlier 39558425762 run covers only recovery, including 26 PostgreSQL cases. All 32 new publication/crash cases need hosted proof; matching final package/CI, merge and protected-main/candidate acceptance remain pending. Accepted-merge/review-evidence fields stay null. See [P3 handoff](delivery/ADMISSION_EXECUTION_PLAN.md#p3-implemented-verification-pending--2026-10-21); default adapters and customer admission remain unavailable.
+- **Progress:** Verified; [#83](https://github.com/spei04/agent-rewind/issues/83) is closed. Reviewed a09e26d merged as 4c86c52a14e45fee6a27f8b4410310ced064cf31 in [PR #92](https://github.com/spei04/agent-rewind/pull/92); PR/main runs 39574109747/39576754575 passed 2860/2870 tests, 13/3 expected skips, all 33 publication plus 26 recovery PostgreSQL cases and three gVisor cases. Lead verified candidate 12335133060 (585266 bytes), exact four files and identity/checksums. [Accepted P3 delivery](delivery/ADMISSION_EXECUTION_PLAN.md#accepted-p3-delivery--2026-10-21) preserves prior failures and current limits. Default adapters and customer admission remain unavailable.
 
 <a id="ar-008-b"></a>
 
@@ -1316,7 +1316,7 @@ M2 / P0 · 4 PRs · 11 engineering days · In progress
 - **Required automated tests:** Envelope schema, unknown key, denied decrypt and legacy format fixtures.
 - **Security and reliability:** No plaintext master key in DB or sandbox; use scoped runtime identity.
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
-- **Responsible role:** PL; required reviewers: SEC, QE. Named assignee pending staffing.
+- **Responsible role:** PL; required reviewers: SEC, QE. Execution assigned to engineer A; named human staffing remains unconfirmed.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
 - **Progress:** In progress; offline contract and synthetic fixtures assigned after verified prerequisites and lead entry review. Runtime and external gates remain open.
 - **Tracking:** https://github.com/spei04/agent-rewind/issues/99
@@ -2435,7 +2435,7 @@ M4 / P0 · 4 PRs · 12 engineering days · In progress
 - **Required automated tests:** OpenAPI fixtures for admin denial, membership revoke and invalid mapping.
 - **Security and reliability:** No self-assigned admin; recovery requires explicit audited operator procedure.
 - **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
-- **Responsible role:** FE; required reviewers: SEC, TL, QE. Named assignee pending staffing.
+- **Responsible role:** FE; required reviewers: SEC, TL, QE. Execution assigned to engineer C; named human staffing remains unconfirmed.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
 - **Progress:** In progress; offline contract and synthetic fixtures assigned after verified prerequisites and lead entry review. Runtime and external gates remain open.
 - **Tracking:** https://github.com/spei04/agent-rewind/issues/100
