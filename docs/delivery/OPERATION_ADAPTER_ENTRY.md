@@ -878,3 +878,64 @@ activation implementation. Then review constructor/new activation tests and the
 existing-fixture adaptation independently before combining them. This entry
 review does not itself activate the factory, implement services, advance P1,
 widen budgets or change outer dependencies.
+
+
+## Bounded primitive checkpoint — accepted entry, 2026-10-21
+
+B and the lead accepted C's concrete handoff against a2220eb and ced548b after
+the composed factory/fixture component passed at 97d39edf. C owns the narrow
+operation_reads factoring and a focused operation_sources module; A independently
+reviews security/test design. This checkpoint precedes service orchestration.
+
+Factor the existing all-16-field job decoder without changing read_job's strict
+receipt behavior. Record optional result candidates as an observed zero or one
+valid scoped descriptor with exact owner/role/cardinality. A SQL NULL result
+permits that observation with no artifact load or inferred result ID; a non-NULL
+result requires one matching descriptor and the existing bounded verified loader.
+The final GET statement must preserve observed absence/cardinality as well as
+all operation/job/source/descriptor fields, scope and by-job discovery.
+
+The accepted schema-2 run envelope has no admission source-run ancestry. The
+existing Lineage rules require every run-job cohort member to be a run with an
+explicit null parent; study and non-null-parent members are already invalid.
+Load the complete same-project by-job cohort, preserve multiple root runs, and
+require the exact returned result ID to belong to it. Foreign incoming aliases
+remain excluded by the existing scoped rules. This equivalence needs executable
+negative controls before it is relied on in services.
+
+One job plus 255 cohort records consumes 256 source visits and 510 edges;
+operation/config/result identities bring the maximum to 259. Materialize at
+most remaining_visits+1 SQL candidates, then gate COUNT and aggregate raw
+returned-cell bytes before projecting bodies. Overcount, malformed or oversized
+candidates produce small explicit refusal markers; they must never be filtered
+or trimmed into success. Preserve the exact canonical 4 MiB retention cap after
+the raw-transfer gate. The single final typed relational comparison must include
+native types, original scope, candidate counts and by-job anti-joins within the
+existing 64-bind/260-row limits.
+
+Cancellation retains a separate immutable operation/config/job association:
+all original operation/config fields and refs, plus job id, kind, created,
+payload, budget, actor, payload_version and config reference/digest. Preserve
+native type distinctions and large integer accounting without float conversion;
+reserved greater than budget remains a valid accounting value.
+Fresh all-16-field job validation must not overwrite it, and strict GET mutable
+job/result/ref equality must not be carried across commit acknowledgment.
+Legitimate worker progress may change status, result/ref, reservation or lease
+without replacing the captured cancellation response. Shared visits do not reset
+between phases: three full validations allow at most 84 roots per phase, rather
+than 255. Proposed 74 GET/162 cancellation charged-attempt figures are design
+estimates requiring actual traces; the existing ceiling remains 512.
+
+First freeze: pure association/observation factoring, cohort and final-query
+primitives, and focused SQLite/PostgreSQL tests. Require maximum matching
+capacity, overflow and aggregate-before-transfer controls, native types, extra
+malformed refs, absent-to-present refs and by-job phantoms. Existing schema has no
+by-job JSON or project-scope index: test substantial nonmatching same-project and
+foreign records under the same VM/time limits. Small result size alone does not
+establish scan cost or enterprise throughput. An unmet measured requirement is a
+review finding; this entry authorizes no index, migration or wider budget.
+
+No service method, HTTP, profile, worker or failure-producer implementation is
+part of this primitive checkpoint. Actual service integration and full P1
+SQLite/PostgreSQL/hosted/delivery evidence remain subsequent gates. Task states,
+outer dependencies, package count, estimates and external authority are unchanged.
