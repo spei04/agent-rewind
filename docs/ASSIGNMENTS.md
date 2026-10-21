@@ -9,7 +9,7 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 | A | Guard diagnostics and delivery-verifier review complete | Bounded guard checks passed; database restored/stopped; no active holds. |
 | C | HTTP test application cleanup complete | a992425: 94 targeted cases passed on each local interpreter; no runtime-limit or existing-assertion changes. |
 | B | Corrected source inventory and hosted delivery audit | Review immutable source, complete run attempts and candidate evidence. |
-| Lead | Corrected HTTP integration and delivery | Primary owns final composition; secondary retained for delivery corrections. Ledger decision remains pending. |
+| Lead | Corrected HTTP integration and approved ledger planning | Primary owns final HTTP composition; secondary retained for delivery corrections. Ledger code waits for accepted HTTP and exact entry review. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -291,10 +291,10 @@ The two retained cloud checkouts remain independently needed; measured filesyste
 
 | Engineer | Historical assignment before corrected PR #92 acceptance | Review checkpoint |
 | --- | --- | --- |
-| C | HTTP test application cleanup complete | a992425: 94 targeted cases passed on each local interpreter; no runtime-limit or existing-assertion changes. |
-| B | Corrected source inventory and hosted delivery audit | Review immutable source, complete run attempts and candidate evidence. |
-| A | Guard diagnostics and delivery-verifier review complete | Bounded guard checks passed; database restored/stopped; no active holds. |
-| Lead | Corrected HTTP integration and delivery | Primary owns final composition; secondary retained for delivery corrections. Ledger decision remains pending. |
+| C | P3 guard-fixture source review accepted at 350a702; worker producer planning and tracking complete | Exact reviewed test blob preserved; planning issues #96/#97/#98 remain Not started. No primary interpreter or database consumer. |
+| B | Independent hosted evidence audit | Failed run 39569954081 is preserved: one shared guard-fixture failure, 31/32 publication and 26/26 recovery cases passed. The next corrected hosted source still requires acceptance. |
+| A | Guard-fixture correction delivered at 350a702 | Reproduced ownership_progress_invalid on unchanged source, then passed all 33 publication and 26 recovery cases on actual PostgreSQL 16.15 with zero skips. Source/interpreter consumers released. |
+| Lead | Owns correction progress, publication and protected delivery | Record independent source review and local PostgreSQL proof; require matching hosted checks, accepted merge and protected-main candidate before closing #83/#80. Parent #8 stays open for AR-008-B. |
 
 2026-10-20 P2 authenticator coverage: Lead assigned B a bounded real-PostgreSQL check of Auth.principal at integrated 6058f91; the existing PostgreSQL suites constructed VerifiedPrincipal directly and did not execute this lookup. B added nine cases in tests/test_http_identity_postgres.py using the existing disposable fixture, actual credential SELECT and a column-restricted read-only app role: finite expiry/revocation, committed changes, missing/malformed identity, bounded selected fields and fixed permission failure. A independently reviews the immutable test delta; lead owns hosted execution and integration. Local checks: 10 existing HTTP identity tests passed, nine PostgreSQL cases explicitly skipped without the opt-in service; Ruff/format and whitespace passed with primary source provenance. No runtime edits, dependency installation, customer activation or P2 verification claim.
 
@@ -603,4 +603,11 @@ The delivery verifier now binds explicit PR and protected-main attempt numbers a
 
 ## P2 cleanup component accepted for delivery review — 2026-10-21
 
-AR-008-B/P2 remains In progress: PR #106 run 39631674974 failed on Python 3.11. The independently reviewed test-only application-cache correction a992425 preserves runtime limits and existing assertions; 94 targeted cases passed on each local interpreter. Corrected-source hosted checks, protected-main delivery and candidate verification remain required. The original hosted failure causes are not established. Ledger implementation remains gated by P2 acceptance and the pending execution-window decision. The primary checkout is reused on work/operation-http-final; the separately published ledger proposal remains on work/ledger-entry. Both existing checkouts own their environments. No provider calls, production changes, partner data or new paid resources were used.
+AR-008-B/P2 remains In progress: PR #106 run 39631674974 failed on Python 3.11. The independently reviewed test-only application-cache correction a992425 preserves runtime limits and existing assertions; 94 targeted cases passed on each local interpreter. Corrected-source hosted checks, protected-main delivery and candidate verification remain required. The original hosted failure causes are not established. The finite-window, two-package ledger plan is owner-approved; implementation remains gated by P2 acceptance and exact manifest/interface/SQL entry review. The primary checkout is reused on work/operation-http-final; the separately published ledger proposal remains on work/ledger-entry. Both existing checkouts own their environments. No provider calls, production changes, partner data or new paid resources were used.
+
+
+## Ledger owner decision — 2026-10-21
+
+The owner approved the [reviewed ledger plan](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md): one finite job execution window supplied by trusted provisioning; retries, claims and restarts cannot extend it; expiry prevents new paid work while retaining obligations. The schema/provisioning then reservation/concurrency split and provisional 6–10 engineering-day estimate are approved. The original owner message and its exact proposal context were verified and recorded privately.
+
+The lead will reconcile the ledger planning amendment and assign exact manifest/interface/SQL entry work. Ledger implementation still waits for accepted HTTP protected-main delivery and entry review. Existing spending authorization, migration-only compatibility, later worker and settlement gates remain unchanged. Earlier dated pending-decision checkpoints remain historical.

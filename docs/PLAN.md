@@ -1,6 +1,6 @@
 # Agent Rewind — enterprise product and engineering roadmap
 
-**Current delivery checkpoint — 2026-10-21:** AR-008-B/P2 remains In progress: PR #106 run 39631674974 failed on Python 3.11. The independently reviewed test-only application-cache correction a992425 preserves runtime limits and existing assertions; 94 targeted cases passed on each local interpreter. Corrected-source hosted checks, protected-main delivery and candidate verification remain required. The original hosted failure causes are not established. Ledger implementation remains gated by P2 acceptance and the pending execution-window decision.
+**Current delivery checkpoint — 2026-10-21:** AR-008-B/P2 remains In progress: PR #106 run 39631674974 failed on Python 3.11. The independently reviewed test-only application-cache correction a992425 preserves runtime limits and existing assertions; 94 targeted cases passed on each local interpreter. Corrected-source hosted checks, protected-main delivery and candidate verification remain required. The original hosted failure causes are not established. The finite-window, two-package ledger plan is owner-approved; implementation remains gated by P2 acceptance and exact manifest/interface/SQL entry review.
 
 **Document owner:** spei04 · **Revision:** 2026-10-21 · **State:** Execution backlog approved; staged delivery in progress
 **Implementation baseline:** `8f1ae757005c95c50a789e4fa0a10aae9b3c4024` · **Delivery clock:** Day 1 begins after execution-backlog approval (E0) and staffing confirmation; runtime implementation also requires G0.
