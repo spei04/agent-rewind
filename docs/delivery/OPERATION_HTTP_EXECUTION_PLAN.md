@@ -1,8 +1,8 @@
 # Operation HTTP execution plan
 
-2026-10-21 · Planning amendment for the existing AR-008-B scope, originally prepared against source 5d3ff3096d81f159a457870a1f4fa57590a06cc2. AR-008-B and both packages remain **Not started**. AR-008-A/P3 and aggregate A are now Verified after [accepted PR/main/candidate evidence](ADMISSION_EXECUTION_PLAN.md#accepted-p3-delivery--2026-10-21). This plan does not implement routes or enable customer admission.
+2026-10-21 · Planning amendment for the existing AR-008-B scope, originally prepared against source 5d3ff3096d81f159a457870a1f4fa57590a06cc2. AR-008-B and P1 are **In progress** with engineer C after accepted prerequisites and independent entry review; P2 remains **Not started** until accepted merged P1. AR-008-A/P3 and aggregate A are now Verified after [accepted PR/main/candidate evidence](ADMISSION_EXECUTION_PLAN.md#accepted-p3-delivery--2026-10-21). This plan does not implement routes or enable customer admission.
 
-The design-only [P1 adapter entry checkpoint](OPERATION_ADAPTER_ENTRY.md) proposes concrete APIs, cumulative bounds and the initial unavailable-failure support table. Tracking is aggregate [#93](https://github.com/spei04/agent-rewind/issues/93), P1 [#94](https://github.com/spei04/agent-rewind/issues/94), P2 [#95](https://github.com/spei04/agent-rewind/issues/95); all remain Not started.
+The design-only [P1 adapter entry checkpoint](OPERATION_ADAPTER_ENTRY.md) proposes concrete APIs, cumulative bounds and the initial unavailable-failure support table. Tracking is aggregate [#93](https://github.com/spei04/agent-rewind/issues/93), P1 [#94](https://github.com/spei04/agent-rewind/issues/94), P2 [#95](https://github.com/spei04/agent-rewind/issues/95); aggregate/P1 are In progress; P2 remains Not started.
 
 ## Entry and delivery boundaries
 
@@ -106,3 +106,7 @@ P2 exercises actual cookie and service-key HTTP requests in two populated projec
 Installed wheel/sdist smoke exercises the new service/routes only through isolated synthetic per-app fixtures, preserving the installed-source provenance guard and actual production refusal in another instance. Local helper tests or explicit PostgreSQL skips are not installed or database proof. Matching hosted checks, independent review and accepted merge are required for each package; aggregate completion also needs protected-main/candidate acceptance. Later full M1 worker/ledger/failure-producer behavior remains AR-012-B and its existing producers.
 
 No code, schema, profile, frozen contract, historical schedule, task dependency, worker/customer activation or paid resource changes follow from this planning amendment.
+
+## P1 implementation assignment — 2026-10-21
+
+Engineer C owns P1 #94 in the reused secondary cloud checkout. B independently reviews cumulative work accounting, optional transaction work and raw receipts before dependent read/cancel services. The initial failure table remains fail-closed: no stored-failure producer is invented. The entry audit found no additional producer prerequisite. Actual PostgreSQL, hosted/package checks, independent source review and accepted delivery are still required. P2 remains Not started; no HTTP/schema/profile/worker/provider/customer activation is included.
