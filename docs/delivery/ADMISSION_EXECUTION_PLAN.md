@@ -15,7 +15,7 @@ AR-008-A retains direct prerequisites AR-007-C and AR-009-B. AR-009-B's preparat
 
 A replaces 2 [2–3] with 7 [7–11] days; B provisionally replaces 2 [2–3] with 3 [3–5]. Both estimates have medium-low confidence. This is re-estimation of already approved work, not additional feature, calendar, staffing, data or paid-execution approval. Reforecast at the first concrete P1 interface and before B assignment. The original historical schedules and immutable C21/owner decisions remain unchanged. Three contributor slots are not six human FTEs.
 
-The ledger retains 151 aggregate tasks and 543 outer edges; two additional delivery packages give 154 planned PRs. Current totals are 452 base days, 765.1 summed upper days, an alternative 565-day allowance at 25%, and a 166.5-day effort-only path. M1 is 53.5 days and BE demand 89.5 days. External waits and role contention remain outside that path.
+The admission-only checkpoint 1d284ba retained 151 aggregate tasks and 543 outer edges, with 154 planned PRs: 452 base days, 765.1 summed upper days, an alternative 565-day allowance at 25%, and a 166.5-day effort-only path. Those are historical checkpoint totals. The subsequent [observability reconciliation](OBSERVABILITY_EXECUTION_PLAN.md) changes the current portfolio totals recorded in the [roadmap](../PLAN.md) and [execution ledger](../../contracts/proposals/execution-backlog.json). External waits and role contention remain outside the effort path.
 
 ## Concrete P1 checkpoint
 
@@ -53,4 +53,4 @@ AR-008-B wires exactly three of the five frozen M1 HTTP operations: submit, oper
 
 AR-010-A/B still own budget/generation/permit and worker dispatch. Adding them as reverse prerequisites would cycle through AR-008-B; instead retain disabled preparatory interfaces and later integration acceptance. AR-012-B closes the full M1 behavior matrix. AR-008-A introduces no HTTP, worker, paid execution, customer-ready profile or activation. All production, spending and data gates remain unchanged.
 
-Open planning finding: AR-011-C requires producer-boundary reconciliation before assignment; foundation-only scope may be ready, full integration awaits AR-010-B. Its existing estimates, aggregate dependencies and package structure are unchanged here. No new telemetry vocabulary, runtime claim or observability re-estimate is bundled into this admission plan.
+The producer-boundary finding raised at the admission-only checkpoint is resolved by the separately reviewed [observability execution plan](OBSERVABILITY_EXECUTION_PLAN.md). Both AR-011-C packages wait for Verified AR-010-B; there is no early foundation start. That plan owns the revised telemetry estimate and dependency, while admission retains correlation persistence. The frozen metric vocabulary and external gates remain unchanged.
