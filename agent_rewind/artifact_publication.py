@@ -37,6 +37,7 @@ from .publication_journal import PublicationJournal
 from .publication_source import lock_ancestor_ref, snapshot
 from .published_reader import PublishedRunReader
 from .scoped_repositories import ProjectContext, _Reads
+from .sqlite_ownership import owned_begin, owned_connect
 
 
 @dataclass(frozen=True)
@@ -198,7 +199,7 @@ class RunPublisher:
     @contextmanager
     def _connection(self, *, write: bool = False) -> Iterator[Connection]:
         try:
-            with self.engine.begin() if write else self.engine.connect() as connection:
+            with owned_begin(self.engine) if write else owned_connect(self.engine) as connection:
                 if write:
                     raw = connection.connection.driver_connection
                     dialect = connection.dialect.name

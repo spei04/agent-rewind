@@ -22,6 +22,72 @@ from agent_rewind.run_projection import utc_created
 from agent_rewind.scoped_repositories import ProjectContext, ResourceNotFound, ScopedRepositories
 
 
+def operation_components_smoke(root: Path) -> None:
+    from cryptography.fernet import Fernet
+    from pydantic import SecretStr
+
+    from agent_rewind.admission_transaction import AdmissionError
+    from agent_rewind.config import Settings
+    from agent_rewind.database import Database
+    from agent_rewind.operation_reads import ReceiptBook
+    from agent_rewind.operation_work import OperationWork, operation_connection
+    from agent_rewind.sqlite_ownership import (
+        SQLiteOwnershipError,
+        create_owned_sqlite_engine,
+        owned_begin,
+        owned_connect,
+        require_owned_sqlite,
+    )
+
+    # Package imports are necessary integration, not factory/service activation.
+    ReceiptBook()
+    database = Database(
+        Settings(
+            _env_file=None,
+            data_dir=root / "default",
+            database_url=f"sqlite:///{root / 'default.sqlite'}",
+            encryption_key=SecretStr(Fernet.generate_key().decode()),
+            bootstrap_key=SecretStr("synthetic-package-bootstrap-default-factory"),
+        )
+    )
+    try:
+        try:
+            require_owned_sqlite(database.engine)
+        except SQLiteOwnershipError:
+            pass
+        else:
+            raise RuntimeError("Default Database factory activated owned SQLite")
+    finally:
+        database.engine.dispose()
+
+    engine = create_owned_sqlite_engine(
+        f"sqlite:///{root / 'owned.sqlite'}", pool_size=1, max_overflow=0
+    )
+    try:
+        with owned_begin(engine) as connection:
+            connection.exec_driver_sql("CREATE TABLE proof (id INTEGER)")
+            connection.exec_driver_sql("INSERT INTO proof VALUES(1)")
+        work = OperationWork()
+        with operation_connection(engine, work) as connection:
+            if connection.exec_driver_sql("SELECT id FROM proof").scalar_one() != 1:
+                raise RuntimeError("Installed owned read changed synthetic data")
+        if work.statements <= 0 or work._started is not None:
+            raise RuntimeError("Installed operation work lost accounting or cleanup")
+        try:
+            with operation_connection(engine, OperationWork()) as connection:
+                connection.exec_driver_sql("INSERT INTO proof VALUES(2)")
+        except AdmissionError as error:
+            if error.code != "dependency_unavailable":
+                raise RuntimeError("Installed read-only refusal changed") from None
+        else:
+            raise RuntimeError("Installed operation read allowed a write")
+        with owned_connect(engine) as connection:
+            if connection.exec_driver_sql("SELECT count(*) FROM proof").scalar_one() != 1:
+                raise RuntimeError("Installed denied read scope changed data")
+    finally:
+        engine.dispose()
+
+
 def repository_smoke(engine: Engine) -> None:
     repository = ScopedRepositories(engine)
     # Synthetic trusted identity matches only the explicit smoke initialization.
@@ -639,6 +705,7 @@ if importlib.metadata.version("agent-rewind") != "0.1.0":
     raise RuntimeError("Unexpected installed package identity")
 admission_foundation_smoke()
 with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporary:
+    operation_components_smoke(Path(temporary))
     database = Path(temporary) / "metadata.sqlite"
     engine = create_engine(f"sqlite:///{database}")
     configure_artifact_engine(engine)

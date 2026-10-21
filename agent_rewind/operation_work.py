@@ -26,6 +26,15 @@ from .admission_transaction import AdmissionError
 from .request_authority import ActionForbidden
 from .request_identity import IdentityInvalid
 from .scoped_lineage import ResourceNotFound
+from .sqlite_ownership import (
+    CheckoutReceipt,
+    ProgressLease,
+    close_owned,
+    connect_owned,
+    finish_owned,
+    optional_progress,
+    quarantine_owned,
+)
 
 MAX_STATEMENTS = 512
 MAX_SECONDS = 10.0
@@ -47,6 +56,7 @@ class OperationWork:
         self._info: dict[str, Any] | None = None
         self._listeners: list[tuple[str, Any]] = []
         self._progress = False
+        self._lease: ProgressLease | None = None
         self._ready = False
         self._detached = True
         self._failed = False
@@ -138,6 +148,8 @@ class OperationWork:
         self.check()
         if self._connection is not None or connection.info.get("operation_work") is not None:
             raise AdmissionError("dependency_unavailable")
+        lease = optional_progress(connection, owner=self)
+        self._lease = lease
         self._connection = connection
         self._raw = connection.connection.driver_connection
         self._info = connection.info
@@ -153,7 +165,10 @@ class OperationWork:
             event.listen(connection, name, callback)
         if connection.dialect.name == "sqlite":
             self._progress = True
-            self._raw.set_progress_handler(self._step, VM_INTERVAL)
+            if self._lease is None:
+                self._raw.set_progress_handler(self._step, VM_INTERVAL)
+            else:
+                self._lease.install(self._step, VM_INTERVAL)
 
     def setup_complete(self) -> None:
         self.check()
@@ -181,14 +196,18 @@ class OperationWork:
         failed = False
         interruption: BaseException | None = None
         if connection is not None:
-            if self._progress:
+            if self._progress or self._lease is not None:
                 try:
-                    self._raw.set_progress_handler(None, 0)
+                    if self._lease is None:
+                        self._raw.set_progress_handler(None, 0)
+                    else:
+                        self._lease.release()
                 except BaseException as error:
                     failed = True
                     if interruption is None and not isinstance(error, Exception):
                         interruption = error
                 self._progress = False
+                self._lease = None
             for name, callback in self._listeners:
                 try:
                     if event.contains(connection, name, callback):
@@ -238,6 +257,7 @@ def operation_connection(engine: Engine, work: OperationWork) -> Iterator[Connec
     """
     work.check()
     connection: Connection | None = None
+    receipt: CheckoutReceipt | None = None
     original: tuple[int, int] | None = None
     primary: BaseException | None = None
     attached = False
@@ -276,7 +296,7 @@ def operation_connection(engine: Engine, work: OperationWork) -> Iterator[Connec
                     cleanup_failure(error)
 
     try:
-        connection = engine.connect()
+        connection, receipt = connect_owned(engine, control_attempt=work.control_attempt)
         attached = True
         work.attach(connection)
         raw = connection.connection.driver_connection
@@ -328,7 +348,35 @@ def operation_connection(engine: Engine, work: OperationWork) -> Iterator[Connec
                 work.detach()
             except BaseException as error:
                 cleanup_failure(error)
-        if connection is not None:
+        if connection is not None and receipt is not None:
+            cleanup_attempt("rollback")
+            try:
+                connection.rollback()
+            except BaseException as error:
+                cleanup_failure(error)
+            if not cleanup_failed and setup_ok and original is not None:
+                try:
+                    raw = connection.connection.driver_connection
+                    if raw is None:
+                        raise AdmissionError("dependency_unavailable")
+                    cleanup_attempt("restore")
+                    raw.execute(f"PRAGMA query_only={original[0]}")
+                    cleanup_attempt("restore")
+                    raw.execute(f"PRAGMA busy_timeout={original[1]}")
+                except BaseException as error:
+                    cleanup_failure(error)
+            if cleanup_failed or not setup_ok:
+                quarantine_owned(receipt)
+            cleanup_attempt("close")
+            try:
+                close_owned(connection, receipt)
+            except BaseException as error:
+                cleanup_failure(error)
+            try:
+                finish_owned(connection, receipt, control_attempt=work.control_attempt)
+            except BaseException as error:
+                cleanup_failure(error)
+        elif connection is not None:
             # Failed accounting cannot skip the native action. Failed native
             # cleanup cannot skip later discard, close, reclose or finish.
             cleanup_attempt("rollback")

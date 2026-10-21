@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 import time
 from collections.abc import Iterator
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Any
 
@@ -14,6 +14,15 @@ from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import SQLAlchemyError
 
 from .errors import Fault
+from .sqlite_ownership import (
+    CheckoutReceipt,
+    ProgressLease,
+    close_owned,
+    connect_owned,
+    finish_owned,
+    optional_progress,
+    quarantine_owned,
+)
 
 MAX_STATEMENTS = 4096
 MAX_SQL_SECONDS = 2.0
@@ -62,6 +71,12 @@ def listing_connection(engine: Engine, work: SQLWork) -> Iterator[Connection]:
     """
     connection: Connection | None = None
     raw: Any = None
+    receipt: CheckoutReceipt | None = None
+    lease: ProgressLease | None = None
+    progress = False
+    primary: BaseException | None = None
+    cleanup_interruption: BaseException | None = None
+    failed = False
     previous: tuple[int, int] | None = None
     listeners: list[tuple[str, Any]] = []
     entered = False
@@ -81,7 +96,8 @@ def listing_connection(engine: Engine, work: SQLWork) -> Iterator[Connection]:
             cursor.execute(f"SET LOCAL lock_timeout = {min(250, remaining_ms)}")
 
     try:
-        connection = engine.connect()
+        connection, receipt = connect_owned(engine)
+        lease = optional_progress(connection, owner=work)
         raw = connection.connection.driver_connection
         if dialect == "sqlite":
             if (
@@ -99,7 +115,11 @@ def listing_connection(engine: Engine, work: SQLWork) -> Iterator[Connection]:
             )
             raw.execute("PRAGMA query_only=ON")
             raw.execute("PRAGMA busy_timeout=250")
-            raw.set_progress_handler(work.progress, VM_INTERVAL)
+            progress = True
+            if lease is None:
+                raw.set_progress_handler(work.progress, VM_INTERVAL)
+            else:
+                lease.install(work.progress, VM_INTERVAL)
         elif dialect == "postgresql" and engine.dialect.driver == "psycopg":
             if getattr(raw, "autocommit", None) is not False:
                 connection.invalidate()
@@ -119,60 +139,77 @@ def listing_connection(engine: Engine, work: SQLWork) -> Iterator[Connection]:
             event.listen(connection, name, callback)
         entered = True
         yield connection
-    except Fault:
-        raise
-    except (SQLAlchemyError, sqlite3.Error):
-        broken = True
-        raise Fault("dependency_unavailable") from None
-    except Exception:
-        if not entered:
-            broken = True
-            raise Fault("dependency_unavailable") from None
-        raise
+    except BaseException as error:
+        primary = error
+        broken = isinstance(error, SQLAlchemyError | sqlite3.Error) or (
+            not entered and isinstance(error, Exception) and not isinstance(error, Fault)
+        )
     finally:
+
+        def failure(error: BaseException) -> None:
+            nonlocal failed, cleanup_interruption
+            failed = True
+            if cleanup_interruption is None and not isinstance(error, Exception):
+                cleanup_interruption = error
+
         if connection is not None:
-            failed = False
-            # Keep cleanup unconditional even after partial event registration.
+            # Acquire precedes effects; detach every installed owner before any
+            # rollback/restore. Accounting or hook failure cannot skip close.
             for name, callback in listeners:
                 try:
                     if event.contains(connection, name, callback):
                         event.remove(connection, name, callback)
-                except Exception:
-                    failed = True
-            if work.started is not None:
-                work.seconds += time.monotonic() - work.started
-                work.started = None
-            exhausted = work.remaining() <= 0
+                except BaseException as error:
+                    failure(error)
+            try:
+                if lease is not None:
+                    lease.release()
+                elif progress:
+                    raw.set_progress_handler(None, 0)
+            except BaseException as error:
+                failure(error)
             try:
                 if not connection.invalidated:
-                    if dialect == "sqlite" and previous is not None:
-                        raw.set_progress_handler(None, 0)
                     connection.rollback()
-                    if dialect == "sqlite" and previous is not None:
+                    if dialect == "sqlite" and previous is not None and not failed:
                         if raw.in_transaction:
-                            raise RuntimeError("unsupported retained read transaction")
+                            raise Fault("dependency_unavailable")
                         raw.execute(f"PRAGMA query_only={previous[0]}")
                         raw.execute(f"PRAGMA busy_timeout={previous[1]}")
-            except Exception:
-                failed = True
-            finally:
-                try:
-                    if broken or failed:
-                        connection.invalidate()
-                except Exception:
-                    failed = True
-                finally:
+            except BaseException as error:
+                failure(error)
+            if broken or failed:
+                if receipt is not None:
+                    quarantine_owned(receipt)
+                else:
                     try:
-                        connection.close()
-                    except Exception:
-                        failed = True
-                        # A pre-close failure may retain a checkout. One bounded
-                        # discard/reclose attempt, never a success claim if it fails.
-                        with suppress(Exception):
-                            connection.invalidate()
-                        with suppress(Exception):
-                            connection.close()
-            # Successful execute/fetch is insufficient if the last parse or
-            # final authority phase spent the remaining shared work budget.
-            if failed or exhausted:
-                raise Fault("dependency_unavailable") from None
+                        connection.invalidate()
+                    except BaseException as error:
+                        failure(error)
+            try:
+                close_owned(connection, receipt)
+            except BaseException as error:
+                failure(error)
+                if receipt is None:
+                    for action in (connection.invalidate, connection.close):
+                        try:
+                            action()
+                        except BaseException as error:
+                            failure(error)
+            try:
+                finish_owned(connection, receipt)
+            except BaseException as error:
+                failure(error)
+        if work.started is not None:
+            work.seconds += time.monotonic() - work.started
+            work.started = None
+    if primary is not None:
+        if isinstance(primary, Fault) or not isinstance(primary, Exception):
+            raise primary from None
+        if broken:
+            raise Fault("dependency_unavailable") from None
+        raise primary from None
+    if cleanup_interruption is not None:
+        raise cleanup_interruption from None
+    if failed or work.remaining() <= 0:
+        raise Fault("dependency_unavailable") from None

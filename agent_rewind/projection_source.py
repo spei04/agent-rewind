@@ -24,6 +24,7 @@ from .scoped_lineage import ResourceNotFound
 from .scoped_repositories import _byte_length, _Reads
 from .scoped_repositories import projects as project_table
 from .scoped_repositories import scopes as scope_table
+from .sqlite_ownership import owned_connect
 
 MAX_PROJECTS = 128
 MAX_RECORD_BYTES = 2 * 1024 * 1024
@@ -57,7 +58,7 @@ class QueryBudget:
 def readonly_source(engine: Engine, budget: QueryBudget) -> Iterator[Connection]:
     """One consistent SQL snapshot; it is closed before any operator byte reader."""
     _secure_engine(engine)
-    with engine.connect() as connection:
+    with owned_connect(engine) as connection:
         previous: int | None = None
         try:
             if connection.dialect.name == "sqlite":

@@ -17,6 +17,13 @@ from sqlalchemy.engine import Connection, Engine
 from .request_authority import ActionForbidden
 from .request_identity import IdentityInvalid
 from .scoped_lineage import ResourceNotFound
+from .sqlite_ownership import (
+    CheckoutReceipt,
+    close_owned,
+    connect_owned,
+    finish_owned,
+    quarantine_owned,
+)
 
 AdmissionCode = Literal[
     "invalid_request",
@@ -135,6 +142,7 @@ def admission_transaction(
     if type(outcome) is not TransactionOutcome or outcome != TransactionOutcome():
         raise AdmissionError("dependency_unavailable")
     connection = None
+    receipt: CheckoutReceipt | None = None
     previous_timeout = None
     primary: BaseException | None = None
     attached = False
@@ -178,7 +186,9 @@ def admission_transaction(
     try:
         if work is not None:
             work.check()
-        connection = engine.connect()
+        connection, receipt = connect_owned(
+            engine, control_attempt=work.control_attempt if work is not None else None
+        )
         if work is not None:
             attached = True  # partial attach still owns mandatory detach/finish
             work.attach(connection)
@@ -206,8 +216,46 @@ def admission_transaction(
                 work.detach()
             except BaseException as error:
                 cleanup_failure(error)
-                discard()
-        if connection is not None:
+                if receipt is None:
+                    discard()
+                else:
+                    quarantine_owned(receipt)
+        if connection is not None and receipt is not None:
+            if primary is not None and outcome.begun and not outcome.commit_acknowledged:
+                outcome.rollback_attempted = True
+                cleanup_attempt("rollback")
+                try:
+                    if connection.invalidated:
+                        raise AdmissionError("outcome_uncertain")
+                    connection.rollback()
+                    outcome.rollback_acknowledged = True
+                except BaseException as error:
+                    cleanup_failure(error)
+            if previous_timeout is not None and not outcome.cleanup_failed:
+                cleanup_attempt("restore")
+                try:
+                    raw = connection.connection.driver_connection
+                    if raw is None:
+                        raise AdmissionError("outcome_uncertain")
+                    raw.execute(f"PRAGMA busy_timeout={previous_timeout}")
+                except BaseException as error:
+                    cleanup_failure(error)
+            if outcome.cleanup_failed or not outcome.begun:
+                quarantine_owned(receipt)
+            cleanup_attempt("close")
+            try:
+                close_owned(connection, receipt)
+            except BaseException as error:
+                cleanup_failure(error)
+            try:
+                finish_owned(
+                    connection,
+                    receipt,
+                    control_attempt=work.control_attempt if work is not None else None,
+                )
+            except BaseException as error:
+                cleanup_failure(error)
+        elif connection is not None:
             if work is not None and not outcome.begun and not connection.invalidated:
                 discard()
             if primary is not None and outcome.begun and not outcome.commit_acknowledged:

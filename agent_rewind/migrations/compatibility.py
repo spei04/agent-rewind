@@ -22,6 +22,7 @@ from sqlalchemy.engine import Connection, Dialect, Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import ConnectionPoolEntry
 
+from ..sqlite_ownership import optional_progress, owned_connect
 from .schema import (
     ADMISSION,
     ARTIFACTS,
@@ -227,6 +228,8 @@ def _inspection(connection: Connection) -> Iterator[None]:
         raise MigrationRefused("idle_inspection_connection_required")
     kind = dialect(connection)
     raw = connection.connection.driver_connection
+    if raw is None:
+        raise MigrationRefused("unsupported_runtime_database")
     deadline = time.monotonic() + INSPECTION_TIMEOUT_SECONDS
     previous: tuple[int, int] | None = None
 
@@ -249,42 +252,84 @@ def _inspection(connection: Connection) -> Iterator[None]:
             cursor.execute(f"SET LOCAL statement_timeout = '{milliseconds}ms'")
             cursor.execute(f"SET LOCAL lock_timeout = '{min(milliseconds, 250)}ms'")
 
-    if kind == "sqlite":
-        if not isinstance(raw, sqlite3.Connection):
-            raise MigrationRefused("unsupported_runtime_database")
-        previous = (
-            raw.execute("PRAGMA query_only").fetchone()[0],
-            raw.execute("PRAGMA busy_timeout").fetchone()[0],
-        )
-        raw.execute("PRAGMA query_only=ON")
-        raw.execute("PRAGMA busy_timeout=250")
-        raw.set_progress_handler(lambda: int(time.monotonic() >= deadline), 1000)
-    elif getattr(raw, "autocommit", None) is not False:
-        raise MigrationRefused("transactional_connection_required")
+    # A failed nested lease owns no cleanup rights on the outer session.
+    lease = optional_progress(connection, owner=object())
+    progress = False
+    listener = False
+    primary: BaseException | None = None
+    cleanup_error: BaseException | None = None
+    interruption: BaseException | None = None
+
+    def failed(error: BaseException) -> None:
+        nonlocal cleanup_error, interruption
+        if cleanup_error is None:
+            cleanup_error = error
+        if interruption is None and not isinstance(error, Exception):
+            interruption = error
+
     try:
+        if kind == "sqlite":
+            if not isinstance(raw, sqlite3.Connection):
+                raise MigrationRefused("unsupported_runtime_database")
+            previous = (
+                raw.execute("PRAGMA query_only").fetchone()[0],
+                raw.execute("PRAGMA busy_timeout").fetchone()[0],
+            )
+            raw.execute("PRAGMA query_only=ON")
+            raw.execute("PRAGMA busy_timeout=250")
+            progress = True
+
+            def callback() -> int:
+                return int(time.monotonic() >= deadline)
+
+            if lease is None:
+                raw.set_progress_handler(callback, 1000)
+            else:
+                lease.install(callback, 1000)
+        elif getattr(raw, "autocommit", None) is not False:
+            raise MigrationRefused("transactional_connection_required")
         connection.begin()
         if kind == "postgresql":
             connection.exec_driver_sql("SET TRANSACTION READ ONLY")
             connection.exec_driver_sql("SET LOCAL search_path TO public, pg_temp")
+        listener = True
         event.listen(connection, "before_cursor_execute", before_query)
-        try:
-            yield
-            remaining()
-        finally:
-            event.remove(connection, "before_cursor_execute", before_query)
+        yield
+        remaining()
+    except BaseException as error:
+        primary = error
     finally:
+        if listener:
+            try:
+                if event.contains(connection, "before_cursor_execute", before_query):
+                    event.remove(connection, "before_cursor_execute", before_query)
+            except BaseException as error:
+                failed(error)
         try:
-            # An expired callback must not interrupt rollback itself. Failed cleanup
-            # invalidates the physical connection rather than returning dirty state.
-            if previous is not None and isinstance(raw, sqlite3.Connection):
+            if lease is not None:
+                lease.release()
+            elif progress:
                 raw.set_progress_handler(None, 0)
+        except BaseException as error:
+            failed(error)
+        try:
             connection.rollback()
-            if previous is not None and isinstance(raw, sqlite3.Connection):
+            if previous is not None and cleanup_error is None:
                 raw.execute(f"PRAGMA query_only={previous[0]}")
                 raw.execute(f"PRAGMA busy_timeout={previous[1]}")
-        except (SQLAlchemyError, sqlite3.Error):
-            connection.invalidate()
-            raise
+        except BaseException as error:
+            failed(error)
+        if cleanup_error is not None:
+            try:
+                connection.invalidate()
+            except BaseException as error:
+                failed(error)
+    if primary is not None:
+        raise primary from None
+    if interruption is not None:
+        raise interruption from None
+    if cleanup_error is not None:
+        raise cleanup_error from None
 
 
 def check_schema_compatibility(
@@ -350,7 +395,7 @@ def runtime_schema_compatibility(engine: Engine) -> CompatibilityResult:
             and not Path(database).is_file()
         ):
             return CompatibilityResult("incompatible", "schema_incompatible")
-        with engine.connect() as connection:
+        with owned_connect(engine) as connection:
             return check_schema_compatibility(connection, profile)
     except (ValueError, ValidationError, MigrationRefused):
         return CompatibilityResult("incompatible", "release_profile_or_connection_invalid")
@@ -370,7 +415,7 @@ def runtime_database_connectivity(engine: Engine) -> bool:
             and not Path(database).is_file()
         ):
             return False
-        with engine.connect() as connection, _inspection(connection):
+        with owned_connect(engine) as connection, _inspection(connection):
             return bool(connection.exec_driver_sql("SELECT 1").scalar_one() == 1)
     except (SQLAlchemyError, sqlite3.Error, OSError, TimeoutError, MigrationRefused):
         return False

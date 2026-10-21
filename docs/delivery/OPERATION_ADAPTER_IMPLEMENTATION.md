@@ -284,3 +284,114 @@ ownership or service code. PostgreSQL remains stopped; the earlier 40-case
 actual PostgreSQL evidence is specifically against f10cf23, not a new run of
 this exception-ordering correction. Private regression logs and source hashes
 are indexed outside the checkout with review date 2026-11-20.
+
+## Dormant caller and callback integration checkpoint
+
+This checkpoint adapts the existing 33 acquisition sites in 14 modules while
+leaving Database.__init__ and its create_engine configuration unchanged. It does
+not activate the owned factory or implement OperationService. The source audit
+covers Database's 18 acquisitions; Auth, CLI doctor, artifact publication,
+projection source, PublishedRunReader, RequestAuthority, ScopedActions and
+ScopedRepositories; both migration service and compatibility wrappers; and the
+three manual operation/listing/admission owners. Existing Connection.begin
+calls remain transaction operations, not additional engine acquisitions.
+Catalog reflection already takes the caller's Connection. No Engine-bound
+reflection, create_all, or implicit migration acquisition is added.
+
+Ordinary callers use owned_connect/owned_begin. Manual owners keep their own
+transaction/outcome decisions and retain connect_owned's receipt through
+close_owned, then finish_owned, before choosing success. Migration service
+explicitly translates SQLiteOwnershipError to its fixed migration/schema
+refusal without manufacturing a DBAPIError. Unregistered engines and PostgreSQL
+return receipt=None and retain their explicit legacy behavior.
+
+The three native callback consumers (OperationWork, listing_session and
+compatibility inspection) use optional_progress before PRAGMA mutations,
+listeners or consumer ownership. None means only an unregistered engine.
+A registered engine with a substituted pool refuses; ownership failure never
+selects the legacy callback path. An unsuccessful nested lease owns nothing to
+remove. Successful leases release before rollback/restoration.
+
+This low-level pass-through is not engine certification. The future
+OperationService must call require_owned_sqlite for SQLite **before its first
+acquisition, including schema compatibility probes**. It must not catch that
+failure to fall back to legacy. PostgreSQL keeps its separately reviewed native
+contract. SQLite support remains limited to the factory-born, file-backed
+QueuePool provenance in the entry contract, not arbitrary custom/memory engines
+or malicious in-process bypasses of the tracked connection.
+
+### Shared cleanup actions
+
+The existing eight-attempt reserve is unchanged. Accounting exceptions are
+recorded separately and cannot prevent the associated native action. Pure
+quarantine marks uncertain state before the first close, so a pool return cannot
+silently reuse failed restoration or callback cleanup.
+
+| Action | Read owner | Mutation owner |
+| --- | --- | --- |
+| Native rollback | 1 | At most 1, only when needed |
+| Restore query_only | 1 | 0 |
+| Restore busy_timeout | 1 | At most 1 |
+| First observed logical close | 1 | 1 |
+| Shared recovery: Connection invalidate | At most 1 | At most 1 |
+| Shared recovery: logical reclose | At most 1 | At most 1 |
+| Shared recovery: retained public proxy invalidate if still valid, otherwise retained raw close | At most 1 | At most 1 |
+| Shared recovery: remaining retained raw close | At most 1 | At most 1 |
+| Maximum cleanup controls | 8 | 7 |
+
+The last two recovery slots permit two raw-close attempts when no valid proxy
+remains. They never add a third raw attempt or target a new proxy/current pool
+occupant. Constructor failure uses the same bounded path and captured receipt;
+an incomplete PoolConnectionRecord is never manually checked in. Native calls
+performed inside an explicitly counted SQLAlchemy control are not recursively
+counted as extra public attempts.
+
+The combined failure regression initially proved that closing raw alone after
+pre-action Connection.invalidate and reclose faults left one pool checkout.
+The retained public-proxy alternative now returns that slot within the same
+bound, retaining the failed verdict. Permanently failing proxy and physical
+controls remain an explicit failed/unreturned verdict; bounded attempts do not
+promise reclamation of a permanently broken driver. The test restores its own
+injected permanent failures and cleans up explicitly.
+
+A post-return close failure can leave a closed raw object in an idle record.
+The next checkout refuses/quarantines it before yielding, then a fresh
+acquisition can succeed. Cleanup does not invalidate a record that may already
+belong to another generation. The historical failed verdict never turns into
+success because later disposal was acknowledged.
+
+Body/setup typed denials and interruptions remain primary. Otherwise the first
+cleanup interruption is rethrown after all cleanup and clock finish. A commit
+ACK followed by failure remains outcome_uncertain; work=None and untracked
+paths retain the existing admission semantics. No disposal failure is treated
+as successful disclosure.
+
+### Integration development evidence
+
+The new combined-control regression failed with checkedout=1 before the shared
+proxy alternative and passed afterward. The original 67 helper cases also
+passed. The initial new fixture incorrectly enabled SQLite foreign_keys after
+starting an INSERT transaction and named a records column body instead of data;
+six failures exposed these fixture errors. The corrected fixture enables FK
+before DML and uses the existing records shape, without weakening production
+checks. A further expectation was corrected to account for Database.get's
+existing id/created metadata. Partial listing setup deliberately discards its
+physical connection: the replacement has the factory's 3000 ms timeout, while
+successful restoration on the same connection retains the original 741 ms.
+
+The focused new integration suite has 42 passing cases. It includes all six
+callback permutations on one native connection, nested refusal preserving the
+outer owner, substituted-pool refusal before effects (including on an already
+acquired connection), exact eight/seven-action controls, accounting and cleanup
+interruptions, permanent-control uncertainty, actual migration-only installation
+and ordinary Database calls, fixed migration error translation, partial callback
+setup, and unchanged factory nonactivation. Broader regression/static results
+are recorded in the immutable handoff. No PostgreSQL server was started for this
+checkpoint; earlier component PG evidence does not prove this integration or
+the later services. The exact allowlist now includes sqlite_ownership.py,
+operation_work.py and operation_reads.py: setuptools already emits all three,
+and normal callers now import the ownership helper. The added installed smoke
+helper imports the components, exercises owned read-only work against synthetic
+SQL, and asserts Database still uses its untracked default factory. The exact
+helper body passes locally; isolated wheel/sdist execution is recorded separately
+when complete. Completed-service smoke remains later P1 work.

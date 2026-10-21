@@ -15,7 +15,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 from threading import RLock
-from typing import Any
+from typing import Any, Literal
 from weakref import WeakKeyDictionary, WeakSet
 
 from sqlalchemy import create_engine, event
@@ -24,6 +24,7 @@ from sqlalchemy.exc import ArgumentError, SQLAlchemyError
 from sqlalchemy.pool import ConnectionPoolEntry, Pool, PoolProxiedConnection, QueuePool
 
 ProgressCallback = Callable[[], int | None]
+ControlAttempt = Callable[[Literal["discard", "close"]], None]
 _REGISTRY_LOCK = RLock()
 _CAPABILITIES: WeakKeyDictionary[Engine, SQLiteCapability] = WeakKeyDictionary()
 _POOLS: WeakKeyDictionary[Pool, SQLiteCapability] = WeakKeyDictionary()
@@ -464,6 +465,13 @@ def acquire_progress(connection: Connection, *, owner: object) -> ProgressLease:
         return lease
 
 
+def optional_progress(connection: Connection, *, owner: object) -> ProgressLease | None:
+    """Explicit legacy/PG fallback only; invalid owned provenance never falls back."""
+    if _capability(connection.engine) is None:
+        return None
+    return acquire_progress(connection, owner=owner)
+
+
 def cleanup_snapshot(receipt: CheckoutReceipt | None) -> CleanupVerdict | None:
     if receipt is None:
         return None
@@ -485,17 +493,26 @@ def require_clean(verdict: CleanupVerdict | None) -> None:
         raise SQLiteOwnershipError(verdict) from None
 
 
-def _cleanup(receipt: CheckoutReceipt, connection: Connection | None) -> None:
-    """Bounded best effort; recording failure never gates the next native action."""
+def _cleanup(
+    receipt: CheckoutReceipt,
+    connection: Connection | None,
+    control_attempt: ControlAttempt | None = None,
+) -> None:
+    """At most four recovery controls; accounting cannot omit a native action."""
+
+    def account(kind: Literal["discard", "close"]) -> None:
+        if control_attempt is not None:
+            try:
+                control_attempt(kind)
+            except BaseException as error:
+                receipt.fail(error)
+
     raw = receipt.raw
     if raw is not None:
         state = raw._ownership
         with state.lock:
             if state.receipt is not receipt:
-                # A completed old scope never touches a new generation.
-                return
-            # Reserve quarantine before dropping the state lock. A concurrent
-            # checkout may not obtain a clean generation while disposal begins.
+                return  # Never touch a later borrower's generation.
             state.tainted = True
             receipt.completed = False
             lease = state.lease
@@ -505,26 +522,49 @@ def _cleanup(receipt: CheckoutReceipt, connection: Connection | None) -> None:
                 lease.release()
             except BaseException as error:
                 receipt.fail(error)
-    for _ in range(2):
+    # One logical invalidation and one close. Retained-raw disposal below is
+    # separate: SQLAlchemy can suppress driver close errors after returning a slot.
+    try:
+        if connection is not None and not connection.closed and not connection.invalidated:
+            account("discard")
+            connection.invalidate()
+        elif connection is None and receipt.proxy is not None and receipt.proxy.is_valid:
+            account("discard")
+            receipt.proxy.invalidate()
+    except BaseException as error:
+        receipt.fail(error)
+    try:
+        if connection is not None and not (connection.closed and receipt.close_acknowledged):
+            account("close")
+            close_owned(connection, receipt)
+        elif connection is None and receipt.proxy is not None:
+            account("close")
+            receipt.proxy.close()
+            if receipt.proxy.is_valid:
+                raise SQLiteOwnershipError()
+            receipt.returned = True
+            receipt.close_acknowledged = True
+    except BaseException as error:
+        receipt.fail(error)
+    # Connection methods may both fail before returning their proxy. Use only
+    # the retained public proxy from this generation; physical close alone does
+    # not establish slot return. This alternative consumes one of two remaining
+    # controls, never an additional retry.
+    remaining = 2
+    if receipt.proxy is not None and receipt.proxy.is_valid:
+        remaining -= 1
+        account("discard")
         try:
-            if connection is not None:
-                connection.invalidate()
-            elif receipt.proxy is not None and receipt.proxy.is_valid:
-                receipt.proxy.invalidate()
+            receipt.proxy.invalidate()
+            if receipt.proxy.is_valid:
+                raise SQLiteOwnershipError()
+            receipt.returned = True
         except BaseException as error:
             receipt.fail(error)
-        try:
-            if connection is not None:
-                close_owned(connection, receipt)
-            elif receipt.proxy is not None:
-                receipt.proxy.close()
-                receipt.returned = True
-                receipt.close_acknowledged = True
-        except BaseException as error:
-            receipt.fail(error)
-        # Initial record construction can fail before its public methods are
-        # usable. Never invalidate/checkin that partial record ourselves.
+    # Never operate on an incompletely constructed PoolConnectionRecord.
+    for _ in range(remaining):
         if raw is not None and not raw._ownership.closed:
+            account("close")
             try:
                 raw.close()
             except BaseException as error:
@@ -532,10 +572,42 @@ def _cleanup(receipt: CheckoutReceipt, connection: Connection | None) -> None:
     if raw is not None:
         with raw._ownership.lock:
             if raw._ownership.receipt is receipt and raw._ownership.closed:
-                # A retained-raw retry may finish after logical close marked the
-                # receipt complete. Keep its actual same-generation close ACK.
                 receipt.disposal_acknowledged = True
     receipt.completed = True
+
+
+def quarantine_owned(receipt: CheckoutReceipt | None) -> None:
+    """Purely prevent reuse of this generation before a caller's observed close."""
+    if receipt is None:
+        return
+    receipt.fail()
+    raw = receipt.raw
+    if raw is not None:
+        with raw._ownership.lock:
+            if raw._ownership.receipt is receipt:
+                raw._ownership.tainted = True
+
+
+def finish_owned(
+    connection: Connection,
+    receipt: CheckoutReceipt | None,
+    *,
+    control_attempt: ControlAttempt | None = None,
+) -> None:
+    """After an observed close, recover if needed and require its terminal verdict.
+
+    Manual transaction owners retain their own primary exception and commit/ACK
+    classification. Catch this failure only after all cleanup, before success.
+    Untracked/PG owners keep their existing cleanup without extra native calls.
+    """
+    if receipt is None:
+        return
+    verdict = cleanup_snapshot(receipt)
+    if verdict is None or not verdict.clean:
+        _cleanup(receipt, connection, control_attempt)
+    if receipt.interruption is not None:
+        raise receipt.interruption from None
+    require_clean(cleanup_snapshot(receipt))
 
 
 def _attest_checkout(engine: Engine, connection: Connection, receipt: CheckoutReceipt) -> None:
@@ -580,7 +652,9 @@ def _attest_checkout(engine: Engine, connection: Connection, receipt: CheckoutRe
             raise SQLiteOwnershipError()
 
 
-def connect_owned(engine: Engine) -> tuple[Connection, CheckoutReceipt | None]:
+def connect_owned(
+    engine: Engine, *, control_attempt: ControlAttempt | None = None
+) -> tuple[Connection, CheckoutReceipt | None]:
     capability = _capability(engine)
     if capability is None:
         return engine.connect(), None
@@ -593,7 +667,7 @@ def connect_owned(engine: Engine) -> tuple[Connection, CheckoutReceipt | None]:
         _attest_checkout(engine, connection, receipt)
     except BaseException as error:
         receipt.fail(error)
-        _cleanup(receipt, connection)
+        _cleanup(receipt, connection, control_attempt)
         # No proxy: the supported QueuePool call has unwound its initial
         # allocation or returned the existing record. Physical close is separate.
         if receipt.proxy is None and (receipt.record is None or receipt.new_record):
@@ -656,14 +730,13 @@ def owned_connect(engine: Engine) -> Iterator[Connection]:
         close_owned(connection, receipt)
     except BaseException as error:
         receipt.fail(error)
-    verdict = cleanup_snapshot(receipt)
-    if verdict is None or not verdict.clean:
-        _cleanup(receipt, connection)
+    try:
+        finish_owned(connection, receipt)
+    except BaseException:
+        if primary is None:
+            raise
     if primary is not None:
         raise primary from None
-    if receipt.interruption is not None:
-        raise receipt.interruption from None
-    require_clean(cleanup_snapshot(receipt))
 
 
 @contextmanager
