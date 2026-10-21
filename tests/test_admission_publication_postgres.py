@@ -392,7 +392,7 @@ def assert_publication(f, accepted):
     assert job["cancel"] is False and type(job["budget"]) is int
     op = rows["operations"][0]
     assert op["id"] == accepted["operation_id"] and op["job_id"] == accepted["job_id"]
-    assert op["accepted_response"] == accepted
+    assert op["accepted_response"] == canonical(accepted).decode("utf-8")
     assert op["failure_correlation_id"] == f.origin.correlation_id
     assert op["execution_config_digest"] == f.config.digest and op["payload_version"] == 2
     assert op["created_at"].utcoffset() == timedelta(0)
