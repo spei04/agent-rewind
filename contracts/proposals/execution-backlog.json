@@ -1367,7 +1367,7 @@
         "QE"
       ],
       "pull_request_boundary": "Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days, then AR-007-C/P2 full existing-route integration 4 [4–7] days after accepted merged P1. P1 does not wire Auth/session issuance, routes, UI, mutations or admission. Aggregate AR-007-C remains unverified until P2 and the full existing-route matrix are accepted.",
-      "contracts_status": "C04/C05 and AR-007-B/011-B/009-B are Verified prerequisites. P1 runtime 8be6316 (C source 8222644) and fixture correction dbfbae0 have A/B source acceptance. Lead integration passed 314 focused tests with 53 explicit local PG skips and static/planning checks; A independently passed 61 reader/publication cases. Final matching hosted execution, including all 46 new PG cases, and accepted merge remain required. P2 #77 remains Not started; CT-M1-007/009 remain planned overall and CT-M1-008 awaits actual durable replay producers.",
+      "contracts_status": "C04/C05 and AR-007-B/011-B/009-B are Verified prerequisites. P1 #76 is Verified at accepted merge 51a2b1f after A/B source review, PR/main full PostgreSQL checks and independently verified candidate delivery. P2 #77 is In progress: C owns Auth/routes/verified views/UI, B owns atomic scoped mutations and dedicated PostgreSQL tests, A independently reviews security and mutations, and lead integrates. CT-M1-007/009 remain planned overall and CT-M1-008 awaits actual durable replay producers.",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/75",
       "delivery_packages": [
         {
@@ -1377,9 +1377,9 @@
             "C04",
             "C05"
           ],
-          "status": "Implemented; verification pending",
-          "accepted_merge_commit": null,
-          "review_evidence": null,
+          "status": "Verified",
+          "accepted_merge_commit": "51a2b1fefc40fc871426a47e3f3865fcbeef5bec",
+          "review_evidence": "PR #78 source 923647d85ac8acc68f5334c2edcad40c6638d59a accepted by A for identity/read security and B for authority/SQL semantics; merge 51a2b1fefc40fc871426a47e3f3865fcbeef5bec has the identical reviewed tree. PR run 39528447469 and protected-main run 39529350057 passed 1789 tests on Python 3.11 and 1793 on Python 3.12, including all 46 new PostgreSQL cases; package/security and three gVisor tests passed. Candidate 12314568373 archive, exact four-file set, source/pinned manifests and package/SHA256SUMS hashes independently verified. Private release record is indexed outside disposable checkouts. https://github.com/spei04/agent-rewind/actions/runs/39529350057",
           "id": "AR-007-C/P1",
           "title": "Identity, authority and verified-reader foundation",
           "effort_days": 2.0,
@@ -1409,7 +1409,7 @@
             "C04",
             "C05"
           ],
-          "status": "Not started",
+          "status": "In progress",
           "accepted_merge_commit": null,
           "review_evidence": null,
           "id": "AR-007-C/P2",
@@ -7262,7 +7262,7 @@
       "resolution": "Own existing routes and reusable authority in two sequential delivery PRs: P1 foundation 2 [2–3], P2 full integration 4 [4–7] after accepted merged P1; aggregate 6 [6–10] BE days, medium-low. Retain verified AR-009-B/C04 and future consumer obligations without reverse dependencies; full CT-M1-007/008/009 gates remain open."
     }
   ],
-  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. A and lead accepted AR-007-C planning correction 839f3a7; P1 #76 is implemented in draft PR #78 at reviewed source 8be6316, with matching hosted checks and accepted merge pending. P2 #77 remains Not started until accepted merged P1; aggregate #75 is In progress. AR-011-C is ready but unassigned. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated.",
+  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. AR-007-C/P1 #76 is Verified in PR #78 at accepted merge 51a2b1f, protected-main run 39529350057 and independently verified candidate delivery. P2 #77 is In progress after that gate; aggregate #75 remains In progress. AR-011-C is ready but unassigned. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated.",
   "github_tracking": {
     "parent_issues": [
       1,
