@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, TypeVar
 
-from sqlalchemy import and_, case, select
+from sqlalchemy import Float, Text, and_, case, cast, select, text, union_all
 from sqlalchemy.engine import Connection
 
 from .database import jobs, records
+from .models import canonical
+from .scoped_artifacts import ArtifactObject
 from .scoped_lineage import (
     MAX_EDGES,
     MAX_NODES,
@@ -19,12 +21,21 @@ from .scoped_lineage import (
     encoded_size,
     identifier,
 )
-from .scoped_repositories import ProjectContext, _byte_length, _Reads, _scope, scopes
+from .scoped_repositories import (
+    ProjectContext,
+    ScopedRepositories,
+    _bounded_row,
+    _byte_length,
+    _Reads,
+    _scope,
+    scopes,
+)
 
 Presentation = TypeVar("Presentation")
 
 MAX_RESPONSE_BYTES = 8 * 1024 * 1024
 MAX_LIST_ROWS = 100
+MAX_RECEIPT_BYTES = 4 * 1024 * 1024
 
 
 @dataclass
@@ -34,6 +45,146 @@ class ReadBudget:
     nodes: int = 0
     edges: int = 0
     retained: int = 0
+    receipts: dict[tuple[str, str], dict[str, Any]] = field(default_factory=dict)
+    receipt_bytes: int = 2
+    discoveries: dict[str, tuple[tuple[str, str], ...]] = field(default_factory=dict)
+
+    def remember(self, kind: str, row: dict[str, Any]) -> None:
+        key = (kind, identifier(row["id"]))
+        prefix = "j_" if kind == "job" else "r_"
+        value = {"kind": kind, "id": key[1], **{prefix + k: v for k, v in row.items() if k != "id"}}
+        size = encoded_size(value) + 1
+        if key in self.receipts:
+            if self.receipts[key] != value:
+                raise ResourceNotFound()
+            return
+        if len(self.receipts) >= MAX_NODES or self.receipt_bytes + size > MAX_RECEIPT_BYTES:
+            raise ResourceNotFound()
+        self.receipt_bytes += size
+        self.receipts[key] = value
+
+    def final(self, connection: Connection, context: ProjectContext) -> None:
+        """One SELECT statement compares the original entire relational closure.
+
+        Input <=4 MiB/2048 identities; output contains only those bounded input
+        identities, never source bodies. SQL body/row bounds remain predicates.
+        The same statement also detects new by-job members. Fresh authority is
+        checked by the caller afterward; this is optimistic READ COMMITTED
+        revalidation, not response linearizability or a writer lock.
+        """
+        if not self.receipts:
+            return
+        if len(self.receipts) > MAX_NODES or self.receipt_bytes > MAX_RECEIPT_BYTES:
+            raise ResourceNotFound()
+        expected = list(self.receipts.values())
+        encoded = canonical(expected)
+        if len(encoded) > MAX_RECEIPT_BYTES:
+            raise ResourceNotFound()
+        fields: dict[str, Any] = {
+            "kind": Text(),
+            "id": Text(),
+            "r_created": Float(),
+            "r_body": Text(),
+        }
+        for column in jobs.c:
+            if column.name != "id":
+                fields["j_" + column.name] = column.type
+        dialect = connection.dialect.name
+        if dialect == "sqlite":
+            source = text("""SELECT
+                json_extract(value,'$.kind') AS kind,
+                json_extract(value,'$.id') AS id,
+                json_extract(value,'$.r_created') AS r_created,
+                json_extract(value,'$.r_body') AS r_body,
+                json_extract(value,'$.j_kind') AS j_kind,
+                json_extract(value,'$.j_created') AS j_created,
+                json_extract(value,'$.j_payload') AS j_payload,
+                json_extract(value,'$.j_status') AS j_status,
+                json_extract(value,'$.j_owner') AS j_owner,
+                json_extract(value,'$.j_lease_until') AS j_lease_until,
+                json_extract(value,'$.j_cancel') AS j_cancel,
+                json_extract(value,'$.j_budget') AS j_budget,
+                json_extract(value,'$.j_reserved') AS j_reserved,
+                json_extract(value,'$.j_result') AS j_result,
+                json_extract(value,'$.j_error') AS j_error,
+                json_extract(value,'$.j_actor') AS j_actor
+                FROM json_each(:receipts)""")
+        elif dialect == "postgresql":
+            source = text("""SELECT * FROM jsonb_to_recordset(CAST(:receipts AS jsonb)) AS w(
+                kind TEXT,id TEXT,r_created DOUBLE PRECISION,r_body TEXT,
+                j_kind TEXT,j_created DOUBLE PRECISION,j_payload TEXT,j_status TEXT,
+                j_owner TEXT,j_lease_until DOUBLE PRECISION,j_cancel BOOLEAN,
+                j_budget BIGINT,j_reserved BIGINT,j_result TEXT,j_error TEXT,j_actor TEXT)""")
+        else:
+            raise ResourceNotFound()
+        wanted = source.columns(**fields).cte("source_receipts").prefix_with("MATERIALIZED")
+        record_query = (
+            select(wanted.c.kind, wanted.c.id)
+            .select_from(
+                wanted.join(
+                    records, and_(records.c.id == wanted.c.id, records.c.kind == wanted.c.kind)
+                ).join(
+                    scopes,
+                    and_(
+                        scopes.c.resource_kind == wanted.c.kind,
+                        scopes.c.resource_id == wanted.c.id,
+                        scopes.c.project_id == context.project_id,
+                    ),
+                )
+            )
+            .where(
+                wanted.c.kind.in_(("run", "study")),
+                _bounded_row(connection, records),
+                records.c.created.is_not_distinct_from(wanted.c.r_created),
+                cast(records.c.data, Text).is_not_distinct_from(wanted.c.r_body),
+            )
+        )
+        known = wanted.alias("known_sources")
+        known_member = (
+            select(known.c.id)
+            .where(known.c.id == records.c.id, known.c.kind == records.c.kind)
+            .correlate(records)
+            .exists()
+        )
+        unknown_member = (
+            select(records.c.id)
+            .select_from(
+                records.join(
+                    scopes,
+                    and_(
+                        scopes.c.project_id == context.project_id,
+                        scopes.c.resource_kind == records.c.kind,
+                        scopes.c.resource_id == records.c.id,
+                    ),
+                )
+            )
+            .where(records.c.data["job_id"].as_string() == wanted.c.id, ~known_member)
+            .correlate(wanted)
+            .exists()
+        )
+        job_query = (
+            select(wanted.c.kind, wanted.c.id)
+            .select_from(
+                wanted.join(jobs, jobs.c.id == wanted.c.id).join(
+                    scopes, _scope("job", jobs.c.id, context)
+                )
+            )
+            .where(
+                wanted.c.kind == "job",
+                _bounded_row(connection, jobs),
+                ~unknown_member,
+                *(
+                    column.is_not_distinct_from(wanted.c["j_" + column.name])
+                    for column in jobs.c
+                    if column.name != "id"
+                ),
+            )
+        )
+        query = union_all(record_query, job_query).limit(len(expected) + 1)
+        rows = connection.execute(query, {"receipts": encoded.decode()}).all()
+        current = {(row.kind, row.id) for row in rows}
+        if len(rows) != len(current) or current != self.receipts.keys():
+            raise ResourceNotFound()
 
     def row(self, value: dict[str, Any]) -> dict[str, Any]:
         created = value.get("created")
@@ -55,6 +206,9 @@ class LegacyReads(_Reads):
     def __init__(self, connection: Connection, context: ProjectContext, budget: ReadBudget):
         super().__init__(connection, context)
         self.budget = budget
+
+    def remember(self, kind: str, row: dict[str, Any]) -> None:
+        self.budget.remember(kind, row)
 
     def record(self, kind: str, resource_id: str) -> dict[str, Any]:
         value = self.budget.row(super().record(kind, resource_id))
@@ -84,6 +238,9 @@ class LegacyReads(_Reads):
 
     def by_job(self, job_id: str) -> list[tuple[str, str]]:
         rows = super().by_job(job_id)
+        original = self.budget.discoveries.setdefault(job_id, tuple(rows))
+        if original != tuple(rows):
+            raise ResourceNotFound()
         if self.budget.edges + len(rows) > MAX_EDGES:
             raise ResourceNotFound()
         self.budget.edges += len(rows)
@@ -139,3 +296,21 @@ def append_response(items: list[Any], value: Any, used: int) -> int:
         raise ResourceNotFound()
     items.append(value)
     return used + size
+
+
+class BudgetRepositories(ScopedRepositories):
+    """Reuse the exact pre/post artifact check with one cumulative read budget."""
+
+    budget: ReadBudget
+
+    def resolve_artifact(
+        self, context: ProjectContext, owner_kind: str, owner_id: str, role: str, digest: str
+    ) -> ArtifactObject:
+        with self._session(context, "read") as reads:
+            return self._resolve(
+                LegacyReads(reads.connection, context, self.budget),
+                owner_kind,
+                owner_id,
+                role,
+                digest,
+            )

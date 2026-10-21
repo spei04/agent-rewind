@@ -13,10 +13,16 @@ from .artifact_graph import GraphRef, decode
 from .artifact_metadata import ArtifactError
 from .compare import compare_presentations
 from .legacy_graph_views import GraphPresentation
-from .legacy_reads import LegacyReads, ReadBudget, append_response, bounded_response
+from .legacy_reads import (
+    BudgetRepositories,
+    LegacyReads,
+    ReadBudget,
+    append_response,
+    bounded_response,
+)
 from .published_reader import PublishedRunReader, RunRead, _identity
 from .scoped_lineage import ResourceNotFound, identifier
-from .scoped_repositories import ProjectContext, ScopedRepositories
+from .scoped_repositories import ProjectContext
 
 MAX_RESULT_BYTES = 1024
 
@@ -70,7 +76,9 @@ class LegacyViews:
         current = self._snapshot(context, kind, budget, ids=[row["id"] for row in rows])
         if rows != current:
             raise ResourceNotFound()
-        self._fresh(context)
+        with self.reader._connection() as connection:
+            budget.final(connection, context)
+            self.reader.repositories._authorize(connection, context, "read")
         return rows
 
     def runs(self, context: ProjectContext, limit: int = 100) -> list[dict[str, Any]]:
@@ -144,11 +152,12 @@ class LegacyViews:
                         raise ArtifactError("publication_loader_unavailable")
                     return loader(value)
 
-                scoped = ScopedRepositories(
+                scoped = BudgetRepositories(
                     self.reader.engine,
                     artifact_resolver=self.reader.repositories.artifact_resolver,
                     artifact_loader=load,
                 )
+                scoped.budget = budget
                 data = scoped.read_artifact(context, "job", row["id"], "result", row["result"])
                 result_body = decode(data)
                 kind = "run" if row["kind"] in {"run", "branch"} else "study"
@@ -171,5 +180,6 @@ class LegacyViews:
                     raise ResourceNotFound()
             if expected:
                 self.reader._final_refs(connection, context, expected, owner_kind="job")
+            budget.final(connection, context)
             self.reader.repositories._authorize(connection, context, "read")
         return bounded_response(result)

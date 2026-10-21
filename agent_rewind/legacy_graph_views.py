@@ -10,7 +10,7 @@ from .artifact_graph import GraphRef, VerifiedGraph, decode
 from .artifact_metadata import ArtifactError
 from .experiments import locate
 from .legacy_reads import append_response, bounded_response
-from .models import Action
+from .models import Action, valid_path
 from .scoped_lineage import ResourceNotFound
 from .workspace import File
 
@@ -35,8 +35,19 @@ class GraphPresentation:
                     raise ValueError()
                 if type(value["actual_result"].get("exit_code", 0)) is not int:
                     raise ValueError()
-                if not isinstance(value["changes"], list):
+                if not isinstance(value["changes"], list) or len(value["changes"]) > 20000:
                     raise ValueError()
+                paths: set[str] = set()
+                for change in value["changes"]:
+                    if not isinstance(change, dict) or set(change) != {"path", "change"}:
+                        raise ValueError()
+                    path = change["path"]
+                    if not isinstance(path, str) or len(path.encode()) > 4096:
+                        raise ValueError()
+                    valid_path(path)
+                    if path in paths or change["change"] not in {"added", "removed", "modified"}:
+                        raise ValueError()
+                    paths.add(path)
             except (ValidationError, ValueError, TypeError, KeyError):
                 raise ArtifactError("artifact_graph_invalid") from None
             used = append_response(self.events, value, used)

@@ -126,6 +126,9 @@ class _Reads:
     def __init__(self, connection: Connection, context: _ProjectScope):
         self.connection, self.context = connection, context
 
+    def remember(self, kind: str, row: dict[str, Any]) -> None:
+        """Optional request-scoped source receipt; default reads retain nothing."""
+
     def record(self, kind: str, resource_id: str) -> dict[str, Any]:
         row = (
             self.connection.execute(
@@ -142,6 +145,7 @@ class _Reads:
         )
         if row is None:
             raise ResourceNotFound()
+        self.remember(kind, dict(row))
         try:
             data = json.loads(
                 row["body"], object_pairs_hook=_object, parse_constant=_invalid_constant
@@ -165,6 +169,7 @@ class _Reads:
         )
         if row is None:
             raise ResourceNotFound()
+        self.remember("job", dict(row))
         return _json_row(dict(row))
 
     def key(self, resource_id: str, *, require_unrevoked: bool = False) -> dict[str, Any]:

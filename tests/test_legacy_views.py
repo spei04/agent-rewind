@@ -254,3 +254,154 @@ def test_first_job_receipt_or_target_changed_during_second_load_refuses(
     with pytest.raises((ResourceNotFound, ArtifactError)):
         view(published).jobs(CONTEXT)
     assert loads == [first.digest, second.digest]
+
+
+@pytest.mark.parametrize("kind", ["run", "job"])
+@pytest.mark.parametrize("change", ["scope", "body", "phantom"])
+def test_final_whole_source_receipts_refuse_earlier_mutation(published, monkeypatch, kind, change):
+    import json
+
+    from agent_rewind.legacy_reads import LegacyReads
+
+    capture, first, _, _ = published
+    other_job, second = "9" * 32, "8" * 32
+    with capture.db.engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO jobs(id,kind,created,payload,status,cancel,budget,reserved) "
+                "VALUES(:id,'run',5,:d,'queued',false,1,0)"
+            ),
+            {"id": other_job, "d": "0" * 64},
+        )
+        connection.execute(
+            text("INSERT INTO records(id,kind,created,data) VALUES(:id,'run',5,:d)"),
+            {"id": second, "d": json.dumps({"parent_id": None, "job_id": other_job})},
+        )
+        for k, ident in (("job", other_job), ("run", second)):
+            connection.execute(
+                text("INSERT INTO resource_scopes VALUES(:k,:id,:p)"),
+                {"k": k, "id": ident, "p": CONTEXT.project_id},
+            )
+        connection.execute(text("UPDATE records SET created=10 WHERE id=:id"), {"id": first})
+        connection.execute(text("UPDATE jobs SET created=10 WHERE id=:id"), {"id": JOB})
+    original = LegacyReads.resource
+    calls = 0
+
+    def changed(self, k, ident):
+        nonlocal calls
+        result = original(self, k, ident)
+        calls += 1
+        if calls == 4:  # Second root of the final sequential closure pass.
+            # Commit the injected test mutation after the final selected query.
+            # The returned earlier Python value remains the original expectation.
+            if change == "scope":
+                self.connection.execute(
+                    text("DELETE FROM artifact_refs WHERE owner_kind='run' AND owner_id=:id"),
+                    {"id": first},
+                )
+                self.connection.execute(
+                    text(
+                        "DELETE FROM resource_scopes WHERE resource_kind='run' AND resource_id=:id"
+                    ),
+                    {"id": first},
+                )
+            elif change == "body":
+                self.connection.execute(
+                    text("UPDATE records SET data=json_set(data,'$.name','changed') WHERE id=:id"),
+                    {"id": first},
+                )
+            else:
+                new = "7" * 32
+                self.connection.execute(
+                    text("INSERT INTO records VALUES(:id,'run',1,:d)"),
+                    {"id": new, "d": json.dumps({"parent_id": None, "job_id": JOB})},
+                )
+                self.connection.execute(
+                    text("INSERT INTO resource_scopes VALUES('run',:id,:p)"),
+                    {"id": new, "p": CONTEXT.project_id},
+                )
+            self.connection.commit()
+        return result
+
+    monkeypatch.setattr(LegacyReads, "resource", changed)
+    with pytest.raises(ResourceNotFound):
+        (view(published).runs if kind == "run" else view(published).jobs)(CONTEXT)
+    assert calls == 4
+
+
+def test_job_pre_post_artifact_closures_share_request_work_limit(published, monkeypatch):
+    from agent_rewind import legacy_reads
+
+    capture, run, _, reader = published
+    result_object(capture, JOB, {"run_id": run})
+    original_row = legacy_reads.ReadBudget.row
+    budgets = []
+
+    def counted(self, value):
+        budgets.append(self)
+        return original_row(self, value)
+
+    monkeypatch.setattr(legacy_reads.ReadBudget, "row", counted)
+    original_load = reader.repositories.artifact_loader
+
+    def load(value):
+        data = original_load(value)
+        assert budgets and len({id(b) for b in budgets}) == 1
+        monkeypatch.setattr(legacy_reads, "MAX_NODES", budgets[0].nodes)
+        return data
+
+    monkeypatch.setattr(reader.repositories, "artifact_loader", load)
+    with pytest.raises(ResourceNotFound):
+        view(published).jobs(CONTEXT)
+
+
+def test_maximum_matching_relational_rowset_has_bounded_sql_work(published):
+    import json
+
+    from sqlalchemy import event
+
+    from agent_rewind.legacy_reads import MAX_NODES, ReadBudget
+
+    capture, _, _, _ = published
+    budget = ReadBudget()
+    entries = []
+    for index in range(MAX_NODES):
+        ident = f"{index:032x}"
+        body = json.dumps({"job_id": JOB, "parent_id": None})
+        entries.append({"id": ident, "body": body})
+        budget.remember("run", {"id": ident, "created": 1.0, "body": body})
+    with capture.db.engine.begin() as connection:
+        connection.execute(text("INSERT INTO records VALUES(:id,'run',1,:body)"), entries)
+        connection.execute(
+            text("INSERT INTO resource_scopes VALUES('run',:id,:p)"),
+            [{"id": v["id"], "p": CONTEXT.project_id} for v in entries],
+        )
+    binds = []
+
+    def statement(conn, cursor, sql, parameters, context, many):
+        if "source_receipts AS MATERIALIZED" in sql:
+            binds.append(len(parameters))
+
+    event.listen(capture.db.engine, "before_cursor_execute", statement)
+    with capture.db.engine.connect() as connection:
+        raw = connection.connection.driver_connection
+        count = 0
+
+        def progress():
+            nonlocal count
+            count += 1000
+            return int(count > 4_000_000)
+
+        raw.set_progress_handler(progress, 1000)
+        try:
+            budget.final(connection, CONTEXT)
+        finally:
+            raw.set_progress_handler(None, 0)
+        assert count < 4_000_000 and binds and max(binds) <= 64
+        connection.execute(
+            text("DELETE FROM resource_scopes WHERE resource_kind='run' AND resource_id=:id"),
+            {"id": entries[0]["id"]},
+        )
+        with pytest.raises(ResourceNotFound):
+            budget.final(connection, CONTEXT)
+    event.remove(capture.db.engine, "before_cursor_execute", statement)
