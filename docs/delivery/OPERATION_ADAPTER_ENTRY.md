@@ -83,14 +83,16 @@ service budget as covering an uninstrumented helper. Project authority may be
 checked separately from the budgeted resource closure, preserving visibility
 before action denial. No listing/cursor or new worker prerequisite is required.
 
-## SQLite callback ownership amendment — review pending
+## SQLite callback ownership amendment — accepted entry
 
 This amendment responds to the independent first-checkpoint finding that a
 clean transaction and a Connection.info marker cannot establish native callback
 ownership: sqlite3 has no progress-handler getter. It is a design prerequisite,
-not accepted implementation. B and the lead must accept this exact entry before
-C starts ownership code or dependent service wiring. Separately assigned
-cleanup/BaseException/native-type regressions may proceed. P1 remains In
+not accepted implementation. B and the lead accepted exact entry 5bedede on
+2026-10-21; C independently confirmed the complete acquisition map. A is assigned
+the dormant helper and focused tests first, with Database activation and consumer
+edits excluded from that checkpoint. Caller integration and activation require
+separate reviewed checkpoints. C retains overall P1 ownership. P1 remains In
 progress, P2 Not started, and neither accepted-merge field changes.
 
 The bounded implementation belongs in one dependency-light internal
