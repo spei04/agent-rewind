@@ -69,7 +69,30 @@ def stores(tmp_path, monkeypatch, module):
         "get_default_verify_paths",
         lambda: SimpleNamespace(cafile=str(bundle), capath=str(ca)),
     )
-    monkeypatch.setattr(module.Path, "home", classmethod(lambda cls: tmp_path / "home"))
+    pip_configs = {
+        "global": tmp_path / "etc/pip.conf",
+        "global_xdg": tmp_path / "etc/xdg/pip/pip.conf",
+        "base_prefix": tmp_path / "base-prefix/pip.conf",
+        "prefix": tmp_path / "prefix/pip.conf",
+        "user": tmp_path / "home/.config/pip/pip.conf",
+        "legacy_user": tmp_path / "home/.pip/pip.conf",
+    }
+    global_configs = {
+        Path("/etc/pip.conf"): pip_configs["global"],
+        Path("/etc/xdg/pip/pip.conf"): pip_configs["global_xdg"],
+    }
+
+    class FixturePaths:
+        def __call__(self, *parts):
+            path = Path(*parts)
+            return global_configs.get(path, path)
+
+        @staticmethod
+        def home():
+            return tmp_path / "home"
+
+    # Only the two otherwise host-bound config paths need constructor redirection.
+    monkeypatch.setattr(module, "Path", FixturePaths())
     monkeypatch.setattr(module.sys, "prefix", str(tmp_path / "prefix"))
     monkeypatch.setattr(module.sys, "base_prefix", str(tmp_path / "base-prefix"))
     for name in module.OVERRIDES:
@@ -90,8 +113,16 @@ def stores(tmp_path, monkeypatch, module):
         bundle.write_bytes(b"\n".join(good.values()) + b"\n")
 
     monkeypatch.setattr(module.subprocess, "run", regenerate)
+    # Refusal tests must start from a valid fixture, not an unrelated early failure.
+    assert module.check_stores(before=True)["os"] == module.signature(set(roots))
     return SimpleNamespace(
-        module=module, roots=roots, good=good, calls=calls, runtime=runtime, regenerate=regenerate
+        module=module,
+        roots=roots,
+        good=good,
+        calls=calls,
+        runtime=runtime,
+        regenerate=regenerate,
+        pip_configs=pip_configs,
     )
 
 
@@ -265,13 +296,39 @@ def test_subject_hash_rejects_unexpected_utility_output(module, monkeypatch, out
         module.subject_hash(b"reviewed")
 
 
-def test_unreviewed_pip_configuration_refuses_before_writes(stores):
-    config = Path(stores.module.sys.base_prefix) / "pip.conf"
-    config.parent.mkdir()
+@pytest.mark.parametrize(
+    "location", ["global", "global_xdg", "base_prefix", "prefix", "user", "legacy_user"]
+)
+def test_unreviewed_pip_configuration_refuses_before_writes(stores, location):
+    m = stores.module
+    config = stores.pip_configs[location]
+    config.parent.mkdir(parents=True, exist_ok=True)
     config.write_text("[global]\ntrusted-host = example.invalid\n")
-    with pytest.raises(ValueError, match="configuration"):
-        stores.module.repair()
-    assert not stores.calls and stores.module.CA_SOURCE.exists()
+    before = {
+        path: path.read_bytes() for path in (m.OS_BUNDLE, m.PIP_BUNDLE, m.CA_CONFIG, m.CA_SOURCE)
+    }
+    with pytest.raises(ValueError, match="Unreviewed pip configuration"):
+        m.repair()
+    assert not stores.calls
+    assert {path: path.read_bytes() for path in before} == before
+
+
+@pytest.mark.parametrize("host_config", ["/etc/pip.conf", "/etc/xdg/pip/pip.conf"])
+def test_fixture_repair_ignores_host_global_pip_configuration(stores, monkeypatch, host_config):
+    original_exists = Path.exists
+    host_probes = []
+
+    def exists(path):
+        if path == Path(host_config):
+            host_probes.append(path)
+            return True
+        return original_exists(path)
+
+    monkeypatch.setattr(Path, "exists", exists)
+    m = stores.module
+    assert m.repair()["os"] == m.signature(set(stores.good))
+    assert len(stores.calls) == 1
+    assert not host_probes
 
 
 def test_capath_directory_bound_refuses_before_writes(stores, monkeypatch):

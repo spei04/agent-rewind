@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Reconcile approved ledger planning with accepted config-byte correction | Independent composition review, then read-only P1 onboarding; implementation remains gated. |
-| Delivery reviewer | Review private verifier and corrected hosted delivery | Preserve failed 316 attempt; require actual final-image and protected-main candidate evidence. |
-| Planning/verification | Review exact planning composition and private verifier v7 | Bind corrected helper/source; preserve approved entry and Not started packages. |
-| Lead | HTTP PR #106 delivery and dependency-ready assignments | Primary holds reviewed ad6bfda; authorize implementation only after accepted HTTP delivery. |
+| Platform/security | Compose approved ledger planning with accepted fixture isolation | Independent exact-union review; P1 implementation still waits for accepted HTTP delivery. |
+| Delivery reviewer | Failed-attempt audit complete; verifier v8 and next hosted delivery | Independent verifier review, fresh PR/main checks and candidate acceptance remain required. |
+| Planning/verification | Review planning composition and verifier v8 | Preserve the frozen entry and Not started packages; keep source and actual execution evidence distinct. |
+| Lead | Corrected HTTP source integration and final inventory | Own primary and PR #106; release implementation only after protected-main candidate acceptance. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -750,3 +750,47 @@ trust, corrected-source CI and protected-main candidate acceptance remain open.
 HTTP #95/#93 remain In progress; ledger #107/#108/#109 remain Not started.
 Independent planning review and read-only P1 onboarding add no implementation,
 database work, model calls, resources or release authority.
+
+## Container test isolation — 2026-10-21
+
+PR run [39678917428](https://github.com/spei04/agent-rewind/actions/runs/39678917428),
+attempt 1 at ad6bfdaa, is retained as failed. Python 3.11 reported 8 failed,
+3878 passed and 14 skipped; Python 3.12 reported 8 failed, 3889 passed and
+3 skipped. Both failed the same eight certificate tests. Package, security,
+gVisor and actual final-container trust checks passed; the CI gate failed and
+candidate delivery was skipped. The logs do not identify which global pip
+configuration file existed.
+
+Platform/security isolated the two remaining host-global config probes in the
+test fixture at a42b6608. The actual helper, runtime, workflow, image and
+pinned dependencies are unchanged. Each of the two controlled pre-fix host
+configurations reproduced the same eight failures. All 51 focused tests pass
+normally and under either simulated host configuration; independent review
+also passed all 51 with both present together and no host-global probes.
+Six explicit config-presence controls preserve refusal before every write.
+
+The collection contains 3907 unique nodes: one prior config case is replaced
+by six cases, and two host-isolation controls are added. Two existing expiry
+parameter timestamps differ only at collection time; their source bytes are
+unchanged and raw deltas are retained. This is inventory evidence, not a
+successful full-suite result. The lead owns the final source/log composition;
+the delivery reviewer owns the next exact-source run and additive v8 failure
+history, with independent planning/verification review. HTTP remains In
+progress and ledger packages remain Not started until protected-main and
+candidate acceptance. No failed attempt is retried or relabeled as acceptance.
+
+## Planning composition with fixture isolation — 2026-10-21
+
+Platform/security composed approved planning 35df1b9 with final reviewed HTTP
+source 065df8c in the reused secondary checkout. The six approved planning files,
+including the frozen ledger entry and backlog tests, remain byte-identical to
+35df1b9; all other source comes exactly from 065df8c. Only this assignment table
+and appended history are reconciled. Statuses, acceptance, dependencies, effort
+and release gates remain unchanged.
+
+Failed ad6bfdaa run 39678917428 and the accepted tests-only isolation at a42b6608
+remain distinct in the preceding checkpoint. Its 3,907-node collection is an
+inventory, not new hosted success. Fresh exact-source CI, protected-main and
+candidate acceptance remain required. HTTP #95/#93 remain In progress; ledger
+#107/#108/#109 remain Not started. This composition adds no runtime or ledger
+implementation, database work, model calls, paid resources or checkout.
