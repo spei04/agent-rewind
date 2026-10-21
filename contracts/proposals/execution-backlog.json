@@ -1367,7 +1367,7 @@
         "QE"
       ],
       "pull_request_boundary": "Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days, then AR-007-C/P2 full existing-route integration 4 [4–7] days after accepted merged P1. P1 does not wire Auth/session issuance, routes, UI, mutations or admission. Aggregate AR-007-C remains unverified until P2 and the full existing-route matrix are accepted.",
-      "contracts_status": "C04/C05 and AR-007-B/011-B/009-B are Verified prerequisites. P1 runtime source 1cf7717 has A identity/read and B authority/transaction acceptance plus 261 integrated focused passes; full hosted PostgreSQL/package evidence and accepted merge remain pending. P2 #77 remains Not started until accepted merged P1. CT-M1-007/009 remain planned overall and CT-M1-008 awaits actual durable replay producers.",
+      "contracts_status": "C04/C05 and AR-007-B/011-B/009-B are Verified prerequisites. A/B accepted P1 runtime 1cf7717. Final run 39526088575 failed one maximum-reference PostgreSQL fixture before reader execution; 45 other new PG cases and package/security/gVisor passed. Fixture-only dbfbae0 preserves the 16,000-reference assertions and has A acceptance; matching hosted rerun and accepted merge remain required. P2 #77 remains Not started; CT-M1-007/009 remain planned overall and CT-M1-008 awaits actual durable replay producers.",
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/75",
       "delivery_packages": [
         {
