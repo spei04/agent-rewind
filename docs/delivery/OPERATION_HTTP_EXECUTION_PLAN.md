@@ -10,12 +10,22 @@ Retain direct prerequisites AR-008-A and AR-011-B and frozen C04. Both packages 
 
 | Package | Independently reviewable scope | Base / range | Exit |
 | --- | --- | --- | --- |
-| AR-008-B/P1 | Bounded Operation read and same-Connection cancellation adapters; producer decision checkpoint | 2 / 2–3 BE days | Reviewed supported-source/cancellation tables, SQLite and actual PostgreSQL evidence, matching hosted checks and accepted merge |
+| AR-008-B/P1 | Bounded Operation read/cancel adapters; factory-born SQLite ownership and producer checkpoint | 4 / 4–7 BE days | Reviewed ownership/source/cancellation tables, all shared-engine caller and SQLite/PostgreSQL proof, matching hosted checks and accepted merge |
 | AR-008-B/P2 | Exactly submit, operation status and cancellation HTTP, using accepted P1 and coordinator | 2 / 2–3 BE days | Full HTTP/contract/race and installed-package matrix, independent review, accepted merge and protected-main candidate |
 
-Total **4 [4–6] BE days, medium-low confidence**, replacing provisional 3 [3–5]. The extra day accounts for the absent status producer and operation-bound cancellation, not another API feature. Reforecast if the concrete producer decision requires work beyond these adapters; do not silently implement worker persistence or weaken refusal to fit the estimate. The full cards are in the [backlog](../EXECUTION_BACKLOG.md#ar-008-b) and [ledger](../../contracts/proposals/execution-backlog.json).
+Total **6 [6–10] BE days, medium-low confidence**. The original adapter/HTTP reconciliation replaced provisional 3 [3–5] with 4 [4–6]; the current two additional P1 days account for the measured SQLite callback-ownership gap, generation-bound post-close verdicts and explicit 33-site/14-module caller adaptation. The first ownership draft's 3 [3–5] P1 estimate was superseded after the missing ordinary-caller reporting boundary was identified. Reforecast if the concrete producer decision requires work beyond these adapters; do not silently implement worker persistence or weaken refusal to fit the estimate. The full cards are in the [backlog](../EXECUTION_BACKLOG.md#ar-008-b) and [ledger](../../contracts/proposals/execution-backlog.json).
 
-At the operation HTTP planning checkpoint: 151 aggregate tasks, 157 delivery PRs, 52 parents, 544 outer edges, 27 gates and 20 contracts; 457 base days, 772.1 summed upper days, alternative 571.25 days with a 25% allowance, M1 58.5 and BE 90.5. The effort-only critical path is 169.5 days. Relative to the published baseline this is +1 base, +1 upper and +1 PR, with no outer edge/status change. These are engineering estimates, not elapsed-time or spending commitments.
+At the original operation HTTP planning checkpoint: 151 aggregate tasks, 157 delivery PRs, 52 parents, 544 outer edges, 27 gates and 20 contracts; 457 base days, 772.1 summed upper days, alternative 571.25 days with a 25% allowance, M1 58.5 and BE 90.5. The effort-only critical path is 169.5 days. Relative to the published baseline this is +1 base, +1 upper and +1 PR, with no outer edge/status change. These are engineering estimates, not elapsed-time or spending commitments.
+
+The current ownership reforecast retains 151 tasks, 158 delivery PRs, 544 outer
+edges, 52 parents, 27 gates and 20 contracts: **461 base / 779.1 upper / 576.25
+alternative allowance / 173.5 effort-path days**, with M1 62.5 and BE 94.5.
+Parent AR-008 totals 13 days. Earlier checkpoint totals above remain history.
+B/lead accepted ownership entry **5bedede** and C independently confirmed the
+acquisition map. The dormant helper d1b7ce20 is independently accepted as a
+component; C is assigned complete caller integration with factory activation
+disabled. Activation and dependent services require separate review.
+Current task/package statuses and later gates are unchanged.
 
 ## Frozen responses and actual producer seams
 
@@ -36,7 +46,7 @@ Existing seams at the pinned source:
 - LegacyViews.jobs demonstrates strict job-owned result reads and original source/ref receipts. Reuse narrowly where behavior is identical; do not load an entire job list or workspace graph to render one operation.
 - ScopedActions.cancel owns its own transaction and returns None. A separate operation lookup followed by that method does not bind operation→job during mutation. P1 must provide the narrow same-Connection effect/operation adapter while preserving legacy callers.
 
-P1 chooses concrete adapter names and finite query/byte/work ceilings at its entry design review, reusing existing bounded SQL, authority and transaction helpers. It must not add a generic operation framework or new global engine behavior. Bound selected cells before transfer/JSON decoding, keep invalid candidates as refusal markers, and retain original operation/job/config/scope and all seven descriptor fields through final bounded SQL checks. Reauthorize after I/O; an original snapshot or signed identity is not lasting authority. No partial status response after a failed final check.
+P1 chooses concrete adapter names and finite query/byte/work ceilings at its entry design review, reusing existing bounded SQL, authority and transaction helpers. The [ownership amendment](OPERATION_ADAPTER_ENTRY.md#sqlite-callback-ownership-amendment--accepted-entry) permits only a factory-born SQLite lifecycle policy and shared progress lease; work-budget listeners remain Connection-local. No generic operation framework or broader engine policy change is included. Bound selected cells before transfer/JSON decoding, keep invalid candidates as refusal markers, and retain original operation/job/config/scope and all seven descriptor fields through final bounded SQL checks. Reauthorize after I/O; an original snapshot or signed identity is not lasting authority. No partial status response after a failed final check.
 
 ## Supported source table and failure-producer decision
 
@@ -109,4 +119,4 @@ No code, schema, profile, frozen contract, historical schedule, task dependency,
 
 ## P1 implementation assignment — 2026-10-21
 
-Engineer C owns P1 #94 in the reused secondary cloud checkout. B independently reviews cumulative work accounting, optional transaction work and raw receipts before dependent read/cancel services. The initial failure table remains fail-closed: no stored-failure producer is invented. The entry audit found no additional producer prerequisite. Actual PostgreSQL, hosted/package checks, independent source review and accepted delivery are still required. P2 remains Not started; no HTTP/schema/profile/worker/provider/customer activation is included.
+Engineer C retains P1 #94 ownership. B independently reviews cumulative work accounting, optional transaction work and raw receipts before dependent read/cancel services. B/lead accepted ownership entry 5bedede; C independently confirmed its acquisition map. A completed dormant helper d1b7ce20, accepted by B/C source review and 67 lead tests plus an original/corrected pool-substitution probe. C is assigned complete caller integration in the reused secondary checkout with Database factory activation disabled. C completed 40 actual PostgreSQL component cases at e490a27; the existing synthetic instance is stopped with baseline state restored. B/lead accepted the separate detach correction 97ef62c after source review and 18 independent regression passes. The helper, caller integration and factory activation remain separately reviewed checkpoints before dependent services. The initial failure table remains fail-closed: no stored-failure producer is invented. The entry audit found no additional producer prerequisite. Actual PostgreSQL, hosted/package checks, independent source review and accepted delivery are still required. P2 remains Not started; no HTTP/schema/profile/worker/provider/customer activation is included.

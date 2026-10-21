@@ -10,8 +10,9 @@ P1 runtime requires accepted AR-008-A/P3 main/candidate evidence and a separate
 implementation assignment. This checkpoint adds no producer, schema, HTTP
 route, available default adapter, profile, worker or customer activation.
 
-The [two-package plan](OPERATION_HTTP_EXECUTION_PLAN.md) retains 4 [4–6] BE
-days and all outer prerequisites. This document freezes a bounded initial
+The [two-package plan](OPERATION_HTTP_EXECUTION_PLAN.md) now estimates 6 [6–10] BE
+days: P1 4 [4–7] and unchanged P2 2 [2–3], medium-low confidence. All outer
+prerequisites remain unchanged. This document freezes a bounded initial
 support table rather than assuming a stored-failure producer exists.
 Frozen C04 remains authoritative; no wire field or error vocabulary changes.
 
@@ -82,6 +83,343 @@ service budget as covering an uninstrumented helper. Project authority may be
 checked separately from the budgeted resource closure, preserving visibility
 before action denial. No listing/cursor or new worker prerequisite is required.
 
+## SQLite callback ownership amendment — accepted entry
+
+This amendment responds to the independent first-checkpoint finding that a
+clean transaction and a Connection.info marker cannot establish native callback
+ownership: sqlite3 has no progress-handler getter. It is a design prerequisite,
+not accepted implementation. B and the lead accepted exact entry 5bedede on
+2026-10-21; C independently confirmed the complete acquisition map. The dormant
+helper d1b7ce20 is independently accepted as a component after B/C source review,
+67 lead tests and an original/corrected pool-substitution probe. C is assigned
+complete caller integration with Database factory activation disabled. Activation
+and dependent services require separate reviewed checkpoints. C retains overall P1 ownership. P1 remains In
+progress, P2 Not started, and neither accepted-merge field changes.
+
+The bounded implementation belongs in one dependency-light internal
+`agent_rewind/sqlite_ownership.py` helper, narrow Database construction, and
+the three known callback consumers: operation_work, listing_session and
+migrations.compatibility's inspection scope. Explicit connection-context adapters
+and the complete 33-site acquisition map below are also P1 work; the factory
+cannot be enabled with that ordinary-caller integration omitted. No schema/profile/HTTP or global
+SQL budget change is included. The current configure_runtime_engine SQLite
+no-op cannot certify an existing Engine; PostgreSQL construction, pre-ping,
+transaction settings and work=None behavior remain unchanged.
+
+### Capability and lease interfaces
+
+Proposed internal interfaces, whose names may be narrowed during source review:
+
+```python
+create_owned_sqlite_engine(url, *, connect_timeout, pool_timeout) -> Engine
+require_owned_sqlite(engine) -> SQLiteCapability
+acquire_progress(connection, *, owner) -> ProgressLease
+owned_connect(engine) -> ContextManager[Connection]
+owned_begin(engine) -> ContextManager[Connection]
+cleanup_snapshot(receipt) -> CleanupVerdict
+require_clean(verdict) -> None
+
+class ProgressLease:
+    def install(self, callback, instruction_interval) -> None: ...
+    def release(self) -> None: ...
+```
+
+The factory creates an explicit file-backed QueuePool and tracked sqlite3
+Connection subclass from birth, before dialect bootstrap. An opaque private
+capability binds the engine, pool record, physical connection and checkout
+generation. It is not a caller-supplied boolean, connection.info assertion or
+retroactive certification. No foreign creator/DBAPI/pool is accepted. Reject
+:memory:, empty SQLite URLs, memory/shared-cache URI modes, StaticPool and
+untracked/custom engines at the new operation boundary. Existing untracked
+CLI, migration and private readiness/probe paths keep their existing behavior
+and explicit separation; they cannot be passed off as operation-owned engines.
+
+Acquisition checks capability/generation and native state without SQL, before
+any consumer PRAGMA, listener or callback change. A private per-physical-handle
+lock serializes checkout generation, direct-handler attempts and lease state;
+check_same_thread=False and the GIL alone are not ownership proof. Do not hold
+that state lock across SQL or user callbacks. Acquisition atomically claims a
+unique owner object; a known active lease refuses a nested borrower without clearing,
+rolling back, invalidating or closing the outer owner's connection. The
+borrower has acquired nothing and must not enter owned cleanup. No helper may
+interpret that refusal as a reason to discard the active outer owner.
+
+Only the matching live lease can install/replace/remove its callback through
+the private native path. Partial installation is tracked before an operation
+can fail; release is idempotent for that lease and must still attempt owned
+removal after budget or provenance failure. Wrong-owner/stale-generation
+release has no native effect. An ordinary direct Python set_progress_handler
+call, including a clear, marks foreign/uncertain provenance and refuses
+**before** replacing the native callback. This also covers a retained idle raw
+reference; its next checkout is rejected/discarded. A direct attempt during a
+live lease leaves that callback intact, but the owner must refuse success and
+quarantine after its own cleanup. A refused direct call is a recorded
+foreign-access attempt, not evidence that an unknown callback was installed:
+the poison prevents later reuse because exclusive ownership was violated.
+Unknown partial native install/remove is a separate, stronger uncertainty
+state. No unknown callback is claimed restored.
+
+This is cooperative in-process ownership, not a sandbox against malicious
+Python. Explicit base-class/native bypass, arbitrary subclass mutation or C
+extension access is outside the proof. Arbitrary retained raw SQL is not
+intercepted: a live native transaction is detected, but committed raw writes
+are not made safe or authorized by this mechanism.
+
+### Construction, checkout and return ordering
+
+1. Database selects the owned factory only for supported application file-backed
+   SQLite. Install provenance/lifecycle hooks before first checkout. Factory
+   construction gives a pristine no-handler connection to dialect bootstrap;
+   the first and every later checkout must verify the recorded physical
+   identity/generation and idle/untainted state.
+2. Set **pool_pre_ping=False only on this owned SQLite pool**. The current
+   Database pre-ping runs before SQLAlchemy's checkout event, so a checkout
+   guard alone is insufficient. Do not move a SELECT/PRAGMA into the guard.
+   A closed handle fails the consumer's first bounded SQL and is discarded;
+   there is no transparent replay of request work. PostgreSQL keeps its
+   existing pre-ping policy; untracked legacy engines are not reconfigured.
+3. Set **pool_reset_on_return=None only on this owned SQLite pool**. Replace
+   implicit pool rollback with explicit no-SQL lifecycle validation at reset/
+   checkin. Native in_transaction must be false, no progress lease may remain,
+   and provenance/generation must be clean. Unknown state, a failed property
+   read, a retained handler attempt or an active transaction never returns a
+   usable record to the pool. Do not silently rely on a clean logical
+   SQLAlchemy transaction to prove clean native state.
+4. Each ordinary caller still owns its SQLAlchemy Connection/transaction
+   cleanup. SQLAlchemy Connection.close may roll back before pool events;
+   disabling pool reset does not disable that behavior. The proposed tracked
+   native rollback guard therefore refuses before native execution while a
+   progress lease is live or a partial install/remove leaves native state
+   unknown. A refused direct handler attempt alone, with a known empty native
+   callback, does not block mandatory rollback; it still forbids reuse.
+   Opted-in commit remains the owned, budgeted transaction path. Opted-in work removes
+   owned callbacks/listeners before rollback/settings restoration/close.
+   Mandatory native cleanup is independent of exhausted counters or accounting
+   errors, and BaseException cannot skip the remaining bounded attempts.
+   Lifecycle hooks perform no restoration SQL and cannot certify settings that
+   a consumer failed to restore. Connection.close can stop before releasing its
+   pool record when rollback refuses: supported callers must still detach their
+   own lease, invalidate/discard and finish bounded close. Prove pool
+   checkedout=0 and physical replacement under this exact fault; a checkin hook
+   that was never reached or eventual GC is not cleanup evidence. A nested
+   borrower must never call this cleanup against the active outer owner.
+5. A dirty return is quarantined: remove its physical handle from eligibility,
+   invalidate/discard it and refuse successful reuse. Active lease on return
+   means the owner has incorrectly released its checkout; this differs from
+   refusing a nested borrower that still holds the outer checkout. Physical
+   close may abort a remaining transaction; never report that as acknowledged
+   application rollback or commit. If close/discard itself fails, retain the
+   quarantine and make bounded cleanup attempts without a new SQL operation,
+   infinite retry or returning the handle to the pool. Report cleanup failure;
+   do not promise resource reclamation when the driver repeatedly fails.
+   Reset/checkin guards must not throw before returning or retiring the pool
+   record; quarantine/error state is retained separately and the checkout is
+   released. Partial invalidation and a second close need bounded fault tests;
+   no pooled handle may become eligible merely because reporting failed.
+6. Compatibility inspection uses the same lease on owned engines and completes
+   its entire rollback/restoration/release phase before operation work starts.
+   It may not nest a callback scope under operation/listing work. It retains
+   its separate bounded budget and actual migration-only guard. Existing
+   untracked inspection paths remain explicit legacy behavior, not ownership
+   evidence. Checkout guards/lease checks run before native effects in every
+   owned compatibility, listing and operation path.
+
+Before disabling reset, source review must inventory **all** callers of the
+Database-owned engine, not just the three callback installers: Database
+connect/begin methods (record/event/job/key/audit reads and writes), initialize/
+upgrade/install, ping/compatibility, Auth/RequestAuthority/scoped repositories,
+ScopedActions, published/legacy/scoped-list readers, artifact engine hooks and
+admission repositories/coordinator transactions. Preserve their successful
+commit/rollback/close behavior and prove each returns native idle without a
+lease. Raw BEGIN helpers need native-state tests because SQLAlchemy may not
+know their transaction. Lifecycle validation does not require hardcoded
+default PRAGMAs: configure_artifact_engine deliberately retains foreign_keys=ON,
+and migration setup may retain an operator-selected busy_timeout. Each scoped
+consumer restores its own saved settings; migration/projection and ordinary
+caller regressions prove that policy is preserved. Retained raw SQL/PRAGMA
+mutation is unsupported and cannot be detected beyond native transaction
+state; no setting-restoration guarantee is inferred for that path.
+Worker disposal must not reintroduce a dirty record;
+checked-out owners keep their cleanup obligations. Do not silently reconfigure
+the separately constructed readiness worker, CLI engines or arbitrary tests.
+If this inventory exposes an incompatible caller, report it before widening the
+factory boundary or enabling a fallback.
+
+### Retained cleanup verdict and ordinary callers
+
+A successful callback release proves only removal of that callback. It does
+not prove Connection.close, pool return or physical disposal succeeded.
+The factory and helpers retain one private CheckoutReceipt per checkout
+attempt/generation, separate from the reusable pool record. Internal lifecycle
+observations are mutable and finite; cleanup_snapshot returns an immutable
+verdict with no raw exception text. No verdict grants authority.
+
+Before engine.connect, the helper opens a private request-local checkout-attempt
+scope. The attempt exists even if no Connection is yielded. Factory creation
+and pool checkout bind any obtained physical handle/record to this attempt and
+generation before bootstrap or customer SQL. A bare acquisition on the owned
+factory without this scope is unsupported and refuses; it must not silently
+bypass the final-verdict obligation. Use an ordinary context-local stack,
+not a shared global current-owner variable. A failed guard must not request
+SQLAlchemy's transparent disconnect/retry path.
+
+For an early timeout/refusal with no handle acquired, the attempt records
+verified no-acquisition. Once a physical handle or pool record is obtained,
+failure before yield requires observed return or quarantine/disposal and
+pool-slot release. Creation/bootstrap/checkout hooks must retain the attempt
+identity through these errors. Neither the absence of a yielded Connection
+nor a log line proves cleanup. A missing terminal observation remains failure;
+bounded disposal is still attempted without GC or an infinite retry.
+Distinguish creation/connect-hook failure before checkout from engine_connect
+failure after a pool proxy was obtained but before Connection construction
+returns. Retain enough public checkout-proxy ownership in the attempt to
+release/dispose that latter proxy; a pool record alone is not proxy cleanup.
+Both stages need independent injected-failure proof, including a secondary
+close failure and checkedout=0. Do not rely on constructor cleanup or private
+SQLAlchemy overrides.
+
+Reset/checkin hooks record idle return, quarantine and failure without throwing
+before record return. The tracked native close method records attempted/returned/
+failed disposal on the matching generation before rethrowing, so a driver
+exception that SQLAlchemy subsequently logs or suppresses remains visible.
+An event exception before native close leaves disposal unconfirmed. Keep
+physical-disposal evidence distinct from pool-slot release; close is not an
+acknowledged transaction rollback. Single injected failures must demonstrate
+checkedout=0 and replacement; repeated driver failure remains explicit
+unreclaimed-resource uncertainty, never eligibility for reuse.
+
+After Connection.close returns, the owner takes the immutable snapshot and
+requires: close acknowledgment, the expected terminal pool return or clean
+disposal, no live lease and no latched cleanup/provenance failure. The check
+does no SQL, callback change or pool lookup. It reads the retained attempt,
+not whichever generation now occupies the record. A concurrent next borrower
+cannot erase this outcome; late/stale observations cannot affect the new
+borrower. If close raises, or terminal proof is absent, no successful result
+is possible even if the record later appears idle.
+
+owned_connect and owned_begin are narrow context managers using public
+Engine/Connection operations. They pass through PostgreSQL and explicitly
+untracked engines unchanged. On owned SQLite they establish the checkout
+attempt, preserve the existing transaction semantics, close and inspect the
+receipt before yielding a successful context exit. No Engine facade,
+SQLAlchemy private connection-class override, global monkeypatch or arbitrary
+engine certification is allowed. owned_begin must retain whether commit was
+attempted/acknowledged; postcommit close failure cannot be reported as a known
+rollback or trigger automatic replay.
+
+Manual session owners use the same private attempt/receipt primitive around
+their existing connect/cleanup sequence, not a second context that commits or
+closes behind their outcome state. They retain the receipt before release and
+check it after their bounded close attempts. Existing primary typed denial or
+BaseException survives secondary cleanup failure; without a primary, read
+cleanup failure maps to fixed dependency_unavailable. Cancellation before
+commit with acknowledged rollback and proven cleanup retains its known-failure
+mapping; attempted/acknowledged commit plus cleanup failure is outcome_uncertain.
+Ordinary mutation callers preserve their existing safe boundary and never
+return success or claim rollback after commit acknowledgment. The wrappers
+must not invent a retryable error to hide that uncertainty.
+
+The owned-engine requirement belongs at the future OperationService entry,
+before its first SQLite acquisition, including the separate schema compatibility
+probe. Its low-level component helpers may retain explicitly untracked legacy
+and test paths; those paths do not certify ownership. Optional lease selection
+returns no lease only for a genuinely unregistered engine. A known owned engine
+whose current pool loses provenance must refuse before effects and must never
+fall back to the untracked path. PostgreSQL retains its existing behavior.
+
+Failed nested lease acquisition is different: it returns no lease or ownership
+receipt for the outer Connection and must perform no outer cleanup. The
+already active owner retains its original receipt. A successfully acquired
+lease whose install later fails does own removal/cleanup. An ordinary checkout
+that succeeds but later fails to acquire its own lease still owes its own
+checkout cleanup; this does not authorize cleaning a borrowed active owner.
+
+### Exact acquisition map and integration gate
+
+The immutable a59e074 source contains these **33 acquisition sites in 14
+modules** (a conditional begin/connect expression is one site). Preserve
+public behavior and existing local context boundaries; only the necessary
+mechanical acquisition/final-verdict adaptation belongs here.
+
+| Module | Sites | Required boundary |
+| --- | ---: | --- |
+| database.py | 18 | Use owned_connect/owned_begin through narrow private Database contexts for every record/event/job/key/audit method; no bare factory acquisition remains |
+| artifact_publication.py | 1 | Preserve its read/write conditional transaction owner with the corresponding wrapper |
+| auth.py | 1 | Existing credential SELECT context uses owned_connect; failure cannot return an authenticated result |
+| cli.py | 1 | The Database-backed context uses owned_connect; this is distinct from separately constructed operator engines |
+| migrations.compatibility.py | 2 | Connectivity and inspection use owned_connect; inspection releases its lease/settings before context close and final verdict |
+| migrations.service.py | 2 | Wrapper preserves explicit operator transaction/retained-PRAGMA policy; untracked operator engines remain pass-through |
+| projection_source.py | 1 | Wrapper encloses existing read snapshot/restoration, then checks final cleanup |
+| published_reader.py | 1 | Existing read-phase owner uses owned_connect; final cleanup precedes result |
+| request_authority.py | 1 | Existing authority context uses owned_connect; no accepted decision after failed cleanup |
+| scoped_actions.py | 1 | Existing mutation owner uses owned_connect without changing commit/rollback/uncertainty observations |
+| scoped_repositories.py | 1 | Existing shared repository context uses owned_connect |
+| admission_transaction.py | 1 | Manual owner retains/checks the private receipt with its TransactionOutcome, including work=None |
+| listing_session.py | 1 | Manual owner retains/checks receipt after callback/settings/rollback/close cleanup |
+| operation_work.py | 1 | Manual owner retains/checks receipt across read phases and optional transaction work |
+
+The count is an audit baseline, not permission to ignore a new caller. Recheck
+all acquisitions at the exact implementation source and fail the integration
+gate if an owned-factory path remains bare or lacks a final verdict. Helpers
+receiving an existing Connection must not close it or consume its owner's
+receipt. No runtime raw_connection acquisition was found in this map; such
+direct access remains unsupported on the owned factory. Engine-bound
+inspect/reflection/metadata create_all/drop_all would also bypass the wrappers
+and is unsupported unless supplied an owned Connection. The audited catalog
+inspection and Alembic migration environment already consume a Connection;
+preserve that boundary rather than create a second checkout.
+
+Separately constructed CLI/migration, readiness-worker and private probe/test
+engines retain untracked behavior and are not certified by these wrappers.
+Database-backed CLI/migration calls in the table are covered. Other indirect
+Auth/repository/coordinator/worker consumers inherit the mapped boundary;
+their tests must establish that inheritance. Arbitrary external raw handles
+are not a supported ordinary caller. This complete adaptation is an entry/
+acceptance obligation, not a promise supplied merely by installing pool hooks.
+
+### Required independent proof and reforecast
+
+Use owned file-backed QueuePool(size=1, max_overflow=0) tests and preserve
+legacy/untracked control cases. Prove:
+
+- compatibility, listing and operation permutations reuse a clean physical
+  connection with original timeout/query_only settings and no surviving
+  callback; compatibility completes before operation work;
+- nested acquisition changes no callback, SQL, settings, transaction or outer
+  close state; wrong-owner/released-generation handles cannot clear a lease;
+- direct handler/clear attempts and retained-idle references refuse, taint and
+  force replacement; no unknown callback restoration claim;
+- checkout executes no pre-ping/guard SQL, and reset performs no implicit SQL;
+  active native transactions, raw BEGIN, dead handles and uncertain property
+  reads are quarantined, with successful replacement after bounded cleanup;
+- premature Connection.close while leased refuses implicit native rollback;
+  supported cleanup still releases the pool checkout without GC, preserving an
+  unrelated active outer owner on nested acquisition refusal;
+- partial acquire/install/release, callback exceptions, exhausted accounting,
+  restoration/close/discard failures and BaseException preserve original
+  denial/interruption and still attempt remaining cleanup; no success follows
+  unconfirmed cleanup or post-ACK failure;
+- reset/checkin failures observed only after close refuse read/cancel success;
+  native close failures remain recorded even if library logging suppresses
+  them; a later checkout cannot overwrite the retained earlier verdict;
+- early creation/bootstrap/checkout refusal proves no acquisition or terminal
+  slot release/disposal without a yielded Connection; every mapped ordinary
+  context observes a failed verdict and preserves an existing primary;
+- ordinary Database and all shared-engine callers above preserve transactional
+  behavior, including work=None and initialization; unsupported/custom/memory
+  operation engines refuse without changing legacy callers; PostgreSQL
+  settings, restricted roles and existing timeout/cleanup tests remain intact.
+
+These are implementation gates, not evidence already supplied by a clean
+transaction or passing fixture. Add actual installed-package/provenance smoke
+for the new internal helper when it exists; no package bytes change here.
+The first ownership draft estimated P1 at 3 [3–5]. Explicit post-close
+verdicts and the 14-module caller adaptation cannot remain implicit in that
+one-day increment. P1 is now **4 [4–7] BE days**, medium-low, versus the original
+2 [2–3]. P2 stays 2 [2–3]; aggregate AR-008-B becomes **6 [6–10]**. No additional task, package, outer edge, activation or
+resource is introduced. If safe ordering cannot be demonstrated within this
+boundary, return the finding rather than certify an arbitrary engine.
+
 ## Concrete limits
 
 These are proposed service refusal limits, not measured throughput promises.
@@ -119,8 +457,8 @@ Supported DBAPI modes must be checked before starting; PostgreSQL is READ
 COMMITTED with local search path/read-only/timeouts, SQLite owns a query_only
 snapshot and progress handler only for that checkout. Remove owned hooks,
 restore settings and roll back/close on every path; invalidate/discard when
-cleanup cannot be confirmed. Do not alter engine-wide defaults or steal a
-callback owned by another session. Admission's mutation transaction is reused
+cleanup cannot be confirmed. The narrowly owned SQLite pool lifecycle above is
+the only engine-policy exception; do not steal another session's callback. Admission's mutation transaction is reused
 only for cancel through the optional work scope below; the current helper alone
 does not enforce this service's cumulative limits. Native timeout/progress exhaustion fails closed, and successful
 phase exit also checks the cumulative clock. Storage duration is not covered by
@@ -351,9 +689,11 @@ during committed disclosure, is outcome_uncertain; the effect/audit is not
 undone or repeated. Typed authority denials retain 401/403/404. The 10-second
 value is a successful-completion/refusal ceiling, not a hard real-time limit
 on connection establishment, native interruption latency, storage or emergency
-cleanup. No Engine-global hooks, background timeout thread or new service is
-required. These optional hooks do not exist yet and require exact-source review
-and actual SQLite/PostgreSQL proof before P1 acceptance.
+cleanup. Work-budget listeners remain Connection-local. Only the factory-born
+SQLite lifecycle guards above may use engine/pool events; they perform no SQL
+or request-budget accounting. No background timeout thread or new service is
+introduced. Optional work and ownership implementations require exact-source
+review and actual SQLite/PostgreSQL proof before P1 acceptance.
 
 ## Fixed failures and transaction stages
 
@@ -461,3 +801,42 @@ cleanup and cancellation lock/disclosure choices. A producer/schema expansion,
 unmeetable measured limit or changed contract is a concrete review finding, not
 implicit authority to broaden P1. All task statuses, estimates, outer edges,
 accepted histories and external gates remain unchanged.
+
+## Independent service composition review — 2026-10-21
+
+A independently reviewed immutable component 97ef62c against entry 579c54b.
+The lead accepted the following constraints for the existing service scope;
+this review starts no service implementation. Caller integration and separately
+reviewed factory activation remain prerequisites.
+
+Cancellation must retain an immutable association receipt independently of the
+fresh 16-field job validation. Preserve the original operation's 14 fields,
+job id/kind/payload/actor/payload_version/budget, config digest/reference and
+seven-field config descriptor/reference. Legitimate worker changes to status,
+reserved amount, result and lease must not overwrite that association or make
+post-commit disclosure fail merely because state advanced. Validate each fresh
+job row and capture the mutation's response. GET continues to require its full
+16-field job receipt. The existing strict repeated ReceiptBook job comparison
+cannot be reused unchanged across cancellation preflight and disclosure.
+
+A PostgreSQL SELECT with two native timeout SETs consumes three charged
+statements. Per-node reads therefore cannot support 256 visited nodes inside
+the existing 512-statement ceiling, even before authority and setup work.
+Use bounded set-oriented frontier/cache reads with the shared visit, edge and
+byte limits and original receipts. An outer counter or a wider ceiling does
+not solve this requirement.
+
+The final relational comparison needs a narrow source-domain bridge: the
+component ReceiptBook's operation/job/config/result domains and the older
+13-column job comparison do not cover the complete service. Preserve native
+types and all 16 job fields; include by-job discovery and config/result candidate
+cardinality in the same final statement within 259 identities, 4 MiB retained
+receipts and 64 bound parameters. Separate successful comparisons do not prove
+one coherent final observation.
+
+Cross-row validation must explicitly enforce operation payload_version=2,
+config digest/reference equality and the original creator's actor identity.
+The current viewer's identity is authorization context, not a replacement for
+the creator. Bounded cell and descriptor primitives alone do not establish
+these associations. These constraints add no new producer, outer dependency,
+resource authority or wider runtime support.

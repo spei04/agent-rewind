@@ -1,13 +1,14 @@
 # C15 administrative identity contract
 
-Status: proposal for SEC/TL/QE peer review, not independent human certification.
+Status: independently accepted offline contract for development consumption;
+peer review is not independent human certification.
 AR-034-A [#100](https://github.com/spei04/agent-rewind/issues/100) produces only
 this document, the [OpenAPI proposal](../../contracts/proposals/administrative-identity.openapi.json),
 [synthetic vectors](../../contracts/fixtures/administrative-identity.json) and
 offline contract tests. No route, grant, session-revocation producer, operator
 tool, database migration, IdP integration or production authority is implemented.
-The register remains unavailable until the separate recorded review/delivery
-gate. Runtime and live exercise belong to AR-034-B and AR-034-C respectively.
+The register is available after the recorded review/delivery gate below.
+Runtime and live exercise belong to AR-034-B and AR-034-C respectively.
 
 ## Existing producers and compatibility
 
@@ -319,3 +320,7 @@ changes, recovery restart/uncertainty, maximum SQL/cursor work, and the existing
 revoked-member /me-to-logout and stale UI response regressions. Synthetic vector
 behavior_status remains planned-not-executed. No task or production gate becomes
 Verified merely because the OpenAPI model and these tests pass.
+
+## Accepted offline delivery — 2026-10-21
+
+AR-034-A offline C15 is Verified after reviewed source 881096a73224f2ca307d31ebfe26d66c86f8229a merged in PR #103 as 9ee75e785224fc2856e4666e32ef62631ef93454 with an identical tree. PR run 39586855528 and protected-main run 39589239743 passed 3040/3050 tests on Python 3.11/3.12 with 13/3 expected skips and one existing warning each; all 33 publication and 26 recovery PostgreSQL cases ran on both versions. Package/security/CI gate, three gVisor cases and main delivery passed. C authored the contract, A independently accepted the corrected contract and schema, and B accepted composition and both CI runs. Lead verified candidate 12342151758 (585143 bytes), exact four files, source/parent/tree, pinned manifests and package/archive hashes; indexed private release record reviewed-delivery-20261021-pr103-9ee75e7.json is retained outside checkouts. C15 is available for development contract consumption. Administrative services/UI, durable mapping/recovery storage, real IdP and production acceptance remain gated; AR-034-B still waits for AR-033-C and its concrete storage/effort entry decision.
