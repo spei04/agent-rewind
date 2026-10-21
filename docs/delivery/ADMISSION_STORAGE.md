@@ -199,3 +199,33 @@ Configured lint, security rules, formatting and strict typing passed. All eight
 predecessor profiles and eighteen frozen contract files remain byte-identical.
 These local checks do not replace matching hosted PostgreSQL or installed-package
 execution.
+
+## Actual ar6 process interruption evidence
+
+Three additional opt-in PostgreSQL cases execute the real initializer in a child
+process and kill that process with SIGKILL after completed ar6 DDL, after final
+fingerprint validation before commit, and immediately after acknowledged commit.
+Each requires both its exact flushed phase marker and the SIGKILL return code;
+other failures expose only the existing bounded refusal diagnostic. The child
+has a 30-second deadline, and the separate control database observes backend
+exit before fresh connections inspect or retry. No migration retry hides refusal.
+
+The snapshots include actual alembic_version and installation_adoptions row
+contents, full catalog, historical source/rows, all progress, run index/counters,
+project/grant/scope and artifact metadata. Precommit death must leave exact ar5
+state; acknowledged commit must leave the exact reviewed ar6 catalog and matching
+fingerprint. Recovery and a second reentry use an independent NullPool engine,
+preserve the source and 18 ciphertexts, leave identities empty and v1 configs
+NULL, and remain migration-only. These are P2 DDL interruption tests, not P3
+upload/publication or uncertain-operation recovery. Actual PostgreSQL execution
+is still required; local collection/skips cannot prove these assertions.
+
+The unchanged migration exclusion is also covered by the existing PostgreSQL
+writer-authority, hidden-session, advisory/table-lock and observed-backend-drain
+tests in test_migrations_postgres.py. The ar6 child invokes that same guard once
+with the existing safe diagnostic wrapper; it neither retries nor relaxes it.
+
+The interruption handoff passed 42 local initializer/catalog/diagnostic tests;
+all 14 PostgreSQL migration cases skipped explicitly. The exact child program
+compiles and focused lint/format/whitespace checks pass. No child PostgreSQL
+execution or successful interruption/recovery is claimed from these checks.

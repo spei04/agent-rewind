@@ -2,6 +2,11 @@
 
 import hashlib
 import json
+import os
+import signal
+import subprocess
+import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -10,7 +15,9 @@ import test_migration_recovery_postgres as recovery_tests
 import test_migrations_postgres as migrations
 import test_run_projection_postgres as projection_tests
 from legacy_fixture import FIXTURE_ROOT, canonical_bytes, read_manifest
-from sqlalchemy import text
+from postgres_control import child_refusal_summary
+from sqlalchemy import create_engine, text
+from sqlalchemy.pool import NullPool
 from test_admission_repository import aliases, config_refs, get, insert, prepared, resolve
 from test_admission_schema import PROJECT, job
 from test_admission_service import snapshot
@@ -26,7 +33,7 @@ from agent_rewind.migrations.compatibility import (
     runtime_schema_compatibility,
 )
 from agent_rewind.migrations.projection_service import backfill_run_index
-from agent_rewind.migrations.schema import ADMISSION, COLUMNS, MigrationRefused, catalog
+from agent_rewind.migrations.schema import ADMISSION, COLUMNS, MigrationRefused, catalog, checksum
 from agent_rewind.request_authority import RequestAuthority
 from agent_rewind.request_identity import VerifiedPrincipal
 
@@ -207,6 +214,208 @@ def admission_rows(engine):
                 ("installation_adoptions", "installation_key"),
             )
         }
+
+
+def interruption_snapshot(engine):
+    # Include version/fingerprint row VALUES, not merely their catalog shape.
+    # All fixture reads are bounded by the fixed synthetic historical inventory.
+    with engine.connect() as connection:
+        version = (
+            connection.exec_driver_sql(
+                "SELECT version_num FROM alembic_version ORDER BY version_num"
+            )
+            .scalars()
+            .all()
+        )
+        adoptions = [
+            dict(row)
+            for row in connection.exec_driver_sql(
+                "SELECT * FROM installation_adoptions ORDER BY installation_key"
+            ).mappings()
+        ]
+        ownership = {
+            name: [
+                dict(row)
+                for row in connection.exec_driver_sql(
+                    f"SELECT * FROM {name} ORDER BY {order}"
+                ).mappings()
+            ]
+            for name, order in (
+                ("organizations", "id"),
+                ("projects", "id"),
+                ("project_memberships", "project_id,principal_id"),
+                ("resource_scopes", "resource_kind,resource_id"),
+                ("artifact_objects", "id"),
+                ("artifact_refs", "project_id,owner_kind,owner_id,artifact_id,role"),
+            )
+        }
+    return {
+        "state": snapshot(engine),
+        "version": version,
+        "adoptions": adoptions,
+        "ownership": ownership,
+        "history": historical_rows(engine),
+    }
+
+
+_ADMISSION_CRASH_CHILD = """
+import importlib.util, json, os, signal
+from sqlalchemy import create_engine
+from sqlalchemy.pool import NullPool
+from agent_rewind.migrations import admission_service, service
+from agent_rewind.migrations.schema import ADMISSION, MigrationRefused
+
+phase = os.environ["SYNTHETIC_ADMISSION_PHASE"]
+if phase not in {"ddl", "fingerprint", "committed"}:
+    raise SystemExit(2)
+spec = importlib.util.spec_from_file_location(
+    "synthetic_observer", os.environ["SYNTHETIC_OBSERVER_PATH"]
+)
+observer = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(observer)
+engine = create_engine(os.environ["SYNTHETIC_ADMISSION_DSN"])
+control = create_engine(
+    os.environ["SYNTHETIC_ADMISSION_CONTROL_DSN"],
+    isolation_level="AUTOCOMMIT", poolclass=NullPool
+)
+original_exclusion = service._postgres_exclusion
+
+
+def observed_exclusion(connection, tables):
+    observer.observe_exclusion_failure(
+        original_exclusion, connection, tables, control=control, database=engine.url.database
+    )
+
+
+def die():
+    print("admission_interruption=" + phase, flush=True)
+    os.kill(os.getpid(), signal.SIGKILL)
+
+
+service._postgres_exclusion = observed_exclusion
+if phase == "ddl":
+    original = admission_service._alembic
+
+    def interrupted(connection, direction, revision):
+        original(connection, direction, revision)
+        assert revision == ADMISSION and connection.in_transaction()
+        die()
+
+    admission_service._alembic = interrupted
+elif phase == "fingerprint":
+    original = admission_service._installed
+
+    def interrupted(connection, shape):
+        value = original(connection, shape)
+        if value["_revision"] == ADMISSION:
+            assert connection.in_transaction()
+            die()
+        return value
+
+    admission_service._installed = interrupted
+try:
+    result = admission_service.initialize_admission(engine)
+    assert phase == "committed" and result["revision"] == ADMISSION
+    assert result["customer_ready"] is False
+    die()
+except MigrationRefused as error:
+    print(json.dumps({
+        "failure": error.code,
+        "notes": getattr(error, "__notes__", []),
+        "same_physical_connection": None,
+    }), flush=True)
+    raise SystemExit(1) from None
+finally:
+    control.dispose()
+    engine.dispose()
+"""
+
+
+@pytest.mark.parametrize("phase", ["ddl", "fingerprint", "committed"])
+def test_postgres_admission_actual_process_death_preserves_exact_revision(complete_legacy, phase):
+    state = complete_legacy
+    engine = state["owner"]
+    before = interruption_snapshot(engine)
+    assert before["version"] == ["ar_0005_run_index"]
+    projection_tests.drain(state)
+    try:
+        result = subprocess.run(
+            [sys.executable, "-c", _ADMISSION_CRASH_CHILD],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            timeout=30,
+            env={
+                **os.environ,
+                "PYTHONDONTWRITEBYTECODE": "1",
+                "SYNTHETIC_ADMISSION_DSN": engine.url.render_as_string(hide_password=False),
+                "SYNTHETIC_ADMISSION_CONTROL_DSN": state["control"].url.render_as_string(
+                    hide_password=False
+                ),
+                "SYNTHETIC_OBSERVER_PATH": str(
+                    Path(__file__).with_name("postgres_control.py").resolve()
+                ),
+                "SYNTHETIC_ADMISSION_PHASE": phase,
+            },
+        )
+    except subprocess.TimeoutExpired:
+        # subprocess.run kills and reaps its timed-out child. Do not expose its
+        # command, raw output or environment through a process/exception repr.
+        pytest.fail("Synthetic admission child exceeded its bounded deadline", pytrace=False)
+    expected_marker = ("admission_interruption=" + phase + "\n").encode()
+    if result.returncode != -signal.SIGKILL or result.stdout != expected_marker:
+        pytest.fail(
+            "Child missed exact admission interruption boundary; "
+            + child_refusal_summary(result.stdout),
+            pytrace=False,
+        )
+    projection_tests.drain(state)
+    current = interruption_snapshot(engine)
+    expected_shape = json.loads(admission_tests.PROFILE.read_text())
+    expected = {
+        **before,
+        "state": (expected_shape, *before["state"][1:]),
+        "version": [ADMISSION],
+        "adoptions": [
+            {**row, "installed_schema_fingerprint": checksum(expected_shape)}
+            for row in before["adoptions"]
+        ],
+    }
+    if phase == "committed":
+        assert current == expected
+    else:
+        # This includes absent ar6 tables/columns and exact ar5 version/fingerprint.
+        assert current == before
+    # Use an independently constructed NullPool engine for recovery and reentry:
+    # each operation has a new physical connection after observed backend exit.
+    fresh = create_engine(engine.url, poolclass=NullPool)
+    try:
+        projection_tests.drain(state)
+        recovered = initialize_admission(fresh)
+        assert recovered["revision"] == ADMISSION and recovered["customer_ready"] is False
+        assert interruption_snapshot(fresh) == expected
+        with fresh.connect() as connection:
+            assert (
+                connection.exec_driver_sql(
+                    "SELECT payload_version,execution_config_ref,execution_config_digest "
+                    "FROM jobs ORDER BY id"
+                ).all()
+                == [(1, None, None)] * 3
+            )
+            assert connection.exec_driver_sql("SELECT count(*) FROM operations").scalar_one() == 0
+            assert (
+                connection.exec_driver_sql("SELECT count(*) FROM operation_keys").scalar_one() == 0
+            )
+        assert runtime_schema_compatibility(fresh).code == "migration_only"
+        projection_tests.drain(state)
+        assert initialize_admission(fresh) == recovered
+        assert interruption_snapshot(fresh) == expected
+    finally:
+        fresh.dispose()
+    for spec in read_manifest()["objects"].values():
+        assert (
+            hashlib.sha256((FIXTURE_ROOT / "objects" / spec["address"]).read_bytes()).hexdigest()
+            == (spec["ciphertext_sha256"])
+        )
 
 
 def test_postgres_admission_restore_preserves_history_aliases_and_config_associations(
