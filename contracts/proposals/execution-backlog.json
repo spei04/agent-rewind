@@ -121,7 +121,7 @@
       "milestone": "M1",
       "priority": "P0",
       "objective": "Diagnose failures without exposing secrets or losing request context.",
-      "base_effort_days": 5.0,
+      "base_effort_days": 7.0,
       "children": [
         "AR-011-A",
         "AR-011-B",
@@ -1836,32 +1836,93 @@
       "title": "Trace propagation and operational counters",
       "objective": "Diagnose failures without exposing secrets or losing request context. This task delivers trace propagation and operational counters.",
       "role": "PL",
-      "effort_days": 2.0,
-      "confidence": "medium",
+      "effort_days": 4.0,
+      "confidence": "medium-low",
       "dependencies": [
         "AR-011-B",
-        "AR-005-C"
+        "AR-005-C",
+        "AR-010-B"
       ],
       "contracts": [
         "C04"
       ],
-      "scope": "Propagate request/job IDs and instrument admission, queue delay, failure and budget counters",
-      "acceptance": "Async worker logs correlate without recording payload; bounded series count under many IDs",
-      "tests": "Trace continuity, label cardinality and redaction regression tests",
-      "security_reliability": "Access-restricted logs and controlled retention; no secret-bearing baggage",
-      "out_of_scope": "No SLO claim or paging rota",
+      "scope": "Deliver two sequential accepted-merge-gated PRs after all aggregate producers are Verified: bounded trusted correlation and the exact five-metric collector at actual HTTP/readiness boundaries, then worker/queue/provider/recovery integration consuming accepted admission origin persistence and ledger fences",
+      "acceptance": "Trusted persisted origin remains unchanged across retries and polls while each HTTP request has a fresh generated ID; actual HTTP/readiness and worker transitions produce only frozen metric names, labels and values. Bounded local diagnostics retain drop state; full integration evidence cannot be replaced by zero counters or mock-only producer callbacks",
+      "tests": "CT-M1-022/023 correlation continuity, repeated polls/replays, unknown/readiness-cache states, exact metric vocabulary, series and buffer bounds, secret canaries and sink failure; actual accepted worker/queue/provider/recovery transitions distinguish observed, uncertain and rejected outcomes without new retries",
+      "security_reliability": "Telemetry is best effort and locally bounded; it cannot replace fail-closed transactional audit or ledger receipts, trigger retries, expose identifiers as labels or block responses indefinitely. HTTP attempts/replays are not committed-job counts; budget_exhausted is reported only from the actual classified HTTP error",
+      "out_of_scope": "No admission or worker schema ownership, exporter/network deployment, new metric names or labels, budget amounts, exported drop metric, SLO/paging claim, paid execution, runtime activation or reconstructed origin from client input",
       "status": "Not started",
-      "definition_of_done": "Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.",
+      "definition_of_done": "Both packages have independent review, matching checks and accepted merge evidence in order; aggregate acceptance requires actual producer integration, correlation/redaction, bounded collector/drop behavior and failure tests. Freeze observation semantics and resource bounds at the first design checkpoint; no external gate is satisfied",
       "effort_range_days": [
-        2.0,
-        3.0
+        4.0,
+        6.0
       ],
       "review_roles": [
         "SEC",
         "QE"
       ],
-      "pull_request_boundary": "Propagate request/job IDs and instrument admission, queue delay, failure and budget counters. Merge behind a disabled path or documented preparatory interface until its integration gate passes; do not combine with another task just to reach a milestone.",
-      "contracts_status": "C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied."
+      "pull_request_boundary": "Two sequential independently reviewable PRs under the unchanged aggregate ID: P1 2 [2–3] PL days and P2 2 [2–3], total 4 [4–6] medium-low. Both inherit the aggregate AR-010-B gate; no early foundation exception",
+      "contracts_status": "C04 and its frozen observability contract remain authoritative. AR-011-B/AR-005-C are Verified, but AR-010-B is Not started, so neither package is ready. AR-008-A/B own trusted durable origin production; AR-010-A/B own queue/ledger/worker fences. AR-012-B remains a downstream acceptance consumer, never a reverse prerequisite",
+      "delivery_packages": [
+        {
+          "role": "PL",
+          "effort_days": 2.0,
+          "effort_range_days": [
+            2.0,
+            3.0
+          ],
+          "confidence": "medium-low",
+          "contracts": [
+            "C04"
+          ],
+          "status": "Not started",
+          "accepted_merge_commit": null,
+          "review_evidence": null,
+          "id": "AR-011-C/P1",
+          "title": "Bounded correlation and HTTP/readiness telemetry",
+          "objective": "Implement bounded trusted correlation and the exact frozen metric collector at actual HTTP and readiness boundaries",
+          "dependencies": [
+            "AR-011-B",
+            "AR-005-C",
+            "AR-010-B"
+          ],
+          "scope": "Implement trusted request/correlation helpers, the five-metric collector, actual HTTP/readiness observations and bounded local diagnostic/drop state. Freeze observation points, readiness cache/unknown semantics, histogram buckets, buffer limits and installation-level series limits at the first design checkpoint",
+          "out_of_scope": "No early start before AR-010-B, durable-origin schema, worker integration claim, network exporter, new metric/label vocabulary, budget amounts or paid calls",
+          "acceptance": "Fresh generated HTTP IDs remain distinct from write-once persisted origin; HTTP attempts and replays count HTTP observations rather than committed jobs. Readiness observations distinguish fresh, cached and unknown evidence under the frozen semantics. Sink failure is bounded and observable locally without replacing required audit",
+          "tests": "Actual HTTP success/error/replay and readiness transition tests; exact five-metric names and finite label values; bounded cardinality/buffers, local drop state, secret canaries and failing-sink behavior; fresh request versus original correlation separation",
+          "security_reliability": "No raw request/body/exception/customer fields or identifiers in labels; no automatic exporter/network or retry. Required audit/ledger failure still follows its fail-closed owner contract; zero-valued worker counters do not establish worker coverage",
+          "definition_of_done": "Independent review and matching checks verify actual HTTP/readiness behavior and frozen resource/observation semantics; accepted merged-source evidence is required before P2. Aggregate remains unverified",
+          "interface_contracts": "C04 observability.contract.json and ERROR_READINESS_TELEMETRY.md; accepted AR-011-B boundary/readiness and AR-005-C compatibility; all aggregate producer prerequisites including AR-010-B"
+        },
+        {
+          "role": "PL",
+          "effort_days": 2.0,
+          "effort_range_days": [
+            2.0,
+            3.0
+          ],
+          "confidence": "medium-low",
+          "contracts": [
+            "C04"
+          ],
+          "status": "Not started",
+          "accepted_merge_commit": null,
+          "review_evidence": null,
+          "id": "AR-011-C/P2",
+          "title": "Worker and durable-origin integration evidence",
+          "objective": "Connect bounded telemetry to accepted durable admission and worker transitions",
+          "dependencies": [
+            "AR-011-C/P1"
+          ],
+          "scope": "Consume accepted AR-008-A/B trusted origin persistence and AR-010-B worker/ledger fences for actual queue, provider and recovery observations. Preserve original operation/job origin on retry while poll/request IDs remain fresh; reuse the accepted P1 collector and diagnostics",
+          "out_of_scope": "No duplicate admission/ledger DDL, change to dispatch/fencing/receipt authority, new exporter or labels, budget amount reporting, provider retry policy, paid execution or customer activation",
+          "acceptance": "Actual producer paths preserve origin and distinguish provider outcomes observed, uncertain and rejected. HTTP attempts/replays remain separate from job commits; budget_exhausted appears only for an actual classified HTTP error. Recovery and diagnostic loss cannot change money, admission, retries or fail-closed audit behavior",
+          "tests": "Actual synthetic queue/provider/ledger transition and recovery evidence using accepted producer interfaces; uncertain/rejected/observed outcomes, correlation across retry/polls, committed identity preservation, diagnostic saturation/drop and audit/ledger failures. Mock-only collector or zero-counter evidence cannot satisfy integration",
+          "security_reliability": "No telemetry-triggered retry or refund; no raw provider response, credential, payload or ID labels. Durable origin and ledger truth stay with their producers; best-effort diagnostics cannot acknowledge a missing audit or receipt",
+          "definition_of_done": "Independent review, matching checks and accepted merge establish actual producer integration and the full bounded/redacted evidence matrix; aggregate completion requires both packages. AR-012-B performs downstream foundation acceptance without a reverse edge",
+          "interface_contracts": "Accepted P1; C04 trusted failure_correlation_id from AR-008-A/B and queue/ledger/worker authority from AR-010-B; frozen call_outcome values observed/uncertain/rejected and exact five metrics"
+        }
+      ]
     },
     {
       "id": "AR-012-A",
@@ -7168,14 +7229,14 @@
     "task_count": 151,
     "parent_count": 52,
     "gate_count": 27,
-    "edge_count": 543,
+    "edge_count": 544,
     "dag_acyclic": true,
     "contract_producers_available_before_consumers": true,
     "schedule_no_predecessor_violations_conditional_on_stated_approvals": true,
     "max_scheduled_delivery_days_per_role_per_day": 0.5,
     "milestone_effort_days": {
       "M0": 8.5,
-      "M1": 53.5,
+      "M1": 55.5,
       "M2": 69.0,
       "M3": 81.0,
       "M4": 82.0,
@@ -7187,13 +7248,13 @@
       "TL": 73.0,
       "FE": 23.0,
       "RS": 66.0,
-      "PL": 88.0,
+      "PL": 90.0,
       "BE": 89.5,
       "QE": 112.5
     },
-    "base_effort_days": 452.0,
-    "upper_range_days": 765.1,
-    "effort_only_critical_path_days": 166.5,
+    "base_effort_days": 454.0,
+    "upper_range_days": 768.1,
+    "effort_only_critical_path_days": 168.5,
     "effort_only_critical_path": [
       "E0",
       "AR-005-A",
@@ -7211,7 +7272,7 @@
       "AR-008-B",
       "AR-010-A",
       "AR-010-B",
-      "AR-006-C",
+      "AR-011-C",
       "AR-012-B",
       "AR-014-A",
       "AR-014-B",
@@ -7256,11 +7317,11 @@
       "G7"
     ],
     "critical_path_excludes_external_waits": true,
-    "revision_notes": "2026-10-21 admission-card reconciliation retains the same aggregate IDs and outer graph: AR-008-A replaces 2 [2–3] with 7 [7–11] BE days across three sequential accepted-merge-gated packages; AR-008-B provisionally replaces 2 [2–3] with 3 [3–5] for three HTTP operations. No runtime implementation, new scope/funding gate, historical schedule or immutable C21/owner decision changed. Current totals are computed from the ledger; reforecast B after the accepted A interface.",
-    "independent_review": "A/lead accepted planning correction 839f3a7. P1 source 923647d was independently accepted by A/B, merged as 51a2b1f and verified through matching PR/main/candidate evidence. P2 component reviews by A/B/C are accepted at their recorded immutable handoffs; combined local 26f55b5 checks passed. Final matching hosted/merge/candidate acceptance remains pending; aggregate AR-007-C remains In progress. The separate AR-008-A/B planning reconciliation awaits exact-source A scope/estimate and C dependency/contract review; no task status is promoted.",
+    "revision_notes": "2026-10-21 separate AR-011-C reconciliation adds the actual worker producer AR-010-B, with two sequential accepted-merge-gated packages totaling 4 [4–6] PL days. Both wait for every aggregate prerequisite. Admission reconciliation 1d284ba remains a separate commit. No runtime, new metric vocabulary, funding gate, historical schedule or immutable C21/owner decision changed",
+    "independent_review": "A/lead accepted planning correction 839f3a7. P1 source 923647d was independently accepted by A/B, merged as 51a2b1f and verified through matching PR/main/candidate evidence. P2 component reviews by A/B/C are accepted at their recorded immutable handoffs; combined local 26f55b5 checks passed. Final matching hosted/merge/candidate acceptance remains pending; aggregate AR-007-C remains In progress. A accepted AR-008-A/B scope/sequence/estimates at 1d284ba with a table-format correction; C accepted its exact dependency/contract boundary and arithmetic. The separate AR-011-C amendment awaits exact-source A/C review; no task status is promoted.",
     "contract_count": 20,
-    "verification": "Two-PR reconciliation passed execution/evaluation/M1 OpenAPI validators and 296 focused tests, including 41 backlog tests with package-order, inherited-input, effort, merge-evidence, aggregate-completion and PR-count refusal cases. Ruff lint/security/format, strict checker types and whitespace passed. Aggregate DAG/effort/status, gates, historical schedules/C21/owner/API/acceptance bytes are unchanged from b42f00b. These are historical planning-check results; current runtime evidence and remaining acceptance gates are recorded in each delivery package and planning_status. The 2026-10-21 admission reconciliation passed the unchanged execution/evaluation/M1 OpenAPI validators and 256 focused tests, including 47 backlog cases (six new third-stage sequencing/input/effort refusals). Final 47-case backlog rerun, Ruff/format and whitespace pass. A separate comparison confirmed identical task IDs/statuses/outer dependencies, gates/contracts, historical schedules, frozen contract/research records and runtime/checker bytes; +6 base/+10 upper/+2 PRs only. Independent exact-source plan review remains pending.",
-    "delivery_pr_count": 154
+    "verification": "Two-PR reconciliation passed execution/evaluation/M1 OpenAPI validators and 296 focused tests, including 41 backlog tests with package-order, inherited-input, effort, merge-evidence, aggregate-completion and PR-count refusal cases. Ruff lint/security/format, strict checker types and whitespace passed. Aggregate DAG/effort/status, gates, historical schedules/C21/owner/API/acceptance bytes are unchanged from b42f00b. These are historical planning-check results; current runtime evidence and remaining acceptance gates are recorded in each delivery package and planning_status. The 2026-10-21 admission reconciliation passed the unchanged execution/evaluation/M1 OpenAPI validators and 256 focused tests, including 47 backlog cases (six new third-stage sequencing/input/effort refusals). Final 47-case backlog rerun, Ruff/format and whitespace pass. A separate comparison confirmed identical task IDs/statuses/outer dependencies, gates/contracts, historical schedules, frozen contract/research records and runtime/checker bytes; +6 base/+10 upper/+2 PRs only. Independent exact-source plan review remains pending. The separate AR-011-C amendment passed all three validators and 263 focused backlog/evaluation/M1 tests, including seven new package producer/merge-gate cases (54 backlog cases total). Configured test lint/format and whitespace passed. A separate comparison confirmed only AR-011-C changes, exactly one added AR-010-B prerequisite, no removed edges, unchanged statuses/gates/contracts/history and frozen runtime/checker/research bytes. Generic validation is unchanged; exact-source independent review remains pending.",
+    "delivery_pr_count": 155
   },
   "review_findings": [
     {
@@ -7356,10 +7417,10 @@
     {
       "id": "REV-19",
       "finding": "The current ready queue treated AR-011-C as a wholly available task although durable origin and worker/ledger transitions have later producers.",
-      "resolution": "AR-011-C requires producer-boundary reconciliation before assignment; foundation-only scope may be ready, full integration awaits AR-010-B. Keep its estimates/dependencies/packages unchanged in this admission reconciliation; a separate reviewed planning correction must settle the boundary before assignment."
+      "resolution": "Separate reviewed reconciliation retains AR-011-C identity and adds AR-010-B before both sequential packages: P1 bounded actual HTTP/readiness foundation, P2 accepted admission-origin/worker integration, 4 [4–6] PL days. No early package exception, new metric vocabulary, schema duplication or reverse AR-012-B edge"
     }
   ],
-  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. AR-007-C/P1 #76 is Verified in PR #78 at accepted merge 51a2b1f, protected-main run 39529350057 and independently verified candidate delivery. P2 #77 is Implemented; verification pending in PR #79 after independent component review and combined local checks; aggregate #75 remains In progress until matching hosted/merge/candidate acceptance. AR-011-C requires producer-boundary reconciliation before assignment; foundation-only scope may be ready, full integration awaits AR-010-B. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated. AR-008-A/B remain Not started: B reconciles planning only in the released C checkout, A reviews scope/estimate and C reviews dependencies/contracts; no package starts before accepted aggregate AR-007-C. The planned registry/service are not available runtime producers.",
+  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. AR-007-C/P1 #76 is Verified in PR #78 at accepted merge 51a2b1f, protected-main run 39529350057 and independently verified candidate delivery. P2 #77 is Implemented; verification pending in PR #79 after independent component review and combined local checks; aggregate #75 remains In progress until matching hosted/merge/candidate acceptance. AR-011-C is Not started and blocked on AR-010-B; both sequential packages inherit that producer gate, with no early foundation start. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated. AR-008-A/B remain Not started: B reconciles planning only in the released C checkout, A reviews scope/estimate and C reviews dependencies/contracts; no package starts before accepted aggregate AR-007-C. The planned registry/service are not available runtime producers.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -7734,6 +7795,6 @@
     "conditions": "B independently reviews both interfaces; A/C cross-review without acting as separate human approval. Review acceptance and hosted checks must actually pass.",
     "contingency": "Upper ranges may need two extra half-day allocations per task in days6–7. Days8–10 retain integration/reforecast capacity. Do not start any dependent on a planned date alone.",
     "unscheduled_approved_queue": [],
-    "unscheduled_queue_policy": "AR-007-C/P1 #76 is Verified at accepted merge 51a2b1f with matching main candidate evidence. P2 #77 is Implemented; verification pending in PR #79 after independent reviews. Lead owns matching hosted checks, accepted merge and protected-main candidate; A prepares AR-008-A planning read-only while its aggregate AR-007-C prerequisite remains unverified. AR-011-C requires producer-boundary reconciliation before assignment; foundation-only scope may be ready, full integration awaits AR-010-B; AR-006-C waits for AR-010-B. Historical daily allocations do not schedule these current assignments or authorize external gates. Admission planning defines sequential A packages followed by B without new daily allocations; it does not schedule runtime before aggregate AR-007-C acceptance."
+    "unscheduled_queue_policy": "AR-007-C/P1 #76 is Verified at accepted merge 51a2b1f with matching main candidate evidence. P2 #77 is Implemented; verification pending in PR #79 after independent reviews. Lead owns matching hosted checks, accepted merge and protected-main candidate; A prepares AR-008-A planning read-only while its aggregate AR-007-C prerequisite remains unverified. AR-011-C is Not started and blocked on AR-010-B; both sequential packages inherit that producer gate, with no early foundation start; AR-006-C waits for AR-010-B. Historical daily allocations do not schedule these current assignments or authorize external gates. Admission planning defines sequential A packages followed by B without new daily allocations; it does not schedule runtime before aggregate AR-007-C acceptance."
   }
 }
