@@ -37,6 +37,8 @@ The common configuration invariant applies to every future new legacy run/branch
 
 ## Publication and recovery
 
+The planning-only [P3 entry checkpoint](ADMISSION_COORDINATOR_ENTRY.md) fixes same-submit restart routing, immutable linked attempts, phase-specific errors and the policy/lock interface. It adds no runtime or authority; P3 remains Not started until accepted merged P2 and explicit assignment.
+
 1. Authenticate and resolve the trusted original project context; authorize the action and resolve **both** scoped client-operation and key-alias identities before readiness, mutable registry lookup or storage.
 2. For a matching existing operation, reauthorize before disclosure and atomically bind any legitimate new alias. Return the original accepted IDs and stored configuration identity even if current defaults change or storage is unavailable. Changed canonical intent or an alias bound elsewhere conflicts; changing service-key principal is not recovery.
 3. Only a genuinely new operation freezes approved configuration and uploads/verifies task, configuration and envelope outside any SQL transaction. Existing artifact receipts/metadata primitives are reusable; raw Database.enqueue and complete-run RunPublisher are not admission substitutes.
