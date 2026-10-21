@@ -23,7 +23,7 @@ def job(connection, identifier=JOB, *, project=PROJECT):
     connection.execute(
         text(
             "INSERT INTO jobs(id,kind,created,payload,status,cancel,budget,reserved,actor) "
-            "VALUES(:id,'run',1700000000.125,:payload,'complete',false,500000,245000,:actor)"
+            "VALUES(:id,'run',1700000000.125,:payload,'succeeded',false,500000,245000,:actor)"
         ),
         {"id": identifier, "payload": "f" * 64, "actor": PRINCIPAL},
     )
@@ -328,3 +328,34 @@ def test_ddl_rollback_keeps_original_thirteen_job_fields(tmp_path):
             assert len(inspect(connection).get_columns("jobs")) == 13
     finally:
         engine.dispose()
+
+
+@pytest.mark.parametrize(
+    "project,principal,target",
+    [
+        (PROJECT, "oidc:" + "a" * 64, SECOND_JOB),
+        (OTHER, PRINCIPAL, FOREIGN_JOB),
+    ],
+)
+def test_identity_namespace_is_project_and_principal_scoped(
+    admission_engine, project, principal, target
+):
+    with admission_engine.begin() as connection:
+        operation(connection)
+        alias(connection)
+        new_id = "9" * 32
+        operation(
+            connection,
+            id=new_id,
+            project_id=project,
+            principal_id=principal,
+            job_id=target,
+            accepted_response=json.dumps(
+                {"job_id": target, "operation_id": new_id},
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+        )
+        alias(connection, project_id=project, principal_id=principal, operation_id=new_id)
+        assert connection.exec_driver_sql("SELECT count(*) FROM operations").scalar_one() == 2
+        assert connection.exec_driver_sql("SELECT count(*) FROM operation_keys").scalar_one() == 2

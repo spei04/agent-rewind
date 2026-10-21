@@ -89,6 +89,19 @@ def assert_preserved_rows(database):
                 dict(row)
                 for row in connection.execute(f"SELECT * FROM {_quoted(table)} ORDER BY {order}")
             ]
+            if table == "jobs" and actual and "payload_version" in actual[0]:
+                # The only accepted additive job fields; never discard arbitrary
+                # unknown columns or weaken the independent historical oracle.
+                extra = {"payload_version", "execution_config_ref", "execution_config_digest"}
+                for row in actual:
+                    assert set(row) == set(expected[0]) | extra
+                    assert (
+                        row["payload_version"],
+                        row["execution_config_ref"],
+                        row["execution_config_digest"],
+                    ) == (1, None, None)
+                    for field in extra:
+                        del row[field]
             if table == "records":
                 for row in actual:
                     row["data"] = json.loads(row["data"])

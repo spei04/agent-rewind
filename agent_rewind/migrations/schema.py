@@ -16,6 +16,8 @@ HEAD = "ar_0002_adoption"  # Explicit install/adopt preparation target, retained
 OWNERSHIP = "ar_0003_ownership"
 ARTIFACTS = "ar_0004_artifacts"
 PROJECTION = "ar_0005_run_index"
+ADMISSION = "ar_0006_admission"
+ADMISSION_TABLES = {"operations", "operation_keys"}
 PROJECTION_TABLES = {"run_index"}
 ARTIFACT_TABLES = {"artifact_objects", "artifact_refs"}
 OWNERSHIP_TABLES = {"organizations", "projects", "project_memberships", "resource_scopes"}
@@ -147,7 +149,9 @@ def _sqlite_ddl_tokens(sql: str) -> list[str]:
     return tokens
 
 
-def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None:
+def _sqlite_supported_clauses(
+    connection: Connection, tables: list[str], *, admission: bool = False
+) -> None:
     # Unindexed COLLATE and conflict policies are invisible to SQLite reflection.
     # This is a conservative supported-DDL exclusion, not a replacement SQL parser.
     forbidden = {
@@ -165,7 +169,12 @@ def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None
         "DEFERRED",
     }
     for table in set(tables) & (
-        set(TABLES) | METADATA_TABLES | OWNERSHIP_TABLES | ARTIFACT_TABLES | PROJECTION_TABLES
+        set(TABLES)
+        | METADATA_TABLES
+        | OWNERSHIP_TABLES
+        | ARTIFACT_TABLES
+        | PROJECTION_TABLES
+        | ADMISSION_TABLES
     ):
         size: int | None = connection.execute(
             text(
@@ -182,8 +191,12 @@ def _sqlite_supported_clauses(connection: Connection, tables: list[str]) -> None
         if not isinstance(sql, str):
             raise MigrationRefused("schema_incompatible")
         restricted = forbidden if table in TABLES else forbidden - {"CHECK", "AS"}
-        if table in OWNERSHIP_TABLES | ARTIFACT_TABLES | PROJECTION_TABLES:
+        if table in OWNERSHIP_TABLES | ARTIFACT_TABLES | PROJECTION_TABLES | ADMISSION_TABLES:
             restricted -= {"REFERENCES", "DEFAULT"}
+        if admission and table == "jobs":
+            # Only the verified ar6 successor may extend this historical table.
+            # Full literal-profile equality still checks every clause and column.
+            restricted -= {"CHECK", "DEFAULT", "AS"}
         if restricted.intersection(_sqlite_ddl_tokens(sql)):
             raise MigrationRefused("schema_incompatible")
 
@@ -328,10 +341,17 @@ def catalog(connection: Connection) -> dict[str, Any]:
     inspector = inspect(connection)
     schema = "public" if name == "postgresql" else None
     tables = inspector.get_table_names(schema=schema)
-    if len(tables) > 16:
+    if len(tables) > 17:
         raise MigrationRefused("schema_incompatible")
     if name == "sqlite":
-        _sqlite_supported_clauses(connection, tables)
+        admission = False
+        if set(tables) >= ADMISSION_TABLES and "alembic_version" in tables:
+            revisions = connection.exec_driver_sql(
+                "SELECT CASE WHEN length(CAST(version_num AS BLOB))<=32 "
+                "THEN version_num END FROM alembic_version LIMIT 2"
+            ).all()
+            admission = revisions == [(ADMISSION,)]
+        _sqlite_supported_clauses(connection, tables, admission=admission)
         extras = connection.exec_driver_sql(
             "SELECT 1 FROM sqlite_master WHERE type IN ('trigger','view') LIMIT 1"
         ).first()
@@ -524,18 +544,25 @@ def verify_baseline(
     ownership: bool = False,
     artifacts: bool = False,
     projection: bool = False,
+    admission: bool = False,
 ) -> None:
     actual = set(shape) - {"$postgres"}
     expected = set(TABLES) | (METADATA_TABLES if versioned else set())
-    if ownership or artifacts or projection:
+    if ownership or artifacts or projection or admission:
         expected |= OWNERSHIP_TABLES
-    if artifacts or projection:
+    if artifacts or projection or admission:
         expected |= ARTIFACT_TABLES
-    if projection:
+    if projection or admission:
         expected |= PROJECTION_TABLES
+    if admission:
+        expected |= ADMISSION_TABLES
     if actual != expected:
         raise MigrationRefused("schema_incompatible")
     for table in TABLES:
+        if admission and table == "jobs":
+            if shape[table] != installed_profile(name, ADMISSION)[table]:
+                raise MigrationRefused("schema_incompatible")
+            continue
         cols = [
             [
                 column,
@@ -587,6 +614,13 @@ def verify_baseline(
                 length = int(kind[8:-1]) + 4 if kind.startswith("VARCHAR(") else -1
                 collation = "pg_catalog.default" if kind.startswith("VARCHAR(") else None
                 expected_columns.append([table, column, length, "", "", position, False, collation])
+        if admission:
+            expected_columns.extend(
+                r
+                for r in installed_profile(name, ADMISSION)["$postgres"]["columns"]
+                if r[0] == "jobs" and r[1] not in {c[0] for c in COLUMNS["jobs"]}
+            )
+            expected_columns.sort(key=lambda r: (r[0], r[5]))
         actual_columns = [r for r in shape["$postgres"]["columns"] if r[0] in TABLES]
         if actual_columns != expected_columns:
             raise MigrationRefused("schema_incompatible")
@@ -603,6 +637,12 @@ def verify_baseline(
                 ]
             )
         expected_constraints.append(["api_keys", "u", False, False, True, "UNIQUE (hash)"])
+        if admission:
+            expected_constraints.extend(
+                r
+                for r in installed_profile(name, ADMISSION)["$postgres"]["constraints"]
+                if r[0] == "jobs" and r[1] == "c"
+            )
         actual_constraints = [r for r in shape["$postgres"]["constraints"] if r[0] in TABLES]
         if sorted(actual_constraints) != sorted(expected_constraints):
             raise MigrationRefused("schema_incompatible")
@@ -610,7 +650,7 @@ def verify_baseline(
 
 def installed_profile(name: str, revision: str = HEAD) -> dict[str, Any]:
     """The checked-in literal profile is authority, never a value stored in the target DB."""
-    if revision not in {HEAD, OWNERSHIP, ARTIFACTS, PROJECTION}:
+    if revision not in {HEAD, OWNERSHIP, ARTIFACTS, PROJECTION, ADMISSION}:
         raise MigrationRefused("unsupported_target_revision")
     profile_name = "postgresql16" if name == "postgresql" else "sqlite"
     if revision == OWNERSHIP:
@@ -619,6 +659,8 @@ def installed_profile(name: str, revision: str = HEAD) -> dict[str, Any]:
         profile_name += "_artifacts"
     elif revision == PROJECTION:
         profile_name += "_projection"
+    elif revision == ADMISSION:
+        profile_name += "_admission"
     profile_path = Path(__file__).parent / "profiles" / (profile_name + ".json")
     if not profile_path.is_file():
         raise MigrationRefused("schema_profile_unavailable")
