@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from contextlib import contextmanager, suppress
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Protocol
 
 from sqlalchemy.engine import Connection, Engine
 
@@ -35,6 +35,25 @@ class AdmissionError(RuntimeError):
         super().__init__(code)
 
 
+class TransactionWork(Protocol):
+    """Optional request-owned accounting; no engine/global listeners.
+
+    Cleanup accounting must never prevent native cleanup. detach removes only
+    owned hooks; finish checks elapsed time after native close. A failed detach
+    requires physical discard. Existing admission callers pass no work object.
+    """
+
+    def attach(self, connection: Connection) -> None: ...
+    def setup_complete(self) -> None: ...
+    def remaining_timeouts_ms(self) -> tuple[int, int]: ...
+    def check(self) -> None: ...
+    def control_attempt(
+        self, kind: Literal["begin", "commit", "rollback", "close", "discard", "restore"]
+    ) -> None: ...
+    def detach(self) -> None: ...
+    def finish(self) -> None: ...
+
+
 @dataclass
 class TransactionOutcome:
     begun: bool = False
@@ -55,7 +74,14 @@ def _discard(connection: Connection) -> None:
         connection.invalidate()
 
 
-def _begin(connection: Connection) -> int | None:
+def _begin(connection: Connection, work: TransactionWork | None = None) -> int | None:
+    def discard_setup() -> None:
+        try:
+            if work is not None:
+                work.control_attempt("discard")
+        finally:
+            _discard(connection)
+
     raw = connection.connection.driver_connection
     dialect = connection.dialect.name
     supported = (
@@ -69,72 +95,143 @@ def _begin(connection: Connection) -> int | None:
         and getattr(raw, "in_transaction", True) is False
     )
     if connection.in_transaction() or not supported:
-        _discard(connection)
+        discard_setup()
         raise AdmissionError("dependency_unavailable")
     if dialect == "sqlite":
         if connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one() != 1:
-            _discard(connection)
+            discard_setup()
             raise AdmissionError("dependency_unavailable")
         previous: object = connection.exec_driver_sql("PRAGMA busy_timeout").scalar_one()
         if type(previous) is not int or previous < 0:
-            _discard(connection)
+            discard_setup()
             raise AdmissionError("dependency_unavailable")
         try:
-            connection.exec_driver_sql("PRAGMA busy_timeout=3000")
+            lock_ms = work.remaining_timeouts_ms()[1] if work is not None else 3000
+            connection.exec_driver_sql(f"PRAGMA busy_timeout={lock_ms}")
             connection.exec_driver_sql("BEGIN IMMEDIATE")
         except BaseException:
-            _discard(connection)
+            discard_setup()
             raise
         return previous
+    if work is not None:
+        work.control_attempt("begin")
     connection.begin()
     connection.exec_driver_sql("SET LOCAL search_path TO public,pg_temp")
     connection.exec_driver_sql("SET TRANSACTION ISOLATION LEVEL READ COMMITTED")
-    connection.exec_driver_sql("SET LOCAL lock_timeout = '3s'")
-    connection.exec_driver_sql("SET LOCAL statement_timeout = '5s'")
+    if work is None:
+        connection.exec_driver_sql("SET LOCAL lock_timeout = '3s'")
+        connection.exec_driver_sql("SET LOCAL statement_timeout = '5s'")
+    else:
+        statement_ms, lock_ms = work.remaining_timeouts_ms()
+        connection.exec_driver_sql(f"SET LOCAL lock_timeout = '{lock_ms}ms'")
+        connection.exec_driver_sql(f"SET LOCAL statement_timeout = '{statement_ms}ms'")
     return None
 
 
 @contextmanager
-def admission_transaction(engine: Engine, outcome: TransactionOutcome) -> Iterator[Connection]:
+def admission_transaction(
+    engine: Engine, outcome: TransactionOutcome, *, work: TransactionWork | None = None
+) -> Iterator[Connection]:
     """Preserve typed denial/primary failure through bounded rollback and cleanup."""
     if type(outcome) is not TransactionOutcome or outcome != TransactionOutcome():
         raise AdmissionError("dependency_unavailable")
     connection = None
     previous_timeout = None
     primary: BaseException | None = None
+    attached = False
+
+    def cleanup_attempt(kind: Literal["rollback", "close", "discard", "restore"]) -> None:
+        nonlocal primary
+        if work is not None:
+            try:
+                work.control_attempt(kind)
+            except Exception as error:
+                outcome.cleanup_failed = True
+                if primary is None:
+                    primary = error
+
+    def discard() -> None:
+        nonlocal primary
+        if connection is None:
+            return
+        if work is None:
+            _discard(connection)
+            return
+        cleanup_attempt("discard")
+        try:
+            connection.invalidate()
+        except Exception as error:
+            outcome.cleanup_failed = True
+            if primary is None:
+                primary = error
+
     try:
+        if work is not None:
+            work.check()
         connection = engine.connect()
-        previous_timeout = _begin(connection)
+        if work is not None:
+            attached = True  # partial attach still owns mandatory detach/finish
+            work.attach(connection)
+        previous_timeout = _begin(connection, work)
         outcome.begun = True
+        if work is not None:
+            work.setup_complete()
         yield connection
+        if work is not None:
+            work.check()
+            work.control_attempt("commit")  # fresh native caps, before attempted
         outcome.commit_attempted = True
         connection.commit()
         outcome.commit_acknowledged = True
+        if work is not None:
+            work.check()
     except BaseException as error:
         primary = error
-        if connection is not None and outcome.begun and not outcome.commit_acknowledged:
-            outcome.rollback_attempted = True
-            try:
-                if connection.invalidated:
-                    raise AdmissionError("outcome_uncertain")
-                connection.rollback()
-                outcome.rollback_acknowledged = True
-            except Exception:
-                _discard(connection)
     finally:
+        # An exhausted VM/deadline callback must not interrupt rollback/restore.
+        if attached and work is not None:
+            try:
+                work.detach()
+            except BaseException as error:
+                outcome.cleanup_failed = True
+                if primary is None:
+                    primary = error
+                if connection is not None:
+                    discard()
         if connection is not None:
+            if work is not None and not outcome.begun and not connection.invalidated:
+                discard()
+            if primary is not None and outcome.begun and not outcome.commit_acknowledged:
+                outcome.rollback_attempted = True
+                try:
+                    cleanup_attempt("rollback")
+                    if connection.invalidated:
+                        raise AdmissionError("outcome_uncertain")
+                    connection.rollback()
+                    outcome.rollback_acknowledged = True
+                except Exception:
+                    discard()
             try:
                 if previous_timeout is not None and not connection.invalidated:
                     raw = connection.connection.driver_connection
                     if raw is None:
                         raise AdmissionError("outcome_uncertain")
+                    cleanup_attempt("restore")
                     raw.execute(f"PRAGMA busy_timeout={previous_timeout}")
+                cleanup_attempt("close")
                 connection.close()
             except Exception:
                 outcome.cleanup_failed = True
-                _discard(connection)
+                discard()
                 with suppress(Exception):
+                    cleanup_attempt("close")
                     connection.close()
+        if attached and work is not None:
+            try:
+                work.finish()
+            except Exception as error:
+                if primary is None:
+                    primary = error
     if primary is not None and (
         not isinstance(primary, Exception)
         or isinstance(primary, IdentityInvalid | ResourceNotFound | ActionForbidden)
