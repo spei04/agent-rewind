@@ -410,3 +410,31 @@ verification remain required. Lead owns delivery; A/B reviewers are available
 and all independent checkout consumers are released. Aggregate #86 and parent #6
 remain open. No profile, schema, contract, scope or effort change and no customer
 activation follow.
+
+## P2 hosted failure and correction — 2026-10-21
+
+Run 39553977500 at reviewed source 745ea042 failed one Python 3.11 case
+(2611 passed, 11 expected skips); Python 3.12 passed 2620 with three expected
+skips. Package, security and three gVisor cases passed, but the overall gate
+failed and supplies no delivery acceptance. The maximum mixed PostgreSQL receipt
+fixture exhausted the unchanged two-second cumulative work budget at 2.001788
+seconds. A frozen Fault then masked that safe refusal during standard generator
+context-manager traceback propagation.
+
+A corrected the exception protocol in f411e286: its normalized public code stays
+read-only, while standard exception metadata can propagate. Deterministic nested
+generator and final-phase list/detail HTTP tests require the original fixed 503,
+no partial response, and clean reusable connections. The maximum-size JSONB
+fixture now controls only the adapter's test clock and retains all 683-record,
+683-job, 2048-node and changed-receipt assertions. It proves data correctness,
+not aggregate latency. Production limits and actual PostgreSQL native-timeout
+tests are unchanged.
+
+B accepted the exact correction and its caller/test review. A passed 223 focused
+boundary/route/session/listing/cursor tests, with 31 explicit PostgreSQL skips
+and one existing warning, in 95.90 seconds; configured lint/security/format/strict
+types passed. Local skipped cases are not PostgreSQL evidence. A preserved the
+admission branch and released the primary checkout; C owns independent execution,
+B reviews, and lead owns fresh hosted checks and delivery. P2 remains
+Implemented; verification pending. No accepted merge, candidate or activation is
+claimed by this correction.
