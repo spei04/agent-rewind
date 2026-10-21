@@ -1,5 +1,12 @@
 # Admission recovery checkpoint
 
+P3 #83 is **Implemented; verification pending** in draft PR #92. The
+[current handoff](ADMISSION_EXECUTION_PLAN.md#p3-implemented-verification-pending--2026-10-21)
+records accepted source/test design and composed local validation separately from
+early hosted recovery evidence. All 32 new PostgreSQL publication/crash cases
+still require hosted execution; accepted-merge/review-evidence fields stay null.
+Aggregate #80/parent #8 remain In progress and AR-008-B remains Not started.
+
 AR-008-A/P3 now composes pure frozen restoration, SQL-only winner recovery and
 an internal new-work path requiring explicit policy, readiness, registry, journal
 and storage dependencies. The default policy is unavailable; the packaged schema
@@ -160,6 +167,7 @@ journal confirmation and fresh disclosure failures retain the reviewed fixed
 phase classifications. Restart after pending always reconciles SQL-only.
 
 Focused tests use actual SQLite and encrypted local storage with a synthetic
-SQL policy, stage faults and observed rollback/commit. Separate real PostgreSQL
-publication tests, process-death/concurrency proof and hosted package validation
-remain pending; this checkpoint does not complete P3 or activate customers.
+SQL policy, stage faults and observed rollback/commit. The separate 32-case
+PostgreSQL publication suite is implemented and its test design reviewed; actual hosted process-death/concurrency execution and final-source
+package validation remain pending. Implementation is complete, but full P3
+verification and customer activation are not established.
