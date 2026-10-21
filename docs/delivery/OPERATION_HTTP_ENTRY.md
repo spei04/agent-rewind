@@ -58,9 +58,9 @@ Preserve the current middleware order: outer SafeBoundary generates correlation;
 security performs its bounded real compatibility probe; BodyLimit buffers at
 most the accepted received-body threshold before routing; route authentication
 and application validation follow. A non-ready real schema refuses before route
-authentication/customer sinks. Existing security maps incompatible to
-schema_incompatible and other non-ready states (including migration_only) to
-dependency_unavailable. Do not change this into a synthetic ready default.
+authentication/customer sinks. Existing security maps status incompatible to
+schema_incompatible; migration_only is one such incompatibility reason. An
+unavailable probe maps to dependency_unavailable. Do not change this into a synthetic ready default.
 BodyLimit's 413 may precede authentication; authority-first below concerns
 application diagnostics, not expansion or unbounded unauthenticated buffering.
 
@@ -143,7 +143,7 @@ exception text, raw headers, paths, file keys, submitted values or traceback.
   including post-ACK uncertainty and fresh-authority denial. No blanket exception
   conversion, raw IntegrityError-to-conflict, ValueError-to-422 or new retry.
   Unexpected non-SQL programming faults retain the sanitized 500 boundary.
-  Uncaught SQLAlchemy errors retain SafeBoundary\'s existing GET dependency / POST
+  Uncaught SQLAlchemy errors retain SafeBoundary's existing GET dependency / POST
   uncertainty classification; do not relabel them as conflicts or malformed input.
 - Add a narrow finite `task_limit=False` keyword to `errors.error_response`
   for the parser's semantic 413 (fixed message: "Canonical materialized task
