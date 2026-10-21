@@ -230,7 +230,12 @@ negative checks are:
   values cannot be updated or deleted through this slice.
 - Actual job FK plus scoped job composite FK for provider calls; exact frozen
   organization/project/job account triple and organization ownership; constant
-  job_resource_kind. Call created_at lies in each of its frozen account periods.
+  job_resource_kind. ar7_calls_constraint must also require the call's own
+  same-project resource_scopes(provider_call,id) row at COMMIT. The separate
+  job scope is not a substitute. ar7_scopes_constraint must reject deletion or
+  reassociation of that provider-call scope while the call remains, including
+  when no budget-evidence ref exists yet. Call created_at lies in each of its
+  frozen account periods.
   An old call does not become invalid merely because the current time, lease or
   job generation later advances.
 - Call request identity, scope, amount, price, purpose, generation, created time
@@ -322,13 +327,33 @@ restricted reservation role, enumerate SELECT access needed by invoker checks,
 INSERT for call/scope/reserve-entry publication and UPDATE only the specific
 balance/fence fields used by P2. P1 does not install or enable a worker login.
 The reviewed synthetic reservation role receives explicit EXECUTE on this one
-invoker trigger function, never PUBLIC EXECUTE or ownership. Before implementation,
-a separately assigned actual-PostgreSQL permission probe must confirm the exact
-creation/invocation behavior and denied direct privilege escalation. This is an
-explicit entry acceptance gate, not executed evidence in this document. Failure
-requires review of this entry, not a SECURITY DEFINER or broader table UPDATE
-fallback. No caller can SET ROLE to the owner. Runtime cannot alter/drop
+invoker trigger function, never PUBLIC EXECUTE or ownership. The bounded privilege
+probe below establishes the creation/invocation distinction; full product-trigger/
+role tests remain required. Failure requires
+review of this entry, not a SECURITY DEFINER or broader table UPDATE fallback.
+No caller can SET ROLE to the owner. Runtime cannot alter/drop
 functions, change trigger enablement or set replica session behavior.
+
+Measured feasibility at frozen source `f3af95ef`: 24 synthetic PostgreSQL 16.15
+checks passed on 2026-10-21 (private indexed evidence identity
+`ledger-invoker-f3af-BaVxMm`). Missing creator TRIGGER or EXECUTE separately
+refused with 42501. The function was invisible to another connection until its
+creation transaction committed with PUBLIC EXECUTE already revoked. The
+explicitly granted role committed valid deferred work; invalid data failed at
+COMMIT with 23514, and the same one-slot pool served a subsequent valid commit.
+Missing invoker SELECT failed at COMMIT with 42501.
+
+The no-EXECUTE control also committed valid work, and invalid work still raised
+23514: PostgreSQL executed the already-installed trigger without a runtime
+function-EXECUTE grant. Therefore explicit EXECUTE is reviewed **creation/grant
+policy, not installed-trigger revocation or DML authorization**. Supported DML
+is controlled by actual table/column privileges and invoker SELECT requirements.
+The probe also denied account identity/insert/delete/truncate/cap changes,
+public DDL, trigger/function alteration, owner SET ROLE and replica bypass.
+Its synthetic database/roles were removed, the exact original baseline restored
+and the instance stopped. This proves the narrow invoker seam only, not the five
+product triggers, full C04 schema, financial authenticity, maximum capacity or
+arbitrary trusted-owner safety.
 
 SQLite has no PostgreSQL deferred constraint-trigger equivalent. Keep **zero**
 SQLite triggers/views; run equivalent bounded final-state/immutability validation
@@ -529,7 +554,7 @@ migration_transaction already provides it.
 | Unsupported schema/history/privilege/executable/limit | Fixed incompatibility/refusal, no partial migration. Original operator evidence remains available privately. |
 | Busy/statement deadline before COMMIT, acknowledged rollback | Fixed migration_busy/database_failure as appropriate; no completed marker or partial accounts. Preserve the original typed refusal/interruption through cleanup. |
 | COMMIT attempted without confirmed result, ACK followed by cleanup failure, or uncertain disposal | New fixed ledger_outcome_uncertain at the operator boundary. Never report "rolled back" merely because a later rollback returned. No automatic replay that issues more writes. |
-| Re-entry after uncertainty | Fresh drained inspection on a new connection: exact complete ar7 rows/manifest => original completion; exact intact ar6/no ar7 publication => safe known absence; mixed/unknown/corrupt state => refusal and reviewed recovery. |
+| Re-entry after uncertainty | Fresh drained inspection on a new connection: exact complete ar7 rows/manifest => original completion; for initialize, exact intact ar6/no ar7 publication => known absence; for later provision, exact intact ar7 with the expected parent head and no target manifest or target account IDs/scope-start identities => known absence. Revalidate the original manifest source binding before any authorized new attempt. Mixed/advanced/unknown/corrupt state => refusal and reviewed recovery. |
 | Process death before/after real COMMIT | Same SQL-only restart classification; no file-only receipt can authorize completion. |
 | Unsafe downgrade or missing provenance | Refuse. Restore the verified consistent pre-change backup, including metadata/catalogs; preserve failed-attempt evidence. |
 
