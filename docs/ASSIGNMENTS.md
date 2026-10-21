@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Accepted ledger P1 entry ready for explicit handoff | Runtime ownership is recorded in the subsequent assignment checkpoint. |
-| Delivery reviewer | HTTP exact PR/main evidence audit accepted | Ledger source and delivery will require independent review. |
-| Planning/verification | Reconcile accepted HTTP progress, then explicit ledger handoff | Own primary documentation only; independent ledger tests wait for stable interfaces and released ownership. |
-| Lead | HTTP candidate accepted; #95/#93/#8 closed and read back | Own next runtime assignment, integration and public tracking. |
+| Platform/security | AR-010-A/P1 #108 runtime in secondary work/ledger-schema from 9f6ea6e | First manifest/progress and explicit ar7 DDL/catalog checkpoint; full P1 product proof still required. Sole coordinated PostgreSQL slot. |
+| Delivery reviewer | Independent ledger source/integration/delivery review | HTTP exact PR/main/candidate audit is accepted; P1 delivery remains unaccepted. |
+| Planning/verification | Primary progress reconciliation, then independent ledger tests | Test authoring waits for accepted progress, stable runtime interfaces and explicit file ownership. No current QE implementation or PostgreSQL slot. |
+| Lead | Ledger P1 assigned; #107/#108/#10 In progress and #109 Not started read back | Own integration, publication and acceptance; keep P2 and worker prerequisites intact. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -50,10 +50,10 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** Independent HTTP source/test/build/hosted reviews and lead candidate verification are complete. Ledger P1 policy 51af77dc and the backlog fixture correction dbec08b are independently accepted. Planning records the predecessor acceptance before the explicit runtime handoff; ledger product proof is not yet available.
+- **Contributor checkpoint:** HTTP delivery and candidate are accepted. Ledger entry 51af77dc and backlog fixture correction dbec08b are independently accepted. Platform/security now owns P1 runtime; planning/verification owns the primary progress patch and later independent tests after interface/ownership release. The lead integrates and the delivery reviewer independently reviews. No ledger package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Ledger AR-010-A/P1 #108 is dependency-ready after accepted HTTP and exact entry policy; explicit runtime assignment follows. P2 #109 waits for accepted P1 and its own reservation/fence entry. Full M1/G1/customer/production gates remain open.
-- **Current storage and consumers:** Two existing cloud checkouts with independently owned matching-lock environments are retained for the next runtime and verification work. Planning owns primary documentation reconciliation only; the lead coordinates secondary reuse and the exclusive PostgreSQL slot. Private release/review evidence remains outside both checkouts; no new checkout or resource was created.
+- **Next evidence-producing milestone:** AR-010-A/P1 #108 immutable manifest/progress and explicit ar7 DDL/literal SQLite/PostgreSQL catalogs, then the full provisioning/opening/constraint/privilege/bounds/recovery matrix. P2 #109 remains Not started until accepted P1 and its own reservation/fence entry. Parser-only completion cannot waive those gates.
+- **Current storage and consumers:** The existing primary checkout is owned by planning for progress reconciliation; the existing secondary is owned by platform/security for P1 runtime. Each retains its own matching-lock environment. Platform/security holds the sole coordinated PostgreSQL slot; planning performs no database work. Private evidence stays outside checkouts, and no new checkout or resource was created.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -828,3 +828,14 @@ no additional checkout, database process, provider call or resource was created.
 ## Accepted HTTP delivery and progress reconciliation — 2026-10-21
 
 AR-008-B/P2 #95 and aggregate #93 are Verified after reviewed source 065df8c89da384d6e502cf0c15bf174e380c53c7, protected merge cefd222230c800eb2e90c49a3b3c411b394d0393, matching PR/main runs 39683408934/39686498691 (attempt 1) and verified candidate 12387716715. P1 #94 retains accepted merge 03a8e074b51dca7c03d69295e0c18ca0f22dc1da and candidate 12355648523. Parent #8 is Verified/closed. [Exact delivery evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21) records the successful source-bound PR/main and candidate checks. The delivery reviewer independently audited hosted results; the lead accepted the candidate and read back issue closures. Planning/verification owns this primary-checkout metadata reconciliation. Ledger implementation is not assigned by this first ordered checkpoint; the already accepted entry permits the next explicit handoff. Earlier dated assignments, failures and pending checkpoints remain history.
+
+## Ledger P1 runtime and independent-test assignment — 2026-10-21
+
+| Owner | Assigned scope | Handoff and limit |
+| --- | --- | --- |
+| Platform/security | AR-010-A/P1 #108 runtime | Existing secondary work/ledger-schema from 9f6ea6e; accepted HTTP cefd222 and entry 51af77dc. First manifest/progress plus explicit ar7 DDL/catalog checkpoint; sole coordinated PostgreSQL slot. |
+| Planning/verification | Progress reconciliation, then independent owned tests | Existing primary; no QE code until this progress is accepted and runtime interfaces are stable. Fixtures, adversarial inputs, bounds, provisioning, constraints, catalog and recovery coverage remain independently owned. |
+| Delivery reviewer | Independent source/integration/delivery review | Review actual P1 proof; no acceptance based solely on parser or design evidence. |
+| Lead | Integration and public tracking | Read back #107/#108/#10 In progress and #109 Not started; authorize subsequent handoffs only after their producer evidence. |
+
+P1 and aggregate AR-010-A are In progress with null delivery acceptance; P2 remains Not started/null acceptance. Current totals are 30 Verified / 1 In progress / 120 Not started tasks and 9 Verified / 1 In progress / 5 Not started packages. The owner-approved finite window, six-day ledger estimate, frozen entry, 544 dependencies and 159 PRs are unchanged. This assignment makes no provider calls, paid-resource or customer-data commitment.

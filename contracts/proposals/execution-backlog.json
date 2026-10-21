@@ -115,7 +115,7 @@
         "AR-010-A",
         "AR-010-B"
       ],
-      "status": "Not started"
+      "status": "In progress"
     },
     "AR-011": {
       "milestone": "M1",
@@ -1657,7 +1657,7 @@
       "security_reliability": "Identity and scoped visibility precede action and input diagnostics. No raw error/result/hash fallback or client-derived origin; unsupported producer evidence fails closed. Preserve project-first lock ordering, fresh disclosure authority and no external I/O under SQL locks. Keep migration-only/customer and later paid-dispatch gates, without a reverse worker prerequisite",
       "out_of_scope": "No run list/detail/cursors, branch/study/export routes, generic operation framework, worker failure producer or dispatch, new ledger/lease/schema/profile, customer activation or paid validation",
       "status": "Verified",
-      "definition_of_done": "Both packages require independent review, matching hosted checks and accepted merged-source evidence in order; aggregate verification requires the complete three-route service/HTTP and actual PostgreSQL matrix. Preserve fixed errors, existing-route behavior, historical evidence and later worker/customer/G1 gates; full M1 integration remains with AR-012-B. B/lead accepted ownership entry 5bedede with C acquisition-map review. The composed owned-factory and fixture checkpoint 97d39edf is accepted as a component after independent source/package review and 1,273 local passes with 250 explicit PostgreSQL skips. The bounded GET/cohort/receipt primitive 691ad661 is accepted as a component after B source review, A's independent 174 SQLite and 18 actual PostgreSQL passes across separate runs, and exact-source package verification. A added three PostgreSQL race/permission controls at cbed928. GET service 28d47cc9 has B/lead source review, 312 combined author passes, 19 separate actual PostgreSQL passes and independently verified exact 112-member installed-package evidence. Earlier primitive source 5e1766d passed matching component CI 39601721324. The caught-read failure latch is corrected at 9f73448d and accepted by B, C and the lead: 55 independent SQLite cases pass, including the original reproducer; author evidence covers 134 SQLite and 40 actual PostgreSQL cases across full runs plus affected reruns. Composition 950a4160 preserves the exact reviewed source union and passes 85 independent GET SQLite and 19 actual PostgreSQL service cases. Cancellation service 1ce9469f is accepted by B and the lead; 68 independent SQLite cases pass at composed source 0f031962. Independent PostgreSQL evidence covers 65 distinct cases across the initial 62 passes and three affected/new passes at 5461917a/ce8a2f04, including two physical QueuePool recovery controls; this is assembled evidence, not one 65-pass run. Composition f9172462 preserves the exact 377-file source union. Installed smoke 71d33737 and all 113 Git/wheel/sdist/installed runtime members are independently verified; final-source package, hosted checks and candidate are accepted at merge 03a8e074. P1 is Verified; P2 is In progress under separate HTTP entry and delivery gates.",
+      "definition_of_done": "Both packages require independent review, matching hosted checks and accepted merged-source evidence in order; aggregate verification requires the complete three-route service/HTTP and actual PostgreSQL matrix. Preserve fixed errors, existing-route behavior, historical evidence and later worker/customer/G1 gates; full M1 integration remains with AR-012-B. B/lead accepted ownership entry 5bedede with C acquisition-map review. The composed owned-factory and fixture checkpoint 97d39edf is accepted as a component after independent source/package review and 1,273 local passes with 250 explicit PostgreSQL skips. The bounded GET/cohort/receipt primitive 691ad661 is accepted as a component after B source review, A's independent 174 SQLite and 18 actual PostgreSQL passes across separate runs, and exact-source package verification. A added three PostgreSQL race/permission controls at cbed928. GET service 28d47cc9 has B/lead source review, 312 combined author passes, 19 separate actual PostgreSQL passes and independently verified exact 112-member installed-package evidence. Earlier primitive source 5e1766d passed matching component CI 39601721324. The caught-read failure latch is corrected at 9f73448d and accepted by B, C and the lead: 55 independent SQLite cases pass, including the original reproducer; author evidence covers 134 SQLite and 40 actual PostgreSQL cases across full runs plus affected reruns. Composition 950a4160 preserves the exact reviewed source union and passes 85 independent GET SQLite and 19 actual PostgreSQL service cases. Cancellation service 1ce9469f is accepted by B and the lead; 68 independent SQLite cases pass at composed source 0f031962. Independent PostgreSQL evidence covers 65 distinct cases across the initial 62 passes and three affected/new passes at 5461917a/ce8a2f04, including two physical QueuePool recovery controls; this is assembled evidence, not one 65-pass run. Composition f9172462 preserves the exact 377-file source union. Installed smoke 71d33737 and all 113 Git/wheel/sdist/installed runtime members are independently verified; final-source package, hosted checks and candidate are accepted at merge 03a8e074. P1 and P2 are Verified after their separate accepted HTTP entry and delivery gates; accepted source, hosted attempts and candidate proof are recorded in the dated delivery plan.",
       "effort_range_days": [
         6.0,
         10.0
@@ -1833,7 +1833,7 @@
       "tests": "CT-M1-018/020 plus relevant generation/lease controls: historical 245000 opening exposure, signed-64-bit/native-type boundaries, absent/overlapping period races, deferred commit rejection, exact executable-catalog drift, restart/restore; eight-way reservations, shared organization caps, prior-period holds, repeated/conflicting calls, wait-time generation/cancel/window changes, rollback/lost acknowledgment and actual PostgreSQL cleanup",
       "security_reliability": "Use trusted bounded provisioning and SQL-derived openings, never mutable worker timeouts, user amounts or invented timestamps. Stable scope exclusion precedes jobs and sorted accounts; select stronger organization mode before downstream locks. No external I/O under SQL locks, no automatic account creation, no refund on timeout, no fabricated call-owned evidence and no generic trigger/function allowance",
       "out_of_scope": "No public SubmitRun/native-v1 changes, automatic lifetime policy, live worker/ChatPolicy dispatch, settlement/release/transfer command, invoice ingestion, incident-latch table, production profile or spending",
-      "status": "Not started",
+      "status": "In progress",
       "definition_of_done": "Both packages require independent exact-entry/source review, local and hosted SQLite/actual PostgreSQL evidence, installed-package/security checks and accepted merged-source/candidate evidence in order. AR-008-B must have accepted protected-main delivery before implementation; P2 additionally waits for accepted merged P1. The whole aggregate precedes AR-010-B; later worker, reconciliation and full M1/customer gates remain separate",
       "effort_range_days": [
         6,
@@ -1857,7 +1857,7 @@
           "contracts": [
             "C04"
           ],
-          "status": "Not started",
+          "status": "In progress",
           "accepted_merge_commit": null,
           "review_evidence": null,
           "id": "AR-010-A/P1",
@@ -1906,7 +1906,9 @@
           "tracking_issue": "https://github.com/spei04/agent-rewind/issues/109"
         }
       ],
-      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/107"
+      "tracking_issue": "https://github.com/spei04/agent-rewind/issues/107",
+      "assigned_to": "Platform/security runtime author in existing secondary work/ledger-schema from 9f6ea6e; planning/verification independent owned tests after stable interfaces and accepted progress handoff; lead integration and independent delivery review",
+      "entry_evidence": "HTTP AR-008-B Verified at protected merge cefd222230c800eb2e90c49a3b3c411b394d0393 after PR/main 39683408934/39686498691 attempt 1 and candidate 12387716715. Exact P1 schema/provisioning entry independently accepted at 51af77dc2bf3527e496f0123c6bee17882f56b4a, document SHA256 8677521af4c3dc9c9340e4ec3e466e5eb122bdaa16b43c4c5f65f99ee1ee9c0a. Lead explicitly assigned P1 runtime implementation on 2026-10-21; actual DDL/catalog, privilege, constraints, bounds and recovery proof remain required."
     },
     {
       "id": "AR-010-B",
@@ -7709,7 +7711,7 @@
       "resolution": "Retain AR-010-B identity, C04 and outer prerequisites; two sequential 2 [2–3] BE packages total 4 [4–6], medium-low. P1 owns the complete chosen representation/provenance/parser/consumer and operator-only historical marker, including reviewed migration ownership/evidence if needed; P2 integrates permits and both distinct failure fences. AR-008-B retains unsupported-evidence refusal and AR-011-C/AR-012-B wait for the whole aggregate"
     }
   ],
-  "planning_status": "Approved engineering scopes remain mapped against immutable C21. AR-008-B/P2 #95 and aggregate #93 are Verified after reviewed source 065df8c89da384d6e502cf0c15bf174e380c53c7, protected merge cefd222230c800eb2e90c49a3b3c411b394d0393, matching PR/main runs 39683408934/39686498691 (attempt 1) and verified candidate 12387716715. P1 #94 retains accepted merge 03a8e074b51dca7c03d69295e0c18ca0f22dc1da and candidate 12355648523. Parent #8 is Verified/closed. AR-010-A/P1 entry policy is independently accepted at 51af77dc; the accepted HTTP prerequisite now permits the explicit implementation handoff. AR-010-A and both packages remain Not started with null acceptance in this acceptance checkpoint. P2 waits for accepted P1 and its own exact reservation/fence entry review. Default adapters, customer admission, worker integration, full M1/G1 acceptance and external funding/data/production gates remain unavailable or open. Earlier dated failures and component evidence remain historical, not current status. Current totals: 30 Verified, 0 In progress and 121 Not started aggregate tasks; 9 Verified, 0 In progress and 6 Not started delivery packages.",
+  "planning_status": "Approved engineering scopes remain mapped against immutable C21. AR-008-B/P2 #95 and aggregate #93 are Verified after reviewed source 065df8c89da384d6e502cf0c15bf174e380c53c7, protected merge cefd222230c800eb2e90c49a3b3c411b394d0393, matching PR/main runs 39683408934/39686498691 (attempt 1) and verified candidate 12387716715. P1 #94 retains accepted merge 03a8e074b51dca7c03d69295e0c18ca0f22dc1da and candidate 12355648523. Parent #8 is Verified/closed. AR-010-A/P1 #108, aggregate #107 and parent #10 are In progress after the explicit lead handoff to platform/security in the existing secondary checkout, work/ledger-schema, from 9f6ea6e. P1 entry policy 51af77dc and the HTTP prerequisite are accepted. P1 product proof and acceptance remain pending; P2 #109 is Not started/null acceptance behind accepted P1 and its own exact reservation/fence entry review. Planning/verification authors independent owned tests only after the progress patch is accepted and runtime interfaces are stable; the lead integrates and the delivery reviewer independently reviews. Default adapters, customer admission, worker integration, full M1/G1 acceptance and external funding/data/production gates remain unavailable or open. Earlier dated failures and component evidence remain historical, not current status. Current totals: 30 Verified, 1 In progress and 120 Not started aggregate tasks; 9 Verified, 1 In progress and 5 Not started delivery packages.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -7751,7 +7753,10 @@
       11,
       12
     ],
-    "active_child_issues": {},
+    "active_child_issues": {
+      "AR-010-A": 107,
+      "AR-010-A/P1": 108
+    },
     "closed_implementation_issues": [
       26,
       28,
@@ -7778,8 +7783,6 @@
       95
     ],
     "queued_child_issues": {
-      "AR-010-A": 107,
-      "AR-010-A/P1": 108,
       "AR-010-A/P2": 109,
       "AR-010-B": 96,
       "AR-010-B/P1": 97,
@@ -7794,7 +7797,7 @@
     "owner_decision_issues": {
       "RESEARCHSCOPE0": 51
     },
-    "design_issue_disposition": "RA-01-A/B, owner engineering reconciliation #51 and offline C07/C15 designs retain their recorded accepted scope and closed issues. AR-008-B/P2 #95 and aggregate #93 are Verified after reviewed source 065df8c89da384d6e502cf0c15bf174e380c53c7, protected merge cefd222230c800eb2e90c49a3b3c411b394d0393, matching PR/main runs 39683408934/39686498691 (attempt 1) and verified candidate 12387716715. P1 #94 retains accepted merge 03a8e074b51dca7c03d69295e0c18ca0f22dc1da and candidate 12355648523. Parent #8 is Verified/closed. Lead read back #95/#93/#8 closed on 2026-10-21; #94 remains closed with its earlier acceptance unchanged. Parent trackers #6/#10/#11/#12 remain open. Ledger #107/#108/#109 are recorded as queued in this ordered HTTP acceptance checkpoint; the subsequent actual handoff is recorded separately. AR-010-A/P1 entry policy is independently accepted at 51af77dc; the accepted HTTP prerequisite now permits the explicit implementation handoff. AR-010-A and both packages remain Not started with null acceptance in this acceptance checkpoint. P2 waits for accepted P1 and its own exact reservation/fence entry review. Default adapters, customer admission, worker integration, full M1/G1 acceptance and external funding/data/production gates remain unavailable or open. Earlier dated failures and component evidence remain historical, not current status."
+    "design_issue_disposition": "RA-01-A/B, owner engineering reconciliation #51 and offline C07/C15 designs retain their recorded accepted scope and closed issues. AR-008-B/P2 #95 and aggregate #93 are Verified after reviewed source 065df8c89da384d6e502cf0c15bf174e380c53c7, protected merge cefd222230c800eb2e90c49a3b3c411b394d0393, matching PR/main runs 39683408934/39686498691 (attempt 1) and verified candidate 12387716715. P1 #94 retains accepted merge 03a8e074b51dca7c03d69295e0c18ca0f22dc1da and candidate 12355648523. Parent #8 is Verified/closed. Lead read back #95/#93/#8 closed on 2026-10-21; #94 remains closed with its earlier acceptance unchanged. Parent trackers #6/#10/#11/#12 remain open. Lead updated and read back #107/#108 and parent #10 open/In progress on 2026-10-21; #109 remains open/Not started. AR-010-A/P1 #108, aggregate #107 and parent #10 are In progress after the explicit lead handoff to platform/security in the existing secondary checkout, work/ledger-schema, from 9f6ea6e. P1 entry policy 51af77dc and the HTTP prerequisite are accepted. P1 product proof and acceptance remain pending; P2 #109 is Not started/null acceptance behind accepted P1 and its own exact reservation/fence entry review. Planning/verification authors independent owned tests only after the progress patch is accepted and runtime interfaces are stable; the lead integrates and the delivery reviewer independently reviews. Default adapters, customer admission, worker integration, full M1/G1 acceptance and external funding/data/production gates remain unavailable or open. Earlier dated failures and component evidence remain historical, not current status."
   },
   "execution_capacity": {
     "lead": "Project lead",
@@ -8102,6 +8105,6 @@
     "conditions": "B independently reviews both interfaces; A/C cross-review without acting as separate human approval. Review acceptance and hosted checks must actually pass.",
     "contingency": "Upper ranges may need two extra half-day allocations per task in days6–7. Days8–10 retain integration/reforecast capacity. Do not start any dependent on a planned date alone.",
     "unscheduled_approved_queue": [],
-    "unscheduled_queue_policy": "Assign only dependency-ready approved work after accepted producer delivery and task-specific entry review. AR-010-A/P1 entry policy is independently accepted at 51af77dc; the accepted HTTP prerequisite now permits the explicit implementation handoff. AR-010-A and both packages remain Not started with null acceptance in this acceptance checkpoint. P2 waits for accepted P1 and its own exact reservation/fence entry review. Historical schedules and opening conditions remain unchanged; no new calendar allocation or staffed-time conversion is made. Default adapters, customer admission, worker integration, full M1/G1 acceptance and external funding/data/production gates remain unavailable or open. Earlier dated failures and component evidence remain historical, not current status."
+    "unscheduled_queue_policy": "Assign only dependency-ready approved work after accepted producer delivery and task-specific entry review. AR-010-A/P1 #108, aggregate #107 and parent #10 are In progress after the explicit lead handoff to platform/security in the existing secondary checkout, work/ledger-schema, from 9f6ea6e. P1 entry policy 51af77dc and the HTTP prerequisite are accepted. P1 product proof and acceptance remain pending; P2 #109 is Not started/null acceptance behind accepted P1 and its own exact reservation/fence entry review. Planning/verification authors independent owned tests only after the progress patch is accepted and runtime interfaces are stable; the lead integrates and the delivery reviewer independently reviews. Historical schedules and opening conditions remain unchanged; no new calendar allocation or staffed-time conversion is made. Default adapters, customer admission, worker integration, full M1/G1 acceptance and external funding/data/production gates remain unavailable or open. Earlier dated failures and component evidence remain historical, not current status."
   }
 }

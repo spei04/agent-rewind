@@ -2,7 +2,7 @@
 
 2026-10-21 · Approved ledger execution plan. The original readiness review used HTTP source `a304d52b52667b882c70e922b73d7070d714efb0`; the current HTTP prerequisite is accepted at protected merge `cefd222230c800eb2e90c49a3b3c411b394d0393`.
 
-**State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry policy is independently accepted at 51af77dc and HTTP delivery is now accepted at cefd222. AR-010-A/P1/P2 remain Not started with null acceptance in this ordered predecessor-acceptance checkpoint; an explicit runtime handoff follows separately. P2 waits for accepted P1 and its own reservation/fence entry review. No public/native-v1 contract, ready-profile or external gate is changed.
+**State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. P1 has no accepted product delivery yet; P2 #109 remains **Not started**, waiting for accepted P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
 ## Problem and intended result
 
@@ -32,7 +32,7 @@ The operator manifest must have a reviewed exact schema, canonical digest, autho
 
 ## Approved two-package delivery
 
-The two approved packages retain AR-010-A and its sole outer prerequisite AR-008-B, now Verified. Both remain Not started in this predecessor-acceptance checkpoint. P1 entry is accepted; P2 waits for accepted merged P1 and its own exact entry. AR-010-B consumes the whole accepted aggregate, not early schema availability.
+The two approved packages retain AR-010-A and its sole outer prerequisite AR-008-B, now Verified. P1 is In progress under the explicit runtime handoff; P2 is Not started and waits for accepted merged P1 and its own exact entry. Both acceptance records remain null. AR-010-B consumes the whole accepted aggregate, not early schema availability.
 
 ### P1 — Ledger schema, trusted provisioning and opening backfill
 
@@ -81,14 +81,14 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- Planning/verification: reconcile accepted HTTP delivery and the subsequent explicit ledger handoff; independent test authoring waits for released ownership and stable runtime interfaces.
-- Platform/security: accepted P1 entry is ready for the explicit runtime handoff; no implementation assignment is recorded in this first predecessor-acceptance checkpoint.
-- Delivery reviewer: HTTP audit is accepted; independent ledger implementation/delivery review remains required.
-- Lead: accepted HTTP candidate and issue closures, owns the explicit next assignment, integration and public issue read-back.
+- Planning/verification: finish independently reviewed progress reconciliation, then author the separately owned fixture/adversarial/limits/provisioning/constraint/catalog/recovery tests after runtime interfaces are stable and the lead releases ownership.
+- Platform/security: own P1 runtime in the existing secondary checkout, work/ledger-schema, from accepted planning 9f6ea6e; first produce immutable bounded manifest/progress parsing plus explicit ar7 DDL and literal SQLite/PostgreSQL catalog evidence. Retain the sole coordinated PostgreSQL slot until baseline restoration and process release are proved.
+- Delivery reviewer: independently review ledger source, integration and actual delivery evidence; accepted HTTP audit remains predecessor evidence.
+- Lead: integrate reviewed runtime/tests, coordinate checkout and PostgreSQL ownership, maintain issue read-back and require the full P1 acceptance matrix before P2 handoff.
 
-The historical first-fortnight schedules and opening conditions remain unchanged. Accepted HTTP and exact P1 entry satisfy the implementation entry prerequisites; the explicit handoff remains separately recorded. Three contributor slots do not imply six staffed roles or an elapsed-time conversion.
+The historical first-fortnight schedules and opening conditions remain unchanged. Accepted HTTP and exact P1 entry satisfy the implementation prerequisites; the lead has issued the P1 handoff. No new calendar allocation or staffed-time conversion follows from the effort totals.
 
-Before assigning implementation, verify accepted AR-008-B delivery; reviewed exact provisioning manifest, authority, cardinality/byte bounds and replay/conflict semantics; schema/profile/deferred SQL and lock-order/restore decisions; existing consumer interfaces and finite outcomes; synchronized planning records and independent entry acceptance. Worker dispatch remains AR-010-B; authentic settlement/opening/transfer producers remain AR-023-A/C. No public API, runtime migration, provider request, paid resource or task-status advance is made by this amendment.
+Implementation entry is satisfied by accepted HTTP and independently accepted P1 policy at 51af77dc. Product delivery still requires exact manifest/bounds/replay behavior, DDL/catalog, deferred constraints/privileges, lock-order, maximum-state and outcome/recovery evidence against that policy. Worker dispatch remains AR-010-B; authentic settlement/opening/transfer producers remain AR-023-A/C. No provider request, paid resource, customer data or ready profile is authorized by this handoff.
 
 ## Accepted P1 entry policy — 2026-10-21
 
@@ -103,3 +103,9 @@ The corrected HTTP PR matrix passed at a439, but [GHSA-hq85-5cpj-mr62](https://g
 ## Accepted HTTP prerequisite — 2026-10-21
 
 HTTP P2 is Verified at cefd222 after exact PR/main attempts 39683408934/39686498691 and verified candidate 12387716715; see [accepted evidence](OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). The earlier security gate and failed attempts above remain history. P1 entry 51af77dc needs no repeated approval. This ordered checkpoint leaves ledger packages Not started/null acceptance pending the explicit assignment; actual constraints, privileges, maximum bounds and recovery remain product evidence to build.
+
+## Explicit P1 runtime handoff — 2026-10-21
+
+The lead assigned platform/security to AR-010-A/P1 #108 in the existing secondary checkout, work/ledger-schema, from published planning 9f6ea6e after accepted HTTP delivery. Aggregate #107 and parent #10 are In progress; #109 remains Not started. The lead read back those issue states on 2026-10-21. P1/P2 accepted merge and review evidence remain null.
+
+Planning/verification owns independent test modules after accepted progress reconciliation and stable runtime interfaces; runtime and test file ownership are separate. First checkpoint is immutable manifest/progress parsing and explicit ar7 DDL/literal catalogs, followed by the complete provisioning, historical opening, privilege, constraint, bounds and recovery proof. Parser-only or synthetic privilege feasibility evidence cannot complete P1. Existing profiles and earlier acceptance records remain unchanged; P2 and worker work retain their original gates.
