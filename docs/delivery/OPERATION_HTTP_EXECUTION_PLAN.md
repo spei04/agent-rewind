@@ -186,3 +186,11 @@ Acceptance unlocks only **AR-008-B/P2 #95**, now In progress under the separate 
 ## P2 entry accepted — 2026-10-21
 
 A/B/lead accepted [the concrete HTTP entry](OPERATION_HTTP_ENTRY.md) at 9f4f9a34 after the compatibility-description correction. C is assigned runtime and SQLite/ASGI tests; A owns independent actual PostgreSQL HTTP tests after a frozen-runtime handoff and B reviews source/security/contracts. This consumes the accepted P1 predecessor without changing estimates, dependencies or external gates. P2 remains In progress with no accepted merge or delivery evidence.
+
+## P2 validation before hosted delivery — 2026-10-21
+
+The exact three-route runtime is frozen at acd5ebc; C's final 24bf739 adds 80 passing HTTP/ASGI/helper cases and installed smoke. B's independent 41bfed8 contract tests exposed the missing explicit false GET CSRF metadata; the correction passed all five contract cases at composed 1fa397d. C independently accepted A's test-only d6be3ba and its single final 34-case actual PostgreSQL run (zero skips, one existing warning, 124.06 seconds). The lead composed exact bytes at 907946c. This is separate evidence, not a combined 119-case run.
+
+Installed proof at be9f3dd used an isolated Python 3.12.3 runtime outside the checkouts. B independently verified all 114 Git/wheel/sdist/installed members, the exact distribution file sets, all 40 locked dependency identities, both smoke markers and CLI execution. Final composition changes only tests and documentation relative to this package proof. The lead separately passed 91 existing API, identity, contract and backlog cases, plus whole-runtime typing, lint/format/security rules and all three contract/planning validators. Failed fixture/oracle and command checkpoints remain private and clearly superseded.
+
+The synthetic PostgreSQL baseline was restored exactly and the server stopped; the temporary installed runtime was removed after all consumers released it. Two cloud checkouts are reused. P2 and aggregate #93 remain In progress. Matching PR checks, protected-main checks and verified candidate delivery remain required; accepted-merge/review ledger fields stay null. The next ledger implementation, worker/customer readiness, full M1 integration and external production/data/funding gates remain open.
