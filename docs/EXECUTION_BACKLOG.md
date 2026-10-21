@@ -103,7 +103,7 @@ After the first two weeks, use dependency-ready milestone scheduling. The former
 | Milestone | Base effort | Scheduling after Day 10 | Explicit exit / integration checkpoint |
 | --- | ---: | --- | --- |
 | M0 | 8.5 days | Internal development freeze verified; external production conditions remain separate | [G0](#g0): M0 accepted; schemas and initial migration scope reviewed. |
-| M1 | 65.5 days | Preparatory projection, existing-route scope, admission P1/P2/P3 and aggregate A Verified; listing P1/P2 and aggregate Verified; Operation adapter P1 Verified; HTTP route P2 In progress; repair AR-006-C remains gated | [G1](#g1): Historical identities, 24 behavioral cases, scope/lease/budget compatibility, required CI and installable main candidate evidence pass. |
+| M1 | 65.5 days | Preparatory projection, existing-route scope, admission P1/P2/P3 and aggregate A Verified; listing P1/P2 and aggregate Verified; Operation adapter P1 Verified; HTTP route P2 Verified; repair AR-006-C remains gated | [G1](#g1): Historical identities, 24 behavioral cases, scope/lease/budget compatibility, required CI and installable main candidate evidence pass. |
 | M2 | 69 days | Start each task after its foundation inputs; joins G1 plus early staging | [G2](#g2): Real gVisor isolation/restore/cleanup, cloud store/key rotation, fail-closed lease and accounted live smoke verified. |
 | M3 | 81 days | Includes 4 base days of RA-01 design before C08/C09 producers; runtime follows its original prerequisites and G2 | [G3](#g3): Resumable distributed studies preserve frozen protocol, missingness and all call accounting; reports independently recompute. |
 | M4 | 82 days | Early IaC after G0; UI/SDK after producer APIs; complete after G3 | [G4](#g4): Independent full browser/SDK workflow and fresh install pass with real IdP/GCS/KMS/gVisor and selected adapter. |
@@ -750,7 +750,7 @@ Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days
 
 ### AR-008 — Make retries safe and admission/cancellation behavior predictable
 
-M1 / P0 · 5 PRs · 13 engineering days · In progress · [Tracking issue #8](https://github.com/spei04/agent-rewind/issues/8)
+M1 / P0 · 5 PRs · 13 engineering days · Verified · [Tracking issue #8](https://github.com/spei04/agent-rewind/issues/8)
 
 <a id="ar-008-a"></a>
 
@@ -919,13 +919,13 @@ M1 / P0 · 2 PRs · 4 engineering days · Verified
 
 ### AR-010 — Enforce budget limits before every potentially paid action
 
-M1 / P0 · 4 PRs · 10 engineering days · Not started · [Tracking issue #10](https://github.com/spei04/agent-rewind/issues/10)
+M1 / P0 · 4 PRs · 10 engineering days · In progress · [Tracking issue #10](https://github.com/spei04/agent-rewind/issues/10)
 
 <a id="ar-010-a"></a>
 
 #### AR-010-A — Integer ledger and hierarchical reservations
 
-Tracking: [#107](https://github.com/spei04/agent-rewind/issues/107) · Not started.
+Tracking: [#107](https://github.com/spei04/agent-rewind/issues/107) · In progress.
 
 - **Objective:** Deliver the scoped integer ledger, trusted fixed-period provisioning and conservative reservation/generation primitives before live worker integration.
 - **Implementation scope / PR boundary:** Two sequential accepted-merge-gated packages: exact additive ledger schema/catalog/provisioning/opening backfill, then connection-bound reservations, minimum generation fences and no-reset rollover. Preserve the three frozen ledger tables, original account triple, gross job reservations and prior outstanding exposure.
@@ -946,7 +946,7 @@ Tracking: [#107](https://github.com/spei04/agent-rewind/issues/107) · Not start
 
 #### AR-010-A/P1 — Ledger schema, trusted provisioning and opening backfill
 
-Tracking: [#108](https://github.com/spei04/agent-rewind/issues/108) · Not started.
+Tracking: [#108](https://github.com/spei04/agent-rewind/issues/108) · In progress.
 
 - **Objective:** Represent scoped accounts, logical calls and evidence-backed entries with explicit trusted provisioning and preserved historical exposure.
 - **Implementation scope:** One additive linear revision after ar6 for the three frozen ledger tables and job generation/legacy-reservation fields. Freeze and implement the exact bounded operator manifest, canonical digest, ownership/authority, replay/conflict semantics and SQL-derived opening backfill. Update both catalog inspection and migration exclusion to the exact 20-table profile; allow only reviewed PostgreSQL deferred constraints/functions, definitions and owner/security/search-path/privilege state. Preserve older literal profiles, resume/restore and migration-only compatibility.
