@@ -101,7 +101,7 @@ def record(directory: Path, root: Path, commit: str) -> None:
         "source_commit": commit,
         "uv_lock_sha256": hashlib.sha256((root / "uv.lock").read_bytes()).hexdigest(),
         "pyproject_sha256": hashlib.sha256((root / "pyproject.toml").read_bytes()).hexdigest(),
-        "uv_version": "0.11.21",
+        "uv_version": "0.13.4",
         "tested_python": ["3.11", "3.12"],
         "files": digests,
         "status": "candidate; no deployment or production certification",

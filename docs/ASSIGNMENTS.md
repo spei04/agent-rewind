@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| A | Completed backlog/tracking and independent P1 entry review | Available for independent implementation tests after accepted HTTP delivery; no active writer or database hold. |
-| C / platform_security | Narrow pinned/checksummed uv security repair in reused secondary | Preserve ledger design branch and shared tooling; independent review and fresh matching delivery evidence required. |
-| B / delivery_audit | Final a439 HTTP evidence audit, then independent uv repair review | Preserve passing and failed attempts separately; no final acceptance of the affected toolchain. |
-| Lead | HTTP delivery and accepted ledger planning composition | Verify remaining PR/main/candidate evidence, publish coherent entry/tracking, then assign P1 implementation. |
+| Platform/security | Reconcile approved ledger planning with patched HTTP source in reused secondary | Preserve exact reviewed source union and frozen entry; hand off to independent planning review. |
+| Delivery reviewer | Audit patched-source PR run 39672365195 and later protected-main delivery | Package, security and isolation passed; both core jobs and final delivery evidence remain pending. |
+| Planning reviewer | Independent planning composition and entry-preservation review | Ledger packages remain Not started until accepted HTTP protected-main and candidate evidence. |
+| Lead | HTTP delivery, final planning integration and dependency-ready assignments | Primary remains frozen at eeca4e5; approve implementation only after its predecessor and entry gates pass. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -629,3 +629,36 @@ A accepted the complete entry and both clarification rounds; the lead independen
 ## Build-tool CA repair assigned — 2026-10-21
 
 The lead verified [GHSA-hq85-5cpj-mr62](https://github.com/astral-sh/uv/security/advisories/GHSA-hq85-5cpj-mr62): uv versions before 0.13.4 using their default bundled CAs are affected. C / platform_security owns a narrow official pinned/checksummed repair in the existing secondary, starting from a439; the accepted ledger design branch is preserved. B / delivery_audit completes the passing a439 audit and independently reviews the repair. The lead preserves the primary planning composition and owns integration. The shared uv0.11.21 executable and other projects are unchanged. This is a new security prerequisite to final delivery, not an explanation for the earlier test failures. No new resource, provider request, spending or customer activation is authorized.
+
+
+## Patched toolchain delivery assignments — 2026-10-21
+
+Corrected HTTP source a439bce passed complete PR run [39638999615](https://github.com/spei04/agent-rewind/actions/runs/39638999615): Python 3.11 recorded 3,838 passes and 14 expected skips; Python 3.12 recorded 3,849 passes and 3 expected skips. Package, security, three isolation tests and CI gate passed. This is functional evidence using the former uv pin, not acceptance of a patched build.
+
+[GHSA-hq85-5cpj-mr62](https://github.com/astral-sh/uv/security/advisories/GHSA-hq85-5cpj-mr62) requires a build-tool update before delivery. Platform/security prepared 6c54c3c with uv 0.13.4, verified official archive/wheel hashes, candidate provenance and version refusal, and added a hosted container build/offline CLI smoke gate. All 53 focused cases and static checks passed; the isolated package smoke passed and 114 runtime members matched Git, wheel, sdist and installation. Project dependencies and runtime bytes are unchanged.
+
+The delivery reviewer independently audits the repair. Planning/verification owns a separately reviewed private verifier update, preserving earlier failed and successful run identities. Platform/security next binds the final source collection; the lead owns PR, protected-main and candidate acceptance. The existing Docker base and shared host trust store are separate inputs; this uv repair does not claim to remediate them. Local Docker remains unavailable, so actual container validation must come from hosted CI.
+
+The approved ledger amendment and accepted schema/provisioning entry are published on [work/ledger-backlog-amendment](https://github.com/spei04/agent-rewind/blob/work/ledger-backlog-amendment/docs/ASSIGNMENTS.md). They establish design readiness only. Ledger #107, #108 and #109 remain Not started; HTTP #95 and #93 remain In progress until the required delivery evidence is accepted. No new paid resources, provider calls, partner data or production activation were used.
+
+
+## Planning composition with patched HTTP delivery — 2026-10-21
+
+Platform/security reused the secondary checkout to compose approved planning
+source 0f32d8ca with exact HTTP source eeca4e5. The only conflict is resolved in
+this assignment log: both branches' dated historical entries are preserved and
+the current owner table reflects this handoff. The ledger schema/provisioning
+entry, task and package statuses, acceptance, dependencies and estimates remain
+unchanged. The previously approved synthetic backlog-test prerequisite setup is
+preserved; the patched HTTP runtime, tests and toolchain are otherwise unchanged.
+
+At this checkpoint, patched-source PR run
+[39672365195](https://github.com/spei04/agent-rewind/actions/runs/39672365195)
+has passed package (including the container build and offline CLI smoke),
+security and isolation; both core jobs remain pending. The earlier failed
+39631674974 and successful but unpatched 39638999615 attempts remain separate
+historical evidence. HTTP delivery has not been accepted, and ledger #107,
+#108 and #109 remain Not started. Independent review of this composition and
+actual accepted HTTP protected-main/candidate evidence precede implementation.
+No database execution, new dependencies, provider calls or paid resources are
+part of this planning reconciliation.
