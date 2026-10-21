@@ -20,6 +20,7 @@ from agent_rewind.legacy_views import LegacyViews
 from agent_rewind.models import Action, Intervention, canonical, digest
 from agent_rewind.published_reader import PublishedRunReader
 from agent_rewind.scoped_lineage import ResourceNotFound
+from agent_rewind.sqlite_ownership import acquire_progress, owned_begin, owned_connect
 
 
 @pytest.fixture
@@ -75,7 +76,7 @@ def test_comparison_is_pure_and_preserves_supported_response(published, task):
 
 def test_metadata_list_is_sql_only_even_when_unpublished(published, monkeypatch):
     capture, run, _, reader = published
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         connection.exec_driver_sql("DELETE FROM artifact_refs")
     monkeypatch.setattr(
         reader.repositories, "artifact_loader", Mock(side_effect=AssertionError("storage"))
@@ -94,7 +95,7 @@ def test_metadata_list_is_sql_only_even_when_unpublished(published, monkeypatch)
 )
 def test_selected_list_identity_is_bounded_and_invalid_never_skipped(published, column, value):
     capture, run, _, _ = published
-    with capture.db.engine.connect() as connection:
+    with owned_connect(capture.db.engine) as connection:
         connection.exec_driver_sql("PRAGMA foreign_keys=OFF")
         connection.execute(
             text(f"UPDATE records SET {column}=:v WHERE id=:r"), {"v": value, "r": run}
@@ -122,7 +123,7 @@ def test_list_aggregate_limit_and_fresh_final_authority(published, monkeypatch):
 
     def changed(*args, **kwargs):
         result = original(*args, **kwargs)
-        with capture.db.engine.begin() as connection:
+        with owned_begin(capture.db.engine) as connection:
             connection.exec_driver_sql("UPDATE project_memberships SET revoked_at='2026-01-01'")
         return result
 
@@ -144,7 +145,7 @@ def result_object(capture, job_id, result):
         datetime.now(UTC),
     )
     capture.publisher.storage.put_verified(value, data)
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         record_verified(connection, value)
         register_ref(
             connection,
@@ -164,7 +165,7 @@ def test_job_result_requires_scoped_descriptor_and_exact_target(published, monke
     capture, run, _, reader = published
     result_object(capture, JOB, {"run_id": run})
     assert view(published).jobs(CONTEXT)[0]["result"] == {"run_id": run}
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         connection.execute(text("DELETE FROM artifact_refs WHERE owner_kind='job'"))
     monkeypatch.setattr(
         reader.repositories, "artifact_loader", Mock(side_effect=AssertionError("storage"))
@@ -191,7 +192,7 @@ def test_job_final_receipt_retains_original_created_at(published, monkeypatch):
 
     def changed(descriptor):
         data = original(descriptor)
-        with capture.db.engine.begin() as connection:
+        with owned_begin(capture.db.engine) as connection:
             connection.execute(
                 text("UPDATE artifact_objects SET created_at=:created WHERE id=:id"),
                 {"created": (value.created_at + timedelta(seconds=1)).isoformat(), "id": value.id},
@@ -220,7 +221,7 @@ def test_first_job_receipt_or_target_changed_during_second_load_refuses(
     second_job = capture.db.get(second_run, "run")["job_id"]
     first = result_object(capture, JOB, {"run_id": first_run})
     second = result_object(capture, second_job, {"run_id": second_run})
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         connection.execute(
             text("UPDATE jobs SET created=CASE WHEN id=:first THEN 10 ELSE 5 END"), {"first": JOB}
         )
@@ -232,7 +233,7 @@ def test_first_job_receipt_or_target_changed_during_second_load_refuses(
         loads.append(descriptor.digest)
         data = original(descriptor)
         if descriptor.digest == second.digest:
-            with capture.db.engine.begin() as connection:
+            with owned_begin(capture.db.engine) as connection:
                 if change == "descriptor":
                     connection.execute(
                         text("UPDATE artifact_objects SET created_at=:created WHERE id=:id"),
@@ -265,7 +266,7 @@ def test_final_whole_source_receipts_refuse_earlier_mutation(published, monkeypa
 
     capture, first, _, _ = published
     other_job, second = "9" * 32, "8" * 32
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         connection.execute(
             text(
                 "INSERT INTO jobs(id,kind,created,payload,status,cancel,budget,reserved) "
@@ -370,7 +371,7 @@ def test_maximum_matching_relational_rowset_has_bounded_sql_work(published):
         body = json.dumps({"job_id": JOB, "parent_id": None})
         entries.append({"id": ident, "body": body})
         budget.remember("run", {"id": ident, "created": 1.0, "body": body})
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         connection.execute(text("INSERT INTO records VALUES(:id,'run',1,:body)"), entries)
         connection.execute(
             text("INSERT INTO resource_scopes VALUES('run',:id,:p)"),
@@ -383,8 +384,7 @@ def test_maximum_matching_relational_rowset_has_bounded_sql_work(published):
             binds.append(len(parameters))
 
     event.listen(capture.db.engine, "before_cursor_execute", statement)
-    with capture.db.engine.connect() as connection:
-        raw = connection.connection.driver_connection
+    with owned_connect(capture.db.engine) as connection:
         count = 0
 
         def progress():
@@ -392,11 +392,12 @@ def test_maximum_matching_relational_rowset_has_bounded_sql_work(published):
             count += 1000
             return int(count > 4_000_000)
 
-        raw.set_progress_handler(progress, 1000)
+        lease = acquire_progress(connection, owner=progress)
+        lease.install(progress, 1000)
         try:
             budget.final(connection, CONTEXT)
         finally:
-            raw.set_progress_handler(None, 0)
+            lease.release()
         assert count < 4_000_000 and binds and max(binds) <= 64
         connection.execute(
             text("DELETE FROM resource_scopes WHERE resource_kind='run' AND resource_id=:id"),

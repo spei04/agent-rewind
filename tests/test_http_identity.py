@@ -17,6 +17,7 @@ from agent_rewind.request_identity import (
     encode_v2_session,
 )
 from agent_rewind.scoped_repositories import RepositoryUnavailable
+from agent_rewind.sqlite_ownership import owned_begin
 
 
 def request(token=None, cookie=None, method="GET", csrf=None, origin=None):
@@ -86,7 +87,7 @@ def test_key_invalid_dynamic_cells_never_authenticate(settings, storage, field, 
     assert auth.principal(
         request(token="Bearer valid-token")
     ).verified == VerifiedPrincipal.service_key(key_id)
-    with db.engine.begin() as connection:
+    with owned_begin(db.engine) as connection:
         connection.execute(text(f"UPDATE api_keys SET {field}=:value"), {"value": value})
     with pytest.raises(IdentityInvalid):
         auth.principal(request(token="Bearer valid-token"))
@@ -96,7 +97,7 @@ def test_key_credential_prefetch_bound_and_real_database_failure(settings, stora
     db, _ = storage
     auth = Auth(settings, db)
     db.issue_key("token", "operator", "test", time.time() + 1000, "fixture")
-    with db.engine.begin() as connection:
+    with owned_begin(db.engine) as connection:
         connection.execute(text("UPDATE api_keys SET expires=:value"), {"value": "x" * 100000})
     # The body SELECT must retain its CASE bound, so it cannot rely solely on
     # a prior size query or a Python check after fetching the oversized cell.
@@ -110,7 +111,7 @@ def test_key_credential_prefetch_bound_and_real_database_failure(settings, stora
     with pytest.raises(IdentityInvalid):
         auth.principal(request(token="Bearer token"))
     assert selected and "CASE WHEN" in selected[-1]
-    with db.engine.begin() as connection:
+    with owned_begin(db.engine) as connection:
         connection.exec_driver_sql("DROP TABLE api_keys")
     with pytest.raises(RepositoryUnavailable):
         auth.principal(request(token="Bearer token"))

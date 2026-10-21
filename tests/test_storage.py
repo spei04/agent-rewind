@@ -7,6 +7,7 @@ from cryptography.fernet import InvalidToken
 from sqlalchemy import update
 
 from agent_rewind.database import BudgetExceeded, JobStopped, jobs
+from agent_rewind.sqlite_ownership import owned_begin
 from agent_rewind.workspace import File, pack, unpack
 
 
@@ -73,7 +74,7 @@ def test_jobs_are_claimed_once_and_expired_owner_cannot_publish(storage, legacy_
         claims = list(pool.map(lambda i: db.claim(str(i)), range(4)))
     assert sum(c is not None for c in claims) == 1
     owner = db.job(job)["owner"]
-    with db.engine.begin() as connection:
+    with owned_begin(db.engine) as connection:
         connection.execute(update(jobs).where(jobs.c.id == job).values(lease_until=0))
     with pytest.raises(JobStopped):
         db.complete_job(job, owner, None, None)

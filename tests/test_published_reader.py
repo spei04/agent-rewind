@@ -14,6 +14,7 @@ from agent_rewind.artifact_publication import UnavailableLiveWriter
 from agent_rewind.models import Action, Intervention
 from agent_rewind.published_reader import PublishedRunReader, RunRead
 from agent_rewind.scoped_lineage import ResourceNotFound
+from agent_rewind.sqlite_ownership import acquire_progress, owned_begin, owned_connect
 
 
 @pytest.fixture
@@ -55,7 +56,7 @@ def test_unavailable_root_refuses_before_backend(published, monkeypatch, case):
     elif case == "foreign_project":
         context = replace(CONTEXT, project_id="f" * 32)
     else:
-        with capture.db.engine.begin() as c:
+        with owned_begin(capture.db.engine) as c:
             c.exec_driver_sql("DELETE FROM artifact_refs WHERE role='result'")
     monkeypatch.setattr(
         reader.repositories, "artifact_loader", Mock(side_effect=AssertionError("I/O"))
@@ -119,7 +120,7 @@ def test_first_graph_ref_removed_during_second_graph_io_refuses_compound(
     def changed(value):
         result = load(value)
         if value.digest == second.root_digest:
-            with capture.db.engine.begin() as c:
+            with owned_begin(capture.db.engine) as c:
                 c.execute(
                     text("DELETE FROM artifact_refs WHERE owner_id=:owner AND role='task'"),
                     {"owner": first_run},
@@ -143,7 +144,7 @@ def test_final_phase_change_refuses_bytes(published, monkeypatch, change):
     def changed(connection, context, identities):
         # The final ref statement follows the completed owner traversal.
         if change != "membership":
-            with capture.db.engine.begin() as c:
+            with owned_begin(capture.db.engine) as c:
                 if change == "ref":
                     c.execute(
                         text("DELETE FROM artifact_refs WHERE artifact_id=:id"), {"id": victim.id}
@@ -158,7 +159,7 @@ def test_final_phase_change_refuses_bytes(published, monkeypatch, change):
                     )
         original(connection, context, identities)
         if change == "membership":
-            with capture.db.engine.begin() as c:
+            with owned_begin(capture.db.engine) as c:
                 c.execute(
                     text("UPDATE project_memberships SET revoked_at=:at"),
                     {"at": datetime.now(UTC).isoformat()},
@@ -187,7 +188,7 @@ def test_unique_root_is_rechecked_after_last_io(published, monkeypatch):
                 digest="e" * 64,
                 locator=f"objects/{context.project_id}/v1/{'e' * 64}",
             )
-            with capture.db.engine.begin() as c:
+            with owned_begin(capture.db.engine) as c:
                 record_verified(c, other)
                 register_ref(
                     c,
@@ -285,7 +286,7 @@ def test_full_supported_ref_set_fits_one_actual_sqlite_statement(published):
     # No fake SQL runner: the max-sized JSON rowset executes against the actual
     # driver without expanding bind count. It then refuses every absent ref.
     with (
-        capture.db.engine.connect() as connection,
+        owned_connect(capture.db.engine) as connection,
         pytest.raises(ArtifactError, match="publication_reference_changed"),
     ):
         reader._final_refs(connection, CONTEXT, identities)
@@ -306,7 +307,7 @@ def test_final_metadata_bound_precedes_python_materialization(published, monkeyp
         return object_parser(row)
 
     def changed(connection, context, identities):
-        with capture.db.engine.begin() as c:
+        with owned_begin(capture.db.engine) as c:
             c.execute(text("UPDATE artifact_objects SET created_at=:value"), {"value": oversized})
         return original(connection, context, identities)
 
@@ -373,7 +374,7 @@ def test_initial_and_post_io_descriptors_are_sql_bounded(published, monkeypatch,
     loaded = []
 
     def mutate():
-        with capture.db.engine.begin() as connection:
+        with owned_begin(capture.db.engine) as connection:
             connection.execute(
                 text("UPDATE artifact_objects SET created_at=:value WHERE id=:id"),
                 {"value": oversized, "id": target.id},
@@ -429,7 +430,7 @@ def test_full_matching_ref_set_has_bounded_sqlite_work(published):
         )
         for n in range(1, count + 1)
     ]
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         connection.exec_driver_sql("INSERT INTO artifact_objects VALUES (?,?,?,?,?,?,?)", objects)
         connection.exec_driver_sql(
             "INSERT INTO artifact_refs VALUES (?,?,?,?,?)",
@@ -452,13 +453,13 @@ def test_full_matching_ref_set_has_bounded_sqlite_work(published):
             instructions += 1000
             return instructions > 20_000_000
 
-        with capture.db.engine.connect() as connection:
-            raw = connection.connection.driver_connection
-            raw.set_progress_handler(progress, 1000)
+        with owned_connect(capture.db.engine) as connection:
+            lease = acquire_progress(connection, owner=progress)
+            lease.install(progress, 1000)
             try:
                 reader._final_refs(connection, CONTEXT, expected)
             finally:
-                raw.set_progress_handler(None, 0)
+                lease.release()
         assert instructions <= 20_000_000
 
     event.listen(capture.db.engine, "before_cursor_execute", statement)
@@ -475,7 +476,7 @@ def test_full_matching_ref_set_has_bounded_sqlite_work(published):
         changed[ref] = (objects[1][0], *changed[ref][1:])
         with pytest.raises(ArtifactError, match="^publication_reference_changed$"):
             verify(changed)
-        with capture.db.engine.begin() as connection:
+        with owned_begin(capture.db.engine) as connection:
             connection.execute(
                 text("DELETE FROM artifact_refs WHERE owner_id=:owner AND artifact_id=:id"),
                 {"owner": run, "id": objects[-1][0]},
@@ -505,7 +506,7 @@ def test_final_ref_keeps_every_descriptor_field_comparison(published, field):
     assert identity[field] != alternatives[field]
     identity[field] = alternatives[field]
     with (
-        capture.db.engine.connect() as connection,
+        owned_connect(capture.db.engine) as connection,
         pytest.raises(ArtifactError, match="^publication_reference_changed$"),
     ):
         reader._final_refs(

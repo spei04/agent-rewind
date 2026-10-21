@@ -20,6 +20,7 @@ from sqlalchemy import text
 from agent_rewind.api import create_app
 from agent_rewind.artifact_metadata import ArtifactError
 from agent_rewind.scoped_actions import ScopedActionError
+from agent_rewind.sqlite_ownership import owned_begin, owned_connect
 
 pytestmark = pytest.mark.usefixtures("legacy_behavior_schema")
 
@@ -31,7 +32,7 @@ def published_http(settings, task):
     run = capture.run(task)
     capture.publisher.publish(capture.intent(run), capture.source)
     app = create_app(settings)
-    with app.state.db.engine.begin() as connection:
+    with owned_begin(app.state.db.engine) as connection:
         connection.execute(
             text("INSERT INTO project_memberships VALUES(:p,:id,'maintainer',NULL,true)"),
             {"p": PROJECT, "id": PRINCIPAL.principal_id},
@@ -43,7 +44,7 @@ def published_http(settings, task):
 
 
 def read_audits(app):
-    with app.state.db.engine.connect() as connection:
+    with owned_connect(app.state.db.engine) as connection:
         return connection.execute(
             text("SELECT actor,target FROM audit WHERE action='run.read'")
         ).all()
@@ -103,7 +104,7 @@ def test_failed_or_revoked_detail_never_returns_success_or_audit(
             if failure == "corrupt":
                 raise ArtifactError("artifact_digest_mismatch")
             result = original(value)
-            with app.state.db.engine.begin() as connection:
+            with owned_begin(app.state.db.engine) as connection:
                 connection.execute(
                     text(
                         "UPDATE project_memberships SET revoked_at='2026-01-01' "
@@ -156,7 +157,7 @@ def test_foreign_resource_visibility_precedes_viewer_action_and_storage(
     app = prepared_app(settings)
     run, job = source_run(app)
     foreign_project, foreign_run, foreign_job = "b" * 32, "c" * 32, "d" * 32
-    with app.state.db.engine.begin() as connection:
+    with owned_begin(app.state.db.engine) as connection:
         connection.execute(
             text("UPDATE project_memberships SET role='viewer' WHERE principal_id=:id"),
             {"id": PRINCIPAL.principal_id},
@@ -272,13 +273,13 @@ def test_service_key_me_intersects_current_membership_and_cannot_manage_keys(set
         )
         assert client.delete("/api/keys/" + key["id"], headers=headers).status_code == 403
         assert client.delete("/api/keys/" + "0" * 32, headers=headers).status_code == 404
-        with app.state.db.engine.begin() as connection:
+        with owned_begin(app.state.db.engine) as connection:
             connection.execute(
                 text("UPDATE project_memberships SET role='maintainer' WHERE principal_id=:id"),
                 {"id": "api-key:" + key["id"]},
             )
         assert client.get("/api/me", headers=headers).json()["role"] == role
-        with app.state.db.engine.begin() as connection:
+        with owned_begin(app.state.db.engine) as connection:
             connection.execute(
                 text(
                     "UPDATE project_memberships SET revoked_at='2026-01-01' WHERE principal_id=:id"

@@ -11,6 +11,7 @@ from agent_rewind.artifact_metadata import ArtifactError
 from agent_rewind.models import Intervention
 from agent_rewind.projection_evidence import FrozenLegacySource, prepare_evidence
 from agent_rewind.projection_source import QueryBudget, read_cohort, readonly_source
+from agent_rewind.sqlite_ownership import owned_begin, owned_connect
 
 
 @pytest.fixture
@@ -37,7 +38,7 @@ def reader(capture):
 
 
 def scope_interrupted(capture, run):
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         connection.execute(
             text("INSERT INTO resource_scopes VALUES('run',:run,:project)"),
             {"run": run, "project": CONTEXT.project_id},
@@ -56,7 +57,7 @@ def test_cohort_is_parent_first_and_rechecks_original_identity(capture, task):
     assert all(r.status == "complete" and r.branchable for r in prepared.rows)
     assert prepared.identity == cohort(capture).identity
     assert prepared.bytes_read > 0
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         connection.execute(
             text("UPDATE records SET created=created+1 WHERE id=:id"), {"id": parent}
         )
@@ -112,7 +113,7 @@ def test_actual_engine_interruption_shapes(capture, task, monkeypatch, when):
 def test_foreign_parent_scope_refuses_before_any_operator_reader(capture, task):
     parent = capture.run(task)
     child = capture.run(task, parent, Intervention(step=2, kind="tool_result", result={"x": 1}))
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         connection.execute(
             text("DELETE FROM resource_scopes WHERE resource_id=:id"), {"id": parent}
         )
@@ -133,7 +134,7 @@ def test_cohort_query_and_metadata_limits(capture, task, monkeypatch):
     monkeypatch.setattr(module, "MAX_CAPTURE_QUERIES", 1)
     with pytest.raises(ArtifactError, match="projection_query_limit"):
         cohort(capture)
-    with capture.db.engine.connect() as connection:
+    with owned_connect(capture.db.engine) as connection:
         assert connection.exec_driver_sql("PRAGMA query_only").scalar_one() == 0
 
 
@@ -141,7 +142,7 @@ def test_oversized_dynamic_source_cell_refuses_before_parser(capture, task, monk
     import agent_rewind.projection_source as module
 
     capture.run(task)
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         connection.execute(text("UPDATE records SET created=:value"), {"value": "x" * 4096})
     monkeypatch.setattr(module, "MAX_RECORD_BYTES", 2048)
     monkeypatch.setattr(
@@ -191,7 +192,7 @@ def test_nul_suffix_identity_refuses_before_identity_materialization(capture, ta
     from sqlalchemy import event
 
     capture.run(task)
-    with capture.db.engine.connect() as connection:
+    with owned_connect(capture.db.engine) as connection:
         connection.exec_driver_sql("PRAGMA foreign_keys=OFF")
         value = "e" * 32 + "\0" + "x" * 4096
         if target == "resource_scopes":
@@ -272,21 +273,51 @@ def test_decoded_capture_counts_toward_combined_metadata_cap(capture, task, monk
 def test_read_snapshot_refuses_and_discards_sqlite_autocommit(capture, mode):
     import sqlite3
 
-    with capture.db.engine.connect() as connection:
+    from sqlalchemy import create_engine
+
+    # PEP249 False immediately opens a native transaction, so owned pool return
+    # rejects it earlier. This one legacy control still reaches the snapshot
+    # reader's exact mode check; the other two modes use the owned Database.
+    legacy = create_engine(capture.db.engine.url) if mode == "driver_autocommit_false" else None
+    native_engine = capture.db.engine if legacy is None else legacy
+    try:
+        with owned_connect(native_engine) as connection:
+            raw = connection.connection.driver_connection
+            if mode.startswith("driver_autocommit"):
+                if not hasattr(raw, "autocommit"):
+                    pytest.skip("sqlite3 driver autocommit is a Python3.12 boundary")
+                raw.autocommit = mode == "driver_autocommit"
+            else:
+                raw.isolation_level = None
+        with (
+            pytest.raises(ArtifactError, match="projection_transaction_required"),
+            readonly_source(native_engine, QueryBudget()),
+        ):
+            pytest.fail("unsupported transaction reached cohort reader")
+        with pytest.raises(sqlite3.ProgrammingError):
+            raw.execute("SELECT 1")
+        with owned_connect(native_engine) as connection:
+            assert connection.exec_driver_sql("PRAGMA query_only").scalar_one() == 0
+            assert not connection.connection.driver_connection.in_transaction
+    finally:
+        if legacy is not None:
+            legacy.dispose()
+
+
+def test_owned_pep249_mode_is_quarantined_before_snapshot(capture):
+    import sqlite3
+
+    from agent_rewind.sqlite_ownership import SQLiteOwnershipError
+
+    with pytest.raises(SQLiteOwnershipError), owned_connect(capture.db.engine) as connection:
         raw = connection.connection.driver_connection
-        if mode.startswith("driver_autocommit"):
-            if not hasattr(raw, "autocommit"):
-                pytest.skip("sqlite3 driver autocommit is a Python3.12 boundary")
-            raw.autocommit = mode == "driver_autocommit"
-        else:
-            raw.isolation_level = None
-    with (
-        pytest.raises(ArtifactError, match="projection_transaction_required"),
-        readonly_source(capture.db.engine, QueryBudget()),
-    ):
-        pytest.fail("unsupported transaction reached cohort reader")
+        if not hasattr(raw, "autocommit"):
+            pytest.skip("sqlite3 driver autocommit is a Python3.12 boundary")
+        raw.autocommit = False
+    assert capture.db.engine.pool.checkedout() == 0
     with pytest.raises(sqlite3.ProgrammingError):
         raw.execute("SELECT 1")
-    with capture.db.engine.connect() as connection:
-        assert connection.exec_driver_sql("PRAGMA query_only").scalar_one() == 0
+    with owned_connect(capture.db.engine) as connection:
+        assert connection.connection.driver_connection is not raw
         assert not connection.connection.driver_connection.in_transaction
+        assert connection.exec_driver_sql("PRAGMA query_only").scalar_one() == 0

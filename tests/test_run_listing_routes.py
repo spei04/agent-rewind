@@ -22,6 +22,7 @@ from agent_rewind.api import create_app
 from agent_rewind.migrations.compatibility import CompatibilityResult, runtime_schema_compatibility
 from agent_rewind.migrations.projection_service import backfill_run_index, initialize_projection
 from agent_rewind.request_identity import SessionIdentity, VerifiedPrincipal, encode_v2_session
+from agent_rewind.sqlite_ownership import owned_connect
 
 legacy = projection_tests.legacy
 OTHER = "8" * 32
@@ -624,7 +625,7 @@ def test_final_sql_phase_exhaustion_is_fixed_503_without_partial_response(
     assert response.json()["retryable"] is True
     assert "items" not in response.json() and "event_head" not in response.json()
     assert reader.engine.pool.checkedout() == 0
-    with reader.engine.connect() as connection:
+    with owned_connect(reader.engine) as connection:
         assert connection.exec_driver_sql("PRAGMA query_only").scalar_one() == 0
         assert not connection.connection.driver_connection.in_transaction
     # The next independent read remains usable after the failed final phase.

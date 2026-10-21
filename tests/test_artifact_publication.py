@@ -4,12 +4,13 @@ from dataclasses import replace
 
 import pytest
 from publication_fixture import CONTEXT, JOB, make_capture
-from sqlalchemy import text
+from sqlalchemy import create_engine, text
 
 from agent_rewind.artifact_metadata import ArtifactError
 from agent_rewind.artifact_publication import UnavailableLiveWriter
 from agent_rewind.models import Action, Intervention
 from agent_rewind.scoped_lineage import ResourceNotFound
+from agent_rewind.sqlite_ownership import owned_begin, owned_connect
 
 
 @pytest.fixture
@@ -20,7 +21,7 @@ def capture(settings):
 
 
 def counts(capture):
-    with capture.db.engine.connect() as c:
+    with owned_connect(capture.db.engine) as c:
         return tuple(
             c.exec_driver_sql("SELECT count(*) FROM " + name).scalar_one()
             for name in ("artifact_objects", "artifact_refs", "publication_roots")
@@ -134,7 +135,7 @@ def test_lost_authority_after_storage_has_no_root(capture, task, monkeypatch, mu
         result = put(obj, content)
         seen += 1
         if seen == len(intent.objects):
-            with capture.db.engine.begin() as c:
+            with owned_begin(capture.db.engine) as c:
                 query = {
                     "generation": "UPDATE publication_fences SET generation=2",
                     "cancel": "UPDATE jobs SET cancel=true",
@@ -155,7 +156,7 @@ def test_exact_committed_reentry_after_lease_loss(capture, task):
     run = capture.run(task)
     intent = capture.intent(run)
     capture.publisher.publish(intent, capture.source)
-    with capture.db.engine.begin() as c:
+    with owned_begin(capture.db.engine) as c:
         c.execute(text("UPDATE jobs SET status='complete',lease_until=1 WHERE id=:id"), {"id": JOB})
     assert (
         capture.publisher.publish(intent, lambda *_: pytest.fail("already committed"))
@@ -224,7 +225,7 @@ def test_committed_sql_without_journal_ack_reconciles_without_live_lease(
     with pytest.raises(ArtifactError, match="journal_unavailable"):
         capture.publisher.publish(intent, capture.source)
     assert counts(capture)[2] == 1
-    with capture.db.engine.begin() as c:
+    with owned_begin(capture.db.engine) as c:
         c.exec_driver_sql("UPDATE jobs SET status='complete',lease_until=1")
     monkeypatch.setattr(JournalSession, "append", real)
     recovered = capture.publisher.load_intent(CONTEXT, intent.publication_id)
@@ -249,7 +250,7 @@ def test_reader_rechecks_earlier_child_ref_after_later_io(capture, task, monkeyp
     def loader(obj):
         result = original(obj)
         if obj.digest == evaluation:
-            with capture.db.engine.begin() as c:
+            with owned_begin(capture.db.engine) as c:
                 c.execute(
                     text("DELETE FROM artifact_refs WHERE role='task' AND artifact_id=:id"),
                     {"id": victim.id},
@@ -266,7 +267,7 @@ def test_reader_checks_descriptor_bound_before_backend(capture, task, monkeypatc
     intent = capture.intent(run)
     capture.publisher.publish(intent, capture.source)
     target = next(ref for ref in intent.refs if ref.role == "task")
-    with capture.db.engine.begin() as c:
+    with owned_begin(capture.db.engine) as c:
         c.execute(
             text("UPDATE artifact_objects SET byte_count=67108865 WHERE digest=:digest"),
             {"digest": target.digest},
@@ -349,7 +350,7 @@ def test_process_death_reloads_exact_intent_and_resolves_sql(capture, task, poin
     recovered = capture.publisher.load_intent(CONTEXT, intent.publication_id)
     assert recovered == intent
     if point == "after_commit":
-        with capture.db.engine.begin() as c:
+        with owned_begin(capture.db.engine) as c:
             c.exec_driver_sql("UPDATE jobs SET status='complete',lease_until=1")
 
         def source(*_):
@@ -367,7 +368,7 @@ def test_oversized_sql_event_cells_refuse_before_materialization(capture, task, 
     from sqlalchemy import event
 
     run = capture.run(task)
-    with capture.db.engine.begin() as c:
+    with owned_begin(capture.db.engine) as c:
         c.execute(text("UPDATE events SET " + field + "=:value"), {"value": "x" * 10000})
     fetched = []
 
@@ -389,19 +390,26 @@ def test_oversized_sql_event_cells_refuse_before_materialization(capture, task, 
 def test_sqlite_effective_autocommit_refuses_before_sql_mutation(capture, task, monkeypatch, mode):
     run = capture.run(task)
     intent = capture.intent(run)
-    if mode == "engine_option":
-        capture.publisher.engine = capture.db.engine.execution_options(isolation_level="AUTOCOMMIT")
-    else:
-        with capture.db.engine.connect() as connection:
-            connection.connection.driver_connection.isolation_level = None
-    monkeypatch.setattr(
-        capture.publisher.writer,
-        "lock_and_check",
-        lambda *_: pytest.fail("autocommit reached writer"),
-    )
-    with pytest.raises(ArtifactError, match="publication_transaction_required"):
-        capture.publisher.publish(intent, capture.source)
-    assert counts(capture) == (0, 0, 0)
+    # A registered-pool OptionEngine is intentionally not certified. Keep this
+    # legacy control focused on the publisher's native transaction-mode guard.
+    legacy = create_engine(capture.db.engine.url) if mode == "engine_option" else None
+    try:
+        if mode == "engine_option":
+            capture.publisher.engine = legacy.execution_options(isolation_level="AUTOCOMMIT")
+        else:
+            with owned_connect(capture.db.engine) as connection:
+                connection.connection.driver_connection.isolation_level = None
+        monkeypatch.setattr(
+            capture.publisher.writer,
+            "lock_and_check",
+            lambda *_: pytest.fail("autocommit reached writer"),
+        )
+        with pytest.raises(ArtifactError, match="publication_transaction_required"):
+            capture.publisher.publish(intent, capture.source)
+        assert counts(capture) == (0, 0, 0)
+    finally:
+        if legacy is not None:
+            legacy.dispose()
 
 
 def test_failed_ancestor_cannot_publish_branch_even_if_branchable(capture, task):
@@ -422,7 +430,7 @@ def test_failed_ancestor_cannot_publish_branch_even_if_branchable(capture, task)
         ),
     )
     before = counts(capture)
-    with capture.db.engine.begin() as connection:
+    with owned_begin(capture.db.engine) as connection:
         row = capture.db.get(parent)
         connection.execute(
             update(records)
