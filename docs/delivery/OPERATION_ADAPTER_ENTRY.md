@@ -319,6 +319,14 @@ Ordinary mutation callers preserve their existing safe boundary and never
 return success or claim rollback after commit acknowledgment. The wrappers
 must not invent a retryable error to hide that uncertainty.
 
+The owned-engine requirement belongs at the future OperationService entry,
+before its first SQLite acquisition, including the separate schema compatibility
+probe. Its low-level component helpers may retain explicitly untracked legacy
+and test paths; those paths do not certify ownership. Optional lease selection
+returns no lease only for a genuinely unregistered engine. A known owned engine
+whose current pool loses provenance must refuse before effects and must never
+fall back to the untracked path. PostgreSQL retains its existing behavior.
+
 Failed nested lease acquisition is different: it returns no lease or ownership
 receipt for the outer Connection and must perform no outer cleanup. The
 already active owner retains its original receipt. A successfully acquired
@@ -793,3 +801,42 @@ cleanup and cancellation lock/disclosure choices. A producer/schema expansion,
 unmeetable measured limit or changed contract is a concrete review finding, not
 implicit authority to broaden P1. All task statuses, estimates, outer edges,
 accepted histories and external gates remain unchanged.
+
+## Independent service composition review — 2026-10-21
+
+A independently reviewed immutable component 97ef62c against entry 579c54b.
+The lead accepted the following constraints for the existing service scope;
+this review starts no service implementation. Caller integration and separately
+reviewed factory activation remain prerequisites.
+
+Cancellation must retain an immutable association receipt independently of the
+fresh 16-field job validation. Preserve the original operation's 14 fields,
+job id/kind/payload/actor/payload_version/budget, config digest/reference and
+seven-field config descriptor/reference. Legitimate worker changes to status,
+reserved amount, result and lease must not overwrite that association or make
+post-commit disclosure fail merely because state advanced. Validate each fresh
+job row and capture the mutation's response. GET continues to require its full
+16-field job receipt. The existing strict repeated ReceiptBook job comparison
+cannot be reused unchanged across cancellation preflight and disclosure.
+
+A PostgreSQL SELECT with two native timeout SETs consumes three charged
+statements. Per-node reads therefore cannot support 256 visited nodes inside
+the existing 512-statement ceiling, even before authority and setup work.
+Use bounded set-oriented frontier/cache reads with the shared visit, edge and
+byte limits and original receipts. An outer counter or a wider ceiling does
+not solve this requirement.
+
+The final relational comparison needs a narrow source-domain bridge: the
+component ReceiptBook's operation/job/config/result domains and the older
+13-column job comparison do not cover the complete service. Preserve native
+types and all 16 job fields; include by-job discovery and config/result candidate
+cardinality in the same final statement within 259 identities, 4 MiB retained
+receipts and 64 bound parameters. Separate successful comparisons do not prove
+one coherent final observation.
+
+Cross-row validation must explicitly enforce operation payload_version=2,
+config digest/reference equality and the original creator's actor identity.
+The current viewer's identity is authorization context, not a replacement for
+the creator. Bounded cell and descriptor primitives alone do not establish
+these associations. These constraints add no new producer, outer dependency,
+resource authority or wider runtime support.
