@@ -424,8 +424,8 @@ def test_postgres_post_ack_immutable_association_change_is_uncertain(
                 )
             else:
                 connection.execute(
-                    text("UPDATE operations SET client_operation_id='changed' WHERE id=:id"),
-                    {"id": OPERATION},
+                    text("UPDATE operations SET client_operation_id=:value WHERE id=:id"),
+                    {"id": OPERATION, "value": "e" * 32},
                 )
 
     before_disclosure(f, monkeypatch, mutate)
