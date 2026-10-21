@@ -107,12 +107,15 @@ atomic issuance transaction; service keys cannot administer keys.
 
 AR-006-B and AR-008-A/B retain later v1/replay integration; AR-010-B validates
 the new-job frozen configuration/generation before dispatch. Work creation
-stays behind a required unavailable adapter until those producers are accepted.
+stays behind a required unavailable adapter until those producers are accepted;
+its refusal precedes readiness probes, storage and enqueue.
 AR-027-B/029-B/032-B own their later debugger/export consumers. AR-012-B must
 verify full CT-M1-007/008/009 behavior; existing-route subset evidence alone
 cannot satisfy those cases. Customer-ready schema and live publication remain
-separately gated. This sequencing clarification retains the original contract
-requirements and API version.
+separately gated. AR-007-C/P1 supplies unwired identity/authority helpers and the shared verified
+reader; P2 wires the complete existing-route boundary only after accepted merged
+P1. Aggregate completion waits for P2/full current-route evidence. This
+sequencing clarification retains the original contract requirements and API version.
 
 ## Admission, retry identity and worker payload
 

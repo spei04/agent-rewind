@@ -14,20 +14,23 @@ The new direct AR-009-B edge records an actual consumed interface. No reverse
 dependency on future route or admission producers is introduced.
 
 C owns implementation, A reviews authentication/security/read behavior,
-B reviews transactions, and the lead integrates. Use one coherent preparatory
-PR with four reviewable commits:
+B reviews transactions, and the lead integrates. [Issue #75](https://github.com/spei04/agent-rewind/issues/75)
+tracks aggregate AR-007-C. The user requested smaller PRs; use two independently
+reviewable delivery packages with their own cards in the execution backlog:
 
-1. Issuer-bound v2 identity/session and fresh default/named-project authority.
-2. Existing data-route readers/renderers using scoped verified refs/graphs.
-3. Atomic cancel/key actions and the required unavailable work-admission adapter.
-4. Exhaustive route, compatibility and real PostgreSQL race/rollback tests.
+| Package | Delivery boundary | Effort and prerequisite |
+| --- | --- | --- |
+| AR-007-C/P1 | Strict v2 codec/identity helpers, fresh project authority/typed denial, shared journal-free verified reader with unique root and final compound recheck; existing RunPublisher.read delegates to it. Auth/session issuance, routes, UI, mutations and admission stay unchanged. | 2 days, range 2–3; inherits Verified AR-007-B/011-B/009-B and C04/C05. |
+| AR-007-C/P2 | Wire Auth/v2 issuance, all existing routes/renderers/UI, atomic cancel/key actions, unavailable admission and the full route/PostgreSQL matrix. | 4 days, range 4–7; starts only after independently accepted, merged P1. |
 
-Estimate: **6 BE engineering days, range 6–10, medium-low confidence**,
-replacing the original two-day estimate for the same obligations. Reforecast
-at the first immutable identity/reader handoff, about 1.5–2 engineering days:
-renderer compatibility and transaction coupling are the main uncertainty.
-These commits are review checkpoints, not separate activation gates or a
-calendar commitment. Do not mark an incomplete route subset Verified.
+Aggregate estimate remains **6 BE engineering days, range 6–10,
+medium-low confidence**. Each package needs exact-source review, matching
+checks and accepted merged-source evidence. P1 can be accepted independently
+without changing existing HTTP behavior; aggregate AR-007-C stays unverified
+until P2 and the complete current-route/transaction matrix pass. Both remain
+migration-only, with no customer/live-path activation. Reforecast after the
+first immutable identity/reader handoff at about 1.5–2 engineering days;
+this is not a calendar commitment or a second charge for the same work.
 
 No new route, schema/profile activation, session infrastructure, IdP deployment,
 historical artifact adoption, paid call, data access or research scope is added.
@@ -77,7 +80,7 @@ changed route must receive an explicit disposition before this PR is accepted.
 | GET /api/runs, /api/runs/{run_id}, /api/runs/{run_id}/files/{step} | Fresh default-project authority, scoped repository/lineage and accepted published graph/ref reader; verify owner/role/digest and reauthorize before return. |
 | GET /api/compare | Authorize both roots and all nested refs in the same project. Replace raw compare/artifact reads with a bounded verified adapter. |
 | GET /api/studies, /api/studies/{study_id}, /api/jobs | Scope list/detail and nested run/result references before body access; use verified refs or safely refuse unsupported/unpublished evidence. No historical raw-hash fallback after a preliminary scope check. |
-| POST /api/runs, /api/branches, /api/studies, /api/investigations | Fresh default-project action authority and existing readiness policy; required admission adapter is unavailable in this slice. Refuse before artifact upload, credential creation, job/scope/audit writes or provider access. No raw enqueue fallback. |
+| POST /api/runs, /api/branches, /api/studies, /api/investigations | Fresh default-project action authority, then refuse the unavailable required admission adapter before readiness probes or storage. When a future adapter is available, existing readiness policy still applies before admission. Refuse before artifact upload, credential creation, job/scope/audit writes or provider access. No raw enqueue fallback. |
 | POST /api/jobs/{job_id}/cancel | Scoped fresh action check and job state/intent/audit in one transaction; preserve terminal outcomes and use the common project-before-job hierarchy. No artifact-readiness dependency. |
 | POST /api/keys; DELETE /api/keys/{key_id} | Human-maintainer authority and key/scope/membership/audit atomicity with fresh transaction-bound reauthorization; no service-key escalation. |
 | GET /api/schema | Existing default-project-scoped schema access; no broad /api/schema or prefix exemption from the schema guard. |
@@ -108,7 +111,7 @@ Recheck membership/key revocation at the documented effect boundary; prove
 actual concurrent mutation behavior with PostgreSQL rather than only mocks.
 No storage/network call may run while retaining the transaction.
 
-The required admission adapter has no permissive default. AR-008-A owns
+The required admission adapter has no permissive default. Check its availability after fresh authorization and before any readiness probe, storage call or enqueue; prove zero calls at those boundaries while it is unavailable. AR-008-A owns
 canonical identity, original-operation recovery, scoped atomic publication and
 frozen execution configuration; AR-008-B owns route integration; AR-010-B owns
 generation/config/cancel validation before paid dispatch. Those prerequisites
@@ -148,13 +151,14 @@ objects owned by different projects. Verify safe errors with secret canaries.
 Use real PostgreSQL for revocation before protected return, role/key mutation
 races, transaction rollback after each key/cancel stage and terminal cancel
 preservation. Test unauthorized requests before expensive probes and all
-unavailable-adapter paths before any persistent write/provider access.
+unavailable-adapter paths before readiness probes, storage, enqueue or any
+persistent write/provider access.
 Verify /api/me and logout after membership revocation, exact Origin/CSRF,
 DB-unavailable refusal and explicit-role UI behavior. Keep the production
 schema-guard negative matrix unchanged.
 
 Independent A/B review, exact-head hosted checks, preserved legacy-compatible
 shapes and documented future obligations are required. The lead records
-Verified only for this coherent preparatory task. M1/customer activation,
+Verified for the aggregate only after accepted merged P1 and P2 and the complete current-route matrix. M1/customer activation,
 live publication, production readiness and external funding/data gates remain
 open.
