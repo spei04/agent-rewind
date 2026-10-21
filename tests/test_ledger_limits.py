@@ -263,23 +263,12 @@ def test_job_account_cannot_expand_the_original_gross_budget():
         validate_ledger_chain(cursors, receipt)
 
 
-@pytest.mark.parametrize(
-    "variant", ["unknown-job", "wrong-project", "wrong-destination", "other-source"]
-)
+@pytest.mark.parametrize("variant", ["unknown-job", "wrong-destination", "other-source"])
 def test_complete_opening_must_bind_the_original_manifest_and_job_cohort(variant):
     raw, cursor, opening = initial_bundle()
     if variant == "unknown-job":
         opening["jobs"][-1]["job_id"] = identifier(9999)
         opening["jobs_digest"] = digest(opening["jobs"])
-    elif variant == "wrong-project":
-        raw["accounts"][-1]["project_id"] = identifier(777)
-        # Keep both cursors structurally valid while changing the initial scope binding.
-        raw["accounts"][1]["project_id"] = identifier(777)
-        raw["accounts"][1]["scope_id"] = identifier(777)
-        raw["accounts"][2]["project_id"] = identifier(777)
-        raw["opening_accounts"]["projects"][0]["project_id"] = identifier(777)
-        cursor = cursor_for(raw, opening=opening)
-        opening["manifest_digest"] = digest(raw)
     elif variant == "wrong-destination":
         opening["project_totals"][0]["account_id"] = identifier(777)
     else:
@@ -288,6 +277,33 @@ def test_complete_opening_must_bind_the_original_manifest_and_job_cohort(variant
     receipt = validate_opening_cursor(opening)
     with pytest.raises(MigrationRefused, match="^ledger_progress_invalid$"):
         validate_ledger_chain((parsed,), receipt)
+
+
+@pytest.mark.parametrize("swap_projects", [False, True])
+def test_job_project_binding_preserves_valid_opening_destinations(swap_projects):
+    raw = manifest(projects=2, jobs=2)
+    opening = opening_for(raw, amounts=[120_000, 120_000])
+    cursors, receipt = values([raw], opening)
+    assert validate_ledger_chain(cursors, receipt).imported_opening_microusd == 240_000
+    if not swap_projects:
+        return
+
+    destinations = deepcopy(raw["opening_accounts"])
+    original_opening = deepcopy(opening)
+    jobs = [row for row in raw["accounts"] if row["scope"] == "job"]
+    jobs[0]["project_id"], jobs[1]["project_id"] = jobs[1]["project_id"], jobs[0]["project_id"]
+    opening["manifest_digest"] = digest(raw)
+    cursors, receipt = values([raw], opening)
+
+    # Destination coverage and original receipts stay valid; only job ownership conflicts.
+    assert raw["opening_accounts"] == destinations
+    assert opening == {**original_opening, "manifest_digest": digest(raw)}
+    assert [
+        (row.project_id, row.account_id) for row in cursors[0].manifest.opening_accounts.projects
+    ] == [(row.project_id, row.account_id) for row in receipt.project_totals]
+    assert {row.job_id for row in receipt.jobs} == {row["job_id"] for row in jobs}
+    with pytest.raises(MigrationRefused, match="^ledger_progress_invalid$"):
+        validate_ledger_chain(cursors, receipt)
 
 
 def test_selected_initial_import_period_must_contain_the_persisted_observation():
