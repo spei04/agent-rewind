@@ -22,6 +22,7 @@ OPERATIONS = (
     (PREFIX + "/operations/{operation_id}/cancel", "post"),
 )
 ANNOTATIONS = {"title", "description", "summary"}
+HTTP_METHODS = {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
 BASELINE_SOURCE = "d70044494322f0135f36c4ff4778ae7445a4d24d"
 # Exact prior metadata, separate from the frozen contract for the three new routes.
 BASELINE_PATH_DIGESTS = {
@@ -161,10 +162,17 @@ def test_existing_openapi_metadata_is_preserved_exactly(documents):
     actual, _ = documents
     preserved = deepcopy(actual)
     for path, method in OPERATIONS:
-        if path in preserved["paths"]:
-            preserved["paths"][path].pop(method, None)
-            if not preserved["paths"][path]:
-                del preserved["paths"][path]
+        if path not in preserved["paths"]:
+            continue
+        path_item = preserved["paths"][path]
+        if path in BASELINE_PATH_DIGESTS:
+            path_item.pop(method, None)
+        else:
+            assert path_item.keys() & HTTP_METHODS == {method}, path
+            # Parameters are compared by effective operation semantics above.
+            # Reject other path-level semantics rather than silently erasing them.
+            assert path_item.keys() <= {method, "parameters", "summary", "description"}, path
+            del preserved["paths"][path]
     components = preserved["components"]
     assert set(components) <= {"schemas", "securitySchemes"}
     assert BASELINE_SCHEMA_DIGESTS.keys() <= components["schemas"].keys(), BASELINE_SOURCE
