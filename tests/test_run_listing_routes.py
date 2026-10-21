@@ -350,3 +350,240 @@ def test_registered_operation_ids_and_required_nullable_response_fields(http_lis
     page = schema["components"]["schemas"]["RunPage"]
     assert set(page["required"]) == {"items", "next_cursor"}
     assert page["additionalProperties"] is False
+
+
+@pytest.mark.parametrize("suffix", ["", "/" + RUN1])
+def test_success_is_sql_only_without_legacy_audit_or_work(http_listing, monkeypatch, suffix):
+    from sqlalchemy import event
+
+    from agent_rewind import engine as run_engine
+
+    app, client, engine = http_listing
+    forbidden = Mock(side_effect=AssertionError("unexpected customer side effect"))
+    monkeypatch.setattr(run_engine, "read_events", forbidden)
+    for owner, names in [
+        (app.state.db, ("enqueue", "audit", "get", "list_records")),
+        (app.state.views, ("run", "runs", "files", "compare", "jobs")),
+        (app.state.actions, ("record_run_read",)),
+        (app.state.reader.repositories, ("artifact_loader",)),
+        (app.state.admission, ("require_available", "admit")),
+        (app.state.readiness, ("check",)),
+    ]:
+        for name in names:
+            monkeypatch.setattr(owner, name, forbidden)
+    with engine.connect() as connection:
+        before = (
+            connection.execute(text("SELECT count(*) FROM audit")).scalar_one(),
+            connection.execute(text("SELECT run_sequence FROM projects ORDER BY id")).all(),
+        )
+    statements = []
+
+    def observe(connection, cursor, statement, parameters, context, many):
+        statements.append(statement)
+
+    event.listen(app.state.db.engine, "before_cursor_execute", observe)
+    try:
+        response = client.get(BASE + suffix, headers=headers(app))
+        assert response.status_code == 200, response.text
+    finally:
+        event.remove(app.state.db.engine, "before_cursor_execute", observe)
+    assert statements and all(s.lstrip().upper().startswith(("SELECT", "WITH")) for s in statements)
+    forbidden.assert_not_called()
+    with engine.connect() as connection:
+        after = (
+            connection.execute(text("SELECT count(*) FROM audit")).scalar_one(),
+            connection.execute(text("SELECT run_sequence FROM projects ORDER BY id")).all(),
+        )
+    assert before == after
+
+
+@pytest.mark.parametrize("suffix", ["", "/" + RUN1])
+@pytest.mark.parametrize("change", ["membership", "source"])
+def test_final_original_receipts_and_authority_are_not_bypassed_at_http(
+    http_listing, monkeypatch, suffix, change
+):
+    app, client, engine = http_listing
+    original = app.state.run_listing._finish
+
+    def altered(principal, context, entries, sources, work):
+        with engine.begin() as connection:
+            if change == "membership":
+                connection.execute(
+                    text(
+                        "UPDATE project_memberships SET revoked_at='2026-01-01' "
+                        "WHERE project_id=:p AND principal_id=:id"
+                    ),
+                    {"p": PROJECT, "id": PRINCIPAL.principal_id},
+                )
+            else:
+                connection.execute(
+                    text("UPDATE records SET created=created+1 WHERE id=:id"), {"id": RUN1}
+                )
+        return original(principal, context, entries, sources, work)
+
+    monkeypatch.setattr(app.state.run_listing, "_finish", altered)
+    response = client.get(BASE + suffix, headers=headers(app))
+    error(
+        response,
+        404 if change == "membership" else 503,
+        "not_found" if change == "membership" else "dependency_unavailable",
+    )
+    assert "items" not in response.json() and "event_head" not in response.json()
+
+
+def test_old_bootstrap_and_mixed_credentials_do_not_bypass_new_routes(http_listing):
+    app, client, _ = http_listing
+    old = app.state.auth.cipher.encrypt(
+        json.dumps({"sub": "route-human", "role": "administrator", "csrf": CSRF}).encode()
+    ).decode()
+    credentials = [
+        {"Cookie": "rewind_session=" + old},
+        {"Authorization": "Bearer " + app.state.auth.settings.bootstrap_key.get_secret_value()},
+        {**headers(app), "Authorization": "Bearer invalid-service-key"},
+    ]
+    for auth in credentials:
+        for path in (BASE + "?cursor=", BASE + "/" + RUN1):
+            error(client.get(path, headers=auth), 401, "unauthenticated")
+
+
+def _contract_shape(value, document):
+    if isinstance(value, list):
+        return [_contract_shape(item, document) for item in value]
+    if not isinstance(value, dict):
+        return value
+    if "$ref" in value:
+        target = document
+        for part in value["$ref"].removeprefix("#/").split("/"):
+            target = target[part]
+        return _contract_shape(target, document)
+    result = {
+        key: _contract_shape(item, document)
+        for key, item in value.items()
+        if key not in {"title", "description", "summary"}
+    }
+    for key in ("required", "enum"):
+        if isinstance(result.get(key), list):
+            result[key] = sorted(result[key])
+    return result
+
+
+def test_two_operations_preserve_frozen_response_headers_and_parameter_schemas(http_listing):
+    from pathlib import Path
+
+    app, _, _ = http_listing
+    actual = app.openapi()
+    frozen = json.loads(
+        (Path(__file__).parents[1] / "contracts/proposals/m1.openapi.json").read_text()
+    )
+    path = "/api/v1/projects/{project_id}/runs"
+    for target in (path, path + "/{run_id}"):
+        operation = actual["paths"][target]["get"]
+        expected = frozen["paths"][target]["get"]
+        assert operation["operationId"] == expected["operationId"]
+        assert _contract_shape(operation["responses"], actual) == _contract_shape(
+            expected["responses"], frozen
+        )
+        expected_parameters = [
+            *frozen["paths"][target].get("parameters", []),
+            *expected.get("parameters", []),
+        ]
+        actual_parameters = operation["parameters"]
+        identities = [(item["in"], item["name"]) for item in actual_parameters]
+        assert len(identities) == len(set(identities))
+
+        # OpenAPI defaults omitted optional query required flags to false.
+        def parameters(items, document):
+            return {
+                (item["in"], item["name"]): {
+                    "required": item.get("required", False),
+                    "schema": _contract_shape(item["schema"], document),
+                }
+                for item in items
+            }
+
+        assert parameters(actual_parameters, actual) == parameters(expected_parameters, frozen)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/api/v1/projects/not-a-project/runs",
+        "/api/v1/projects/not-a-project/runs/not-a-run",
+        BASE + "/not-a-run",
+    ],
+)
+def test_path_schema_patterns_do_not_validate_before_auth_and_visibility(http_listing, path):
+    app, client, _ = http_listing
+    error(client.get(path), 401, "unauthenticated")
+    error(client.get(path, headers=headers(app)), 404, "not_found")
+
+
+def test_populated_projects_keep_lists_and_details_disjoint(http_listing):
+    from sqlalchemy import insert
+
+    from agent_rewind.database import jobs, records
+
+    app, client, engine = http_listing
+    other_ids = ("4" * 32, "5" * 32)
+    with engine.begin() as connection:
+        original = json.loads(
+            connection.execute(
+                text("SELECT CAST(data AS TEXT) FROM records WHERE id=:id"), {"id": RUN1}
+            ).scalar_one()
+        )
+        original_job = dict(
+            connection.execute(text("SELECT * FROM jobs WHERE id=:id"), {"id": original["job_id"]})
+            .mappings()
+            .one()
+        )
+        for sequence, run_id in enumerate(other_ids, 1):
+            job_id = str(sequence + 5) * 32
+            connection.execute(
+                insert(jobs).values(
+                    **{
+                        **original_job,
+                        "id": job_id,
+                        "kind": "run",
+                        "status": "succeeded",
+                        "cancel": False,
+                        "owner": None,
+                        "lease_until": None,
+                    }
+                )
+            )
+            connection.execute(
+                insert(records).values(
+                    id=run_id,
+                    kind="run",
+                    created=1700000000.125,
+                    data={**original, "job_id": job_id, "parent_id": None, "status": "complete"},
+                )
+            )
+            for kind, identity in (("run", run_id), ("job", job_id)):
+                connection.execute(
+                    text("INSERT INTO resource_scopes VALUES(:kind,:id,:project)"),
+                    {"kind": kind, "id": identity, "project": OTHER},
+                )
+            connection.execute(
+                text(
+                    "INSERT INTO run_index "
+                    "SELECT :id,:project,'run',created_at,status,branchable,NULL,event_head,"
+                    ":seq,projection_reason FROM run_index WHERE run_id=:original"
+                ),
+                {"id": run_id, "project": OTHER, "seq": sequence, "original": RUN1},
+            )
+        connection.execute(text("UPDATE projects SET run_sequence=2 WHERE id=:id"), {"id": OTHER})
+        assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
+    for project, expected in ((PROJECT, [RUN2, RUN1]), (OTHER, list(reversed(other_ids)))):
+        base = f"/api/v1/projects/{project}/runs"
+        response = client.get(base, headers=headers(app))
+        assert response.status_code == 200, response.text
+        page = response.json()
+        assert [item["id"] for item in page["items"]] == expected
+        assert page["next_cursor"] is None
+        for item in page["items"]:
+            assert set(item) == FIELDS and item["project_id"] == project
+            detail = client.get(base + "/" + item["id"], headers=headers(app))
+            assert detail.status_code == 200 and detail.json() == item
+        foreign = other_ids[0] if project == PROJECT else RUN1
+        error(client.get(base + "/" + foreign, headers=headers(app)), 404, "not_found")

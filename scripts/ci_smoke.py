@@ -84,13 +84,18 @@ def projection_smoke(engine: Engine) -> None:
 def run_listing_smoke(engine: Engine) -> None:
     import base64
     from datetime import UTC, datetime
+    from pathlib import Path
 
     from cryptography.fernet import Fernet
+    from fastapi.testclient import TestClient
     from pydantic import SecretStr
+    from sqlalchemy import text
 
+    from agent_rewind.api import create_app
     from agent_rewind.config import Settings
     from agent_rewind.cursor_config import cursor_codec
-    from agent_rewind.request_identity import VerifiedPrincipal
+    from agent_rewind.migrations.compatibility import CompatibilityResult
+    from agent_rewind.request_identity import SessionIdentity, VerifiedPrincipal, encode_v2_session
     from agent_rewind.run_cursor import CursorPosition, initial_expiry
     from agent_rewind.scoped_run_listing import ScopedRunReader
 
@@ -117,6 +122,73 @@ def run_listing_smoke(engine: Engine) -> None:
         pass
     else:
         raise RuntimeError("Installed scoped detail invented an unpublished run")
+
+    # Actual installed HTTP route wiring, using only this synthetic database.
+    # First retain the real migration-only guard; successful reads below use a
+    # per-instance test substitution, not a customer-ready profile or runtime flag.
+    settings.database_url = engine.url.render_as_string(hide_password=False)
+    settings.data_dir = Path(str(engine.url.database)).parent
+    settings.oidc_issuer = "https://installed-route.invalid"
+    identity = SessionIdentity(
+        VerifiedPrincipal.oidc(settings.oidc_issuer, "installed-viewer"),
+        settings.oidc_issuer,
+        "installed-viewer",
+        "d" * 32,
+    )
+    app = create_app(settings)
+    client = TestClient(app)  # Do not start readiness or any external service.
+    original_guard = app.state.db.schema_compatibility
+    base = "/api/v1/projects/" + "9" * 32 + "/runs"
+    try:
+        response = client.get(base)
+        if response.status_code != 503 or response.json()["code"] != "schema_incompatible":
+            raise RuntimeError("Installed route bypassed the real migration-only guard")
+        with engine.begin() as connection:
+            connection.execute(
+                text("INSERT INTO project_memberships VALUES(:p,:id,'viewer',NULL,false)"),
+                {"p": "9" * 32, "id": identity.principal.principal_id},
+            )
+        app.state.db.schema_compatibility = lambda: CompatibilityResult(
+            "ready", "synthetic_installed_route_smoke"
+        )
+        cookie = {"Cookie": "rewind_session=" + encode_v2_session(app.state.auth.cipher, identity)}
+        response = client.get(base, headers=cookie)
+        if response.status_code != 200 or response.json() != {"items": [], "next_cursor": None}:
+            raise RuntimeError("Installed HTTP listing changed its exact empty response")
+        if response.headers["cache-control"] != "no-store":
+            raise RuntimeError("Installed HTTP listing lost cache protection")
+        for path, status, code in [
+            (base + "/" + "1" * 32, 404, "not_found"),
+            (base + "?cursor=", 422, "invalid_cursor"),
+        ]:
+            response = client.get(path, headers=cookie)
+            body = response.json()
+            if (
+                response.status_code != status
+                or set(body) != {"code", "message", "request_id", "retryable"}
+                or body["code"] != code
+                or response.headers["x-request-id"] != body["request_id"]
+            ):
+                raise RuntimeError("Installed HTTP read changed its fixed error envelope")
+        settings.cursor_signing_key = None
+        if client.get(base).status_code != 401:
+            raise RuntimeError("Installed missing-key error preceded credential authentication")
+        foreign = "/api/v1/projects/" + "7" * 32 + "/runs"
+        if client.get(foreign, headers=cookie).status_code != 404:
+            raise RuntimeError("Installed missing-key error preceded project visibility")
+        if client.get(base, headers=cookie).status_code != 503:
+            raise RuntimeError("Installed list ignored its missing cursor key")
+        if client.get(base + "/" + "1" * 32, headers=cookie).status_code != 404:
+            raise RuntimeError("Installed detail incorrectly required the cursor key")
+    finally:
+        app.state.db.schema_compatibility = original_guard
+        client.close()
+        app.state.db.engine.dispose()
+        with engine.begin() as connection:
+            connection.execute(
+                text("DELETE FROM project_memberships WHERE project_id=:p AND principal_id=:id"),
+                {"p": "9" * 32, "id": identity.principal.principal_id},
+            )
 
 
 def publication_smoke(engine: Engine, root: Path) -> None:

@@ -5,10 +5,11 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from threading import Lock
-from typing import Any, Literal, TypeVar
+from typing import Annotated, Any, Literal, TypeVar
 
 from anyio.to_thread import current_default_thread_limiter
 from fastapi import FastAPI, Request
+from fastapi import Path as ApiPath
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -50,6 +51,34 @@ class RunSummary(StrictModel):
 class RunPage(StrictModel):
     items: list[RunSummary] = Field(max_length=200)
     next_cursor: str | None = Field(max_length=2048)
+
+
+class RunReadError(StrictModel):
+    code: ErrorCode
+    message: str = Field(max_length=300)
+    request_id: str = Field(pattern=r"^[0-9a-f]{32}$")
+    retryable: bool
+
+
+def run_read_responses() -> dict[int | str, dict[str, Any]]:
+    """Document the existing safe boundary for only the two v1 read operations."""
+    common: dict[str, dict[str, Any]] = {
+        "X-Request-ID": {"schema": {"type": "string", "pattern": "^[0-9a-f]{32}$"}},
+        "Cache-Control": {"schema": {"type": "string", "const": "no-store"}},
+    }
+    responses: dict[int | str, dict[str, Any]] = {200: {"headers": common}}
+    for status in (401, 403, 404, 413, 422, 429, 500, 503):
+        headers = dict(common)
+        if status == 401:
+            headers["WWW-Authenticate"] = {"schema": {"type": "string", "const": "Bearer"}}
+        if status == 429:
+            headers["Retry-After"] = {"schema": {"type": "integer", "minimum": 1, "maximum": 60}}
+        responses[status] = {
+            "model": RunReadError,
+            "description": "Fixed safe error response.",
+            "headers": headers,
+        }
+    return responses
 
 
 class KeyRequest(StrictModel):
@@ -310,6 +339,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get(
         "/api/v1/projects/{project_id}/runs",
         operation_id="listProjectRuns",
+        responses=run_read_responses(),
         openapi_extra={
             "parameters": [
                 {
@@ -327,7 +357,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             ]
         },
     )
-    def list_project_runs(request: Request, project_id: str) -> RunPage:
+    def list_project_runs(
+        request: Request,
+        project_id: Annotated[str, ApiPath(json_schema_extra={"pattern": "^[0-9a-f]{32}$"})],
+    ) -> RunPage:
         context = named_read(request, project_id).context
         parameters: dict[str, str] = {}
         for name, value in request.query_params.multi_items():
@@ -361,8 +394,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             next_cursor=page.next_cursor,
         )
 
-    @app.get("/api/v1/projects/{project_id}/runs/{run_id}", operation_id="getProjectRun")
-    def get_project_run(request: Request, project_id: str, run_id: str) -> RunSummary:
+    @app.get(
+        "/api/v1/projects/{project_id}/runs/{run_id}",
+        operation_id="getProjectRun",
+        responses=run_read_responses(),
+    )
+    def get_project_run(
+        request: Request,
+        project_id: Annotated[str, ApiPath(json_schema_extra={"pattern": "^[0-9a-f]{32}$"})],
+        run_id: Annotated[str, ApiPath(json_schema_extra={"pattern": "^[0-9a-f]{32}$"})],
+    ) -> RunSummary:
         context = named_read(request, project_id).context
         if request.query_params.multi_items():
             raise Fault("invalid_request")

@@ -323,3 +323,45 @@ only the refusal marker, not candidate cells. The original BLOB continuation
 regression failed before this correction. Focused correction checks passed 108
 tests with fourteen explicit PostgreSQL skips; the three new native range cases
 remain hosted-only. Schema, profile and customer activation behavior are unchanged.
+
+
+## P2 HTTP source checkpoint
+
+After P1's accepted merge `ed0d6c4`, the two project-scoped GET operations now
+delegate to the accepted SQL reader. Actual credential authentication and named
+project visibility precede raw query validation and lazy LIST key resolution.
+The limit grammar is bounded canonical ASCII decimal from 1 through 200; omitted
+continuation limits remain absent. Unknown or duplicate parameters refuse.
+DETAIL has no cursor-key dependency. Required nulls and false booleans remain
+present in the seven-field summary and two-field page.
+
+The generated schema for these two operations preserves the frozen success and
+fixed-error schemas, response headers, path patterns and query metadata.
+Path patterns are documentation only, so malformed path values still receive
+authentication/visibility precedence. No eager request model, quota mechanism,
+legacy renderer, audit, storage, event read or admission path was added.
+
+The final HTTP regressions cover two populated projects, real v2 cookies and
+scoped service keys, no/default-to-another-project membership, pagination and
+late/rolled-back publication, final source/membership changes, exact error
+envelopes and zero side-effect sinks. The real migration-only guard remains
+unchanged and independently refuses before customer sinks. Synthetic successful
+route tests substitute only their own app instance's compatibility result.
+
+The existing installed-package helper now exercises both actual HTTP route
+registrations: real migration refusal first, then synthetic viewer empty-list
+success, missing-detail and invalid-cursor errors, and LIST-only missing-key
+failure after identity/project visibility. A second app retains the real guard.
+The helper restores the original guard and removes its synthetic membership;
+the helper regression checks unchanged membership and migration-only status.
+Local execution of the helper is source-level evidence; installed wheel/sdist
+execution remains a hosted requirement.
+
+Author checks passed 41 route cases and a separate 143-case package/API/boundary/
+schema/existing-route selection, with no skips and the existing TestClient
+warning. Configured lint/security rules, formatting and strict typing passed.
+C independently accepted the initial `af1722a` HTTP/auth/guard source after 168
+passes and a separate populated-project probe. B's metadata finding is corrected
+here and awaits exact-source final review. Matching hosted checks, installed
+package proof, accepted merge and protected-main candidate verification remain
+required; this source checkpoint grants no customer-ready activation.
