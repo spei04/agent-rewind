@@ -224,18 +224,21 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         code = codes.get(exc.code, "internal_error")
         return exception_response(request.scope, Fault(code))
 
-    @app.api_route("/readyz", methods=["GET", "HEAD"])
+    @app.get("/readyz")
+    @app.head("/readyz")
     async def ready(request: Request) -> JSONResponse:
         result = await readiness.check()
         if result != "ready":
             return error_response(request.scope, result)
         return JSONResponse({"status": "ready"})
 
-    @app.api_route("/livez", methods=["GET", "HEAD"])
+    @app.get("/livez")
+    @app.head("/livez")
     def liveness() -> dict[str, str]:
         return {"status": "live"}
 
-    @app.api_route("/healthz", methods=["GET", "HEAD"])
+    @app.get("/healthz")
+    @app.head("/healthz")
     async def health() -> JSONResponse:
         # Preserve legacy database-connectivity semantics while operators migrate
         # probes. This is neither customer admission nor artifact/sentinel readiness.

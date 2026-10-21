@@ -187,6 +187,8 @@ def test_ready_is_not_authorization_or_schema_bypass(boundary_app, monkeypatch):
     monkeypatch.setattr(boundary_app.state.readiness, "check", ready)
     with TestClient(boundary_app) as client:
         assert client.get("/readyz").json() == {"status": "ready"}
+        head = client.head("/readyz")
+        assert head.status_code == 200 and head.content == b""
         assert client.get("/api/runs").status_code == 401
         monkeypatch.setattr(
             boundary_app.state.db,

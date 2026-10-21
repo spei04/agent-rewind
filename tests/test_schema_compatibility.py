@@ -2,6 +2,7 @@
 
 import json
 import time
+import warnings
 from dataclasses import FrozenInstanceError
 
 import pytest
@@ -546,3 +547,22 @@ def test_legacy_health_checks_connectivity_without_claiming_schema_readiness(set
         assert client.head("/livez").status_code == 200
         assert client.get("/livez").json() == {"status": "live"}
     app.state.db.engine.dispose()
+
+
+def test_probe_methods_have_distinct_openapi_operation_ids(settings):
+    app = create_app(settings)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("error", message="Duplicate Operation ID")
+        schema = app.openapi()
+    methods = {"get", "head", "post", "put", "patch", "delete", "options", "trace"}
+    identifiers = [
+        operation["operationId"]
+        for path in schema["paths"].values()
+        for method, operation in path.items()
+        if method in methods
+    ]
+    assert len(identifiers) == len(set(identifiers))
+    for path in ("/readyz", "/livez", "/healthz"):
+        operations = schema["paths"][path]
+        assert set(operations) == {"get", "head"}
+        assert operations["get"]["operationId"] != operations["head"]["operationId"]
