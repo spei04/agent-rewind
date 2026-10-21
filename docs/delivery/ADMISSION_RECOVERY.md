@@ -1,11 +1,10 @@
 # Admission recovery checkpoint
 
-P3 #83 is **Implemented; verification pending** in draft PR #92. The
-[current handoff](ADMISSION_EXECUTION_PLAN.md#p3-implemented-verification-pending--2026-10-21)
-records accepted source/test design and composed local validation separately from
-early hosted recovery evidence. All 32 new PostgreSQL publication/crash cases
-still require hosted execution; accepted-merge/review-evidence fields stay null.
-Aggregate #80/parent #8 remain In progress and AR-008-B remains Not started.
+P3 #83 and aggregate #80 are **Verified/closed** after
+[accepted PR #92/main/candidate evidence](ADMISSION_EXECUTION_PLAN.md#accepted-p3-delivery--2026-10-21).
+All 33 publication and 26 recovery PostgreSQL cases executed on both supported
+Python versions; independent source/hosted review and candidate verification
+passed. Parent #8 remains open and AR-008-B remains Not started.
 
 AR-008-A/P3 now composes pure frozen restoration, SQL-only winner recovery and
 an internal new-work path requiring explicit policy, readiness, registry, journal
@@ -167,7 +166,8 @@ journal confirmation and fresh disclosure failures retain the reviewed fixed
 phase classifications. Restart after pending always reconciles SQL-only.
 
 Focused tests use actual SQLite and encrypted local storage with a synthetic
-SQL policy, stage faults and observed rollback/commit. The separate 32-case
-PostgreSQL publication suite is implemented and its test design reviewed; actual hosted process-death/concurrency execution and final-source
-package validation remain pending. Implementation is complete, but full P3
-verification and customer activation are not established.
+SQL policy, stage faults and observed rollback/commit. The final 33-case
+PostgreSQL publication suite and 26-case recovery suite passed actual local and
+hosted execution, including process-death/concurrency cases. Final-source
+installed-package validation and protected-main candidate verification passed;
+see the accepted P3 record above. Customer activation remains gated.
