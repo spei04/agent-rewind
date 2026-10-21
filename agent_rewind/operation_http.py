@@ -249,7 +249,11 @@ def register_operation_routes(app: FastAPI, *, auth: Auth, authority: RequestAut
         operation_id="getProjectOperation",
         response_model=Operation,
         responses=_responses(200),
-        openapi_extra={"security": security, "x-minimum-role": "viewer"},
+        openapi_extra={
+            "security": security,
+            "x-minimum-role": "viewer",
+            "x-csrf-required-for-cookie-auth": False,
+        },
     )
     async def get_project_operation(
         request: Request, project_id: PathIdentifier, operation_id: PathIdentifier
