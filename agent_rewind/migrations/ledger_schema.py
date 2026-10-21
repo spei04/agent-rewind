@@ -5,7 +5,6 @@ from sqlalchemy.engine import Connection
 
 from .schema import dialect
 
-LEDGER_TABLES = frozenset({"budget_accounts", "provider_calls", "budget_entries"})
 TRIGGERS = {
     "ar7_accounts_constraint": ("budget_accounts", "INSERT OR UPDATE OR DELETE"),
     "ar7_calls_constraint": ("provider_calls", "INSERT OR UPDATE OR DELETE"),
@@ -333,6 +332,16 @@ BEGIN
                 RETURN NULL;
             END IF;
             RAISE EXCEPTION 'missing ledger call' USING ERRCODE = '23514';
+        END IF;
+        IF TG_TABLE_NAME = 'resource_scopes' THEN
+            -- Deferred final-state checks must not erase an earlier identity change.
+            IF TG_OP = 'DELETE' THEN
+                RAISE EXCEPTION 'immutable ledger call scope' USING ERRCODE = '23514';
+            END IF;
+            IF ROW(OLD.resource_kind,OLD.resource_id,OLD.project_id) IS DISTINCT FROM
+               ROW(NEW.resource_kind,NEW.resource_id,NEW.project_id) THEN
+                RAISE EXCEPTION 'immutable ledger call scope' USING ERRCODE = '23514';
+            END IF;
         END IF;
         IF call_row.organization_account_id = call_row.project_account_id
            OR call_row.organization_account_id = call_row.job_account_id

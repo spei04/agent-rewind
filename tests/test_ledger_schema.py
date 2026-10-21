@@ -8,7 +8,7 @@ import pytest
 import test_migrations_postgres as migration_tests
 from sqlalchemy import create_engine, event, inspect, text
 from sqlalchemy.exc import DBAPIError, IntegrityError
-from test_admission_schema import JOB, PROJECT, predecessor
+from test_admission_schema import JOB, OTHER, PROJECT, predecessor
 from test_ownership import FRESH
 
 from agent_rewind.migrations import service
@@ -291,6 +291,127 @@ def test_postgres_valid_call_and_parent_scope_retention(ledger_db):
     with engine.connect() as connection:
         assert connection.exec_driver_sql("SELECT count(*) FROM provider_calls").scalar_one() == 1
         assert connection.exec_driver_sql("SELECT count(*) FROM budget_entries").scalar_one() == 3
+
+
+@pytest.mark.parametrize(
+    "mutation", ["delete_reinsert", "project_revert", "kind_revert", "identity_revert"]
+)
+def test_postgres_call_scope_identity_change_cannot_be_reversed(ledger_db, mutation):
+    engine, _ = ledger_db
+    if engine.dialect.name != "postgresql":
+        pytest.skip("PostgreSQL deferred OLD/NEW identity retention")
+    with engine.begin() as connection:
+        triple(connection)
+        call(connection)
+    reached_commit = False
+    with pytest.raises(IntegrityError) as failure, engine.begin() as connection:
+        if mutation == "delete_reinsert":
+            connection.execute(
+                text(
+                    "DELETE FROM resource_scopes WHERE resource_kind='provider_call' "
+                    "AND resource_id=:id"
+                ),
+                {"id": CALL},
+            )
+            connection.execute(
+                text("INSERT INTO resource_scopes VALUES('provider_call',:id,:project)"),
+                {"id": CALL, "project": PROJECT},
+            )
+        else:
+            column, changed, original = {
+                "project_revert": ("project_id", OTHER, PROJECT),
+                "kind_revert": ("resource_kind", "run", "provider_call"),
+                "identity_revert": ("resource_id", "9" * 32, CALL),
+            }[mutation]
+            connection.execute(
+                text(
+                    f"UPDATE resource_scopes SET {column}=:changed "
+                    "WHERE resource_kind='provider_call' AND resource_id=:id"
+                ),
+                {"changed": changed, "id": CALL},
+            )
+            connection.execute(
+                text(
+                    f"UPDATE resource_scopes SET {column}=:original "
+                    "WHERE resource_kind=:kind AND resource_id=:id"
+                ),
+                {
+                    "original": original,
+                    "kind": changed if column == "resource_kind" else "provider_call",
+                    "id": changed if column == "resource_id" else CALL,
+                },
+            )
+        assert connection.exec_driver_sql("SELECT count(*) FROM artifact_refs").scalar_one() == 0
+        assert connection.exec_driver_sql("SELECT count(*) FROM budget_entries").scalar_one() == 3
+        reached_commit = True
+    assert reached_commit
+    assert failure.value.orig.sqlstate == "23514"
+    assert failure.value.orig.diag.message_primary == "immutable ledger call scope"
+    with engine.connect() as connection:
+        assert (
+            connection.execute(
+                text(
+                    "SELECT project_id FROM resource_scopes WHERE resource_kind='provider_call' "
+                    "AND resource_id=:id"
+                ),
+                {"id": CALL},
+            ).scalar_one()
+            == PROJECT
+        )
+        assert connection.exec_driver_sql("SELECT count(*) FROM provider_calls").scalar_one() == 1
+        assert connection.exec_driver_sql("SELECT count(*) FROM budget_entries").scalar_one() == 3
+
+
+def test_postgres_scope_guard_preserves_noop_and_unconstrained_scopes(ledger_db):
+    engine, _ = ledger_db
+    if engine.dialect.name != "postgresql":
+        pytest.skip("PostgreSQL deferred scope identity controls")
+    orphan, unrelated = "8" * 32, "9" * 32
+    with engine.begin() as connection:
+        triple(connection)
+        call(connection)
+        for kind, identifier in (("provider_call", orphan), ("run", unrelated)):
+            connection.execute(
+                text("INSERT INTO resource_scopes VALUES(:kind,:id,:project)"),
+                {"kind": kind, "id": identifier, "project": PROJECT},
+            )
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "UPDATE resource_scopes SET project_id=project_id "
+                "WHERE resource_kind='provider_call' AND resource_id=:id"
+            ),
+            {"id": CALL},
+        )
+        for identifier in (orphan, unrelated):
+            connection.execute(
+                text("UPDATE resource_scopes SET project_id=:project WHERE resource_id=:id"),
+                {"project": OTHER, "id": identifier},
+            )
+    with engine.begin() as connection:
+        for identifier in (orphan, unrelated):
+            connection.execute(
+                text("DELETE FROM resource_scopes WHERE resource_id=:id"), {"id": identifier}
+            )
+    with engine.connect() as connection:
+        assert (
+            connection.execute(
+                text(
+                    "SELECT project_id FROM resource_scopes WHERE resource_kind='provider_call' "
+                    "AND resource_id=:id"
+                ),
+                {"id": CALL},
+            ).scalar_one()
+            == PROJECT
+        )
+        assert (
+            connection.execute(
+                text("SELECT count(*) FROM resource_scopes WHERE resource_id IN (:a,:b)"),
+                {"a": orphan, "b": unrelated},
+            ).scalar_one()
+            == 0
+        )
+        assert connection.exec_driver_sql("SELECT count(*) FROM artifact_refs").scalar_one() == 0
 
 
 def test_twenty_first_table_refuses_before_reflection(ledger_db):
