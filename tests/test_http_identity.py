@@ -4,6 +4,7 @@ import math
 import time
 
 import pytest
+from pydantic import SecretStr
 from sqlalchemy import event, text
 from starlette.requests import Request
 
@@ -113,3 +114,19 @@ def test_key_credential_prefetch_bound_and_real_database_failure(settings, stora
         connection.exec_driver_sql("DROP TABLE api_keys")
     with pytest.raises(RepositoryUnavailable):
         auth.principal(request(token="Bearer token"))
+
+
+def test_non_ascii_bootstrap_does_not_break_service_key_authentication(settings, storage):
+    db, _ = storage
+    settings.bootstrap_key = SecretStr("é" * 32)
+    auth = Auth(settings, db)
+    key_id = db.issue_key("scoped-token", "operator", "test", time.time() + 1000, "fixture")
+    assert auth.principal(
+        request(token="Bearer scoped-token")
+    ).verified == VerifiedPrincipal.service_key(key_id)
+    # Accepted configuration cannot turn the operator-only secret into an HTTP
+    # identity, even if an accidental matching legacy key hash exists.
+    bootstrap = settings.bootstrap_key.get_secret_value()
+    db.issue_key(bootstrap, "operator", "collision", time.time() + 1000, "fixture")
+    with pytest.raises(IdentityInvalid):
+        auth.principal(request(token="Bearer " + bootstrap))

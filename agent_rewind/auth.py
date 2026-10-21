@@ -80,7 +80,9 @@ class Auth:
         if not 1 <= len(token) <= 256 or not token.isascii():
             raise IdentityInvalid()
         bootstrap = self.settings.bootstrap_key
-        if bootstrap is not None and hmac.compare_digest(token, bootstrap.get_secret_value()):
+        if bootstrap is not None and hmac.compare_digest(
+            token.encode("ascii"), bootstrap.get_secret_value().encode("utf-8")
+        ):
             raise IdentityInvalid()
         # Bootstrap is an operator credential, never a customer API identity.
         # Select only bounded credential fields; role is evaluated freshly by
