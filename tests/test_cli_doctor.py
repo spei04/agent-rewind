@@ -1,12 +1,12 @@
 """Doctor must perform the artifact round trip even with Python optimization."""
 
 import json
-from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 import pytest
+from sqlalchemy.engine import Connection, Engine
 
 
 @pytest.mark.parametrize("optimize", [0, 2])
@@ -18,11 +18,14 @@ def test_doctor_checks_artifacts_when_optimized(monkeypatch, capsys, optimize, h
     settings = SimpleNamespace(
         sandbox_runtime="runsc", allowed_images="", model_api_key="", model_name=""
     )
-    connection = Mock()
+    connection = MagicMock(spec=Connection)
+    connection.__enter__.return_value = connection
+    connection.close.return_value = None
+    connection.__exit__.side_effect = lambda *_: connection.close()
+    engine = Mock(spec=Engine)
+    engine.connect.return_value = connection
     namespace["Settings"] = lambda: settings
-    namespace["Database"] = lambda _: SimpleNamespace(
-        engine=SimpleNamespace(connect=lambda: nullcontext(connection))
-    )
+    namespace["Database"] = lambda _: SimpleNamespace(engine=engine)
     store = Mock()
     store.put.return_value = "synthetic-health-object"
     store.get.return_value = b"health check" if healthy else b"incorrect payload"
@@ -39,6 +42,8 @@ def test_doctor_checks_artifacts_when_optimized(monkeypatch, capsys, optimize, h
             namespace["main"]()
         assert capsys.readouterr().out == ""
         runner.assert_not_called()
+    engine.connect.assert_called_once_with()
+    connection.close.assert_called_once_with()
     connection.exec_driver_sql.assert_called_once_with("SELECT 1")
     store.put.assert_called_once_with(b"health check")
     store.get.assert_called_once_with("synthetic-health-object")
