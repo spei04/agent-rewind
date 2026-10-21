@@ -1,19 +1,22 @@
 # Scoped run listing and detail execution plan
 
-This is the AR-006-B implementation boundary for independent review, not runtime
-acceptance or a customer-ready release. The [task cards](../EXECUTION_BACKLOG.md#ar-006-b)
-and [machine ledger](../../contracts/proposals/execution-backlog.json) retain the
-aggregate identity and existing prerequisites: Verified AR-006-A, AR-007-C and
-AR-011-B, consuming reviewed C04. P1 and the aggregate are **In progress** with A
-in the primary checkout; P2 remains **Not started** until accepted merged P1.
+This is the AR-006-B preparatory implementation boundary. P1 is **Verified**;
+its accepted foundation does not complete route integration or activate customers.
+The [task cards](../EXECUTION_BACKLOG.md#ar-006-b) and
+[machine ledger](../../contracts/proposals/execution-backlog.json) retain the
+aggregate identity and prerequisites: Verified AR-006-A, AR-007-C and AR-011-B,
+consuming C04. The aggregate remains **In progress**; A starts P2 **In progress**
+in reused primary work/scoped-run-routes after accepted P1 delivery.
 
 A authored exact plan `9b97a09`; B independently accepted its contract, dependency
 and arithmetic review, and the lead accepted the plan. Tracking: aggregate
 [#86](https://github.com/spei04/agent-rewind/issues/86), P1
 [#87](https://github.com/spei04/agent-rewind/issues/87), P2
-[#88](https://github.com/spei04/agent-rewind/issues/88). Lead dispatched P1 in
-[draft PR #89](https://github.com/spei04/agent-rewind/pull/89); B independently reviews
-and the lead integrates. No HTTP wiring or package acceptance follows from dispatch.
+[#88](https://github.com/spei04/agent-rewind/issues/88). P1 [PR #89](https://github.com/spei04/agent-rewind/pull/89) merged as
+`ed0d6c48b8db3533c1bb20a75df93d7efc89fc7c`; successful PR/main checks and
+verified candidate 12323231309 establish the [accepted P1 delivery](#accepted-p1-delivery--2026-10-21).
+Issue #87 is closed, #88 is assigned to A and aggregate #86 remains open.
+No customer-ready profile or production activation follows.
 
 C04, the frozen OpenAPI/logical schema and CT-M1-005/006 remain authoritative.
 This plan elaborates their implementation without changing their bytes. Read/cursor
@@ -323,3 +326,22 @@ only the refusal marker, not candidate cells. The original BLOB continuation
 regression failed before this correction. Focused correction checks passed 108
 tests with fourteen explicit PostgreSQL skips; the three new native range cases
 remain hosted-only. Schema, profile and customer activation behavior are unchanged.
+
+## Accepted P1 delivery — 2026-10-21
+
+Reviewed source `dc1f6ebaccd19983b52867e9e24dd2626d81ff3e` merged in PR #89 as
+`ed0d6c48b8db3533c1bb20a75df93d7efc89fc7c`. Independent A/B/C source, security,
+interface and native PostgreSQL test reviews are accepted.
+[PR run 39547572853](https://github.com/spei04/agent-rewind/actions/runs/39547572853)
+and [protected-main run 39548734170](https://github.com/spei04/agent-rewind/actions/runs/39548734170)
+passed 2419/2427 core tests on Python 3.11/3.12, with 11/3 expected skips and
+one existing warning per job, plus three gVisor cases and all required checks.
+Lead verified candidate 12323231309 (509080 bytes), exact four files, archive/API
+digest, source/tree/parent, pinned manifests and package hashes. Its private
+indexed release record is retained outside checkouts with review date 2026-11-20.
+
+P1 is Verified and #87 closed. A starts P2 #88 in the reused primary checkout
+on work/scoped-run-routes; B independently reviews and lead integrates/delivers.
+Aggregate #86 remains In progress. P2 owns only the frozen v1 GET list/detail
+route integration and its required tests/package coverage; no schema/profile,
+legacy-route, artifact/event/repair, provider or customer-activation expansion.

@@ -28,7 +28,12 @@ SOURCE_QUERIES = {
     "api_keys": "SELECT * FROM api_keys ORDER BY id",
     "audit": "SELECT * FROM audit ORDER BY id",
     "events": "SELECT * FROM events ORDER BY run_id,step",
-    "jobs": "SELECT * FROM jobs ORDER BY id",
+    # Keep the original thirteen-column value/header projection after ar6 adds
+    # nullable configuration columns. Additive metadata is not source history.
+    "jobs": (
+        "SELECT id,kind,created,payload,status,owner,lease_until,cancel,budget,reserved,"
+        "result,error,actor FROM jobs ORDER BY id"
+    ),
     "records": "SELECT id,kind,created,CAST(data AS TEXT) AS data FROM records ORDER BY id",
 }
 

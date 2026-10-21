@@ -356,6 +356,54 @@ def admission_foundation_smoke() -> None:
         raise RuntimeError("Installed configuration expanded processor permission")
 
 
+def admission_storage_smoke(engine: Engine) -> None:
+    from sqlalchemy import text
+
+    from agent_rewind.admission_records import verify_job_configuration
+    from agent_rewind.admission_repository import AdmissionRepository
+    from agent_rewind.migrations.admission_service import initialize_admission
+    from agent_rewind.request_authority import RequestAuthority
+    from agent_rewind.request_identity import VerifiedPrincipal
+
+    result = initialize_admission(engine)
+    if result["revision"] != "ar_0006_admission" or result["customer_ready"]:
+        raise RuntimeError("Installed admission storage transition failed")
+    if initialize_admission(engine) != result:
+        raise RuntimeError("Installed admission storage reentry changed metadata")
+    authority = RequestAuthority(engine)
+    principal = VerifiedPrincipal("oidc:" + "a" * 64)
+    context = authority.named(principal, "9" * 32).context
+    repository = AdmissionRepository(authority)
+    with engine.connect() as connection:
+        empty = repository.resolve_identities(
+            connection,
+            principal,
+            context,
+            client_operation_id="1" * 32,
+            key_hash="2" * 64,
+            request_digest="3" * 64,
+        )
+        if empty.operation is not None or empty.needs_alias:
+            raise RuntimeError("Installed empty admission namespace changed")
+        for lookup in (
+            lambda: repository.get_operation(connection, principal, context, operation_id="4" * 32),
+            lambda: verify_job_configuration(
+                connection, context=context, job_id="5" * 32, payload_version=1
+            ),
+        ):
+            try:
+                lookup()
+            except ResourceNotFound:
+                pass
+            else:
+                raise RuntimeError("Installed missing admission resource was accessible")
+        counts = connection.execute(
+            text("SELECT (SELECT count(*) FROM operations),(SELECT count(*) FROM operation_keys)")
+        ).one()
+        if tuple(counts) != (0, 0):
+            raise RuntimeError("Installed read primitives created admission identities")
+
+
 def readiness_smoke(root: Path, database_url: str) -> None:
     import asyncio
     import time
@@ -418,6 +466,8 @@ for profile in (
     "sqlite_artifacts",
     "postgresql16_artifacts",
     "sqlite_projection",
+    "sqlite_admission",
+    "postgresql16_admission",
 ):
     shape = json.loads(
         importlib.resources.files("agent_rewind.migrations")
@@ -473,6 +523,7 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
         publication_smoke(engine, Path(temporary))
         request_foundation_smoke(engine, Path(temporary))
         existing_routes_smoke(engine, Path(temporary))
+        admission_storage_smoke(engine)
         compatibility = runtime_schema_compatibility(engine)
         if compatibility.status != "incompatible" or compatibility.code != "migration_only":
             raise RuntimeError(
