@@ -70,9 +70,11 @@ two known child attempts. It never enumerates the installation root. Each root
 must be pre-provisioned, private, durable and installation-specific as required by
 PublicationJournal. Existing journal defaults and callers retain their limits.
 The wrapper tightens reads before materialization to 4 KiB per locator, 128 KiB
-per child, 64 records per child and 16 KiB per record; combined child history is
-bounded to 1,179,648 bytes. Four known journals are locked by one local owner;
-this is not a distributed or installation-wide writer limit.
+per child, 64 records per child and 16 KiB per record. Each child intent plus
+its history is bounded to 1,179,648 bytes; the two children together are bounded
+to 2,359,296 bytes, plus two locator intents of at most 4,096 bytes each. Four
+known journals are locked by one local owner; this is not a distributed or
+installation-wide writer limit.
 
 `bind` durably freezes identical full identities, request digest, first origin
 and child IDs. A later request origin is ignored in favor of that first origin.
