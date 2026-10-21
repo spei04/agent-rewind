@@ -4,6 +4,7 @@ import base64
 import hashlib
 import hmac
 import json
+import math
 import secrets
 import time
 from dataclasses import dataclass
@@ -15,19 +16,32 @@ import jwt
 from cryptography.fernet import Fernet, InvalidToken
 from fastapi import HTTPException, Request
 from fastapi.responses import RedirectResponse
+from sqlalchemy import and_, case, select
+from sqlalchemy.exc import SQLAlchemyError
 
 from .config import Settings
-from .database import Database
+from .database import Database, keys
 from .models import canonical
-
-ROLES = {"viewer": 0, "operator": 1, "administrator": 2}
+from .request_identity import (
+    IdentityInvalid,
+    SessionIdentity,
+    VerifiedPrincipal,
+    decode_v2_session,
+    encode_v2_session,
+)
+from .scoped_repositories import RepositoryUnavailable, _byte_length
 
 
 @dataclass(frozen=True)
 class Principal:
-    subject: str
-    role: str
+    """Authenticated identity only; current project grants supply authority."""
+
+    verified: VerifiedPrincipal
     csrf: str = ""
+
+    @property
+    def subject(self) -> str:
+        return self.verified.principal_id
 
 
 class Auth:
@@ -38,38 +52,69 @@ class Auth:
         self.discovery: dict[str, Any] | None = None
         self.jwks: jwt.PyJWKClient | None = None
 
-    def principal(self, request: Request, minimum: str = "viewer") -> Principal:
-        header = request.headers.get("authorization", "")
-        principal = None
-        if header.startswith("Bearer "):
-            token = header[7:]
-            bootstrap = self.settings.bootstrap_key
-            if bootstrap and hmac.compare_digest(token, bootstrap.get_secret_value()):
-                principal = Principal("bootstrap", "administrator")
-            else:
-                key = self.db.lookup_key(token)
-                if key:
-                    principal = Principal(f"api-key:{key['id']}", key["role"])
-        elif request.cookies.get("rewind_session"):
-            try:
-                session = json.loads(
-                    self.cipher.decrypt(request.cookies["rewind_session"].encode(), ttl=900)
+    def session(self, request: Request) -> Principal:
+        """V2 cookie authentication, including CSRF/Origin on unsafe methods.
+
+        Deliberately independent of project membership so a revoked member can
+        recover their own CSRF through /api/me and clear the session via logout.
+        """
+        identity = decode_v2_session(
+            self.cipher, request.cookies.get("rewind_session", ""), self.settings.oidc_issuer
+        )
+        if request.method not in {"GET", "HEAD", "OPTIONS"}:
+            if not hmac.compare_digest(
+                request.headers.get("x-rewind-csrf", "").encode(), identity.csrf.encode()
+            ):
+                raise HTTPException(403, "Missing CSRF token.")
+            if request.headers.get("origin") != self.settings.public_url.rstrip("/"):
+                raise HTTPException(403, "Invalid request origin.")
+        return Principal(identity.principal, identity.csrf)
+
+    def principal(self, request: Request) -> Principal:
+        header = request.headers.get("authorization")
+        if header is None:
+            return self.session(request)
+        if not header.startswith("Bearer "):
+            raise IdentityInvalid()
+        token = header[7:]
+        if not 1 <= len(token) <= 256 or not token.isascii():
+            raise IdentityInvalid()
+        # Bootstrap is an operator credential, never a customer API identity.
+        # Select only bounded credential fields; role is evaluated freshly by
+        # RequestAuthority, never copied into this authenticated identity.
+        try:
+            with self.db.engine.connect() as connection:
+                safe = and_(
+                    _byte_length(connection, keys.c.id) == 32,
+                    _byte_length(connection, keys.c.expires) <= 64,
                 )
-                principal = Principal(session["sub"], session["role"], session["csrf"])
-            except (InvalidToken, ValueError, KeyError):
-                raise HTTPException(401, "Session expired.") from None
-            if request.method not in {"GET", "HEAD", "OPTIONS"}:
-                if not hmac.compare_digest(
-                    request.headers.get("x-rewind-csrf", ""), principal.csrf
-                ):
-                    raise HTTPException(403, "Missing CSRF token.")
-                if request.headers.get("origin") != self.settings.public_url.rstrip("/"):
-                    raise HTTPException(403, "Invalid request origin.")
-        if principal is None:
-            raise HTTPException(401, "Authentication required.")
-        if principal.role not in ROLES or ROLES[principal.role] < ROLES[minimum]:
-            raise HTTPException(403, "Insufficient permissions.")
-        return principal
+                rows = (
+                    connection.execute(
+                        select(
+                            case((safe, keys.c.id), else_=None).label("id"),
+                            case((safe, keys.c.expires), else_=None).label("expires"),
+                        )
+                        .where(
+                            keys.c.hash == hashlib.sha256(token.encode("ascii")).hexdigest(),
+                            keys.c.revoked.is_(False),
+                        )
+                        .limit(2)
+                    )
+                    .mappings()
+                    .all()
+                )
+        except SQLAlchemyError:
+            raise RepositoryUnavailable() from None
+        if len(rows) != 1:
+            raise IdentityInvalid()
+        expires = rows[0]["expires"]
+        if (
+            type(expires) not in {int, float}
+            or not math.isfinite(expires)
+            or expires <= time.time()
+        ):
+            raise IdentityInvalid()
+        return Principal(VerifiedPrincipal.service_key(rows[0]["id"]))
 
     def _discovery(self) -> dict[str, Any]:
         if not self.settings.oidc_issuer:
@@ -168,28 +213,24 @@ class Auth:
             )
             if not hmac.compare_digest(claims["nonce"], flow["nonce"]):
                 raise ValueError("Invalid nonce.")
-            role = claims.get(self.settings.oidc_role_claim)
-            if role not in ROLES:
-                raise ValueError("Identity has no application role.")
-        except (InvalidToken, ValueError, KeyError, httpx.HTTPError, jwt.PyJWTError):
+            identity = SessionIdentity(
+                VerifiedPrincipal.oidc(self.settings.oidc_issuer, claims["sub"]),
+                self.settings.oidc_issuer,
+                claims["sub"],
+                secrets.token_urlsafe(32),
+            )
+            session = encode_v2_session(self.cipher, identity)
+        except (InvalidToken, ValueError, TypeError, KeyError, httpx.HTTPError, jwt.PyJWTError):
             raise HTTPException(401, "Identity login failed.") from None
-        session = {"sub": claims["sub"], "role": role, "csrf": secrets.token_urlsafe(32)}
         result = RedirectResponse("/")
         result.delete_cookie("rewind_login", path="/auth")
         result.set_cookie(
             "rewind_session",
-            self.cipher.encrypt(canonical(session)).decode(),
+            session,
             max_age=900,
             httponly=True,
             secure=self.secure,
             samesite="lax",
         )
-        self.db.audit(claims["sub"], "identity.login", "session")
+        self.db.audit(identity.principal.principal_id, "identity.login", "session")
         return result
-
-    def issue(self, role: str, name: str, days: int, actor: str) -> dict[str, str]:
-        if role not in ROLES or not 1 <= days <= 90 or not 1 <= len(name) <= 120:
-            raise HTTPException(422, "Invalid key role, name, or lifetime.")
-        token = "rw_" + secrets.token_urlsafe(32)
-        key_id = self.db.issue_key(token, role, name, time.time() + days * 86400, actor)
-        return {"id": key_id, "token": token, "role": role}

@@ -20,7 +20,8 @@ from agent_rewind.models import canonical
         ({"aud": "wrong-client"}, False),
         ({"nonce": "wrong-nonce"}, False),
         ({"exp": 1}, False),
-        ({"rewind_role": "unknown"}, False),
+        ({"rewind_role": "unknown"}, True),
+        ({"sub": ""}, False),
     ],
 )
 @pytest.mark.parametrize("missing_keys", [False, True])
@@ -88,6 +89,15 @@ def test_signed_identity_token_validation(
         )
         assert "httponly" in session_cookie.lower()
         assert "max-age=900" in session_cookie.lower()
+        from http.cookies import SimpleCookie
+
+        from agent_rewind.request_identity import VerifiedPrincipal, decode_v2_session
+
+        jar = SimpleCookie()
+        jar.load(session_cookie)
+        identity = decode_v2_session(auth.cipher, jar["rewind_session"].value, settings.oidc_issuer)
+        assert identity.principal == VerifiedPrincipal.oidc(settings.oidc_issuer, claims["sub"])
+        assert "role" not in identity.record()
     else:
         with pytest.raises(HTTPException) as caught:
             auth.callback(request)

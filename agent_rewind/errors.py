@@ -14,6 +14,12 @@ from starlette.exceptions import HTTPException
 from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from .artifact_metadata import ArtifactError
+from .request_authority import ActionForbidden
+from .request_identity import IdentityInvalid
+from .scoped_lineage import ResourceNotFound
+from .scoped_repositories import RepositoryUnavailable
+
 ErrorCode = Literal[
     "invalid_request",
     "unauthenticated",
@@ -77,6 +83,14 @@ def error_response(scope: Scope, code: ErrorCode, *, body_limit: bool = False) -
 def classified(scope: Scope, error: Exception) -> ErrorCode:
     if isinstance(error, Fault) and error.code in RULES:
         return error.code
+    if isinstance(error, IdentityInvalid):
+        return "unauthenticated"
+    if isinstance(error, ResourceNotFound):
+        return "not_found"
+    if isinstance(error, ActionForbidden):
+        return "forbidden"
+    if isinstance(error, ArtifactError | RepositoryUnavailable):
+        return "dependency_unavailable"
     if isinstance(error, RequestValidationError):
         return "invalid_request"
     if isinstance(error, HTTPException):
