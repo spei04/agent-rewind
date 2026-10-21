@@ -179,3 +179,31 @@ def test_reusing_outcome_is_refused_before_sql(engine):
     ):
         pytest.fail("reused transaction state")
     assert rows(engine) == []
+
+
+def test_failed_timeout_setup_discards_changed_physical_connection(engine):
+    state = TransactionOutcome()
+    fired = False
+    with engine.connect() as connection:
+        raw = connection.connection.driver_connection
+
+    def after(_connection, _cursor, statement, _parameters, _context, _many):
+        nonlocal fired
+        if statement == "PRAGMA busy_timeout=3000" and not fired:
+            fired = True
+            raise RuntimeError("PRIVATE-TIMEOUT-SETUP")
+
+    event.listen(engine, "after_cursor_execute", after)
+    try:
+        with (
+            pytest.raises(AdmissionError, match="^dependency_unavailable$"),
+            admission_transaction(engine, state),
+        ):
+            pytest.fail("setup failure reached transaction body")
+    finally:
+        event.remove(engine, "after_cursor_execute", after)
+    assert fired and not state.begun and not state.commit_attempted
+    assert engine.pool.checkedout() == 0
+    assert rows(engine) == []
+    with engine.connect() as connection:
+        assert connection.connection.driver_connection is not raw

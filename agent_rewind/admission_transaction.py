@@ -79,8 +79,8 @@ def _begin(connection: Connection) -> int | None:
         if type(previous) is not int or previous < 0:
             _discard(connection)
             raise AdmissionError("dependency_unavailable")
-        connection.exec_driver_sql("PRAGMA busy_timeout=3000")
         try:
+            connection.exec_driver_sql("PRAGMA busy_timeout=3000")
             connection.exec_driver_sql("BEGIN IMMEDIATE")
         except BaseException:
             _discard(connection)
