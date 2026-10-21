@@ -1,6 +1,6 @@
 # Operation HTTP execution plan
 
-2026-10-21 · Planning amendment for the existing AR-008-B scope, based on published source 5d3ff3096d81f159a457870a1f4fa57590a06cc2. AR-008-B and both packages remain **Not started**. AR-008-A/P3 is Implemented; verification pending. This plan does not accept its pending CI, merge or candidate, implement routes, or enable customer admission.
+2026-10-21 · Planning amendment for the existing AR-008-B scope, originally prepared against source 5d3ff3096d81f159a457870a1f4fa57590a06cc2. AR-008-B and both packages remain **Not started**. AR-008-A/P3 and aggregate A are now Verified after [accepted PR/main/candidate evidence](ADMISSION_EXECUTION_PLAN.md#accepted-p3-delivery--2026-10-21). This plan does not implement routes or enable customer admission.
 
 The design-only [P1 adapter entry checkpoint](OPERATION_ADAPTER_ENTRY.md) proposes concrete APIs, cumulative bounds and the initial unavailable-failure support table. Tracking is aggregate [#93](https://github.com/spei04/agent-rewind/issues/93), P1 [#94](https://github.com/spei04/agent-rewind/issues/94), P2 [#95](https://github.com/spei04/agent-rewind/issues/95); all remain Not started.
 
