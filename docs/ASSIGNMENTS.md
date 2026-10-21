@@ -6,9 +6,9 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| A | Independent cancellation phase-entry review | Primitive behavior accepted: 174 SQLite and 18 actual PostgreSQL passes; test-only cbed928 released. Review shared retention and phase lifecycle before implementation. |
+| A | AR-008-B/P1 cancellation phase helper in primary | Implement only the independently accepted 5e1766d phase-entry API and its SQLite/PostgreSQL tests; service orchestration remains separate. |
 | C | AR-008-B/P1 GET service preparation | Primitive 691ad661 and exact 111-member package proof complete. Prepare the concrete GET call sequence; no service implementation yet. |
-| B | Cancellation phase API and independent source review | Primitive SQL/security accepted; review the three added PostgreSQL controls and freeze the next phase interface. |
+| B | Draft #105 hosted audit and independent helper review | Primitive source, added tests and exact 5e1766d phase entry accepted; audit the new composed CI source before reviewing A’s frozen helper. |
 | Lead | Integrated CI, progress and delivery | Compose reviewed primitives and doctor correction for draft #105. Full service/P1 delivery remains pending; P2 Not started. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
@@ -500,3 +500,5 @@ separate. All current statuses, outer edges and later acceptance gates remain.
 - 2026-10-21 hosted fixture correction: A owned the primary checkout for test_cli_doctor.py only, reproduced the four failures from draft run 39596377455 and froze a92db83 after 37 doctor/CLI/sentinel passes. B and the lead accepted its source; all seven original assertions and the real owned_connect remain. A released the clean checkout and all consumers to the lead. C retains the secondary and the existing isolated PostgreSQL lifecycle for the bounded primitive checkpoint; A next reviews its frozen source, while B reviews independent evidence. The failed 3.11/3.12 run is preserved (3326/3337 passes, four failures each, 14/3 skips, one warning); all 99 targeted PostgreSQL cases and package/security/three gVisor checks passed. No corrected hosted run or full P1 acceptance is claimed.
 
 - 2026-10-21 primitive verification complete: C delivered 691ad661 and exact-source wheel/sdist proof; B accepted SQL/security source; A independently passed 174 SQLite and 18 actual PostgreSQL cases across separate runs and froze test-only cbed928. Lead verified source/evidence/package hashes; all database and checkout consumers were released. A now reviews cancellation phase ownership, B prepares that concrete interface and C prepares GET composition. Lead owns the primary checkout and integrated CI; the secondary is retained for the next implementation. Full service and P1 acceptance remain pending.
+
+- 2026-10-21 cancellation helper assignment: B accepted exact phase entry 5e1766d after A’s independent design review. A now owns the reused primary on work/operation-cancel-phases for the focused phase owner, bounded reader/final-query hooks and dedicated native tests only. C prepares the separate GET service entry in the secondary; B audits draft #105 at 5e1766d and later reviews A’s frozen helper. No cancellation service, HTTP, schema, new resource or cap increase is included.

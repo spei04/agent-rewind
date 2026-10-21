@@ -1029,3 +1029,7 @@ Before cancellation service wiring, prove on SQLite and actual PostgreSQL:
 - Maximum matching cases and scoped/foreign distractors retain the existing
   SQL/VM/time/bind bounds. Later lock/authority/effect/ACK/disclosure tests remain
   required for the service; this helper checkpoint does not replace them.
+
+B accepted this exact entry at 5e1766d after A’s independent design review.
+A is assigned the focused phase helper and dedicated SQLite/PostgreSQL proof;
+service orchestration requires its separate reviewed checkpoint.
