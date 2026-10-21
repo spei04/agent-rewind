@@ -169,6 +169,7 @@ class AdmissionJournalSession:
             if (
                 type(outcome) is not TransactionOutcome
                 or not outcome.confirmed_precommit_rollback
+                or outcome.cleanup_failed
                 or type(collision) is not MetadataCollision
                 or self._snapshots[0] is None
                 or self._snapshots[1] is not None
