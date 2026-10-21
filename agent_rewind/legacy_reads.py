@@ -91,9 +91,11 @@ class ReadBudget:
                 fields["j_" + column.name] = column.type
         dialect = connection.dialect.name
         if dialect == "sqlite":
+            # JSON-derived identities otherwise have no TEXT affinity, causing
+            # repeated scans instead of indexed joins to the frozen VARCHAR keys.
             source = text("""SELECT
-                json_extract(value,'$.kind') AS kind,
-                json_extract(value,'$.id') AS id,
+                CAST(json_extract(value,'$.kind') AS TEXT) AS kind,
+                CAST(json_extract(value,'$.id') AS TEXT) AS id,
                 json_extract(value,'$.r_created') AS r_created,
                 json_extract(value,'$.r_body') AS r_body,
                 json_extract(value,'$.j_kind') AS j_kind,
@@ -139,15 +141,15 @@ class ReadBudget:
                 cast(records.c.data, Text).is_not_distinct_from(wanted.c.r_body),
             )
         )
+        # Materialize one set of unexpected by-job members for the requested
+        # jobs. Correlated EXISTS queries rescanned both records and the expected
+        # rowset for every job; even small mixed closures became quadratic/cubic.
+        # This anti-join discovers only this project's rows, and its DISTINCT
+        # job IDs are a subset of the bounded expected job IDs.
+        requested_jobs = select(wanted.c.id).where(wanted.c.kind == "job")
         known = wanted.alias("known_sources")
-        known_member = (
-            select(known.c.id)
-            .where(known.c.id == records.c.id, known.c.kind == records.c.kind)
-            .correlate(records)
-            .exists()
-        )
-        unknown_member = (
-            select(records.c.id)
+        unexpected_jobs = (
+            select(records.c.data["job_id"].as_string().label("job_id"))
             .select_from(
                 records.join(
                     scopes,
@@ -156,23 +158,32 @@ class ReadBudget:
                         scopes.c.resource_kind == records.c.kind,
                         scopes.c.resource_id == records.c.id,
                     ),
+                ).outerjoin(
+                    known,
+                    and_(known.c.id == records.c.id, known.c.kind == records.c.kind),
                 )
             )
-            .where(records.c.data["job_id"].as_string() == wanted.c.id, ~known_member)
-            .correlate(wanted)
-            .exists()
+            .where(
+                records.c.data["job_id"].as_string().in_(requested_jobs),
+                known.c.id.is_(None),
+            )
+            .distinct()
+            .cte("unexpected_jobs")
+            .prefix_with("MATERIALIZED")
         )
+        # Bind scope directly to the expected ID as well as the job PK. The
+        # indirect scope->job->expected join can scan every expected job per scope.
         job_query = (
             select(wanted.c.kind, wanted.c.id)
             .select_from(
-                wanted.join(jobs, jobs.c.id == wanted.c.id).join(
-                    scopes, _scope("job", jobs.c.id, context)
-                )
+                wanted.join(jobs, jobs.c.id == wanted.c.id)
+                .join(scopes, _scope("job", wanted.c.id, context))
+                .outerjoin(unexpected_jobs, unexpected_jobs.c.job_id == wanted.c.id)
             )
             .where(
                 wanted.c.kind == "job",
                 _bounded_row(connection, jobs),
-                ~unknown_member,
+                unexpected_jobs.c.job_id.is_(None),
                 *(
                     column.is_not_distinct_from(wanted.c["j_" + column.name])
                     for column in jobs.c
