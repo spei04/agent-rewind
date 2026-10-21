@@ -123,7 +123,7 @@ class ArtifactBinding:
 
 @dataclass(frozen=True, init=False)
 class PreparedAdmission:
-    """Consistent new-operation intent/envelope, awaiting P3's real publication."""
+    """Validated intent/configuration/envelope association; no policy or SQL grant."""
 
     project_id: str
     job_id: str
@@ -137,33 +137,24 @@ class PreparedAdmission:
     def __init__(
         self,
         intent: CanonicalIntent,
-        registry: NativeRegistry,
+        configuration: NativeConfiguration,
         *,
         project_id: str,
         job_id: str,
         origin: OriginCorrelation,
         task_binding: ArtifactBinding,
         configuration_binding: ArtifactBinding,
-        permitted_processor_profile: str | None,
     ):
         _id(project_id)
         _id(job_id)
         if (
             type(intent) is not CanonicalIntent
-            or type(registry) is not NativeRegistry
+            or type(configuration) is not NativeConfiguration
             or type(origin) is not OriginCorrelation
             or type(task_binding) is not ArtifactBinding
             or type(configuration_binding) is not ArtifactBinding
         ):
             _invalid()
-        # This entry point is only for a genuinely new identity, after P3 has
-        # checked both authorized recovery keys. Registry lookup is pure.
-        task = json.loads(intent.task_bytes)
-        configuration = registry.resolve_new(
-            intent.adapter_config_id,
-            task["image"],
-            permitted_processor_profile=permitted_processor_profile,
-        )
         for binding, role, content in (
             (task_binding, "task", intent.task_bytes),
             (configuration_binding, "admission_config", configuration.canonical_bytes),
@@ -242,13 +233,60 @@ def prepare_admission(
     configuration_binding: ArtifactBinding,
     permitted_processor_profile: str | None,
 ) -> PreparedAdmission:
+    """Prepare only genuinely new identities after P3's authorized dual lookup."""
+    if type(intent) is not CanonicalIntent or type(registry) is not NativeRegistry:
+        _invalid()
+    task = json.loads(intent.task_bytes)
+    configuration = registry.resolve_new(
+        intent.adapter_config_id,
+        task["image"],
+        permitted_processor_profile=permitted_processor_profile,
+    )
     return PreparedAdmission(
         intent,
-        registry,
+        configuration,
         project_id=project_id,
         job_id=job_id,
         origin=origin,
         task_binding=task_binding,
         configuration_binding=configuration_binding,
-        permitted_processor_profile=permitted_processor_profile,
     )
+
+
+def restore_admission(
+    intent: CanonicalIntent,
+    *,
+    frozen_configuration: bytes,
+    expected_configuration_digest: str,
+    expected_envelope_digest: str,
+    project_id: str,
+    job_id: str,
+    origin: OriginCorrelation,
+    task_binding: ArtifactBinding,
+    configuration_binding: ArtifactBinding,
+) -> PreparedAdmission:
+    """Validate an exact frozen attempt without consulting current configuration.
+
+    The coordinator must first validate its complete original journal identities,
+    origin, descriptors and phase. This pure reconstruction neither grants policy
+    permission nor proves a receipt/SQL commit. Expected IDs and origin must come
+    from that original attempt, never the retry's correlation or a new registry.
+    """
+    configuration = NativeConfiguration(
+        frozen_configuration, expected_digest=expected_configuration_digest
+    )
+    restored = PreparedAdmission(
+        intent,
+        configuration,
+        project_id=project_id,
+        job_id=job_id,
+        origin=origin,
+        task_binding=task_binding,
+        configuration_binding=configuration_binding,
+    )
+    if (
+        type(expected_envelope_digest) is not str
+        or restored.envelope_digest != expected_envelope_digest
+    ):
+        _invalid()
+    return restored
