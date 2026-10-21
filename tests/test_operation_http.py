@@ -102,6 +102,7 @@ def failed(response, status, code):
     value = response.json()
     assert set(value) == {"code", "message", "request_id", "retryable"}
     assert value["code"] == code
+    assert value["retryable"] is (code in {"dependency_unavailable", "quota_exceeded"})
     assert response.headers["x-request-id"] == value["request_id"]
     assert response.headers["cache-control"] == "no-store"
     assert len(value["request_id"]) == 32
@@ -234,7 +235,7 @@ def test_unused_inputs_cannot_change_service_arguments_and_encoding_precedes_eff
     assert value["status"] == ("queued" if method == "GET" else "cancelled")
 
 
-def test_no_new_work_default_and_real_schema_guard_are_separate(http_operation, settings):
+def test_no_new_work_default_and_synthetic_schema_refusal_are_separate(http_operation, settings):
     f = http_operation
     default = AdmissionCoordinator(f.f.engine, f.f.authority)
     default.schema_compatibility = lambda: CompatibilityResult("ready", "synthetic_http_only")
@@ -395,7 +396,10 @@ def test_materialized_task_boundary_reaches_real_encrypted_storage(http_operatio
 
 
 @pytest.mark.parametrize("overflow", [False, True])
-def test_actual_chunked_bytes_override_content_length_and_stop_at_limit(http_operation, overflow):
+@pytest.mark.parametrize("declared_length", [None, "1"])
+def test_actual_chunked_bytes_override_content_length_and_stop_at_limit(
+    http_operation, overflow, declared_length
+):
     f = http_operation
     raw = canonical(submission())
     chunks = [raw, b" " * (MAX_BODY_BYTES - len(raw))]
@@ -408,17 +412,29 @@ def test_actual_chunked_bytes_override_content_length_and_stop_at_limit(http_ope
             consumed.append(index)
             yield chunk
 
+    seen_headers = []
+
+    async def observed_app(scope, receive, send):
+        seen_headers.extend(scope["headers"])
+        await f.app(scope, receive, send)
+
     async def request():
         async with httpx.AsyncClient(
-            transport=httpx.ASGITransport(app=f.app), base_url="http://testserver"
+            transport=httpx.ASGITransport(app=observed_app), base_url="http://testserver"
         ) as client:
             return await client.post(
                 f.base + "/runs",
-                headers={**f.headers, "Content-Length": "1"},
+                headers={
+                    **f.headers,
+                    **({"Content-Length": declared_length} if declared_length else {}),
+                },
                 content=content(),
             )
 
     response = asyncio.run(request())
+    assert [value for key, value in seen_headers if key == b"content-length"] == (
+        [b"1"] if declared_length else []
+    )
     if overflow:
         error = failed(response, 413, "invalid_request")
         assert error["message"] == "Request body exceeds 9 MiB."
@@ -794,3 +810,158 @@ def test_legacy_failure_refusal_does_not_block_terminal_cancellation(http_operat
             ).scalar_one()
             == 2
         )
+
+
+
+
+@pytest.mark.parametrize(
+    "variant",
+    [
+        "missing_key",
+        "high_bit_key",
+        "missing_media",
+        "empty_charset",
+        "extra_parameter",
+        "query",
+        "encoding_list",
+    ],
+)
+def test_remaining_raw_transport_refusals_do_not_prepare_work(http_operation, variant):
+    f = http_operation
+    headers = [(name.lower().encode(), value.encode()) for name, value in f.headers.items()]
+    path = f.base + "/runs"
+    if variant == "missing_key":
+        headers = [(name, value) for name, value in headers if name != b"idempotency-key"]
+    elif variant == "high_bit_key":
+        headers = [
+            (name, b"\xff" * 8 if name == b"idempotency-key" else value) for name, value in headers
+        ]
+    elif variant == "missing_media":
+        headers = [(name, value) for name, value in headers if name != b"content-type"]
+    elif variant in {"empty_charset", "extra_parameter"}:
+        media = (
+            b"application/json;charset="
+            if variant == "empty_charset"
+            else b"application/json;boundary=unused"
+        )
+        headers = [(name, media if name == b"content-type" else value) for name, value in headers]
+    elif variant == "query":
+        path += "?client_operation_id=other"
+    else:
+        headers += [(b"content-encoding", b"identity,identity")]
+    failed(
+        f.client.post(path, headers=headers, content=canonical(submission())),
+        422,
+        "invalid_request",
+    )
+    assert not f.f.policy.calls and not f.f.storage.calls
+
+
+def test_single_identity_encoding_accepts_case_and_optional_whitespace(http_operation):
+    f = http_operation
+    response = post(f, headers={**f.headers, "Content-Encoding": " \tIdEnTiTy\t "})
+    assert response.status_code == 202, response.text
+
+
+def test_completed_ar6_real_migration_only_guard_blocks_all_routes_and_sinks(
+    settings, tmp_path, monkeypatch
+):
+    from agent_rewind.migrations.admission_service import initialize_admission
+    from agent_rewind.migrations.artifact_service import initialize_artifacts
+    from agent_rewind.migrations.compatibility import load_release_profile
+    from agent_rewind.migrations.ownership_service import initialize_ownership
+    from agent_rewind.migrations.projection_service import initialize_projection
+    from agent_rewind.migrations.service import install
+
+    settings.database_url = f"sqlite:///{tmp_path / 'real-guard.sqlite'}"
+    settings.data_dir = tmp_path / "real-guard-data"
+    settings.oidc_issuer = ISSUER
+    app = create_app(settings)
+    engine = app.state.db.engine
+    project = "9" * 32
+    principal = VerifiedPrincipal.oidc(ISSUER, SUBJECT)
+    install(engine, "operation-http-guard")
+    initialize_ownership(
+        engine,
+        {
+            "schema_version": 1,
+            "installation_key": "operation-http-guard",
+            "organization_id": "8" * 32,
+            "project_id": project,
+            "project_name": "Guard",
+            "principal_grants": [
+                {
+                    "principal_id": principal.principal_id,
+                    "role": "maintainer",
+                    "legacy_default": False,
+                }
+            ],
+        },
+    )
+    initialize_artifacts(engine)
+    initialize_projection(engine)
+    initialize_admission(engine)
+    profile = load_release_profile()
+
+    def state():
+        with owned_connect(engine) as connection:
+            tables = (
+                connection.exec_driver_sql(
+                    "SELECT name FROM sqlite_master WHERE type='table' "
+                    "AND name NOT LIKE 'sqlite_%' ORDER BY name"
+                )
+                .scalars()
+                .all()
+            )
+            return {
+                name: connection.exec_driver_sql(f'SELECT * FROM "{name}"').all() for name in tables
+            }
+
+    original = state()
+    guard = app.state.db.schema_compatibility()
+    assert (guard.status, guard.code) == ("incompatible", "migration_only")
+    forbidden = Mock(side_effect=AssertionError("real migration-only guard reached a sink"))
+    for owner, names in [
+        (app.state.auth, ("principal",)),
+        (app.state.authority, ("named",)),
+        (app.state.operation_coordinator, ("submit",)),
+        (app.state.operation_service, ("read_operation", "cancel_operation", "artifact_loader")),
+        (app.state.operation_service._actions, ("_cancel_effect",)),
+        (app.state.readiness, ("check",)),
+        (app.state.admission, ("require_available", "admit")),
+    ]:
+        for name in names:
+            monkeypatch.setattr(owner, name, forbidden)
+    token = encode_v2_session(
+        app.state.auth.cipher, SessionIdentity(principal, ISSUER, SUBJECT, CSRF)
+    )
+    headers = {
+        "Cookie": "rewind_session=" + token,
+        "X-Rewind-CSRF": CSRF,
+        "Origin": settings.public_url.rstrip("/"),
+        "Content-Type": "application/json",
+        "Idempotency-Key": KEY,
+    }
+    base = f"/api/v1/projects/{project}"
+    paths = [
+        ("POST", base + "/runs"),
+        ("GET", base + "/operations/" + "0" * 32),
+        ("POST", base + "/operations/" + "0" * 32 + "/cancel"),
+    ]
+    client = TestClient(app)
+    try:
+        for method, path in paths:
+            failed(
+                client.request(method, path, headers=headers, content=b"{"),
+                503,
+                "schema_incompatible",
+            )
+        forbidden.assert_not_called()
+        after = app.state.db.schema_compatibility()
+        assert (after.status, after.code) == ("incompatible", "migration_only")
+        assert state() == original
+        assert load_release_profile() == profile
+        assert engine.pool.checkedout() == 0
+    finally:
+        client.close()
+        engine.dispose()
