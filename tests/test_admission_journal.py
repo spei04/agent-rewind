@@ -297,7 +297,7 @@ def test_record_exhaustion_is_bounded_and_refuses_without_overwrite(f):
     assert len(list((f.root / f.identity.children[0]).glob("0*.json"))) == MAX_ATTEMPT_RECORDS
 
 
-def test_one_linked_retry_requires_observed_rollback_and_exact_collision(f):
+def test_one_linked_retry_requires_observed_rollback_clean_release_and_exact_collision(f):
     with f.journal.open(f.identity) as session:
         freeze(f, session)
         session.upload_started("task")
@@ -323,7 +323,22 @@ def test_one_linked_retry_requires_observed_rollback_and_exact_collision(f):
             configuration_binding=f.value.configuration_binding,
         )
         collision = MetadataCollision(old, winner)
+        failed_release = TransactionOutcome(
+            begun=True, rollback_attempted=True, rollback_acknowledged=True, cleanup_failed=True
+        )
+        assert failed_release.confirmed_precommit_rollback
+        before_snapshot, before_states = session.snapshot, session.states
+
+        def files():
+            return {
+                path.relative_to(f.root): path.read_bytes()
+                for path in f.root.rglob("*")
+                if path.is_file()
+            }
+
+        before_files = files()
         for outcome in (
+            failed_release,
             True,
             TransactionOutcome(),
             TransactionOutcome(
@@ -342,6 +357,8 @@ def test_one_linked_retry_requires_observed_rollback_and_exact_collision(f):
                     outcome=outcome,
                     collision=collision,
                 )
+            assert session.snapshot == before_snapshot and session.states == before_states
+            assert len(session.states) == 1 and files() == before_files
         outcome = TransactionOutcome(
             begun=True, rollback_attempted=True, rollback_acknowledged=True
         )
