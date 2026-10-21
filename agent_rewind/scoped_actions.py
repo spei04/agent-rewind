@@ -24,7 +24,9 @@ from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import Select
 
+from .artifact_metadata import ArtifactError
 from .database import audit, jobs, keys
+from .publication_source import _lock_closure
 from .request_authority import RequestAuthority
 from .request_identity import VerifiedPrincipal
 from .scoped_lineage import ResourceNotFound, identifier
@@ -327,3 +329,31 @@ class ScopedActions:
                 .values(revoked_at=datetime.now(UTC).isoformat())
             )
             self._audit(connection, audit_id, principal, "key.revoke", key_id)
+
+    def record_run_read(
+        self, principal: VerifiedPrincipal, context: ProjectContext, run_id: str
+    ) -> None:
+        """Record only an already successfully verified/rendered run response.
+
+        Caller rendering finishes before this SQL-only transaction. Reuse the
+        bounded publication lineage lock/revalidation protocol; existing source
+        rows/scopes remain stable through audit commit, while future source
+        writers must still follow its project/owning-job phantom discipline.
+        This does not verify artifact bytes or promise response linearizability.
+        """
+        self._identity(principal, context)
+        identifier(run_id)
+        audit_id = uuid.uuid4().hex
+        with self._transaction() as connection:
+            self.authority.check(
+                connection, principal, context, resource_kind="run", resource_id=run_id
+            )
+            self._locks(connection, principal, context, None, None)
+            try:
+                _lock_closure(_Reads(connection, context), run_id)
+            except ArtifactError:
+                raise ResourceNotFound() from None
+            self.authority.check(
+                connection, principal, context, resource_kind="run", resource_id=run_id
+            )
+            self._audit(connection, audit_id, principal, "run.read", run_id)

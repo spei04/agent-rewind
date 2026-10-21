@@ -43,7 +43,7 @@ def actions(pg):
     prepare_scoped(pg)
     with pg["owner"].begin() as connection:
         role = pg["app_role"]  # Fixture-generated identifier, never a request value.
-        for table in ("projects", "organizations"):
+        for table in ("projects", "organizations", "records"):
             connection.exec_driver_sql(f"GRANT UPDATE(id) ON {table} TO {role}")
         connection.exec_driver_sql(f"GRANT UPDATE(cancel,status) ON jobs TO {role}")
         connection.exec_driver_sql(f"GRANT UPDATE(revoked) ON api_keys TO {role}")
@@ -141,14 +141,16 @@ def test_postgres_actions_need_only_declared_dml_and_preserve_other_sources(pg, 
                 "SELECT has_schema_privilege(current_user,'public','CREATE'),"
                 "has_table_privilege(current_user,'records','INSERT'),"
                 "has_table_privilege(current_user,'events','UPDATE'),"
-                "has_column_privilege(current_user,'jobs','reserved','UPDATE')"
+                "has_column_privilege(current_user,'jobs','reserved','UPDATE'),"
+                "has_column_privilege(current_user,'records','data','UPDATE')"
             )
-        ).one() == (False, False, False, False)
+        ).one() == (False, False, False, False, False)
     issued = actions.issue_key(HUMAN, CA, "viewer", "synthetic", 30)
     assert (
         actions.authority.legacy(VerifiedPrincipal.service_key(issued.id)).context.project_id == A
     )
     actions.cancel(HUMAN, CA, JOB_A)
+    actions.record_run_read(HUMAN, CA, RUN_A)
     actions.revoke_key(HUMAN, CA, issued.id)
     with pytest.raises(ResourceNotFound):
         actions.authority.legacy(VerifiedPrincipal.service_key(issued.id))
@@ -170,6 +172,7 @@ def test_postgres_actions_need_only_declared_dml_and_preserve_other_sources(pg, 
         ).all() == [
             (ALICE, "key.create"),
             (ALICE, "job.cancel"),
+            (ALICE, "run.read"),
             (ALICE, "key.revoke"),
         ]
 
@@ -207,19 +210,25 @@ def test_postgres_action_denial_does_not_disclose_known_foreign_key_or_job(
 
 
 @pytest.mark.parametrize(
-    "kind",
+    "operation,kind",
     [
-        "member_role",
-        "member_revoke",
-        "key_member",
-        "key_revoke",
-        "key_expiry",
-        "key_scope",
-        "target_scope",
-    ],
+        ("cancel", kind)
+        for kind in (
+            "member_role",
+            "member_revoke",
+            "key_member",
+            "key_revoke",
+            "key_expiry",
+            "key_scope",
+            "target_scope",
+        )
+    ]
+    + [("read", "member_revoke"), ("read", "key_revoke")],
 )
-def test_postgres_prior_uncommitted_revocation_wins_before_effect(pg, actions, kind):
+def test_postgres_prior_uncommitted_revocation_wins_before_effect(pg, actions, operation, kind):
     principal, context = key_caller(pg) if kind.startswith("key_") else (HUMAN, CA)
+    action = actions.cancel if operation == "cancel" else actions.record_run_read
+    target = JOB_A if operation == "cancel" else RUN_A
     ready, pids, listener = observe_actor(pg["app"])
     try:
         with pg["owner"].connect() as writer, ThreadPoolExecutor(max_workers=1) as pool:
@@ -228,7 +237,7 @@ def test_postgres_prior_uncommitted_revocation_wins_before_effect(pg, actions, k
                 text(deny_sql(kind)),
                 {"p": A, "id": principal.principal_id, "key": RUN_A, "job": JOB_A, "other": B},
             )
-            future = pool.submit(actions.cancel, principal, context, JOB_A)
+            future = pool.submit(action, principal, context, target)
             try:
                 assert ready.wait(3)
                 wait_blocked(pg, pids[0], blocker)
@@ -247,9 +256,17 @@ def test_postgres_prior_uncommitted_revocation_wins_before_effect(pg, actions, k
         assert connection.execute(select(audit.c.id)).all() == []
 
 
-@pytest.mark.parametrize("kind", ["member_role", "member_revoke", "key_member", "key_revoke"])
-def test_postgres_existing_grant_locks_hold_through_action_commit(pg, actions, monkeypatch, kind):
+@pytest.mark.parametrize(
+    "operation,kind",
+    [("cancel", kind) for kind in ("member_role", "member_revoke", "key_member", "key_revoke")]
+    + [("read", "member_revoke"), ("read", "key_revoke")],
+)
+def test_postgres_existing_grant_locks_hold_through_action_commit(
+    pg, actions, monkeypatch, operation, kind
+):
     principal, context = key_caller(pg) if kind.startswith("key_") else (HUMAN, CA)
+    execute = actions.cancel if operation == "cancel" else actions.record_run_read
+    target = JOB_A if operation == "cancel" else RUN_A
     effect, release, revoker_started = Event(), Event(), Event()
     actor_pid, revoker_pid = [], []
     audit_write = actions._audit
@@ -272,7 +289,7 @@ def test_postgres_existing_grant_locks_hold_through_action_commit(pg, actions, m
 
     monkeypatch.setattr(actions, "_audit", paused_audit)
     with ThreadPoolExecutor(max_workers=2) as pool:
-        action = pool.submit(actions.cancel, principal, context, JOB_A)
+        action = pool.submit(execute, principal, context, target)
         try:
             if not effect.wait(5):
                 action.result(timeout=1)
@@ -286,12 +303,15 @@ def test_postgres_existing_grant_locks_hold_through_action_commit(pg, actions, m
         assert revoker.result(timeout=8) is None
     monkeypatch.setattr(actions, "_audit", audit_write)
     with pytest.raises(denial(kind)):
-        actions.cancel(principal, context, JOB_A)
+        execute(principal, context, target)
     with pg["owner"].connect() as connection:
-        assert (
-            connection.execute(select(jobs.c.cancel).where(jobs.c.id == JOB_A)).scalar_one() is True
+        assert connection.execute(select(jobs.c.cancel).where(jobs.c.id == JOB_A)).scalar_one() is (
+            operation == "cancel"
         )
-        assert len(connection.execute(select(audit.c.id)).all()) == 1
+        expected_action = "job.cancel" if operation == "cancel" else "run.read"
+        assert connection.execute(select(audit.c.action, audit.c.target)).all() == [
+            (expected_action, target)
+        ]
 
 
 def test_postgres_default_switch_while_waiting_cannot_retarget_effect(pg, actions):
@@ -382,7 +402,7 @@ def test_postgres_real_permission_failure_rolls_back_key_scope_membership_audit(
     assert snapshot(pg["owner"]) == before
 
 
-@pytest.mark.parametrize("operation", ["cancel", "revoke"])
+@pytest.mark.parametrize("operation", ["cancel", "revoke", "read"])
 def test_postgres_audit_permission_failure_rolls_back_effect(pg, actions, operation):
     target_key(pg)
     before = snapshot(pg["owner"])
@@ -391,6 +411,8 @@ def test_postgres_audit_permission_failure_rolls_back_effect(pg, actions, operat
     with pytest.raises(ScopedActionError, match="^action_unavailable$"):
         if operation == "cancel":
             actions.cancel(HUMAN, CA, JOB_A)
+        elif operation == "read":
+            actions.record_run_read(HUMAN, CA, RUN_A)
         else:
             actions.revoke_key(HUMAN, CA, RUN_A)
     assert snapshot(pg["owner"]) == before
@@ -446,3 +468,59 @@ def test_postgres_effective_autocommit_refuses_before_mutation(pg, actions, mode
             event.remove(pg["app"], "checkout", listener)
     assert all(raw.closed for raw in used)
     assert snapshot(pg["owner"]) == before
+
+
+@pytest.mark.parametrize("changed", ["job_scope", "run_identity"])
+def test_postgres_run_read_audit_keeps_validated_closure_locked_until_commit(
+    pg, actions, monkeypatch, changed
+):
+    audited, release, writer_started = Event(), Event(), Event()
+    actor_pid, writer_pid = [], []
+    original = actions._audit
+
+    def paused(connection, *args):
+        original(connection, *args)
+        actor_pid.append(connection.connection.driver_connection.info.backend_pid)
+        audited.set()
+        assert release.wait(8), "Timed out awaiting closure-lock observation"
+
+    def mutate():
+        with pg["owner"].begin() as connection:
+            connection.exec_driver_sql("SET LOCAL lock_timeout='5s'")
+            writer_pid.append(connection.exec_driver_sql("SELECT pg_backend_pid()").scalar_one())
+            writer_started.set()
+            if changed == "job_scope":
+                connection.execute(
+                    text(
+                        "UPDATE resource_scopes SET project_id=:p "
+                        "WHERE resource_kind='job' AND resource_id=:id"
+                    ),
+                    {"p": B, "id": JOB_A},
+                )
+            else:
+                connection.execute(
+                    text("UPDATE records SET data=CAST(:body AS json) WHERE id=:id"),
+                    {"body": '{"job_id":"' + JOB_B + '","parent_id":null}', "id": RUN_A},
+                )
+
+    monkeypatch.setattr(actions, "_audit", paused)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        reader = pool.submit(actions.record_run_read, HUMAN, CA, RUN_A)
+        try:
+            if not audited.wait(5):
+                reader.result(timeout=1)
+                pytest.fail("Read audit did not reach the held transaction")
+            writer = pool.submit(mutate)
+            assert writer_started.wait(3)
+            wait_blocked(pg, writer_pid[0], actor_pid[0])
+        finally:
+            release.set()
+        assert reader.result(timeout=8) is None
+        assert writer.result(timeout=8) is None
+    monkeypatch.setattr(actions, "_audit", original)
+    with pytest.raises(ResourceNotFound):
+        actions.record_run_read(HUMAN, CA, RUN_A)
+    with pg["owner"].connect() as connection:
+        assert connection.execute(select(audit.c.action, audit.c.target)).all() == [
+            ("run.read", RUN_A)
+        ]

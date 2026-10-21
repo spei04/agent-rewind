@@ -15,6 +15,7 @@ from test_scoped_repositories import (
     JOB_A,
     JOB_B,
     RUN_A,
+    RUN_B,
     A,
     B,
     add_key,
@@ -407,4 +408,83 @@ def test_unsupported_sqlite_modes_refuse_without_mutation(actions, mode):
         event.remove(engine, "checkout", mutate)
     with pytest.raises(sqlite3.ProgrammingError):
         used[0].execute("SELECT 1")
+    assert snapshot(engine) == before
+
+
+@pytest.mark.parametrize("role", ["viewer", "operator", "maintainer"])
+def test_run_read_audit_is_scoped_fixed_and_sql_only(actions, role):
+    engine, service = actions
+    change(
+        engine,
+        "UPDATE project_memberships SET role=:role WHERE principal_id=:id",
+        role=role,
+        id=ALICE,
+    )
+    sql = []
+
+    def observed(connection, cursor, statement, parameters, context, many):
+        sql.append(statement)
+
+    event.listen(engine, "before_cursor_execute", observed)
+    try:
+        assert service.record_run_read(HUMAN, CA, RUN_A) is None
+    finally:
+        event.remove(engine, "before_cursor_execute", observed)
+    assert not any(
+        "artifact" in statement.lower() or "journal" in statement.lower() for statement in sql
+    )
+    writes = [
+        statement for statement in sql if statement.startswith(("INSERT", "UPDATE", "DELETE"))
+    ]
+    assert len(writes) == 1 and writes[0].startswith("INSERT INTO audit")
+    with engine.connect() as connection:
+        assert connection.execute(select(audit.c.actor, audit.c.action, audit.c.target)).all() == [
+            (ALICE, "run.read", RUN_A),
+        ]
+
+
+@pytest.mark.parametrize("failure", ["missing", "foreign", "revoked", "job_scope", "cycle"])
+def test_run_read_denial_never_records_success(actions, failure):
+    engine, service = actions
+    run_id = RUN_A
+    if failure == "missing":
+        run_id = "0" * 32
+    elif failure == "foreign":
+        run_id = RUN_B
+    elif failure == "revoked":
+        change(
+            engine,
+            "UPDATE project_memberships SET revoked_at='2026-01-01' WHERE principal_id=:id",
+            id=ALICE,
+        )
+    elif failure == "job_scope":
+        change(
+            engine,
+            "UPDATE resource_scopes SET project_id=:p "
+            "WHERE resource_kind='job' AND resource_id=:id",
+            p=B,
+            id=JOB_A,
+        )
+    else:
+        from test_scoped_repositories import edit
+
+        edit(engine, RUN_A, parent_id=RUN_A)
+    before = snapshot(engine)
+    with pytest.raises(ResourceNotFound):
+        service.record_run_read(HUMAN, CA, run_id)
+    assert snapshot(engine) == before
+
+
+def test_run_read_audit_failure_rolls_back_and_is_fixed(actions, monkeypatch):
+    engine, service = actions
+    original = service._audit
+    before = snapshot(engine)
+
+    def failed(connection, *args):
+        original(connection, *args)
+        raise OperationalError(CANARY, {}, RuntimeError(CANARY))
+
+    monkeypatch.setattr(service, "_audit", failed)
+    with pytest.raises(ScopedActionError, match="^action_unavailable$"):
+        service.record_run_read(HUMAN, CA, RUN_A)
     assert snapshot(engine) == before
