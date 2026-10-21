@@ -7,6 +7,13 @@ aggregate identity and existing prerequisites: Verified AR-006-A, AR-007-C and
 AR-011-B, consuming reviewed C04. Both delivery packages remain **Not started**;
 a planning assignment does not start their runtime work.
 
+A authored exact plan `9b97a09`; B independently accepted its contract, dependency
+and arithmetic review, and the lead accepted the plan. Tracking: aggregate
+[#86](https://github.com/spei04/agent-rewind/issues/86), P1
+[#87](https://github.com/spei04/agent-rewind/issues/87), P2
+[#88](https://github.com/spei04/agent-rewind/issues/88). Runtime remains unassigned;
+planning acceptance does not satisfy either delivery package.
+
 C04, the frozen OpenAPI/logical schema and CT-M1-005/006 remain authoritative.
 This plan elaborates their implementation without changing their bytes. Read/cursor
 authority also contributes to CT-M1-007/008; it cannot close their later replay or
