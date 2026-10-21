@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from collections import defaultdict
 from graphlib import CycleError, TopologicalSorter
@@ -141,6 +142,212 @@ def check_cards(data: dict[str, Any], markdown: str, plan: str) -> None:
         )
 
 
+def check_delivery_packages(data: dict[str, Any], markdown: str, plan: str) -> int:
+    """Check optional sequential PR boundaries without changing aggregate DAG identity."""
+    tasks = indexed(data["tasks"], "task")
+    nodes = {**tasks, **indexed(data["gates"], "gate")}
+    count = 0
+    for task in tasks.values():
+        packages = task.get("delivery_packages")
+        if packages is None:
+            count += 1
+            continue
+        require(isinstance(packages, list) and 2 <= len(packages) <= 8, "Invalid PR package count")
+        count += len(packages)
+        parts = indexed(packages, "delivery package")
+        expected_ids = [f"{task['id']}/P{i}" for i in range(1, len(packages) + 1)]
+        require(list(parts) == expected_ids, "Delivery package identities/order differ")
+        external: set[str] = set()
+        contracts: set[str] = set()
+        for index, package in enumerate(packages):
+            key = package["id"]
+            required = {
+                "title",
+                "objective",
+                "role",
+                "scope",
+                "out_of_scope",
+                "acceptance",
+                "tests",
+                "security_reliability",
+                "definition_of_done",
+                "confidence",
+                "effort_days",
+                "effort_range_days",
+                "dependencies",
+                "contracts",
+                "interface_contracts",
+                "status",
+                "accepted_merge_commit",
+                "review_evidence",
+            }
+            require(package.keys() >= required, f"Missing delivery package fields: {key}")
+            require(
+                all(
+                    isinstance(package[name], str) and package[name].strip()
+                    for name in (
+                        "title",
+                        "objective",
+                        "scope",
+                        "out_of_scope",
+                        "acceptance",
+                        "tests",
+                        "security_reliability",
+                        "definition_of_done",
+                        "interface_contracts",
+                    )
+                ),
+                f"Empty delivery package boundary: {key}",
+            )
+            lower, upper = package["effort_range_days"]
+            require(
+                all(
+                    type(v) in (int, float) and math.isfinite(v)
+                    for v in (lower, package["effort_days"], upper)
+                )
+                and 0 < lower <= package["effort_days"] <= upper,
+                f"Invalid delivery package effort: {key}",
+            )
+            require(package["role"] == task["role"], "Delivery package role differs")
+            require(
+                package["status"]
+                in {"Not started", "In progress", "Implemented; verification pending", "Verified"},
+                f"Invalid delivery package status: {key}",
+            )
+            deps = package["dependencies"]
+            require(len(deps) == len(set(deps)), "Duplicate delivery package dependency")
+            internal = set(deps) & parts.keys()
+            require(
+                internal == ({expected_ids[index - 1]} if index else set()),
+                f"Delivery package must depend on its preceding accepted PR: {key}",
+            )
+            external.update(set(deps) - parts.keys())
+            if index == 0:
+                require(
+                    set(deps) >= set(task["dependencies"]),
+                    "Delivery packages dropped inherited prerequisites",
+                )
+            require(
+                set(deps) - parts.keys() <= set(task["dependencies"]),
+                f"Delivery package bypasses aggregate prerequisites: {key}",
+            )
+            require(
+                set(package["contracts"]) == set(task["contracts"]),
+                f"Delivery package dropped inherited contracts: {key}",
+            )
+            contracts.update(package["contracts"])
+            merge = package["accepted_merge_commit"]
+            evidence = package["review_evidence"]
+            if package["status"] == "Verified":
+                require(
+                    isinstance(merge, str)
+                    and re.fullmatch(r"[0-9a-f]{40}", merge) is not None
+                    and isinstance(evidence, str)
+                    and bool(evidence.strip()),
+                    f"Delivery package lacks accepted merge/review evidence: {key}",
+                )
+            else:
+                require(
+                    merge is None and evidence is None, f"Unverified package claims merge: {key}"
+                )
+            if package["status"] != "Not started":
+                require(task["status"] != "Not started", "Active package under unstarted aggregate")
+                require(
+                    all(
+                        parts[dep]["status"] == "Verified"
+                        and isinstance(parts[dep]["accepted_merge_commit"], str)
+                        for dep in internal
+                    ),
+                    f"Delivery package starts before accepted merged prerequisite: {key}",
+                )
+                require(
+                    all(nodes[dep]["status"] in READY for dep in task["dependencies"]),
+                    f"Delivery package starts before aggregate prerequisites: {key}",
+                )
+            heading = f"#### {key} — {package['title']}"
+            require(markdown.count(heading + "\n") == 1, f"Missing delivery package card: {key}")
+            body = markdown.split(heading + "\n", 1)[1]
+            stop = re.search(r"^#{1,4} ", body, re.M)
+            fields = dict(
+                re.findall(
+                    r"^- \*\*([^*]+):\*\* (.+)$",
+                    body[: stop.start()] if stop else body,
+                    re.M,
+                )
+            )
+            for label, field in {
+                "Objective": "objective",
+                "Implementation scope": "scope",
+                "Out of scope": "out_of_scope",
+                "Acceptance criteria": "acceptance",
+                "Required automated tests": "tests",
+                "Security and reliability": "security_reliability",
+                "Definition of done": "definition_of_done",
+            }.items():
+                require(
+                    fields.get(label) == package[field].rstrip(".") + ".",
+                    f"Delivery package card differs: {key}/{field}",
+                )
+            documented_deps = re.findall(
+                r"\[([A-Z][A-Z0-9/-]*)\]\(#", fields.get("Prerequisites", "")
+            )
+            require(
+                set(documented_deps) == set(deps),
+                f"Delivery package card dependencies differ: {key}",
+            )
+            require(
+                fields.get("Required contracts")
+                == ", ".join(package["contracts"]) + ". " + package["interface_contracts"] + ".",
+                f"Delivery package card contracts differ: {key}",
+            )
+            require(
+                fields.get("Effort / confidence")
+                == f"{package['effort_days']:g} engineering days; "
+                f"planning range {lower:g}–{upper:g}; {package['confidence']} confidence.",
+                f"Delivery package card effort differs: {key}",
+            )
+            require(
+                fields.get("Progress", "").startswith(package["status"])
+                and fields.get("Responsible role", "").startswith(package["role"]),
+                f"Delivery package card status/role differs: {key}",
+            )
+        require(
+            external == set(task["dependencies"]),
+            "Delivery packages dropped inherited prerequisites",
+        )
+        require(
+            contracts == set(task["contracts"]), "Delivery packages dropped inherited contracts"
+        )
+        require(
+            sum(p["effort_days"] for p in packages) == task["effort_days"]
+            and [sum(p["effort_range_days"][i] for p in packages) for i in (0, 1)]
+            == task["effort_range_days"],
+            "Delivery package effort/range rollup differs",
+        )
+        if task["status"] == "Verified":
+            require(
+                all(p["status"] == "Verified" for p in packages),
+                "Aggregate completes before all delivery packages",
+            )
+        parent = task["parent"]
+        parent_prs = sum(
+            len(tasks[k].get("delivery_packages", [None]))
+            for k in data["parents"][parent]["children"]
+        )
+        row = next((line for line in plan.splitlines() if line.startswith(f"| {parent} | M")), "")
+        require(f": {parent_prs} PRs." in row, "Roadmap delivery PR count differs")
+        parent_section = re.search(rf"^### {re.escape(parent)} — [^\n]+\n+([^\n]+)", markdown, re.M)
+        require(
+            parent_section is not None and f"· {parent_prs} PRs" in parent_section[1],
+            "Backlog parent delivery PR count differs",
+        )
+    require(
+        f"{len(tasks)} aggregate tasks and {count} planned delivery PRs" in markdown,
+        "Backlog delivery PR count differs",
+    )
+    return count
+
+
 def validate(data: dict[str, Any], markdown: str, plan: str) -> dict[str, Any]:
     tasks = indexed(data["tasks"], "task")
     gates = indexed(data["gates"], "gate")
@@ -239,6 +446,7 @@ def validate(data: dict[str, Any], markdown: str, plan: str) -> dict[str, Any]:
         milestones[task["milestone"]] += task["effort_days"]
     longest = max((paths[key] for key in nodes), key=lambda item: (item[0], len(item[1])))
     computed = {
+        "delivery_pr_count": check_delivery_packages(data, markdown, plan),
         "task_count": len(tasks),
         "parent_count": len(data["parents"]),
         "gate_count": len(gates),

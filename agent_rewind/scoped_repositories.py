@@ -11,7 +11,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from sqlalchemy import LargeBinary, Text, and_, cast, column, func, literal, select, table
+from sqlalchemy import LargeBinary, Text, and_, case, cast, column, func, literal, select, table
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.elements import ColumnElement
@@ -51,6 +51,7 @@ members = table(
     column("principal_id"),
     column("role"),
     column("revoked_at"),
+    column("legacy_default"),
 )
 
 
@@ -233,7 +234,8 @@ class ScopedRepositories:
         self.artifact_resolver = artifact_resolver
         self.artifact_loader = artifact_loader
 
-    def _authorize(self, connection: Connection, context: ProjectContext, action: str) -> None:
+    def effective_role(self, connection: Connection, context: ProjectContext) -> str:
+        """Fresh membership/token intersection; context construction is not authentication."""
         identifier(context.organization_id)
         identifier(context.project_id)
         if not isinstance(context.principal_id, str) or not re.fullmatch(
@@ -241,7 +243,9 @@ class ScopedRepositories:
         ):
             raise ResourceNotFound()
         role = connection.execute(
-            select(members.c.role)
+            select(
+                case((_byte_length(connection, members.c.role) <= 16, members.c.role), else_=None)
+            )
             .select_from(
                 members.join(projects, members.c.project_id == projects.c.id).join(
                     organizations, organizations.c.id == projects.c.organization_id
@@ -254,7 +258,7 @@ class ScopedRepositories:
                 members.c.revoked_at.is_(None),
             )
         ).scalar_one_or_none()
-        if role is None or not allows_project_action(role, action):
+        if role not in {"viewer", "operator", "maintainer"}:
             raise ResourceNotFound()
         if context.principal_id.startswith("api-key:"):
             row = _Reads(connection, context).key(context.principal_id[8:], require_unrevoked=True)
@@ -269,8 +273,16 @@ class ScopedRepositories:
             # An explicitly mapped historical administrator key has at most
             # operator authority. Membership can reduce, never expand, its scope.
             ceiling = "operator" if row["role"] == "administrator" else row["role"]
-            if ceiling not in {"viewer", "operator"} or not allows_project_action(ceiling, action):
+            if ceiling not in {"viewer", "operator"}:
                 raise ResourceNotFound()
+            if ceiling == "viewer" or role == "viewer":
+                return "viewer"
+            return "operator"
+        return str(role)
+
+    def _authorize(self, connection: Connection, context: ProjectContext, action: str) -> None:
+        if not allows_project_action(self.effective_role(connection, context), action):
+            raise ResourceNotFound()
 
     @contextmanager
     def _session(self, context: ProjectContext, action: str) -> Iterator[_Reads]:

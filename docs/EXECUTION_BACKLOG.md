@@ -2,9 +2,9 @@
 
 **Revision:** 2026-10-20 · **Owner:** spei04 · **Status:** Approved for staged execution; task-specific gates remain applicable.
 
-This is the assignable execution companion to [the roadmap](PLAN.md). It covers 52 work packages as 151 independently reviewable PR-sized tasks. No application implementation, production provisioning or paid inference was started in preparing this packet. E0 is satisfied by explicit project-owner approval on 2026-10-19. Initial assignments and subsequent reviews are tracked in [ASSIGNMENTS.md](ASSIGNMENTS.md). Task cards and the machine-readable ledger record current status. Existing product code and historical test evidence are the starting point, not completion evidence for these tasks.
+This is the assignable execution companion to [the roadmap](PLAN.md). It covers 52 work packages as 151 aggregate tasks and 152 planned delivery PRs. No application implementation, production provisioning or paid inference was started in preparing this packet. E0 is satisfied by explicit project-owner approval on 2026-10-19. Initial assignments and subsequent reviews are tracked in [ASSIGNMENTS.md](ASSIGNMENTS.md). Task cards and the machine-readable ledger record current status. Existing product code and historical test evidence are the starting point, not completion evidence for these tasks.
 
-The [machine-readable backlog](../contracts/proposals/execution-backlog.json) records the same task fields, contract producers, gates, first-fortnight allocations and dependency audit. Recompute metrics and validate task/gate dependencies, contract-producer ancestry, card/roadmap parity and conditional schedule with `python scripts/check_execution_backlog.py` from the repository root; `python -m pytest -q -p no:cacheprovider tests/test_execution_backlog.py` exercises refusal of planning drift. Maintain the roadmap summary, this document, that ledger and affected GitHub issues together. IDs are permanent; never renumber completed evidence. The roadmap remains authoritative for product/architecture requirements; task-level edges here replace coarse package-level start assumptions. A future contract is a required producer deliverable, not an already implemented interface.
+The [machine-readable backlog](../contracts/proposals/execution-backlog.json) records the same task fields, contract producers, gates, first-fortnight allocations and dependency audit. Recompute metrics and validate task/gate dependencies, contract-producer ancestry, card/roadmap parity and conditional schedule with `python scripts/check_execution_backlog.py` from the repository root; `python -m pytest -q -p no:cacheprovider tests/test_execution_backlog.py` exercises refusal of planning drift. Maintain the roadmap summary, this document, that ledger and affected GitHub issues together. IDs are permanent; never renumber completed evidence. Optional nested delivery packages have their own acceptance/merged-source evidence and sequential prerequisites; they are not extra aggregate tasks or effort. The checker validates package cards, prerequisite/contract inheritance, effort rollup and aggregate completion. AR-007-C/P2 cannot start before accepted merged P1; the aggregate stays unverified until both packages and the full current-route matrix pass. The roadmap remains authoritative for product/architecture requirements; task-level edges here replace coarse package-level start assumptions. A future contract is a required producer deliverable, not an already implemented interface.
 
 ## Approval boundary and readiness
 
@@ -18,10 +18,10 @@ Reviewed PLAN, README and the current-release architecture, deployment, security
 
 | ID | Finding | Correction |
 | --- | --- | --- |
-| REV-01 | Five/ten-day packages had generic a/b splits with no assignable PR boundary. | 151 specific tasks, 0.5–4 engineering days each, with scope, exclusions, contracts, tests, review and acceptance. Parent IDs retained for traceability. |
+| REV-01 | Five/ten-day packages had generic a/b splits with no assignable PR boundary. | 151 specific tasks, 0.5–6 engineering days each; the six-day route task has two sequential delivery PRs, with scope, exclusions, contracts, tests, review and acceptance. Parent IDs retained for traceability. |
 | REV-02 | Real storage/KMS/runtime verification depended on IaC scheduled after runtime, creating a coarse milestone loop. | AR-033-A/B are early M4 foundation tasks after G0/ENV0; AR-033-C/D integrate and independently reinstall later. Task graph, not package-level all-to-all edges, governs starts. |
 | REV-03 | Reference cloud uses GCS but current artifact implementation only provides local/S3 paths. | AR-016-C explicitly implements native GCS and real-store conformance. No assumption that S3 support proves GCS compatibility. |
-| REV-04 | 42–50 week GA and 28–34 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff. | Retire dated windows. 442 base engineering days; 154.5-day effort-only longest path excludes role contention and external waits. Reforecast after Day 10 and each gate using actual throughput; no committed launch date. |
+| REV-04 | 42–50 week GA and 28–34 week pilot forecasts were derived from unlevelled package estimates and unconfirmed staff. | Retire dated windows. 446 base engineering days; 160.5-day effort-only longest path excludes role contention and external waits. Reforecast after Day 10 and each gate using actual throughput; no committed launch date. |
 | REV-05 | Uniform effort estimates concealed research, independent review and customer integration uncertainty. | Each task has confidence/range. 25% portfolio reserve is separate; audit fixes, procurement gaps, customer remediation and staffing/vendor waits remain explicitly unestimated gates. |
 | REV-06 | Five M1 operations cannot support all branch, study, admin, export and SDK consumers. | Contract producer PRs AR-027-A/029-A/032-A/034-A precede their services/consumers; runtime consumers cannot start on an absent future schema. |
 | REV-07 | Logical artifact and idempotency scope references lacked explicit matching composite unique/FK constraints. | Tighten m1.data-model.json artifact/project/owner and operation/principal/kind constraints; add corresponding scope-negative assertions to existing planned acceptance cases. |
@@ -34,12 +34,13 @@ Reviewed PLAN, README and the current-release architecture, deployment, security
 | REV-14 | M1 org/project/job caps do not by themselves cap a fan-out study spanning many child jobs. | AR-020-A/B explicitly introduce study-scoped ledger accounts and project/study/call closure; AR-022-A tests atomic study-wide caps under parallel child dispatch. |
 | REV-15 | Approved research design could be bypassed by future experiment/report producers if kept only in prose. | RA-01-A/B and C20/C21 are internally verified; AR-020-A/AR-024-A retain their reviewed design/owner gate and original runtime prerequisites. Deferred scopes remain separately gated. |
 | REV-16 | C04 required stale-projection repair with restricted audit, but no independently estimated implementation card owned it. | AR-006-A owns initial projection/rules; AR-006-B conservatively suppresses unsafe reads; AR-006-C implements bounded fenced repair/audit after AR-010-B, before AR-012-B verification. Add 2 base / 3.5 upper days; no new feature or spending authority. |
+| REV-17 | AR-007-C promised absent future v1/replay/export routes and excluded the C04 session upgrade; two days omitted renderer and transaction integration. | Own existing routes and reusable authority in two sequential PRs: foundation 2 [2–3], integration 4 [4–7] after accepted merged foundation; aggregate 6 [6–10] BE days, medium-low confidence. Add verified AR-009-B and C04; retain future consumer obligations without reverse dependencies, with full CT-M1-007/008/009 gates still open. |
 
 ## Estimates, staffing and uncertainty
 
 Engineering effort includes implementation or design, task tests, ordinary review/rework and documentation. Six logical role totals are demand estimates, not six funded human FTEs. Three contributor slots are active; no measured conversion from those slots to engineering days or a launch calendar is assumed. A hypothetical human role at 3.5 delivery days/week is shown only as a capacity lower bound. Ranges are planning bounds, not probabilities; RA-01 uses approved 2–3 and 2–4 day design ranges. The 25% integration reserve is alternative to summed upper ranges, not additive. External review/operations/funding waits and unestimated follow-up implementation remain excluded.
 
-Base effort: **442 engineering days**. A 25% integration/rework allowance gives **552.5 days**; summing task upper planning bounds gives **748.1 days**. These are alternative views of uncertainty, not budgets to add together and not calendar commitments. Earlier 430-day/538-day totals are superseded. Research execution time and model charges, external assessment lead time/fees, unknown security fixes, customer-required gaps and ongoing support are not disguised inside a fixed ten-day task. An unknown required fix becomes a new ID/PR with scope and tests before its gate can close.
+Base effort: **446 engineering days**. A 25% integration/rework allowance gives **557.5 days**; summing task upper planning bounds gives **755.1 days**. These are alternative views of uncertainty, not budgets to add together and not calendar commitments. Earlier 430-day/538-day totals are superseded. Research execution time and model charges, external assessment lead time/fees, unknown security fixes, customer-required gaps and ongoing support are not disguised inside a fixed ten-day task. An unknown required fix becomes a new ID/PR with scope and tests before its gate can close.
 
 | Primary role | Base delivery days | Single-role capacity lower bound at 3.5 days/week |
 | --- | ---: | ---: |
@@ -47,7 +48,7 @@ Base effort: **442 engineering days**. A 25% integration/rework allowance gives 
 | FE | 23 | 6.6 weeks |
 | RS | 66 | 18.9 weeks |
 | PL | 88 | 25.1 weeks |
-| BE | 79.5 | 22.7 weeks |
+| BE | 83.5 | 23.9 weeks |
 | QE | 112.5 | 32.1 weeks |
 
 Roles: TL technical lead/backend, BE execution/backend, PL platform/SRE, FE frontend, RS research, QE quality. PM and SEC are shared reviewers/decision owners; actual names and independent statistical/security reviewers are not yet confirmed. Task effort includes ordinary verification and review work; the 30% availability reserve covers coordination, support and interruptions. Do not double-book primary tasks or assume the six roles are six available employees. QE ownership includes independent integration/rehearsal evidence, while every implementing engineer still writes their task tests.
@@ -56,14 +57,14 @@ QE and PL are material resource constraints. At the Day 10 review, redistribute 
 
 ## Critical path, parallel tracks and contingencies
 
-The task DAG has **542 edges**, **27 explicit gates**, no cycles and a **154.5-engineering-day longest effort path**. Under a hypothetical human role at 3.5 delivery days/week this is about 44.1 workweeks before contention and external waits; the three contributor slots have no validated conversion to that staffing scenario. It is a lower bound, not a launch forecast. Zero effort on an external gate means engineering effort is not estimated; it never means the gate is already satisfied or has zero lead time.
+The task DAG has **543 edges**, **27 explicit gates**, no cycles and a **160.5-engineering-day longest effort path**. Under a hypothetical human role at 3.5 delivery days/week this is about 45.9 workweeks before contention and external waits; the three contributor slots have no validated conversion to that staffing scenario. It is a lower bound, not a launch forecast. Zero effort on an external gate means engineering effort is not estimated; it never means the gate is already satisfied or has zero lead time.
 
 The computed effort path, including integration joins, is:
 
 ```text
 E0 → AR-005-A → AR-012-A → AR-004-B → AR-004-C →
 G0 → AR-005-B → AR-005-C → AR-011-B → AR-009-A →
-AR-009-B → AR-008-A → AR-008-B → AR-010-A → AR-010-B →
+AR-009-B → AR-007-C → AR-008-A → AR-008-B → AR-010-A → AR-010-B →
 AR-006-C → AR-012-B → AR-014-A → AR-014-B → AR-017-A →
 AR-023-A → AR-023-B → AR-023-C → AR-021-A → AR-021-B →
 AR-021-C → AR-022-B → AR-022-C → AR-026-B → AR-026-C →
@@ -95,7 +96,7 @@ After the first two weeks, use dependency-ready milestone scheduling. The former
 | Milestone | Base effort | Scheduling after Day 10 | Explicit exit / integration checkpoint |
 | --- | ---: | --- | --- |
 | M0 | 8.5 days | Internal development freeze verified; external production conditions remain separate | [G0](#g0): M0 accepted; schemas and initial migration scope reviewed. |
-| M1 | 43.5 days | Continue verified-producer foundation slices after G0; run projection is active | [G1](#g1): Historical identities, 24 behavioral cases, scope/lease/budget compatibility, required CI and installable main candidate evidence pass. |
+| M1 | 47.5 days | Projection Verified; accepted planning 839f3a7; P1 #76 implemented with hosted verification pending, P2 #77 Not started until accepted merged P1 | [G1](#g1): Historical identities, 24 behavioral cases, scope/lease/budget compatibility, required CI and installable main candidate evidence pass. |
 | M2 | 69 days | Start each task after its foundation inputs; joins G1 plus early staging | [G2](#g2): Real gVisor isolation/restore/cleanup, cloud store/key rotation, fail-closed lease and accounted live smoke verified. |
 | M3 | 81 days | Includes 4 base days of RA-01 design before C08/C09 producers; runtime follows its original prerequisites and G2 | [G3](#g3): Resumable distributed studies preserve frozen protocol, missingness and all call accounting; reports independently recompute. |
 | M4 | 82 days | Early IaC after G0; UI/SDK after producer APIs; complete after G3 | [G4](#g4): Independent full browser/SDK workflow and fresh install pass with real IdP/GCS/KMS/gVisor and selected adapter. |
@@ -122,7 +123,7 @@ The table preserves the conditional foundation scenario from the issue #51 decis
 | Delivery Day 9 | Review, contingency and integration; no new base allocation | Reserve for measured rework and hosted verification; reforecast the ready M1 queue only after actual acceptance. |
 | Delivery Day 10 | Review, contingency and integration; no new base allocation | Reserve for measured rework and hosted verification; reforecast the ready M1 queue only after actual acceptance. |
 
-The 2–3 day ranges leave days 6–7 for up to two additional half-day allocations per author; later days retain hosted integration/review and reforecast capacity. Review dates are conditional, not automatic acceptance. AR-009-B is Verified for its preparatory scope in PR #70 after C implementation, independent A/B review and matching hosted checks. AR-006-A is active in issue #71: C owns capture/backfill/publication, B owns the schema/revision/compatibility slice after planning, and A/lead independently review with reciprocal scoped review. AR-011-C and AR-007-C remain ready but unassigned. AR-006-C waits for AR-006-A and AR-010-B; the lead must allocate implementation and independent review before any further start. Research implementation remains unscheduled because its original C08/C09 and runtime prerequisites are not yet available. M3 is now 81 base days, while M5 stays 50 pending measured calibration, permissions, funding and independent statistical review.
+The historical 2–3 day scenario ranges left days 6–7 for contingency; those rows do not allocate the current wave. AR-009-B and AR-006-A are Verified for preparatory scope in PR #70/#72; issue #71 is closed. P1 #76 is implemented at A/B-reviewed 8be6316; the lead owns final hosted verification and accepted merge. P2 #77 remains Not started until that gate. Its P1 foundation 2 [2–3] and P2 integration 4 [4–7] day packages total 6 [6–10] days. Read-only P2 preparation retains the estimate after the foundation handoff; this is not a new fortnight or launch calendar. AR-011-C remains ready/unassigned; AR-006-C waits for AR-010-B. Research implementation stays unscheduled behind original runtime prerequisites; M3 remains 81 and M5 50 base days with external execution gates.
 
 ### Historical RA-01 conditional design schedule — 2026-10-20
 
@@ -580,7 +581,7 @@ M1 / P0 · 3 PRs · 7 engineering days · In progress · [Tracking issue #6](htt
 #### AR-006-B — Stable cursor listing and run summaries
 
 - **Objective:** Make large run histories queryable through bounded authorized requests. This task delivers stable cursor listing and run summaries.
-- **Implementation scope / PR boundary:** Implement scoped list/detail v1 routes with opaque bound cursors, stable tie ordering and fixed page limits; apply bounded conservative current-job status/branchability suppression at read time without mutating the projection or scanning artifacts.
+- **Implementation scope / PR boundary:** Implement scoped list/detail v1 routes with opaque bound cursors, stable tie ordering and fixed page limits; apply bounded conservative current-job status/branchability suppression at read time without mutating the projection or scanning artifacts; use AR-007-C trusted named-project authority for new v1 list/detail and cursor access; reauthorize before returning any stored result after revocation.
 - **Out of scope:** No full history download or arbitrary search engine or mutable reconciliation/audit (AR-006-C).
 - **Prerequisites:** [AR-006-A](#ar-006-a), [AR-007-C](#ar-007-c), [AR-011-B](#ar-011-b). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C04; definitions and producer availability in the contract register. C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.
@@ -613,7 +614,7 @@ M1 / P0 · 3 PRs · 7 engineering days · In progress · [Tracking issue #6](htt
 
 ### AR-007 — Prevent cross-project access through both legacy and new paths
 
-M1 / P0 · 3 PRs · 5.5 engineering days · In progress
+M1 / P0 · 4 PRs across 3 aggregate tasks · 9.5 engineering days · In progress
 
 <a id="ar-007-a"></a>
 
@@ -651,20 +652,56 @@ M1 / P0 · 3 PRs · 5.5 engineering days · In progress
 
 <a id="ar-007-c"></a>
 
-#### AR-007-C — Legacy and v1 authorization enforcement
+#### AR-007-C — Existing-route authorization and reusable project authority
 
-- **Objective:** Prevent cross-project access through both legacy and new paths. This task delivers legacy and v1 authorization enforcement.
-- **Implementation scope / PR boundary:** Route all legacy and v1 reads/writes, exports, cancellation and key use through scoped checks.
-- **Out of scope:** No session redesign or customer IdP provisioning.
-- **Prerequisites:** [AR-007-B](#ar-007-b), [AR-011-B](#ar-011-b). E0 applies transitively; required producer contracts must be reviewed.
-- **Required contracts:** C05; definitions and producer availability in the contract register.
-- **Acceptance criteria:** Revocation immediately applies to idempotent replay and in-flight API access; bypass inventory empty.
-- **Required automated tests:** M1-007/009 route matrix, legacy aliases, cookie CSRF and scoped API keys.
-- **Security and reliability:** Keep second-project feature disabled until full route deny suite passes.
-- **Effort / confidence:** 2 engineering days; planning range 2–3; medium confidence.
-- **Responsible role:** BE; required reviewers: TL, QE. Named assignee pending staffing.
-- **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Objective:** Prevent cross-project access in every existing route and supply the trusted authority boundary for later route producers.
+- **Implementation scope / PR boundary:** Upgrade to issuer-bound v2 sessions; implement fresh explicit default/named-project authority with 401/404/403 distinctions; adapt every existing data route to scoped repository and verified published-graph/ref reads without raw-hash fallback; commit scoped cancellation and human-maintainer key issuance/revocation with fresh authority and audit atomically; wire work creation to a required unavailable admission adapter that refuses before readiness probes, storage or enqueue.
+- **Out of scope:** No new v1/debugger/study/export routes, session infrastructure or IdP provisioning, historical artifact adoption, customer-ready schema profile, live publication, or actual work admission. The required C04 v2 session format upgrade is included; durable admission/replay/frozen config and worker integration remain with AR-008-A/B and AR-010-B.
+- **Prerequisites:** [AR-007-B](#ar-007-b), [AR-011-B](#ar-011-b), [AR-009-B](#ar-009-b). E0/G0 and reviewed producer contracts apply; all direct inputs are Verified.
+- **Required contracts:** C04, C05; [existing-route plan](delivery/EXISTING_ROUTE_AUTHORITY_PLAN.md) records the exact boundary and future consumers.
+- **Acceptance criteria:** Exhaustive existing-route inventory has no unscoped data bypass; inaccessible/default-ambiguous resources return 404 and insufficient action rights in an accessible project return 403; v1 cookies are rejected; identity-only me/logout remain usable after project revocation without exposing project/resource IDs; revocation prevents protected return/mutation; cancel and key changes are atomic; unavailable admission refuses before readiness probes and causes no storage, artifact, secret, job or audit writes. CT-M1-007/009 current-route subsets alone cannot close the full cases; CT-M1-008 remains planned for durable replay producers.
+- **Required automated tests:** Existing-route/alias matrix; v2 issuer collision and old-cookie refusal; missing/ambiguous default, named/cross-project and shared-object probes; CSRF/exact Origin; me/logout after revocation and DB failure; real PostgreSQL revocation-before-return and mutation races, cancel/key rollback and terminal cancellation; unavailable adapter fails before readiness probes, storage, enqueue and all writes/provider access; actual schema guard still denies customer routes.
+- **Security and reliability:** Keep migration-only schema guard and customer/second-project activation gates; authorize before expensive I/O and reauthorize before return/commit; project-before-job lock hierarchy; token role intersects current membership and never grants key administration; no client-selected legacy scope, raw artifact fallback or raw enqueue.
+- **Effort / confidence:** 6 engineering days; planning range 6–10; medium-low confidence. Reforecast after the first immutable identity/reader handoff at about 1.5–2 engineering days.
+- **Responsible role:** BE; C implements after accepted planning/design, A reviews security/auth/read behavior, B reviews transactions, lead integrates; required reviewers: TL, QE.
+- **Definition of done:** P1 and P2 each have independent review, matching checks and a recorded accepted merge. Aggregate completion additionally requires the full P2 existing-route/transaction matrix with A security/auth/read review, B transaction review and lead integration. Only partial coverage of CT-M1-007/009 is attributed here; CT-M1-008 and future-route gates remain planned. No customer activation or full M1 acceptance follows.
+- **Progress:** In progress; [aggregate tracker #75](https://github.com/spei04/agent-rewind/issues/75). A and lead accepted planning correction 839f3a7; P1 runtime 8be6316 has A identity/read and B authority/transaction acceptance. Final matching hosted verification and accepted merge are lead-owned. P2 waits for accepted merged P1; no full current-route or CT-M1-007/008/009 acceptance.
+
+Two independently reviewable delivery PRs: AR-007-C/P1 foundation 2 [2–3] days, then AR-007-C/P2 full existing-route integration 4 [4–7] days after accepted merged P1. P1 does not wire Auth/session issuance, routes, UI, mutations or admission. Aggregate AR-007-C remains unverified until P2 and the full existing-route matrix are accepted.
+
+<a id="ar-007-c-p1"></a>
+
+#### AR-007-C/P1 — Identity, authority and verified-reader foundation
+
+- **Objective:** Provide tested reusable identity/project decisions and one verified publication-read boundary before changing HTTP behavior.
+- **Implementation scope:** Implement a strict issuer-bound v2 codec and identity helpers without wiring Auth/session issuance; fresh default/named project authority with typed 401/404/403 decisions; a shared journal-free verified reader that resolves a unique published root and performs a final compound ownership/ref/authority recheck. Delegate the existing RunPublisher.read consumer to that reader with preserved behavior.
+- **Out of scope:** No Auth/session issuance wiring, existing-route/renderer/UI changes, key/cancel mutations, admission integration, new schema/profile, live writer or customer activation.
+- **Prerequisites:** [AR-007-B](#ar-007-b), [AR-011-B](#ar-011-b), [AR-009-B](#ar-009-b).
+- **Required contracts:** C04, C05. C04 issuer/principal/v2 codec and safe-error grammar; C05 role/scope/token intersection; accepted AR-009-B root/graph/ref fidelity, unique-root rejection and read reauthorization. The shared reader must not require a publication journal or live writer.
+- **Acceptance criteria:** Helpers reject invalid/v1 session encodings without issuing cookies; default/named authority preserves inaccessible404 versus accessible-action403; reader rejects zero/ambiguous roots, foreign/nested refs and revoked authority before protected return; RunPublisher.read retains supported output/failure semantics and uses the shared reader; every existing auth/route/UI/mutation behavior remains unchanged.
+- **Required automated tests:** Codec issuer collision/strict shape/version and safe-error tests; default/named role and service-key intersections; shared-object and unique-root denial; compound recheck after I/O and real PostgreSQL revocation races; existing publication-reader regressions prove delegation preserves semantics; package smoke includes reusable modules.
+- **Security and reliability:** No journal needed for reads and no connection held across storage I/O; bound graph/ref operations; final compound recheck before return; preserve migration-only guard and unavailable live writer.
+- **Effort / confidence:** 2 engineering days; planning range 2–3; medium-low confidence.
+- **Responsible role:** BE; C implements, A identity/security/read review, B transaction review, lead integration.
+- **Definition of done:** Independent A identity/read and B transaction review accepted; matching hosted checks and behavior-preservation regressions pass; record accepted merged source and review evidence before P2 starts. This closes P1 only, not aggregate AR-007-C or any route-activation gate.
+- **Progress:** Implemented; verification pending; [issue #76](https://github.com/spei04/agent-rewind/issues/76), [draft PR #78](https://github.com/spei04/agent-rewind/pull/78). A/B accepted corrected runtime 8be6316 (C source 8222644) and fixture-only dbfbae0. Lead integration passed 314 focused tests with 53 explicit local PostgreSQL skips and all static/planning checks; A independently passed 61 reader/publication cases. The measured SQLite rescan is corrected with materialized exact-ID matching and an instruction-budget regression. Earlier run 39526088575 failed its maximum PostgreSQL fixture before reader execution; final matching hosted execution of all 46 new PostgreSQL cases, full regressions, package/security/gVisor and accepted merge remain required.
+
+<a id="ar-007-c-p2"></a>
+
+#### AR-007-C/P2 — Complete existing-route authority integration
+
+- **Objective:** Replace all existing unscoped route consumers and mutations using the accepted foundation, preserving compatibility and fail-closed admission.
+- **Implementation scope:** Wire accepted P1 into Auth/v2 cookie issuance, every existing route/renderer and explicit-role UI; implement exact me/logout/schema exceptions, atomic cancel/key/scope/membership/audit mutations and the required unavailable work adapter; finish exhaustive existing-route and real PostgreSQL race/rollback evidence.
+- **Out of scope:** No new v1/debugger/study/export route, historical artifact adoption, active schema profile, live publication or actual admission/paid dispatch; later producers retain their C04 obligations.
+- **Prerequisites:** [AR-007-C/P1](#ar-007-c-p1).
+- **Required contracts:** C04, C05. Accepted merged P1 codec/typed authority/journal-free verified reader; C04 exact route exceptions, project-before-job transaction and frozen-config/admission refusal boundaries; C05 current membership/key scope; AR-011-B errors/readiness, with unavailable-adapter refusal before readiness invocation.
+- **Acceptance criteria:** All existing routes use fresh scoped authority and verified evidence with no raw-hash/raw-enqueue fallback; current revoked users can use identity-only me/logout safely; cancel/key effects and restricted audit are atomic; explicit role gates UI actions; unavailable admission refuses before readiness probes/storage/enqueue; the full current-route matrix passes before aggregate completion.
+- **Required automated tests:** Exhaustive route/alias 401/403/404 and legacy-shape matrix; old-cookie refusal and v2 issuance, CSRF/exact Origin, me/logout revoked/default/DB-error cases; real PostgreSQL revocation-before-return, mutation races, terminal cancel and rollback at each stage; key/default/secret one-time handling; shared-object cross-project probes; zero readiness/storage/enqueue/provider calls with unavailable adapter; real migration guard refusal.
+- **Security and reliability:** P2 starts only after accepted merged P1; fresh authorization before I/O and effect/return; account/project/job lock discipline; no service-key escalation or cookie-role fallback; all customer/live/external gates unchanged.
+- **Effort / confidence:** 4 engineering days; planning range 4–7; medium-low confidence.
+- **Responsible role:** BE; C implements, A identity/security/read review, B transaction review, lead integration.
+- **Definition of done:** Independent A security/auth/read and B transaction review, matching hosted full current-route/PG matrix and accepted merge recorded. Lead may then verify aggregate AR-007-C for preparatory scope only; CT-M1-007/009 remain partial overall and CT-M1-008 remains planned until later actual producers pass.
+- **Progress:** Not started; [issue #77](https://github.com/spei04/agent-rewind/issues/77). Requires accepted merged P1; accepted merged source and review evidence not yet available.
 
 <a id="ar-008"></a>
 
@@ -677,7 +714,7 @@ M1 / P0 · 2 PRs · 4 engineering days · Not started · [Tracking issue #8](htt
 #### AR-008-A — Canonical request and durable admission identity
 
 - **Objective:** Make retries safe and admission/cancellation behavior predictable. This task delivers canonical request and durable admission identity.
-- **Implementation scope / PR boundary:** Implement operation/key alias constraints, default materialization and transactional job/scope/audit publication after upload.
+- **Implementation scope / PR boundary:** Implement operation/key alias constraints, default materialization and transactional job/scope/audit publication after upload; consume AR-007-C authority for new admission and recovery lookup; bind job/scope/audit/common frozen configuration atomically and reauthorize before disclosing original operation identity.
 - **Out of scope:** No provider retry policy or study submission.
 - **Prerequisites:** [AR-007-C](#ar-007-c), [AR-009-B](#ar-009-b). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C04; definitions and producer availability in the contract register.
@@ -694,7 +731,7 @@ M1 / P0 · 2 PRs · 4 engineering days · Not started · [Tracking issue #8](htt
 #### AR-008-B — Submit, operation status and cancellation routes
 
 - **Objective:** Make retries safe and admission/cancellation behavior predictable. This task delivers submit, operation status and cancellation routes.
-- **Implementation scope / PR boundary:** Expose five M1 operations with task limits, stable errors and atomic cancel intent.
+- **Implementation scope / PR boundary:** Expose five M1 operations with task limits, stable errors and atomic cancel intent; integrate the required admission adapter only after AR-008-A; apply trusted named-project authority to submission, operation polling and cancellation, preserving the legacy authority contract.
 - **Out of scope:** No branch or study endpoints.
 - **Prerequisites:** [AR-008-A](#ar-008-a), [AR-011-B](#ar-011-b). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C04; definitions and producer availability in the contract register.
@@ -776,7 +813,7 @@ M1 / P0 · 2 PRs · 5 engineering days · Not started · [Tracking issue #10](ht
 #### AR-010-B — Lease-fenced admission permits and cancellation accounting
 
 - **Objective:** Enforce budget limits before every potentially paid action. This task delivers lease-fenced admission permits and cancellation accounting.
-- **Implementation scope / PR boundary:** Require valid owner/lease/cancel state before issuing permit; expose ledger diagnostics without prompt bodies.
+- **Implementation scope / PR boundary:** Require valid owner/lease/cancel state before issuing permit; expose ledger diagnostics without prompt bodies; validate scoped immutable common configuration and generation/cancel authority before dispatch for all newly admitted jobs; integrate the required admission/publication fence without enabling historical redispatch.
 - **Out of scope:** No distributed study scheduling or automatic paid replay.
 - **Prerequisites:** [AR-010-A](#ar-010-a), [AR-005-C](#ar-005-c). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C04; definitions and producer availability in the contract register.
@@ -873,7 +910,7 @@ M1 / P0 · 2 PRs · 5 engineering days · In progress · [Tracking issue #12](ht
 #### AR-012-B — Integrated M1 concurrency and compatibility gate
 
 - **Objective:** Detect incompatible or unsafe foundation changes before integration. This task delivers integrated m1 concurrency and compatibility gate.
-- **Implementation scope / PR boundary:** Wire PostgreSQL/object-backed required checks for all 24 M1 cases and upgrade/legacy compatibility; independently validate AR-006-C live stale-projection repair and restricted audit integration.
+- **Implementation scope / PR boundary:** Wire PostgreSQL/object-backed required checks for all 24 M1 cases and upgrade/legacy compatibility; independently validate AR-006-C live stale-projection repair and restricted audit integration; verify the deferred v1, durable replay and common-config consumer obligations from AR-007-C against their actual producers; preparatory route subsets do not satisfy all CT-M1-007/008/009 cases.
 - **Out of scope:** No benchmark capacity or enterprise readiness declaration.
 - **Prerequisites:** [AR-006-B](#ar-006-b), [AR-006-C](#ar-006-c), [AR-008-B](#ar-008-b), [AR-009-B](#ar-009-b), [AR-010-B](#ar-010-b), [AR-011-C](#ar-011-c), [AR-012-A](#ar-012-a). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C04; definitions and producer availability in the contract register. C04 reviewed for development/testing at source 22c4376 and G0 recorded. Other contracts require their listed producers and task-specific gates; no runtime or production acceptance is implied.
@@ -1786,7 +1823,7 @@ M4 / P0 · 3 PRs · 10 engineering days · Not started
 #### AR-027-B — History and branch API services
 
 - **Objective:** Let engineers inspect and branch large recorded runs through stable contracts. This task delivers history and branch api services.
-- **Implementation scope / PR boundary:** Implement paged timeline/files, idempotent branch admission and bounded comparison from immutable lineage.
+- **Implementation scope / PR boundary:** Implement paged timeline/files, idempotent branch admission and bounded comparison from immutable lineage; consume AR-007-C trusted project authority and reauthorize bounded timeline/files/branch/compare results; no raw-hash lookup after an initial scope check.
 - **Out of scope:** No browser interface or study report.
 - **Prerequisites:** [AR-027-A](#ar-027-a), [AR-014-C](#ar-014-c), [AR-008-B](#ar-008-b). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C11; definitions and producer availability in the contract register.
@@ -1900,7 +1937,7 @@ M4 / P0 · 3 PRs · 10 engineering days · Not started
 #### AR-029-B — Study and report API integration
 
 - **Objective:** Expose study progress, uncertainty and costs without overstating evidence. This task delivers study and report api integration.
-- **Implementation scope / PR boundary:** Expose scoped idempotent study commands, paged trial status and recomputable report/export.
+- **Implementation scope / PR boundary:** Expose scoped idempotent study commands, paged trial status and recomputable report/export; consume AR-007-C trusted project authority for new study/report/export routes and reauthorize after artifact I/O.
 - **Out of scope:** No new estimator or UI.
 - **Prerequisites:** [AR-029-A](#ar-029-a), [AR-022-C](#ar-022-c), [AR-026-C](#ar-026-c), [AR-008-B](#ar-008-b). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C12; definitions and producer availability in the contract register.
@@ -2071,7 +2108,7 @@ M4 / P0 · 3 PRs · 10 engineering days · Not started
 #### AR-032-B — Scoped export and tombstone lifecycle
 
 - **Objective:** Honor retention, export and deletion without breaking live evidence. This task delivers scoped export and tombstone lifecycle.
-- **Implementation scope / PR boundary:** Implement bounded evidence export, authenticated deletion intent and hold-protected tombstones.
+- **Implementation scope / PR boundary:** Implement bounded evidence export, authenticated deletion intent and hold-protected tombstones; consume AR-007-C trusted project authority for bounded lifecycle export/delete and reauthorize at effect/return boundaries.
 - **Out of scope:** No physical GC or instant backup erasure promise.
 - **Prerequisites:** [AR-032-A](#ar-032-a), [AR-029-B](#ar-029-b). E0 applies transitively; required producer contracts must be reviewed.
 - **Required contracts:** C13; definitions and producer availability in the contract register.
@@ -3307,3 +3344,15 @@ The [context/selection amendment and RC-01–06 cards](research/CONTEXT_SELECTIO
 Recomputed live planning totals: 151 tasks, 52 parents, 27 gates, 20 contracts and 542 acyclic edges; 442 base / 748.1 upper / 552.5 alternate 25% allowance days, with a 154.5-day effort-only path. M1 is 43.5 days and BE 79.5; other role/milestone totals are unchanged. Historical C21/owner issuance records and prior schedules remain unchanged; these estimates do not establish a calendar or new staffing.
 
 2026-10-20 projection acceptance: AR-006-A preparatory run projection is Verified in PR #72 at reviewed source 46639c49502995870eb19faaea218b84a02a95ec. Hosted run 39497717028 passed 1596 tests on Python 3.11 and 1600 on Python 3.12, including all 21 new actual PostgreSQL backfill/publication cases. Three core Docker skips are covered by three passing gVisor cases; four sqlite3 transaction-mode cases are Python-3.12-only. Lint, formatting, strict types, contract/planning validation, dependency security audit, isolated package smoke and CI gate passed. A/B accepted the scoped runtime, transaction, catalog, test and diagnostic corrections. Frozen history, interrupted process recovery, backup/restore/resume, project serialization and publication rollback/retry have synthetic execution evidence. Live generation-aware publication, API listing, mutable repair/audit, customer admission and production acceptance remain gated. No model calls, new paid resources or partner data were used. Parent AR-006 stays In progress. Dependencies, estimates and gates are unchanged.
+
+2026-10-20 existing-route planning reconciliation: [AR-007-C plan](delivery/EXISTING_ROUTE_AUTHORITY_PLAN.md) retains original C04/C05 obligations in one preparatory PR with four reviewable commits. Estimate replaces 2 [2–3] with 6 [6–10] BE days, medium-low; direct verified AR-009-B is added as a consumed graph-reader producer. B owns planning, C design/implementation after acceptance, A security/auth/read and B transaction review; runtime remains Not started. Current totals: 151 tasks, 543 acyclic edges, 446 base / 755.1 upper / 557.5 alternate allowance and 160.5 effort-path days; M1 47.5 and BE 83.5. Historical owner/C21 records and daily schedules remain unchanged; no full future-route, customer, paid or production gate is promoted.
+
+2026-10-20 smaller-PR correction supersedes the preceding one-PR/four-commit proposal: the user requested separately reviewable deliveries. AR-007-C/P1 is the 2 [2–3] day foundation with unwired strict v2 helpers, fresh authority, shared journal-free verified reader and preserved RunPublisher.read delegation; AR-007-C/P2 is the 4 [4–7] day complete integration after accepted merged P1. Both retain migration-only limits; aggregate AR-007-C stays Not started until implementation begins and cannot be Verified before accepted P2/full route matrix. Issue #75 is the aggregate tracker. Refusal by the unavailable admission adapter precedes readiness probes, storage and enqueue. A/C/lead accepted the split in principle; exact delta review remains required.
+
+The aggregate graph and effort stay 151 tasks, 543 edges, 446 base / 755.1 upper / 557.5 alternate allowance and 160.5 effort-path days. Delivery accounting is now explicitly 152 planned PRs; parent AR-007 has four PRs across three aggregate tasks. Nested package checks require inherited prerequisites/contracts, sum base/ranges without double counting, accepted merged P1 before P2, and complete package evidence before aggregate verification. Historical decisions and prior daily schedules remain unchanged.
+
+2026-10-20 foundation assignment: A/lead accepted exact planning correction 839f3a7. P1 is In progress with C; A and B independently review its runtime handoffs. P2 remains Not started pending accepted merged P1, aggregate #75 remains In progress, and the current ready/unassigned queue contains only AR-011-C. Historical conditional daily allocations are preserved.
+
+2026-10-20 P1 hosted correction: final run [39526088575](https://github.com/spei04/agent-rewind/actions/runs/39526088575) at e7442b5 failed one PostgreSQL fixture before the maximum-reference reader query: repeated project parameters inferred conflicting text/varchar types. Python 3.11 passed 1778 with seven skips; Python 3.12 passed 1782 with three skips; each had one failure and one existing warning. The other 45 new PostgreSQL cases, package/security and three gVisor tests passed. B delivered fixture-only dbfbae0, preserving all 16,000 rows and assertions; A accepted the exact fixture correction and the lead owns matching hosted verification. P1 remains Implemented; verification pending, P2 Not started and aggregate #75 In progress. B/C completed read-only P2 interface and test preparation; the accepted 4 [4–7] engineering-day estimate and prerequisite gate remain. No new checkout, model call, paid resource or partner data was used.
+
+2026-10-20 P1 query correction: C delivered 8222644, integrated as 8be6316, after a bounded SQLite probe found repeated JSON rowset scans. A/B accepted materialized, exact-object-ID matching with the original single-statement snapshot, complete descriptor/ownership checks and input/result bounds retained. A independently verified 16,000 matching refs within about 4.21 million VM instructions under a 20-million ceiling, plus foreign/substituted/missing refusals; 61 reader/publication tests passed. Unsupported SQLite versions refuse before storage. Lead integration passed 314 focused tests with 53 explicit local PostgreSQL skips, lint/format/security rules, strict types and all planning/contract validators. PostgreSQL fixture correction dbfbae0 remains included. These results do not establish PostgreSQL performance: final matching hosted execution, package checks and accepted merge remain required. P1 is Implemented; verification pending; P2 remains Not started and aggregate #75 In progress. No new checkout, dependency installation, paid call or partner data was used.

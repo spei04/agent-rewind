@@ -92,6 +92,31 @@ configuration switch cannot restore the old organization-wide API bypass.
 Second-project admission remains disabled until AR-007-C and AR-009-B cross-project
 legacy and nested-reference tests pass; one mapped project is the migration mode.
 
+### Existing-route implementation ownership
+
+AR-007-C implements the required issuer-bound v2 format, fresh default/named
+authority and all existing data-route consumers; it does not add future v1,
+debugger or export routes. Its [implementation plan](EXISTING_ROUTE_AUTHORITY_PLAN.md)
+defines the exhaustive exceptions: exact /api/me returns only authenticated
+identity/CSRF and optional current effective default role (null when absent,
+revoked or ambiguous; safe 503 on DB failure), while logout requires v2 identity,
+CSRF and exact Origin independently of membership. Neither is a broad schema
+guard exemption. /api/schema remains default-scoped. New viewer/operator keys
+receive explicit legacy_default membership for the authorized project in the
+atomic issuance transaction; service keys cannot administer keys.
+
+AR-006-B and AR-008-A/B retain later v1/replay integration; AR-010-B validates
+the new-job frozen configuration/generation before dispatch. Work creation
+stays behind a required unavailable adapter until those producers are accepted;
+its refusal precedes readiness probes, storage and enqueue.
+AR-027-B/029-B/032-B own their later debugger/export consumers. AR-012-B must
+verify full CT-M1-007/008/009 behavior; existing-route subset evidence alone
+cannot satisfy those cases. Customer-ready schema and live publication remain
+separately gated. AR-007-C/P1 supplies unwired identity/authority helpers and the shared verified
+reader; P2 wires the complete existing-route boundary only after accepted merged
+P1. Aggregate completion waits for P2/full current-route evidence. This
+sequencing clarification retains the original contract requirements and API version.
+
 ## Admission, retry identity and worker payload
 
 [`api.py`](../../agent_rewind/api.py) currently stores a bare TaskSpec and
