@@ -165,6 +165,12 @@ def _delivery_packet(packet):
     )
     markdown = markdown[:start] + body + markdown[end:]
     markdown = _sync_package_cards(markdown, task["delivery_packages"])
+    # Rewinding the producer also rewinds its now-active admission consumer.
+    admission = next(t for t in data["tasks"] if t["id"] == "AR-008-A")
+    admission["status"] = "Not started"
+    for package in admission["delivery_packages"]:
+        package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
+    markdown = _sync_package_cards(markdown, admission["delivery_packages"])
     return data, markdown, plan, task, task["delivery_packages"]
 
 
@@ -264,7 +270,9 @@ def test_accepted_merged_foundation_allows_p2_without_completing_aggregate(packe
         review_evidence="Synthetic test-only accepted source/review/check record",
     )
     packages[1]["status"] = "In progress"
-    assert CHECK.check_delivery_packages(data, _sync_package_cards(markdown, packages), plan) == 152
+    assert CHECK.check_delivery_packages(
+        data, _sync_package_cards(markdown, packages), plan
+    ) == sum(len(task.get("delivery_packages", [None])) for task in data["tasks"])
     assert task["status"] == "In progress"
 
 
@@ -289,3 +297,93 @@ def test_delivery_package_prose_and_pr_counts_are_checked(packet, variant):
         data["validation"]["delivery_pr_count"] = 151
     with pytest.raises(ValueError):
         CHECK.validate(data, markdown, plan)
+
+
+@pytest.mark.parametrize(
+    "variant,message",
+    [
+        ("early_p3", "before accepted merged prerequisite"),
+        ("skip_p2", "preceding accepted PR"),
+        ("missing_input", "dropped inherited prerequisites"),
+        ("missing_contract", "dropped inherited contracts"),
+        ("early_aggregate", "Aggregate completes before"),
+        ("effort_drift", "effort/range rollup differs"),
+    ],
+)
+def test_admission_three_stage_delivery_retains_all_gates(packet, variant, message):
+    data, markdown, plan = deepcopy(packet)
+    task = next(t for t in data["tasks"] if t["id"] == "AR-008-A")
+    p1, p2, p3 = task["delivery_packages"]
+    if variant == "early_p3":
+        task["status"] = p3["status"] = "In progress"
+    elif variant == "skip_p2":
+        p3["dependencies"] = [p1["id"]]
+    elif variant == "missing_input":
+        p1["dependencies"].remove("AR-007-C")
+    elif variant == "missing_contract":
+        p3["contracts"] = []
+    elif variant == "early_aggregate":
+        task["status"] = "Verified"
+    else:
+        p3["effort_days"] = p3["effort_range_days"][0] = 2.5
+    markdown = _sync_package_cards(markdown, task["delivery_packages"])
+    with pytest.raises(ValueError, match=message):
+        CHECK.check_delivery_packages(data, markdown, plan)
+
+
+@pytest.mark.parametrize(
+    "variant,message",
+    [
+        ("early_foundation", "before aggregate prerequisites"),
+        ("early_integration", "before aggregate prerequisites"),
+        ("missing_worker", "dropped inherited prerequisites"),
+        ("missing_contract", "dropped inherited contracts"),
+        ("unmerged_foundation", "before accepted merged prerequisite"),
+        ("early_aggregate", "Aggregate completes before"),
+    ],
+)
+def test_observability_packages_wait_for_real_worker_producer(packet, variant, message):
+    data, markdown, plan = deepcopy(packet)
+    task = next(t for t in data["tasks"] if t["id"] == "AR-011-C")
+    p1, p2 = task["delivery_packages"]
+    if variant == "early_foundation":
+        task["status"] = p1["status"] = "In progress"
+    elif variant == "early_integration":
+        task["status"] = p2["status"] = "In progress"
+        p1.update(
+            status="Verified",
+            accepted_merge_commit="a" * 40,
+            review_evidence="Synthetic accepted foundation cannot waive worker producer",
+        )
+    elif variant == "missing_worker":
+        p1["dependencies"].remove("AR-010-B")
+    elif variant == "missing_contract":
+        p2["contracts"] = []
+    elif variant == "unmerged_foundation":
+        task["status"] = p2["status"] = "In progress"
+    else:
+        task["status"] = "Verified"
+    markdown = _sync_package_cards(markdown, task["delivery_packages"])
+    with pytest.raises(ValueError, match=message):
+        CHECK.check_delivery_packages(data, markdown, plan)
+
+
+def test_observability_successor_requires_accepted_merge_and_all_aggregate_inputs(packet):
+    data, markdown, plan = deepcopy(packet)
+    task = next(t for t in data["tasks"] if t["id"] == "AR-011-C")
+    p1, p2 = task["delivery_packages"]
+    # Isolate package policy: full graph validation separately checks producer ancestry.
+    for row in data["tasks"]:
+        if row["id"] in task["dependencies"]:
+            row["status"] = "Verified"
+    task["status"] = "In progress"
+    p1.update(
+        status="Verified",
+        accepted_merge_commit="b" * 40,
+        review_evidence="Synthetic accepted source and merge after worker producer",
+    )
+    p2["status"] = "In progress"
+    assert CHECK.check_delivery_packages(
+        data, _sync_package_cards(markdown, task["delivery_packages"]), plan
+    ) == sum(len(row.get("delivery_packages", [None])) for row in data["tasks"])
+    assert task["status"] != "Verified"
