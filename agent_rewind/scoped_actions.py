@@ -37,6 +37,7 @@ from .scoped_repositories import (
     members,
     scopes,
 )
+from .sqlite_ownership import owned_connect
 
 ActionCode = Literal["action_invalid_input", "action_unavailable", "outcome_uncertain"]
 KeyRole = Literal["viewer", "operator"]
@@ -80,7 +81,7 @@ class ScopedActions:
     def _transaction(self) -> Iterator[Connection]:
         commit_attempted = False
         try:
-            with self.engine.connect() as connection:
+            with owned_connect(self.engine) as connection:
                 raw = connection.connection.driver_connection
                 dialect = connection.dialect.name
                 if not (

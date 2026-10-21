@@ -30,6 +30,7 @@ from .request_identity import (
     encode_v2_session,
 )
 from .scoped_repositories import RepositoryUnavailable, _byte_length
+from .sqlite_ownership import owned_connect
 
 
 @dataclass(frozen=True)
@@ -88,7 +89,7 @@ class Auth:
         # Select only bounded credential fields; role is evaluated freshly by
         # RequestAuthority, never copied into this authenticated identity.
         try:
-            with self.db.engine.connect() as connection:
+            with owned_connect(self.db.engine) as connection:
                 safe = and_(
                     _byte_length(connection, keys.c.id) == 32,
                     _byte_length(connection, keys.c.expires) <= 64,

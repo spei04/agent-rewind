@@ -21,6 +21,7 @@ from .scoped_repositories import (
     organizations,
     projects,
 )
+from .sqlite_ownership import owned_connect
 
 
 class ActionForbidden(PermissionError):
@@ -125,7 +126,7 @@ class RequestAuthority:
     ) -> ProjectDecision:
         self._principal(principal)
         try:
-            with self.engine.connect() as connection:
+            with owned_connect(self.engine) as connection:
                 context = self._context(connection, principal, project_id)
                 return self.check(
                     connection,

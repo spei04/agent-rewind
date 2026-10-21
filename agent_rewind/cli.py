@@ -14,6 +14,7 @@ from sqlalchemy.exc import ArgumentError
 
 from .config import MigrationSettings, Settings
 from .database import Database
+from .sqlite_ownership import owned_connect
 
 
 def _migrate(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
@@ -193,7 +194,7 @@ def main() -> None:
         from .runner import DockerRunner
 
         db = Database(settings)
-        with db.engine.connect() as connection:
+        with owned_connect(db.engine) as connection:
             connection.exec_driver_sql("SELECT 1")
         store = Artifacts(settings)
         if store.get(store.put(b"health check")) != b"health check":

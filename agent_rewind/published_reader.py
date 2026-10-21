@@ -26,6 +26,7 @@ from .artifact_storage import ArtifactStorage
 from .models import canonical
 from .scoped_lineage import ResourceNotFound, identifier
 from .scoped_repositories import ProjectContext, ScopedRepositories, _byte_length, _Reads, scopes
+from .sqlite_ownership import owned_connect
 
 MAX_COMPOUND_RUNS = 2
 MAX_REF_INPUT_BYTES = 4 * 1024 * 1024
@@ -135,7 +136,7 @@ class PublishedRunReader:
     @contextmanager
     def _connection(self) -> Iterator[Connection]:
         try:
-            with self.engine.connect() as connection:
+            with owned_connect(self.engine) as connection:
                 # Refuse unsupported CTE syntax during SQL-only preflight,
                 # before a graph can trigger storage/decryption work.
                 version = connection.dialect.server_version_info
