@@ -22,7 +22,16 @@ from sqlalchemy.engine import Connection, Dialect, Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import ConnectionPoolEntry
 
-from .schema import ARTIFACTS, HEAD, OWNERSHIP, PROJECTION, MigrationRefused, catalog, dialect
+from .schema import (
+    ADMISSION,
+    ARTIFACTS,
+    HEAD,
+    OWNERSHIP,
+    PROJECTION,
+    MigrationRefused,
+    catalog,
+    dialect,
+)
 from .service import _installed
 
 POOL_TIMEOUT_SECONDS = 1
@@ -48,9 +57,15 @@ class BackfillRequirement(BaseModel):
 class RevisionProfile(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
     revision: Literal[
-        "ar_0002_adoption", "ar_0003_ownership", "ar_0004_artifacts", "ar_0005_run_index"
+        "ar_0002_adoption",
+        "ar_0003_ownership",
+        "ar_0004_artifacts",
+        "ar_0005_run_index",
+        "ar_0006_admission",
     ]
-    catalog_profile: Literal["adoption_v1", "ownership_v1", "artifacts_v1", "projection_v1"]
+    catalog_profile: Literal[
+        "adoption_v1", "ownership_v1", "artifacts_v1", "projection_v1", "admission_v1"
+    ]
     mode: Literal["migration_only"]
     required_completed_backfills: tuple[BackfillRequirement, ...] = Field(max_length=16)
 
@@ -61,6 +76,7 @@ class RevisionProfile(BaseModel):
             OWNERSHIP: "ownership_v1",
             ARTIFACTS: "artifacts_v1",
             PROJECTION: "projection_v1",
+            ADMISSION: "admission_v1",
         }[self.revision]
         if self.catalog_profile != expected:
             raise ValueError("Revision catalog profile mismatch")
@@ -69,7 +85,7 @@ class RevisionProfile(BaseModel):
             if self.revision != HEAD
             else ()
         )
-        if self.revision == PROJECTION:
+        if self.revision in {PROJECTION, ADMISSION}:
             requirements += (BackfillRequirement(revision=PROJECTION, phase="run_index"),)
         if self.revision != HEAD and self.required_completed_backfills != requirements:
             raise ValueError("Required backfill differs")
@@ -82,7 +98,7 @@ class ReleaseProfile(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
     manifest_version: Literal[1]
     release: Literal["0.1.0"]
-    revisions: tuple[RevisionProfile, ...] = Field(min_length=1, max_length=4)
+    revisions: tuple[RevisionProfile, ...] = Field(min_length=1, max_length=5)
 
     @model_validator(mode="after")
     def unique_revisions(self) -> ReleaseProfile:

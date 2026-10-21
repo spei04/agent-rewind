@@ -16,7 +16,7 @@ from ..run_projection import MAX_RUNS
 from ..scoped_repositories import _byte_length
 from .inputs import _unique_object
 from .ownership_state import MAX_CURSOR_BYTES, timestamp
-from .schema import PROJECTION, MigrationRefused
+from .schema import ADMISSION, PROJECTION, MigrationRefused
 
 PHASE = "run_index"
 
@@ -31,7 +31,7 @@ class ProjectionState:
 
 def inspect_projection_state(connection: Connection, row: dict[str, Any]) -> ProjectionState:
     try:
-        if row["state"] != "ownership_complete" or row["_revision"] != PROJECTION:
+        if row["state"] != "ownership_complete" or row["_revision"] not in {PROJECTION, ADMISSION}:
             raise ValueError
         progress = table(
             "migration_progress",

@@ -1,10 +1,10 @@
 # Admission execution plan
 
-2026-10-21 · Planning reconciliation of existing AR-008-A/B and reviewed C04 obligations. AR-008-A/P1 is Verified, with pure parser/configuration/envelope modules described in [ADMISSION_FOUNDATION.md](ADMISSION_FOUNDATION.md). C starts P2; P3 and AR-008-B remain Not started. The pure registry prepares explicit immutable values; no deployed registry, admission service, accepted migration, customer-ready profile or spending authority is supplied.
+2026-10-21 · Planning reconciliation of existing AR-008-A/B and reviewed C04 obligations. AR-008-A/P1 is Verified, with pure parser/configuration/envelope modules described in [ADMISSION_FOUNDATION.md](ADMISSION_FOUNDATION.md). P2 is Implemented; verification pending under lead delivery; P3 and AR-008-B remain Not started. The pure registry prepares explicit immutable values; no deployed registry, admission service, accepted migration, customer-ready profile or spending authority is supplied.
 
 ## Entry and delivery boundaries
 
-AR-008-A retains direct prerequisites AR-007-C and AR-009-B, both Verified for their preparatory scope. AR-007-C completed accepted PR #79/main/candidate gates; see [P2 evidence](EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21). AR-008-A [#80](https://github.com/spei04/agent-rewind/issues/80) remains In progress; P1 [#81](https://github.com/spei04/agent-rewind/issues/81) is Verified after accepted PR #85 merge 81905a5 and matching PR/main/candidate evidence; C starts P2 [#82](https://github.com/spei04/agent-rewind/issues/82), while P3 [#83](https://github.com/spei04/agent-rewind/issues/83) remains Not started until accepted merged P2. P1 inherits both prerequisites and C04; P2 requires accepted merged P1 and P3 requires accepted merged P2. The aggregate cannot be Verified until all three and the full service matrix pass. AR-008-B retains AR-008-A and AR-011-B. No outer dependency is removed or added.
+AR-008-A retains direct prerequisites AR-007-C and AR-009-B, both Verified for their preparatory scope. AR-007-C completed accepted PR #79/main/candidate gates; see [P2 evidence](EXISTING_ROUTE_AUTHORITY_PLAN.md#accepted-p2-delivery--2026-10-21). AR-008-A [#80](https://github.com/spei04/agent-rewind/issues/80) remains In progress; P1 [#81](https://github.com/spei04/agent-rewind/issues/81) is Verified after accepted PR #85 merge 81905a5 and matching PR/main/candidate evidence; P2 [#82](https://github.com/spei04/agent-rewind/issues/82) is Implemented; verification pending in draft PR #90, while P3 [#83](https://github.com/spei04/agent-rewind/issues/83) remains Not started until accepted merged P2. P1 inherits both prerequisites and C04; P2 requires accepted merged P1 and P3 requires accepted merged P2. The aggregate cannot be Verified until all three and the full service matrix pass. AR-008-B retains AR-008-A and AR-011-B. No outer dependency is removed or added.
 
 | Delivery | Scope | Base / planning range | Handoff |
 | --- | --- | --- | --- |
@@ -36,6 +36,8 @@ Preserve all 14 original fixture rows, 18 encrypted objects, hash heads and 2450
 The common configuration invariant applies to every future new legacy run/branch/study/investigate job. Schema/config association belongs here; actual later legacy branch/study admission must prove source-policy/image compatibility and preserve version-1 bodies. Unsupported mapping remains unavailable. No study submission or provider retry policy is added to A.
 
 ## Publication and recovery
+
+The planning-only [P3 entry checkpoint](ADMISSION_COORDINATOR_ENTRY.md) fixes same-submit restart routing, immutable linked attempts, phase-specific errors and the policy/lock interface. It adds no runtime or authority; P3 remains Not started until accepted merged P2 and explicit assignment.
 
 1. Authenticate and resolve the trusted original project context; authorize the action and resolve **both** scoped client-operation and key-alias identities before readiness, mutable registry lookup or storage.
 2. For a matching existing operation, reauthorize before disclosure and atomically bind any legitimate new alias. Return the original accepted IDs and stored configuration identity even if current defaults change or storage is unavailable. Changed canonical intent or an alias bound elsewhere conflicts; changing service-key principal is not recovery.
@@ -85,3 +87,11 @@ skipped. The close-failure case depends on A's e85ccd80 correction. This is no
 local PostgreSQL execution or listing acceptance claim; all C test consumers
 were released before checkout reuse. Admission P2 adds no coordinator,
 HTTP/worker/ledger/generation, provider access or customer activation.
+
+## P2 implementation checkpoint — 2026-10-21
+
+P2 #82 is **Implemented; verification pending** in [PR #90](https://github.com/spei04/agent-rewind/pull/90). C completed the additive ar6 schema, connection-bound identity repositories, exact reviewed SQLite/PostgreSQL profiles, installed-package wiring and migration/restore/process-death tests. A/B independently accepted source and test design; B verified the actual captured PostgreSQL literal before its exact freeze. The failed capture run remains historical evidence, not release acceptance.
+
+A independently checked composed source `01b3b65`: 461 tests passed, 78 actual-PostgreSQL cases skipped explicitly and one existing warning. Lead's full Ruff/security checks, formatting (202 files), strict typing (86 source files), frozen lock and all three validators passed. Matching hosted P2 migration, repository/contention, restore, SIGKILL and installed-package checks, accepted merge and protected-main candidate verification remain required. [Storage evidence and limits](ADMISSION_STORAGE.md) retain exact source/literal identities.
+
+Lead owns admission delivery, B reviews independently and C releases the reused checkout after progress validation. Aggregate #80/parent #8 remain open; P3 #83 is Not started. Listing P1 #87 is now Verified after accepted merge `ed0d6c48b8db3533c1bb20a75df93d7efc89fc7c`, successful PR/main runs 39547572853/39548734170 (2419/2427 core tests and three gVisor cases) and verified candidate 12323231309. A is assigned listing P2 #88 in reused primary work/scoped-run-routes; aggregate #86 remains open. No runtime, historical contract/profile, dependency, estimate, paid execution or activation change is made by this checkpoint.
