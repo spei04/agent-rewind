@@ -460,8 +460,10 @@ chosen once by the owning PR and recorded in the compatibility manifest.
 | ownership-v1 / AR-007-A | Own all organization/project/membership/resource_scopes DDL, explicit principal grants/defaults and resumable ownership backfill from adoption intent. |
 | run-index-v1 / AR-006-A | Own run_index DDL/backfill/publication sequence after scoped ownership exists. |
 | artifacts-v1 / AR-009-A | Own object/ref DDL and reachability backfill metadata; AR-009-B wires publication. |
-| admission-v1 / AR-008-A | Own operation/key-alias DDL and versioned payload/job metadata; depends on artifact schema contract, publication integration in AR-008-B. |
+| admission-v1 / AR-008-A | Own canonical/configuration foundation, operation/key-alias DDL, versioned payload/job metadata and reusable atomic admission publication/recovery; depends on accepted authority/artifact contracts. AR-008-B wires three HTTP operations (submit/status/cancel); AR-006-B retains list/detail/cursors. |
 | ledger-v1 / AR-010-A | Own accounts/calls/entries and lease_generation DDL, opening holds and constraints; AR-010-B wire permit/call paths. |
+
+The 2026-10-21 [admission execution plan](ADMISSION_EXECUTION_PLAN.md) clarifies delivery ownership only: AR-008-A's three sequential PRs retain the canonical/envelope, composite-scope, atomicity and recovery requirements above; AR-008-B consumes their accepted service without duplicating run list/detail. Neither task supplies the later worker permit or a customer-ready profile. Registry representation/mutation and ref-versus-digest association require concrete design review before implementation; this plan does not assert a deployed registry. Frozen OpenAPI, logical-model, acceptance and decision-record bytes are unchanged.
 
 `installation_adoptions` has singleton installation_key (PK varchar64),
 source_kind `fresh|legacy`, source_baseline char40, schema_fingerprint char64, organization_id/project_id
