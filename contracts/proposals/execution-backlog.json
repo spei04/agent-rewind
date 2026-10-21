@@ -7262,7 +7262,7 @@
       "resolution": "Own existing routes and reusable authority in two sequential delivery PRs: P1 foundation 2 [2–3], P2 full integration 4 [4–7] after accepted merged P1; aggregate 6 [6–10] BE days, medium-low. Retain verified AR-009-B/C04 and future consumer obligations without reverse dependencies; full CT-M1-007/008/009 gates remain open."
     }
   ],
-  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. A and lead accepted AR-007-C planning correction 839f3a7; P1 #76 is implemented in draft PR #78 at reviewed source 1cf7717, with matching hosted checks and accepted merge pending. P2 #77 remains Not started until accepted merged P1; aggregate #75 is In progress. AR-011-C is ready but unassigned. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated.",
+  "planning_status": "Approved issue #51 engineering scopes remain mapped against immutable C21. AR-006-A, AR-007-B and preparatory AR-009-A/B are Verified. A and lead accepted AR-007-C planning correction 839f3a7; P1 #76 is implemented in draft PR #78 at reviewed source 8be6316, with matching hosted checks and accepted merge pending. P2 #77 remains Not started until accepted merged P1; aggregate #75 is In progress. AR-011-C is ready but unassigned. AR-006-C repair/audit waits for AR-010-B before AR-012-B. Customer admission, optional research adapters, paid/held-out evaluation, data and production remain separately gated.",
   "github_tracking": {
     "parent_issues": [
       1,
