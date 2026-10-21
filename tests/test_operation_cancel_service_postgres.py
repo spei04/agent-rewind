@@ -727,11 +727,12 @@ def test_postgres_acknowledged_rollback_cleanup_failure_remains_dependency(
     f = cancel_pg
     original_effect = f.service._actions._cancel_effect
     original_rollback, original_close = Connection.rollback, Connection.close
-    staged, rollback_acks, cleanup_faults = [], [], []
+    staged, mutation_connections, rollback_acks, cleanup_faults = [], [], [], []
 
     def effect(*args):
         result = original_effect(*args)
         staged.append(result)
+        mutation_connections.append(args[0])
         raise RuntimeError("private precommit effect failure")
 
     def rollback(connection):
@@ -768,7 +769,10 @@ def test_postgres_acknowledged_rollback_cleanup_failure_remains_dependency(
     if cleanup == "close":
         monkeypatch.setattr(Connection, "close", close)
     fault(lambda: invoke(f))
-    assert len(staged) == len(cleanup_faults) == 1 and rollback_acks
+    assert len(staged) == len(cleanup_faults) == len(mutation_connections) == 1
+    assert mutation_connections[0] in rollback_acks
+    if cleanup == "close":
+        assert cleanup_faults == mutation_connections
     assert snapshot(f) == previous
     released(f)
 
