@@ -49,7 +49,10 @@ package/final-container trust checks and three gVisor cases passed. Static
 security failed on two source constructs; dependency audit was skipped and
 the required CI gate failed. Main-only delivery was skipped. This is retained
 failed-attempt evidence, not successful foundation delivery. The Python 3.12
-job took 1780 of 1800 seconds; CI reliability work is separately reviewed.
+job took 1780 of 1800 seconds. Reviewed correction c3e9fd0 raises only the core
+job limit from 30 to 45 minutes and its existing test bound. All 87 CI workflow
+and delivery checks pass on each interpreter; application deadlines and every
+required check remain unchanged.
 
 Correction 91f0742 and private guard ff65892 have independent internal source
 acceptance. The guard selection passed 281 checks on Python 3.12.3 (26.70s)
@@ -312,10 +315,10 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- Planning/verification: own primary for the optional implementation-PR checker, meaningful negative controls and synchronized current planning records; no runtime or database changes.
-- Platform/security: retain internal guard/source review and prepare exact reader query-family/native-plan review; F2 implementation remains gated.
-- Delivery reviewer: independently review the refinement and its checker evidence after source freeze; prior guard test authorship and peer review remain explicit.
-- Lead: compose and publish only reviewed sources, keep database/checkouts under explicit ownership, update public issue/PR scope and require full P1 acceptance before P2.
+- Planning/verification: hand off the frozen refinement and prepare source-bound hosted inventory and CI evidence; no runtime or database changes.
+- Platform/security: independently review the private candidate verifier and bounded native read controls; F2 query design and implementation remain gated.
+- Delivery reviewer: author and test the private candidate-verifier correction while preserving exact runtime identity, archive and delivery gates; independent review precedes use.
+- Lead: independently review the refinement, compose and publish reviewed sources, keep database/checkouts under explicit ownership, update public issue/PR scope and require full P1 acceptance before P2.
 
 The historical first-fortnight schedules and opening conditions remain unchanged. Accepted HTTP and exact P1 entry satisfy the implementation prerequisites; the lead has issued the P1 handoff. No new calendar allocation or staffed-time conversion follows from the effort totals.
 
