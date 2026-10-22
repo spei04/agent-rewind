@@ -394,7 +394,7 @@ def latin1_pg(monkeypatch):
 
 
 @postgres_only
-def test_postgres_latin1_native_bytes_and_utf8_transfer_are_distinct(
+def test_postgres_latin1_native_bytes_and_decoded_utf8_sizes_are_distinct(
     latin1_pg, observed_reader, monkeypatch, record_property
 ):
     from test_ownership import FRESH
@@ -427,24 +427,32 @@ def test_postgres_latin1_native_bytes_and_utf8_transfer_are_distinct(
         before = postgres_snapshot(case.engine)
         drain(latin1_pg)
         watch = RowTransferWatch(monkeypatch, {"latin1-financial-payload": "café"})
-        engine, outcome = case.operator_engine(), LedgerOutcome()
+        engine, work, outcome = case.operator_engine(), LedgerWork(), LedgerOutcome()
         try:
-            with ledger_transaction(engine, outcome, work=LedgerWork()) as connection:
+            with ledger_transaction(engine, outcome, work=work) as connection:
+                observer_start = work.observed_ordinary
+                actual_server = connection.exec_driver_sql("SHOW server_encoding").scalar_one()
+                actual_client = connection.exec_driver_sql("SHOW client_encoding").scalar_one()
+                observer_units = work.observed_ordinary - observer_start
+                assert actual_server == "LATIN1"
                 state = inspect_ledger_state(connection)
                 assert state.model_dump(mode="json") == case.expected
             assert outcome.commit_acknowledged and not outcome.cleanup_failed
         finally:
             engine.dispose()
-        # The observed wire cell is UTF-8 sized independently of PostgreSQL octets.
+        # Size the decoded Python value as UTF-8, independently of native octets.
+        # This is not a measurement of physical network packet bytes.
         assert watch.hits and all(hit["bytes"] == 5 for hit in watch.hits)
         record_property(
             "encoding_receipt",
             json.dumps(
                 {
-                    "server_encoding": "LATIN1",
+                    "server_encoding": actual_server,
+                    "operator_client_encoding": actual_client,
+                    "encoding_observer_units": observer_units,
                     "native_bytes": native,
-                    "utf8_bytes": 5,
-                    "transport_bound": 4 * native,
+                    "decoded_utf8_bytes": 5,
+                    "decoded_utf8_bound": 4 * native,
                     "observed_transfers": watch.hits,
                 }
             ),
