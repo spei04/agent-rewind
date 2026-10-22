@@ -4,6 +4,46 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. P1 has no accepted product delivery yet; P2 #109 remains **Not started**, waiting for accepted P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
+## Operator SQLite verification checkpoint — 2026-10-22
+
+Corrected runtime df55c1fc3a574f66a2ad96ef924cc1e1710c022d is composed with
+independent tests at 3716811ec2990398c6e09deec11118691b336c7b. The exact committed
+source passes 79 independent SQLite and nonconnecting factory cases in 2.47
+seconds: 14 transaction, 37 work-boundary and 28 factory checks. Separate authored
+checks pass 41 cases. These results are not a combined full-suite or P1 result.
+
+The first independent transaction run preserved four failures: an inaccurate
+BEGIN-attempt flag, artificial uncertainty despite acknowledged rollback,
+replacement of the first interruption, and incorrect mapping of a native lock
+timeout. Corrective source f4395ce also addresses the reviewed PostgreSQL adapter
+context, pre-construction plugin rejection, server-major gate and final
+check-before-release ordering. Subsequent native deadline controls showed BEGIN,
+SELECT and COMMIT executing after their timeout setter exhausted the deadline;
+reservation-delay controls exposed stale caps and a setter running after expiry.
+Follow-up df55c1f reserves the whole bundle before obtaining caps, checks between
+setters and before the target, and refreshes the second PostgreSQL lock cap.
+Failed runs and native traces remain retained.
+
+Independent native SQLite effects and fresh connection reads support the outcome
+checks. The real ordinary-unit boundary is 2028 plus 12 prepaid startup/eight
+cleanup units; prepaid allowance is not an observed SQL count. Nonconnecting
+PostgreSQL factory controls do not establish native PostgreSQL behavior. The
+full startup/cleanup matrix, both-interpreter proof, prior ownership/admission
+regressions and full operator acceptance remain pending.
+
+Platform/security owns native PostgreSQL and isolated Python 3.11.17 validation
+in the existing secondary; the 3.12 environment is unchanged. PostgreSQL testing
+uses the existing socket-only server after a verified 3-database/15-role baseline
+with zero other clients. Independent QE prepares PostgreSQL verification while
+the lead updates progress in the released primary; database use waits for
+restoration, stop and explicit handoff. Delivery independently reviews source
+and evidence. No new checkout, provider call, paid resource or partner data.
+
+P1 remains In progress with null accepted-merge and runtime-acceptance fields.
+Provisioning, the actual 245000 opening/backfill, replay, concurrency, recovery,
+maximum-state inspection and hosted delivery remain required. P2 stays Not
+started. Dependencies, estimates, staffing and external approval gates are unchanged.
+
 ## Operator slice assigned — 2026-10-22
 
 The lead and independent reviewer accepted V3 of the operator design, digest
@@ -140,8 +180,8 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- Planning/verification: first schema checkpoint independently accepted; author separate operator fault tests after the primary handoff, using frozen V3 interfaces and stable runtime bytes.
-- Platform/security: implement the reviewed V3 work/transaction/factory slice in the reused secondary; verify the stopped baseline before using the next exclusive PostgreSQL slot and restore/stop it before handing it to QE.
+- Planning/verification: 79 independent SQLite/factory checks frozen at 3716811; prepare independent PostgreSQL verification and wait for explicit restored/stopped database handoff.
+- Platform/security: validate corrected runtime df55c1f across native PostgreSQL and both interpreters in the reused secondary; owns the exclusive database slot and must restore/stop it before handing it to QE.
 - Delivery reviewer: independently review ledger source, integration and actual delivery evidence; accepted HTTP audit remains predecessor evidence.
 - Lead: integrate reviewed runtime/tests, coordinate checkout and PostgreSQL ownership, maintain issue read-back and require the full P1 acceptance matrix before P2 handoff.
 

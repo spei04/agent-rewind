@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Implement ledger work, transaction and owned-engine slice | Reviewed V3 design; native startup, outcome and cleanup proof required. Owns reused secondary and the next exclusive PostgreSQL slot. |
-| Delivery reviewer | Independent operator implementation and native-evidence review | Planning PR #110 main/candidate and V3 design accepted; implementation acceptance remains pending. |
-| Planning/verification | Independent operator fault tests in the reused primary | Frozen matrix and V3 interfaces; starts after lead handoff. PostgreSQL waits for the author to restore and release its slot. |
-| Lead | Review integration, publish the schema checkpoint and coordinate handoffs | P1 #108 remains In progress; P2 #109 stays Not started with null acceptance. |
+| Platform/security | Validate native operator startup, outcomes and cleanup in both Python versions | Corrected runtime df55c1f; owns the reused secondary and the sole existing PostgreSQL slot. |
+| Delivery reviewer | Review corrected operator source and native evidence | Initial defects have reviewed corrections; full native-envelope and implementation acceptance remain pending. |
+| Planning/verification | 79 independent SQLite/factory checks frozen; prepare PostgreSQL verification | Reuses primary after the lead progress update; database testing waits for the author to restore and release its slot. |
+| Lead | Review integration, publish the operator checkpoint and coordinate handoffs | P1 #108 remains In progress; P2 #109 stays Not started with null acceptance. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -50,10 +50,10 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** First ledger schema checkpoint b2e19be is independently accepted: 65 native independent passes, 107 combined schema passes and 18 deliberate dialect skips. Four reviewed scope-reversal failures are repaired with original red evidence retained. V3 resolves the proposed accounting gaps for implementation: platform/security owns runtime, planning owns independent fault tests, and delivery reviews native proof. No ledger package is Verified.
+- **Contributor checkpoint:** First ledger schema checkpoint b2e19be remains independently accepted. Corrected operator source at 3716811 passes 79 independent SQLite/factory checks; original transaction, setter-expiry and reservation-delay failures remain retained. Platform/security validates PostgreSQL and both interpreters, planning prepares independent PostgreSQL tests, and delivery reviews the evidence. No ledger package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
 - **Next evidence-producing milestone:** AR-010-A/P1 #108 reviewed operator work accounting, transaction outcomes and owned engine factory, with independent native fault tests, then the full provisioning/opening/constraint/privilege/bounds/recovery matrix. P2 #109 remains Not started until accepted P1 and its own reservation/fence entry. The accepted schema checkpoint cannot waive those gates.
-- **Current storage and consumers:** The lead hands the existing primary to independent QE after this log review; platform/security owns the existing secondary for runtime implementation. Each retains its own matching-lock environment. PostgreSQL is restored/stopped; the author may take the next exclusive slot only after verifying its baseline. Private evidence stays outside both checkouts; no new checkout or paid resource was created.
+- **Current storage and consumers:** Two existing cloud checkouts remain in use. The lead briefly owns primary for this progress update, then returns it to independent QE; platform/security owns secondary and the sole PostgreSQL slot after verifying the restored 3-database/15-role baseline with zero other clients. Native PostgreSQL testing is active. Secondary also owns an isolated pinned Python 3.11 environment; the existing 3.12 environment is unchanged. Private evidence stays outside the checkouts; no new checkout or paid resource was created.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -875,3 +875,30 @@ The schema progress correction 6a5171c is independently reviewed.
 
 No additional checkout, provider call or paid resource was created. The accepted
 schema checkpoint and planning delivery are separate from ledger product acceptance.
+
+## Operator SQLite verification checkpoint — 2026-10-22
+
+| Owner | Assignment / result | Next gate |
+| --- | --- | --- |
+| Platform/security | Frozen corrections f4395ce and df55c1f; 41 authored SQLite/factory checks pass | Native PostgreSQL startup/fault and both-interpreter proof; restore and stop the database before release. |
+| Planning/verification | Exact source 3716811: 79 independent checks pass in 2.47 seconds | Independent PostgreSQL coverage after the explicit database handoff; primary released clean for this lead update. |
+| Delivery reviewer | Reviews the corrected factory, outcome and deadline boundaries against retained failures | Independently review exact source and the remaining native trace matrix. |
+| Lead | Publish the corrected checkpoint and synchronize progress documents | Keep P1 acceptance null; integrate only after the complete slice evidence passes. |
+
+The original transaction run had 10 passes/four failures. The corrected source
+passes the same 14 semantic controls, including a native BEGIN-then-fault test
+that still reproduced the old failure after its hook was adapted. Independent
+deadline tests then found three targets executing after their setter exhausted
+the clock, plus stale-cap/post-expiry setter behavior after reservation delay.
+Those original failures remain preserved; all corrected controls now pass.
+The independent 2028 ordinary-unit boundary retains 12 prepaid startup and
+eight cleanup units within the unchanged 2048 ceiling.
+
+The 79-case run contains 14 transaction, 37 work-boundary and 28 factory cases;
+its native database effects are SQLite. Nonconnecting PostgreSQL configuration
+checks do not establish PostgreSQL execution. Authored 41-case evidence is
+separate. Native PostgreSQL, Python 3.11 completion, the full startup/cleanup
+envelope and prior ownership/admission regressions remain acceptance gates.
+The isolated Python 3.11.17 environment uses the existing lockfile and has its
+own installed files. No provider calls, new paid resources or partner data.
+P1 stays In progress; P2 stays Not started.
