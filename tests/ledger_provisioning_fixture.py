@@ -2,7 +2,7 @@
 
 Only predecessor setup is reused. Expected manifests, source framing, accounts,
 opening cursors and receipts do not call the writer's preparation/serialization
-helpers. These small SQLite states establish no capacity or PostgreSQL claim.
+helpers. These small states establish no capacity claim; execution evidence is recorded separately.
 """
 
 import hashlib
@@ -124,8 +124,9 @@ def source_fingerprint(rows):
         result.update(canonical([table, list(fields)]) + b"\n")
         for raw in rows[table]:
             row = list(raw)
-            if table == "records":
+            if table == "records" and isinstance(row[3], str):
                 row[3] = json.loads(row[3])
+            row = [int(value) if isinstance(value, bool) else value for value in row]
             result.update(canonical(row) + b"\n")
     return result.hexdigest()
 
@@ -330,8 +331,8 @@ def expected_opening(fixture, first, observed):
     }
 
 
-def assert_stage(fixture, manifests, receipts):
-    """Compare every new cursor/account field against native predecessor facts."""
+def expected_stage(fixture, manifests, receipts, *, database_role=None):
+    """Pure expected values derived from intent and original native rows."""
     assert len(manifests) == len(receipts) and manifests
     first = manifests[0]
     opening = expected_opening(fixture, first, receipts[0].initialized_at)
@@ -375,7 +376,7 @@ def assert_stage(fixture, manifests, receipts):
             "manifest_digest": digest(manifest),
             "sequence": sequence,
             "parent_manifest_digest": manifest["parent_manifest_digest"],
-            "database_role": None,
+            "database_role": database_role,
             "os_uid": os.getuid(),
             "initialized_at": receipt.initialized_at,
             "account_projection_digest": digest(accounts),
@@ -389,6 +390,25 @@ def assert_stage(fixture, manifests, receipts):
             manifest["source_digest"],
         )
     expected_progress["ledger_opening"] = (opening, len(fixture.jobs), fixture.source)
+    expected_head = receipts[-1].model_dump(mode="json")
+    del expected_head["outcome"]
+    state = {
+        "status": "complete",
+        "installation_key": first["installation_key"],
+        "revision": LEDGER,
+        "head": expected_head,
+        "manifest_count": len(manifests),
+        "account_count": len(expected_accounts),
+        "opening": opening,
+    }
+    return expected_accounts, expected_progress, state
+
+
+def assert_stage(fixture, manifests, receipts):
+    """Compare every new cursor/account field against native predecessor facts."""
+    expected_accounts, expected_progress, expected_state = expected_stage(
+        fixture, manifests, receipts
+    )
     with reader(fixture.case.path) as connection:
         actual_accounts = [
             dict(row) for row in connection.execute("SELECT * FROM budget_accounts ORDER BY id")
@@ -440,7 +460,19 @@ def assert_stage(fixture, manifests, receipts):
         "columns": ("version_num",),
         "rows": ((LEDGER,),),
     }
-    previous_jobs = fixture.before["tables"]["jobs"]
+    assert_preserved_jobs(fixture.before, after)
+    for table, before in fixture.before["tables"].items():
+        if table not in {"jobs", "alembic_version", "installation_adoptions", "migration_progress"}:
+            assert after["tables"][table] == before, table
+    assert source_rows(fixture.case.path) == fixture.original
+    assert source_fingerprint(source_rows(fixture.case.path)) == fixture.source
+    assert ciphertexts(fixture.case) == fixture.encrypted
+    assert inspect(fixture).model_dump(mode="json") == expected_state
+
+
+def assert_preserved_jobs(before, after):
+    """All predecessor values survive; only the two ar7 fields are added."""
+    previous_jobs = before["tables"]["jobs"]
     current_jobs = after["tables"]["jobs"]
     assert current_jobs["columns"] == (
         *previous_jobs["columns"],
@@ -459,24 +491,6 @@ def assert_stage(fixture, manifests, receipts):
             job["id"]
         ]
     assert len(current_jobs["rows"]) == len(original_jobs_by_id)
-    for table, before in fixture.before["tables"].items():
-        if table not in {"jobs", "alembic_version", "installation_adoptions", "migration_progress"}:
-            assert after["tables"][table] == before, table
-    assert source_rows(fixture.case.path) == fixture.original
-    assert source_fingerprint(source_rows(fixture.case.path)) == fixture.source
-    assert ciphertexts(fixture.case) == fixture.encrypted
-    state = inspect(fixture).model_dump(mode="json")
-    expected_head = receipts[-1].model_dump(mode="json")
-    del expected_head["outcome"]
-    assert state == {
-        "status": "complete",
-        "installation_key": first["installation_key"],
-        "revision": LEDGER,
-        "head": expected_head,
-        "manifest_count": len(manifests),
-        "account_count": len(expected_accounts),
-        "opening": opening,
-    }
 
 
 WRITE_ACTIONS = {
