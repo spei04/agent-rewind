@@ -8,6 +8,7 @@ from ledger_operator_fixture import assert_pool_released, ledger_case, proof_row
 from sqlalchemy.engine import Connection
 
 from agent_rewind import sqlite_ownership as ownership
+from agent_rewind.migrations import ledger_transaction as ledger_transaction_module
 from agent_rewind.migrations import ledger_work
 from agent_rewind.migrations.ledger_transaction import LedgerOutcome, ledger_transaction
 from agent_rewind.migrations.ledger_work import LedgerWork
@@ -356,4 +357,99 @@ def test_setter_return_rechecks_deadline_before_native_target(
         assert target_seen and caught == []
         assert outcome.commit_acknowledged and not outcome.cleanup_failed
         assert proof_rows(case.path) == ([] if target == "statement" else [23])
+    assert_pool_released(case)
+
+
+@pytest.mark.parametrize("elapsed", [119.5, 121.0])
+def test_reservation_delay_cannot_leave_a_stale_native_timeout(
+    clock, ledger_case, monkeypatch, elapsed
+):
+    case = ledger_case
+    work, outcome = LedgerWork(), LedgerOutcome()
+    original = work.reserve_ordinary
+    armed = [False]
+    calls = []
+    target_range = []
+    caught = []
+
+    def reserve_then_delay(count):
+        original(count)
+        if armed[0]:
+            armed[0] = False
+            calls.append(count)
+            clock[0] += elapsed
+
+    monkeypatch.setattr(work, "reserve_ordinary", reserve_then_delay)
+    try:
+        with ledger_transaction(case.engine, outcome, work=work) as connection:
+            armed[0] = True
+            target_range.append(len(case.trace.events))
+            try:
+                connection.exec_driver_sql("SELECT 29").scalar_one()
+            finally:
+                target_range.append(len(case.trace.events))
+    except MigrationRefused as error:
+        caught.append(str(error))
+    assert calls == [2] and len(target_range) == 2
+    sql = [event[3] for event in case.trace.events[slice(*target_range)] if event[0] == "sql"]
+    setters = [
+        int(statement.split("=")[1])
+        for statement in sql
+        if statement.startswith("PRAGMA busy_timeout=")
+    ]
+    if elapsed < 120:
+        assert len(setters) == 1 and 0 < setters[0] <= 500
+        assert "SELECT 29" in sql and caught == []
+        assert outcome.commit_acknowledged
+    else:
+        assert setters == [] and "SELECT 29" not in sql
+        assert caught == ["migration_busy"]
+        assert not outcome.commit_attempted and outcome.confirmed_precommit_rollback
+    assert_pool_released(case)
+
+
+@pytest.mark.parametrize("expire", [False, True])
+def test_final_deadline_classification_precedes_publishing_engine_reuse(
+    clock, ledger_case, monkeypatch, expire
+):
+    case = ledger_case
+    work, outcome = LedgerWork(), LedgerOutcome()
+    original_close = Connection.close
+    original_release = ledger_transaction_module.release_ledger_engine
+    target = []
+    released = []
+    caught = []
+
+    def close_then_expire(connection):
+        result = original_close(connection)
+        if target and connection is target[0] and expire:
+            clock[0] += 121
+        return result
+
+    def release(claim, *, clean):
+        released.append((clean, outcome.cleanup_failed))
+        return original_release(claim, clean=clean)
+
+    monkeypatch.setattr(Connection, "close", close_then_expire)
+    monkeypatch.setattr(ledger_transaction_module, "release_ledger_engine", release)
+    try:
+        with ledger_transaction(case.engine, outcome, work=work) as connection:
+            target.append(connection)
+            connection.exec_driver_sql("INSERT INTO proof VALUES (24)")
+    except MigrationRefused as error:
+        caught.append(str(error))
+    assert outcome.commit_acknowledged and proof_rows(case.path) == [24]
+    assert released == ([(False, True)] if expire else [(True, False)])
+    assert caught == (["ledger_outcome_uncertain"] if expire else [])
+    boundary = len(case.trace.events)
+    if expire:
+        with (
+            pytest.raises(MigrationRefused, match="^schema_incompatible$"),
+            ledger_transaction(case.engine, LedgerOutcome(), work=LedgerWork()),
+        ):
+            pytest.fail("failed final deadline published a reusable factory")
+        assert case.trace.events[boundary:] == []
+    else:
+        with ledger_transaction(case.engine, LedgerOutcome(), work=LedgerWork()) as connection:
+            assert connection.exec_driver_sql("SELECT 1").scalar_one() == 1
     assert_pool_released(case)
