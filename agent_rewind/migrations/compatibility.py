@@ -290,6 +290,7 @@ def _inspection(
     lease = optional_progress(connection, owner=object())
     progress = False
     listener = False
+    native_begin_attempted = False
     primary: BaseException | None = None
     cleanup_error: BaseException | None = None
     interruption: BaseException | None = None
@@ -345,6 +346,7 @@ def _inspection(
             setup_check()
         elif coherent_snapshot:
             # sqlite3 legacy transaction control does not BEGIN for SELECT.
+            native_begin_attempted = True
             connection.exec_driver_sql("BEGIN")
             setup_check()
         if not coherent_snapshot:
@@ -370,6 +372,12 @@ def _inspection(
             failed(error)
         try:
             connection.rollback()
+            if native_begin_attempted and raw.in_transaction:
+                # Python 3.12 autocommit=True makes DBAPI rollback a no-op,
+                # even after our explicit BEGIN. Discharge only our own attempt.
+                raw.execute("ROLLBACK")
+                if raw.in_transaction:
+                    raise RuntimeError("inspection native rollback not acknowledged")
             if previous is not None and cleanup_error is None:
                 raw.execute(f"PRAGMA query_only={previous[0]}")
                 raw.execute(f"PRAGMA busy_timeout={previous[1]}")

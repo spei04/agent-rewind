@@ -1,10 +1,12 @@
 """Native coherent-read lifecycle controls; no operator body is manufactured."""
 
 import sqlite3
+import sys
 from contextlib import contextmanager
 
 import pytest
 from sqlalchemy import create_engine, event
+from sqlalchemy.pool import QueuePool
 
 from agent_rewind.database import Database
 from agent_rewind.migrations import compatibility as guard
@@ -203,3 +205,52 @@ def test_direct_api_starts_at_its_own_entry(settings, monkeypatch):
             assert not connection.in_transaction()
     finally:
         db.engine.dispose()
+
+
+@pytest.mark.skipif(sys.version_info < (3, 12), reason="sqlite3 native autocommit is Python 3.12+")
+@pytest.mark.parametrize("fault", ["none", "after_begin", "rollback"])
+def test_native_autocommit_explicit_begin_is_owned_and_rolled_back(tmp_path, monkeypatch, fault):
+    clock = Clock()
+    monkeypatch.setattr(guard, "time", clock)
+
+    class AutocommitNative(sqlite3.Connection):
+        def execute(self, statement, *args, **kwargs):
+            if fault == "rollback" and statement == "ROLLBACK":
+                raise RuntimeError("native rollback fixture")
+            return super().execute(statement, *args, **kwargs)
+
+    raw = sqlite3.connect(tmp_path / "autocommit.sqlite", factory=AutocommitNative, autocommit=True)
+    raw.execute("PRAGMA busy_timeout=741")
+    raw.execute("CREATE TABLE proof(id INTEGER)")
+    trace = []
+
+    def observe(statement):
+        trace.append(statement)
+        if fault == "after_begin" and statement == "BEGIN":
+            clock.now = 2.0
+
+    raw.set_trace_callback(observe)
+    engine = create_engine("sqlite://", creator=lambda: raw, poolclass=QueuePool)
+    try:
+        with engine.connect() as connection:
+            if fault == "none":
+                with guard._inspection(connection, coherent_snapshot=True):
+                    assert raw.in_transaction
+                    assert (
+                        connection.exec_driver_sql("SELECT count(*) FROM proof").scalar_one() == 0
+                    )
+            else:
+                error = TimeoutError if fault == "after_begin" else RuntimeError
+                with pytest.raises(error), guard._inspection(connection, coherent_snapshot=True):
+                    assert fault == "rollback"
+            if fault == "rollback":
+                assert connection.invalidated
+                with pytest.raises(sqlite3.ProgrammingError):
+                    raw.execute("SELECT 1")
+            else:
+                restored(connection, raw)
+                assert "ROLLBACK" in trace
+            assert "COMMIT" not in trace
+        assert engine.pool.checkedout() == 0
+    finally:
+        engine.dispose()
