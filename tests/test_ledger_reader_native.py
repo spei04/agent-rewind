@@ -21,6 +21,7 @@ from ledger_reader_fixture import (
 from postgres_control import observe_exclusion_failure, wait_for_database_drain
 from sqlalchemy import create_engine, text
 from sqlalchemy.pool import NullPool
+from sqlalchemy.util import immutabledict
 from test_ledger_operator_postgres import PostgresTrace
 from test_ledger_reader_independent import COMPLETE_CASES, reader_case
 from test_run_projection_postgres import drain, observed_reader
@@ -51,7 +52,7 @@ class NativeParameterWatch:
                 0
                 if parameters is None
                 else len(parameters)
-                if type(parameters) in (tuple, list, dict)
+                if type(parameters) in (tuple, list, dict, immutabledict)
                 else None
             )
             sql = query.decode() if isinstance(query, bytes) else str(query)
@@ -636,7 +637,9 @@ def _tuple_write_delta(before, after):
     }
 
 
-@pytest.mark.parametrize("binding", ["omitted", "none", "tuple", "list", "keyword-dict"])
+@pytest.mark.parametrize(
+    "binding", ["omitted", "none", "tuple", "list", "keyword-dict", "immutable-dict"]
+)
 def test_native_parameter_watch_preserves_exact_driver_arguments(monkeypatch, binding):
     trace = SimpleNamespace(phase="reader", events=[])
     raw, result, calls = object(), object(), []
@@ -647,10 +650,11 @@ def test_native_parameter_watch_preserves_exact_driver_arguments(monkeypatch, bi
         "tuple": tuple(range(16)),
         "list": [1, 2],
         "keyword-dict": {"value": 1},
+        "immutable-dict": immutabledict({str(index): index for index in range(16)}),
     }[binding]
-    args = () if binding in ("omitted", "keyword-dict") else (parameters,)
+    args = () if binding in ("omitted", "keyword-dict", "immutable-dict") else (parameters,)
     kwargs = {"prepare": False, "binary": True}
-    if binding == "keyword-dict":
+    if binding in ("keyword-dict", "immutable-dict"):
         kwargs["params"] = parameters
 
     def delegate(actual_cursor, actual_query, *actual_args, **actual_kwargs):
@@ -666,24 +670,33 @@ def test_native_parameter_watch_preserves_exact_driver_arguments(monkeypatch, bi
     assert actual_args == args and actual_kwargs == kwargs
     if args:
         assert actual_args[0] is parameters
-    if binding == "keyword-dict":
+    if binding in ("keyword-dict", "immutable-dict"):
         assert actual_kwargs["params"] is parameters
     watch.assert_reader_calls(raw)
     assert watch.receipts[0]["parameter_count"] == (0 if parameters is None else len(parameters))
 
 
 @pytest.mark.parametrize(
-    "fault", ["seventeen", "unknown-container", "missing-call", "extra-call", "wrong-raw"]
+    "fault",
+    [
+        "seventeen",
+        "immutable-seventeen",
+        "unknown-container",
+        "missing-call",
+        "extra-call",
+        "wrong-raw",
+    ],
 )
 def test_native_parameter_watch_refuses_unproved_driver_calls(monkeypatch, fault):
     trace = SimpleNamespace(phase="reader", events=[])
     raw, result = object(), object()
     cursor, query = SimpleNamespace(connection=raw), "SELECT driver_fixture"
-    parameters = (
-        object()
-        if fault == "unknown-container"
-        else tuple(range(17 if fault == "seventeen" else 1))
-    )
+    if fault == "unknown-container":
+        parameters = object()
+    elif fault == "immutable-seventeen":
+        parameters = immutabledict({str(index): index for index in range(17)})
+    else:
+        parameters = tuple(range(17 if fault == "seventeen" else 1))
 
     def delegate(actual_cursor, actual_query, *args, **kwargs):
         trace.events.append((trace.phase, "sql-call", id(raw), actual_query))
