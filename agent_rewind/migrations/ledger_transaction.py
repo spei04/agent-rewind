@@ -95,6 +95,7 @@ def _body_live(body: _LedgerBody) -> None:
             or connection.engine is not claim.engine
             or claim.engine.pool is not state.pool
             or claim.engine.dialect is not state.dialect
+            or ledger_engine._handlers(claim.engine) != state.handlers
         ):
             raise MigrationRefused("transactional_connection_required")
         _body_listeners(connection, work, state.handlers)
