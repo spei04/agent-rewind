@@ -667,7 +667,8 @@ def test_postgres_complete_evolving_financial_state(
             with case.engine.connect() as connection:
                 future = connection.execute(
                     text(
-                        "SELECT limit_microusd,held_microusd,accounted_microusd FROM budget_accounts "
+                        "SELECT limit_microusd,held_microusd,accounted_microusd "
+                        "FROM budget_accounts "
                         "WHERE id IN (:organization,:project) ORDER BY id"
                     ),
                     {
@@ -727,3 +728,114 @@ def test_postgres_adoption_utf8_receipt_before_json_semantics(
     drain(pg)
     assert postgres_snapshot(case.engine) == before
     drain(pg)
+
+
+@pytest.mark.parametrize("reader_case", [COMPLETE_CASES[1]], indirect=True)
+@pytest.mark.parametrize("expire", [False, True], ids=["unexpired-control", "pure-loop-expiry"])
+def test_complete_reader_stops_expired_pure_reducer_and_cleans_up(
+    reader_case, reader_trace, monkeypatch, record_property, expire
+):
+    from agent_rewind.migrations import ownership_lineage
+    from agent_rewind.migrations.ledger_inspection import inspect_ledger_state
+
+    case, trace = reader_case, reader_trace
+    study_job, study = "e" * 32, "f" * 32
+    source_run = "1" * 32
+    metadata = {
+        "job_id": study_job,
+        "source_run": source_run,
+        "request": {"run_id": source_run},
+        "candidates": [{"pairs": [{} for _ in range(64)]}],
+        "confirmation": None,
+    }
+    with case.engine.begin() as connection:
+        project = connection.execute(
+            text(
+                "SELECT project_id FROM resource_scopes "
+                "WHERE resource_kind='run' AND resource_id=:source"
+            ),
+            {"source": source_run},
+        ).scalar_one()
+        connection.execute(
+            text(
+                "INSERT INTO jobs (id,kind,created,payload,status,cancel,budget,reserved,"
+                "payload_version) VALUES (:id,'study',1.0,'opaque','succeeded',false,1,0,1)"
+            ),
+            {"id": study_job},
+        )
+        connection.execute(
+            text("INSERT INTO records (id,kind,created,data) VALUES (:id,'study',1.0,:data)"),
+            {"id": study, "data": json.dumps(metadata)},
+        )
+        for kind, identifier in (("job", study_job), ("study", study)):
+            connection.execute(
+                text(
+                    "INSERT INTO resource_scopes (resource_kind,resource_id,project_id) "
+                    "VALUES (:kind,:identifier,:project)"
+                ),
+                {"kind": kind, "identifier": identifier, "project": project},
+            )
+        assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
+    before = sqlite_snapshot(case.path)
+    clock, probes = [0.0], []
+    original = ownership_lineage._unique_object
+
+    class ObservedPair(dict):
+        def __contains__(self, key):
+            if key in ("control_run", "treatment_run"):
+                probes.append(key)
+                trace.phase = "pure-reducer"
+                if expire:
+                    clock[0] = 121.0
+            return super().__contains__(key)
+
+    def observed_object(items):
+        value = original(items)
+        return ObservedPair(value) if value == {} else value
+
+    # Preserve parsing and values; observe actual arm membership checks only.
+    # The clock expires after the first valid pair starts, not before inspection.
+    monkeypatch.setattr(ownership_lineage, "_unique_object", observed_object)
+    monkeypatch.setattr(ledger_work, "monotonic", lambda: clock[0])
+    engine, work, outcome = case.operator_engine(), LedgerWork(), LedgerOutcome()
+    returned = []
+    raw = None
+    try:
+        if expire:
+            with (
+                pytest.raises(MigrationRefused, match="^migration_busy$"),
+                ledger_transaction(engine, outcome, work=work) as connection,
+            ):
+                trace.phase = "reader"
+                raw = connection.connection.driver_connection
+                returned.append(inspect_ledger_state(connection))
+            assert returned == [] and probes == ["control_run", "treatment_run"]
+            assert outcome.rollback_acknowledged and not outcome.commit_attempted
+        else:
+            with ledger_transaction(engine, outcome, work=work) as connection:
+                trace.phase = "reader"
+                raw = connection.connection.driver_connection
+                returned.append(inspect_ledger_state(connection))
+            assert returned[0].model_dump(mode="json") == case.expected
+            assert probes == ["control_run", "treatment_run"] * 64
+            assert outcome.commit_acknowledged
+        assert not outcome.cleanup_failed
+        assert work.observed_ordinary <= 2028 and len(work.cleanup_observations) <= 8
+        assert engine.pool.checkedout() == 0 and raw is not None
+        with pytest.raises(sqlite3.ProgrammingError):
+            raw.execute("SELECT 1")
+        record_property(
+            "pure_reducer_boundary",
+            json.dumps(
+                {
+                    "expired": expire,
+                    "actual_arm_probes": len(probes),
+                    "returned_states": len(returned),
+                    "total_ordinary": work.observed_ordinary,
+                    "cleanup_observations": work.cleanup_observations,
+                }
+            ),
+        )
+    finally:
+        engine.dispose()
+    assert sqlite_snapshot(case.path) == before
