@@ -2,7 +2,7 @@
 
 2026-10-21 · Approved ledger execution plan. The original readiness review used HTTP source `a304d52b52667b882c70e922b73d7070d714efb0`; the current HTTP prerequisite is accepted at protected merge `cefd222230c800eb2e90c49a3b3c411b394d0393`.
 
-**State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2 is **In progress** under the [accepted implementation entry](#f2-reader-implementation-entry--2026-10-22), with null checkpoint acceptance. F3 and P2 #109 remain **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
+**State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2 is **Merged; checkpoint accepted** at e8cba52; [accepted evidence](#accepted-f2-reader-and-f3-handoff--2026-10-22) binds source ac3b0a31, exact PR/main attempts and verified candidate 12431486551. The lead explicitly started F3 on 2026-10-22 with the shared-check kernel first; F3 is **In progress** with null checkpoint acceptance. P2 #109 remains **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
 ## Current P1 implementation sequence — 2026-10-22
 
@@ -15,8 +15,8 @@ acceptance packages.
 | Implementation PR | Boundary | Entry and exit | Current state |
 | --- | --- | --- | --- |
 | F1 · [PR #111](https://github.com/spei04/agent-rewind/pull/111) | Dormant schema, owned operator and private guard foundation | Accepted HTTP/P1 entry; independent exact-source review, native regression proof and scoped PR/main/candidate acceptance | Merged; checkpoint accepted at 2e0eeeab; [evidence](#accepted-f1-foundation-checkpoint--2026-10-22) |
-| F2 · [PR #113](https://github.com/spei04/agent-rewind/pull/113) | Complete bounded persisted reader | Accepted F1 plus exact query-family/native-plan review; complete provenance/financial/graph proof, maximum-state limits and scoped PR/main/candidate acceptance | In progress; PR merged at 08234c, main gate failed; checkpoint acceptance remains null |
-| F3 | Trusted provisioning, original opening, replay and recovery | Accepted F2; complete original P1 matrix including preservation, concurrency, privilege, child interruption and restore, then final protected-main candidate | Not started |
+| F2 · [PR #114](https://github.com/spei04/agent-rewind/pull/114) | Complete bounded persisted reader | Accepted F1 plus exact query-family/native-plan review; complete provenance/financial/graph proof, maximum-state limits and scoped PR/main/candidate acceptance | Merged; checkpoint accepted at e8cba52; [evidence](#accepted-f2-reader-and-f3-handoff--2026-10-22) |
+| F3 | Trusted provisioning, original opening, replay and recovery | Accepted F2; complete original P1 matrix including preservation, concurrency, privilege, child interruption and restore, then final protected-main candidate | In progress; explicit 2026-10-22 handoff, kernel first; checkpoint acceptance remains null |
 
 [Assignable PR cards](../EXECUTION_BACKLOG.md#ar-010-a)
 record exact inherited contracts, prerequisites, scope, tests and exit criteria.
@@ -59,9 +59,9 @@ acceptance. The guard selection passed 281 checks on Python 3.12.3 (26.70s)
 and Python 3.11.17 (23.96s), with no skips or warnings. Database state was
 restored and the server stopped before checkout handoff. These local results
 are complemented by the [accepted F1 hosted and candidate evidence](#accepted-f1-foundation-checkpoint--2026-10-22); they alone did not establish delivery.
-The full reader remains unaccepted. Exact component query plans and the combined
-schedule are reviewed at the F2 entry below; the conditional 215-page graph bound
-does not prove complete implementation cost or capacity.
+The complete internal reader is accepted by the F2 record below. Exact component
+query plans and the combined schedule remain bound to that evidence; the
+conditional 215-page graph bound alone does not prove implementation cost or capacity.
 No partial LedgerState, hidden server-cursor FETCH or second work budget is
 authorized. The dated checkpoints below retain their original state of knowledge.
 
@@ -316,10 +316,10 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- Planning/verification: reconcile current progress and independently review the isolated listing-test correction and exact delivery evidence; preserve null F2/P1 acceptance and dated history.
-- Platform/security: prepare reviewed F3 component evidence only after documented checkout/database handoffs; writer feasibility is complete, compatibility cleanup corrections remain pending.
-- Independent QE: own the isolated test-clock correction in primary, preserving actual-query deadline and pool-reuse controls and the unchanged runtime two-second limit.
-- Lead: integrate reviewed source and evidence, coordinate checkout/database ownership, and require fresh protected F2 delivery then complete F3/P1 acceptance before P2.
+- Planning/verification: finalize accepted F2 progress, release primary and independently review F3 integration/evidence.
+- Platform/security: implement the guarded writer/service, finalization and recovery in primary after progress release and reviewed kernel composition. Existing writer/compatibility native evidence remains component-only.
+- Independent QE: implement the minimal shared-check kernel in secondary, then the compatibility adapter and independent native/recovery controls; retain the unchanged two-second deadline and verify old profiles under the new coherent snapshot.
+- Lead: own policy, source integration and delivery; coordinate checkout/database ownership and require complete F3/P1 acceptance before P2.
 
 The historical first-fortnight schedules and opening conditions remain unchanged. Accepted HTTP and exact P1 entry satisfy the implementation prerequisites; the lead has issued the P1 handoff. No new calendar allocation or staffed-time conversion follows from the effort totals.
 
@@ -713,3 +713,56 @@ commit/replay, owner/ACL-preserving financial recovery or two-second compatibili
 adapter proof. Compatibility controller cleanup corrections remain pending.
 F3/P2 stay Not started; all approved scope, effort, dependencies and external
 gates remain unchanged.
+
+## Accepted F2 reader and F3 handoff — 2026-10-22
+
+The complete internal persisted reader is accepted at source
+**ac3b0a31edb1ff06393b12943eabd31e0ae232b5** and protected merge
+**e8cba52f2979b9b8d2f2047de6856f82ba8e0502**. The final test-only correction
+047a0f08 isolates eight malformed-order cases and adds actual-query continuation
+controls below and at the unchanged two-second deadline, including connection
+reuse. Its local selection passed 59 cases on Python 3.12 and **57 with two
+predeclared Python-3.12-only skips** on Python 3.11. A reporting wrapper wrongly
+expected zero skips after successful pytest; its failure and separate metadata
+validation are retained, with no pytest rerun or product-test assertion change.
+
+| Exact attempt | Python 3.11 | Python 3.12 | Remaining required jobs |
+| --- | --- | --- | --- |
+| PR #114 · 39780954252/1 | 4738 passed, 32 skipped, 1 warning; 1593.10s | 4749 passed, 21 skipped, 1 warning; 2022.52s | Package/container, security, three gVisor cases and gate passed; main-only delivery correctly skipped |
+| Protected main · 39786131008/1 | 4738 passed, 32 skipped, 1 warning; 1999.91s | 4749 passed, 21 skipped, 1 warning; 1945.83s | All seven jobs passed, including candidate rebuild/upload |
+
+Both cores exercised actual PostgreSQL. The one existing Starlette warning per
+core and exact expected skip inventories remain recorded. Fresh collection binds
+4770 unique cases. The original 29-case native matrix and five added complete
+financial-boundary cases retain their separate source/interpreter identities;
+this is bounded limit/refusal proof, not a claim that every joint maximum fits.
+
+Candidate **12431486551** is **853440 bytes**, archive SHA256
+**9dff927ab83464b63066126f121f2efa5f74942b419dfa078ac578372515c56f**.
+The unchanged reviewed verifier accepted its manifest and **133 exact runtime
+members**, independently rechecked against Git. Durable release record
+reviewed-delivery-20261021-pr114-e8cba52.json has SHA256
+**3f74e257d52532dc7c72a6bfeaf2594760816309435d8f31cba72ceba824338d**.
+The first invocation stopped on SSH exit 255 before completing its source/merge
+check (record d9f0d44b); the separate second invocation passed unchanged
+(record b5aa94a7). Original PR #113 delivery and failed main 39773689705/1
+remain separate history; no failed result is retroactively accepted.
+
+The lead explicitly authorizes F3 implementation, kernel first, in the existing
+build/test scope. Entry record 0e930256 binds this handoff. QE owns the shared-check
+kernel then compatibility adapter in secondary; platform/security owns the
+guarded writer/service, finalization and recovery in primary after progress
+release and reviewed kernel composition. Planning reviews integration and the
+lead owns policy, source integration and delivery. The lead updated and read back
+#10/#107/#108 with accepted F2 and the F3 start; all remain open/In progress
+with full P1 acceptance null. #109 remains Not started and was not changed.
+
+Writer feasibility **20 SQLite / 23 PostgreSQL** asserted component groups and
+compatibility projection **27 cases on each dialect** have scoped peer acceptance
+after the reviewed cleanup corrections and restored/stopped database releases.
+They do not establish the full adapter's two-second coherent lifecycle, complete
+command capacity, real initialization-derived positive states, replay/uncertainty
+handling or owner/ACL-preserving financial recovery. All original P1 gates remain.
+F3 is In progress with null checkpoint acceptance; P1, AR-010-A and parent #10
+remain In progress/null acceptance. P2 remains Not started. No ready profile,
+customer activation, spending authority, effort or dependency change follows.

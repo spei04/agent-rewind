@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Writer feasibility component passed 20 SQLite and 23 PostgreSQL asserted case groups; restored/stopped release recorded | Prepare reviewed F3 components only; compatibility cleanup corrections and implementation gates remain open. |
-| Independent QE | Frozen isolated listing-test clock correction after the protected-main failure | Independent source review and Python 3.11 checks before integration; runtime two-second limit remains unchanged. |
-| Planning/verification | Final PR/main audits frozen; current progress reconciliation in secondary | Review the test correction and release secondary for lead composition and fresh delivery. |
-| Lead | PR #113 merged at 08234c; F2 acceptance remains null after the main gate failed | Compose reviewed correction and progress, then require fresh PR/main/candidate evidence; F3/full P1 still precede P2. |
+| Platform/security | F3 guarded writer/service, finalization and recovery in primary after progress release and reviewed kernel composition | Preserve the full initialization, replay, uncertainty, native limits and owner/ACL recovery gates. |
+| Independent QE | F3 shared-check kernel in secondary, then compatibility adapter after kernel review | Preserve existing guards/work owners, the unchanged two-second deadline and coherent old-profile snapshots; own independent native/recovery controls. |
+| Planning/verification | Completed exact PR/main audits; finalize accepted F2 progress and release primary | Independently review F3 integration and source-bound evidence. |
+| Lead | Accepted F2 at e8cba52 with verified candidate; issued explicit F3 implementation handoff | Own policy, integration and delivery; full P1 acceptance remains required before P2. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -52,8 +52,8 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
 - **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Independently review and integrate the isolated listing-test clock correction, then complete fresh protected delivery for F2. F2 acceptance remains null despite the PR merge. F3 trusted provisioning/opening/replay/recovery follows accepted F2. Only complete final P1 acceptance permits P2 entry.
-- **Current storage and consumers:** The two existing cloud checkouts are reused: independent QE owns the test correction in primary; planning owns the narrow progress update in secondary until release to the lead. The original 29-case PostgreSQL matrix and the five added complete-reader boundary cases pass separately on both interpreters. The writer feasibility component also has a restored/stopped release; no database consumer remains from those runs. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
+- **Next evidence-producing milestone:** Review the minimal shared-check kernel, then integrate F3's guarded writer/service and coherent compatibility adapter. Real initialization, replay, outcome, maximum-state/refusal and owner/ACL recovery evidence remain required; component query proofs alone do not complete those gates. Only complete final P1 acceptance permits P2 entry.
+- **Current storage and consumers:** The two existing cloud checkouts are reused: planning finalizes progress in primary before releasing it to platform/security; independent QE takes secondary for the shared-check kernel and compatibility adapter. The 29-case PostgreSQL matrix and five added complete-reader boundaries retain their separate source/interpreter evidence. Writer and compatibility component runs restored their baselines and stopped PostgreSQL; native execution needs an explicit exclusive-slot handoff. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -1114,3 +1114,30 @@ PostgreSQL** asserted component case groups and restored/stopped release **1161b
 Reviewed writer, compatibility and recovery preparation does not start F3;
 compatibility controller cleanup corrections remain pending. F2/P1 acceptance
 stays null; F3/P2 stay Not started.
+
+## Accepted F2 and F3 assignment — 2026-10-22
+
+Reviewed source **ac3b0a31** passed PR #114 attempt **39780954252/1** and
+protected-main attempt **39786131008/1** after normal merge **e8cba52**.
+Both runs passed **4738 / 32 skipped** on Python 3.11 and **4749 / 21 skipped**
+on Python 3.12, one existing warning each; package, security, native PostgreSQL,
+three gVisor cases and the gates passed. The main candidate was rebuilt and
+uploaded, then independently verified as artifact **12431486551**, **853440
+bytes**, with **133 exact runtime members**. [Accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f2-reader-and-f3-handoff--2026-10-22)
+retains exact identities, timings and prior failures.
+
+The first candidate verification stopped on SSH exit 255 before its source/merge
+check completed; the unchanged verifier's separate second attempt passed.
+The original failed main attempt 39773689705/1 remains retained. Neither
+interruption is relabeled as successful evidence.
+
+F2 is Merged; checkpoint accepted. The lead explicitly starts F3 within the
+existing build/test scope: QE owns the shared-check kernel then compatibility
+adapter in secondary; platform/security owns the guarded writer/service and
+finalization/recovery in primary after progress release and kernel review.
+Planning reviews integration; the lead owns policy and delivery. Writer
+**20 SQLite / 23 PostgreSQL** component groups and compatibility **27 cases on
+each dialect** have scoped peer acceptance only. Full adapter deadline,
+capacity, real initialization and owner/ACL financial recovery still need
+implementation evidence. P1/AR-010-A remain In progress/null acceptance;
+F3 is In progress/null acceptance; P2 remains Not started.

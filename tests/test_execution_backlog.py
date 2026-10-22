@@ -554,6 +554,14 @@ def test_implementation_pr_acceptance_does_not_complete_parent_package(packet, c
     p1, p2 = task["delivery_packages"]
     for number, pr in enumerate(p1["implementation_prs"][:completed], 1):
         _accept_implementation_pr(pr, number)
+    for pr in p1["implementation_prs"][completed:]:
+        pr.update(
+            status="Not started",
+            source_commit=None,
+            accepted_merge_commit=None,
+            review_evidence=None,
+            tracking_pr=None,
+        )
     if completed < 3:
         p1["implementation_prs"][completed]["status"] = "In progress"
     markdown = _sync_implementation_cards(markdown, p1)
