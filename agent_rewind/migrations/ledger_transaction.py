@@ -83,6 +83,9 @@ def _body_live(body: _LedgerBody) -> None:
         or connection.get_transaction() is not body.root
         or not body.root.is_active
         or connection.in_nested_transaction()
+        or bool(connection.get_execution_options())
+        or not body.proxy.is_valid
+        or body.proxy.is_detached
         or connection.connection is not body.proxy
         or body.proxy.driver_connection is not body.raw
         or not work._used
