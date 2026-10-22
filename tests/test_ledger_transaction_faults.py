@@ -149,8 +149,16 @@ def test_fault_after_real_begin_keeps_attempt_without_fabricating_begin_return(
     case = ledger_case
     outcome = LedgerOutcome()
     original = Connection.exec_driver_sql
+    original_raw = ownership._TrackedSQLite.execute
     native_begun = []
     body = []
+
+    def after_raw_begin(raw, statement, *args, **kwargs):
+        result = original_raw(raw, statement, *args, **kwargs)
+        if statement == "BEGIN EXCLUSIVE":
+            native_begun.append(raw.in_transaction)
+            raise RuntimeError("private-after-native-begin")
+        return result
 
     def after_begin(connection, statement, *args, **kwargs):
         result = original(connection, statement, *args, **kwargs)
@@ -160,6 +168,9 @@ def test_fault_after_real_begin_keeps_attempt_without_fabricating_begin_return(
             raise RuntimeError("private-after-native-begin")
         return result
 
+    # Both supported call sites delegate the native action before injecting the
+    # same fault; the raw path raises before the outer call can acknowledge it.
+    monkeypatch.setattr(ownership._TrackedSQLite, "execute", after_raw_begin)
     monkeypatch.setattr(Connection, "exec_driver_sql", after_begin)
     with (
         pytest.raises(MigrationRefused, match="^migration_database_failure$"),
