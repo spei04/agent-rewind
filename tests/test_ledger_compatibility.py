@@ -305,3 +305,101 @@ def test_malformed_native_account_at_either_edge_refuses_before_any_projection_b
     result, statements = inspect_case(legacy)
     assert result.code == "schema_incompatible"
     assert not body_statements(legacy, statements)
+
+
+def assert_actual_service_history(case, initial, receipt, later):
+    """Independent stored identities; fixtures never seed an expected ar7 result."""
+    from ledger_reader_fixture import original_rows
+
+    from agent_rewind.migrations.schema import LEDGER, catalog, checksum
+
+    assert original_rows(case.engine) == case.original_rows
+    expected_opening = 245000 if case.legacy else 0
+    assert receipt.outcome == "complete"
+    assert receipt.manifest_id == initial.manifest_id
+    assert receipt.manifest_digest == initial.digest
+    assert receipt.imported_opening_microusd == expected_opening
+    with case.engine.connect() as connection:
+        adoption = dict(
+            connection.exec_driver_sql("SELECT * FROM installation_adoptions").mappings().one()
+        )
+        assert adoption["installed_schema_fingerprint"] == checksum(catalog(connection))
+        assert {
+            key: value for key, value in adoption.items() if key != "installed_schema_fingerprint"
+        } == {
+            key: value
+            for key, value in case.adoption.items()
+            if key != "installed_schema_fingerprint"
+        }
+        assert [
+            tuple(row)
+            for row in connection.execute(
+                text(
+                    "SELECT * FROM migration_progress WHERE revision<>:revision "
+                    "ORDER BY revision,phase"
+                ),
+                {"revision": LEDGER},
+            )
+        ] == case.previous_progress
+        rows = list(
+            connection.execute(
+                text(
+                    "SELECT phase,CAST(cursor AS TEXT),status FROM migration_progress "
+                    "WHERE revision=:revision ORDER BY phase"
+                ),
+                {"revision": LEDGER},
+            )
+        )
+        assert len(rows) == (3 if later else 2)
+        assert all(row[2] == "complete" for row in rows)
+        opening = json.loads(next(row[1] for row in rows if row[0] == "ledger_opening"))
+        assert opening["organization_opening_microusd"] == expected_opening
+        assert opening["manifest_id"] == initial.manifest_id
+        assert opening["manifest_digest"] == initial.digest
+        assert opening["source_digest"] == initial.source_digest
+        accounts = list(
+            connection.exec_driver_sql(
+                "SELECT id,limit_microusd,opening_held_microusd,held_microusd,accounted_microusd "
+                "FROM budget_accounts ORDER BY id"
+            )
+        )
+        manifests = (initial, later) if later else (initial,)
+        expected = {account.id: account for manifest in manifests for account in manifest.accounts}
+        assert {row[0] for row in accounts} == set(expected)
+        assert all(row[1] == expected[row[0]].limit_microusd for row in accounts)
+        assert all(row[2] == row[3] and row[4] == 0 for row in accounts)
+        assert sum(row[2] for row in accounts) == expected_opening * 3
+        assert (
+            connection.exec_driver_sql(
+                "SELECT coalesce(sum(legacy_reserved_microusd),0) FROM jobs"
+            ).scalar_one()
+            == expected_opening
+        )
+
+
+@pytest.mark.parametrize("history", ["empty", "legacy", "later"])
+def test_actual_writer_history_stays_migration_only(tmp_path, history):
+    from ledger_service_fixture import provision_after
+    from test_ledger_service import intent
+
+    from agent_rewind.migrations.ledger_inputs import validate_ledger_manifest
+    from agent_rewind.migrations.ledger_service import initialize_ledger
+
+    case = complete_ar6(tmp_path / "service-compat.sqlite", legacy=history != "empty")
+    try:
+        initial = validate_ledger_manifest(intent(case, empty=history == "empty"))
+        operator = case.operator_engine()
+        try:
+            receipt = initialize_ledger(operator, initial)
+            later = provision_after(initial, receipt) if history == "later" else None
+            if later:
+                second = initialize_ledger(operator, later)
+                assert second.sequence == 1
+        finally:
+            operator.dispose()
+        assert_actual_service_history(case, initial, receipt, later)
+        result, _ = inspect_case(case)
+        assert result == guard.CompatibilityResult("incompatible", "migration_only")
+        assert_actual_service_history(case, initial, receipt, later)
+    finally:
+        case.dispose()

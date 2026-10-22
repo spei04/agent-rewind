@@ -156,7 +156,7 @@ def test_postgres_guard_uses_read_only_transaction_and_no_ddl(pg, settings):
 
     event.listen(db.engine, "before_cursor_execute", observed)
     assert db.schema_compatibility().code == "migration_only"
-    assert "SET TRANSACTION READ ONLY" in queries
+    assert "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY" in queries
     assert all(q.startswith(("SELECT", "SHOW", "SET")) for q in queries)
     assert not any(q.startswith(("CREATE", "ALTER", "DROP", "INSERT", "UPDATE")) for q in queries)
     db.engine.dispose()
