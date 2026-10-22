@@ -75,7 +75,11 @@ def test_opt_in_has_real_snapshot_and_default_keeps_legacy_select_behavior(nativ
             finally:
                 writer.close()
             observed = connection.exec_driver_sql("SELECT value FROM witness").scalar_one()
-            checks.check()
+            if coherent:
+                assert checks is not None
+                checks.check()
+            else:
+                assert checks is None
             assert observed == ("before" if coherent else "after")
             assert raw.execute("PRAGMA query_only").fetchone() == (1,)
         restored(connection, raw)

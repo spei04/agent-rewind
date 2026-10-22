@@ -249,7 +249,7 @@ def _inspection(
     *,
     coherent_snapshot: bool = False,
     checks: _InspectionChecks | None = None,
-) -> Iterator[_InspectionChecks]:
+) -> Iterator[_InspectionChecks | None]:
     """Own one idle connection transaction; restore session state before pool return."""
     if connection.in_transaction():
         raise MigrationRefused("idle_inspection_connection_required")
@@ -358,7 +358,7 @@ def _inspection(
         if not coherent_snapshot:
             listener = True
             event.listen(connection, "before_cursor_execute", before_query)
-        yield checks
+        yield checks if coherent_snapshot else None
         remaining()
     except BaseException as error:
         primary = error
