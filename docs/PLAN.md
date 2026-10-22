@@ -1138,12 +1138,16 @@ The lead accepted the [complete reader implementation entry](delivery/LEDGER_EXE
 
 ## F3 component integration checkpoint — 2026-10-22
 
-F2 is accepted at e8cba52. F3 remains In progress: the counted fingerprint,
-complete-context extraction and coherent immutable-history adapter have scoped
-review and SQLite test evidence. The composed writer/adapter passes 251 Python
-3.12 cases and 248 Python 3.11 cases with three explicit version skips. Offline
-packages match all 141 runtime files. Platform/security and QE now prepare
-separate native service/adapter and recovery controls. [Current evidence and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#f3-component-integration-checkpoint--2026-10-22)
-separate these results from full command, PostgreSQL, capacity and recovery
-acceptance. Full P1 acceptance is null and P2 is Not started. Counts, estimates,
-dependencies, funding and production gates are unchanged.
+F2 is accepted at e8cba52. F3 remains In progress. The reviewed local composition
+passes 251 Python 3.12 cases and 248 Python 3.11 cases with three explicit
+version skips; offline packages match all 141 runtime files. New PostgreSQL
+evidence on Python 3.12 adds 33 compatibility passes and service coverage from
+four earlier passes plus five corrected continuation passes. Both original
+failed attempts remain recorded; the runtime is unchanged.
+
+The next assignments are independent two-account provisioning/preservation and
+complete adapter capacity, followed by the remaining concurrency, uncertainty,
+process-death and owner/ACL recovery gates. [Current native evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-native-validation-checkpoint--2026-10-22)
+does not establish full P1 or protected delivery acceptance. P1 acceptance is
+null and P2 is Not started. Counts, estimates, dependencies, funding and
+production gates are unchanged.

@@ -3822,11 +3822,14 @@ evidence distinction.
 
 ### Current F3 implementation evidence — 2026-10-22
 
-The composed local writer/adapter checkpoint at 8708b8f passes 251 Python 3.12
-cases and 248 Python 3.11 cases with three explicit version skips. Offline
-wheel/sdist contents match all 141 runtime files. These component/integration
-results leave F3, P1 and AR-010-A In progress with null acceptance; P2 remains
-Not started. Native PostgreSQL, concurrency, process interruption, owner/ACL
-restore, capacity and final protected delivery gates remain mandatory. See the
-[ledger delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-component-integration-checkpoint--2026-10-22).
+The local composition at 8708b8f retains 251 Python 3.12 passes, 248 Python 3.11
+passes with three explicit version skips, and 141 matching runtime package
+members. Subsequent PostgreSQL validation on Python 3.12 passes 33 compatibility
+cases. Service coverage comprises four passes at a6456ca and five corrected
+continuation passes at 00e568a; failed attempts remain separately recorded.
+
+Independent two-account provisioning, complete-path capacity, concurrency,
+uncertainty, process interruption, owner/ACL restore and final protected delivery
+are still required. F3, P1 and AR-010-A remain In progress with null acceptance;
+P2 remains Not started. See the [native delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-native-validation-checkpoint--2026-10-22).
 Task/PR counts, estimates, dependencies and external approvals are unchanged.

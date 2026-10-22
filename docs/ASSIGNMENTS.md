@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Writer service reviewed; author PostgreSQL service controls in primary | Freeze native tests/controller for review; no database execution before exclusive handoff. |
-| Independent QE | Compatibility adapter and SQLite lifecycle reviewed; prepare native/recovery controls privately | Secondary released to lead integration; await the frozen integrated tree and exclusive PostgreSQL handoff. |
-| Planning/verification | Service, preparation and integration source reviewed; audit native test plans and evidence | Preserve exact scope, finite errors, source bindings and remaining delivery gates. |
-| Lead | Combined interpreter checks and package comparison pass; release frozen secondary to native QE | Preserve null F3/P1 acceptance until full native/recovery and protected delivery gates pass. |
+| Platform/security | Native service controls complete; review combined evidence and subsequent test slices | Four earlier passes plus five corrected continuation passes; retain both failed attempts. |
+| Independent QE | Native compatibility controls complete; assigned complete-path capacity tests in secondary | Freeze valid maximum-history fixtures; measure the unchanged two-second deadline and refusal cleanup. |
+| Planning/verification | Assigned independent provisioning/oracles in primary after lead handoff | Build actual S0→S1→S2 with new organization and project accounts; prove exact preservation and cap refusals. |
+| Lead | Compose native-tested sources, publish progress and hand back both checkouts | Keep F3/P1 acceptance null until independent coverage, recovery and protected delivery gates pass. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -53,7 +53,7 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
 - **Next evidence-producing milestone:** Complete guarded writer/service integration with the reviewed coherent compatibility adapter. Real initialization, replay, outcome, maximum-state/refusal and owner/ACL recovery evidence remain required; reviewed components alone do not complete those gates. Only complete final P1 acceptance permits P2 entry.
-- **Current storage and consumers:** The two existing cloud checkouts are reused: platform/security owns primary service work; the lead owns released secondary for component integration and packaging. QE prepares native controls privately, and planning reviews immutable source without a checkout hold. Earlier PostgreSQL proofs retain their exact source/interpreter scope; the database is stopped and native execution needs an explicit exclusive-slot handoff. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
+- **Current storage and consumers:** Two existing cloud checkouts are reused. The lead composes the native-tested checkpoint before handing primary to the provisioning engineer and secondary to QE for capacity work; platform/security reviews immutable evidence. PostgreSQL access remains exclusive to a reviewed run. The completed runs restored the same baseline and stopped the server. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -1207,3 +1207,20 @@ proof remain required. The lead returns secondary to QE after this documentation
 handoff; platform/security owns primary native-test authoring, and planning
 reviews source/controller evidence. Database execution still requires a reviewed
 exclusive handoff. F3/P1 acceptance remains null and P2 is Not started.
+
+
+## F3 native validation and next assignments — 2026-10-22
+
+QE delivered 33 passing PostgreSQL compatibility cases at 001e0bd (22 new and
+11 existing). Platform delivered four service passes at a6456ca and five
+remaining passes at 00e568a; these are separate runs, not a single nine-pass
+attempt. The original newline assertion and earlier live-writer refusal remain
+recorded failures; both corrections changed test fixtures/assertions only.
+Native runs restored the baseline and stopped PostgreSQL.
+
+The lead composes these sources with all 141 runtime files unchanged from
+8708b8f. Next, the provisioning engineer builds the independent two-account S2
+case in primary, QE measures complete adapter capacity in secondary, and
+platform/security reviews their work. Concurrency, uncertainty, process death,
+owner/ACL restore and protected delivery remain open. F3/P1 stays In progress
+with null acceptance; P2 stays Not started.

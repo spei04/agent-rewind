@@ -812,3 +812,40 @@ work units under unchanged limits; 1910 SQLite trace callbacks include trigger
 repetitions and are not an independent execute-attempt count. Full native,
 recovery and protected delivery gates remain open. F3/P1 acceptance stays null;
 P2 remains Not started.
+
+
+## F3 native validation checkpoint — 2026-10-22
+
+At **001e0bd**, **33 PostgreSQL compatibility cases pass** on Python 3.12 in
+86.15 seconds: 22 new controls and 11 existing regressions, with one existing
+warning. They cover complete seeded histories, deliberately corrupt immutable
+projections, coherent metadata snapshots, deadline boundaries, rollback faults
+and three actual service-created histories. Independent evidence reconciles
+7,617 ordered driver receipts across 24 wrapper observations. The 30 new
+projection calls use at most 16 binds; unchanged old-profile reflection remains
+separately reported. Controlled-clock cases prove check placement, not maximum
+elapsed capacity.
+
+Service validation is assembled from **four passes at a6456ca** and **five
+passes at 00e568a**. The first attempt stopped on a missing newline in a trace
+assertion; the next reached four complete passes before the owner fixture
+correctly triggered the earlier live-writer guard. The final fixture temporarily
+disables only its original owner's LOGIN flag, restores it in a finally block,
+and reaches the intended ownership refusal. All five unresolved cases then pass
+in 26.94 seconds, including three post-write rollbacks and the actual deferred
+constraint refusal. Neither failure was erased or relabeled as a passing run.
+No runtime guard changed.
+
+All native runs restored the same database/role baseline, reaped their test
+processes and stopped PostgreSQL. Composition preserves all **141 runtime files**
+from 8708b8f. These results are scoped Python 3.12 evidence; full matching
+two-interpreter hosted delivery remains required.
+
+Next work uses the two existing checkouts: independent actual S2 provisioning
+adds both organization and project accounts, while QE measures complete adapter
+capacity under the unchanged two-second limit. The existing later-provision
+fixture adds only an organization account and does not close the S2 gate.
+Concurrency, uncertainty, process death, owner/ACL restore, remaining boundaries
+and protected PR/main/candidate acceptance stay open. F3/P1 remains In progress
+with null acceptance; P2 remains Not started. No task, estimate, dependency,
+spending or deployment gate changes.
