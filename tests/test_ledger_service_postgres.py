@@ -211,7 +211,7 @@ def test_postgres_actual_initialize_provision_and_shared_work(
                 immediate = next(
                     i
                     for i, event in enumerate(events)
-                    if event[1] == "sql-return" and event[3] == "SET CONSTRAINTS ALL IMMEDIATE"
+                    if event[1] == "sql-return" and event[3] == "SET CONSTRAINTS ALL IMMEDIATE\n"
                 )
                 commit = next(i for i, event in enumerate(events) if event[1] == "commit-call")
                 assert immediate < commit
