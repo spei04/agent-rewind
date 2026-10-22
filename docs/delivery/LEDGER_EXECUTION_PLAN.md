@@ -2,7 +2,7 @@
 
 2026-10-21 · Approved ledger execution plan. The original readiness review used HTTP source `a304d52b52667b882c70e922b73d7070d714efb0`; the current HTTP prerequisite is accepted at protected merge `cefd222230c800eb2e90c49a3b3c411b394d0393`.
 
-**State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. P1 has no accepted product delivery yet; P2 #109 remains **Not started**, waiting for accepted P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
+**State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2/F3 and P2 #109 remain **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
 ## Current P1 implementation sequence — 2026-10-22
 
@@ -14,7 +14,7 @@ acceptance packages.
 
 | Implementation PR | Boundary | Entry and exit | Current state |
 | --- | --- | --- | --- |
-| F1 · [PR #111](https://github.com/spei04/agent-rewind/pull/111) | Dormant schema, owned operator and private guard foundation | Accepted HTTP/P1 entry; independent exact-source review, native regression proof and scoped PR/main/candidate acceptance | In progress; no accepted checkpoint merge |
+| F1 · [PR #111](https://github.com/spei04/agent-rewind/pull/111) | Dormant schema, owned operator and private guard foundation | Accepted HTTP/P1 entry; independent exact-source review, native regression proof and scoped PR/main/candidate acceptance | Merged; checkpoint accepted at 2e0eeeab; [evidence](#accepted-f1-foundation-checkpoint--2026-10-22) |
 | F2 | Complete bounded persisted reader | Accepted F1 plus exact query-family/native-plan review; complete provenance/financial/graph proof, maximum-state limits and scoped PR/main/candidate acceptance | Not started; traversal design remains held |
 | F3 | Trusted provisioning, original opening, replay and recovery | Accepted F2; complete original P1 matrix including preservation, concurrency, privilege, child interruption and restore, then final protected-main candidate | Not started |
 
@@ -58,7 +58,7 @@ Correction 91f0742 and private guard ff65892 have independent internal source
 acceptance. The guard selection passed 281 checks on Python 3.12.3 (26.70s)
 and Python 3.11.17 (23.96s), with no skips or warnings. Database state was
 restored and the server stopped before checkout handoff. These local results
-do not replace fresh hosted source checks, protected merge or candidate proof.
+are complemented by the [accepted F1 hosted and candidate evidence](#accepted-f1-foundation-checkpoint--2026-10-22); they alone did not establish delivery.
 The full reader remains unaccepted: the corrected conditional graph bound is
 215 pages, but exact observed query plans and combined costs are still required.
 No partial LedgerState, hidden server-cursor FETCH or second work budget is
@@ -315,10 +315,10 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- Planning/verification: hand off the frozen refinement and prepare source-bound hosted inventory and CI evidence; no runtime or database changes.
-- Platform/security: independently review the private candidate verifier and bounded native read controls; F2 query design and implementation remain gated.
-- Delivery reviewer: author and test the private candidate-verifier correction while preserving exact runtime identity, archive and delivery gates; independent review precedes use.
-- Lead: independently review the refinement, compose and publish reviewed sources, keep database/checkouts under explicit ownership, update public issue/PR scope and require full P1 acceptance before P2.
+- Planning/verification: compose the accepted F1 progress update in the reused secondary checkout, preserving null P1 acceptance and dated evidence; no runtime or database changes.
+- Platform/security: prepare exact catalog/preflight query proposals; complete reader implementation remains gated on independent query-family/native-plan and combined budget review.
+- Delivery reviewer: prepare a C2 native feasibility harness after accepted partial C2/fingerprint static reviews, with lead harness review before execution. Completed A2/B2 native work remains partial proof, with database and checkout ownership released after restoration and stop.
+- Lead: independently review and publish the progress composition, maintain explicit checkout/database ownership and public issue scope, and require complete F2/F3 and final P1 acceptance before P2.
 
 The historical first-fortnight schedules and opening conditions remain unchanged. Accepted HTTP and exact P1 entry satisfy the implementation prerequisites; the lead has issued the P1 handoff. No new calendar allocation or staffed-time conversion follows from the effort totals.
 
@@ -343,3 +343,48 @@ HTTP P2 is Verified at cefd222 after exact PR/main attempts 39683408934/39686498
 The lead assigned platform/security to AR-010-A/P1 #108 in the existing secondary checkout, work/ledger-schema, from published planning 9f6ea6e after accepted HTTP delivery. Aggregate #107 and parent #10 are In progress; #109 remains Not started. The lead read back those issue states on 2026-10-21. P1/P2 accepted merge and review evidence remain null.
 
 Planning/verification owns independent test modules after accepted progress reconciliation and stable runtime interfaces; runtime and test file ownership are separate. First checkpoint is immutable manifest/progress parsing and explicit ar7 DDL/literal catalogs, followed by the complete provisioning, historical opening, privilege, constraint, bounds and recovery proof. Parser-only or synthetic privilege feasibility evidence cannot complete P1. Existing profiles and earlier acceptance records remain unchanged; P2 and worker work retain their original gates.
+
+## Accepted F1 foundation checkpoint — 2026-10-22
+
+[PR #111](https://github.com/spei04/agent-rewind/pull/111) merged normally with
+reviewed source `c6f32cdd2633d5022d4ebdbc78589920a7f3d9dc` at protected-main
+merge `2e0eeeab45eb97c925454a7c9e23f2ddfcc47249`. The merge has the reviewed
+source tree and unchanged required protection. Independent delivery review
+accepted both exact attempts and the candidate archive.
+
+| Evidence | Python 3.11 | Python 3.12 |
+| --- | --- | --- |
+| [PR run 39729061054/1](https://github.com/spei04/agent-rewind/actions/runs/39729061054) | 4561 passed, 32 skipped, 1 existing warning; 1817.93s | 4572 passed, 21 skipped, 1 existing warning; 1305.61s |
+| [Protected-main run 39733331352/1](https://github.com/spei04/agent-rewind/actions/runs/39733331352) | 4561 passed, 32 skipped, 1 existing warning; 1093.68s | 4572 passed, 21 skipped, 1 existing warning; 1201.11s |
+
+Durations are pytest durations. Skip totals match the source-bound interpreter
+and dialect forecast; the existing warning is the Starlette/httpx deprecation.
+Both attempts used the pinned PostgreSQL 16.15 service and actual database
+opt-ins. Three actual gVisor cases, package/installed-service/HTTP smoke, locked
+dependency audit, static security and the required CI gate passed. The exact
+source Docker build and separate offline installed-image checks passed,
+including the four-store CA identity proof. Protected-main delivery passed.
+
+The reviewed verifier accepted artifact **12407151544**, **726324 bytes**,
+archive SHA256
+`746fd89d18ad35604ee92b6043352d0d6589bb4c9151cbc62ff7ed94af4d2479`.
+It verified the exact candidate members and **124 runtime files** against the
+reviewed Git source, wheel and source distribution. The durable release record
+`reviewed-delivery-20261021-pr111-2e0eeea.json` has SHA256
+`b28fd23a35b3b3e8cc02418912cf215898f44baf57bf73ef60489dcb03dbf1e8`.
+Original failed run 39724247038 and all earlier failed attempts remain separate
+retained evidence; no successful run replaces their outcome.
+
+This accepts only AR-010-A/P1/F1. P1, AR-010-A and parent AR-010 remain
+**In progress**; P1 accepted-merge/review fields remain null. F2/F3 remain
+**Not started**, with no component source/merge/review acceptance. F1 satisfies
+F2's predecessor gate, while exact query-family/native-plan and combined cost
+review still precedes reader implementation. A2 native feasibility (15 cases
+on each database dialect) and B2 native feasibility (43 on each) are partial proofs,
+not complete reader or capacity acceptance. P2 remains Not started/null,
+behind complete P1 and its own entry. No customer, production or spending gate
+changes, new task, effort, dependency or PR allocation follows.
+
+The lead updated and read back issues #10/#107/#108 on 2026-10-22 with this
+F1 evidence; all remain open/In progress. Issue #109 was separately read back
+open/Not started and was unchanged.

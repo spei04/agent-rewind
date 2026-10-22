@@ -620,6 +620,15 @@ def test_implementation_pr_invalid_claims_reach_the_intended_gate(packet, varian
     task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
     p1, p2 = task["delivery_packages"]
     prs = p1["implementation_prs"]
+    if variant in ("unaccepted_evidence", "early_f2"):
+        prs[0].update(
+            status="In progress",
+            source_commit=None,
+            accepted_merge_commit=None,
+            review_evidence=None,
+        )
+        markdown = _sync_implementation_cards(markdown, p1)
+        assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
     if variant in ("empty", "one", "over_bound", "null_list"):
         p1["implementation_prs"] = {
             "empty": [],
@@ -692,6 +701,8 @@ def test_implementation_pr_invalid_claims_reach_the_intended_gate(packet, varian
 
 @pytest.mark.parametrize("variant", ["scope", "progress", "evidence", "tracking", "missing_card"])
 def test_implementation_pr_card_drift_is_rejected(packet, variant):
+    import re
+
     data, markdown, plan = deepcopy(packet)
     assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
     p1 = next(t for t in data["tasks"] if t["id"] == "AR-010-A")["delivery_packages"][0]
@@ -702,12 +713,16 @@ def test_implementation_pr_card_drift_is_rejected(packet, variant):
     if variant == "missing_card":
         body = ""
     else:
-        old, new = {
-            "scope": (pr["scope"], "Scope omitted"),
-            "progress": ("**Progress:** In progress.", "**Progress:** Not started."),
-            "evidence": ("Pending; no accepted source/merge/review.", "All package gates passed."),
-            "tracking": (pr["tracking_pr"], "https://github.com/spei04/agent-rewind/pull/9999"),
-        }[variant]
+        if variant in ("progress", "evidence"):
+            label = "Progress" if variant == "progress" else "Checkpoint evidence"
+            match = re.search(rf"(?m)^- \*\*{label}:\*\* .+$", body)
+            assert match is not None
+            old, new = match[0], f"- **{label}:** Synthetic inconsistent field."
+        else:
+            old, new = {
+                "scope": (pr["scope"], "Scope omitted"),
+                "tracking": (pr["tracking_pr"], "https://github.com/spei04/agent-rewind/pull/9999"),
+            }[variant]
         assert old in body
         body = body.replace(old, new, 1)
     markdown = markdown[:start] + body + markdown[end:]
