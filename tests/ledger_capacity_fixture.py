@@ -31,7 +31,7 @@ def object_hashes(case):
 
 
 def extend_opening(case):
-    """Keep the real three-job 245000 opening and add 45 zero-held v1 jobs."""
+    """Keep the real three-job 245000 opening and add 45 terminal zero-held v1 jobs."""
     with case.engine.begin() as connection:
         organization = connection.exec_driver_sql("SELECT id FROM organizations").scalar_one()
         original = [
@@ -63,7 +63,7 @@ def extend_opening(case):
             connection.execute(
                 text(
                     "INSERT INTO jobs(id,kind,created,payload,status,cancel,budget,reserved) "
-                    "VALUES(:id,'run',1700000000.125,:payload,'queued',false,1000000,0)"
+                    "VALUES(:id,'run',1700000000.125,:payload,'succeeded',false,1000000,0)"
                 ),
                 {"id": job, "payload": "c" * 64},
             )
@@ -74,6 +74,33 @@ def extend_opening(case):
                 ),
                 {"job": job, "project": projects[index % 15]},
             )
+        added = [
+            dict(row)
+            for row in connection.exec_driver_sql(
+                "SELECT id,status,payload_version,reserved,owner,lease_until,"
+                "execution_config_ref,execution_config_digest FROM jobs ORDER BY id"
+            ).mappings()
+            if row["id"] not in {old[0] for old in original}
+        ]
+        assert len(added) == 45
+        assert all(
+            row["status"] == "succeeded"
+            and row["payload_version"] == 1
+            and row["reserved"] == 0
+            and row["owner"] is None
+            and row["lease_until"] is None
+            and row["execution_config_ref"] is None
+            and row["execution_config_digest"] is None
+            for row in added
+        )
+        assert [
+            tuple(row)
+            for row in connection.exec_driver_sql(
+                "SELECT id,kind,created,payload,status,owner,lease_until,cancel,budget,reserved,"
+                "result,error,actor FROM jobs ORDER BY id"
+            )
+            if row[0] in {old[0] for old in original}
+        ] == original
         case.original_digest = source_digest(connection)
     return original
 
