@@ -151,7 +151,8 @@ def test_unrelated_bounded_unicode_progress_body_is_not_transferred(
     reader_case, monkeypatch, record_property
 ):
     case = reader_case
-    opaque = json.dumps("opaque-unrelated-body" * 100_000)
+    opaque = json.dumps("opaque-unrelated-body" * 3000)
+    assert len(opaque.encode("utf-8")) <= 65536
     with case.engine.begin() as connection:
         connection.execute(
             text(
