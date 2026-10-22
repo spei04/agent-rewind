@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Reviewed one-bind catalog repair 2bf3352 and unchanged observer correction composed at a48cd9e | Run the same 29 native cases on existing Python 3.11 after final-source and exclusive database handoff. |
-| Independent QE | All 29 PostgreSQL cases pass at 09cc3ba on Python 3.12; baseline restored and server stopped | Freeze native evidence for independent audit; preserve the earlier failed attempts. |
-| Planning/verification | Accepted source, catalog repair and observer correction; audit the successful native matrix | Review final source inventory and exact PR/main/candidate evidence; preserve null F2/P1 acceptance. |
-| Lead | Integrate/review source and evidence; coordinate delivery and exclusive database ownership | F2 scoped PR/main/candidate, then F3/full P1 before P2. |
+| Platform/security | Original 29-case PostgreSQL matrix passes on Python 3.11; the 25 focused boundary checks also pass | Execute the five new PostgreSQL boundary cases after the corrected Python 3.12 release and exclusive handoff. |
+| Independent QE | All five new PostgreSQL boundary cases pass on Python 3.12 at 8da2938; baseline restored and server stopped | Freeze evidence for independent audit and the Python 3.11 handoff. |
+| Planning/verification | Original PR #113 source passes all required hosted jobs; corrected boundary source independently reviewed | Audit new native results, fresh source inventory and replacement PR/main/candidate evidence. |
+| Lead | Composed reviewed test corrections and preserved the 133 runtime members | Coordinate native ownership and protected delivery; F2 acceptance remains pending, followed by F3/full P1 before P2. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -53,7 +53,7 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
 - **Next evidence-producing milestone:** Implement and independently validate the complete F2 persisted reader under the accepted 2026-10-22 entry; F2 acceptance remains null. F3 trusted provisioning/opening/replay/recovery follows accepted F2. Only complete final P1 acceptance permits P2 entry.
-- **Current storage and consumers:** Platform/security owns secondary for F2 runtime; independent QE owns primary for tests. Planning reviews immutable source without another checkout. The lead briefly owns the two progress documents between source-bound runs. The Python 3.12 native matrix has released PostgreSQL after verified restoration and stop; the next exclusive handoff is to platform/security for the same Python 3.11 matrix. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
+- **Current storage and consumers:** Platform/security uses secondary for F2 delivery; independent QE owns primary for tests. Planning reviews immutable source without another checkout. The lead updates progress and PR tracking between source-bound runs. The original 29-case PostgreSQL matrix passes on both interpreters; the five added complete-reader boundary cases have separate exclusive handoffs, baseline restoration and stopped-server checks. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -1050,3 +1050,44 @@ among the selected 29. The exact database/role baseline is restored and the
 server stopped. Python 3.11, final independent audit and hosted delivery remain
 pending at this checkpoint. No maximum-capacity or production claim follows.
 F2/P1 acceptance remains null; F3/P2 remain Not started.
+
+
+## F2 boundary coverage and delivery review — 2026-10-22
+
+| Owner | Completed work | Next assignment |
+| --- | --- | --- |
+| Platform/security | Original 29 PostgreSQL cases pass on Python 3.11 at 93ef7d5; 25 focused SQLite/fixture checks pass at abe4488 | Run the five new PostgreSQL boundary cases from the final composed source after QE releases the database. |
+| Independent QE | Schema-valid cohort c683cfd preserves the original 245000 opening; 25 offline checks and all five corrected PostgreSQL cases pass on Python 3.12 | Freeze native evidence at 8da2938 and release the restored/stopped database for Python 3.11. |
+| Planning/verification | Reviewed cohort calibration, source equivalence and original PR attempt 39763710972 | Audit the five-case native evidence, final source inventory and fresh hosted delivery. |
+| Lead | Composed unchanged reviewed corrections and linked [PR #113](https://github.com/spei04/agent-rewind/pull/113) to the F2 card | Complete exact PR/main/candidate acceptance before advancing F2. |
+
+Final-card review identified a missing integrated check: earlier PostgreSQL
+component tests and the 29-case reader matrix did not establish the complete
+reader's shared 2 MiB native and canonical boundaries. Five cases now exercise
+native CAP, native CAP + 1, escaping expansion, canonical CAP and canonical
+CAP + 1. The exact canonical-CAP positive must return the complete state;
+native overflow must refuse before financial body transfer.
+
+The first native fixture attempt exceeded the schema's 64-character payload
+field before inspection. The corrected cohort uses individually valid rows
+and bounded payloads, checks a complete one-row control, then independently
+calibrates actual native receipts and canonical serialization. Its next native
+attempt reached the expected refusal but failed at a test-only exception-context
+access. The two-line correction captures the entered exception context and
+retains the exact original-error identity assertion. Both failed attempts and
+their restored/stopped releases remain evidence; later assertions and cases
+were not credited.
+
+Original PR source 93ef7d5 passed hosted attempt 39763710972: Python 3.11
+4729 passed/32 skipped and Python 3.12 4740 passed/21 skipped, each with one
+existing warning; package, security, isolation and gate jobs passed. These
+results belong to that source. The boundary correction requires fresh CI.
+F2/P1 acceptance stays null; F3/P2 remain Not started.
+
+
+At **8da2938**, all five new PostgreSQL cases pass in **79.78s**, without
+selected skips or warnings. The canonical-CAP positive returns the original
+complete state, native CAP + 1 transfers no financial bodies, and all native
+calls remain within the unchanged bind/work limits. The exact baseline is
+restored and PostgreSQL stopped. Python 3.11 verification of these five cases
+and fresh hosted delivery remain pending at this checkpoint.

@@ -1000,7 +1000,7 @@ Implementation PRs: [F1 foundation](#ar-010-a-p1-f1), [F2 reader](#ar-010-a-p1-f
 - **Progress:** In progress.
 - **Entry:** Accepted 2026-10-22 [implementation entry](delivery/LEDGER_EXECUTION_PLAN.md#f2-reader-implementation-entry--2026-10-22); no checkpoint acceptance.
 - **Checkpoint evidence:** Pending; no accepted source/merge/review.
-- **Tracking PR:** Not assigned.
+- **Tracking PR:** https://github.com/spei04/agent-rewind/pull/113.
 
 <a id="ar-010-a-p1-f3"></a>
 

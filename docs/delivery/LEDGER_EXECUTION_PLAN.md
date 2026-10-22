@@ -610,3 +610,65 @@ final independent evidence audit and exact protected PR/main/package/candidate
 checks remain pending at this checkpoint. Maximum joint capacity, F2 delivery,
 full P1, provisioning and production readiness are not accepted by these local
 results. F2/P1 acceptance stays null; F3/P2 remain Not started.
+
+
+## F2 integrated byte-boundary review — 2026-10-22
+
+The original 29-case PostgreSQL matrix also passes on Python 3.11 at
+**93ef7d516e67048744834031f8028589829984a5**: 2 write controls (9.64s),
+17 independent cases (68.07s), 6 integration cases (26.04s) and 4 catalog
+drift controls (13.11s), with no selected skips or warnings. The exact baseline
+is restored and PostgreSQL stopped. Source-equivalence review preserves the
+separate Python 3.12 evidence at 09cc3ba.
+
+Final acceptance review identified an additional requirement: the complete
+PostgreSQL reader needed shared 2 MiB native and canonical boundary evidence.
+Earlier component-bound checks and a representative 4097-job reader state
+did not establish that integrated property. Five cases cover native CAP and
+CAP + 1, canonical escaping expansion, and canonical CAP and CAP + 1. Native
+overflow must refuse before financial body transfer. Canonical CAP must
+return the exact complete immutable state; canonical overflow must refuse.
+
+The first attempt failed during fixture construction because one payload
+exceeded PostgreSQL's existing VARCHAR(64) limit. Test-only **c683cfd** replaces
+that invalid fixture with individually valid zero-reserved v1 jobs and exact
+scopes, retaining the original **245000 microUSD** opening. A complete
+single-row control precedes scaled calibration. Actual ten-family receipts
+and independent whole-array serialization establish the final byte sizes;
+each payload remains at most 64 characters and total candidates stay below
+the existing row limit. No schema, reader or allowance changes.
+
+Twenty-five focused offline checks pass on each interpreter. In SQLite,
+canonical CAP is exactly **2097152** bytes with **1189447** native bytes and
+**12191** candidate rows; native CAP and CAP + 1 are separately observed.
+The next PostgreSQL attempt at c683cfd reaches the expected native-CAP
+reader refusal and passes its same-connection/zero-write checks, then fails
+when the test accesses the exception context manager incorrectly. Later
+postconditions and four cases do not execute. Test-only **8da2938** captures
+the entered context and still requires identity with the original reader
+exception; seven focused installed-pytest probes validate refusal and
+non-refusal paths. Both failed native attempts are retained with restored,
+stopped releases.
+
+[PR #113](https://github.com/spei04/agent-rewind/pull/113) tracks F2.
+Its original source 93ef7d5 passes hosted attempt **39763710972/1**:
+Python 3.11 **4729 passed / 32 skipped** and Python 3.12 **4740 passed /
+21 skipped**, one existing warning each; package, security, isolation and
+CI gate pass. That result does not cover the subsequent boundary correction.
+The corrected five-case PostgreSQL run at **8da2938121d0cd6cddb826d0c8f1add51e836ea5**
+passes on Python 3.12 in **79.78s**, with no selected skips or warnings.
+Native CAP is **2097152** bytes; native CAP + 1 is **2097153** and transfers
+no financial bodies. The canonical-CAP positive returns the exact complete
+state at **2097152** canonical bytes, **1199873** native bytes and **12051**
+candidate rows. Canonical CAP + 1 and escaping expansion refuse while native
+bytes remain below the cap. Every observed native call uses at most 10 binds;
+maximum inspect-only work is 618 units and maximum total ordinary work is
+667, including the separate counter observations and transaction setup.
+Same-connection, no-write, rollback/commit, cleanup and unchanged-snapshot
+postconditions pass. The exact database baseline is restored and the server
+stopped.
+
+The matching five-case Python 3.11 run, refreshed source inventory, replacement
+PR checks and protected-main candidate remain required. These are separate
+limit-enforcement proofs, not a promise that every combination of maximum
+dimensions fits. F2/P1 acceptance remains null; F3/P2 remain Not started.
