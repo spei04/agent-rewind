@@ -7,6 +7,7 @@ import psycopg
 import pytest
 import test_migrations_postgres as migration_tests
 from postgres_control import wait_for_database_drain
+from sqlalchemy.engine import Connection
 from test_ledger_operator_postgres import PostgresTrace
 
 from agent_rewind.migrations import ledger_transaction as transaction
@@ -304,3 +305,109 @@ def test_pg_final_cleanup_deadline_cannot_publish_clean_factory_reuse(
     else:
         with ledger_transaction(pg_case.engine, LedgerOutcome(), work=LedgerWork()) as connection:
             assert connection.exec_driver_sql("SELECT 89").scalar_one() == 89
+
+
+@pytest.mark.parametrize(
+    "boundary", ["reservation", "setter", "before_native", "after_native", "positive"]
+)
+def test_pg_logical_begin_ack_is_distinct_from_first_physical_begin(
+    pg_case, pg_trace, monkeypatch, record_property, boundary
+):
+    work, outcome = LedgerWork(), LedgerOutcome()
+    begin = Connection.begin
+    execute = psycopg.Cursor.execute
+    command = psycopg.Connection._exec_command
+    logical = []
+    physical = []
+    targets = []
+    body = []
+    armed = [False]
+    caught = []
+
+    def logical_begin(connection):
+        result = begin(connection)
+        if connection is work._connection:
+            raw = connection.connection.driver_connection
+            targets.append(raw)
+            logical.append((work.observed_ordinary, raw.info.transaction_status.name))
+            armed[0] = True
+            if boundary == "reservation":
+                work.reserve_ordinary(2028 - work.observed_ordinary)
+        return result
+
+    def setter(cursor, query, *args, **kwargs):
+        if (
+            boundary == "setter"
+            and armed[0]
+            and cursor.connection is targets[0]
+            and str(query).startswith("SET LOCAL statement_timeout")
+        ):
+            armed[0] = False
+            physical.append(("setter-refused", cursor.connection.info.transaction_status.name))
+            raise MigrationRefused("migration_busy")
+        return execute(cursor, query, *args, **kwargs)
+
+    def physical_begin(raw, query, *args, **kwargs):
+        sql = query.decode() if isinstance(query, bytes) else str(query)
+        if not (armed[0] and targets and raw is targets[0] and sql == "BEGIN"):
+            return command(raw, query, *args, **kwargs)
+
+        def observed():
+            armed[0] = False
+            physical.append(("before-native", raw.info.transaction_status.name))
+            if boundary == "before_native":
+                raise RuntimeError("synthetic-before-native-begin")
+            result = yield from command(raw, query, *args, **kwargs)
+            physical.append(("after-native", raw.info.transaction_status.name))
+            if boundary == "after_native":
+                raise RuntimeError("synthetic-after-native-begin")
+            return result
+
+        return observed()
+
+    monkeypatch.setattr(Connection, "begin", logical_begin)
+    monkeypatch.setattr(psycopg.Cursor, "execute", setter)
+    monkeypatch.setattr(psycopg.Connection, "_exec_command", physical_begin)
+    try:
+        with ledger_transaction(pg_case.engine, outcome, work=work) as connection:
+            body.append(True)
+            connection.exec_driver_sql("INSERT INTO proof VALUES (33)")
+    except MigrationRefused as error:
+        caught.append(str(error))
+    record_property(
+        "begin_boundary",
+        json.dumps(
+            {
+                "boundary": boundary,
+                "logical": logical,
+                "physical": physical,
+                "body_entered": bool(body),
+                "begin_attempted": outcome.begin_attempted,
+                "begun": outcome.begun,
+                "rollback_acknowledged": outcome.rollback_acknowledged,
+            }
+        ),
+    )
+    assert logical == [(1, "IDLE")]
+    # PostgreSQL's acknowledged wrapper is logical; native evidence below must
+    # neither erase that acknowledgment nor manufacture a physical BEGIN.
+    assert outcome.begin_attempted and outcome.begun and targets[0].closed
+    if boundary == "reservation":
+        assert physical == [] and work.observed_ordinary == 2028
+        assert caught == ["ledger_limit_exceeded"]
+    elif boundary == "setter":
+        assert physical == [("setter-refused", "IDLE")]
+        assert caught == ["migration_busy"]
+    elif boundary == "before_native":
+        assert physical == [("before-native", "IDLE")]
+        assert caught == ["migration_database_failure"]
+    else:
+        assert physical == [("before-native", "IDLE"), ("after-native", "INTRANS")]
+        assert caught == ([] if boundary == "positive" else ["migration_database_failure"])
+    if boundary == "positive":
+        assert body == [True] and outcome.commit_acknowledged and not outcome.cleanup_failed
+        assert visible_rows(pg_case, pg_trace) == [33]
+    else:
+        assert body == [] and outcome.rollback_acknowledged and not outcome.commit_attempted
+        assert not outcome.cleanup_failed
+        assert visible_rows(pg_case, pg_trace) == []
