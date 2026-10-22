@@ -183,7 +183,6 @@ def observe_native_capacity(pg, monkeypatch, record_property, *, overflow):
                 "tuple_write_delta": probe.counters,
                 "raw_closed": probe.raw.closed,
                 "rollback_acknowledged": True,
-                "snapshot_unchanged": True,
             }
         ),
     )
