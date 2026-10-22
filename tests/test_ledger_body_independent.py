@@ -770,3 +770,41 @@ def test_added_connection_listener_refuses_the_supported_body(ledger_case, guard
         guard_trace.append({"foreign_event": event_name, "native_effects": False})
     assert outcome.commit_acknowledged and not outcome.cleanup_failed
     assert_pool_released(case)
+
+
+@postgres_only
+@pytest.mark.parametrize("event_name", ["before_cursor_execute", "after_cursor_execute"])
+def test_pg_foreign_listener_refuses_before_unmetered_native_callback(
+    pg_case, pg_trace, pg_driver_controls, record_property, event_name
+):
+    work, outcome = LedgerWork(), LedgerOutcome()
+    calls = []
+
+    def foreign(connection, cursor, statement, *args):
+        if statement == "SELECT pg_current_xact_id()::text":
+            with cursor.connection.cursor() as side:
+                side.execute("SELECT 91")
+            calls.append(True)
+
+    with ledger_transaction(pg_case.engine, outcome, work=work) as connection:
+        assert transaction._require_ledger_body(connection) is work
+        event.listen(connection, event_name, foreign)
+        before, boundary = work.observed_ordinary, len(pg_trace.events)
+        try:
+            _pg_refused_without_native_work(pg_trace, connection)
+        finally:
+            event.remove(connection, event_name, foreign)
+            record_property(
+                "foreign_native_cost",
+                json.dumps(
+                    {
+                        "event_name": event_name,
+                        "sql": _pg_sql(pg_trace, boundary),
+                        "ordinary_delta": work.observed_ordinary - before,
+                        "callback_calls": len(calls),
+                    }
+                ),
+            )
+        assert calls == [] and work.observed_ordinary == before
+    assert outcome.commit_acknowledged and not outcome.cleanup_failed
+    assert visible_rows(pg_case, pg_trace) == []
