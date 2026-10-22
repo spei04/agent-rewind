@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Implement the reviewed private transaction-body guard in the reused secondary | Native identity, revocation and unchanged work/cleanup bounds; full reader traversal remains under review. |
-| Delivery reviewer | Review reader design and prepare independent guard controls | Guard design accepted; source review and native tests follow the author checkpoint. |
-| Planning/verification | Preserve exact hosted evidence for draft PR #111 | Original core jobs pending; security correction independently accepted locally. |
-| Lead | Publish the security correction and coordinate guard delivery | Owns primary for progress/publication. Full P1 remains In progress; P2 remains Not started. |
+| Platform/security | Review the accepted private guard evidence and exact reader query families | Complete reader traversal remains held pending native plans and combined bounds. |
+| Delivery reviewer | Review the delivery refinement after source freeze | Guard evidence is internally accepted; fresh hosted foundation delivery is still pending. |
+| Planning/verification | Implement F1/F2/F3 bookkeeping, checker tests and synchronized current docs in primary | Preserve P1 scope/null acceptance, P2 gate, effort and historical records; independent review before publication. |
+| Lead | Coordinate the separate CI reliability correction and exact-source publication | Reuse released secondary; compose only reviewed changes. Full P1 remains In progress; P2 remains Not started. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -50,10 +50,10 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** Schema b2e19be and bounded operator 80023cbc are independently accepted internal checkpoints. All 100 independent SQLite/factory/lifecycle cases pass on both interpreters; separate PostgreSQL evidence is reviewed. Earlier runtime defects and fixture failures retain their distinct evidence. No ledger package is Verified.
+- **Contributor checkpoint:** Schema/operator and private guard ff65892 are accepted internal checkpoints. The guard selection passed 281 tests on each supported interpreter without skips or warnings. Original hosted run39724247038 passed both database cores, package and isolation but failed static security and the required gate. Fresh exact-source PR/main/candidate evidence remains required; no ledger package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** AR-010-A/P1 #108 bounded persisted inspection/provenance, followed by actual opening/provisioning/replay, concurrency, capacity and recovery. Implement only the independently reviewed transaction guard first; reader data traversal awaits observed paging and work-budget review. Require full P1 delivery before P2.
-- **Current storage and consumers:** Two existing cloud checkouts are retained for sequential reuse. Lead owns primary for progress/publication; platform/security reuses secondary for the guard with its separate pinned Python 3.11 and 3.12 environments. PostgreSQL was restored to three databases/fifteen roles and stopped; the author has the next exclusive test slot only after baseline verification, with restoration and stop required before handoff. Measured filesystem availability is 101.24 GB. Private evidence remains outside checkouts; no new checkout or paid resource was created.
+- **Next evidence-producing milestone:** Accept F1 foundation through fresh reviewed PR/main/candidate evidence, then F2 complete bounded reader after exact query-plan review, then F3 trusted provisioning/opening/replay/recovery. Only the complete final P1 gate can populate P1 acceptance and permit P2 entry.
+- **Current storage and consumers:** Two existing cloud checkouts are retained for sequential reuse. Planning/verification owns primary for planning/checker work; the lead owns released secondary for a separately reviewed CI reliability correction. PostgreSQL was restored and stopped before handoff; this planning assignment has no database slot. The last recorded filesystem availability was 101.24 GB. Private evidence remains outside checkouts; no new checkout or paid resource was created.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -925,3 +925,19 @@ In progress and P2 Not started.
 - Delivery accepted this guard design and prepares independent native controls. The wider reader design still needs explicitly observed page reads: psycopg server-cursor fetches cannot escape work accounting. Lead retains primary for publication and synchronized progress.
 
 Only the guard is assigned for implementation. No partial reader API, provisioning, customer activation or new spending is introduced. P1 stays In progress with null acceptance; P2 stays Not started.
+
+
+## P1 delivery refinement and original CI outcome — 2026-10-22
+
+- Planning/verification completed the read-only sequencing review, then received primary to implement optional F1/F2/F3 records and consistency checks. P1 remains the complete approved acceptance unit.
+- Platform/security and the lead accepted private guard ff65892 after independent source review and 281 checks on each supported Python version; database restoration/stop and checkout release were recorded.
+- Delivery independently reviews the refinement after its immutable handoff. Lead separately coordinates the CI reliability correction and final reviewed-source publication; no concurrent primary writer.
+- Original PR #111 attempt39724247038/1 completed at d2c04f24/a4eaf800: Python 3.11 4431 passes/32 skips, Python 3.12 4442/21, one existing warning each; package/final-container proof and three gVisor cases passed. Static security and CI gate failed; dependency audit and main-only candidate delivery did not run. The original evidence remains intact and the reviewed correction needs fresh hosted proof.
+
+F1 foundation, F2 complete reader and F3 provisioning/opening/replay/recovery
+share the unchanged P1 scope and effort. Current forecast is 161 PRs (AR-010-A
+four, parent AR-010 six), with 151 tasks, 15 packages and 544 outer edges.
+P1/aggregate/parent stay In progress, P1 acceptance stays null and P2 stays
+Not started. Issue #108 remains open through F1/F2; actual GitHub updates are
+owned by the lead after review. No customer, production, spending or data gate
+is promoted.

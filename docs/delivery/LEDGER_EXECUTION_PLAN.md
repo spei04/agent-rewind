@@ -4,6 +4,63 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. P1 has no accepted product delivery yet; P2 #109 remains **Not started**, waiting for accepted P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
+## Current P1 implementation sequence — 2026-10-22
+
+The lead accepted a scope-preserving delivery refinement: three independently
+reviewable implementation PRs inside the existing P1 acceptance package. This
+keeps the approved finite window, exact entry, scope, effort and all final
+gates. F1/F2/F3 are implementation identities, not new aggregate tasks or
+acceptance packages.
+
+| Implementation PR | Boundary | Entry and exit | Current state |
+| --- | --- | --- | --- |
+| F1 · [PR #111](https://github.com/spei04/agent-rewind/pull/111) | Dormant schema, owned operator and private guard foundation | Accepted HTTP/P1 entry; independent exact-source review, native regression proof and scoped PR/main/candidate acceptance | In progress; no accepted checkpoint merge |
+| F2 | Complete bounded persisted reader | Accepted F1 plus exact query-family/native-plan review; complete provenance/financial/graph proof, maximum-state limits and scoped PR/main/candidate acceptance | Not started; traversal design remains held |
+| F3 | Trusted provisioning, original opening, replay and recovery | Accepted F2; complete original P1 matrix including preservation, concurrency, privilege, child interruption and restore, then final protected-main candidate | Not started |
+
+[Assignable PR cards](../EXECUTION_BACKLOG.md#ar-010-a)
+record exact inherited contracts, prerequisites, scope, tests and exit criteria.
+Each PR inherits all P1 inputs; successors wait for accepted predecessor
+checkpoints. F1/F2 merges cannot populate P1 accepted-merge/review fields, close
+issue #108 or start P2. All three component records and the complete final P1
+gate must pass before P1 acceptance is bound to the final F3 merge and review
+record. P2 still requires its own entry; AR-010-B still waits for the whole
+AR-010-A aggregate. No customer ar7 profile or public operator activation follows
+from the foundation or reader.
+
+The optional implementation_prs records validate structural source/merge/review
+references and matching cards. A 40-character hash in JSON is not proof of a
+real merge or passing remote checks. Independent review still verifies actual
+source, PR/main attempts and protected candidate artifacts. Component records
+use **Merged; checkpoint accepted** separately from package **Verified**.
+
+Current PR forecast is **161**, including four for AR-010-A and six for parent
+AR-010. There remain 151 tasks and 15 acceptance packages, with 544 outer edges.
+P1/P2 each retain 3 [3–5] BE days, aggregate 6 [6–10]; base 464, upper 784.6,
+alternative allowance 580, effort path 176.5, M1 65.5 and BE 97.5 are unchanged
+estimate baselines, not new staffing or calendar promises. Component PRs do not
+duplicate effort. Earlier dated 159/four-PR records below remain history.
+
+Original hosted attempt [39724247038/1](https://github.com/spei04/agent-rewind/actions/runs/39724247038)
+tested source d2c04f24 through merge a4eaf800. Python 3.11 passed 4431 tests with
+32 skips and one existing warning in 1667.43 seconds; Python 3.12 passed 4442
+with 21 skips and the same warning in 1730.67 seconds. Actual PostgreSQL,
+package/final-container trust checks and three gVisor cases passed. Static
+security failed on two source constructs; dependency audit was skipped and
+the required CI gate failed. Main-only delivery was skipped. This is retained
+failed-attempt evidence, not successful foundation delivery. The Python 3.12
+job took 1780 of 1800 seconds; CI reliability work is separately reviewed.
+
+Correction 91f0742 and private guard ff65892 have independent internal source
+acceptance. The guard selection passed 281 checks on Python 3.12.3 (26.70s)
+and Python 3.11.17 (23.96s), with no skips or warnings. Database state was
+restored and the server stopped before checkout handoff. These local results
+do not replace fresh hosted source checks, protected merge or candidate proof.
+The full reader remains unaccepted: the corrected conditional graph bound is
+215 pages, but exact observed query plans and combined costs are still required.
+No partial LedgerState, hidden server-cursor FETCH or second work budget is
+authorized. The dated checkpoints below retain their original state of knowledge.
+
 ## Security correction and guard handoff — 2026-10-22
 
 Draft [PR #111](https://github.com/spei04/agent-rewind/pull/111) publishes the
@@ -236,7 +293,7 @@ The two approved packages retain AR-010-A and its sole outer prerequisite AR-008
 - **Effort/role:** BE 3 [3–5] days, medium-low confidence; TL/QE review and independent PostgreSQL tests.
 - **Done:** Independent source/test review, local and hosted actual-database evidence, installed package proof, accepted merge/candidate and all AR-010-A criteria. Full C04 and M1 acceptance remain separate.
 
-Approved planning total: **6 [6–10] engineering days**, replacing 3 [3–4.5] within the same aggregate. These are effort estimates, not staffing or calendar commitments. No new outer dependency or funding gate is added. The machine ledger computes 151 tasks, 159 delivery PRs, 544 outer edges, 464 base / 784.6 upper / 580 alternative allowance and 176.5 effort-path days; M1 is 65.5, BE 97.5 and parent AR-010 10 days/four PRs. Earlier proposal/estimate history remains auditable.
+Approved planning total: **6 [6–10] engineering days**, replacing 3 [3–4.5] within the same aggregate. These are effort estimates, not staffing or calendar commitments. No new outer dependency or funding gate is added. The machine ledger computes 151 tasks, 161 delivery PRs, 544 outer edges, 464 base / 784.6 upper / 580 alternative allowance and 176.5 effort-path days; M1 is 65.5, BE 97.5 and parent AR-010 10 days/six PRs. The three implementation PRs refine P1 delivery without changing either approved package. Earlier proposal/estimate history remains auditable.
 
 ## Evidence and future producer ownership
 
@@ -255,10 +312,10 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- Platform/security: review the bounded persisted-inspection/provenance seam before new reader code.
-- Delivery reviewer: independently review progress integration and the next reader design; lifecycle authorship remains separate from peer review.
-- Planning/verification: independently audit matching hosted checks after publication; both-interpreter lifecycle and native PostgreSQL checkpoints are complete.
-- Lead: own primary for publication, reuse secondary sequentially, keep PostgreSQL stopped until a documented test slot, and require full P1 acceptance before P2.
+- Planning/verification: own primary for the optional implementation-PR checker, meaningful negative controls and synchronized current planning records; no runtime or database changes.
+- Platform/security: retain internal guard/source review and prepare exact reader query-family/native-plan review; F2 implementation remains gated.
+- Delivery reviewer: independently review the refinement and its checker evidence after source freeze; prior guard test authorship and peer review remain explicit.
+- Lead: compose and publish only reviewed sources, keep database/checkouts under explicit ownership, update public issue/PR scope and require full P1 acceptance before P2.
 
 The historical first-fortnight schedules and opening conditions remain unchanged. Accepted HTTP and exact P1 entry satisfy the implementation prerequisites; the lead has issued the P1 handoff. No new calendar allocation or staffed-time conversion follows from the effort totals.
 
