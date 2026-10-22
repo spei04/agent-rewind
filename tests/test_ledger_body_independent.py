@@ -467,6 +467,20 @@ def test_detached_proxy_refuses_before_guard_native_work(ledger_case, guard_trac
     assert_pool_released(case)
 
 
+@pytest.fixture
+def pg_driver_controls(pg_trace, monkeypatch):
+    for name in ("execute", "fetchone", "fetchmany"):
+        original = getattr(psycopg.ServerCursor, name)
+
+        def observed(cursor, *args, _name=name, _original=original, **kwargs):
+            pg_trace.events.append((pg_trace.phase, "server-" + _name, id(cursor.connection), None))
+            return _original(cursor, *args, **kwargs)
+
+        monkeypatch.setattr(psycopg.ServerCursor, name, observed)
+    yield
+    assert not any(event[1].startswith("server-") for event in pg_trace.events)
+
+
 def _pg_refused_without_native_work(trace, connection):
     boundary = len(trace.events)
     with pytest.raises(MigrationRefused, match="^transactional_connection_required$"):
@@ -487,7 +501,7 @@ def _assert_xid_bundle(sql):
 
 @postgres_only
 def test_pg_publication_and_each_guard_pay_one_native_bundle(
-    pg_case, pg_trace, monkeypatch, record_property
+    pg_case, pg_trace, pg_driver_controls, monkeypatch, record_property
 ):
     work, outcome = LedgerWork(), LedgerOutcome()
     register = transaction._register_ledger_body
@@ -544,7 +558,7 @@ def test_pg_publication_and_each_guard_pay_one_native_bundle(
 @postgres_only
 @pytest.mark.parametrize("restart", [False, True])
 def test_pg_native_transaction_change_cannot_reuse_logical_body(
-    pg_case, pg_trace, record_property, restart
+    pg_case, pg_trace, pg_driver_controls, record_property, restart
 ):
     work, outcome = LedgerWork(), LedgerOutcome()
     identities = []
@@ -588,7 +602,7 @@ def test_pg_native_transaction_change_cannot_reuse_logical_body(
 @postgres_only
 @pytest.mark.parametrize("mutation", ["stream_results", "yield_per", "detach"])
 def test_pg_changed_options_and_detach_refuse_before_any_driver_query(
-    pg_case, pg_trace, record_property, mutation
+    pg_case, pg_trace, pg_driver_controls, record_property, mutation
 ):
     work, outcome = LedgerWork(), LedgerOutcome()
     witnesses = []
@@ -624,7 +638,7 @@ def test_pg_changed_options_and_detach_refuse_before_any_driver_query(
 @postgres_only
 @pytest.mark.parametrize("remaining", [2, 3])
 def test_pg_guard_cannot_split_or_refund_its_last_native_bundle(
-    pg_case, pg_trace, record_property, remaining
+    pg_case, pg_trace, pg_driver_controls, record_property, remaining
 ):
     work, outcome = LedgerWork(), LedgerOutcome()
     with (
@@ -659,7 +673,7 @@ def test_pg_guard_cannot_split_or_refund_its_last_native_bundle(
 @pytest.mark.parametrize("setter", ["statement_timeout", "lock_timeout"])
 @pytest.mark.parametrize("expire", [False, True])
 def test_pg_guard_rechecks_clock_after_each_actual_native_setter(
-    pg_case, pg_trace, guard_clock, monkeypatch, record_property, setter, expire
+    pg_case, pg_trace, pg_driver_controls, guard_clock, monkeypatch, record_property, setter, expire
 ):
     work, outcome = LedgerWork(), LedgerOutcome()
     execute = psycopg.Cursor.execute
@@ -708,7 +722,7 @@ def test_pg_guard_rechecks_clock_after_each_actual_native_setter(
 @postgres_only
 @pytest.mark.parametrize("after_native", [False, True])
 def test_pg_failed_identity_publication_never_yields_or_survives_cleanup(
-    pg_case, pg_trace, monkeypatch, record_property, after_native
+    pg_case, pg_trace, pg_driver_controls, monkeypatch, record_property, after_native
 ):
     work, outcome = LedgerWork(), LedgerOutcome()
     execute = psycopg.Cursor.execute
