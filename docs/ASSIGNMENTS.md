@@ -2,14 +2,14 @@
 
 Execution backlog approved on 2026-10-19. The project lead coordinates three independent contributor slots, reviews each delivery, integrates tested changes, then assigns dependency-ready work to the free slot. These are logical contributor roles, not six confirmed full-time hires; the prior staffing/calendar scenario remains unconfirmed. Task-specific external funding, data, customer and release gates still apply.
 
-## Current assignments — 2026-10-21
+## Current assignments — 2026-10-22
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | AR-010-A/P1 #108 runtime in secondary work/ledger-schema from 9f6ea6e | First manifest/progress and explicit ar7 DDL/catalog checkpoint; full P1 product proof still required. Sole coordinated PostgreSQL slot. |
-| Delivery reviewer | Independent ledger source/integration/delivery review | HTTP exact PR/main/candidate audit is accepted; P1 delivery remains unaccepted. |
-| Planning/verification | Primary progress reconciliation, then independent ledger tests | Test authoring waits for accepted progress, stable runtime interfaces and explicit file ownership. No current QE implementation or PostgreSQL slot. |
-| Lead | Ledger P1 assigned; #107/#108/#10 In progress and #109 Not started read back | Own integration, publication and acceptance; keep P2 and worker prerequisites intact. |
+| Platform/security | Independently review the candidate verifier and native size controls | Exact source, artifact and bounded-read checks; complete reader design remains held. |
+| Delivery reviewer | Implement and test the private candidate verifier correction | Preserve exact Git/runtime identity and existing delivery gates; independent review before use. |
+| Planning/verification | Prepare source-bound inventory and hosted CI evidence after handoff | Refinement source is frozen; preserve original failed attempts and report actual results. |
+| Lead | Independently review the delivery refinement and compose the foundation update | Reuse the released checkouts; publish reviewed source and verify protected delivery. Full P1 remains In progress; P2 remains Not started. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -50,10 +50,10 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** HTTP delivery and candidate are accepted. Ledger entry 51af77dc and backlog fixture correction dbec08b are independently accepted. Platform/security now owns P1 runtime; planning/verification owns the primary progress patch and later independent tests after interface/ownership release. The lead integrates and the delivery reviewer independently reviews. No ledger package is Verified.
+- **Contributor checkpoint:** Schema/operator and private guard ff65892 are accepted internal checkpoints. The guard selection passed 281 tests on each supported interpreter without skips or warnings. Original hosted run39724247038 passed both database cores, package and isolation but failed static security and the required gate. Fresh exact-source PR/main/candidate evidence remains required; no ledger package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** AR-010-A/P1 #108 immutable manifest/progress and explicit ar7 DDL/literal SQLite/PostgreSQL catalogs, then the full provisioning/opening/constraint/privilege/bounds/recovery matrix. P2 #109 remains Not started until accepted P1 and its own reservation/fence entry. Parser-only completion cannot waive those gates.
-- **Current storage and consumers:** The existing primary checkout is owned by planning for progress reconciliation; the existing secondary is owned by platform/security for P1 runtime. Each retains its own matching-lock environment. Platform/security holds the sole coordinated PostgreSQL slot; planning performs no database work. Private evidence stays outside checkouts, and no new checkout or resource was created.
+- **Next evidence-producing milestone:** Accept F1 foundation through fresh reviewed PR/main/candidate evidence, then F2 complete bounded reader after exact query-plan review, then F3 trusted provisioning/opening/replay/recovery. Only the complete final P1 gate can populate P1 acceptance and permit P2 entry.
+- **Current storage and consumers:** Two existing cloud checkouts are retained for sequential reuse. The lead holds the released checkouts for composition and verification; planning/verification prepares hosted evidence from the frozen source. PostgreSQL was restored and stopped before handoff; this planning assignment has no database slot. The last recorded filesystem availability was 101.24 GB. Private evidence remains outside checkouts; no new checkout or paid resource was created.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -839,3 +839,105 @@ AR-008-B/P2 #95 and aggregate #93 are Verified after reviewed source 065df8c89da
 | Lead | Integration and public tracking | Read back #107/#108/#10 In progress and #109 Not started; authorize subsequent handoffs only after their producer evidence. |
 
 P1 and aggregate AR-010-A are In progress with null delivery acceptance; P2 remains Not started/null acceptance. Current totals are 30 Verified / 1 In progress / 120 Not started tasks and 9 Verified / 1 In progress / 5 Not started packages. The owner-approved finite window, six-day ledger estimate, frozen entry, 544 dependencies and 159 PRs are unchanged. This assignment makes no provider calls, paid-resource or customer-data commitment.
+
+
+## Schema checkpoint accepted and operator review assigned — 2026-10-21
+
+Platform/security repaired four independently reproduced scope reversals at
+1ec7202 and recaptured only the changed native function definition/digest.
+Planning/verification added fourteen membership/window/metadata cases and
+accepted combined source b2e19be after 65 independent passes (107 combined
+passes, 18 deliberate dialect skips). The lead verified source, evidence and
+all 121 local packaged runtime members, then composed planning main b304da1
+without a source-tree change. The 209 prior migration regressions also pass.
+
+Operator review identified unobserved cold-start SQL and a missing callback
+retry in cleanup accounting. Platform/security owns the bounded design
+correction; delivery reviews it while monitoring main CI; planning prepares
+independent fault controls. The lead owns integration and the next code handoff.
+P1 remains In progress and P2 Not started. No provider calls, customer data,
+production activation or new paid resources were used.
+
+
+## Operator implementation handoff — 2026-10-22
+
+Cloud access was rechecked successfully; the earlier authentication hold is resolved.
+Planning PR #110 is accepted at protected merge b304da1 after matching PR/main
+attempts 39691736070/39694886231 and independently verified candidate 12391249020.
+The schema progress correction 6a5171c is independently reviewed.
+
+| Owner | Assignment | Required handoff |
+| --- | --- | --- |
+| Platform/security | Implement private ledger work, transaction and owned-engine modules plus authored controls in the existing secondary | Freeze a stable source/interface checkpoint for independent QE; retain native traces and restore/stop PostgreSQL before release. |
+| Planning/verification | Review this log, then implement independent startup, budget, outcome and cleanup fault tests in the existing primary | Use separate test modules; wait for stable runtime bytes and the exclusive database handoff before native PostgreSQL execution. |
+| Delivery reviewer | Independently review implementation and source-bound native evidence | V3 design approval does not substitute for observed startup/cleanup bounds or the later full P1 matrix. |
+| Lead | Publish reviewed checkpoints, integrate source/tests and keep progress consistent | P1 remains In progress; P2 and all production/provider/data/spending gates remain unchanged. |
+
+No additional checkout, provider call or paid resource was created. The accepted
+schema checkpoint and planning delivery are separate from ledger product acceptance.
+
+## Operator SQLite verification checkpoint — 2026-10-22
+
+| Owner | Assignment / result | Next gate |
+| --- | --- | --- |
+| Platform/security | Frozen corrections f4395ce and df55c1f; 41 authored SQLite/factory checks pass | Native PostgreSQL startup/fault and both-interpreter proof; restore and stop the database before release. |
+| Planning/verification | Exact source 3716811: 79 independent checks pass in 2.47 seconds | Independent PostgreSQL coverage after the explicit database handoff; primary released clean for this lead update. |
+| Delivery reviewer | Reviews the corrected factory, outcome and deadline boundaries against retained failures | Independently review exact source and the remaining native trace matrix. |
+| Lead | Publish the corrected checkpoint and synchronize progress documents | Keep P1 acceptance null; integrate only after the complete slice evidence passes. |
+
+The expanded transaction run had 10 passes/four genuine failures; the earlier 9-pass/four-failure run included one test-setup failure. The corrected source
+passes the same 14 semantic controls, including a native BEGIN-then-fault test
+that still reproduced the old failure after its hook was adapted. Independent
+deadline tests then found three targets executing after their setter exhausted
+the clock, plus stale-cap/post-expiry setter behavior after reservation delay.
+Those original failures remain preserved; all corrected controls now pass.
+The independent 2028 ordinary-unit boundary retains 12 prepaid startup and
+eight cleanup units within the unchanged 2048 ceiling.
+
+The 79-case run contains 14 transaction, 37 work-boundary and 28 factory cases;
+its native database effects are SQLite. Nonconnecting PostgreSQL configuration
+checks do not establish PostgreSQL execution. Authored 41-case evidence is
+separate. Native PostgreSQL, Python 3.11 completion, the full startup/cleanup
+envelope and prior ownership/admission regressions remain acceptance gates.
+The isolated Python 3.11.17 environment uses the existing lockfile and has its
+own installed files. No provider calls, new paid resources or partner data.
+P1 stays In progress; P2 stays Not started.
+
+
+## Operator native and lifecycle checkpoint — 2026-10-22
+
+- Platform/security completed corrected operator/native evidence and independently accepted the lifecycle controls.
+- Delivery authored 21 lifecycle cases at 80023cbc; 100 selected checks pass. Primary was released for lead integration.
+- Planning/verification independently passed the same 100 cases on both Python versions and released secondary clean. PostgreSQL stayed stopped.
+- Lead accepted this internal checkpoint, prepares a draft P1 delivery for hosted checks, and assigns review of the next bounded reader.
+
+Separate PostgreSQL evidence is 131 passes together on Python 3.11; Python 3.12
+has an earlier 47-case run and final 18-case extension. Counts overlap other
+selections. Earlier fixture failures are not runtime defects. Full P1 remains
+In progress and P2 Not started.
+
+
+## Security correction and guard handoff — 2026-10-22
+
+- Delivery corrected the two static security findings at 91f0742; platform/security independently verified identical parser behavior and emitted SQL. Full security rules, lint, formatting and types pass; 291 selected regressions pass with 42 expected skips and one existing warning.
+- Planning/verification preserves draft PR #111 attempt 39724247038/1. Isolation and package checks pass; security failed before dependency audit, and both core jobs remain pending at this checkpoint. These results do not establish a successful full CI run.
+- Platform/security owns the next private transaction-body guard in the reused secondary, based on 91f0742. Register only after native exclusion, verify current native identity, and revoke before commit/cleanup. Added PostgreSQL identity reads consume the existing ordinary allowance.
+- Delivery accepted this guard design and prepares independent native controls. The wider reader design still needs explicitly observed page reads: psycopg server-cursor fetches cannot escape work accounting. Lead retains primary for publication and synchronized progress.
+
+Only the guard is assigned for implementation. No partial reader API, provisioning, customer activation or new spending is introduced. P1 stays In progress with null acceptance; P2 stays Not started.
+
+
+## P1 delivery refinement and original CI outcome — 2026-10-22
+
+- Planning/verification completed the read-only sequencing review, then received primary to implement optional F1/F2/F3 records and consistency checks. P1 remains the complete approved acceptance unit.
+- Platform/security and the lead accepted private guard ff65892 after independent source review and 281 checks on each supported Python version; database restoration/stop and checkout release were recorded.
+- Lead independently reviews the frozen refinement and composes the accepted CI reliability correction. Delivery authors the private candidate-verifier correction; platform/security reviews its exact runtime identity and size controls. Planning/verification prepares hosted evidence after handoff; no concurrent checkout writer.
+- Original PR #111 attempt39724247038/1 completed at d2c04f24/a4eaf800: Python 3.11 4431 passes/32 skips, Python 3.12 4442/21, one existing warning each; package/final-container proof and three gVisor cases passed. Static security and CI gate failed; dependency audit and main-only candidate delivery did not run. The original evidence remains intact and the reviewed correction needs fresh hosted proof.
+
+F1 foundation, F2 complete reader and F3 provisioning/opening/replay/recovery
+share the unchanged P1 scope and effort. Current forecast is 161 PRs (AR-010-A
+four, parent AR-010 six), with 151 tasks, 15 packages and 544 outer edges.
+P1/aggregate/parent stay In progress, P1 acceptance stays null and P2 stays
+Not started. Issue #108 remains open through F1/F2; actual GitHub updates are
+owned by the lead after review. No customer, production, spending or data gate
+is promoted.

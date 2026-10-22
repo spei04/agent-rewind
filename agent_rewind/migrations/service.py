@@ -185,15 +185,21 @@ def migration_transaction(engine: Engine, timeout_seconds: int = 5) -> Iterator[
                         raise MigrationRefused("migration_busy")
                     tables: list[str] = list(
                         connection.execute(
-                            text("""
-                        SELECT tablename FROM pg_tables WHERE schemaname='public'
-                        ORDER BY tablename LIMIT 18
-                    """)
+                            text(
+                                "SELECT tablename FROM pg_tables WHERE schemaname='public' "
+                                "ORDER BY tablename LIMIT 21"
+                            )
                         ).scalars()
                     )
-                    if len(tables) > 17:
+                    if len(tables) > 20:
                         raise MigrationRefused("schema_incompatible")
                     _postgres_exclusion(connection, tables)
+                    if len(tables) > 17:
+                        # Reading a revision row requires established owner authority.
+                        # Preserve the original typed refusal for unprivileged callers.
+                        from .schema import schema_table_names
+
+                        schema_table_names(connection)
                 yield connection
                 connection.commit()
             except BaseException:

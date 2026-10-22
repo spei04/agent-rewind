@@ -142,6 +142,173 @@ def check_cards(data: dict[str, Any], markdown: str, plan: str) -> None:
         )
 
 
+def planned_delivery_prs(task: dict[str, Any]) -> int:
+    """Count implementation PRs without multiplying package effort or DAG nodes."""
+    count = 0
+    for package in task.get("delivery_packages", [{}]):
+        if "implementation_prs" not in package:
+            count += 1
+            continue
+        prs = package["implementation_prs"]
+        require(isinstance(prs, list) and 2 <= len(prs) <= 8, "Invalid implementation PR count")
+        count += len(prs)
+    return count
+
+
+def check_implementation_prs(package: dict[str, Any], markdown: str) -> None:
+    """Check structural references and sequencing, not remote delivery authenticity."""
+    if "implementation_prs" not in package:
+        return
+    prs = package["implementation_prs"]
+    require(isinstance(prs, list) and 2 <= len(prs) <= 8, "Invalid implementation PR count")
+    text_fields = {
+        "title",
+        "objective",
+        "scope",
+        "out_of_scope",
+        "interface_contracts",
+        "acceptance",
+        "tests",
+        "security_reliability",
+        "definition_of_done",
+    }
+    required = text_fields | {
+        "id",
+        "dependencies",
+        "contracts",
+        "role",
+        "status",
+        "source_commit",
+        "accepted_merge_commit",
+        "review_evidence",
+        "tracking_pr",
+    }
+    for pr in prs:
+        require(isinstance(pr, dict) and pr.keys() == required, "Invalid implementation PR fields")
+        require(
+            isinstance(pr["id"], str)
+            and all(isinstance(pr[k], str) and pr[k].strip() for k in text_fields),
+            "Empty implementation PR boundary",
+        )
+    parts = indexed(prs, "implementation PR")
+    ids = [f"{package['id']}/F{i}" for i in range(1, len(prs) + 1)]
+    require(list(parts) == ids, "Implementation PR identities/order differ")
+    accepted = "Merged; checkpoint accepted"
+    merges: list[str] = []
+    tracking: list[str] = []
+    for index, pr in enumerate(prs):
+        key = pr["id"]
+        deps = pr["dependencies"]
+        require(
+            isinstance(deps, list)
+            and all(isinstance(v, str) for v in deps)
+            and len(deps) == len(set(deps)),
+            f"Invalid implementation PR dependencies: {key}",
+        )
+        expected_deps = set(package["dependencies"]) | ({ids[index - 1]} if index else set())
+        require(set(deps) == expected_deps, f"Implementation PR prerequisites differ: {key}")
+        require(
+            isinstance(pr["contracts"], list)
+            and all(isinstance(v, str) for v in pr["contracts"])
+            and len(pr["contracts"]) == len(set(pr["contracts"]))
+            and set(pr["contracts"]) == set(package["contracts"]),
+            f"Implementation PR dropped inherited contracts: {key}",
+        )
+        require(pr["role"] == package["role"], f"Implementation PR role differs: {key}")
+        require(
+            pr["status"]
+            in {"Not started", "In progress", "Implemented; verification pending", accepted},
+            f"Invalid implementation PR status: {key}",
+        )
+        url = pr["tracking_pr"]
+        require(
+            url is None
+            or (
+                isinstance(url, str)
+                and re.fullmatch(r"https://github\.com/spei04/agent-rewind/pull/[1-9][0-9]*", url)
+                is not None
+            ),
+            f"Invalid implementation PR tracking: {key}",
+        )
+        if url is not None:
+            tracking.append(url)
+        if pr["status"] == accepted:
+            require(
+                all(
+                    isinstance(pr[k], str) and re.fullmatch(r"[0-9a-f]{40}", pr[k]) is not None
+                    for k in ("source_commit", "accepted_merge_commit")
+                )
+                and isinstance(pr["review_evidence"], str)
+                and bool(pr["review_evidence"].strip())
+                and url is not None,
+                f"Implementation PR lacks source/merge/review evidence: {key}",
+            )
+            merges.append(pr["accepted_merge_commit"])
+        else:
+            require(
+                all(
+                    pr[k] is None
+                    for k in ("source_commit", "accepted_merge_commit", "review_evidence")
+                ),
+                f"Unaccepted implementation PR claims evidence: {key}",
+            )
+        if pr["status"] != "Not started":
+            require(
+                package["status"] != "Not started",
+                f"Active implementation PR under unstarted package: {key}",
+            )
+            require(
+                not index or prs[index - 1]["status"] == accepted,
+                f"Implementation PR starts before accepted predecessor: {key}",
+            )
+        heading = f"#### {key} — {pr['title']}\n"
+        require(markdown.count(heading) == 1, f"Missing implementation PR card: {key}")
+        body = markdown.split(heading, 1)[1]
+        stop = re.search(r"^#{1,4} ", body, re.M)
+        fields = dict(
+            re.findall(r"^- \*\*([^*]+):\*\* (.+)$", body[: stop.start()] if stop else body, re.M)
+        )
+        values = {
+            "Objective": pr["objective"],
+            "Implementation scope": pr["scope"],
+            "Out of scope": pr["out_of_scope"],
+            "Required contracts": ", ".join(pr["contracts"]) + ". " + pr["interface_contracts"],
+            "Acceptance criteria": pr["acceptance"],
+            "Required automated tests": pr["tests"],
+            "Security and reliability": pr["security_reliability"],
+            "Definition of done": pr["definition_of_done"],
+            "Prerequisites": ", ".join(f"[{k}](#{k.lower().replace('/', '-')})" for k in deps),
+            "Responsible role": pr["role"],
+            "Effort allocation": (
+                f"Included in {package['id']}; no additional effort or acceptance package"
+            ),
+            "Progress": pr["status"],
+            "Tracking PR": url or "Not assigned",
+            "Checkpoint evidence": (
+                f"{pr['source_commit']} / {pr['accepted_merge_commit']}. {pr['review_evidence']}"
+                if pr["status"] == accepted
+                else "Pending; no accepted source/merge/review"
+            ),
+        }
+        for label, value in values.items():
+            require(
+                fields.get(label) == value.rstrip(".") + ".",
+                f"Implementation PR card differs: {key}/{label}",
+            )
+    require(len(merges) == len(set(merges)), "Implementation PRs reuse accepted merge")
+    require(len(tracking) == len(set(tracking)), "Implementation PRs reuse tracking identity")
+    if package["status"] == "Verified":
+        require(
+            all(pr["status"] == accepted for pr in prs),
+            "Package completes before all implementation PRs",
+        )
+        require(
+            package["accepted_merge_commit"] == prs[-1]["accepted_merge_commit"]
+            and package["review_evidence"] == prs[-1]["review_evidence"],
+            "Package acceptance differs from final implementation PR evidence",
+        )
+
+
 def check_delivery_packages(data: dict[str, Any], markdown: str, plan: str) -> int:
     """Check optional sequential PR boundaries without changing aggregate DAG identity."""
     tasks = indexed(data["tasks"], "task")
@@ -153,7 +320,7 @@ def check_delivery_packages(data: dict[str, Any], markdown: str, plan: str) -> i
             count += 1
             continue
         require(isinstance(packages, list) and 2 <= len(packages) <= 8, "Invalid PR package count")
-        count += len(packages)
+        count += planned_delivery_prs(task)
         parts = indexed(packages, "delivery package")
         expected_ids = [f"{task['id']}/P{i}" for i in range(1, len(packages) + 1)]
         require(list(parts) == expected_ids, "Delivery package identities/order differ")
@@ -264,6 +431,7 @@ def check_delivery_packages(data: dict[str, Any], markdown: str, plan: str) -> i
                     all(nodes[dep]["status"] in READY for dep in task["dependencies"]),
                     f"Delivery package starts before aggregate prerequisites: {key}",
                 )
+            check_implementation_prs(package, markdown)
             heading = f"#### {key} — {package['title']}"
             require(markdown.count(heading + "\n") == 1, f"Missing delivery package card: {key}")
             body = markdown.split(heading + "\n", 1)[1]
@@ -331,8 +499,7 @@ def check_delivery_packages(data: dict[str, Any], markdown: str, plan: str) -> i
             )
         parent = task["parent"]
         parent_prs = sum(
-            len(tasks[k].get("delivery_packages", [None]))
-            for k in data["parents"][parent]["children"]
+            planned_delivery_prs(tasks[k]) for k in data["parents"][parent]["children"]
         )
         row = next((line for line in plan.splitlines() if line.startswith(f"| {parent} | M")), "")
         require(f": {parent_prs} PRs." in row, "Roadmap delivery PR count differs")

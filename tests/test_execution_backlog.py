@@ -161,6 +161,14 @@ def _delivery_packet(packet):
         current["status"] = "In progress" if key == "AR-007-C" else "Not started"
         for package in current["delivery_packages"]:
             package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
+            for pr in package.get("implementation_prs", []):
+                pr.update(
+                    status="Not started",
+                    source_commit=None,
+                    accepted_merge_commit=None,
+                    review_evidence=None,
+                )
+            markdown = _sync_implementation_cards(markdown, package)
         markdown = _sync_package_cards(markdown, current["delivery_packages"])
         heading = re.search(rf"^#{{3,4}} {re.escape(key)} — .+$", markdown, re.M)
         assert heading is not None
@@ -293,7 +301,7 @@ def test_accepted_merged_foundation_allows_p2_without_completing_aggregate(packe
     packages[1]["status"] = "In progress"
     assert CHECK.check_delivery_packages(
         data, _sync_package_cards(markdown, packages), plan
-    ) == sum(len(task.get("delivery_packages", [None])) for task in data["tasks"])
+    ) == sum(CHECK.planned_delivery_prs(task) for task in data["tasks"])
     assert task["status"] == "In progress"
 
 
@@ -465,6 +473,13 @@ def test_observability_successor_requires_accepted_merge_and_all_aggregate_input
                 accepted_merge_commit=f"{index:040x}",
                 review_evidence="Synthetic accepted prerequisite package",
             )
+            for number, pr in enumerate(package.get("implementation_prs", []), 1):
+                _accept_implementation_pr(pr, number)
+            if package.get("implementation_prs"):
+                final = package["implementation_prs"][-1]
+                package["accepted_merge_commit"] = final["accepted_merge_commit"]
+                package["review_evidence"] = final["review_evidence"]
+                markdown = _sync_implementation_cards(markdown, package)
         markdown = _sync_package_cards(markdown, packages)
     task["status"] = "In progress"
     p1.update(
@@ -475,5 +490,253 @@ def test_observability_successor_requires_accepted_merge_and_all_aggregate_input
     p2["status"] = "In progress"
     assert CHECK.check_delivery_packages(
         data, _sync_package_cards(markdown, task["delivery_packages"]), plan
-    ) == sum(len(row.get("delivery_packages", [None])) for row in data["tasks"])
+    ) == sum(CHECK.planned_delivery_prs(row) for row in data["tasks"])
     assert task["status"] != "Verified"
+
+
+def test_implementation_pr_refinement_counts_prs_without_completing_package(packet):
+    data, markdown, plan = packet
+    result = CHECK.validate(data, markdown, plan)
+    assert result["delivery_pr_count"] == 161
+    task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
+    p1, p2 = task["delivery_packages"]
+    assert len(p1["implementation_prs"]) == 3
+    assert p1["status"] == "In progress"
+    assert p1["accepted_merge_commit"] is p1["review_evidence"] is None
+    assert p2["status"] == "Not started"
+    assert result["task_count"] == 151
+    assert result["edge_count"] == 544
+    assert result["base_effort_days"] == 464
+
+
+def _sync_implementation_cards(markdown, package):
+    import re
+
+    for pr in package.get("implementation_prs", []):
+        start = markdown.index(f"#### {pr['id']} —")
+        following = re.search(r"^#{1,4} ", markdown[start + 5 :], re.M)
+        end = start + 5 + following.start() if following else len(markdown)
+        values = {
+            "Progress": pr["status"],
+            "Checkpoint evidence": (
+                f"{pr['source_commit']} / {pr['accepted_merge_commit']}. {pr['review_evidence']}"
+                if pr["status"] == "Merged; checkpoint accepted"
+                else "Pending; no accepted source/merge/review"
+            ),
+            "Tracking PR": pr["tracking_pr"] or "Not assigned",
+        }
+        body = markdown[start:end]
+        for label, value in values.items():
+            body, count = re.subn(
+                rf"(?m)^- \*\*{re.escape(label)}:\*\* .*$",
+                lambda match, label=label, value=value: f"- **{label}:** {value.rstrip('.')}.",
+                body,
+            )
+            assert count == 1
+        markdown = markdown[:start] + body + markdown[end:]
+    return markdown
+
+
+def _accept_implementation_pr(pr, number):
+    pr.update(
+        status="Merged; checkpoint accepted",
+        source_commit=f"{100 + number:040x}",
+        accepted_merge_commit=f"{200 + number:040x}",
+        review_evidence=f"Synthetic checkpoint {number}: reviewed source, PR/main and candidate",
+        tracking_pr=f"https://github.com/spei04/agent-rewind/pull/{9000 + number}",
+    )
+
+
+@pytest.mark.parametrize("completed", [1, 2, 3])
+def test_implementation_pr_acceptance_does_not_complete_parent_package(packet, completed):
+    data, markdown, plan = deepcopy(packet)
+    task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
+    p1, p2 = task["delivery_packages"]
+    for number, pr in enumerate(p1["implementation_prs"][:completed], 1):
+        _accept_implementation_pr(pr, number)
+    if completed < 3:
+        p1["implementation_prs"][completed]["status"] = "In progress"
+    markdown = _sync_implementation_cards(markdown, p1)
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
+    assert p1["status"] == task["status"] == "In progress"
+    assert p1["accepted_merge_commit"] is p1["review_evidence"] is None
+    assert p2["status"] == "Not started"
+
+
+def test_final_implementation_evidence_allows_explicit_p1_acceptance_and_p2_start(packet):
+    data, markdown, plan = deepcopy(packet)
+    task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
+    p1, p2 = task["delivery_packages"]
+    for number, pr in enumerate(p1["implementation_prs"], 1):
+        _accept_implementation_pr(pr, number)
+    final = p1["implementation_prs"][-1]
+    p1.update(
+        status="Verified",
+        accepted_merge_commit=final["accepted_merge_commit"],
+        review_evidence=final["review_evidence"],
+    )
+    p2["status"] = "In progress"
+    markdown = _sync_package_cards(_sync_implementation_cards(markdown, p1), [p1, p2])
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
+    assert task["status"] == "In progress"
+
+
+@pytest.mark.parametrize(
+    "variant,message",
+    [
+        ("empty", "Invalid implementation PR count"),
+        ("one", "Invalid implementation PR count"),
+        ("over_bound", "Invalid implementation PR count"),
+        ("null_list", "Invalid implementation PR count"),
+        ("duplicate", "Duplicate implementation PR identity"),
+        ("order", "Implementation PR identities/order differ"),
+        ("empty_scope", "Empty implementation PR boundary"),
+        ("extra_effort", "Invalid implementation PR fields"),
+        ("missing_input", "Implementation PR prerequisites differ"),
+        ("extra_input", "Implementation PR prerequisites differ"),
+        ("skip_predecessor", "Implementation PR prerequisites differ"),
+        ("contract", "Implementation PR dropped inherited contracts"),
+        ("role", "Implementation PR role differs"),
+        ("status", "Invalid implementation PR status"),
+        ("tracking", "Invalid implementation PR tracking"),
+        ("unaccepted_evidence", "Unaccepted implementation PR claims evidence"),
+        ("early_f2", "Implementation PR starts before accepted predecessor"),
+        ("inactive_package", "Active implementation PR under unstarted package"),
+        ("missing_source", "Implementation PR lacks source/merge/review evidence"),
+        ("missing_merge", "Implementation PR lacks source/merge/review evidence"),
+        ("missing_review", "Implementation PR lacks source/merge/review evidence"),
+        ("missing_tracking", "Implementation PR lacks source/merge/review evidence"),
+        ("premature_package", "Package completes before all implementation PRs"),
+        ("early_p2", "Delivery package starts before accepted merged prerequisite"),
+        ("wrong_final_merge", "Package acceptance differs from final implementation PR evidence"),
+        ("wrong_final_review", "Package acceptance differs from final implementation PR evidence"),
+        ("reused_merge", "Implementation PRs reuse accepted merge"),
+        ("reused_tracking", "Implementation PRs reuse tracking identity"),
+    ],
+)
+def test_implementation_pr_invalid_claims_reach_the_intended_gate(packet, variant, message):
+    data, markdown, plan = deepcopy(packet)
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
+    task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
+    p1, p2 = task["delivery_packages"]
+    prs = p1["implementation_prs"]
+    if variant in ("empty", "one", "over_bound", "null_list"):
+        p1["implementation_prs"] = {
+            "empty": [],
+            "one": prs[:1],
+            "over_bound": prs * 3,
+            "null_list": None,
+        }[variant]
+    elif variant == "duplicate":
+        prs[1]["id"] = prs[0]["id"]
+    elif variant == "order":
+        prs[1]["id"] = p1["id"] + "/F4"
+    elif variant == "empty_scope":
+        prs[0]["scope"] = " "
+    elif variant == "extra_effort":
+        prs[0]["effort_days"] = 3
+    elif variant == "missing_input":
+        prs[0]["dependencies"] = []
+    elif variant == "extra_input":
+        prs[0]["dependencies"].append("AR-005-C")
+    elif variant == "skip_predecessor":
+        prs[2]["dependencies"][-1] = prs[0]["id"]
+    elif variant == "contract":
+        prs[0]["contracts"] = []
+    elif variant == "role":
+        prs[0]["role"] = "QE"
+    elif variant == "status":
+        prs[0]["status"] = "Verified"
+    elif variant == "tracking":
+        prs[0]["tracking_pr"] = "https://example.invalid/pull/111"
+    elif variant == "unaccepted_evidence":
+        prs[0]["source_commit"] = "a" * 40
+    elif variant == "early_f2":
+        prs[1]["status"] = "In progress"
+    elif variant == "inactive_package":
+        p1["status"] = "Not started"
+    elif variant.startswith("missing_"):
+        _accept_implementation_pr(prs[0], 1)
+        field = {
+            "missing_source": "source_commit",
+            "missing_merge": "accepted_merge_commit",
+            "missing_review": "review_evidence",
+            "missing_tracking": "tracking_pr",
+        }[variant]
+        prs[0][field] = None
+    else:
+        completed = 1 if variant in ("premature_package", "early_p2") else 3
+        for number, pr in enumerate(prs[:completed], 1):
+            _accept_implementation_pr(pr, number)
+        if variant == "early_p2":
+            p2["status"] = "In progress"
+        elif variant in ("premature_package", "wrong_final_merge", "wrong_final_review"):
+            p1.update(
+                status="Verified",
+                accepted_merge_commit=prs[-1]["accepted_merge_commit"] or "a" * 40,
+                review_evidence=prs[-1]["review_evidence"] or "Synthetic premature package claim",
+            )
+            if variant == "wrong_final_merge":
+                p1["accepted_merge_commit"] = prs[0]["accepted_merge_commit"]
+            elif variant == "wrong_final_review":
+                p1["review_evidence"] = prs[0]["review_evidence"]
+        elif variant == "reused_merge":
+            prs[1]["accepted_merge_commit"] = prs[0]["accepted_merge_commit"]
+        else:
+            prs[1]["tracking_pr"] = prs[0]["tracking_pr"]
+        markdown = _sync_implementation_cards(markdown, p1)
+        markdown = _sync_package_cards(markdown, [p1, p2])
+    with pytest.raises(ValueError, match=message):
+        CHECK.check_delivery_packages(data, markdown, plan)
+
+
+@pytest.mark.parametrize("variant", ["scope", "progress", "evidence", "tracking", "missing_card"])
+def test_implementation_pr_card_drift_is_rejected(packet, variant):
+    data, markdown, plan = deepcopy(packet)
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
+    p1 = next(t for t in data["tasks"] if t["id"] == "AR-010-A")["delivery_packages"][0]
+    pr = p1["implementation_prs"][0]
+    start = markdown.index(f"#### {pr['id']} —")
+    end = markdown.index("#### AR-010-A/P1/F2")
+    body = markdown[start:end]
+    if variant == "missing_card":
+        body = ""
+    else:
+        old, new = {
+            "scope": (pr["scope"], "Scope omitted"),
+            "progress": ("**Progress:** In progress.", "**Progress:** Not started."),
+            "evidence": ("Pending; no accepted source/merge/review.", "All package gates passed."),
+            "tracking": (pr["tracking_pr"], "https://github.com/spei04/agent-rewind/pull/9999"),
+        }[variant]
+        assert old in body
+        body = body.replace(old, new, 1)
+    markdown = markdown[:start] + body + markdown[end:]
+    with pytest.raises(
+        ValueError, match="(?:Missing implementation PR card|Implementation PR card differs)"
+    ):
+        CHECK.check_delivery_packages(data, markdown, plan)
+
+
+def test_legacy_packages_keep_one_pr_each_without_refinement(packet):
+    import re
+
+    data, markdown, plan = deepcopy(packet)
+    task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
+    p1 = task["delivery_packages"][0]
+    del p1["implementation_prs"]
+    start = markdown.index("#### AR-010-A/P1/F1")
+    end = markdown.index("#### AR-010-A/P2")
+    markdown = markdown[:start] + markdown[end:]
+    markdown = markdown.replace(
+        "151 aggregate tasks and 161 planned delivery PRs",
+        "151 aggregate tasks and 159 planned delivery PRs",
+        1,
+    )
+    markdown = re.sub(r"(### AR-010 —[^\n]+\n\nM1 / P0 · )6 PRs", r"\g<1>4 PRs", markdown)
+    plan = plan.replace(
+        "[AR-010](EXECUTION_BACKLOG.md#ar-010): 6 PRs.",
+        "[AR-010](EXECUTION_BACKLOG.md#ar-010): 4 PRs.",
+        1,
+    )
+    data["validation"]["delivery_pr_count"] = 159
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 159

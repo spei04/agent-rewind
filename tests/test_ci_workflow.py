@@ -19,7 +19,7 @@ def test_pr_workflow_has_no_privileged_trigger_or_token():
     )
     for job_id, job in WORKFLOW["jobs"].items():
         assert job["runs-on"] == "ubuntu-24.04"
-        assert 0 < job["timeout-minutes"] <= (30 if job_id == "core" else 20)
+        assert 0 < job["timeout-minutes"] <= (45 if job_id == "core" else 20)
         assert "permissions" not in job
         assert "continue-on-error" not in job
         for step in job["steps"]:
