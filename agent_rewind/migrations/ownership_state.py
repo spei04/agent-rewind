@@ -90,7 +90,16 @@ def inspect_ownership_state(connection: Connection, row: dict[str, Any]) -> Owne
     try:
         if len(entries) != 1:
             raise ValueError("missing progress")
-        progress = entries[0]
+        state = validate_ownership_progress(row, dict(entries[0]))
+        verify_principals(connection, row, state)
+        return state
+    except (ValueError, TypeError, KeyError, RecursionError):
+        raise MigrationRefused("ownership_progress_invalid") from None
+
+
+def validate_ownership_progress(row: dict[str, Any], progress: dict[str, Any]) -> OwnershipState:
+    """Parse an already bounded historical row without inspecting live memberships."""
+    try:
         cursor = json.loads(progress["cursor"], object_pairs_hook=_unique_object)
         if (
             set(cursor)
@@ -167,7 +176,6 @@ def inspect_ownership_state(connection: Connection, row: dict[str, Any]) -> Owne
             name,
             grants,
         )
-        verify_principals(connection, row, state)
         return state
     except (ValueError, TypeError, KeyError, RecursionError):
         raise MigrationRefused("ownership_progress_invalid") from None

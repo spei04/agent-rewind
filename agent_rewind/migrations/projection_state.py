@@ -93,6 +93,14 @@ def inspect_projection_state(connection: Connection, row: dict[str, Any]) -> Pro
         if len(entries) != 1:
             raise ValueError
         entry = entries[0]
+        return validate_projection_progress(dict(entry))
+    except (ValueError, KeyError, TypeError, RecursionError):
+        raise MigrationRefused("projection_progress_invalid") from None
+
+
+def validate_projection_progress(entry: dict[str, Any]) -> ProjectionState:
+    """Parse an already bounded historical projection row without issuing SQL."""
+    try:
         cursor = json.loads(entry["cursor"], object_pairs_hook=_unique_object)
         if (
             set(cursor)

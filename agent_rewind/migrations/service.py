@@ -231,35 +231,8 @@ def _alembic(connection: Connection, operation: str, target: str) -> None:
         command.upgrade(config, target)
 
 
-def _installed(connection: Connection, shape: dict[str, Any]) -> dict[str, Any]:
-    if "alembic_version" not in shape:
-        raise MigrationRefused("schema_incompatible")
-    revisions: list[str] = list(
-        connection.execute(text("SELECT version_num FROM alembic_version LIMIT 2")).scalars()
-    )
-    if len(revisions) != 1 or revisions[0] not in {
-        HEAD,
-        OWNERSHIP,
-        ARTIFACTS,
-        PROJECTION,
-        ADMISSION,
-    }:
-        raise MigrationRefused("schema_incompatible")
-    revision = revisions[0]
-    verify_baseline(
-        shape,
-        dialect(connection),
-        versioned=True,
-        ownership=revision in {OWNERSHIP, ARTIFACTS, PROJECTION, ADMISSION},
-        artifacts=revision in {ARTIFACTS, PROJECTION, ADMISSION},
-        projection=revision in {PROJECTION, ADMISSION},
-        admission=revision == ADMISSION,
-    )
-    verify_installed_profile(shape, dialect(connection), revision)
-    rows = connection.execute(text("SELECT * FROM installation_adoptions LIMIT 2")).mappings().all()
-    if len(rows) != 1 or rows[0]["installed_schema_fingerprint"] != checksum(shape):
-        raise MigrationRefused("schema_incompatible")
-    row = dict(rows[0])
+def _validate_adoption_row(connection: Connection, row: dict[str, Any], revision: str) -> None:
+    """Validate already bounded adoption fields without reading current principals."""
     try:
         if isinstance(row["mapping"], str):
             row["mapping"] = json.loads(row["mapping"])
@@ -308,6 +281,38 @@ def _installed(connection: Connection, shape: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("invalid origin")
     except (ValueError, TypeError, RecursionError):
         raise MigrationRefused("adoption_metadata_drift") from None
+
+
+def _installed(connection: Connection, shape: dict[str, Any]) -> dict[str, Any]:
+    if "alembic_version" not in shape:
+        raise MigrationRefused("schema_incompatible")
+    revisions: list[str] = list(
+        connection.execute(text("SELECT version_num FROM alembic_version LIMIT 2")).scalars()
+    )
+    if len(revisions) != 1 or revisions[0] not in {
+        HEAD,
+        OWNERSHIP,
+        ARTIFACTS,
+        PROJECTION,
+        ADMISSION,
+    }:
+        raise MigrationRefused("schema_incompatible")
+    revision = revisions[0]
+    verify_baseline(
+        shape,
+        dialect(connection),
+        versioned=True,
+        ownership=revision in {OWNERSHIP, ARTIFACTS, PROJECTION, ADMISSION},
+        artifacts=revision in {ARTIFACTS, PROJECTION, ADMISSION},
+        projection=revision in {PROJECTION, ADMISSION},
+        admission=revision == ADMISSION,
+    )
+    verify_installed_profile(shape, dialect(connection), revision)
+    rows = connection.execute(text("SELECT * FROM installation_adoptions LIMIT 2")).mappings().all()
+    if len(rows) != 1 or rows[0]["installed_schema_fingerprint"] != checksum(shape):
+        raise MigrationRefused("schema_incompatible")
+    row = dict(rows[0])
+    _validate_adoption_row(connection, row, revision)
     row["_revision"] = revision
     if revision in {OWNERSHIP, ARTIFACTS, PROJECTION, ADMISSION}:
         from .ownership_state import inspect_ownership_state
