@@ -627,6 +627,14 @@ def test_implementation_pr_invalid_claims_reach_the_intended_gate(packet, varian
             accepted_merge_commit=None,
             review_evidence=None,
         )
+        for successor in prs[1:]:
+            successor.update(
+                status="Not started",
+                source_commit=None,
+                accepted_merge_commit=None,
+                review_evidence=None,
+                tracking_pr=None,
+            )
         markdown = _sync_implementation_cards(markdown, p1)
         assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
     if variant in ("empty", "one", "over_bound", "null_list"):
