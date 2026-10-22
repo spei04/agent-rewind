@@ -616,15 +616,16 @@ class RowTransferWatch:
             ):
                 value = _original(strategy, result, cursor, *args, **kwargs)
                 rows = [value] if _method == "fetchone" else value
-                statement = result.context.statement.strip()
-                if statement in statements:
-                    self.statement_hits.append(
-                        {
-                            "name": statements[statement],
-                            "method": _method,
-                            "rows": sum(row is not None for row in rows or []),
-                        }
-                    )
+                if statements:
+                    statement = result.context.statement.strip()
+                    if statement in statements:
+                        self.statement_hits.append(
+                            {
+                                "name": statements[statement],
+                                "method": _method,
+                                "rows": sum(row is not None for row in rows or []),
+                            }
+                        )
                 changed, substituted = False, []
                 for row in rows or []:
                     if row is None:
