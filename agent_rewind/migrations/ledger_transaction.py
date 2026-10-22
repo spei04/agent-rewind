@@ -61,6 +61,26 @@ class _LedgerBody:
 _BODIES: dict[Connection, _LedgerBody] = {}
 
 
+def _body_listeners(
+    connection: Connection, work: LedgerWork, inherited: dict[str, tuple[Any, ...]]
+) -> None:
+    # SQLAlchemy wraps before_cursor_execute. Match its registration and exact
+    # per-event cardinality, including the factory's frozen inherited callbacks.
+    owned = dict(work._listeners)
+    if len(work._listeners) != 2 or set(owned) != {"before_cursor_execute", "after_cursor_execute"}:
+        raise MigrationRefused("transactional_connection_required")
+    for name in Connection.dispatch._event_names:
+        expected = inherited.get(f"engine.{name}", ())
+        actual = tuple(getattr(connection.dispatch, name))
+        if (
+            tuple(getattr(connection.engine.dispatch, name)) != expected
+            or len(actual) != len(expected) + int(name in owned)
+            or any(callback not in actual for callback in expected)
+            or (name in owned and not event.contains(connection, name, owned[name]))
+        ):
+            raise MigrationRefused("transactional_connection_required")
+
+
 def _body_live(body: _LedgerBody) -> None:
     connection, claim, work = body.connection, body.claim, body.work
     with ledger_engine._LOCK:
@@ -77,6 +97,7 @@ def _body_live(body: _LedgerBody) -> None:
             or claim.engine.dialect is not state.dialect
         ):
             raise MigrationRefused("transactional_connection_required")
+        _body_listeners(connection, work, state.handlers)
     if (
         connection.closed
         or connection.invalidated
@@ -94,8 +115,6 @@ def _body_live(body: _LedgerBody) -> None:
         or work._detached
         or work._connection is not connection
         or work._raw is not body.raw
-        or len(work._listeners) != 2
-        or any(not event.contains(connection, name, callback) for name, callback in work._listeners)
     ):
         raise MigrationRefused("transactional_connection_required")
     receipt, lease = body.receipt, body.lease
