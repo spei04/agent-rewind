@@ -1134,3 +1134,15 @@ evidence distinction.
 ## F2 reader entry and assignment — 2026-10-22
 
 The lead accepted the [complete reader implementation entry](delivery/LEDGER_EXECUTION_PLAN.md#f2-reader-implementation-entry--2026-10-22) after exact query/schedule review and separate native catalog component checks. F2 is In progress with null acceptance; P1 remains In progress/null, and F3/P2 remain Not started. Platform/security implements the reader after the secondary documentation handoff; independent QE owns new tests in primary; planning reviews integration and the lead owns delivery. No task, effort, dependency, spending or production gate changes.
+
+
+## F3 component integration checkpoint — 2026-10-22
+
+F2 is accepted at e8cba52. F3 remains In progress: the counted fingerprint,
+complete-context extraction and coherent immutable-history adapter have scoped
+review and SQLite test evidence. The lead is integrating these components;
+platform/security continues the writer and QE prepares independent native and
+recovery controls. [Current evidence and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#f3-component-integration-checkpoint--2026-10-22)
+separate these results from full command, PostgreSQL, capacity and recovery
+acceptance. Full P1 acceptance is null and P2 is Not started. Counts, estimates,
+dependencies, funding and production gates are unchanged.

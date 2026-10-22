@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | F3 guarded writer/service, finalization and recovery in primary after progress release and reviewed kernel composition | Preserve the full initialization, replay, uncertainty, native limits and owner/ACL recovery gates. |
-| Independent QE | Shared-check kernel reviewed; implement the coherent compatibility adapter in secondary | Preserve existing guards/work owners, the unchanged two-second deadline and coherent old-profile snapshots; own independent native/recovery controls. |
-| Planning/verification | Completed exact PR/main audits; finalize accepted F2 progress and release primary | Independently review F3 integration and source-bound evidence. |
-| Lead | Accepted F2 at e8cba52 with verified candidate; issued explicit F3 implementation handoff | Own policy, integration and delivery; full P1 acceptance remains required before P2. |
+| Platform/security | Source fingerprint and complete-context components reviewed; implement guarded writer/service in primary | Prove actual initialization, provisioning, replay, finalization and uncertainty before native recovery acceptance. |
+| Independent QE | Compatibility adapter and SQLite lifecycle reviewed; prepare native/recovery controls privately | Secondary released to lead integration; await the frozen integrated tree and exclusive PostgreSQL handoff. |
+| Planning/verification | Context extraction accepted; review pure preparation and fixed writer SQL | Check exact eligibility, opening, replay, cursor and finite-error boundaries against frozen contracts. |
+| Lead | Integrate reviewed F3 components, package policy and progress in released secondary | Preserve null F3/P1 acceptance until full writer/native/recovery and delivery gates pass. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -52,8 +52,8 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
 - **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Review the minimal shared-check kernel, then integrate F3's guarded writer/service and coherent compatibility adapter. Real initialization, replay, outcome, maximum-state/refusal and owner/ACL recovery evidence remain required; component query proofs alone do not complete those gates. Only complete final P1 acceptance permits P2 entry.
-- **Current storage and consumers:** The two existing cloud checkouts are reused: planning finalizes progress in primary before releasing it to platform/security; independent QE takes secondary for the shared-check kernel and compatibility adapter. The 29-case PostgreSQL matrix and five added complete-reader boundaries retain their separate source/interpreter evidence. Writer and compatibility component runs restored their baselines and stopped PostgreSQL; native execution needs an explicit exclusive-slot handoff. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
+- **Next evidence-producing milestone:** Complete guarded writer/service integration with the reviewed coherent compatibility adapter. Real initialization, replay, outcome, maximum-state/refusal and owner/ACL recovery evidence remain required; reviewed components alone do not complete those gates. Only complete final P1 acceptance permits P2 entry.
+- **Current storage and consumers:** The two existing cloud checkouts are reused: platform/security owns primary service work; the lead owns released secondary for component integration and packaging. QE prepares native controls privately, and planning reviews immutable source without a checkout hold. Earlier PostgreSQL proofs retain their exact source/interpreter scope; the database is stopped and native execution needs an explicit exclusive-slot handoff. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -1159,3 +1159,30 @@ Planning reviews source and evidence; the lead owns package policy and delivery.
 No PostgreSQL or hosted run is claimed for this component. The full adapter
 deadline, writer, concurrency and recovery gates remain open; F3/P1 acceptance
 is null and P2 remains Not started.
+
+## F3 component review and reassignment — 2026-10-22
+
+Platform/security's counted fingerprint at a50b11fb and complete context at
+36eee0e9 have independent source/evidence acceptance. Their Python 3.12 SQLite
+selections passed 33 and 86 cases respectively; these are separate selections.
+All 40 fingerprint statements match the reviewed packet. The context preserves
+the full reader proof and retains no extra graph or caller authority.
+
+QE's compatibility adapter at b7f7ea4 passed 180 cases on Python 3.12 and
+177 with three explicit version skips on Python 3.11, one existing warning each.
+All eight projection statements match their reviewed packet. Independent review
+caught a native-autocommit SQLite transaction leak at 8d57c885; correction
+63e069f7 owns the explicit rollback and quarantines failed cleanup. Original
+failed controls and the separate test-pool correction remain recorded.
+
+The default inspection context also retains its original None return after
+the narrow integration correction a197989; the paired snapshot controls pass
+on both interpreters. Pure intent preparation at 090d22c has independent review
+and 18 passing direct tests; its 16 SQL/type records match the frozen packet.
+
+The lead takes released secondary for package policy and integration. QE is
+reassigned to native and recovery controls; planning reviews the next pure
+preparation checkpoint while platform/security continues the actual service.
+Seeded history checks do not establish service-created state, native PostgreSQL,
+whole-command capacity or recovery. F3/P1 remain In progress with null acceptance;
+P2 remains Not started. No provider calls or new paid resources were added.

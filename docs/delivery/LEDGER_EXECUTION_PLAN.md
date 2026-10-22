@@ -766,3 +766,31 @@ handling or owner/ACL-preserving financial recovery. All original P1 gates remai
 F3 is In progress with null checkpoint acceptance; P1, AR-010-A and parent #10
 remain In progress/null acceptance. P2 remains Not started. No ready profile,
 customer activation, spending authority, effort or dependency change follows.
+
+
+## F3 component integration checkpoint — 2026-10-22
+
+The following components have source review and bounded local evidence. None is
+full F3, P1, production or maximum-capacity acceptance.
+
+| Component | Reviewed source and evidence | Remaining integration proof |
+| --- | --- | --- |
+| Counted original-source fingerprint | a50b11fb; all 40 statements match the frozen packet; 33 Python 3.12 SQLite cases pass | Python 3.11 and PostgreSQL consumer execution; both actual writer traversals and complete caller prerequisites |
+| Private complete context | 36eee0e9; original full inspector pipeline preserved; 86 Python 3.12 cases pass with 11 existing JUnit invocation warnings | Actual service use and finalizer ordering; native integration |
+| Coherent compatibility lifecycle | 63e069f7 resolves independently found native-autocommit rollback leak; original and corrected controls retained | PostgreSQL repeatable-read setup, native setters and cleanup; whole two-second lifecycle |
+| Immutable compatibility adapter | b7f7ea4; eight exact projection statements; 180 Python 3.12 passes and 177 Python 3.11 passes/three explicit version skips, one existing warning each | Actual service-created ar7 states, PostgreSQL consumer execution and whole-history/account capacity |
+| Pure intent preparation and writer SQL | 090d22c; independent review, 18 direct tests and 16 exact SQL/type records | Actual provenance/project receipts, service-created rows, native execution and whole-command bounds |
+
+Compatibility success remains incompatible/migration_only, with no ready state
+or operator rights. Its seeded histories validate immutable provenance, actual
+accounts and original opening; they deliberately do not prove current balances,
+calls, entries or graph health. Deadline tests use actual serialization followed
+by controlled clock advancement, not elapsed wall-clock capacity evidence.
+
+The lead integrates policy and progress in released secondary. Platform/security
+owns the writer in primary; planning reviews pure preparation/fixed SQL; QE
+prepares native/recovery controls without an active database hold. Full actual
+initialization, provisioning, exact older replay, uncertainty, commit/cleanup,
+owner/ACL restore and final protected PR/main/candidate gates remain required.
+F3/P1 acceptance stays null; P2 remains Not started. No new spending, deployment
+or partner-data authorization follows.
