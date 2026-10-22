@@ -822,41 +822,130 @@ def _financial_projection_receipt(connection) -> dict[str, Any]:
     }
 
 
-def calibrate_financial_boundary(case: ReaderFixture, mode: str) -> tuple[str, dict[str, Any]]:
-    """Build actual bounded state; no product counter, cap or result is replaced."""
+def calibrate_financial_boundary(
+    case: ReaderFixture, mode: str, *, before_control=None
+) -> tuple[str, dict[str, Any]]:
+    """Use real narrow native cells and rows, never a replaced consumer budget."""
+    from agent_rewind.migrations.ledger_inspection import inspect_ledger_state
+    from agent_rewind.migrations.ledger_transaction import LedgerOutcome, ledger_transaction
+    from agent_rewind.migrations.ledger_work import LedgerWork
+
     assert mode in FINANCIAL_BOUNDARIES and case.legacy and case.revision == LEDGER
     cap = 2 * 1024 * 1024
-    with case.engine.begin() as connection:
-        job, version = connection.exec_driver_sql(
-            "SELECT id,payload_version FROM jobs ORDER BY id LIMIT 1"
-        ).one()
-        assert version == 1
 
-        def replace(payload):
+    def identities(count):
+        return [f"{80_000_000 + index:032x}" for index in range(count)]
+
+    def add_rows(connection, values, project):
+        for start in range(0, len(values), 64):
+            batch = values[start : start + 64]
             connection.execute(
-                text("UPDATE jobs SET payload=:payload WHERE id=:job"),
-                {"payload": payload, "job": job},
+                text(
+                    "INSERT INTO jobs(id,kind,created,payload,status,cancel,budget,reserved,"
+                    "actor,payload_version,lease_generation,legacy_reserved_microusd) "
+                    "VALUES(:id,'run',1700000000.125,'','succeeded',false,1,0,NULL,1,0,0)"
+                ),
+                [{"id": value} for value in batch],
+            )
+            connection.execute(
+                text(
+                    "INSERT INTO resource_scopes(resource_kind,resource_id,project_id) "
+                    "VALUES('job',:id,:project)"
+                ),
+                [{"id": value, "project": project} for value in batch],
             )
 
-        replace("")
+    with case.engine.begin() as connection:
+        project = connection.exec_driver_sql(
+            "SELECT project_id FROM resource_scopes "
+            "WHERE resource_kind='job' ORDER BY resource_id LIMIT 1"
+        ).scalar_one()
         baseline = _financial_projection_receipt(connection)
-        if mode.startswith("native"):
-            payload = "z" * (cap + (mode == "native-one-over") - baseline["native_bytes"])
-        elif mode == "canonical-expansion":
-            payload = '"' * (cap // 2 + 1)
-        else:
-            target = cap + (mode == "canonical-one-over")
-            quotes, tail = divmod(target - baseline["canonical_bytes"], 2)
-            assert quotes > 0
-            payload = '"' * quotes + "z" * tail
-        replace(payload)
+        add_rows(connection, identities(1), project)
+        single = _financial_projection_receipt(connection)
+    increments = {
+        field: single[field] - baseline[field]
+        for field in ("native_bytes", "canonical_bytes", "rows")
+    }
+    assert increments["rows"] == 2
+    assert increments["native_bytes"] > 0 and increments["canonical_bytes"] > 0
+
+    # Prove the new zero-import job is a supported complete state before scaling.
+    snapshot = (
+        (lambda: sqlite_snapshot(case.path))
+        if case.path is not None
+        else (lambda: postgres_snapshot(case.engine))
+    )
+    small_before = snapshot()
+    case.engine.dispose()
+    if before_control is not None:
+        before_control()
+    engine, work, outcome = case.operator_engine(), LedgerWork(), LedgerOutcome()
+    try:
+        with ledger_transaction(engine, outcome, work=work) as connection:
+            state = inspect_ledger_state(connection)
+        assert state.model_dump(mode="json") == case.expected
+        assert state.opening.organization_opening_microusd == 245000
+        assert outcome.commit_acknowledged and not outcome.cleanup_failed
+        assert 0 < work.observed_ordinary <= 2028
+    finally:
+        engine.dispose()
+    if before_control is not None:
+        before_control()
+    assert snapshot() == small_before
+    small_work = work.observed_ordinary
+
+    native = mode.startswith("native")
+    field = "native_bytes" if native else "canonical_bytes"
+    target = cap + (mode in {"native-one-over", "canonical-one-over", "canonical-expansion"})
+    capacity = increments[field] + (64 if native else 128)
+    count = max(1, (target - baseline[field] + capacity - 1) // capacity)
+    assert baseline["rows"] + 2 * count < 65536
+    keys = identities(count)
+    with case.engine.begin() as connection:
+        add_rows(connection, keys[1:], project)
+        blank = _financial_projection_receipt(connection)
+        for name, increment in increments.items():
+            assert blank[name] == baseline[name] + count * increment
+        remaining = target - blank[field]
+        assert 0 < remaining <= count * (64 if native else 128)
+        payloads = []
+        for _ in keys:
+            if mode == "canonical-expansion":
+                payload = '"' * 64
+            elif native:
+                size = min(64, remaining)
+                payload = "z" * size
+                remaining -= size
+            else:
+                size = min(128, remaining)
+                quotes, tail = divmod(size, 2)
+                payload = '"' * quotes + "z" * tail
+                remaining -= size
+            payloads.append(payload)
+        if mode != "canonical-expansion":
+            assert remaining == 0
+        # Unique same-cost sentinel avoids recording thousands of identical cells.
+        payloads[0] = ("y" if native else "\\") + payloads[0][1:]
+        assert all(len(value) <= 64 and len(value.encode()) <= 64 for value in payloads)
+        assert payloads[0] and sum(value == payloads[0] for value in payloads) == 1
+        for start in range(0, count, 64):
+            connection.execute(
+                text("UPDATE jobs SET payload=:payload WHERE id=:job"),
+                [
+                    {"payload": payload, "job": job}
+                    for job, payload in zip(
+                        keys[start : start + 64], payloads[start : start + 64], strict=True
+                    )
+                ],
+            )
         receipt = _financial_projection_receipt(connection)
     assert len(receipt["domains"]) == 10 and 0 < receipt["rows"] < 65536
     assert all(
         row["invalid_rows"] == 0 and row["native_bytes"] < cap
         for row in receipt["domains"].values()
     )
-    if mode.startswith("native"):
+    if native:
         assert receipt["native_bytes"] == cap + (mode == "native-one-over")
         assert receipt["canonical_bytes"] > cap
     else:
@@ -865,7 +954,16 @@ def calibrate_financial_boundary(case: ReaderFixture, mode: str) -> tuple[str, d
             assert receipt["canonical_bytes"] > cap
         else:
             assert receipt["canonical_bytes"] == cap + (mode == "canonical-one-over")
-    return payload, receipt
+    receipt["cohort"] = {
+        "added_jobs": count,
+        "added_scopes": count,
+        "per_row_increments": increments,
+        "maximum_payload_characters": max(map(len, payloads)),
+        "small_complete_control_total_ordinary": small_work,
+        "original_opening_microusd": 245000,
+        "small_control_snapshot_equal": True,
+    }
+    return payloads[0], receipt
 
 
 def assert_financial_transfer_boundary(watch: RowTransferWatch, mode: str) -> None:

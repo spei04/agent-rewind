@@ -1018,7 +1018,7 @@ def test_postgres_complete_financial_boundaries(
     from agent_rewind.migrations.ledger_inspection import inspect_ledger_state
 
     case = postgres_reader_case
-    payload, receipt = calibrate_financial_boundary(case, mode)
+    payload, receipt = calibrate_financial_boundary(case, mode, before_control=lambda: drain(pg))
     before = postgres_snapshot(case.engine)
     drain(pg)
     watch = RowTransferWatch(
