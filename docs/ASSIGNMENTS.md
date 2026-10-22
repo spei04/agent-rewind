@@ -7,7 +7,7 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
 | Platform/security | F3 guarded writer/service, finalization and recovery in primary after progress release and reviewed kernel composition | Preserve the full initialization, replay, uncertainty, native limits and owner/ACL recovery gates. |
-| Independent QE | F3 shared-check kernel in secondary, then compatibility adapter after kernel review | Preserve existing guards/work owners, the unchanged two-second deadline and coherent old-profile snapshots; own independent native/recovery controls. |
+| Independent QE | Shared-check kernel reviewed; implement the coherent compatibility adapter in secondary | Preserve existing guards/work owners, the unchanged two-second deadline and coherent old-profile snapshots; own independent native/recovery controls. |
 | Planning/verification | Completed exact PR/main audits; finalize accepted F2 progress and release primary | Independently review F3 integration and source-bound evidence. |
 | Lead | Accepted F2 at e8cba52 with verified candidate; issued explicit F3 implementation handoff | Own policy, integration and delivery; full P1 acceptance remains required before P2. |
 
@@ -1141,3 +1141,21 @@ each dialect** have scoped peer acceptance only. Full adapter deadline,
 capacity, real initialization and owner/ACL financial recovery still need
 implementation evidence. P1/AR-010-A remain In progress/null acceptance;
 F3 is In progress/null acceptance; P2 remains Not started.
+
+## F3 shared interface handoff — 2026-10-22
+
+The shared check-only interface at 0d59d1e passed independent review and was
+composed unchanged with accepted progress at aa2d784. Each supported Python
+version passed 429 selected cases, with 23 explicit PostgreSQL opt-in skips
+and 17 deselections; the 42 warnings per run concern existing JUnit reporting.
+The 14 focused cases cover interruption during serialization, opening traversal,
+period comparisons and final return. Offline distributions match all 134 runtime
+files against Git; whole-project type checking passes across 118 source files.
+
+QE now owns compatibility implementation in secondary. Platform/security owns
+the independent counted source-fingerprint component in primary, followed by
+guarded context and service integration after composing the reviewed interface.
+Planning reviews source and evidence; the lead owns package policy and delivery.
+No PostgreSQL or hosted run is claimed for this component. The full adapter
+deadline, writer, concurrency and recovery gates remain open; F3/P1 acceptance
+is null and P2 remains Not started.
