@@ -22,11 +22,31 @@ from agent_rewind.migrations.schema import LEDGER
 CURSOR_LIMIT = 16 * 1024 * 1024
 
 
-def object_hashes(case):
-    assert case.path is not None
+def strict_json_value(raw):
+    """Decode fixture JSON without losing duplicate members or nonfinite values."""
+
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate fixture JSON member")
+            result[key] = value
+        return result
+
+    def reject_constant(value):
+        raise ValueError("nonfinite fixture JSON number")
+
+    assert type(raw) is str
+    return json.loads(raw, object_pairs_hook=unique_object, parse_constant=reject_constant)
+
+
+def object_hashes(case, *, directory=None):
+    if directory is None:
+        assert case.path is not None
+        directory = case.path.parent / "objects"
     return {
         path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-        for path in sorted((case.path.parent / "objects").iterdir())
+        for path in sorted(directory.iterdir())
     }
 
 
@@ -105,10 +125,15 @@ def extend_opening(case):
     return original
 
 
-def capacity_history(case, *, accounts):
+def capacity_history(case, *, accounts, object_directory=None, database_role=None):
     """256 manifests; initial 64 rows and 255 nonempty adjacent provision batches."""
     assert accounts in {319, 4096}
-    ciphertext = object_hashes(case)
+    if case.engine.dialect.name == "postgresql":
+        assert object_directory is not None and type(database_role) is str
+        assert database_role and len(database_role.encode()) <= 63
+    else:
+        assert case.engine.dialect.name == "sqlite" and database_role is None
+    ciphertext = object_hashes(case, directory=object_directory)
     legacy_jobs = extend_opening(case)
     seed_ar7(case)
     assert len(case.manifest["accounts"]) == 64
@@ -145,6 +170,8 @@ def capacity_history(case, *, accounts):
         "initial": initial,
         "legacy_jobs": legacy_jobs,
         "ciphertext": ciphertext,
+        "object_directory": object_directory,
+        "database_role": database_role,
     }
 
 
@@ -163,7 +190,8 @@ def assert_capacity_history(case, expected):
             dict(row)
             for row in connection.execute(
                 text(
-                    "SELECT phase,cursor,source_digest,rows_verified,status "
+                    "SELECT phase,CAST(cursor AS TEXT) AS cursor,"
+                    "source_digest,rows_verified,status "
                     "FROM migration_progress WHERE revision=:revision ORDER BY phase"
                 ),
                 {"revision": LEDGER},
@@ -178,6 +206,12 @@ def assert_capacity_history(case, expected):
                 "JOIN projects p ON p.id=s.project_id ORDER BY j.id"
             ).mappings()
         ]
+        balances = list(
+            connection.exec_driver_sql(
+                "SELECT held_microusd,accounted_microusd,opening_held_microusd "
+                "FROM budget_accounts ORDER BY id"
+            )
+        )
         legacy = [
             tuple(row)
             for row in connection.exec_driver_sql(
@@ -187,21 +221,30 @@ def assert_capacity_history(case, expected):
             if row[0] in {old[0] for old in expected["legacy_jobs"]}
         ]
     assert legacy == expected["legacy_jobs"]
-    assert object_hashes(case) == expected["ciphertext"]
+    assert all(held == opening and accounted == 0 for held, accounted, opening in balances)
+    assert object_hashes(case, directory=expected["object_directory"]) == expected["ciphertext"]
+    if case.engine.dialect.name == "postgresql":
+        for row in native:
+            for field in ("period_start", "period_end"):
+                value = row[field]
+                assert type(value) is datetime and value.utcoffset() is not None
+                row[field] = value.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     assert len(native) == expected["accounts"] and len(progress) == 257
     assert len(jobs) == 48 and len({row["project_id"] for row in jobs}) == 15
     assert sum(row["legacy_reserved_microusd"] for row in jobs) == 245000
     opening_row = next(row for row in progress if row["phase"] == "ledger_opening")
-    opening = json.loads(opening_row["cursor"])
-    assert opening["jobs"] == [
-        {
-            "job_id": row["id"],
-            "project_id": row["project_id"],
-            "budget_microusd": row["budget"],
-            "legacy_reserved_microusd": row["legacy_reserved_microusd"],
-        }
-        for row in jobs
-    ]
+    opening = strict_json_value(opening_row["cursor"])
+    assert canonical_bytes(opening["jobs"]) == canonical_bytes(
+        [
+            {
+                "job_id": row["id"],
+                "project_id": row["project_id"],
+                "budget_microusd": row["budget"],
+                "legacy_reserved_microusd": row["legacy_reserved_microusd"],
+            }
+            for row in jobs
+        ]
+    )
     assert opening["jobs_digest"] == digest(opening["jobs"])
     assert opening["organization_opening_microusd"] == 245000
     totals = defaultdict(int)
@@ -220,7 +263,9 @@ def assert_capacity_history(case, expected):
         if account["scope"] == "job":
             exposure[account["id"]] = job_amounts[account["job_id"]]
     assert all(row["opening_held_microusd"] == exposure.get(row["id"], 0) for row in native)
-    cursors = [json.loads(row["cursor"]) for row in progress if row["phase"] != "ledger_opening"]
+    cursors = [
+        strict_json_value(row["cursor"]) for row in progress if row["phase"] != "ledger_opening"
+    ]
     cursors.sort(key=lambda row: row["sequence"])
     assert [row["sequence"] for row in cursors] == list(range(256))
     by_id = {row["id"]: row for row in native}
@@ -235,14 +280,14 @@ def assert_capacity_history(case, expected):
         previous = cursor["manifest_digest"]
         assert raw["installation_key"] == expected["initial"]["installation_key"]
         assert cursor["account_count"] == len(raw["accounts"]) <= 64
-        assert cursor["database_role"] is None
+        assert cursor["database_role"] == expected["database_role"]
         assert len(canonical_bytes(raw)) <= 32768
         projection = []
         for account in raw["accounts"]:
             assert account["id"] not in seen
             seen.add(account["id"])
             row = by_id[account["id"]]
-            assert {key: row[key] for key in account} == account
+            assert canonical_bytes({key: row[key] for key in account}) == canonical_bytes(account)
             if cursor["sequence"] > 0:
                 assert row["opening_held_microusd"] == 0
             projection.append(row)
@@ -259,7 +304,7 @@ def assert_capacity_history(case, expected):
     assert opening["manifest_id"] == cursors[0]["manifest"]["manifest_id"]
     assert sum(row["opening_held_microusd"] for row in native) == 735000
     for row in progress:
-        cursor = json.loads(row["cursor"])
+        cursor = strict_json_value(row["cursor"])
         assert row["status"] == "complete"
         is_opening = row["phase"] == "ledger_opening"
         assert row["source_digest"] == (
@@ -277,8 +322,9 @@ def assert_capacity_history(case, expected):
         "opening_microusd": 245000,
         "native_projection_sha256": digest(native),
         "cursor_bytes": sum(len(row["cursor"].encode()) for row in progress),
+        "canonical_cursors_sha256": digest([strict_json_value(row["cursor"]) for row in progress]),
         "canonical_cursor_bytes": sum(
-            len(canonical_bytes(json.loads(row["cursor"]))) for row in progress
+            len(canonical_bytes(strict_json_value(row["cursor"]))) for row in progress
         ),
         "head": previous,
     }
@@ -291,7 +337,7 @@ def pad_cursor_bytes(case, *, total):
         rows = list(
             connection.execute(
                 text(
-                    "SELECT phase,cursor FROM migration_progress "
+                    "SELECT phase,CAST(cursor AS TEXT) AS cursor FROM migration_progress "
                     "WHERE revision=:revision ORDER BY phase"
                 ),
                 {"revision": LEDGER},
