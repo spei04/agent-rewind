@@ -822,8 +822,12 @@ def test_complete_reader_stops_expired_pure_reducer_and_cleans_up(
         assert not outcome.cleanup_failed
         assert work.observed_ordinary <= 2028 and len(work.cleanup_observations) <= 8
         assert engine.pool.checkedout() == 0 and raw is not None
-        with pytest.raises(sqlite3.ProgrammingError):
-            raw.execute("SELECT 1")
+        assert not raw.in_transaction
+        cursor = raw.execute("PRAGMA busy_timeout")
+        try:
+            assert cursor.fetchone() == (work.previous_timeout,)
+        finally:
+            cursor.close()
         record_property(
             "pure_reducer_boundary",
             json.dumps(
@@ -838,4 +842,6 @@ def test_complete_reader_stops_expired_pure_reducer_and_cleans_up(
         )
     finally:
         engine.dispose()
+    with pytest.raises(sqlite3.ProgrammingError):
+        raw.execute("SELECT 1")
     assert sqlite_snapshot(case.path) == before
