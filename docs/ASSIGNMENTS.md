@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Prepare exact catalog/preflight query proposals | Independent query-family/native-plan and combined budget review before complete reader implementation. |
-| Delivery reviewer | Prepare a C2 native feasibility harness after accepted partial C2/fingerprint static reviews | Lead harness review before execution; complete F2 and capacity remain unaccepted. |
-| Planning/verification | Compose the accepted F1 progress update in the reused secondary checkout | Preserve null P1 acceptance, unchanged gates and dated history; lead review before publication. |
-| Lead | Review and publish accepted F1 progress; maintain public issue scope and checkout ownership | F2/F3 and final P1 delivery remain required before P2. |
+| Platform/security | Complete F2 reader/runtime in reused secondary after documentation release | Exact accepted query/transport/work contract; independent native and source review before delivery. |
+| Independent QE | Three new reader fixture/state/native test modules in reused primary | Complete installed-state positives and isolated native/semantic negatives; immutable runtime handoffs. |
+| Planning/verification | Record F2 entry, then independently review integration | Release secondary clean to runtime author; preserve null F2/P1 acceptance and dated history. |
+| Lead | Integrate/review source and evidence; coordinate delivery and exclusive database ownership | F2 scoped PR/main/candidate, then F3/full P1 before P2. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -52,8 +52,8 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
 - **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Complete exact query-family/native-plan and combined work-budget review before F2 persisted-reader implementation, then F3 trusted provisioning/opening/replay/recovery. Accepted F1 satisfies only the F2 predecessor gate. Only the complete final P1 gate can populate P1 acceptance and permit P2 entry.
-- **Current storage and consumers:** Two existing cloud checkouts are retained for sequential reuse. Planning/verification owns secondary for this progress composition; primary remains under lead coordination. Completed A2/B2 native work released the database and primary after restoration and stop; this progress assignment has no database slot. The last recorded filesystem availability was 101.24 GB. Private evidence remains outside checkouts; no new checkout or paid resource was created.
+- **Next evidence-producing milestone:** Implement and independently validate the complete F2 persisted reader under the accepted 2026-10-22 entry; F2 acceptance remains null. F3 trusted provisioning/opening/replay/recovery follows accepted F2. Only complete final P1 acceptance permits P2 entry.
+- **Current storage and consumers:** Two existing cloud checkouts are reused: planning owns secondary for this documentation update, then explicitly releases it to platform runtime; independent QE owns primary. Catalog component work restored/stopped the database and released it; this documentation assignment has no database slot. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -963,3 +963,19 @@ capacity, provisioning or recovery acceptance is recorded here.
 
 The lead updated and read back #10/#107/#108 on 2026-10-22; all remain
 open/In progress with accepted F1 evidence. #109 remains open/Not started.
+
+
+## F2 reader implementation handoff — 2026-10-22
+
+The lead accepted the [exact reader entry](delivery/LEDGER_EXECUTION_PLAN.md#f2-reader-implementation-entry--2026-10-22)
+after separate SQLite 36-case and PostgreSQL 54-case catalog evidence,
+retained alias-failure history, exact H literals/transport adapter and complete
+work-schedule review. F2 is In progress/null acceptance; P1 stays In progress/null,
+and F3/P2 remain Not started. Component evidence is not product or capacity proof.
+
+Planning/verification records this entry in the reused secondary and releases
+it clean to platform/security for the complete runtime reader. Independent QE
+owns new reader fixture/state/native modules in primary. Planning then reviews
+integration; the lead owns source composition, delivery and database handoffs.
+No runtime/shared test edit or database execution occurs in this documentation
+assignment. All estimates, dependencies, frozen entry and earlier history remain.
