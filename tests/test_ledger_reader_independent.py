@@ -23,6 +23,7 @@ from agent_rewind.migrations.ledger_state import (
     validate_progress_row,
 )
 from agent_rewind.migrations.ledger_transaction import LedgerOutcome, ledger_transaction
+from agent_rewind.migrations.ledger_work import LedgerWork
 from agent_rewind.migrations.schema import LEDGER, MigrationRefused, catalog, checksum
 
 
@@ -111,7 +112,7 @@ def inspect(case):
     engine = case.operator_engine()
     outcome = LedgerOutcome()
     try:
-        with ledger_transaction(engine, outcome) as connection:
+        with ledger_transaction(engine, outcome, work=LedgerWork()) as connection:
             result = inspect_ledger_state(connection)
         assert outcome.commit_acknowledged and not outcome.cleanup_failed
         assert engine.pool.checkedout() == 0
