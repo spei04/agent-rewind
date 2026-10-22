@@ -305,15 +305,20 @@ def replace_progress(case: ReaderFixture, phase: str, value: dict[str, Any]) -> 
         assert result.rowcount == 1
 
 
-def postgres_snapshot(engine: Engine) -> dict[str, list[tuple[Any, ...]]]:
-    """Complete small-fixture row witness, outside the operator engine."""
+def postgres_snapshot(engine: Engine) -> dict[str, Any]:
+    """Small-fixture rows and catalog metadata, outside the operator engine."""
     with engine.connect() as connection:
+        shape = catalog(connection)
         return {
-            table: sorted(
-                [tuple(row) for row in connection.exec_driver_sql(f'SELECT * FROM "{table}"')],
-                key=repr,
-            )
-            for table in sorted(catalog(connection))
+            "catalog": shape,
+            "rows": {
+                table: sorted(
+                    [tuple(row) for row in connection.exec_driver_sql(f'SELECT * FROM "{table}"')],
+                    key=repr,
+                )
+                for table in sorted(shape)
+                if table != "$postgres"
+            },
         }
 
 

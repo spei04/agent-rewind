@@ -212,7 +212,9 @@ def test_postgres_fixture_has_complete_profile_history_and_opening(postgres_read
         if case.revision == LEDGER:
             rows = (
                 connection.exec_driver_sql(
-                    "SELECT * FROM migration_progress WHERE revision='ar_0007_ledger' "
+                    "SELECT revision,phase,source_digest,CAST(cursor AS TEXT) AS cursor,"
+                    "rows_verified,status,updated_at FROM migration_progress "
+                    "WHERE revision='ar_0007_ledger' "
                     "ORDER BY phase"
                 )
                 .mappings()
@@ -229,7 +231,7 @@ def test_postgres_fixture_has_complete_profile_history_and_opening(postgres_read
 
 @postgres_only
 @pytest.mark.parametrize("postgres_reader_case", COMPLETE_CASES, indirect=True)
-def test_postgres_complete_reader_native_identity_and_readonly_effects(
+def test_postgres_complete_reader_identity_and_unchanged_rows(
     postgres_reader_case, pg, monkeypatch, record_property
 ):
     from agent_rewind.migrations.ledger_inspection import inspect_ledger_state

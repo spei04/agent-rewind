@@ -142,7 +142,7 @@ def test_complete_reader_returns_exact_immutable_state_without_writes(reader_cas
 
 
 @pytest.mark.parametrize("reader_case", [COMPLETE_CASES[0], COMPLETE_CASES[4]], indirect=True)
-def test_unrelated_bounded_unicode_progress_keys_do_not_read_opaque_body(reader_case):
+def test_unrelated_bounded_unicode_progress_keys_tolerate_opaque_body(reader_case):
     case = reader_case
     with case.engine.begin() as connection:
         connection.execute(
