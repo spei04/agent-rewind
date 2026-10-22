@@ -667,7 +667,7 @@ def test_postgres_complete_evolving_financial_state(
             with case.engine.connect() as connection:
                 future = connection.execute(
                     text(
-                        "SELECT limit_amount,held,accounted FROM budget_accounts "
+                        "SELECT limit_microusd,held_microusd,accounted_microusd FROM budget_accounts "
                         "WHERE id IN (:organization,:project) ORDER BY id"
                     ),
                     {
