@@ -48,6 +48,7 @@
     "agent_rewind/migrations/inputs.py",
     "agent_rewind/migrations/ledger_catalog.py",
     "agent_rewind/migrations/ledger_catalog_sql.py",
+    "agent_rewind/migrations/ledger_check.py",
     "agent_rewind/migrations/ledger_engine.py",
     "agent_rewind/migrations/ledger_financial_sql.py",
     "agent_rewind/migrations/ledger_graph_sql.py",
