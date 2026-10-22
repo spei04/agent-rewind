@@ -221,8 +221,29 @@ def configure_runtime_engine(engine: Engine, *, production: bool = False) -> Non
             policy.production = policy.production or production
 
 
+@dataclass(frozen=True)
+class _InspectionChecks:
+    """One caller-owned deadline; this view grants no ledger transaction rights."""
+
+    deadline: float
+
+    def remaining(self) -> int:
+        milliseconds = math.floor((self.deadline - time.monotonic()) * 1000)
+        if milliseconds <= 0:
+            raise TimeoutError("inspection deadline")
+        return milliseconds
+
+    def check(self) -> None:
+        self.remaining()
+
+
 @contextmanager
-def _inspection(connection: Connection) -> Iterator[None]:
+def _inspection(
+    connection: Connection,
+    *,
+    coherent_snapshot: bool = False,
+    checks: _InspectionChecks | None = None,
+) -> Iterator[_InspectionChecks]:
     """Own one idle connection transaction; restore session state before pool return."""
     if connection.in_transaction():
         raise MigrationRefused("idle_inspection_connection_required")
@@ -230,14 +251,23 @@ def _inspection(connection: Connection) -> Iterator[None]:
     raw = connection.connection.driver_connection
     if raw is None:
         raise MigrationRefused("unsupported_runtime_database")
-    deadline = time.monotonic() + INSPECTION_TIMEOUT_SECONDS
+    if checks is None:
+        checks = _InspectionChecks(time.monotonic() + INSPECTION_TIMEOUT_SECONDS)
+    deadline = checks.deadline
+    if coherent_snapshot:
+        checks.check()
+        if kind == "sqlite" and getattr(raw, "in_transaction", False):
+            raise MigrationRefused("idle_inspection_connection_required")
+        if kind == "postgresql" and raw.info.transaction_status != 0:
+            raise MigrationRefused("idle_inspection_connection_required")
     previous: tuple[int, int] | None = None
 
     def remaining() -> int:
-        milliseconds = math.floor((deadline - time.monotonic()) * 1000)
-        if milliseconds <= 0:
-            raise TimeoutError("inspection deadline")
-        return milliseconds
+        return checks.remaining()
+
+    def setup_check() -> None:
+        if coherent_snapshot:
+            checks.check()
 
     def before_query(
         connection: Connection,
@@ -250,7 +280,10 @@ def _inspection(connection: Connection) -> Iterator[None]:
         milliseconds = remaining()
         if kind == "postgresql":
             cursor.execute(f"SET LOCAL statement_timeout = '{milliseconds}ms'")
+            if coherent_snapshot:
+                milliseconds = remaining()
             cursor.execute(f"SET LOCAL lock_timeout = '{min(milliseconds, 250)}ms'")
+            setup_check()
 
     # Capture before effects; failed nested acquisition owns no cleanup rights.
     receipt = owned_receipt(connection)
@@ -272,12 +305,16 @@ def _inspection(connection: Connection) -> Iterator[None]:
         if kind == "sqlite":
             if not isinstance(raw, sqlite3.Connection):
                 raise MigrationRefused("unsupported_runtime_database")
-            previous = (
-                raw.execute("PRAGMA query_only").fetchone()[0],
-                raw.execute("PRAGMA busy_timeout").fetchone()[0],
-            )
+            setup_check()
+            query_only = raw.execute("PRAGMA query_only").fetchone()[0]
+            setup_check()
+            busy_timeout = raw.execute("PRAGMA busy_timeout").fetchone()[0]
+            previous = (query_only, busy_timeout)
+            setup_check()
             raw.execute("PRAGMA query_only=ON")
+            setup_check()
             raw.execute("PRAGMA busy_timeout=250")
+            setup_check()
             progress = True
 
             def callback() -> int:
@@ -289,13 +326,31 @@ def _inspection(connection: Connection) -> Iterator[None]:
                 lease.install(callback, 1000)
         elif getattr(raw, "autocommit", None) is not False:
             raise MigrationRefused("transactional_connection_required")
+        setup_check()
         connection.begin()
+        setup_check()
+        # Install before coherent setup so its PostgreSQL targets get fresh caps too.
+        if coherent_snapshot:
+            listener = True
+            event.listen(connection, "before_cursor_execute", before_query)
         if kind == "postgresql":
-            connection.exec_driver_sql("SET TRANSACTION READ ONLY")
+            transaction_mode = (
+                "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY"
+                if coherent_snapshot
+                else "SET TRANSACTION READ ONLY"
+            )
+            connection.exec_driver_sql(transaction_mode)
+            setup_check()
             connection.exec_driver_sql("SET LOCAL search_path TO public, pg_temp")
-        listener = True
-        event.listen(connection, "before_cursor_execute", before_query)
-        yield
+            setup_check()
+        elif coherent_snapshot:
+            # sqlite3 legacy transaction control does not BEGIN for SELECT.
+            connection.exec_driver_sql("BEGIN")
+            setup_check()
+        if not coherent_snapshot:
+            listener = True
+            event.listen(connection, "before_cursor_execute", before_query)
+        yield checks
         remaining()
     except BaseException as error:
         primary = error
@@ -332,6 +387,7 @@ def _inspection(connection: Connection) -> Iterator[None]:
         raise interruption from None
     if cleanup_error is not None:
         raise cleanup_error from None
+    setup_check()
 
 
 def check_schema_compatibility(
@@ -344,12 +400,23 @@ def check_schema_compatibility(
     The first release deliberately has no customer-ready revision. A later scoped
     release must extend both the manifest and validated revision/state handlers.
     """
+    checks = _InspectionChecks(time.monotonic() + INSPECTION_TIMEOUT_SECONDS)
+    return _check_schema_compatibility(connection, release_profile, checks)
+
+
+def _check_schema_compatibility(
+    connection: Connection,
+    release_profile: ReleaseProfile,
+    checks: _InspectionChecks,
+) -> CompatibilityResult:
     try:
+        checks.check()
         # Revalidate even constructed/copy-modified models; no arbitrary caller profile
         # can turn the adoption revision into a customer-ready revision.
         profile = ReleaseProfile.model_validate_json(release_profile.model_dump_json())
-        with _inspection(connection):
+        with _inspection(connection, coherent_snapshot=True, checks=checks):
             shape = catalog(connection)
+            checks.check()
             if "alembic_version" not in shape:
                 return CompatibilityResult("incompatible", "schema_incompatible")
             revisions: list[str] = list(
@@ -357,10 +424,12 @@ def check_schema_compatibility(
                     text("SELECT version_num FROM alembic_version LIMIT 2")
                 ).scalars()
             )
+            checks.check()
             selected = [p for p in profile.revisions if revisions == [p.revision]]
             if len(selected) != 1:
                 return CompatibilityResult("incompatible", "schema_incompatible")
             _installed(connection, shape)
+            checks.check()
             for requirement in selected[0].required_completed_backfills:
                 rows: Sequence[str] = (
                     connection.execute(
@@ -373,6 +442,7 @@ def check_schema_compatibility(
                     .scalars()
                     .all()
                 )
+                checks.check()
                 if rows != ["complete"]:
                     return CompatibilityResult("incompatible", "backfill_incomplete")
             return CompatibilityResult("incompatible", "migration_only")
@@ -386,6 +456,7 @@ def check_schema_compatibility(
 
 def runtime_schema_compatibility(engine: Engine) -> CompatibilityResult:
     """Production entry point: only the packaged release profile is consumed."""
+    checks = _InspectionChecks(time.monotonic() + INSPECTION_TIMEOUT_SECONDS)
     try:
         profile = load_release_profile()
         configure_runtime_engine(engine)
@@ -397,8 +468,13 @@ def runtime_schema_compatibility(engine: Engine) -> CompatibilityResult:
             and not Path(database).is_file()
         ):
             return CompatibilityResult("incompatible", "schema_incompatible")
+        checks.check()
         with owned_connect(engine) as connection:
-            return check_schema_compatibility(connection, profile)
+            result = _check_schema_compatibility(connection, profile, checks)
+        # Connection return is part of this invocation, unlike the direct API's
+        # already-connected caller. Never reset the deadline after acquisition.
+        checks.check()
+        return result
     except (ValueError, ValidationError, MigrationRefused):
         return CompatibilityResult("incompatible", "release_profile_or_connection_invalid")
     except (SQLAlchemyError, sqlite3.Error, OSError, TimeoutError):
