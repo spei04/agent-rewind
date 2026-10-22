@@ -248,3 +248,44 @@ def test_begin_reservation_refuses_before_attempt_flag(engine, monkeypatch, nati
     assert not outcome.begun
     assert not outcome.commit_attempted
     assert not outcome.cleanup_failed
+
+
+@pytest.mark.parametrize(
+    "target,ordinal", [("BEGIN EXCLUSIVE", 2), ("SELECT 23", 3), ("COMMIT", 4)]
+)
+@pytest.mark.parametrize("elapsed", [0, 121])
+def test_deadline_between_native_setter_and_target(
+    engine, monkeypatch, native_trace, target, ordinal, elapsed
+):
+    from agent_rewind.migrations import ledger_work
+
+    now = [1000.0]
+    monkeypatch.setattr(ledger_work, "monotonic", lambda: now[0])
+    original = ownership._TrackedSQLite.execute
+    setters = []
+
+    def elapsed_setter(raw, sql, *args, **kwargs):
+        result = original(raw, sql, *args, **kwargs)
+        if sql.startswith("PRAGMA busy_timeout="):
+            setters.append(sql)
+            if len(setters) == ordinal:
+                now[0] += elapsed
+        return result
+
+    monkeypatch.setattr(ownership._TrackedSQLite, "execute", elapsed_setter)
+    outcome = LedgerOutcome()
+
+    def run():
+        with ledger_transaction(engine, outcome, work=LedgerWork()) as connection:
+            assert connection.exec_driver_sql("SELECT 23").scalar_one() == 23
+
+    if elapsed:
+        with pytest.raises(MigrationRefused, match="migration_busy"):
+            run()
+        assert target not in native_trace.statements("ordinary")
+        assert not outcome.commit_attempted
+        assert not outcome.cleanup_failed
+    else:
+        run()
+        assert target in native_trace.statements("ordinary")
+        assert outcome.commit_acknowledged

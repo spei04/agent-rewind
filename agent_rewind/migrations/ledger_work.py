@@ -91,15 +91,17 @@ class LedgerWork:
         connection = self._connection
         if connection is None or connection.invalidated or connection.closed or self._detached:
             raise MigrationRefused("migration_database_failure")
+        self.reserve_ordinary(2 if connection.dialect.name == "sqlite" else 3)
         statement_ms, lock_ms = self.remaining_timeouts_ms()
         if connection.dialect.name == "sqlite":
-            self.reserve_ordinary(2)
             self._raw.execute(f"PRAGMA busy_timeout={lock_ms}")
         else:
-            self.reserve_ordinary(3)
             with self._raw.cursor() as cursor:
                 cursor.execute(f"SET LOCAL statement_timeout = '{statement_ms}ms'")
+                self.check()
+                _, lock_ms = self.remaining_timeouts_ms()
                 cursor.execute(f"SET LOCAL lock_timeout = '{lock_ms}ms'")
+        self.check()
 
     def _before(
         self,
