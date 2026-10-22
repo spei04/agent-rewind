@@ -2,13 +2,14 @@
 
 import json
 from datetime import timedelta
+from types import SimpleNamespace
 
 import pytest
 import test_scoped_run_listing as listing_tests
 from sqlalchemy import insert, text
 from test_scoped_run_listing import NOW, PRINCIPAL, PROJECT, RUN1, RUN2
 
-from agent_rewind import scoped_run_listing
+from agent_rewind import listing_session, scoped_run_listing
 from agent_rewind.database import jobs, records
 from agent_rewind.errors import Fault
 from agent_rewind.listing_session import SQLWork
@@ -301,7 +302,11 @@ def test_study_links_stop_at_remaining_edge_allowance(monkeypatch):
         pytest.param("9999-01-01T00:00:00+00:00\0", id="nul-suffix"),
     ],
 )
-def test_invalid_order_cell_cannot_vanish_before_continuation(listing, value):
+def test_invalid_order_cell_cannot_vanish_before_continuation(listing, monkeypatch, value):
+    # This tests malformed-order detection and recovery, independently of host
+    # scheduling. Native SQL and the statement/instruction limits stay active;
+    # the paired continuation test below covers the unchanged elapsed-time cap.
+    monkeypatch.setattr(listing_session, "time", SimpleNamespace(monotonic=lambda: 0.0))
     _, engine, reader = listing
     first = reader.list(PRINCIPAL, PROJECT, now=NOW, limit=1)
     assert [row["id"] for row in first.items] == [RUN2] and first.next_cursor
@@ -325,3 +330,47 @@ def test_invalid_order_cell_cannot_vanish_before_continuation(listing, value):
         )
     tail = reader.list(PRINCIPAL, PROJECT, now=NOW, cursor=first.next_cursor)
     assert [row["id"] for row in tail.items] == [RUN1] and tail.next_cursor is None
+
+
+@pytest.mark.parametrize(
+    ("elapsed", "refused"),
+    [pytest.param(1.0, False, id="below-deadline"), pytest.param(2.0, True, id="at-deadline")],
+)
+def test_continuation_clock_refusal_and_pool_reuse(listing, monkeypatch, elapsed, refused):
+    _, engine, reader = listing
+    clock = [0.0]
+    monkeypatch.setattr(listing_session, "time", SimpleNamespace(monotonic=lambda: clock[0]))
+    first = reader.list(PRINCIPAL, PROJECT, now=NOW, limit=1)
+    assert [row["id"] for row in first.items] == [RUN2] and first.next_cursor
+    work = SQLWork()
+    observed = []
+    original = scoped_run_listing.candidates
+
+    def candidates(*args, **kwargs):
+        result = original(*args, **kwargs)
+        observed.append([entry.value.run_id for entry in result[1]])
+        # Advance only after the actual continuation query. The next native
+        # target must honor cumulative elapsed time before returning any page.
+        clock[0] = elapsed
+        return result
+
+    with monkeypatch.context() as patch:
+        patch.setattr(scoped_run_listing, "candidates", candidates)
+        patch.setattr(scoped_run_listing, "SQLWork", lambda: work)
+        if refused:
+            with pytest.raises(Fault, match="dependency_unavailable"):
+                reader.list(PRINCIPAL, PROJECT, now=NOW, cursor=first.next_cursor)
+        else:
+            tail = reader.list(PRINCIPAL, PROJECT, now=NOW, cursor=first.next_cursor)
+            assert [row["id"] for row in tail.items] == [RUN1] and tail.next_cursor is None
+    assert observed == [[RUN1]]
+    assert work.seconds == elapsed and work.started is None
+    assert engine.pool.checkedout() == 0
+    with engine.connect() as connection:
+        assert connection.exec_driver_sql("PRAGMA query_only").scalar_one() == 0
+        assert not connection.connection.driver_connection.in_transaction
+    # A new request owns a new budget after either the refusal or valid page.
+    clock[0] = 0.0
+    tail = reader.list(PRINCIPAL, PROJECT, now=NOW, cursor=first.next_cursor)
+    assert [row["id"] for row in tail.items] == [RUN1] and tail.next_cursor is None
+    assert engine.pool.checkedout() == 0
