@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Review the next bounded ledger inspection seam | Preserve historical provenance and current authority separately; source review before reader code. |
-| Delivery reviewer | Review integration and progress documents | Authored 21 lifecycle controls; independent peer review and both-interpreter replay accepted. |
-| Planning/verification | Verify hosted checks after draft P1 publication | 100 affected cases pass per interpreter; native PostgreSQL evidence accepted; secondary released clean. |
-| Lead | Publish reviewed checkpoint and coordinate the next slice | Owns primary for publication. Full P1 remains In progress; P2 remains Not started. |
+| Platform/security | Implement the reviewed private transaction-body guard in the reused secondary | Native identity, revocation and unchanged work/cleanup bounds; full reader traversal remains under review. |
+| Delivery reviewer | Review reader design and prepare independent guard controls | Guard design accepted; source review and native tests follow the author checkpoint. |
+| Planning/verification | Preserve exact hosted evidence for draft PR #111 | Original core jobs pending; security correction independently accepted locally. |
+| Lead | Publish the security correction and coordinate guard delivery | Owns primary for progress/publication. Full P1 remains In progress; P2 remains Not started. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -52,8 +52,8 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
 - **Contributor checkpoint:** Schema b2e19be and bounded operator 80023cbc are independently accepted internal checkpoints. All 100 independent SQLite/factory/lifecycle cases pass on both interpreters; separate PostgreSQL evidence is reviewed. Earlier runtime defects and fixture failures retain their distinct evidence. No ledger package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** AR-010-A/P1 #108 bounded persisted inspection/provenance, followed by actual opening/provisioning/replay, concurrency, capacity and recovery. Review the reader seam before code; require full P1 delivery before P2.
-- **Current storage and consumers:** Two existing cloud checkouts are retained for sequential reuse. Lead owns primary for publication; independent QE released secondary clean, retaining its separate pinned Python 3.11 and 3.12 environments. PostgreSQL is restored to three databases/fifteen roles with zero other clients and stopped. Measured filesystem availability is 101.24 GB. Private evidence remains outside checkouts; no new checkout or paid resource was created.
+- **Next evidence-producing milestone:** AR-010-A/P1 #108 bounded persisted inspection/provenance, followed by actual opening/provisioning/replay, concurrency, capacity and recovery. Implement only the independently reviewed transaction guard first; reader data traversal awaits observed paging and work-budget review. Require full P1 delivery before P2.
+- **Current storage and consumers:** Two existing cloud checkouts are retained for sequential reuse. Lead owns primary for progress/publication; platform/security reuses secondary for the guard with its separate pinned Python 3.11 and 3.12 environments. PostgreSQL was restored to three databases/fifteen roles and stopped; the author has the next exclusive test slot only after baseline verification, with restoration and stop required before handoff. Measured filesystem availability is 101.24 GB. Private evidence remains outside checkouts; no new checkout or paid resource was created.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -915,3 +915,13 @@ Separate PostgreSQL evidence is 131 passes together on Python 3.11; Python 3.12
 has an earlier 47-case run and final 18-case extension. Counts overlap other
 selections. Earlier fixture failures are not runtime defects. Full P1 remains
 In progress and P2 Not started.
+
+
+## Security correction and guard handoff — 2026-10-22
+
+- Delivery corrected the two static security findings at 91f0742; platform/security independently verified identical parser behavior and emitted SQL. Full security rules, lint, formatting and types pass; 291 selected regressions pass with 42 expected skips and one existing warning.
+- Planning/verification preserves draft PR #111 attempt 39724247038/1. Isolation and package checks pass; security failed before dependency audit, and both core jobs remain pending at this checkpoint. These results do not establish a successful full CI run.
+- Platform/security owns the next private transaction-body guard in the reused secondary, based on 91f0742. Register only after native exclusion, verify current native identity, and revoke before commit/cleanup. Added PostgreSQL identity reads consume the existing ordinary allowance.
+- Delivery accepted this guard design and prepares independent native controls. The wider reader design still needs explicitly observed page reads: psycopg server-cursor fetches cannot escape work accounting. Lead retains primary for publication and synchronized progress.
+
+Only the guard is assigned for implementation. No partial reader API, provisioning, customer activation or new spending is introduced. P1 stays In progress with null acceptance; P2 stays Not started.

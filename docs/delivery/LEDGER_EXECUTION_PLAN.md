@@ -4,6 +4,37 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. P1 has no accepted product delivery yet; P2 #109 remains **Not started**, waiting for accepted P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
+## Security correction and guard handoff — 2026-10-22
+
+Draft [PR #111](https://github.com/spei04/agent-rewind/pull/111) publishes the
+reviewed schema/operator checkpoint at d2c04f24. Original attempt
+[39724247038/1](https://github.com/spei04/agent-rewind/actions/runs/39724247038)
+passed isolation and package checks but failed static security rules before
+dependency audit; both core jobs remain pending at this checkpoint.
+
+Reviewed correction 91f0742 renames a numeric parser argument and selects
+between two complete literal SQL queries. Independent semantic probes confirm
+unchanged lexical behavior and emitted SQL. No rule suppression, dependency,
+test or workflow change. Full security rules, lint, formatting and types pass;
+291 regressions pass with 42 expected skips and one existing warning.
+Private peer review digest:
+042897d8772d20b37ca9047457d286613b6776b724a193767ad699764c3967e9.
+
+The next assigned internal checkpoint is the private transaction-body guard.
+Platform/security reuses secondary from 91f0742; lead retains primary for
+progress/publication, delivery prepares independent controls and planning owns
+hosted evidence. The guard issues only after actual exclusion, verifies the
+same native transaction and owned connection, then revokes before commit or
+cleanup. Added PostgreSQL identity reads consume ordinary work within the
+unchanged 2048 total. SQLite continuity remains a cooperative caller guarantee.
+
+The complete reader remains under design review. Its new traversal must use
+observed fixed-page reads because native server-cursor fetches bypass the
+existing statement observer. Financial byte bounds, whole-reader query cost and
+catalog text bounds need evidence before implementation acceptance. No partial
+LedgerState success path is authorized. No new provider call or paid resource.
+P1 remains In progress/null acceptance; P2 remains Not started.
+
 ## Operator native and lifecycle checkpoint — 2026-10-22
 
 The lead and independent reviewers accept source
