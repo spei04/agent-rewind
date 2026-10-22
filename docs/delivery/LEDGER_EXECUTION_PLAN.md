@@ -4,6 +4,36 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. P1 has no accepted product delivery yet; P2 #109 remains **Not started**, waiting for accepted P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
+## Operator slice assigned — 2026-10-22
+
+The lead and independent reviewer accepted V3 of the operator design, digest
+74bafbf8d60f9352b1d9f9fb854f476fe2692f1837c0ddb95ff90f129043765f,
+for implementation. It conserves 12 prepaid startup units, eight prepaid cleanup
+units and at most 2028 ordinary units within the existing 2048 ceiling. These
+allowances are not claimed as observed SQL counts. One deadline, strict command
+engine ownership and single-endpoint connection policy remain mandatory.
+Commit attempt, acknowledgment and cleanup facts are separate; uncertain outcomes
+cannot become completion. Actual native traces must validate the proposed bounds.
+
+Platform/security owns the work/transaction/factory code in the reused secondary.
+Independent QE owns separate startup/accounting/outcome/cleanup tests in the reused
+primary after handoff. The author has the next exclusive PostgreSQL slot only
+after verifying the restored, stopped baseline; QE waits for explicit release.
+Delivery reviews the implementation and its evidence. The lead integrates reviewed
+checkpoints. No provisioning/CLI activation is included in this first code slice.
+
+Planning PR #110 is accepted at protected merge b304da1 with PR/main attempts
+39691736070/39694886231 and independently verified candidate 12391249020.
+The source wheel/archive match all 114 runtime members of that planning merge;
+this does not prove the separately developed ledger implementation. All seven
+main jobs passed; Python 3.11 recorded 3894 passes/14 documented skips and Python
+3.12 recorded 3905 passes/3 documented skips. Prior failed evidence remains retained.
+
+P1 and its aggregate remain In progress with null delivery acceptance. The full
+opening/provisioning, replay, concurrency, recovery and capacity gates remain
+required. P2 remains Not started. No budget, dependency, staffing or external
+approval boundary changed.
+
 ## First schema checkpoint — 2026-10-21
 
 Independent review accepted source `b2e19beaf8ca195c74a69871817ef96004f73444`.
@@ -110,8 +140,8 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- Planning/verification: first schema checkpoint independently accepted; prepare operator fault controls, then author the next separately owned tests after stable interfaces and an explicit checkout handoff.
-- Platform/security: first runtime checkpoint and scope correction are reviewed; revise the two operator accounting gaps before the next implementation assignment in the reused secondary. PostgreSQL is stopped and unassigned until an explicit exclusive handoff.
+- Planning/verification: first schema checkpoint independently accepted; author separate operator fault tests after the primary handoff, using frozen V3 interfaces and stable runtime bytes.
+- Platform/security: implement the reviewed V3 work/transaction/factory slice in the reused secondary; verify the stopped baseline before using the next exclusive PostgreSQL slot and restore/stop it before handing it to QE.
 - Delivery reviewer: independently review ledger source, integration and actual delivery evidence; accepted HTTP audit remains predecessor evidence.
 - Lead: integrate reviewed runtime/tests, coordinate checkout and PostgreSQL ownership, maintain issue read-back and require the full P1 acceptance matrix before P2 handoff.
 
