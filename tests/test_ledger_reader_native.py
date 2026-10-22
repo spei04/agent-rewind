@@ -254,13 +254,15 @@ def _inspect_postgres_case(case, pg, monkeypatch, record_property):
     try:
         with ledger_transaction(engine, outcome, work=work) as connection:
             trace.phase = "counter-observer"
-            assert connection.exec_driver_sql("SHOW track_counts").scalar_one() == "on"
             observer_start = work.observed_ordinary
+            assert connection.exec_driver_sql("SHOW track_counts").scalar_one() == "on"
             counters_before = _transaction_write_counters(connection)
             before_units = work.observed_ordinary - observer_start
             trace.phase = "reader"
             raw = connection.connection.driver_connection
+            reader_start = work.observed_ordinary
             state = inspect_ledger_state(connection)
+            reader_units = work.observed_ordinary - reader_start
             assert connection.connection.driver_connection is raw
             assert state.model_dump(mode="json") == case.expected
             trace.phase = "counter-observer"
@@ -291,7 +293,8 @@ def _inspect_postgres_case(case, pg, monkeypatch, record_property):
         assert not any(
             sql.startswith(("DECLARE", "FETCH", "INSERT", "UPDATE", "DELETE")) for sql in commands
         )
-        record_property("reader_work", str(work.observed_ordinary))
+        record_property("reader_work", str(reader_units))
+        record_property("total_ordinary", str(work.observed_ordinary))
     finally:
         engine.dispose()
         trace.stop()
@@ -435,8 +438,11 @@ def test_postgres_latin1_native_bytes_and_decoded_utf8_sizes_are_distinct(
                 actual_client = connection.exec_driver_sql("SHOW client_encoding").scalar_one()
                 observer_units = work.observed_ordinary - observer_start
                 assert actual_server == "LATIN1"
+                reader_start = work.observed_ordinary
                 state = inspect_ledger_state(connection)
+                reader_units = work.observed_ordinary - reader_start
                 assert state.model_dump(mode="json") == case.expected
+            assert work.observed_ordinary <= 2028
             assert outcome.commit_acknowledged and not outcome.cleanup_failed
         finally:
             engine.dispose()
@@ -450,6 +456,8 @@ def test_postgres_latin1_native_bytes_and_decoded_utf8_sizes_are_distinct(
                     "server_encoding": actual_server,
                     "operator_client_encoding": actual_client,
                     "encoding_observer_units": observer_units,
+                    "reader_work": reader_units,
+                    "total_ordinary": work.observed_ordinary,
                     "native_bytes": native,
                     "decoded_utf8_bytes": 5,
                     "decoded_utf8_bound": 4 * native,
@@ -643,14 +651,31 @@ def test_postgres_native_write_witness_detects_cte_and_exposes_zero_row_limit(
 
 
 @postgres_only
-@pytest.mark.parametrize("effect", ["reserved", "settled", "released"])
+@pytest.mark.parametrize(
+    ("effect", "future_zero_period"),
+    [("reserved", False), ("settled", False), ("released", False), ("reserved", True)],
+    ids=["reserved", "settled", "released", "later-reservation-after-future-period"],
+)
 def test_postgres_complete_evolving_financial_state(
-    pg, observed_reader, effect, monkeypatch, record_property
+    pg, observed_reader, effect, future_zero_period, monkeypatch, record_property
 ):
     case = complete_postgres_ar6(pg, legacy=False)
     try:
         seed_ar7(case)
-        later_admitted_call(case, effect=effect)
+        ids = later_admitted_call(case, effect=effect, future_zero_period=future_zero_period)
+        if future_zero_period:
+            with case.engine.connect() as connection:
+                future = connection.execute(
+                    text(
+                        "SELECT limit_amount,held,accounted FROM budget_accounts "
+                        "WHERE id IN (:organization,:project) ORDER BY id"
+                    ),
+                    {
+                        "organization": ids["future_accounts"][0],
+                        "project": ids["future_accounts"][1],
+                    },
+                ).all()
+                assert future == [(0, 0, 0), (0, 0, 0)]
         drain(pg)
         _inspect_postgres_case(case, pg, monkeypatch, record_property)
     finally:
