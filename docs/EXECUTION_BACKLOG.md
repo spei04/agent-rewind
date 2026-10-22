@@ -3822,14 +3822,21 @@ evidence distinction.
 
 ### Current F3 implementation evidence — 2026-10-22
 
-The local composition at 8708b8f retains 251 Python 3.12 passes, 248 Python 3.11
-passes with three explicit version skips, and 141 matching runtime package
-members. Subsequent PostgreSQL validation on Python 3.12 passes 33 compatibility
-cases. Service coverage comprises four passes at a6456ca and five corrected
-continuation passes at 00e568a; failed attempts remain separately recorded.
+F2 remains accepted at e8cba52. Composition 5f575667 includes actual provisioning
+and two reviewed runtime performance fixes. Eight SQLite provisioning cases
+pass on each supported Python version. The new PostgreSQL slice comprises
+two passes at 015ac758 and six continuation passes at 42ec316a; both failed
+attempts remain separately recorded.
 
-Independent two-account provisioning, complete-path capacity, concurrency,
-uncertainty, process interruption, owner/ACL restore and final protected delivery
-are still required. F3, P1 and AR-010-A remain In progress with null acceptance;
-P2 remains Not started. See the [native delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-native-validation-checkpoint--2026-10-22).
-Task/PR counts, estimates, dependencies and external approvals are unchanged.
+The runtime fixes replace repeated period scans with adjacent-period checks
+and trim legal outer JSON whitespace after unchanged raw-size/BOM checks.
+Their 337 focused tests pass on each interpreter under the unchanged two-second
+inspection limit. Later JSON-oracle and read-query observer corrections change
+tests only. Four native capacity cases collect on both interpreters, with four
+affected SQLite regressions passing; their PostgreSQL execution is pending.
+
+Next work covers native capacity, remaining writer boundaries, uncertainty,
+concurrency, process death, owner/ACL restore and protected PR/main/candidate
+delivery. F3/P1/AR-010-A remain In progress with null acceptance; P2 is Not
+started. Counts, estimates, dependencies, funding and production gates are
+unchanged. See the [current delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-provisioning-and-capacity-checkpoint--2026-10-22).

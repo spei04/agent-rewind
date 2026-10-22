@@ -849,3 +849,70 @@ Concurrency, uncertainty, process death, owner/ACL restore, remaining boundaries
 and protected PR/main/candidate acceptance stay open. F3/P1 remains In progress
 with null acceptance; P2 remains Not started. No task, estimate, dependency,
 spending or deployment gate changes.
+
+
+## F3 provisioning and capacity checkpoint — 2026-10-22
+
+Composition **5f575667** advances F3. The earlier a4007b0 checkpoint preserved
+all runtime files; this checkpoint changes exactly **ledger_state.py** and
+**ledger_inputs.py** in the runtime. Sorted adjacent-period checks replace
+repeated scans while preserving immediate overlap refusal and deadline checks.
+The parser trims only the four legal outer JSON whitespace characters after
+unchanged raw-byte and BOM checks. SQL, transaction lifecycle, limits and the
+migration-only profile remain unchanged.
+
+| Evidence | Result | Scope |
+| --- | --- | --- |
+| SQLite provisioning at 5e73c863 | Eight passes on each Python version | Actual initialization, new organization and project periods, original columns/ciphertexts, older replay and cap refusal |
+| Runtime capacity fixes at 16dfc7c3 | 337 focused passes on each interpreter | Independent writer-eligible seeded histories; complete already-connected SQLite compatibility inspection |
+| Native provisioning | Two passes at 015ac758; six continuation passes at 42ec316a in 51.22 seconds | Actual S0→S1→S2, empty initialization, four cap refusals and two actual-service write-observer negatives |
+| Native capacity preparation | Four SQLite regressions pass at 5a73c621; four native nodes collect on each interpreter at e4600298 | PostgreSQL execution, reviewed controller and exclusive grant remain pending |
+
+The first capacity fixtures were reader-valid but had queued-v1 jobs that the
+writer could not initialize. Those failed runs remain reader-capacity findings.
+After eligibility was corrected, the 4,096-account fixture still timed out.
+The period-search correction resolved that measured bottleneck; the parser
+correction improved the separate trailing-padding fixture. At 16dfc7c3, the complete
+SQLite inspection took **1.27 / 1.19 seconds** for 4,096 accounts and
+**0.93 / 0.80 seconds** for a separate 16 MiB trailing-padding history on Python
+3.12 / 3.11. One byte over refuses before history-body transfer. The two-second
+limit is unchanged. These results cover the recorded shapes and host, not joint
+maxima, arbitrary whitespace layouts or production sizing. Earlier failures of
+a linear-scan-specific test remain recorded; its replacement checks expiry
+during the actual bounded lookup and prevents subsequent insertion/projection.
+
+The first native provisioning attempt failed after initialization because its
+oracle expected canonical JSON text despite the writer's existing JSONB cast.
+The corrected independent decoder compares canonical values, rejects duplicate
+keys and nonfinite numbers, preserves boolean/number distinctions, and records
+raw progress before assertions. Exact non-JSON fields and aware timestamps stay
+unchanged; eight pure oracle controls pass. The next attempt passed the complete
+provisioning/replay and empty-initialization cases, then stopped because the
+no-write observer lacked two existing read-only project queries. The test-only
+correction adds their exact digests and four hidden-update negative mutations.
+Only the six unresolved cases ran afterward. Report **two prior passes plus six
+continuation passes**, never a single eight-pass run. Both failures are retained.
+
+The actual-service negative controls detect same-value and zero-row writes.
+Cap refusals preserve the original 245000 exposure and native state. Independent
+review verified typed progress values, exact non-JSON preservation and ordered
+native receipts. Every native attempt restored the original database/role
+baseline, verified unchanged source inputs and stopped PostgreSQL. Earlier
+evidence remains separate: 33 compatibility passes and four service passes plus
+five continuation passes.
+
+Prepared native capacity cases cover the whole PostgreSQL runtime wrapper,
+including checkout and cleanup. Earlier SQLite measurements start from an
+already-connected entry; timings are not a controlled cross-database comparison.
+Native fixtures retain exact JSON bytes and strict values, native non-JSON
+cells, ciphertexts and owner/ACL/catalog state. Review removed a premature
+preservation-report field; the remaining report follows actual comparisons.
+Collection and SQLite regression results do not establish native capacity.
+
+Next gates are native capacity, remaining writer boundaries, fresh inspection
+after uncertain outcomes, concurrent operators, actual process death,
+owner/ACL-preserving restore and matching two-interpreter protected
+PR/main/candidate delivery. F3/P1/AR-010-A remain **In progress** with null
+acceptance; P2 remains **Not started**. Task counts, estimates, dependencies and
+funding/deployment/data gates are unchanged. This checkpoint made no provider
+calls and created no paid resources.

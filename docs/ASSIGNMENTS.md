@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Native service controls complete; review combined evidence and subsequent test slices | Four earlier passes plus five corrected continuation passes; retain both failed attempts. |
-| Independent QE | Native compatibility controls complete; assigned complete-path capacity tests in secondary | Freeze valid maximum-history fixtures; measure the unchanged two-second deadline and refusal cleanup. |
-| Planning/verification | Assigned independent provisioning/oracles in primary after lead handoff | Build actual S0→S1→S2 with new organization and project accounts; prove exact preservation and cap refusals. |
-| Lead | Compose native-tested sources, publish progress and hand back both checkouts | Keep F3/P1 acceptance null until independent coverage, recovery and protected delivery gates pass. |
+| Provisioning engineer | SQLite and native provisioning/preservation slice complete | Next: fresh inspection after uncertain outcomes, then process interruption and concurrency. |
+| Capacity engineer | Runtime performance fixes reviewed; native capacity test source prepared | Four native cases still need a reviewed controller and exclusive execution. |
+| Independent reviewer | Review exact source, native evidence and capacity preparation | Preserve failed attempts; component evidence does not complete F3/P1. |
+| Lead | Compose source and synchronize roadmap, backlog and progress issue | Keep acceptance null until recovery, remaining boundaries and protected delivery pass. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -52,8 +52,8 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
 - **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Complete guarded writer/service integration with the reviewed coherent compatibility adapter. Real initialization, replay, outcome, maximum-state/refusal and owner/ACL recovery evidence remain required; reviewed components alone do not complete those gates. Only complete final P1 acceptance permits P2 entry.
-- **Current storage and consumers:** Two existing cloud checkouts are reused. The lead composes the native-tested checkpoint before handing primary to the provisioning engineer and secondary to QE for capacity work; platform/security reviews immutable evidence. PostgreSQL access remains exclusive to a reviewed run. The completed runs restored the same baseline and stopped the server. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
+- **Next evidence-producing milestone:** Complete native capacity, remaining writer boundaries, uncertain outcomes, concurrent execution, process interruption and owner/ACL recovery. Actual two-account provisioning and older replay now have scoped native evidence. Only complete final P1 acceptance permits P2 entry.
+- **Current storage and consumers:** Two existing cloud checkouts are reused. Both engineers released their completed slices; the lead owns primary for integration and publication. Secondary is available for capacity execution preparation. PostgreSQL access stays exclusive to a reviewed run; completed runs restored the baseline and stopped the server. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -1224,3 +1224,22 @@ case in primary, QE measures complete adapter capacity in secondary, and
 platform/security reviews their work. Concurrency, uncertainty, process death,
 owner/ACL restore and protected delivery remain open. F3/P1 stays In progress
 with null acceptance; P2 stays Not started.
+
+## F3 provisioning and capacity handoff — 2026-10-22
+
+Provisioning delivered eight SQLite passes on each supported Python version.
+Native validation comprises two passes at 015ac758 followed by six continuation
+passes at 42ec316a. Both failed attempts remain recorded; their JSON-oracle and
+read-query observer corrections changed tests only.
+
+Capacity delivered two reviewed runtime fixes with 337 focused passes on each
+interpreter, then prepared four PostgreSQL cases at e4600298. Native collection
+passes on both versions and four affected SQLite regressions pass; PostgreSQL
+capacity execution remains pending. Review removed a premature preservation
+report before source acceptance.
+
+The lead composes these slices at 5f575667. Next assignments are native capacity
+execution preparation and fresh-inspection/uncertain-outcome controls, followed
+by process death, concurrency and owner/ACL restore. Both existing checkouts
+remain available for that work. [Exact evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-provisioning-and-capacity-checkpoint--2026-10-22)
+keep F3/P1 In progress with null acceptance and P2 Not started.

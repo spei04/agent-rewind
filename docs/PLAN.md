@@ -1138,16 +1138,21 @@ The lead accepted the [complete reader implementation entry](delivery/LEDGER_EXE
 
 ## F3 component integration checkpoint — 2026-10-22
 
-F2 is accepted at e8cba52. F3 remains In progress. The reviewed local composition
-passes 251 Python 3.12 cases and 248 Python 3.11 cases with three explicit
-version skips; offline packages match all 141 runtime files. New PostgreSQL
-evidence on Python 3.12 adds 33 compatibility passes and service coverage from
-four earlier passes plus five corrected continuation passes. Both original
-failed attempts remain recorded; the runtime is unchanged.
+F2 remains accepted at e8cba52. Composition 5f575667 includes actual provisioning
+and two reviewed runtime performance fixes. Eight SQLite provisioning cases
+pass on each supported Python version. The new PostgreSQL slice comprises
+two passes at 015ac758 and six continuation passes at 42ec316a; both failed
+attempts remain separately recorded.
 
-The next assignments are independent two-account provisioning/preservation and
-complete adapter capacity, followed by the remaining concurrency, uncertainty,
-process-death and owner/ACL recovery gates. [Current native evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-native-validation-checkpoint--2026-10-22)
-does not establish full P1 or protected delivery acceptance. P1 acceptance is
-null and P2 is Not started. Counts, estimates, dependencies, funding and
-production gates are unchanged.
+The runtime fixes replace repeated period scans with adjacent-period checks
+and trim legal outer JSON whitespace after unchanged raw-size/BOM checks.
+Their 337 focused tests pass on each interpreter under the unchanged two-second
+inspection limit. Later JSON-oracle and read-query observer corrections change
+tests only. Four native capacity cases collect on both interpreters, with four
+affected SQLite regressions passing; their PostgreSQL execution is pending.
+
+Next work covers native capacity, remaining writer boundaries, uncertainty,
+concurrency, process death, owner/ACL restore and protected PR/main/candidate
+delivery. F3/P1/AR-010-A remain In progress with null acceptance; P2 is Not
+started. Counts, estimates, dependencies, funding and production gates are
+unchanged. See the [current delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-provisioning-and-capacity-checkpoint--2026-10-22).
