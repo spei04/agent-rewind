@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import sqlite3
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields
 from typing import Any
 
+import psycopg
 from sqlalchemy import text
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import DBAPIError
@@ -43,13 +45,20 @@ class LedgerOutcome:
 
 def _begin(connection: Connection, outcome: LedgerOutcome, work: LedgerWork) -> None:
     raw = connection.connection.driver_connection
+    if raw is None:
+        raise MigrationRefused("migration_database_failure")
     if connection.dialect.name == "sqlite":
         if getattr(raw, "autocommit", -1) != -1 or getattr(raw, "isolation_level", None) is None:
             raise MigrationRefused("transactional_connection_required")
         connection.exec_driver_sql("PRAGMA foreign_keys=ON")
+        # FK setup already established SQLAlchemy's logical transaction. Reserve
+        # before recording a native BEGIN attempt, including setter failures.
+        work._prepare_target()
         outcome.begin_attempted = True
-        connection.exec_driver_sql("BEGIN EXCLUSIVE")
+        cursor = raw.execute("BEGIN EXCLUSIVE")
         outcome.begun = True
+        cursor.close()
+        work.check()
         return
     if getattr(raw, "autocommit", None) is not False:
         raise MigrationRefused("transactional_connection_required")
@@ -82,13 +91,13 @@ def _begin(connection: Connection, outcome: LedgerOutcome, work: LedgerWork) -> 
 def _ordinary_error(error: BaseException) -> MigrationRefused:
     if isinstance(error, MigrationRefused):
         return error
-    if isinstance(error, DBAPIError):
-        if getattr(error.orig, "sqlstate", None) in {"55P03", "57014"} or getattr(
-            error.orig, "sqlite_errorcode", None
-        ) in {5, 6, 9}:
-            return MigrationRefused("migration_busy")
-        if isinstance(error.orig, MigrationRefused):
-            return error.orig
+    native = error.orig if isinstance(error, DBAPIError) else error
+    if (isinstance(native, psycopg.Error) and native.sqlstate in {"55P03", "57014"}) or (
+        isinstance(native, sqlite3.Error) and getattr(native, "sqlite_errorcode", None) in {5, 6, 9}
+    ):
+        return MigrationRefused("migration_busy")
+    if isinstance(native, MigrationRefused):
+        return native
     return MigrationRefused("migration_database_failure")
 
 
@@ -144,6 +153,10 @@ def ledger_transaction(
         claim._begin_connect()
         connection, receipt = connect_owned(engine, control_attempt=work.observe_cleanup)
         work.check()
+        if connection.dialect.name == "postgresql" and (
+            connection.dialect.server_version_info or ()
+        )[:1] != (16,):
+            raise MigrationRefused("schema_incompatible")
         attached = True
         work._attach(connection)
         _begin(connection, outcome, work)
@@ -189,7 +202,7 @@ def ledger_transaction(
                         "restore",
                         lambda: work._raw.execute(f"PRAGMA busy_timeout={work.previous_timeout}"),
                     )
-                if outcome.cleanup_failed or not outcome.begun:
+                if outcome.cleanup_failed:
                     quarantine_owned(receipt)
                 cleanup("close", lambda: close_owned(connection, receipt))
                 try:
@@ -211,20 +224,17 @@ def ledger_transaction(
 
             if not cleanup("raw_close", raw_close):
                 cleanup("raw_close", raw_close)
-        if claim is not None:
-            # A typed body refusal with clean disposal does not poison the engine.
-            try:
-                release_ledger_engine(claim, clean=not resource_failure)
-            except BaseException as error:
-                cleanup_failure(error)
         if primary is None:
             try:
                 work.check()
             except BaseException as error:
-                outcome.cleanup_failed = True
-                primary = error
-                if not isinstance(error, Exception):
-                    interruption = error
+                cleanup_failure(error)
+        if claim is not None:
+            # Decide cleanup truth while ownership is still held.
+            try:
+                release_ledger_engine(claim, clean=not resource_failure)
+            except BaseException as error:
+                cleanup_failure(error)
     if interruption is not None:
         raise interruption from None
     uncertain = (

@@ -92,8 +92,13 @@ def _handlers(engine: Engine) -> dict[str, tuple[Any, ...]]:
     return result
 
 
-def _pg_parameters(arguments: Any, parameters: Mapping[str, Any]) -> None:
-    if arguments or set(parameters) - _PG_PARAMETERS:
+def _pg_parameters(arguments: Any, parameters: Mapping[str, Any], *, context: Any) -> None:
+    if (
+        arguments
+        or set(parameters) - (_PG_PARAMETERS | {"context"})
+        or context is None
+        or parameters.get("context") is not context
+    ):
         raise MigrationRefused("unsupported_runtime_endpoint")
     _validate_runtime_endpoint(parameters, production=True)
     for value in (
@@ -125,6 +130,7 @@ class _EngineState:
     pool: Any
     dialect: Any
     url: Any
+    context: Any = None
     handlers: dict[str, tuple[Any, ...]] = field(default_factory=dict)
     claim: LedgerEngineClaim | None = None
     poisoned: bool = False
@@ -141,6 +147,12 @@ def create_ledger_engine(url: str) -> Engine:
     if parsed.drivername not in {"sqlite", "sqlite+pysqlite", "postgresql+psycopg"}:
         raise MigrationRefused("schema_incompatible")
     kind = "sqlite" if parsed.drivername.startswith("sqlite") else "postgresql"
+    if kind == "postgresql" and (
+        set(parsed.query) - _PG_PARAMETERS
+        or any(type(value) is not str for value in parsed.query.values())
+    ):
+        # Plugins are consumed by create_engine before dialect validation.
+        raise MigrationRefused("unsupported_runtime_endpoint")
     _supported_versions(kind)
     _no_class_handlers(Engine, Connection, Pool)
     if kind == "sqlite":
@@ -160,9 +172,10 @@ def create_ledger_engine(url: str) -> Engine:
     try:
         _no_class_handlers(type(engine.dialect))
         arguments, parameters = engine.dialect.create_connect_args(engine.url)
+        context = getattr(engine.dialect, "_psycopg_adapters_map", None)
         if kind == "postgresql":
-            _pg_parameters(arguments, parameters)
-        state = _EngineState(engine.pool, engine.dialect, engine.url)
+            _pg_parameters(arguments, parameters, context=context)
+        state = _EngineState(engine.pool, engine.dialect, engine.url, context=context)
 
         def connect(dialect: Dialect, record: Any, args: Any, params: Any) -> Any:
             with _LOCK:
@@ -179,7 +192,7 @@ def create_ledger_engine(url: str) -> Engine:
                 raise MigrationRefused("schema_incompatible")
             if supplied.pop("prepare_threshold", object()) is not None:
                 raise MigrationRefused("schema_incompatible")
-            _pg_parameters(args, supplied)
+            _pg_parameters(args, supplied, context=state.context)
             supplied["target_session_attrs"] = "any"
             _trusted_startup_path(dialect, record, [], supplied)
             statement_ms, lock_ms = claim.work.remaining_timeouts_ms()
@@ -244,10 +257,11 @@ def claim_ledger_engine(engine: Engine, work: LedgerWork) -> LedgerEngineClaim:
                 or engine.dialect.use_native_hstore
                 or engine.dialect.client_encoding is not None
                 or engine.dialect.isolation_level is not None
+                or engine.dialect._psycopg_adapters_map is not state.context
             ):
                 raise MigrationRefused("schema_incompatible")
             args, params = cast(Dialect, engine.dialect).create_connect_args(engine.url)
-            _pg_parameters(args, params)
+            _pg_parameters(args, params, context=state.context)
         work._prepay()
         claim = LedgerEngineClaim(engine, work)
         state.claim = claim

@@ -167,13 +167,15 @@ class LedgerWork:
                 self.observe_cleanup("detach")
             except BaseException as error:
                 first = error
+                if not isinstance(error, Exception):
+                    interruption = error
             if self._lease is not None:
                 try:
                     self._lease.release()
                 except BaseException as error:
                     if first is None:
                         first = error
-                    if not isinstance(error, Exception):
+                    if interruption is None and not isinstance(error, Exception):
                         interruption = error
             for name, callback in self._listeners:
                 try:
