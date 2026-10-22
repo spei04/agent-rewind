@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import math
 import re
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from typing import Any
 
@@ -35,7 +36,23 @@ def _id(value: Any) -> str:
 
 
 def relational_closure(connection: Connection) -> Closure:
-    """Keep only capped identifiers/edges, never the accumulated source JSON bodies."""
+    """Keep only capped identifiers/edges, never accumulated source JSON bodies."""
+
+    def rows(sql: str) -> Any:
+        return connection.execute(
+            text(sql).execution_options(stream_results=True, yield_per=1, max_row_buffer=1)
+        )
+
+    return reduce_relational_closure(rows)
+
+
+def reduce_relational_closure(
+    rows: Callable[[str], Iterable[Any]],
+    *,
+    check: Callable[[], None] | None = None,
+    projects: dict[tuple[str, str], str] | None = None,
+) -> Closure:
+    """Shared relational proof; supplied rows own transport and optional scope checks."""
     resources: list[tuple[str, str]] = []
     edges: list[tuple[str, ...]] = []
     retained_bytes = 0
@@ -48,7 +65,14 @@ def relational_closure(connection: Connection) -> Closure:
 
     def retain(value: tuple[str, ...], *, resource: bool = False) -> None:
         nonlocal retained_bytes
+        if check is not None:
+            check()
         retained_bytes += len(canonical(value))
+        if resource and projects is not None:
+            project = projects.get((value[0], value[1]))
+            if project is None:
+                raise MigrationRefused("ownership_lineage_invalid")
+            retained_bytes += len(canonical((value[0], value[1], project)))
         if retained_bytes > MAX_RETAINED_BYTES:
             raise MigrationRefused("ownership_closure_limit")
         if resource:
@@ -59,11 +83,6 @@ def relational_closure(connection: Connection) -> Closure:
             if len(edges) >= MAX_EDGES:
                 raise MigrationRefused("ownership_closure_limit")
             edges.append(value)
-
-    def rows(sql: str) -> Any:
-        return connection.execute(
-            text(sql).execution_options(stream_results=True, yield_per=1, max_row_buffer=1)
-        )
 
     for row in rows("SELECT id,kind FROM jobs ORDER BY id"):
         identifier = _id(row.id)
@@ -122,9 +141,13 @@ def relational_closure(connection: Connection) -> Closure:
                 raise MigrationRefused("ownership_lineage_invalid")
             groups = candidates + ([confirmation] if confirmation is not None else [])
             for group_index, group in enumerate(groups):
+                if check is not None:
+                    check()
                 if not isinstance(group, dict) or not isinstance(group.get("pairs"), list):
                     raise MigrationRefused("ownership_lineage_invalid")
                 for pair_index, pair in enumerate(group["pairs"]):
+                    if check is not None:
+                        check()
                     if not isinstance(pair, dict):
                         raise MigrationRefused("ownership_lineage_invalid")
                     for arm in ("control", "treatment"):
@@ -140,6 +163,8 @@ def relational_closure(connection: Connection) -> Closure:
     # Iterative, memoized walks also bound a late long chain which joins a known suffix.
     depths: dict[str, int] = {}
     for run in parents:
+        if check is not None:
+            check()
         trail: list[str] = []
         seen: set[str] = set()
         current: str | None = run
@@ -157,17 +182,31 @@ def relational_closure(connection: Connection) -> Closure:
             if depth > MAX_PARENT_DEPTH:
                 raise MigrationRefused("ownership_ancestry_limit")
             depths[member] = depth
-    study_jobs = [job for source, job in studies.values()]
+    study_jobs = []
+    for _, job in studies.values():
+        if check is not None:
+            check()
+        study_jobs.append(job)
     if len(set(study_jobs)) != len(study_jobs):
         raise MigrationRefused("ownership_ambiguous_trial")
     for source, job in studies.values():
+        if check is not None:
+            check()
         if source not in parents or run_jobs[source] == job:
             raise MigrationRefused("ownership_lineage_invalid")
     for trial, (_study, source, job) in trial_claims.items():
+        if check is not None:
+            check()
         if trial not in parents or parents[trial] != source or run_jobs[trial] != job:
             raise MigrationRefused("ownership_lineage_invalid")
-    study_sources = {job: source for source, job in studies.values()}
+    study_sources = {}
+    for source, job in studies.values():
+        if check is not None:
+            check()
+        study_sources[job] = source
     for run, job in run_jobs.items():
+        if check is not None:
+            check()
         if jobs[job] in {"study", "investigate"} and (
             job not in study_sources or parents[run] != study_sources[job]
         ):
@@ -179,5 +218,18 @@ def relational_closure(connection: Connection) -> Closure:
         if row.run_id not in parents or type(row.step) is not int or row.step < 1:
             raise MigrationRefused("ownership_lineage_invalid")
         retain(("event", _id(row.run_id), str(row.step)))
+    if projects is not None:
+        for edge in edges:
+            if check is not None:
+                check()
+            if edge[0] == "event":
+                continue
+            if len(edge) == 4:
+                target_kind = "job" if edge[2] == "job" else "run"
+                target_id = edge[3]
+            else:
+                target_kind, target_id = "run", edge[5]
+            if projects[(edge[0], edge[1])] != projects.get((target_kind, target_id)):
+                raise MigrationRefused("ownership_lineage_invalid")
     ordered = tuple(sorted(resources))
     return Closure(ordered, checksum({"resources": ordered, "edges": sorted(edges)}), keys)

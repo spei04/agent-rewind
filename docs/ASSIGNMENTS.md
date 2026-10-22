@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Prepare exact catalog/preflight query proposals | Independent query-family/native-plan and combined budget review before complete reader implementation. |
-| Delivery reviewer | Prepare a C2 native feasibility harness after accepted partial C2/fingerprint static reviews | Lead harness review before execution; complete F2 and capacity remain unaccepted. |
-| Planning/verification | Compose the accepted F1 progress update in the reused secondary checkout | Preserve null P1 acceptance, unchanged gates and dated history; lead review before publication. |
-| Lead | Review and publish accepted F1 progress; maintain public issue scope and checkout ownership | F2/F3 and final P1 delivery remain required before P2. |
+| Platform/security | Original 29-case PostgreSQL matrix passes on Python 3.11; the 25 focused boundary checks also pass | Execute the five new PostgreSQL boundary cases after the corrected Python 3.12 release and exclusive handoff. |
+| Independent QE | All five new PostgreSQL boundary cases pass on Python 3.12 at 8da2938; baseline restored and server stopped | Freeze evidence for independent audit and the Python 3.11 handoff. |
+| Planning/verification | Original PR #113 source passes all required hosted jobs; corrected boundary source independently reviewed | Audit new native results, fresh source inventory and replacement PR/main/candidate evidence. |
+| Lead | Composed reviewed test corrections and preserved the 133 runtime members | Coordinate native ownership and protected delivery; F2 acceptance remains pending, followed by F3/full P1 before P2. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -52,8 +52,8 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
 - **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Complete exact query-family/native-plan and combined work-budget review before F2 persisted-reader implementation, then F3 trusted provisioning/opening/replay/recovery. Accepted F1 satisfies only the F2 predecessor gate. Only the complete final P1 gate can populate P1 acceptance and permit P2 entry.
-- **Current storage and consumers:** Two existing cloud checkouts are retained for sequential reuse. Planning/verification owns secondary for this progress composition; primary remains under lead coordination. Completed A2/B2 native work released the database and primary after restoration and stop; this progress assignment has no database slot. The last recorded filesystem availability was 101.24 GB. Private evidence remains outside checkouts; no new checkout or paid resource was created.
+- **Next evidence-producing milestone:** Implement and independently validate the complete F2 persisted reader under the accepted 2026-10-22 entry; F2 acceptance remains null. F3 trusted provisioning/opening/replay/recovery follows accepted F2. Only complete final P1 acceptance permits P2 entry.
+- **Current storage and consumers:** Platform/security uses secondary for F2 delivery; independent QE owns primary for tests. Planning reviews immutable source without another checkout. The lead updates progress and PR tracking between source-bound runs. The original 29-case PostgreSQL matrix passes on both interpreters; the five added complete-reader boundary cases have separate exclusive handoffs, baseline restoration and stopped-server checks. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -963,3 +963,131 @@ capacity, provisioning or recovery acceptance is recorded here.
 
 The lead updated and read back #10/#107/#108 on 2026-10-22; all remain
 open/In progress with accepted F1 evidence. #109 remains open/Not started.
+
+
+## F2 reader implementation handoff — 2026-10-22
+
+The lead accepted the [exact reader entry](delivery/LEDGER_EXECUTION_PLAN.md#f2-reader-implementation-entry--2026-10-22)
+after separate SQLite 36-case and PostgreSQL 54-case catalog evidence,
+retained alias-failure history, exact H literals/transport adapter and complete
+work-schedule review. F2 is In progress/null acceptance; P1 stays In progress/null,
+and F3/P2 remain Not started. Component evidence is not product or capacity proof.
+
+Planning/verification records this entry in the reused secondary and releases
+it clean to platform/security for the complete runtime reader. Independent QE
+owns new reader fixture/state/native modules in primary. Planning then reviews
+integration; the lead owns source composition, delivery and database handoffs.
+No runtime/shared test edit or database execution occurs in this documentation
+assignment. All estimates, dependencies, frozen entry and earlier history remain.
+
+
+## F2 integration checkpoint — 2026-10-22
+
+| Owner | Completed handoff | Next assignment |
+| --- | --- | --- |
+| Platform/security | Frozen complete reader 90ce951; first 20 SQLite checks and 166 existing-caller regressions pass; repository format/lint/security/type checks pass | Compose independently corrected tests, then resolve source-review findings and support scoped delivery. |
+| Independent QE | Frozen fixture extension fd4c9dc; 15 fixture/witness checks pass. Composed runtime b8751d4; expanded run has 69 passes, two fixture/oracle failures and 11 PostgreSQL cases deselected | Correct the two tests, retain failed evidence, then execute complete native PostgreSQL and encoding/no-write controls. |
+| Planning/verification | Reviewed query families and confirmed the future-period over-refusal; author removed that prospective rule and QE's regression passes | Review frozen complete source and combined-bound coverage. |
+| Lead | Verified immutable handoffs and retained evidence; accepted PR #112 candidate; reconciled SQLite's extra observed temp query without increasing the work budget | Coordinate native ownership, integrate reviewed F2 delivery and update acceptance only after exact PR/main/candidate proof. |
+
+The valid future-period regression confirms that later current-period exposure
+does not invalidate a previously affordable unused future period. Future
+admission eligibility remains a provisioning/reservation responsibility.
+The first two expanded-run failures occur before the intended financial
+assertion: one test used a role excluded by the existing schema, and another
+changed a v2 budget inconsistently with its admitted configuration. Neither
+justifies weakening the production reader. These are intermediate results;
+F2/P1 acceptance remains null. See the
+[delivery checkpoint](delivery/LEDGER_EXECUTION_PLAN.md#f2-source-and-test-handoffs--2026-10-22).
+
+
+## F2 independent verification checkpoint — 2026-10-22
+
+| Owner | Reviewed delivery | Current assignment |
+| --- | --- | --- |
+| Platform/security | Fixed two cooperative deadline gaps at 0ce4c3e; real paging and publication controls at 3212df98; final offline composition 0638961 | Prepare the same native matrix on the existing Python 3.11 environment after QE releases PostgreSQL. |
+| Independent QE | Complete SQLite suite: 78 passes at 11c12bc, then two affected cleanup cases at 28f5685; independently replayed six authored SQLite controls | Execute corrected PostgreSQL controls and complete reader at 5e92242; retain first failure and exact source/baseline evidence. |
+| Planning/verification | Accepted deadline repair and integration controls, including actual 4096+1 pages, four terminal gates and late-budget refusal | Independently inspect native traces, encoding receipts, write witnesses and restored/stopped release. |
+| Lead | Verified source-bound evidence, reviewed the one-line rollback-sentinel correction and kept the two existing checkouts assigned | Update progress, coordinate native handoffs and prepare protected delivery after verification. |
+
+Final combined offline selection at 0638961 passes 267 checks on Python 3.12
+and 265 on Python 3.11, with two intentional older-version autocommit skips;
+25 PostgreSQL cases are deselected and one existing warning remains per run.
+Format, lint, security rules, types, frozen offline build and distribution
+policy pass. All 133 runtime files match Git, disk, wheel and source archive.
+Collection finds 4715 cases per interpreter; two existing time-derived case
+IDs differ, so raw node lists are not claimed identical.
+
+The first native attempt executes one write-witness case: it detects three
+same-value job updates, then fails because its deliberate ordinary exception
+is mapped by the transaction layer. Later assertions and phases do not run.
+Test-only 5e92242 makes the sentinel a distinct interruption; no broad error
+expectation or runtime change hides earlier assertion failures. The exact
+database baseline is restored and PostgreSQL stopped before the corrected
+attempt. F2/P1 acceptance remains null; F3/P2 remain Not started.
+
+
+## F2 PostgreSQL repair and verification — 2026-10-22
+
+| Owner | Reviewed delivery | Next assignment |
+| --- | --- | --- |
+| Platform/security | Corrected the actual pinned reflection failure at 2bf3352; 124 selected offline tests pass on each interpreter and all 133 runtime package members match | Verify the same 29 native cases on Python 3.11 from the final delivery source. |
+| Independent QE | Added exact native parameter receipts and corrected pinned immutable-map recognition at 09cc3ba; all 29 PostgreSQL cases pass on Python 3.12 | Preserve raw failures and successful traces; support independent evidence and delivery audit. |
+| Planning/verification | Accepted the bounded one-bind replacement and narrow observer correction | Audit native outcomes, final source inventory and hosted delivery. |
+| Lead | Verified all four successful native phases and restored/stopped release | Publish the reviewed F2 slice and complete protected PR/main/candidate checks. |
+
+The first complete PostgreSQL reader failed because the pinned reflection
+implementation compiled 21 parameters, exceeding the unchanged 16-bind limit.
+The fixed catalog query uses one bound table name and at most 33 returned rows,
+with a 32-column acceptance limit and unchanged scalar/profile checks. A later
+attempt returned the expected state but its test observer could not count the
+pinned immutable parameter-map type. The narrow test correction preserves
+unknown-container refusal and adds explicit 16/17-bind boundary controls.
+
+At 09cc3ba, actual PostgreSQL passes 2 write-witness controls, 17 independent
+cases, 6 integration cases and 4 catalog-drift cases, with no skips or warnings
+among the selected 29. The exact database/role baseline is restored and the
+server stopped. Python 3.11, final independent audit and hosted delivery remain
+pending at this checkpoint. No maximum-capacity or production claim follows.
+F2/P1 acceptance remains null; F3/P2 remain Not started.
+
+
+## F2 boundary coverage and delivery review — 2026-10-22
+
+| Owner | Completed work | Next assignment |
+| --- | --- | --- |
+| Platform/security | Original 29 PostgreSQL cases pass on Python 3.11 at 93ef7d5; 25 focused SQLite/fixture checks pass at abe4488 | Run the five new PostgreSQL boundary cases from the final composed source after QE releases the database. |
+| Independent QE | Schema-valid cohort c683cfd preserves the original 245000 opening; 25 offline checks and all five corrected PostgreSQL cases pass on Python 3.12 | Freeze native evidence at 8da2938 and release the restored/stopped database for Python 3.11. |
+| Planning/verification | Reviewed cohort calibration, source equivalence and original PR attempt 39763710972 | Audit the five-case native evidence, final source inventory and fresh hosted delivery. |
+| Lead | Composed unchanged reviewed corrections and linked [PR #113](https://github.com/spei04/agent-rewind/pull/113) to the F2 card | Complete exact PR/main/candidate acceptance before advancing F2. |
+
+Final-card review identified a missing integrated check: earlier PostgreSQL
+component tests and the 29-case reader matrix did not establish the complete
+reader's shared 2 MiB native and canonical boundaries. Five cases now exercise
+native CAP, native CAP + 1, escaping expansion, canonical CAP and canonical
+CAP + 1. The exact canonical-CAP positive must return the complete state;
+native overflow must refuse before financial body transfer.
+
+The first native fixture attempt exceeded the schema's 64-character payload
+field before inspection. The corrected cohort uses individually valid rows
+and bounded payloads, checks a complete one-row control, then independently
+calibrates actual native receipts and canonical serialization. Its next native
+attempt reached the expected refusal but failed at a test-only exception-context
+access. The two-line correction captures the entered exception context and
+retains the exact original-error identity assertion. Both failed attempts and
+their restored/stopped releases remain evidence; later assertions and cases
+were not credited.
+
+Original PR source 93ef7d5 passed hosted attempt 39763710972: Python 3.11
+4729 passed/32 skipped and Python 3.12 4740 passed/21 skipped, each with one
+existing warning; package, security, isolation and gate jobs passed. These
+results belong to that source. The boundary correction requires fresh CI.
+F2/P1 acceptance stays null; F3/P2 remain Not started.
+
+
+At **8da2938**, all five new PostgreSQL cases pass in **79.78s**, without
+selected skips or warnings. The canonical-CAP positive returns the original
+complete state, native CAP + 1 transfers no financial bodies, and all native
+calls remain within the unchanged bind/work limits. The exact baseline is
+restored and PostgreSQL stopped. Python 3.11 verification of these five cases
+and fresh hosted delivery remain pending at this checkpoint.

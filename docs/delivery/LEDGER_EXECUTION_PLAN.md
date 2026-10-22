@@ -2,7 +2,7 @@
 
 2026-10-21 · Approved ledger execution plan. The original readiness review used HTTP source `a304d52b52667b882c70e922b73d7070d714efb0`; the current HTTP prerequisite is accepted at protected merge `cefd222230c800eb2e90c49a3b3c411b394d0393`.
 
-**State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2/F3 and P2 #109 remain **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
+**State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2 is **In progress** under the [accepted implementation entry](#f2-reader-implementation-entry--2026-10-22), with null checkpoint acceptance. F3 and P2 #109 remain **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
 ## Current P1 implementation sequence — 2026-10-22
 
@@ -15,7 +15,7 @@ acceptance packages.
 | Implementation PR | Boundary | Entry and exit | Current state |
 | --- | --- | --- | --- |
 | F1 · [PR #111](https://github.com/spei04/agent-rewind/pull/111) | Dormant schema, owned operator and private guard foundation | Accepted HTTP/P1 entry; independent exact-source review, native regression proof and scoped PR/main/candidate acceptance | Merged; checkpoint accepted at 2e0eeeab; [evidence](#accepted-f1-foundation-checkpoint--2026-10-22) |
-| F2 | Complete bounded persisted reader | Accepted F1 plus exact query-family/native-plan review; complete provenance/financial/graph proof, maximum-state limits and scoped PR/main/candidate acceptance | Not started; traversal design remains held |
+| F2 | Complete bounded persisted reader | Accepted F1 plus exact query-family/native-plan review; complete provenance/financial/graph proof, maximum-state limits and scoped PR/main/candidate acceptance | In progress; entry accepted, complete implementation/delivery pending |
 | F3 | Trusted provisioning, original opening, replay and recovery | Accepted F2; complete original P1 matrix including preservation, concurrency, privilege, child interruption and restore, then final protected-main candidate | Not started |
 
 [Assignable PR cards](../EXECUTION_BACKLOG.md#ar-010-a)
@@ -59,8 +59,9 @@ acceptance. The guard selection passed 281 checks on Python 3.12.3 (26.70s)
 and Python 3.11.17 (23.96s), with no skips or warnings. Database state was
 restored and the server stopped before checkout handoff. These local results
 are complemented by the [accepted F1 hosted and candidate evidence](#accepted-f1-foundation-checkpoint--2026-10-22); they alone did not establish delivery.
-The full reader remains unaccepted: the corrected conditional graph bound is
-215 pages, but exact observed query plans and combined costs are still required.
+The full reader remains unaccepted. Exact component query plans and the combined
+schedule are reviewed at the F2 entry below; the conditional 215-page graph bound
+does not prove complete implementation cost or capacity.
 No partial LedgerState, hidden server-cursor FETCH or second work budget is
 authorized. The dated checkpoints below retain their original state of knowledge.
 
@@ -315,10 +316,10 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- Planning/verification: compose the accepted F1 progress update in the reused secondary checkout, preserving null P1 acceptance and dated evidence; no runtime or database changes.
-- Platform/security: prepare exact catalog/preflight query proposals; complete reader implementation remains gated on independent query-family/native-plan and combined budget review.
-- Delivery reviewer: prepare a C2 native feasibility harness after accepted partial C2/fingerprint static reviews, with lead harness review before execution. Completed A2/B2 native work remains partial proof, with database and checkout ownership released after restoration and stop.
-- Lead: independently review and publish the progress composition, maintain explicit checkout/database ownership and public issue scope, and require complete F2/F3 and final P1 acceptance before P2.
+- Planning/verification: independently review frozen reader integration and acceptance coverage; preserve null F2/P1 acceptance and dated evidence.
+- Platform/security: maintain the complete dormant F2 reader/runtime in secondary, compose reviewed independent tests and resolve integration findings under the exact query and work schedule.
+- Independent QE: own only new tests/ledger_reader_fixture.py, tests/test_ledger_reader_independent.py and tests/test_ledger_reader_native.py in primary; validate complete states and native boundaries against immutable runtime handoffs.
+- Lead: review/integrate source and independent evidence, coordinate exclusive database ownership, maintain public issue scope, and require scoped F2 delivery then full F3/P1 acceptance before P2.
 
 The historical first-fortnight schedules and opening conditions remain unchanged. Accepted HTTP and exact P1 entry satisfy the implementation prerequisites; the lead has issued the P1 handoff. No new calendar allocation or staffed-time conversion follows from the effort totals.
 
@@ -388,3 +389,286 @@ changes, new task, effort, dependency or PR allocation follows.
 The lead updated and read back issues #10/#107/#108 on 2026-10-22 with this
 F1 evidence; all remain open/In progress. Issue #109 was separately read back
 open/Not started and was unchanged.
+
+
+## F2 reader implementation entry — 2026-10-22
+
+The lead accepted the complete dormant reader entry after independent exact
+query/schedule review. Private entry identity:
+9f9b34a48a1b9abeef52e49d623ef3cda7bcccec86beb7e17e70a614946bee2e.
+F2 is **In progress**, with source/merge/review acceptance null. P1 remains
+In progress/null; F3 and P2 remain Not started. This starts implementation,
+not a product, maximum-capacity or customer-readiness claim. The canonical
+entry is agent_rewind.migrations.ledger_inspection.inspect_ledger_state(Connection).
+
+Catalog component evidence is separate: SQLite passed **36 cases**, observing
+288/351 ar6/ar7 targets and one additional target in the injected fallback.
+PostgreSQL passed **54 cases** after correcting the unquoted reserved alias
+in the constraint gate, observing 119/141 targets on fresh/warm/restored paths.
+The original alias-failure evidence remains retained. The conservative SQLite
+420/564-target fallback allowance is source-derived, not measured worst-case
+capacity. A2/B2/C2 partial evidence is reused; complete installed provenance,
+financial/graph closure and actual operator-budget proof remain required.
+
+New support conditions apply only to this dormant reader: four previously
+unbounded historical SQLite timestamp cells have a native 64 KiB ceiling each
+(262144 bytes together), preserving the original aware-time grammar; all
+progress keys must be native TEXT within schema-derived 128/256-byte ceilings,
+without an ASCII-only restriction or fetching unrelated bodies. SQLite fetched
+partial-index SQL is bounded at 64 KiB; reflection-omitted physical indexes and
+duplicate extra foreign keys refuse. Scoped main-table options follow
+no-ATTACH/empty-temp checks. PostgreSQL rejects non-NULL comments, including
+empty comments, only at the exact fetched joins. Existing wrappers and the
+frozen P1 schema entry remain unchanged.
+
+Implementation uses one issued Connection/LedgerWork, entry/final body guards
+and observed fixed-page queries. SQL, setters, xids and fallback targets are
+charged; pure loops check the deadline without consuming an extra work unit. Keep 2048 total units (12 bootstrap, 2028
+ordinary, 8 cleanup), 120 seconds and 16 binds. The complete schedule pays
+duplicate discovery/H00 and catalog prefixes until traced reuse exists.
+The entry estimate used P=0 ordinary totals of SQLite ar6/ar7 676/816 nominal,
+940/1242 conservative fallback, and PostgreSQL 535/628. The complete-reader
+trace and source review below correct SQLite by two units; PostgreSQL is
+unchanged. Each accepted graph page adds 4/6 units respectively. These
+constructions do not prove executed capacity, and jointly incompatible maxima
+cannot be combined.
+
+Keep native storage, decoded UTF8 receipts and canonical bytes separate.
+The original H10 1114625-byte and fixed nonledger 1443887-byte bounds are
+unchanged and independently checked. PostgreSQL UTC wire text becomes an
+aware datetime only after exact 27-byte format, receipt and round-trip checks,
+before the unchanged H30/H60 validators; SQLite historical text remains raw.
+Retain each existing JSON decoder. All ten financial gates and the shared
+2 MiB native/canonical limits precede financial or graph-job bodies. Complete
+history, source, scope, account, opening and chain closure must precede the
+seven-field immutable LedgerState. No recursive old wrapper, current source
+digest traversal, hidden server cursor or new budget is permitted.
+
+Platform/security implements runtime in secondary after this documentation
+handoff. Independent QE owns three new reader test modules in primary;
+planning reviews integration and the lead owns delivery. Complete ar6/ar7
+positives, original 245000 exposure, joint bounds and no-write/native faults
+belong to this slice. Exact F2 PR/main/package/security/candidate acceptance
+still precedes F3. Progress PR #112 merged at f39d2db with all seven main jobs
+passing; its candidate verification was still running at this entry checkpoint.
+No final artifact acceptance is inferred from those job results.
+
+
+## F2 source and test handoffs — 2026-10-22
+
+Runtime source **90ce9513bbafc74fa7f5e93246d08ddae913b7b7** freezes the
+complete non-owning reader, nine bounded query/consumer modules, shared pure
+historical reducers and the explicit 133-file distribution policy. The first
+complete SQLite selection passes **20 tests** across fresh/legacy ar6 and
+empty/organization/legacy-opening ar7. Fresh existing-caller regressions pass
+**166 tests**; whole-repository format/lint, source security and type checks
+pass. These are local checkpoints, not final F2 acceptance.
+
+Independent QE source **fd4c9dc7fedd0ed6fc401c88cebcdd24100c9570** adds
+evolving reserved/settled/released states, financial closure failures, transport
+witness controls, a future-period regression and prepared LATIN1 coverage.
+Its fixture-only selection passes 15 checks. The first composed independent
+reader run records **69 passes, two failures and 11 PostgreSQL cases
+deselected**. The two failures are retained: an invalid test role fails the
+existing schema before inspection; a changed v2 job budget fails its immutable
+admission association before the intended exposure check. QE owns the narrow
+fixture/oracle corrections. All complete-state, evolving-state, future-period,
+H10 receipt and SQLite no-write/guard tests in that run pass.
+
+The complete trace observes P=0 ordinary work **678/818** on SQLite ar6/ar7.
+The outer early-temp witness is additional to the component's early witness
+and original catalog witness: one extra target costs two ordinary units.
+Preserve the ordering and correct the source-derived conservative fallback
+bases to **942/1244**. PostgreSQL remains **535/628**; graph pages add **4/6**
+units. The total remains **2048 = 12 bootstrap + 2028 ordinary + 8 cleanup**,
+with 120 seconds and 16 binds. No allowance is increased and no positive
+maximum-capacity claim follows.
+
+Independent source review, corrected complete test results, native PostgreSQL,
+combined-bound evidence and exact PR/main/package/candidate delivery remain
+required. F2/P1 acceptance stays null; F3 and P2 stay Not started.
+
+## Accepted progress delivery after F1 — 2026-10-22
+
+The earlier pending candidate for [PR #112](https://github.com/spei04/agent-rewind/pull/112)
+is now independently accepted: reviewed source
+**08bf372743a03c3a21140caee7b830561bed0ef1**, protected-main merge
+**f39d2db892595b45aa4f234454c4d83d2e06ee63**. Exact PR/main runs
+[39737515333/1](https://github.com/spei04/agent-rewind/actions/runs/39737515333)
+and [39742506695/1](https://github.com/spei04/agent-rewind/actions/runs/39742506695)
+pass. Main Python 3.11 records **4561 passed / 32 skipped** and Python 3.12
+**4572 passed / 21 skipped**, each with one existing warning; the other
+required native, isolation, security and delivery jobs pass.
+
+Candidate **12411685094** is 726290 bytes, SHA256
+`d74a7392759e727922c8712176eb9b1cd68a7a98ec43a64d9b990505d9d1bb74`.
+The unchanged reviewed verifier confirms all 124 runtime files against the
+source, wheel and source distribution. The first verifier invocation's
+transient log-download failure remains retained; the successful invocation and
+durable release record are separate. This delivery updates F1 progress only;
+it contains no F2 runtime and cannot accept F2 or P1.
+
+
+## F2 reviewed source and offline verification — 2026-10-22
+
+Independent source review found missing cooperative deadline checks in pure
+study/graph traversal and the separate financial descriptor-validation pass.
+Correction **0ce4c3edc3525197adb354582a96425eaefbd985** adds those checks
+without another work budget or changing SQL. Genuine failing regressions on
+the prior source and passing corrected results remain recorded. Historical
+callers retain their existing behavior when no check callback is supplied.
+
+The real integration fixture contains 4097 valid jobs and scopes. Both Python
+versions traverse 4096+1 job pages and all four terminal empty streams, using
+524534 native financial bytes, 864631 canonical bytes and 686 total ordinary
+units. A separate control spends the remaining work through 677 real SELECT
+queries and refuses at 2028 ordinary units before returning any state. Final
+reentrancy, changed connection options and expiry controls run after real graph
+validation. This establishes representative paging and refusal behavior, not
+maximum joint capacity or detection of hidden raw SQLite transaction changes.
+
+Final offline composition **0638961b3f732b769a16358edea13d27d5bb0c91**
+passes **267 tests on Python 3.12** and **265 on Python 3.11**, with two
+intentional Python-3.12-only autocommit skips, 25 PostgreSQL cases deselected
+and one existing warning per run. Repository formatting, lint, source security,
+types, frozen offline build and package policy pass. All **133 runtime files**
+match Git, disk, wheel and source archive. Collection contains 4715 cases on
+each interpreter; two existing wall-clock-derived IDs differ between collections.
+These results are a selected offline suite, not full hosted CI.
+
+Independent SQLite evidence is separately staged: 78 passes at 11c12bc,
+followed by two cleanup-order cases at 28f5685; the six new authored integration
+cases also pass independently. Earlier fixture, oracle and style failures remain
+retained. The initial pooled-connection test incorrectly required immediate raw
+closure; the corrected test proves restored timeout, no transaction or checked-out
+lease, unchanged rows before disposal and closure after explicit disposal.
+
+The first complete-reader native attempt stops in its first write-witness case.
+The native counter detects exactly three intended job updates, but the deliberate
+ordinary rollback exception is mapped to the existing database-failure category.
+Post-context assertions, the zero-row control and the reader phases do not execute.
+The exact three-database/fifteen-role baseline is restored and the server stopped.
+Reviewed test-only **5e92242937bf96024bf15479ee7589b8d220eaa5** changes only
+that sentinel to a distinct interruption, preserving all assertions and avoiding
+an error expectation that could mask earlier failures. The corrected matrix
+contains 2 write-witness, 17 independent and 6 authored PostgreSQL cases.
+
+Native traces, complete PostgreSQL outcomes, LATIN1 and exact UTF8 receipts,
+then exact protected PR/main/package/candidate evidence remain required.
+Independent native reports measure inspect-only work separately from charged
+observation queries; the authored property records total ordinary work.
+F2/P1 acceptance stays null. F3 and P2 stay Not started.
+
+
+## F2 PostgreSQL bind repair and complete native checkpoint — 2026-10-22
+
+The corrected write-witness controls both pass, followed by five fixture
+histories. The first complete reader then exposes a product compatibility
+failure: pinned SQLAlchemy PostgreSQL column reflection compiles **21 binds**,
+so the existing **16-bind** guard refuses before its target native cursor call.
+That compilation count is separate from observed native execution. The failed
+attempt and exact restored/stopped release remain retained.
+
+Reviewed repair **2bf335288d85133e4f4962218d0a2b47e086914b** replaces only
+the new reader's PostgreSQL column observation with fixed literal SQL and one
+bound table name. It returns at most 33 rows, refuses zero or more than 32, and
+preserves observed names, native types, nullability and defaults through the
+existing scalar and exact-profile gates. Unsupported generated, identity,
+dropped, commented and type states still refuse. SQLite and historical caller
+paths are unchanged. No query, time, bind or payload allowance is increased.
+
+The repair's selected offline suite passes **124 tests on each interpreter**,
+with 29 PostgreSQL cases deselected and no warnings. Formatting, lint, security,
+types, frozen offline build and distribution checks pass; all **133 runtime
+members** match source, wheel and source archive. This supplements the earlier
+267/265 regression checkpoint; it is not a repeated full-suite claim.
+
+A separate native observer records actual cursor calls, raw identity, parameter
+counts and outcome without recording parameter values or changing arguments.
+Its first native run returns the exact fresh-ar6 state, then the observer refuses
+six pinned immutable parameter-map containers that it cannot yet count. The
+remaining post-witness assertions and later cases were not reached. Test-only
+**09cc3ba0d65e25408c7cc4d27c3d15834ba54411** recognizes that exact pinned
+class, preserves unknown-container refusal and adds 16-bind acceptance and
+17-bind refusal controls. Fourteen focused observer/CTE checks pass.
+
+The corrected PostgreSQL 16.15 run at 09cc3ba passes all **29 selected cases**
+on Python 3.12: 2 write controls (8.96s), 17 independent cases (66.08s), 6
+integration cases (26.70s) and 4 catalog-drift controls (13.11s). There are no
+selected skips or warnings. Complete fresh/legacy ar6 and three ar7 histories,
+evolving reservations, LATIN1/UTF8 receipts, real paging, exhaustion, final
+publication guards and default/type/comment/dropped-column drift are covered.
+Every observed call in the nine shared complete/evolved-state positives uses
+at most 10 parameters; that observation does not extend the observer's scope
+to other test modules. The LATIN1 case observes 4 native bytes and 5 decoded
+UTF8 bytes for its payload, not physical wire capture.
+
+All phases restore the exact three-database/fifteen-role/zero-client baseline.
+The final release proves PostgreSQL stopped with no PID, socket or socket lock.
+Source bytes are unchanged across execution. The same 29-case Python 3.11 run,
+final independent evidence audit and exact protected PR/main/package/candidate
+checks remain pending at this checkpoint. Maximum joint capacity, F2 delivery,
+full P1, provisioning and production readiness are not accepted by these local
+results. F2/P1 acceptance stays null; F3/P2 remain Not started.
+
+
+## F2 integrated byte-boundary review — 2026-10-22
+
+The original 29-case PostgreSQL matrix also passes on Python 3.11 at
+**93ef7d516e67048744834031f8028589829984a5**: 2 write controls (9.64s),
+17 independent cases (68.07s), 6 integration cases (26.04s) and 4 catalog
+drift controls (13.11s), with no selected skips or warnings. The exact baseline
+is restored and PostgreSQL stopped. Source-equivalence review preserves the
+separate Python 3.12 evidence at 09cc3ba.
+
+Final acceptance review identified an additional requirement: the complete
+PostgreSQL reader needed shared 2 MiB native and canonical boundary evidence.
+Earlier component-bound checks and a representative 4097-job reader state
+did not establish that integrated property. Five cases cover native CAP and
+CAP + 1, canonical escaping expansion, and canonical CAP and CAP + 1. Native
+overflow must refuse before financial body transfer. Canonical CAP must
+return the exact complete immutable state; canonical overflow must refuse.
+
+The first attempt failed during fixture construction because one payload
+exceeded PostgreSQL's existing VARCHAR(64) limit. Test-only **c683cfd** replaces
+that invalid fixture with individually valid zero-reserved v1 jobs and exact
+scopes, retaining the original **245000 microUSD** opening. A complete
+single-row control precedes scaled calibration. Actual ten-family receipts
+and independent whole-array serialization establish the final byte sizes;
+each payload remains at most 64 characters and total candidates stay below
+the existing row limit. No schema, reader or allowance changes.
+
+Twenty-five focused offline checks pass on each interpreter. In SQLite,
+canonical CAP is exactly **2097152** bytes with **1189447** native bytes and
+**12191** candidate rows; native CAP and CAP + 1 are separately observed.
+The next PostgreSQL attempt at c683cfd reaches the expected native-CAP
+reader refusal and passes its same-connection/zero-write checks, then fails
+when the test accesses the exception context manager incorrectly. Later
+postconditions and four cases do not execute. Test-only **8da2938** captures
+the entered context and still requires identity with the original reader
+exception; seven focused installed-pytest probes validate refusal and
+non-refusal paths. Both failed native attempts are retained with restored,
+stopped releases.
+
+[PR #113](https://github.com/spei04/agent-rewind/pull/113) tracks F2.
+Its original source 93ef7d5 passes hosted attempt **39763710972/1**:
+Python 3.11 **4729 passed / 32 skipped** and Python 3.12 **4740 passed /
+21 skipped**, one existing warning each; package, security, isolation and
+CI gate pass. That result does not cover the subsequent boundary correction.
+The corrected five-case PostgreSQL run at **8da2938121d0cd6cddb826d0c8f1add51e836ea5**
+passes on Python 3.12 in **79.78s**, with no selected skips or warnings.
+Native CAP is **2097152** bytes; native CAP + 1 is **2097153** and transfers
+no financial bodies. The canonical-CAP positive returns the exact complete
+state at **2097152** canonical bytes, **1199873** native bytes and **12051**
+candidate rows. Canonical CAP + 1 and escaping expansion refuse while native
+bytes remain below the cap. Every observed native call uses at most 10 binds;
+maximum inspect-only work is 618 units and maximum total ordinary work is
+667, including the separate counter observations and transaction setup.
+Same-connection, no-write, rollback/commit, cleanup and unchanged-snapshot
+postconditions pass. The exact database baseline is restored and the server
+stopped.
+
+The matching five-case Python 3.11 run, refreshed source inventory, replacement
+PR checks and protected-main candidate remain required. These are separate
+limit-enforcement proofs, not a promise that every combination of maximum
+dimensions fits. F2/P1 acceptance remains null; F3/P2 remain Not started.
