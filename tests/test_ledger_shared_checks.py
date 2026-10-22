@@ -175,16 +175,20 @@ def test_expiry_after_actual_serialization_prevents_more_work_or_return(monkeypa
     assert validate_ledger_chain(cursors, opening) == expected
 
 
-def test_expiry_inside_same_scope_overlap_scan_stops_next_comparison(monkeypatch, cohort):
+def test_expiry_during_period_lookup_refuses_before_insertion(monkeypatch, cohort):
     cursors, opening = cohort
     target = cursors[-1].manifest.accounts[-1]
     clock = [0.0]
     comparisons = []
+    searches = []
+    projections = []
     expire = [False]
     original = LedgerAccount.__getattribute__
+    original_dump = LedgerAccount.model_dump
+    search = ledger_state.bisect_left
     monkeypatch.setattr(ledger_work, "monotonic", lambda: clock[0])
 
-    class ObservedEnd(str):
+    class ObservedStart(str):
         def __gt__(self, other):
             result = super().__gt__(other)
             comparisons.append(other)
@@ -194,21 +198,40 @@ def test_expiry_inside_same_scope_overlap_scan_stops_next_comparison(monkeypatch
 
     def observed(self, name):
         result = original(self, name)
-        # Only the last real account's comparison is observed. All stored fields
-        # and comparison results remain unchanged; earlier cohorts are traversed.
-        if self is target and name == "period_end":
-            return ObservedEnd(result)
+        if self is target and name == "period_start":
+            return ObservedStart(result)
         return result
 
+    def searched(intervals, period):
+        result = search(intervals, period)
+        if isinstance(period[0], ObservedStart):
+            searches.append((intervals, len(intervals)))
+        return result
+
+    def dumped(self, *args, **kwargs):
+        if self is target:
+            projections.append(self.id)
+        return original_dump(self, *args, **kwargs)
+
     monkeypatch.setattr(LedgerAccount, "__getattribute__", observed)
+    monkeypatch.setattr(LedgerAccount, "model_dump", dumped)
+    monkeypatch.setattr(ledger_state, "bisect_left", searched)
     expected = validate_ledger_chain(cursors, opening, check=LedgerWork().check)
-    assert len(comparisons) == 191
+    assert len(searches) == 1 and projections == [target.id]
+    assert 1 <= len(comparisons) <= searches[0][1].bit_length()
+    assert len(searches[0][0]) == searches[0][1] + 1
     comparisons.clear()
+    searches.clear()
+    projections.clear()
     expire[0] = True
     work = LedgerWork()
     with pytest.raises(MigrationRefused, match="^migration_busy$"):
         validate_ledger_chain(cursors, opening, check=work.check)
-    assert len(comparisons) == 1
+    assert len(searches) == 1 and not projections
+    assert 1 <= len(comparisons) <= searches[0][1].bit_length()
+    assert len(searches[0][0]) == searches[0][1]
+    # Expiry during a bounded search is observed after it, before insertion.
+    # Pure validation without an injected deadline retains the same receipt.
     assert validate_ledger_chain(cursors, opening, check=None) == expected
 
 

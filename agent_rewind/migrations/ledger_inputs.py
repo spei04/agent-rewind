@@ -249,7 +249,9 @@ def decode_ledger_json(raw: bytes, *, maximum: int) -> object:
     """Lexical proof shared by manifest files and bounded durable cursor bytes."""
     if len(raw) > maximum or raw.startswith(b"\xef\xbb\xbf"):
         raise ValueError("size or BOM")
-    source = raw.decode("utf-8")
+    # Keep raw limits above; only JSON's four legal outer whitespace bytes
+    # are irrelevant to lexical validation. Quoted/internal content is untouched.
+    source = raw.decode("utf-8").strip(" \t\r\n")
     depth = 0
     quoted = escaped = False
     for character in source:
