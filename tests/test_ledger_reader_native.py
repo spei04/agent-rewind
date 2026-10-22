@@ -828,6 +828,7 @@ def test_complete_reader_stops_expired_pure_reducer_and_cleans_up(
             assert cursor.fetchone() == (work.previous_timeout,)
         finally:
             cursor.close()
+        assert sqlite_snapshot(case.path) == before
         record_property(
             "pure_reducer_boundary",
             json.dumps(
@@ -844,4 +845,3 @@ def test_complete_reader_stops_expired_pure_reducer_and_cleans_up(
         engine.dispose()
     with pytest.raises(sqlite3.ProgrammingError):
         raw.execute("SELECT 1")
-    assert sqlite_snapshot(case.path) == before
