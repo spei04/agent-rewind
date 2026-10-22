@@ -316,8 +316,8 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- Planning/verification: finish the entry/assignment update in secondary, then independently review reader integration; preserve null F2/P1 acceptance and dated evidence.
-- Platform/security: implement the complete dormant F2 reader/runtime in secondary after the explicit documentation handoff, under the accepted exact query and work schedule.
+- Planning/verification: independently review frozen reader integration and acceptance coverage; preserve null F2/P1 acceptance and dated evidence.
+- Platform/security: maintain the complete dormant F2 reader/runtime in secondary, compose reviewed independent tests and resolve integration findings under the exact query and work schedule.
 - Independent QE: own only new tests/ledger_reader_fixture.py, tests/test_ledger_reader_independent.py and tests/test_ledger_reader_native.py in primary; validate complete states and native boundaries against immutable runtime handoffs.
 - Lead: review/integrate source and independent evidence, coordinate exclusive database ownership, maintain public issue scope, and require scoped F2 delivery then full F3/P1 acceptance before P2.
 
@@ -426,10 +426,12 @@ and observed fixed-page queries. SQL, setters, xids and fallback targets are
 charged; pure loops check the deadline without consuming an extra work unit. Keep 2048 total units (12 bootstrap, 2028
 ordinary, 8 cleanup), 120 seconds and 16 binds. The complete schedule pays
 duplicate discovery/H00 and catalog prefixes until traced reuse exists.
-Current P=0 ordinary totals are SQLite ar6/ar7 676/816 nominal, 940/1242
-conservative fallback, and PostgreSQL 535/628; each accepted graph page adds
-4/6 units respectively. These constructions do not prove executed capacity,
-and jointly incompatible maxima cannot be combined.
+The entry estimate used P=0 ordinary totals of SQLite ar6/ar7 676/816 nominal,
+940/1242 conservative fallback, and PostgreSQL 535/628. The complete-reader
+trace and source review below correct SQLite by two units; PostgreSQL is
+unchanged. Each accepted graph page adds 4/6 units respectively. These
+constructions do not prove executed capacity, and jointly incompatible maxima
+cannot be combined.
 
 Keep native storage, decoded UTF8 receipts and canonical bytes separate.
 The original H10 1114625-byte and fixed nonledger 1443887-byte bounds are
@@ -450,3 +452,58 @@ belong to this slice. Exact F2 PR/main/package/security/candidate acceptance
 still precedes F3. Progress PR #112 merged at f39d2db with all seven main jobs
 passing; its candidate verification was still running at this entry checkpoint.
 No final artifact acceptance is inferred from those job results.
+
+
+## F2 source and test handoffs — 2026-10-22
+
+Runtime source **90ce9513bbafc74fa7f5e93246d08ddae913b7b7** freezes the
+complete non-owning reader, nine bounded query/consumer modules, shared pure
+historical reducers and the explicit 133-file distribution policy. The first
+complete SQLite selection passes **20 tests** across fresh/legacy ar6 and
+empty/organization/legacy-opening ar7. Fresh existing-caller regressions pass
+**166 tests**; whole-repository format/lint, source security and type checks
+pass. These are local checkpoints, not final F2 acceptance.
+
+Independent QE source **fd4c9dc7fedd0ed6fc401c88cebcdd24100c9570** adds
+evolving reserved/settled/released states, financial closure failures, transport
+witness controls, a future-period regression and prepared LATIN1 coverage.
+Its fixture-only selection passes 15 checks. The first composed independent
+reader run records **69 passes, two failures and 11 PostgreSQL cases
+deselected**. The two failures are retained: an invalid test role fails the
+existing schema before inspection; a changed v2 job budget fails its immutable
+admission association before the intended exposure check. QE owns the narrow
+fixture/oracle corrections. All complete-state, evolving-state, future-period,
+H10 receipt and SQLite no-write/guard tests in that run pass.
+
+The complete trace observes P=0 ordinary work **678/818** on SQLite ar6/ar7.
+The outer early-temp witness is additional to the component's early witness
+and original catalog witness: one extra target costs two ordinary units.
+Preserve the ordering and correct the source-derived conservative fallback
+bases to **942/1244**. PostgreSQL remains **535/628**; graph pages add **4/6**
+units. The total remains **2048 = 12 bootstrap + 2028 ordinary + 8 cleanup**,
+with 120 seconds and 16 binds. No allowance is increased and no positive
+maximum-capacity claim follows.
+
+Independent source review, corrected complete test results, native PostgreSQL,
+combined-bound evidence and exact PR/main/package/candidate delivery remain
+required. F2/P1 acceptance stays null; F3 and P2 stay Not started.
+
+## Accepted progress delivery after F1 — 2026-10-22
+
+The earlier pending candidate for [PR #112](https://github.com/spei04/agent-rewind/pull/112)
+is now independently accepted: reviewed source
+**08bf372743a03c3a21140caee7b830561bed0ef1**, protected-main merge
+**f39d2db892595b45aa4f234454c4d83d2e06ee63**. Exact PR/main runs
+[39737515333/1](https://github.com/spei04/agent-rewind/actions/runs/39737515333)
+and [39742506695/1](https://github.com/spei04/agent-rewind/actions/runs/39742506695)
+pass. Main Python 3.11 records **4561 passed / 32 skipped** and Python 3.12
+**4572 passed / 21 skipped**, each with one existing warning; the other
+required native, isolation, security and delivery jobs pass.
+
+Candidate **12411685094** is 726290 bytes, SHA256
+`d74a7392759e727922c8712176eb9b1cd68a7a98ec43a64d9b990505d9d1bb74`.
+The unchanged reviewed verifier confirms all 124 runtime files against the
+source, wheel and source distribution. The first verifier invocation's
+transient log-download failure remains retained; the successful invocation and
+durable release record are separate. This delivery updates F1 progress only;
+it contains no F2 runtime and cannot accept F2 or P1.

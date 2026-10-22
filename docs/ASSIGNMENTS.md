@@ -6,9 +6,9 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Complete F2 reader/runtime in reused secondary after documentation release | Exact accepted query/transport/work contract; independent native and source review before delivery. |
-| Independent QE | Three new reader fixture/state/native test modules in reused primary | Complete installed-state positives and isolated native/semantic negatives; immutable runtime handoffs. |
-| Planning/verification | Record F2 entry, then independently review integration | Release secondary clean to runtime author; preserve null F2/P1 acceptance and dated history. |
+| Platform/security | Frozen complete F2 reader at 90ce951; compose reviewed QE corrections in secondary | Fresh regressions and static checks pass; independent native/source review and delivery remain. |
+| Independent QE | Execute frozen runtime against independently authored reader tests in primary | Correct isolated fixture/oracle failures; complete PostgreSQL, encoding, no-write and boundary proof. |
+| Planning/verification | Independently review frozen F2 source and acceptance coverage | Complete closure, transport/work bounds and historical semantics; preserve null F2/P1 acceptance. |
 | Lead | Integrate/review source and evidence; coordinate delivery and exclusive database ownership | F2 scoped PR/main/candidate, then F3/full P1 before P2. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
@@ -53,7 +53,7 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
 - **Next evidence-producing milestone:** Implement and independently validate the complete F2 persisted reader under the accepted 2026-10-22 entry; F2 acceptance remains null. F3 trusted provisioning/opening/replay/recovery follows accepted F2. Only complete final P1 acceptance permits P2 entry.
-- **Current storage and consumers:** Two existing cloud checkouts are reused: planning owns secondary for this documentation update, then explicitly releases it to platform runtime; independent QE owns primary. Catalog component work restored/stopped the database and released it; this documentation assignment has no database slot. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
+- **Current storage and consumers:** Platform/security owns secondary for F2 runtime; independent QE owns primary for tests. Planning reviews immutable source without another checkout. The lead briefly owns the two progress documents between source-bound runs. PostgreSQL is stopped and unassigned pending an explicit exclusive native-test handoff. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -979,3 +979,23 @@ owns new reader fixture/state/native modules in primary. Planning then reviews
 integration; the lead owns source composition, delivery and database handoffs.
 No runtime/shared test edit or database execution occurs in this documentation
 assignment. All estimates, dependencies, frozen entry and earlier history remain.
+
+
+## F2 integration checkpoint — 2026-10-22
+
+| Owner | Completed handoff | Next assignment |
+| --- | --- | --- |
+| Platform/security | Frozen complete reader 90ce951; first 20 SQLite checks and 166 existing-caller regressions pass; repository format/lint/security/type checks pass | Compose independently corrected tests, then resolve source-review findings and support scoped delivery. |
+| Independent QE | Frozen fixture extension fd4c9dc; 15 fixture/witness checks pass. Composed runtime b8751d4; expanded run has 69 passes, two fixture/oracle failures and 11 PostgreSQL cases deselected | Correct the two tests, retain failed evidence, then execute complete native PostgreSQL and encoding/no-write controls. |
+| Planning/verification | Reviewed query families and confirmed the future-period over-refusal; author removed that prospective rule and QE's regression passes | Review frozen complete source and combined-bound coverage. |
+| Lead | Verified immutable handoffs and retained evidence; accepted PR #112 candidate; reconciled SQLite's extra observed temp query without increasing the work budget | Coordinate native ownership, integrate reviewed F2 delivery and update acceptance only after exact PR/main/candidate proof. |
+
+The valid future-period regression confirms that later current-period exposure
+does not invalidate a previously affordable unused future period. Future
+admission eligibility remains a provisioning/reservation responsibility.
+The first two expanded-run failures occur before the intended financial
+assertion: one test used a role excluded by the existing schema, and another
+changed a v2 budget inconsistently with its admitted configuration. Neither
+justifies weakening the production reader. These are intermediate results;
+F2/P1 acceptance remains null. See the
+[delivery checkpoint](delivery/LEDGER_EXECUTION_PLAN.md#f2-source-and-test-handoffs--2026-10-22).
