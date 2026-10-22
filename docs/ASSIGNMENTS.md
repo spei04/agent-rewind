@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Source fingerprint and complete-context components reviewed; implement guarded writer/service in primary | Prove actual initialization, provisioning, replay, finalization and uncertainty before native recovery acceptance. |
+| Platform/security | Writer service reviewed; author PostgreSQL service controls in primary | Freeze native tests/controller for review; no database execution before exclusive handoff. |
 | Independent QE | Compatibility adapter and SQLite lifecycle reviewed; prepare native/recovery controls privately | Secondary released to lead integration; await the frozen integrated tree and exclusive PostgreSQL handoff. |
-| Planning/verification | Context extraction accepted; review pure preparation and fixed writer SQL | Check exact eligibility, opening, replay, cursor and finite-error boundaries against frozen contracts. |
-| Lead | Integrate reviewed F3 components, package policy and progress in released secondary | Preserve null F3/P1 acceptance until full writer/native/recovery and delivery gates pass. |
+| Planning/verification | Service, preparation and integration source reviewed; audit native test plans and evidence | Preserve exact scope, finite errors, source bindings and remaining delivery gates. |
+| Lead | Combined interpreter checks and package comparison pass; release frozen secondary to native QE | Preserve null F3/P1 acceptance until full native/recovery and protected delivery gates pass. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -1181,8 +1181,29 @@ on both interpreters. Pure intent preparation at 090d22c has independent review
 and 18 passing direct tests; its 16 SQL/type records match the frozen packet.
 
 The lead takes released secondary for package policy and integration. QE is
-reassigned to native and recovery controls; planning reviews the next pure
-preparation checkpoint while platform/security continues the actual service.
+reassigned to native and recovery controls; planning reviews service/integration
+evidence while platform/security prepares PostgreSQL service controls.
 Seeded history checks do not establish service-created state, native PostgreSQL,
 whole-command capacity or recovery. F3/P1 remain In progress with null acceptance;
 P2 remains Not started. No provider calls or new paid resources were added.
+
+## F3 composed local checkpoint — 2026-10-22
+
+Source 8708b8f composes the reviewed writer, source transport, preparation,
+context and adapter. Combined checks pass 251 cases on Python 3.12 and 248 with
+three explicit Python-version skips on Python 3.11, one existing warning each.
+The unchanged backlog checker and 94 backlog tests pass; formatting, lint,
+security and whole-project type checking pass. Offline wheel/sdist validation
+matches all 141 runtime files byte for byte against Git. The first local build
+wrapper omitted the existing no-gitignore flag and correctly failed the exact
+output-directory check; its separate corrected build passed without test or
+product changes. No installed-package or hosted delivery is inferred.
+
+The service's earlier 20 controls comprise 15 actual SQLite cases and five
+pre-checkout refusals. Real legacy opening is 245000, and original fields remain
+unchanged. Native PostgreSQL, independent zero-write replay accounting,
+concurrency, process interruption, owner/ACL restore and supported capacity
+proof remain required. The lead returns secondary to QE after this documentation
+handoff; platform/security owns primary native-test authoring, and planning
+reviews source/controller evidence. Database execution still requires a reviewed
+exclusive handoff. F3/P1 acceptance remains null and P2 is Not started.

@@ -788,9 +788,27 @@ calls, entries or graph health. Deadline tests use actual serialization followed
 by controlled clock advancement, not elapsed wall-clock capacity evidence.
 
 The lead integrates policy and progress in released secondary. Platform/security
-owns the writer in primary; planning reviews pure preparation/fixed SQL; QE
-prepares native/recovery controls without an active database hold. Full actual
+owns service/native-test work in primary; planning reviews service/integration
+evidence; QE prepares native/recovery controls without an active database hold. Full actual
 initialization, provisioning, exact older replay, uncertainty, commit/cleanup,
 owner/ACL restore and final protected PR/main/candidate gates remain required.
 F3/P1 acceptance stays null; P2 remains Not started. No new spending, deployment
 or partner-data authorization follows.
+
+
+At composed source **8708b8f**, the combined selection passes **251 cases on
+Python 3.12** and **248 with three explicit version skips on Python 3.11**,
+one existing warning each. The unchanged backlog validator and 94 backlog tests,
+full lint/format/security and type checking across 125 source files pass. Offline
+wheel/sdist checks confirm all **141 runtime members** equal Git. A separate
+corrected build uses the existing CI no-gitignore option after the first local
+wrapper's extra-file refusal; both attempts remain recorded. No installed-package,
+hosted-delivery, native PostgreSQL or full-capacity result is claimed.
+
+Writer source **6bc02da** has independent API/replay and lead finalizer review.
+Its separate 189-case selection includes 20 service controls: 15 actual SQLite
+cases and five pre-checkout refusals. The legacy invocation records 1646 ordinary
+work units under unchanged limits; 1910 SQLite trace callbacks include trigger
+repetitions and are not an independent execute-attempt count. Full native,
+recovery and protected delivery gates remain open. F3/P1 acceptance stays null;
+P2 remains Not started.

@@ -3818,3 +3818,15 @@ on each Python version. Fresh foundation delivery remains required. The
 [delivery plan](delivery/LEDGER_EXECUTION_PLAN.md#current-p1-implementation-sequence--2026-10-22)
 records exact results, remaining gates and the structural-versus-authenticated
 evidence distinction.
+
+
+### Current F3 implementation evidence — 2026-10-22
+
+The composed local writer/adapter checkpoint at 8708b8f passes 251 Python 3.12
+cases and 248 Python 3.11 cases with three explicit version skips. Offline
+wheel/sdist contents match all 141 runtime files. These component/integration
+results leave F3, P1 and AR-010-A In progress with null acceptance; P2 remains
+Not started. Native PostgreSQL, concurrency, process interruption, owner/ACL
+restore, capacity and final protected delivery gates remain mandatory. See the
+[ledger delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-component-integration-checkpoint--2026-10-22).
+Task/PR counts, estimates, dependencies and external approvals are unchanged.

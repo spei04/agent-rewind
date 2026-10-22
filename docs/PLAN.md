@@ -1140,9 +1140,10 @@ The lead accepted the [complete reader implementation entry](delivery/LEDGER_EXE
 
 F2 is accepted at e8cba52. F3 remains In progress: the counted fingerprint,
 complete-context extraction and coherent immutable-history adapter have scoped
-review and SQLite test evidence. The lead is integrating these components;
-platform/security continues the writer and QE prepares independent native and
-recovery controls. [Current evidence and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#f3-component-integration-checkpoint--2026-10-22)
+review and SQLite test evidence. The composed writer/adapter passes 251 Python
+3.12 cases and 248 Python 3.11 cases with three explicit version skips. Offline
+packages match all 141 runtime files. Platform/security and QE now prepare
+separate native service/adapter and recovery controls. [Current evidence and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#f3-component-integration-checkpoint--2026-10-22)
 separate these results from full command, PostgreSQL, capacity and recovery
 acceptance. Full P1 acceptance is null and P2 is Not started. Counts, estimates,
 dependencies, funding and production gates are unchanged.
