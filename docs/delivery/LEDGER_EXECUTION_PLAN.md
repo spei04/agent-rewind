@@ -558,3 +558,55 @@ then exact protected PR/main/package/candidate evidence remain required.
 Independent native reports measure inspect-only work separately from charged
 observation queries; the authored property records total ordinary work.
 F2/P1 acceptance stays null. F3 and P2 stay Not started.
+
+
+## F2 PostgreSQL bind repair and complete native checkpoint — 2026-10-22
+
+The corrected write-witness controls both pass, followed by five fixture
+histories. The first complete reader then exposes a product compatibility
+failure: pinned SQLAlchemy PostgreSQL column reflection compiles **21 binds**,
+so the existing **16-bind** guard refuses before its target native cursor call.
+That compilation count is separate from observed native execution. The failed
+attempt and exact restored/stopped release remain retained.
+
+Reviewed repair **2bf335288d85133e4f4962218d0a2b47e086914b** replaces only
+the new reader's PostgreSQL column observation with fixed literal SQL and one
+bound table name. It returns at most 33 rows, refuses zero or more than 32, and
+preserves observed names, native types, nullability and defaults through the
+existing scalar and exact-profile gates. Unsupported generated, identity,
+dropped, commented and type states still refuse. SQLite and historical caller
+paths are unchanged. No query, time, bind or payload allowance is increased.
+
+The repair's selected offline suite passes **124 tests on each interpreter**,
+with 29 PostgreSQL cases deselected and no warnings. Formatting, lint, security,
+types, frozen offline build and distribution checks pass; all **133 runtime
+members** match source, wheel and source archive. This supplements the earlier
+267/265 regression checkpoint; it is not a repeated full-suite claim.
+
+A separate native observer records actual cursor calls, raw identity, parameter
+counts and outcome without recording parameter values or changing arguments.
+Its first native run returns the exact fresh-ar6 state, then the observer refuses
+six pinned immutable parameter-map containers that it cannot yet count. The
+remaining post-witness assertions and later cases were not reached. Test-only
+**09cc3ba0d65e25408c7cc4d27c3d15834ba54411** recognizes that exact pinned
+class, preserves unknown-container refusal and adds 16-bind acceptance and
+17-bind refusal controls. Fourteen focused observer/CTE checks pass.
+
+The corrected PostgreSQL 16.15 run at 09cc3ba passes all **29 selected cases**
+on Python 3.12: 2 write controls (8.96s), 17 independent cases (66.08s), 6
+integration cases (26.70s) and 4 catalog-drift controls (13.11s). There are no
+selected skips or warnings. Complete fresh/legacy ar6 and three ar7 histories,
+evolving reservations, LATIN1/UTF8 receipts, real paging, exhaustion, final
+publication guards and default/type/comment/dropped-column drift are covered.
+Every observed call in the nine shared complete/evolved-state positives uses
+at most 10 parameters; that observation does not extend the observer's scope
+to other test modules. The LATIN1 case observes 4 native bytes and 5 decoded
+UTF8 bytes for its payload, not physical wire capture.
+
+All phases restore the exact three-database/fifteen-role/zero-client baseline.
+The final release proves PostgreSQL stopped with no PID, socket or socket lock.
+Source bytes are unchanged across execution. The same 29-case Python 3.11 run,
+final independent evidence audit and exact protected PR/main/package/candidate
+checks remain pending at this checkpoint. Maximum joint capacity, F2 delivery,
+full P1, provisioning and production readiness are not accepted by these local
+results. F2/P1 acceptance stays null; F3/P2 remain Not started.

@@ -6,9 +6,9 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Complete reader corrected at 0ce4c3e; composed source 1004c402 in secondary | Offline checks and 133-file package proof pass; prepare Python 3.11 native verification after exclusive handoff. |
-| Independent QE | Execute the corrected 25-case PostgreSQL matrix at 5e92242 in primary | Own the exclusive database slot; retain failures, restore baseline and stop before release. |
-| Planning/verification | Accepted source/deadline and integration-test corrections; audit native evidence | Verify actual native outcomes and later exact PR/main/candidate evidence; preserve null F2/P1 acceptance. |
+| Platform/security | Reviewed one-bind catalog repair 2bf3352 and unchanged observer correction composed at a48cd9e | Run the same 29 native cases on existing Python 3.11 after final-source and exclusive database handoff. |
+| Independent QE | All 29 PostgreSQL cases pass at 09cc3ba on Python 3.12; baseline restored and server stopped | Freeze native evidence for independent audit; preserve the earlier failed attempts. |
+| Planning/verification | Accepted source, catalog repair and observer correction; audit the successful native matrix | Review final source inventory and exact PR/main/candidate evidence; preserve null F2/P1 acceptance. |
 | Lead | Integrate/review source and evidence; coordinate delivery and exclusive database ownership | F2 scoped PR/main/candidate, then F3/full P1 before P2. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
@@ -53,7 +53,7 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
 - **Next evidence-producing milestone:** Implement and independently validate the complete F2 persisted reader under the accepted 2026-10-22 entry; F2 acceptance remains null. F3 trusted provisioning/opening/replay/recovery follows accepted F2. Only complete final P1 acceptance permits P2 entry.
-- **Current storage and consumers:** Platform/security owns secondary for F2 runtime; independent QE owns primary for tests. Planning reviews immutable source without another checkout. The lead briefly owns the two progress documents between source-bound runs. PostgreSQL is assigned exclusively to independent QE for the corrected native matrix; platform/security waits for a verified restored/stopped release. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
+- **Current storage and consumers:** Platform/security owns secondary for F2 runtime; independent QE owns primary for tests. Planning reviews immutable source without another checkout. The lead briefly owns the two progress documents between source-bound runs. The Python 3.12 native matrix has released PostgreSQL after verified restoration and stop; the next exclusive handoff is to platform/security for the same Python 3.11 matrix. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -1025,3 +1025,28 @@ Test-only 5e92242 makes the sentinel a distinct interruption; no broad error
 expectation or runtime change hides earlier assertion failures. The exact
 database baseline is restored and PostgreSQL stopped before the corrected
 attempt. F2/P1 acceptance remains null; F3/P2 remain Not started.
+
+
+## F2 PostgreSQL repair and verification — 2026-10-22
+
+| Owner | Reviewed delivery | Next assignment |
+| --- | --- | --- |
+| Platform/security | Corrected the actual pinned reflection failure at 2bf3352; 124 selected offline tests pass on each interpreter and all 133 runtime package members match | Verify the same 29 native cases on Python 3.11 from the final delivery source. |
+| Independent QE | Added exact native parameter receipts and corrected pinned immutable-map recognition at 09cc3ba; all 29 PostgreSQL cases pass on Python 3.12 | Preserve raw failures and successful traces; support independent evidence and delivery audit. |
+| Planning/verification | Accepted the bounded one-bind replacement and narrow observer correction | Audit native outcomes, final source inventory and hosted delivery. |
+| Lead | Verified all four successful native phases and restored/stopped release | Publish the reviewed F2 slice and complete protected PR/main/candidate checks. |
+
+The first complete PostgreSQL reader failed because the pinned reflection
+implementation compiled 21 parameters, exceeding the unchanged 16-bind limit.
+The fixed catalog query uses one bound table name and at most 33 returned rows,
+with a 32-column acceptance limit and unchanged scalar/profile checks. A later
+attempt returned the expected state but its test observer could not count the
+pinned immutable parameter-map type. The narrow test correction preserves
+unknown-container refusal and adds explicit 16/17-bind boundary controls.
+
+At 09cc3ba, actual PostgreSQL passes 2 write-witness controls, 17 independent
+cases, 6 integration cases and 4 catalog-drift cases, with no skips or warnings
+among the selected 29. The exact database/role baseline is restored and the
+server stopped. Python 3.11, final independent audit and hosted delivery remain
+pending at this checkpoint. No maximum-capacity or production claim follows.
+F2/P1 acceptance remains null; F3/P2 remain Not started.
