@@ -5,12 +5,12 @@ from __future__ import annotations
 import sqlite3
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field, fields, replace
 from typing import Any
 
 import psycopg
-from sqlalchemy import text
-from sqlalchemy.engine import Connection, Engine
+from sqlalchemy import event, text
+from sqlalchemy.engine import Connection, Engine, RootTransaction
 from sqlalchemy.exc import DBAPIError
 
 from ..sqlite_ownership import (
@@ -21,6 +21,7 @@ from ..sqlite_ownership import (
     finish_owned,
     quarantine_owned,
 )
+from . import ledger_engine
 from .ledger_engine import LedgerEngineClaim, claim_ledger_engine, release_ledger_engine
 from .ledger_work import LedgerWork
 from .schema import MigrationRefused, schema_table_names
@@ -41,6 +42,164 @@ class LedgerOutcome:
     @property
     def confirmed_precommit_rollback(self) -> bool:
         return self.begun and not self.commit_attempted and self.rollback_acknowledged
+
+
+@dataclass(frozen=True)
+class _LedgerBody:
+    connection: Connection
+    root: RootTransaction
+    raw: Any
+    proxy: Any
+    claim: LedgerEngineClaim
+    work: LedgerWork
+    receipt: CheckoutReceipt | None
+    generation: int | None
+    lease: Any
+    xid: str | None = None
+
+
+_BODIES: dict[Connection, _LedgerBody] = {}
+
+
+def _body_live(body: _LedgerBody) -> None:
+    connection, claim, work = body.connection, body.claim, body.work
+    with ledger_engine._LOCK:
+        state = ledger_engine._REGISTRY.get(claim.engine)
+        if (
+            state is None
+            or state.claim is not claim
+            or state.poisoned
+            or claim.released
+            or claim.work is not work
+            or not claim.checked_out
+            or connection.engine is not claim.engine
+            or claim.engine.pool is not state.pool
+            or claim.engine.dialect is not state.dialect
+        ):
+            raise MigrationRefused("transactional_connection_required")
+    if (
+        connection.closed
+        or connection.invalidated
+        or connection.get_transaction() is not body.root
+        or not body.root.is_active
+        or connection.in_nested_transaction()
+        or connection.connection is not body.proxy
+        or body.proxy.driver_connection is not body.raw
+        or not work._used
+        or not work._claimed
+        or not work._attached
+        or work._detached
+        or work._connection is not connection
+        or work._raw is not body.raw
+        or len(work._listeners) != 2
+        or any(not event.contains(connection, name, callback) for name, callback in work._listeners)
+    ):
+        raise MigrationRefused("transactional_connection_required")
+    receipt, lease = body.receipt, body.lease
+    if connection.dialect.name == "sqlite":
+        if receipt is None or lease is None:
+            raise MigrationRefused("transactional_connection_required")
+        physical = body.raw._ownership
+        if (
+            receipt.connection is not connection
+            or receipt.raw is not body.raw
+            or receipt.proxy is not body.proxy
+            or receipt.pool is not claim.engine.pool
+            or receipt.record is None
+            or receipt.record.dbapi_connection is not body.raw
+            or receipt.record not in receipt.capability.records
+            or receipt.capability is not physical.capability
+            or receipt.generation != body.generation
+            or receipt.failed
+            or receipt.completed
+            or receipt.returned
+            or physical.receipt is not receipt
+            or physical.generation != body.generation
+            or not physical.borrowed
+            or physical.tainted
+            or physical.closed
+            or physical.unknown_callback
+            or physical.native_busy
+            or physical.lease is not lease
+            or work._lease is not lease
+            or lease._released
+            or lease._raw is not body.raw
+            or lease._receipt is not receipt
+            or lease._owner is not work
+            or lease._generation != body.generation
+            or not body.raw.in_transaction
+        ):
+            raise MigrationRefused("transactional_connection_required")
+    elif (
+        connection.dialect.name != "postgresql"
+        or receipt is not None
+        or claim.raw is not body.raw
+        or body.raw.closed
+        or body.raw.info.transaction_status != psycopg.pq.TransactionStatus.INTRANS
+    ):
+        raise MigrationRefused("transactional_connection_required")
+    work.check()
+
+
+def _body_xid(body: _LedgerBody) -> str:
+    # The existing connection observer reserves both timeout setters and this
+    # target. Liveness must be checked first: querying an idle handle starts a tx.
+    _body_live(body)
+    xid: Any = body.connection.exec_driver_sql("SELECT pg_current_xact_id()::text").scalar_one()
+    _body_live(body)
+    if type(xid) is not str or not xid.isascii() or not xid.isdecimal() or not 1 <= len(xid) <= 20:
+        raise MigrationRefused("transactional_connection_required")
+    return xid
+
+
+def _register_ledger_body(
+    connection: Connection,
+    claim: LedgerEngineClaim,
+    work: LedgerWork,
+    receipt: CheckoutReceipt | None,
+) -> None:
+    root = connection.get_transaction()
+    if connection in _BODIES or root is None or connection.closed or connection.invalidated:
+        raise MigrationRefused("transactional_connection_required")
+    body = _LedgerBody(
+        connection,
+        root,
+        work._raw,
+        connection.connection,
+        claim,
+        work,
+        receipt,
+        receipt.generation if receipt is not None else None,
+        work._lease,
+    )
+    _body_live(body)
+    if connection.dialect.name == "postgresql":
+        body = replace(body, xid=_body_xid(body))
+    _BODIES[connection] = body
+
+
+def _revoke_ledger_body(connection: Connection) -> None:
+    _BODIES.pop(connection, None)
+
+
+def _require_ledger_body(connection: Connection) -> LedgerWork:
+    """Require the same excluded body; this is cooperative, not authentication.
+
+    SQLite cannot detect raw ROLLBACK/BEGIN on the same native handle. Supported
+    callers must not issue raw transaction control, release locks, change
+    role/search_path or use the connection concurrently.
+    """
+    if type(connection) is not Connection:
+        raise MigrationRefused("transactional_connection_required")
+    body = _BODIES.get(connection)
+    if body is None:
+        raise MigrationRefused("transactional_connection_required")
+    _body_live(body)
+    if body.xid is not None and _body_xid(body) != body.xid:
+        raise MigrationRefused("transactional_connection_required")
+    if _BODIES.get(connection) is not body:
+        raise MigrationRefused("transactional_connection_required")
+    return body.work
 
 
 def _begin(connection: Connection, outcome: LedgerOutcome, work: LedgerWork) -> None:
@@ -160,7 +319,11 @@ def ledger_transaction(
         attached = True
         work._attach(connection)
         _begin(connection, outcome, work)
-        yield connection
+        try:
+            _register_ledger_body(connection, claim, work, receipt)
+            yield connection
+        finally:
+            _revoke_ledger_body(connection)
         work._prepare_target()
         outcome.commit_attempted = True
         connection.commit()
