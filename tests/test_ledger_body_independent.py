@@ -12,7 +12,7 @@ from ledger_operator_fixture import (
     ledger_case,
     proof_rows,
 )
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.pool import NullPool
@@ -747,3 +747,26 @@ def test_pg_failed_identity_publication_never_yields_or_survives_cleanup(
     assert outcome.confirmed_precommit_rollback and not outcome.commit_attempted
     assert not outcome.cleanup_failed and visible_rows(pg_case, pg_trace) == []
     record_property("failed_identity_publication", json.dumps({"after_native": after_native}))
+
+
+@pytest.mark.parametrize("event_name", ["before_cursor_execute", "after_cursor_execute"])
+def test_added_connection_listener_refuses_the_supported_body(ledger_case, guard_trace, event_name):
+    case = ledger_case
+    work, outcome = LedgerWork(), LedgerOutcome()
+    calls = []
+
+    def foreign(*args):
+        calls.append(True)
+
+    with ledger_transaction(case.engine, outcome, work=work) as connection:
+        assert transaction._require_ledger_body(connection) is work
+        event.listen(connection, event_name, foreign)
+        assert event.contains(connection, event_name, foreign)
+        try:
+            _refused_without_native_work(case, connection)
+        finally:
+            event.remove(connection, event_name, foreign)
+        assert calls == []
+        guard_trace.append({"foreign_event": event_name, "native_effects": False})
+    assert outcome.commit_acknowledged and not outcome.cleanup_failed
+    assert_pool_released(case)
