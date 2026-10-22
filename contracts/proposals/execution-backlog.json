@@ -1983,7 +1983,7 @@
         }
       ],
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/107",
-      "assigned_to": "Platform/security complete F2 reader/runtime in reused secondary work/ledger-reader-runtime after documentation release; independent QE new reader fixtures/state/native test modules in primary; planning/verification independent integration review; lead integration and delivery",
+      "assigned_to": "Independent QE isolated listing-test clock correction in primary; planning/verification current progress and independent correction/delivery review; platform/security reviewed F3 component preparation only; lead source integration and fresh protected delivery",
       "entry_evidence": "HTTP AR-008-B Verified at protected merge cefd222230c800eb2e90c49a3b3c411b394d0393 after PR/main 39683408934/39686498691 attempt 1 and candidate 12387716715. Exact P1 schema/provisioning entry independently accepted at 51af77dc2bf3527e496f0123c6bee17882f56b4a, document SHA256 8677521af4c3dc9c9340e4ec3e466e5eb122bdaa16b43c4c5f65f99ee1ee9c0a. Lead explicitly assigned P1 runtime implementation on 2026-10-21; actual DDL/catalog, privilege, constraints, bounds and recovery proof remain required. F2 implementation entry accepted by the lead on 2026-10-22 after exact catalog and H query/schedule review, separate SQLite 36-case and PostgreSQL 54-case component evidence, and strict native/UTF8/time-adapter conditions. Private entry SHA256 9f9b34a48a1b9abeef52e49d623ef3cda7bcccec86beb7e17e70a614946bee2e; this authorizes complete reader implementation, not product/capacity acceptance."
     },
     {
