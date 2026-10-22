@@ -10,7 +10,10 @@ import pytest
 from ledger_fixture import canonical_bytes
 from ledger_reader_fixture import (
     RowTransferWatch,
+    assert_financial_transfer_boundary,
+    calibrate_financial_boundary,
     complete_ar6,
+    financial_statements,
     later_admitted_call,
     original_rows,
     replace_progress,
@@ -637,81 +640,62 @@ def test_complete_equal_amount_cohorts_refuse_gross_settle_plus_release_excess(e
     refused(case, "ledger_exposure_refused")
 
 
-def _financial_native_receipts(connection):
-    # Fixture calibration uses reviewed literal gates, not the consumer's
-    # accumulator. The test separately observes whether any body was transferred.
-    from agent_rewind.migrations.ledger_financial_sql import SQL
-
-    base = ("account", "call", "entry", "job", "operation", "scope", "organization")
-    return {
-        domain: dict(
-            connection.exec_driver_sql(
-                SQL[
-                    (
-                        "ar7",
-                        "sqlite",
-                        ("financial_base_" if domain in base else "financial_") + domain + "_gate",
-                    )
-                ]
-            )
-            .mappings()
-            .one()
-        )
-        for domain in (*base, "ref", "object", "project")
-    }
-
-
 @pytest.mark.parametrize("native_delta", [0, 1], ids=["native-cap", "native-one-over"])
 @pytest.mark.parametrize("reader_case", [COMPLETE_CASES[4]], indirect=True)
 def test_shared_native_boundary_precedes_separate_canonical_refusal(
     reader_case, monkeypatch, native_delta, record_property
 ):
-    case, cap = reader_case, 2 * 1024 * 1024
-    with case.engine.begin() as connection:
-        first = _financial_native_receipts(connection)
-        job, old = connection.exec_driver_sql(
-            "SELECT id,payload FROM jobs ORDER BY id LIMIT 1"
-        ).one()
-        payload = "z" * (
-            len(old.encode("utf-8"))
-            + cap
-            + native_delta
-            - sum(row["native_bytes"] for row in first.values())
-        )
-        connection.execute(
-            text("UPDATE jobs SET payload=:payload WHERE id=:job"), {"payload": payload, "job": job}
-        )
-        final = _financial_native_receipts(connection)
-        assert len(final) == 10 and all(row["invalid_rows"] == 0 for row in final.values())
-        assert all(row["native_bytes"] < cap for row in final.values())
-        assert sum(row["native_bytes"] for row in final.values()) == cap + native_delta
-    watch = RowTransferWatch(monkeypatch, {"calibrated-job-payload": payload})
-    refused(case, "ledger_limit_exceeded")
-    # Exactly CAP passes native gates and then refuses canonical framing overhead.
-    # One byte over the shared native sum must refuse before this body is fetched.
-    assert bool(watch.hits) is (native_delta == 0)
-    record_property("all_ten_native_receipts", json.dumps(final))
+    mode = "native-one-over" if native_delta else "native-cap"
+    payload, receipt = calibrate_financial_boundary(reader_case, mode)
+    watch = RowTransferWatch(
+        monkeypatch,
+        {"calibrated-job-payload": payload},
+        statements=financial_statements("sqlite"),
+    )
+    refused(reader_case, "ledger_limit_exceeded")
+    assert_financial_transfer_boundary(watch, mode)
+    record_property("financial_boundary", json.dumps(receipt))
     record_property("financial_body_transfers", json.dumps(watch.hits))
+    record_property("financial_statement_fetches", json.dumps(watch.statement_hits))
 
 
 @pytest.mark.parametrize("reader_case", [COMPLETE_CASES[4]], indirect=True)
 def test_canonical_string_expansion_refuses_below_native_financial_cap(
     reader_case, monkeypatch, record_property
 ):
-    case, cap = reader_case, 2 * 1024 * 1024
-    payload = '"' * (cap // 2 + 1)
-    assert len(payload.encode("utf-8")) < cap
-    assert len(canonical_bytes(payload)) > cap
-    with case.engine.begin() as connection:
-        job = connection.exec_driver_sql("SELECT id FROM jobs ORDER BY id LIMIT 1").scalar_one()
-        connection.execute(
-            text("UPDATE jobs SET payload=:payload WHERE id=:job"), {"payload": payload, "job": job}
-        )
-        receipts = _financial_native_receipts(connection)
-        assert all(row["invalid_rows"] == 0 for row in receipts.values())
-        assert sum(row["native_bytes"] for row in receipts.values()) < cap
-    watch = RowTransferWatch(monkeypatch, {"expanding-financial-payload": payload})
-    refused(case, "ledger_limit_exceeded")
-    assert watch.hits
-    record_property("all_ten_native_receipts", json.dumps(receipts))
+    mode = "canonical-expansion"
+    payload, receipt = calibrate_financial_boundary(reader_case, mode)
+    watch = RowTransferWatch(
+        monkeypatch,
+        {"expanding-financial-payload": payload},
+        statements=financial_statements("sqlite"),
+    )
+    refused(reader_case, "ledger_limit_exceeded")
+    assert_financial_transfer_boundary(watch, mode)
+    record_property("financial_boundary", json.dumps(receipt))
     record_property("financial_body_transfers", json.dumps(watch.hits))
+    record_property("financial_statement_fetches", json.dumps(watch.statement_hits))
+
+
+@pytest.mark.parametrize("one_over", [False, True], ids=["canonical-cap", "canonical-one-over"])
+@pytest.mark.parametrize("reader_case", [COMPLETE_CASES[4]], indirect=True)
+def test_complete_canonical_boundary_returns_state_or_refuses(
+    reader_case, monkeypatch, one_over, record_property
+):
+    mode = "canonical-one-over" if one_over else "canonical-cap"
+    payload, receipt = calibrate_financial_boundary(reader_case, mode)
+    before = sqlite_snapshot(reader_case.path)
+    watch = RowTransferWatch(
+        monkeypatch,
+        {"canonical-boundary-payload": payload},
+        statements=financial_statements("sqlite"),
+    )
+    if one_over:
+        refused(reader_case, "ledger_limit_exceeded")
+    else:
+        assert inspect(reader_case).model_dump(mode="json") == reader_case.expected
+    assert_financial_transfer_boundary(watch, mode)
+    assert sqlite_snapshot(reader_case.path) == before
+    record_property("financial_boundary", json.dumps(receipt))
+    record_property("financial_body_transfers", json.dumps(watch.hits))
+    record_property("financial_statement_fetches", json.dumps(watch.statement_hits))

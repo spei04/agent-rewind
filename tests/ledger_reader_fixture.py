@@ -12,6 +12,7 @@ import sqlite3
 from contextlib import closing
 from copy import deepcopy
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -597,11 +598,14 @@ class RowTransferWatch:
         targets: dict[str, str | bytes],
         *,
         replacements: dict[str, str | bytes] | None = None,
+        statements: dict[str, str] | None = None,
     ):
         from sqlalchemy.engine.cursor import CursorFetchStrategy
 
         self.hits: list[dict[str, Any]] = []
         self.targets = targets
+        self.statement_hits: list[dict[str, Any]] = []
+        statements = statements or {}
         replacements = replacements or {}
         assert set(replacements) <= set(targets)
         for method in ("fetchone", "fetchmany", "fetchall"):
@@ -612,6 +616,15 @@ class RowTransferWatch:
             ):
                 value = _original(strategy, result, cursor, *args, **kwargs)
                 rows = [value] if _method == "fetchone" else value
+                statement = result.context.statement.strip()
+                if statement in statements:
+                    self.statement_hits.append(
+                        {
+                            "name": statements[statement],
+                            "method": _method,
+                            "rows": sum(row is not None for row in rows or []),
+                        }
+                    )
                 changed, substituted = False, []
                 for row in rows or []:
                     if row is None:
@@ -639,3 +652,235 @@ class RowTransferWatch:
                 return value
 
             monkeypatch.setattr(CursorFetchStrategy, method, observed)
+
+
+# Frozen financial projection contract, intentionally independent of consumer _FIELDS.
+_FINANCIAL_FIELDS = {
+    "account": [
+        "id",
+        "organization_id",
+        "scope",
+        "scope_id",
+        "period_start",
+        "period_end",
+        "limit_microusd",
+        "held_microusd",
+        "accounted_microusd",
+        "project_id",
+        "job_id",
+        "opening_held_microusd",
+    ],
+    "call": [
+        "id",
+        "project_id",
+        "job_id",
+        "logical_call_id",
+        "purpose",
+        "request_digest",
+        "price_version",
+        "state",
+        "reserved_microusd",
+        "usage_estimate_microusd",
+        "provider_request_id",
+        "created_at",
+        "organization_id",
+        "job_resource_kind",
+        "lease_generation",
+        "organization_account_id",
+        "project_account_id",
+        "job_account_id",
+    ],
+    "entry": [
+        "call_id",
+        "account_id",
+        "entry_kind",
+        "amount_microusd",
+        "evidence_ref",
+        "created_at",
+        "project_id",
+        "evidence_owner_kind",
+        "evidence_role",
+    ],
+    "job": [
+        "id",
+        "kind",
+        "created",
+        "payload",
+        "status",
+        "owner",
+        "lease_until",
+        "cancel",
+        "budget",
+        "reserved",
+        "result",
+        "error",
+        "actor",
+        "payload_version",
+        "execution_config_ref",
+        "execution_config_digest",
+        "lease_generation",
+        "legacy_reserved_microusd",
+    ],
+    "operation": [
+        "id",
+        "project_id",
+        "principal_id",
+        "kind",
+        "client_operation_id",
+        "request_digest",
+        "job_id",
+        "accepted_response",
+        "created_at",
+        "retain_until",
+        "job_resource_kind",
+        "execution_config_digest",
+        "payload_version",
+        "failure_correlation_id",
+    ],
+    "scope": ["resource_kind", "resource_id", "project_id"],
+    "ref": ["project_id", "owner_kind", "owner_id", "artifact_id", "role"],
+    "object": [
+        "id",
+        "project_id",
+        "digest",
+        "locator",
+        "format_version",
+        "byte_count",
+        "created_at",
+    ],
+    "project": ["id", "organization_id"],
+    "organization": ["id", "installation_key"],
+}
+_FINANCIAL_TIMES = {
+    "account": ("period_start", "period_end"),
+    "call": ("created_at",),
+    "entry": ("created_at",),
+    "object": ("created_at",),
+    "operation": ("created_at", "retain_until"),
+}
+_FINANCIAL_BASE = {"account", "call", "entry", "job", "operation", "scope", "organization"}
+FINANCIAL_BOUNDARIES = (
+    "native-cap",
+    "native-one-over",
+    "canonical-expansion",
+    "canonical-cap",
+    "canonical-one-over",
+)
+
+
+def financial_statements(dialect_name: str) -> dict[str, str]:
+    from agent_rewind.migrations.ledger_financial_sql import SQL
+
+    return {
+        query.strip(): name
+        for (revision, dialect, name), query in SQL.items()
+        if revision == "ar7" and dialect == dialect_name
+    }
+
+
+def _financial_projection_receipt(connection) -> dict[str, Any]:
+    from agent_rewind.migrations.ledger_financial_sql import SQL
+
+    receipts, frames = {}, []
+    dialect = connection.dialect.name
+    for domain, fields in _FINANCIAL_FIELDS.items():
+        prefix = "financial_base_" if domain in _FINANCIAL_BASE else "financial_"
+        name = prefix + domain
+        receipts[domain] = dict(
+            connection.execute(text(SQL[("ar7", dialect, name + "_gate")])).mappings().one()
+        )
+        rows = connection.execute(text(SQL[("ar7", dialect, name + "_body")])).mappings().all()
+        assert len(rows) == receipts[domain]["candidate_rows"]
+        for raw in rows:
+            row = dict(raw)
+            assert set(row) == {*fields, "invalid"} and row.pop("invalid") == 0
+            for field in _FINANCIAL_TIMES.get(domain, ()):
+                value = row[field]
+                instant = datetime.fromisoformat(value) if isinstance(value, str) else value
+                assert isinstance(instant, datetime) and instant.utcoffset() is not None
+                row[field] = (
+                    instant.astimezone(UTC)
+                    .isoformat(timespec="microseconds")
+                    .replace("+00:00", "Z")
+                )
+                assert len(row[field]) == 27
+            frames.append([domain, [row[field] for field in fields]])
+    encoded = json.dumps(frames, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    # Full flat-array serialization independently agrees with the row-frame contract.
+    row_sizes = [
+        len(json.dumps(frame, sort_keys=True, separators=(",", ":"), allow_nan=False).encode())
+        for frame in frames
+    ]
+    assert len(encoded) == 2 + sum(row_sizes) + max(0, len(frames) - 1)
+    return {
+        "domains": receipts,
+        "native_bytes": sum(row["native_bytes"] for row in receipts.values()),
+        "canonical_bytes": len(encoded),
+        "canonical_sha256": hashlib.sha256(encoded).hexdigest(),
+        "rows": len(frames),
+    }
+
+
+def calibrate_financial_boundary(case: ReaderFixture, mode: str) -> tuple[str, dict[str, Any]]:
+    """Build actual bounded state; no product counter, cap or result is replaced."""
+    assert mode in FINANCIAL_BOUNDARIES and case.legacy and case.revision == LEDGER
+    cap = 2 * 1024 * 1024
+    with case.engine.begin() as connection:
+        job, version = connection.exec_driver_sql(
+            "SELECT id,payload_version FROM jobs ORDER BY id LIMIT 1"
+        ).one()
+        assert version == 1
+
+        def replace(payload):
+            connection.execute(
+                text("UPDATE jobs SET payload=:payload WHERE id=:job"),
+                {"payload": payload, "job": job},
+            )
+
+        replace("")
+        baseline = _financial_projection_receipt(connection)
+        if mode.startswith("native"):
+            payload = "z" * (cap + (mode == "native-one-over") - baseline["native_bytes"])
+        elif mode == "canonical-expansion":
+            payload = '"' * (cap // 2 + 1)
+        else:
+            target = cap + (mode == "canonical-one-over")
+            quotes, tail = divmod(target - baseline["canonical_bytes"], 2)
+            assert quotes > 0
+            payload = '"' * quotes + "z" * tail
+        replace(payload)
+        receipt = _financial_projection_receipt(connection)
+    assert len(receipt["domains"]) == 10 and 0 < receipt["rows"] < 65536
+    assert all(
+        row["invalid_rows"] == 0 and row["native_bytes"] < cap
+        for row in receipt["domains"].values()
+    )
+    if mode.startswith("native"):
+        assert receipt["native_bytes"] == cap + (mode == "native-one-over")
+        assert receipt["canonical_bytes"] > cap
+    else:
+        assert receipt["native_bytes"] < cap
+        if mode == "canonical-expansion":
+            assert receipt["canonical_bytes"] > cap
+        else:
+            assert receipt["canonical_bytes"] == cap + (mode == "canonical-one-over")
+    return payload, receipt
+
+
+def assert_financial_transfer_boundary(watch: RowTransferWatch, mode: str) -> None:
+    bodies = [value for value in watch.statement_hits if value["name"].endswith("_body")]
+    if mode == "native-one-over":
+        assert not bodies and not watch.hits
+    else:
+        assert bodies and watch.hits
+        first_body = next(
+            index
+            for index, value in enumerate(watch.statement_hits)
+            if value["name"].endswith("_body")
+        )
+        gates = {
+            value["name"]
+            for value in watch.statement_hits[:first_body]
+            if value["name"].endswith("_gate") and value["name"] != "financial_owner_gate"
+        }
+        assert len(gates) == 10

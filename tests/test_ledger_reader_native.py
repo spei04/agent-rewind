@@ -3,6 +3,7 @@
 import hashlib
 import json
 import sqlite3
+from contextlib import nullcontext
 from types import SimpleNamespace
 from uuid import uuid4
 
@@ -11,8 +12,12 @@ import pytest
 import test_migrations_postgres as migration_tests
 from ledger_operator_fixture import SQLiteTrace
 from ledger_reader_fixture import (
+    FINANCIAL_BOUNDARIES,
     RowTransferWatch,
+    assert_financial_transfer_boundary,
+    calibrate_financial_boundary,
     complete_postgres_ar6,
+    financial_statements,
     later_admitted_call,
     postgres_snapshot,
     seed_ar7,
@@ -1002,3 +1007,102 @@ def test_complete_reader_stops_expired_pure_reducer_and_cleans_up(
         engine.dispose()
     with pytest.raises(sqlite3.ProgrammingError):
         raw.execute("SELECT 1")
+
+
+@postgres_only
+@pytest.mark.parametrize("postgres_reader_case", [COMPLETE_CASES[4]], indirect=True)
+@pytest.mark.parametrize("mode", FINANCIAL_BOUNDARIES)
+def test_postgres_complete_financial_boundaries(
+    postgres_reader_case, pg, monkeypatch, record_property, mode
+):
+    from agent_rewind.migrations.ledger_inspection import inspect_ledger_state
+
+    case = postgres_reader_case
+    payload, receipt = calibrate_financial_boundary(case, mode)
+    before = postgres_snapshot(case.engine)
+    drain(pg)
+    watch = RowTransferWatch(
+        monkeypatch,
+        {"financial-boundary-payload": payload},
+        statements=financial_statements("postgresql"),
+    )
+    trace = PostgresTrace(monkeypatch)
+    parameters = NativeParameterWatch(monkeypatch, trace)
+    engine, work, outcome = case.operator_engine(), LedgerWork(), LedgerOutcome()
+    returned, reader_errors = [], []
+    observer_units = reader_units = 0
+    accepted = mode == "canonical-cap"
+    expected = (
+        nullcontext()
+        if accepted
+        else pytest.raises(MigrationRefused, match="^ledger_limit_exceeded$")
+    )
+    try:
+        with expected, ledger_transaction(engine, outcome, work=work) as connection:
+            raw = connection.connection.driver_connection
+            trace.phase = "counter-observer"
+            observer_start = work.observed_ordinary
+            assert connection.exec_driver_sql("SHOW track_counts").scalar_one() == "on"
+            counters_before = _transaction_write_counters(connection)
+            observer_units += work.observed_ordinary - observer_start
+            trace.phase = "reader"
+            reader_start = work.observed_ordinary
+            error = None
+            try:
+                returned.append(inspect_ledger_state(connection))
+            except MigrationRefused as caught:
+                error = caught
+                reader_errors.append(caught)
+                assert not accepted and caught.code == "ledger_limit_exceeded"
+            else:
+                assert accepted and returned[0].model_dump(mode="json") == case.expected
+            reader_units = work.observed_ordinary - reader_start
+            assert connection.connection.driver_connection is raw
+            trace.phase = "counter-observer"
+            observer_start = work.observed_ordinary
+            counters_after = _transaction_write_counters(connection)
+            observer_units += work.observed_ordinary - observer_start
+            assert _tuple_write_delta(counters_before, counters_after) == {}
+            trace.phase = "ordinary"
+            if error is not None:
+                raise error
+        if accepted:
+            assert len(returned) == 1 and not reader_errors
+            assert outcome.commit_acknowledged
+        else:
+            assert not returned and len(reader_errors) == 1
+            assert expected.value is reader_errors[0]
+            assert outcome.rollback_acknowledged and not outcome.commit_attempted
+        assert not outcome.cleanup_failed and raw.closed and len(trace.handles) == 1
+        assert 0 < work.observed_ordinary <= 2028
+        parameters.assert_reader_calls(raw)
+        commands = [
+            sql
+            for phase, kind, _, sql in trace.events
+            if phase == "reader" and kind == "sql-call" and sql
+        ]
+        _assert_reviewed_ctes(commands)
+        assert commands and all(
+            sql.lstrip().upper().startswith(("SELECT", "WITH", "SET LOCAL", "SHOW"))
+            for sql in commands
+        )
+        assert not any(
+            sql.lstrip().upper().startswith(("DECLARE", "FETCH", "CLOSE"))
+            for phase, kind, _, sql in trace.events
+            if phase == "reader" and kind in {"sql-call", "command"} and sql
+        )
+        assert_financial_transfer_boundary(watch, mode)
+    finally:
+        engine.dispose()
+        trace.stop()
+        record_property("financial_boundary", json.dumps(receipt))
+        record_property("financial_body_transfers", json.dumps(watch.hits))
+        record_property("financial_statement_fetches", json.dumps(watch.statement_hits))
+        record_property("reader_native_trace", json.dumps(trace.events))
+        record_property("reader_native_parameters", json.dumps(parameters.receipts))
+        record_property("reader_work", str(reader_units))
+        record_property("counter_observer_units", str(observer_units))
+        record_property("total_ordinary", str(work.observed_ordinary))
+    drain(pg)
+    assert postgres_snapshot(case.engine) == before
+    drain(pg)
