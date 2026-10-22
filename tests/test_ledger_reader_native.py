@@ -1038,7 +1038,7 @@ def test_postgres_complete_financial_boundaries(
         else pytest.raises(MigrationRefused, match="^ledger_limit_exceeded$")
     )
     try:
-        with expected, ledger_transaction(engine, outcome, work=work) as connection:
+        with expected as captured, ledger_transaction(engine, outcome, work=work) as connection:
             raw = connection.connection.driver_connection
             trace.phase = "counter-observer"
             observer_start = work.observed_ordinary
@@ -1071,7 +1071,7 @@ def test_postgres_complete_financial_boundaries(
             assert outcome.commit_acknowledged
         else:
             assert not returned and len(reader_errors) == 1
-            assert expected.value is reader_errors[0]
+            assert captured.value is reader_errors[0]
             assert outcome.rollback_acknowledged and not outcome.commit_attempted
         assert not outcome.cleanup_failed and raw.closed and len(trace.handles) == 1
         assert 0 < work.observed_ordinary <= 2028
