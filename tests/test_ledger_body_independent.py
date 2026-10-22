@@ -3,7 +3,9 @@
 import json
 import sqlite3
 
+import psycopg
 import pytest
+import test_migrations_postgres as migration_tests
 from ledger_operator_fixture import (
     _CONNECT,
     assert_pool_released,
@@ -12,7 +14,9 @@ from ledger_operator_fixture import (
 )
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Connection
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.pool import NullPool
+from test_ledger_operator_boundaries_postgres import pg_case, pg_trace, visible_rows
 
 from agent_rewind.migrations import ledger_transaction as transaction
 from agent_rewind.migrations import ledger_work
@@ -20,7 +24,11 @@ from agent_rewind.migrations.ledger_transaction import LedgerOutcome, ledger_tra
 from agent_rewind.migrations.ledger_work import LedgerWork
 from agent_rewind.migrations.schema import MigrationRefused
 
-__all__ = ["ledger_case"]
+__all__ = ["ledger_case", "pg_case", "pg_trace"]
+pg = migration_tests.pg
+postgres_only = pytest.mark.skipif(
+    not migration_tests.POSTGRES, reason="Opt-in independent PostgreSQL body guard"
+)
 
 
 def _refused_without_native_work(case, connection):
@@ -457,3 +465,271 @@ def test_detached_proxy_refuses_before_guard_native_work(ledger_case, guard_trac
     assert proof_rows(case.path) == []
     guard_trace.append({"detached": True, "cleanup_failed": outcome.cleanup_failed})
     assert_pool_released(case)
+
+
+def _pg_refused_without_native_work(trace, connection):
+    boundary = len(trace.events)
+    with pytest.raises(MigrationRefused, match="^transactional_connection_required$"):
+        transaction._require_ledger_body(connection)
+    assert trace.events[boundary:] == []
+
+
+def _pg_sql(trace, start, end=None):
+    return [event[3] for event in trace.events[start:end] if event[1] == "sql-call"]
+
+
+def _assert_xid_bundle(sql):
+    assert len(sql) == 3
+    assert sql[0].startswith("SET LOCAL statement_timeout")
+    assert sql[1].startswith("SET LOCAL lock_timeout")
+    assert sql[2] == "SELECT pg_current_xact_id()::text"
+
+
+@postgres_only
+def test_pg_publication_and_each_guard_pay_one_native_bundle(
+    pg_case, pg_trace, monkeypatch, record_property
+):
+    work, outcome = LedgerWork(), LedgerOutcome()
+    register = transaction._register_ledger_body
+    prepare = work._prepare_target
+    registrations, checks, target = [], [], []
+    ending = [False]
+
+    def registered(connection, claim, budget, receipt):
+        before = budget.observed_ordinary
+        boundary = len(pg_trace.events)
+        register(connection, claim, budget, receipt)
+        sql = _pg_sql(pg_trace, boundary)
+        _assert_xid_bundle(sql)
+        assert budget.observed_ordinary - before == 3
+        registrations.append(sql)
+
+    def prepared():
+        if ending[0]:
+            _pg_refused_without_native_work(pg_trace, target[0])
+            checks.append("revoked_before_commit_prepare")
+        return prepare()
+
+    monkeypatch.setattr(transaction, "_register_ledger_body", registered)
+    monkeypatch.setattr(work, "_prepare_target", prepared)
+    with ledger_transaction(pg_case.engine, outcome, work=work) as connection:
+        target.append(connection)
+        raw = connection.connection.driver_connection
+        assert raw.info.transaction_status is psycopg.pq.TransactionStatus.INTRANS
+        for _ in range(2):
+            before, boundary = work.observed_ordinary, len(pg_trace.events)
+            assert transaction._require_ledger_body(connection) is work
+            _assert_xid_bundle(_pg_sql(pg_trace, boundary))
+            assert work.observed_ordinary - before == 3
+        pg_trace.phase = "contender"
+        with pg_case.verifier.connect() as contender:
+            contender.exec_driver_sql("SET LOCAL lock_timeout='1ms'")
+            with pytest.raises(DBAPIError) as caught:
+                contender.exec_driver_sql("INSERT INTO proof VALUES (81)")
+            assert caught.value.orig.sqlstate == "55P03"
+            contender.rollback()
+        pg_trace.phase = "ordinary"
+        connection.exec_driver_sql("INSERT INTO proof VALUES (80)")
+        ending[0] = True
+    assert len(registrations) == 1 and checks == ["revoked_before_commit_prepare"]
+    _pg_refused_without_native_work(pg_trace, connection)
+    assert raw.closed and outcome.commit_acknowledged and not outcome.cleanup_failed
+    assert visible_rows(pg_case, pg_trace) == [80]
+    with pg_case.verifier.begin() as contender:
+        contender.exec_driver_sql("INSERT INTO proof VALUES (81)")
+    assert visible_rows(pg_case, pg_trace) == [80, 81]
+    record_property("native_registration_bundle", json.dumps(registrations))
+
+
+@postgres_only
+@pytest.mark.parametrize("restart", [False, True])
+def test_pg_native_transaction_change_cannot_reuse_logical_body(
+    pg_case, pg_trace, record_property, restart
+):
+    work, outcome = LedgerWork(), LedgerOutcome()
+    identities = []
+    with (
+        pytest.raises(MigrationRefused, match="^transactional_connection_required$"),
+        ledger_transaction(pg_case.engine, outcome, work=work) as connection,
+    ):
+        raw = connection.connection.driver_connection
+        root, proxy = connection.get_transaction(), connection.connection
+        assert transaction._require_ledger_body(connection) is work
+        pg_trace.phase = "test-native-control"
+        with raw.cursor() as cursor:
+            cursor.execute("SELECT pg_current_xact_id()::text")
+            identities.append(cursor.fetchone()[0])
+        raw.rollback()
+        assert raw.info.transaction_status is psycopg.pq.TransactionStatus.IDLE
+        if restart:
+            with raw.cursor() as cursor:
+                cursor.execute("BEGIN")
+                cursor.execute("SELECT pg_current_xact_id()::text")
+                identities.append(cursor.fetchone()[0])
+            assert identities[0] != identities[1]
+            assert raw.info.transaction_status is psycopg.pq.TransactionStatus.INTRANS
+        assert connection.get_transaction() is root and connection.connection is proxy
+        pg_trace.phase = "ordinary"
+        boundary, before = len(pg_trace.events), work.observed_ordinary
+        try:
+            transaction._require_ledger_body(connection)
+        finally:
+            if restart:
+                _assert_xid_bundle(_pg_sql(pg_trace, boundary))
+                assert work.observed_ordinary - before == 3
+            else:
+                assert pg_trace.events[boundary:] == [] and work.observed_ordinary == before
+    assert raw.closed and outcome.confirmed_precommit_rollback
+    assert not outcome.commit_attempted and not outcome.cleanup_failed
+    assert visible_rows(pg_case, pg_trace) == []
+    record_property("native_transaction_ids", json.dumps(identities))
+
+
+@postgres_only
+@pytest.mark.parametrize("mutation", ["stream_results", "yield_per", "detach"])
+def test_pg_changed_options_and_detach_refuse_before_any_driver_query(
+    pg_case, pg_trace, record_property, mutation
+):
+    work, outcome = LedgerWork(), LedgerOutcome()
+    witnesses = []
+    with (
+        pytest.raises(MigrationRefused, match="^schema_incompatible$"),
+        ledger_transaction(pg_case.engine, outcome, work=work) as connection,
+    ):
+        raw, proxy, root = (
+            connection.connection.driver_connection,
+            connection.connection,
+            connection.get_transaction(),
+        )
+        assert transaction._require_ledger_body(connection) is work
+        if mutation == "detach":
+            connection.detach()
+            assert proxy.is_detached and connection.get_transaction() is root
+            assert raw.info.transaction_status is psycopg.pq.TransactionStatus.INTRANS
+            # Pinned SQLAlchemy already changes this identity on detach. Retain
+            # the actual witness rather than declaring an unobserved old defect.
+            witnesses.append({"retained_driver_same": proxy.driver_connection is raw})
+        else:
+            connection.execution_options(**{mutation: True if mutation == "stream_results" else 1})
+        _pg_refused_without_native_work(pg_trace, connection)
+        raise MigrationRefused("schema_incompatible")
+    assert raw.closed and outcome.confirmed_precommit_rollback
+    assert not outcome.commit_attempted and not outcome.cleanup_failed
+    assert visible_rows(pg_case, pg_trace) == []
+    record_property(
+        "changed_connection", json.dumps({"mutation": mutation, "witnesses": witnesses})
+    )
+
+
+@postgres_only
+@pytest.mark.parametrize("remaining", [2, 3])
+def test_pg_guard_cannot_split_or_refund_its_last_native_bundle(
+    pg_case, pg_trace, record_property, remaining
+):
+    work, outcome = LedgerWork(), LedgerOutcome()
+    with (
+        pytest.raises(MigrationRefused) as caught,
+        ledger_transaction(pg_case.engine, outcome, work=work) as connection,
+    ):
+        raw = connection.connection.driver_connection
+        work.reserve_ordinary(2028 - remaining - work.observed_ordinary)
+        before, boundary = work.observed_ordinary, len(pg_trace.events)
+        if remaining == 3:
+            assert transaction._require_ledger_body(connection) is work
+            _assert_xid_bundle(_pg_sql(pg_trace, boundary))
+            assert work.observed_ordinary == 2028
+            raise MigrationRefused("schema_incompatible")
+        try:
+            transaction._require_ledger_body(connection)
+        finally:
+            assert pg_trace.events[boundary:] == [] and work.observed_ordinary == before
+    assert str(caught.value) == (
+        "schema_incompatible" if remaining == 3 else "ledger_limit_exceeded"
+    )
+    assert (work.prepaid_bootstrap, work.prepaid_cleanup) == (12, 8)
+    assert raw.closed and outcome.confirmed_precommit_rollback and not outcome.commit_attempted
+    assert visible_rows(pg_case, pg_trace) == []
+    record_property(
+        "last_guard_bundle",
+        json.dumps({"remaining": remaining, "ordinary": work.observed_ordinary}),
+    )
+
+
+@postgres_only
+@pytest.mark.parametrize("setter", ["statement_timeout", "lock_timeout"])
+@pytest.mark.parametrize("expire", [False, True])
+def test_pg_guard_rechecks_clock_after_each_actual_native_setter(
+    pg_case, pg_trace, guard_clock, monkeypatch, record_property, setter, expire
+):
+    work, outcome = LedgerWork(), LedgerOutcome()
+    execute = psycopg.Cursor.execute
+    armed, delays, intervals, errors = [False], [], [], []
+
+    def elapsed(cursor, query, *args, **kwargs):
+        result = execute(cursor, query, *args, **kwargs)
+        if armed[0] and str(query).startswith("SET LOCAL " + setter):
+            armed[0] = False
+            delays.append(str(query))
+            if expire:
+                guard_clock[0] += 121
+        return result
+
+    monkeypatch.setattr(psycopg.Cursor, "execute", elapsed)
+    try:
+        with ledger_transaction(pg_case.engine, outcome, work=work) as connection:
+            raw = connection.connection.driver_connection
+            before = work.observed_ordinary
+            armed[0] = True
+            intervals.append(len(pg_trace.events))
+            try:
+                assert transaction._require_ledger_body(connection) is work
+            finally:
+                intervals.append(len(pg_trace.events))
+                assert work.observed_ordinary - before == 3
+    except MigrationRefused as error:
+        errors.append(str(error))
+    sql = _pg_sql(pg_trace, *intervals)
+    assert len(delays) == 1 and raw.closed
+    if expire:
+        assert errors == ["migration_busy"]
+        assert len(sql) == (1 if setter == "statement_timeout" else 2)
+        assert not any("pg_current_xact_id" in query for query in sql)
+        assert outcome.confirmed_precommit_rollback and not outcome.commit_attempted
+    else:
+        assert errors == []
+        _assert_xid_bundle(sql)
+        assert outcome.commit_acknowledged and not outcome.cleanup_failed
+    assert visible_rows(pg_case, pg_trace) == []
+    record_property(
+        "guard_setter_clock", json.dumps({"setter": setter, "expire": expire, "sql": sql})
+    )
+
+
+@postgres_only
+@pytest.mark.parametrize("after_native", [False, True])
+def test_pg_failed_identity_publication_never_yields_or_survives_cleanup(
+    pg_case, pg_trace, monkeypatch, record_property, after_native
+):
+    work, outcome = LedgerWork(), LedgerOutcome()
+    execute = psycopg.Cursor.execute
+    touched = []
+
+    def failed(cursor, query, *args, **kwargs):
+        if str(query) == "SELECT pg_current_xact_id()::text" and not touched:
+            touched.append(cursor.connection)
+            if after_native:
+                execute(cursor, query, *args, **kwargs)
+            raise MigrationRefused("schema_incompatible")
+        return execute(cursor, query, *args, **kwargs)
+
+    monkeypatch.setattr(psycopg.Cursor, "execute", failed)
+    with (
+        pytest.raises(MigrationRefused, match="^schema_incompatible$"),
+        ledger_transaction(pg_case.engine, outcome, work=work),
+    ):
+        pytest.fail("failed native identity registration yielded the body")
+    assert len(touched) == 1 and touched[0].closed
+    _pg_refused_without_native_work(pg_trace, work._connection)
+    assert outcome.confirmed_precommit_rollback and not outcome.commit_attempted
+    assert not outcome.cleanup_failed and visible_rows(pg_case, pg_trace) == []
+    record_property("failed_identity_publication", json.dumps({"after_native": after_native}))
