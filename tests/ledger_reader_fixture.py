@@ -408,7 +408,9 @@ def append_provision(case: ReaderFixture, accounts: list[dict[str, Any]]) -> Non
     }
 
 
-def later_admitted_call(case: ReaderFixture, *, effect: str = "reserved") -> dict[str, Any]:
+def later_admitted_call(
+    case: ReaderFixture, *, effect: str = "reserved", future_zero_period: bool = False
+) -> dict[str, Any]:
     """A complete synthetic post-opening admission and financial closure.
 
     Artifact helpers establish SQL metadata associations only. No provider,
@@ -458,6 +460,25 @@ def later_admitted_call(case: ReaderFixture, *, effect: str = "reserved") -> dic
     ]
     append_provision(case, rows)
     triple = [identifier(10_000), identifier(20_000), identifier(30_000)]
+    future_ids = []
+    if future_zero_period:
+        # Provision while carried exposure is zero, before the later January
+        # reservation. A future admission may refuse; persisted state is valid.
+        future_rows = [
+            _account(40_000, organization, "organization", organization, limit=0),
+            _account(50_000, organization, "project", project, project=project, limit=0),
+        ]
+        for row in future_rows:
+            row.update(period_start=END, period_end="2026-03-01T00:00:00.000000Z")
+        with case.engine.connect() as connection:
+            assert (
+                connection.exec_driver_sql(
+                    "SELECT sum(held_microusd) FROM budget_accounts"
+                ).scalar_one()
+                == 0
+            )
+        append_provision(case, future_rows)
+        future_ids = [row["id"] for row in future_rows]
     with case.engine.begin() as connection:
         _insert(
             connection,
@@ -533,10 +554,16 @@ def later_admitted_call(case: ReaderFixture, *, effect: str = "reserved") -> dic
                     },
                 )
         connection.execute(
-            text("UPDATE budget_accounts SET held_microusd=:held,accounted_microusd=:accounted"),
+            text(
+                "UPDATE budget_accounts SET held_microusd=:held,accounted_microusd=:accounted "
+                "WHERE id IN (:organization,:project,:job)"
+            ),
             {
                 "held": 1 if effect == "reserved" else 0,
                 "accounted": 1 if effect == "settled" else 0,
+                "organization": triple[0],
+                "project": triple[1],
+                "job": triple[2],
             },
         )
         connection.execute(
@@ -553,6 +580,7 @@ def later_admitted_call(case: ReaderFixture, *, effect: str = "reserved") -> dic
         "accounts": triple,
         "evidence_id": evidence_id,
         "configuration": value.configuration,
+        "future_accounts": future_ids,
     }
 
 

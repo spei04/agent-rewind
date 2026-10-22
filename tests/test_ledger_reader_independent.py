@@ -558,3 +558,59 @@ def test_adoption_utf8_receipt_is_checked_before_json_semantics(
     assert watch.hits, "The intended raw H10 body cell must actually be observed"
     record_property("mapping_transport_delta", str(extra_whitespace))
     record_property("mapping_transfers", json.dumps(watch.hits))
+
+
+@pytest.fixture
+def future_period_case(tmp_path):
+    case = complete_ar6(tmp_path / "future-period.sqlite")
+    try:
+        seed_ar7(case)
+        identities = later_admitted_call(case, future_zero_period=True)
+        yield case, identities
+    finally:
+        case.dispose()
+
+
+def test_future_period_fixture_was_affordable_before_later_current_reservation(future_period_case):
+    case, ids = future_period_case
+    assert case.opening["organization_opening_microusd"] == 0
+    assert case.expected["manifest_count"] == 3 and case.expected["account_count"] == 5
+    with case.engine.connect() as connection:
+        rows = (
+            connection.exec_driver_sql(
+                "SELECT * FROM migration_progress WHERE revision='ar_0007_ledger' ORDER BY phase"
+            )
+            .mappings()
+            .all()
+        )
+        values = [validate_progress_row(connection, dict(row)) for row in rows]
+        manifests = sorted(
+            [value for value in values if hasattr(value, "manifest")],
+            key=lambda value: value.sequence,
+        )
+        opening = next(value for value in values if hasattr(value, "jobs"))
+        assert (
+            validate_ledger_chain(manifests, opening).model_dump(mode="json")
+            == case.expected["head"]
+        )
+        future = connection.execute(
+            text(
+                "SELECT limit_microusd,held_microusd,accounted_microusd FROM budget_accounts "
+                "WHERE id IN (:organization,:project)"
+            ),
+            {"organization": ids["future_accounts"][0], "project": ids["future_accounts"][1]},
+        ).all()
+        assert future == [(0, 0, 0), (0, 0, 0)]
+        current = connection.execute(
+            text("SELECT held_microusd FROM budget_accounts WHERE id IN (:organization,:project)"),
+            {"organization": ids["accounts"][0], "project": ids["accounts"][1]},
+        ).all()
+        assert current == [(1,), (1,)]
+        assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
+
+
+def test_later_current_reservation_does_not_invalidate_affordable_future_period(future_period_case):
+    case, _ = future_period_case
+    before = sqlite_snapshot(case.path)
+    assert inspect(case).model_dump(mode="json") == case.expected
+    assert sqlite_snapshot(case.path) == before
