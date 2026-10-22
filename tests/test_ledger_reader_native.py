@@ -614,7 +614,7 @@ def test_postgres_native_write_witness_detects_cte_and_exposes_zero_row_limit(
     drain(pg)
     engine, work, outcome = case.operator_engine(), LedgerWork(), LedgerOutcome()
 
-    class RollbackWitness(Exception):
+    class RollbackWitness(BaseException):
         pass
 
     try:
