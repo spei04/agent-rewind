@@ -885,7 +885,7 @@ schema checkpoint and planning delivery are separate from ledger product accepta
 | Delivery reviewer | Reviews the corrected factory, outcome and deadline boundaries against retained failures | Independently review exact source and the remaining native trace matrix. |
 | Lead | Publish the corrected checkpoint and synchronize progress documents | Keep P1 acceptance null; integrate only after the complete slice evidence passes. |
 
-The original transaction run had 10 passes/four failures. The corrected source
+The expanded transaction run had 10 passes/four genuine failures; the earlier 9-pass/four-failure run included one test-setup failure. The corrected source
 passes the same 14 semantic controls, including a native BEGIN-then-fault test
 that still reproduced the old failure after its hook was adapted. Independent
 deadline tests then found three targets executing after their setter exhausted

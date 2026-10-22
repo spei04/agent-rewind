@@ -12,7 +12,7 @@ source passes 79 independent SQLite and nonconnecting factory cases in 2.47
 seconds: 14 transaction, 37 work-boundary and 28 factory checks. Separate authored
 checks pass 41 cases. These results are not a combined full-suite or P1 result.
 
-The first independent transaction run preserved four failures: an inaccurate
+The expanded independent transaction run preserved four genuine failures: an inaccurate
 BEGIN-attempt flag, artificial uncertainty despite acknowledged rollback,
 replacement of the first interruption, and incorrect mapping of a native lock
 timeout. Corrective source f4395ce also addresses the reviewed PostgreSQL adapter
@@ -181,7 +181,7 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 ## Assignment and dependency review
 
 - Planning/verification: 79 independent SQLite/factory checks frozen at 3716811; prepare independent PostgreSQL verification and wait for explicit restored/stopped database handoff.
-- Platform/security: validate corrected runtime df55c1f across native PostgreSQL and both interpreters in the reused secondary; owns the exclusive database slot and must restore/stop it before handing it to QE.
+- Platform/security: validates corrected runtime df55c1f across native PostgreSQL and both interpreters in the reused secondary; independent QE takes database ownership only after documented restoration, stop and explicit handoff.
 - Delivery reviewer: independently review ledger source, integration and actual delivery evidence; accepted HTTP audit remains predecessor evidence.
 - Lead: integrate reviewed runtime/tests, coordinate checkout and PostgreSQL ownership, maintain issue read-back and require the full P1 acceptance matrix before P2 handoff.
 
