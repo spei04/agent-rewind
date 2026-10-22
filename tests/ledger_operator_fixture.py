@@ -2,6 +2,7 @@
 
 import sqlite3
 import sys
+from contextlib import closing
 from types import SimpleNamespace
 
 import pytest
@@ -13,7 +14,7 @@ _CONNECT = sqlite3.connect
 
 def proof_rows(path):
     # A separate native connection, outside the command engine and its fault spies.
-    with _CONNECT(path) as connection:
+    with closing(_CONNECT(path)) as connection:
         return [row[0] for row in connection.execute("SELECT id FROM proof ORDER BY id")]
 
 
@@ -70,7 +71,7 @@ class SQLiteTrace:
 @pytest.fixture
 def ledger_case(tmp_path, monkeypatch):
     path = tmp_path / "ledger-boundary.sqlite"
-    with _CONNECT(path) as raw:
+    with closing(_CONNECT(path)) as raw, raw:
         raw.execute("CREATE TABLE proof (id INTEGER PRIMARY KEY)")
     trace = SQLiteTrace()
     monkeypatch.setattr(sqlite3, "connect", trace.connect)
