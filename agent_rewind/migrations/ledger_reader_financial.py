@@ -345,6 +345,7 @@ def validate_financial(
     if required_objects != set(descriptors):
         _refuse()
     for row in data["ref"]:
+        work.check()
         if row["role"] not in {"admission_config", "budget_evidence"}:
             continue
         descriptor = descriptors[row["artifact_id"]]

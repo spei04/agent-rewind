@@ -141,9 +141,13 @@ def reduce_relational_closure(
                 raise MigrationRefused("ownership_lineage_invalid")
             groups = candidates + ([confirmation] if confirmation is not None else [])
             for group_index, group in enumerate(groups):
+                if check is not None:
+                    check()
                 if not isinstance(group, dict) or not isinstance(group.get("pairs"), list):
                     raise MigrationRefused("ownership_lineage_invalid")
                 for pair_index, pair in enumerate(group["pairs"]):
+                    if check is not None:
+                        check()
                     if not isinstance(pair, dict):
                         raise MigrationRefused("ownership_lineage_invalid")
                     for arm in ("control", "treatment"):
@@ -178,17 +182,31 @@ def reduce_relational_closure(
             if depth > MAX_PARENT_DEPTH:
                 raise MigrationRefused("ownership_ancestry_limit")
             depths[member] = depth
-    study_jobs = [job for source, job in studies.values()]
+    study_jobs = []
+    for _, job in studies.values():
+        if check is not None:
+            check()
+        study_jobs.append(job)
     if len(set(study_jobs)) != len(study_jobs):
         raise MigrationRefused("ownership_ambiguous_trial")
     for source, job in studies.values():
+        if check is not None:
+            check()
         if source not in parents or run_jobs[source] == job:
             raise MigrationRefused("ownership_lineage_invalid")
     for trial, (_study, source, job) in trial_claims.items():
+        if check is not None:
+            check()
         if trial not in parents or parents[trial] != source or run_jobs[trial] != job:
             raise MigrationRefused("ownership_lineage_invalid")
-    study_sources = {job: source for source, job in studies.values()}
+    study_sources = {}
+    for source, job in studies.values():
+        if check is not None:
+            check()
+        study_sources[job] = source
     for run, job in run_jobs.items():
+        if check is not None:
+            check()
         if jobs[job] in {"study", "investigate"} and (
             job not in study_sources or parents[run] != study_sources[job]
         ):

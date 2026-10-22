@@ -96,3 +96,45 @@ def test_original_api_key_grant_remains_valid_without_live_membership_equality(
         if engine is not None:
             engine.dispose()
         case.dispose()
+
+
+def test_expiry_between_descriptor_validations_stops_before_the_next_body(tmp_path, monkeypatch):
+    from agent_rewind.migrations import ledger_reader_financial, ledger_work
+
+    case = seed_ar7(complete_ar6(tmp_path / "reader.sqlite"))
+    engine = None
+    try:
+        ledger_reader_fixture.later_admitted_call(case, effect="settled")
+        engine = case.operator_engine()
+        clock = [0.0]
+        expire = [False]
+        observed = []
+        original = ledger_reader_financial._object
+
+        def observed_descriptor(value):
+            result = original(value)
+            observed.append(value["id"])
+            if expire[0]:
+                clock[0] = 121.0
+            return result
+
+        monkeypatch.setattr(ledger_work, "monotonic", lambda: clock[0])
+        monkeypatch.setattr(ledger_reader_financial, "_object", observed_descriptor)
+        with ledger_transaction(engine, LedgerOutcome(), work=LedgerWork()) as connection:
+            assert inspect_ledger_state(connection).model_dump(mode="json") == case.expected
+        assert len(observed) >= 2
+
+        observed.clear()
+        expire[0] = True
+        before = sqlite_snapshot(case.path)
+        with (
+            pytest.raises(MigrationRefused, match="^migration_busy$"),
+            ledger_transaction(engine, LedgerOutcome(), work=LedgerWork()) as connection,
+        ):
+            inspect_ledger_state(connection)
+        assert len(observed) == 1
+        assert sqlite_snapshot(case.path) == before
+    finally:
+        if engine is not None:
+            engine.dispose()
+        case.dispose()
