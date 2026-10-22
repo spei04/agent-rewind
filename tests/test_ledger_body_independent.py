@@ -252,9 +252,19 @@ def test_changed_native_or_logical_transaction_refuses_without_reconnect(
         with ledger_transaction(case.engine, outcome, work=work) as connection:
             assert transaction._require_ledger_body(connection) is work
             if mutation == "new_root":
-                connection.rollback()
+                connection.commit()
                 connection.exec_driver_sql("BEGIN EXCLUSIVE")
                 assert connection.connection.driver_connection.in_transaction
+            elif mutation == "rollback":
+                # Inject a real native rollback below the cooperative lease API.
+                # The logical wrapper remains active, so native state must decide.
+                raw = connection.connection.driver_connection
+                sqlite3.Connection.rollback(raw)
+                assert connection.in_transaction() and not raw.in_transaction
+            elif mutation == "close":
+                connection.commit()
+                connection.close()
+                assert connection.closed
             else:
                 getattr(connection, mutation)()
             _refused_without_native_work(case, connection)
@@ -405,4 +415,45 @@ def test_committed_cleanup_fault_leaves_no_live_guard_or_reusable_engine(
         pytest.fail("uncertain cleanup published a reusable engine")
     assert case.trace.events[boundary:] == []
     guard_trace.append({"commit_visible": True, "cleanup_failed": True, "guard_revoked": True})
+    assert_pool_released(case)
+
+
+@pytest.mark.parametrize("options", [{"stream_results": True}, {"yield_per": 1}])
+def test_changed_connection_options_refuse_before_guard_native_work(
+    ledger_case, guard_trace, options
+):
+    case = ledger_case
+    work, outcome = LedgerWork(), LedgerOutcome()
+    with ledger_transaction(case.engine, outcome, work=work) as connection:
+        assert transaction._require_ledger_body(connection) is work
+        assert not connection.get_execution_options()
+        connection.execution_options(**options)
+        _refused_without_native_work(case, connection)
+        guard_trace.append({"unsupported_options": options})
+    assert outcome.commit_acknowledged and not outcome.cleanup_failed
+    assert proof_rows(case.path) == []
+    assert_pool_released(case)
+
+
+def test_detached_proxy_refuses_before_guard_native_work(ledger_case, guard_trace):
+    case = ledger_case
+    work, outcome = LedgerWork(), LedgerOutcome()
+    checked = []
+    try:
+        with ledger_transaction(case.engine, outcome, work=work) as connection:
+            proxy = connection.connection
+            raw = proxy.driver_connection
+            root = connection.get_transaction()
+            assert transaction._require_ledger_body(connection) is work
+            connection.detach()
+            assert proxy.is_detached and connection.connection is proxy
+            assert connection.get_transaction() is root and raw.in_transaction
+            _refused_without_native_work(case, connection)
+            checked.append(True)
+            raise MigrationRefused("schema_incompatible")
+    except MigrationRefused as error:
+        assert str(error) in {"schema_incompatible", "ledger_outcome_uncertain"}
+    assert checked == [True]
+    assert proof_rows(case.path) == []
+    guard_trace.append({"detached": True, "cleanup_failed": outcome.cleanup_failed})
     assert_pool_released(case)
