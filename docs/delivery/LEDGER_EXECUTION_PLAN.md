@@ -15,7 +15,7 @@ acceptance packages.
 | Implementation PR | Boundary | Entry and exit | Current state |
 | --- | --- | --- | --- |
 | F1 · [PR #111](https://github.com/spei04/agent-rewind/pull/111) | Dormant schema, owned operator and private guard foundation | Accepted HTTP/P1 entry; independent exact-source review, native regression proof and scoped PR/main/candidate acceptance | Merged; checkpoint accepted at 2e0eeeab; [evidence](#accepted-f1-foundation-checkpoint--2026-10-22) |
-| F2 | Complete bounded persisted reader | Accepted F1 plus exact query-family/native-plan review; complete provenance/financial/graph proof, maximum-state limits and scoped PR/main/candidate acceptance | In progress; entry accepted, complete implementation/delivery pending |
+| F2 · [PR #113](https://github.com/spei04/agent-rewind/pull/113) | Complete bounded persisted reader | Accepted F1 plus exact query-family/native-plan review; complete provenance/financial/graph proof, maximum-state limits and scoped PR/main/candidate acceptance | In progress; PR merged at 08234c, main gate failed; checkpoint acceptance remains null |
 | F3 | Trusted provisioning, original opening, replay and recovery | Accepted F2; complete original P1 matrix including preservation, concurrency, privilege, child interruption and restore, then final protected-main candidate | Not started |
 
 [Assignable PR cards](../EXECUTION_BACKLOG.md#ar-010-a)
@@ -316,10 +316,10 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- Planning/verification: independently review frozen reader integration and acceptance coverage; preserve null F2/P1 acceptance and dated evidence.
-- Platform/security: maintain the complete dormant F2 reader/runtime in secondary, compose reviewed independent tests and resolve integration findings under the exact query and work schedule.
-- Independent QE: own only new tests/ledger_reader_fixture.py, tests/test_ledger_reader_independent.py and tests/test_ledger_reader_native.py in primary; validate complete states and native boundaries against immutable runtime handoffs.
-- Lead: review/integrate source and independent evidence, coordinate exclusive database ownership, maintain public issue scope, and require scoped F2 delivery then full F3/P1 acceptance before P2.
+- Planning/verification: reconcile current progress and independently review the isolated listing-test correction and exact delivery evidence; preserve null F2/P1 acceptance and dated history.
+- Platform/security: prepare reviewed F3 component evidence only after documented checkout/database handoffs; writer feasibility is complete, compatibility cleanup corrections remain pending.
+- Independent QE: own the isolated test-clock correction in primary, preserving actual-query deadline and pool-reuse controls and the unchanged runtime two-second limit.
+- Lead: integrate reviewed source and evidence, coordinate checkout/database ownership, and require fresh protected F2 delivery then complete F3/P1 acceptance before P2.
 
 The historical first-fortnight schedules and opening conditions remain unchanged. Accepted HTTP and exact P1 entry satisfy the implementation prerequisites; the lead has issued the P1 handoff. No new calendar allocation or staffed-time conversion follows from the effort totals.
 
@@ -672,3 +672,44 @@ The matching five-case Python 3.11 run, refreshed source inventory, replacement
 PR checks and protected-main candidate remain required. These are separate
 limit-enforcement proofs, not a promise that every combination of maximum
 dimensions fits. F2/P1 acceptance remains null; F3/P2 remain Not started.
+
+## F2 protected-main delivery remains unaccepted — 2026-10-22
+
+The five additional PostgreSQL boundary cases also pass on Python 3.11 at
+432bcbc in **81.63s**, without selected skips or warnings; the separate Python
+3.12 run passed in **79.78s**. Final collection contains **4768 unique cases**
+and the package retains **133 runtime members**. These complement the earlier
+29-case native matrix, not a universal combined maximum-state capacity claim.
+
+Exact source **432bcbc04dd83b3c1330e2a8042802929e2a2425** passed PR #113
+attempt **39768849981/1**: Python 3.11 **4736 passed / 32 skipped / 1 warning**
+in **2004.63s**, Python 3.12 **4747 passed / 21 skipped / 1 warning** in
+**2088.87s**. Package, security, isolation and the PR gate passed. Normal
+protected merge **08234c3796cf0ebeaa59ea1c0d1a2c325857551a** preserves that tree.
+
+Protected-main attempt **39773689705/1** failed: Python 3.11 recorded **1 failed /
+4735 passed / 32 skipped / 1 warning** in **1746.66s**; Python 3.12 passed
+**4747 / 21 skipped / 1 warning** in **2072.88s**. The failure is the
+nul-suffix variant of the malformed-order listing test, during its subsequent
+valid continuation: observed SQL work was **2.0331571339997936 seconds**
+against the existing two-second limit. Its malformed-value refusal, restored
+value and released-connection checks had already passed. This does not
+establish a reader implementation defect or a harmless infrastructure cause.
+Package, security and isolation passed; the main gate failed, candidate
+delivery was skipped and the run has no artifacts. Both complete job outcomes
+and the original failed trace are retained.
+
+The next delivery combines a separately reviewed test-only clock correction
+with this progress update. Actual-query deadline and connection-reuse controls
+remain required; no production timeout, work allowance or reader changes follow
+from the test repair. F2 accepted-source/merge/review fields and full P1
+acceptance remain null until fresh protected delivery and candidate verification.
+
+F3 preparation remains separate from implementation: writer statement,
+compatibility projection and recovery-rehearsal designs have scoped review;
+writer feasibility passed **20 SQLite / 23 PostgreSQL** asserted component case groups with
+restored/stopped release **1161b848**. This is not complete provisioning,
+commit/replay, owner/ACL-preserving financial recovery or two-second compatibility
+adapter proof. Compatibility controller cleanup corrections remain pending.
+F3/P2 stay Not started; all approved scope, effort, dependencies and external
+gates remain unchanged.
