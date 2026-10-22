@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from datetime import UTC, datetime
 from typing import Annotated, Literal
 
@@ -284,16 +284,25 @@ def validate_progress_row(
 
 
 def validate_ledger_chain(
-    manifests: tuple[ManifestCursor, ...], opening: OpeningCursor
+    manifests: tuple[ManifestCursor, ...],
+    opening: OpeningCursor,
+    *,
+    check: Callable[[], None] | None = None,
 ) -> LedgerManifestReceipt:
     """Validate immutable receipts only; SQL rows and native byte gates are separate."""
+    if check is not None:
+        check()
     try:
         if not 1 <= len(manifests) <= MAX_MANIFESTS:
             raise ValueError("manifest count")
-        if (
-            sum(len(canonical(cursor.model_dump(mode="json"))) for cursor in (*manifests, opening))
-            > MAX_PROGRESS_BYTES
-        ):
+        progress_bytes = 0
+        for progress_cursor in (*manifests, opening):
+            if check is not None:
+                check()
+            progress_bytes += len(canonical(progress_cursor.model_dump(mode="json")))
+            if check is not None:
+                check()
+        if progress_bytes > MAX_PROGRESS_BYTES:
             raise ValueError("progress size")
         first = manifests[0]
         if (
@@ -313,13 +322,22 @@ def validate_ledger_chain(
             != [(row.project_id, row.account_id) for row in opening.project_totals]
         ):
             raise ValueError("opening destination")
-        jobs = {job.job_id: job for job in opening.jobs}
-        initial_jobs = {
-            account.job_id: account for account in first.manifest.accounts if account.scope == "job"
-        }
+        jobs = {}
+        for job in opening.jobs:
+            if check is not None:
+                check()
+            jobs[job.job_id] = job
+        initial_jobs = {}
+        for account in first.manifest.accounts:
+            if check is not None:
+                check()
+            if account.scope == "job":
+                initial_jobs[account.job_id] = account
         if set(jobs) != set(initial_jobs):
             raise ValueError("opening job coverage")
         for job_id, job in jobs.items():
+            if check is not None:
+                check()
             account = initial_jobs[job_id]
             if account.project_id != job.project_id or account.limit_microusd > job.budget_microusd:
                 raise ValueError("opening job binding")
@@ -331,6 +349,8 @@ def validate_ledger_chain(
         seen_digests: set[str] = set()
         previous: str | None = None
         for sequence, cursor in enumerate(manifests):
+            if check is not None:
+                check()
             manifest = cursor.manifest
             if (
                 cursor.sequence != sequence
@@ -349,12 +369,17 @@ def validate_ledger_chain(
                     opening_values[opening.organization_account_id] = (
                         opening.organization_opening_microusd
                     )
-                opening_values.update(
-                    (row.account_id, row.opening_held_microusd) for row in opening.project_totals
-                )
+                for row in opening.project_totals:
+                    if check is not None:
+                        check()
+                    opening_values[row.account_id] = row.opening_held_microusd
                 for job_id, job in jobs.items():
+                    if check is not None:
+                        check()
                     opening_values[initial_jobs[job_id].id] = job.legacy_reserved_microusd
                 for account in manifest.accounts:
+                    if check is not None:
+                        check()
                     if (
                         account.id
                         in {
@@ -366,6 +391,8 @@ def validate_ledger_chain(
                         raise ValueError("opening period")
             projection = []
             for account in manifest.accounts:
+                if check is not None:
+                    check()
                 if account.id in account_ids or (
                     account.job_id is not None and account.job_id in job_ids
                 ):
@@ -380,11 +407,11 @@ def validate_ledger_chain(
                     job_ids.add(account.job_id)
                 key = (account.scope, account.scope_id)
                 cohort = periods.setdefault(key, [])
-                if any(
-                    start < account.period_end and account.period_start < end
-                    for start, end in cohort
-                ):
-                    raise ValueError("overlapping provisioned period")
+                for start, end in cohort:
+                    if check is not None:
+                        check()
+                    if start < account.period_end and account.period_start < end:
+                        raise ValueError("overlapping provisioned period")
                 cohort.append((account.period_start, account.period_end))
                 exposure = opening_values.get(account.id, 0)
                 if exposure > account.limit_microusd:
@@ -392,8 +419,15 @@ def validate_ledger_chain(
                 projection.append(
                     {**account.model_dump(mode="json"), "opening_held_microusd": exposure}
                 )
+            if check is not None:
+                check()
             if checksum(projection) != cursor.account_projection_digest:
                 raise ValueError("account projection")
-        return manifests[-1].receipt
+            if check is not None:
+                check()
+        receipt = manifests[-1].receipt
+        if check is not None:
+            check()
+        return receipt
     except (ValueError, TypeError, RecursionError, KeyError):
         raise MigrationRefused("ledger_progress_invalid") from None

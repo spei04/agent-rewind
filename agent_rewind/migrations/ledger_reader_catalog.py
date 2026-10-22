@@ -10,7 +10,7 @@ from sqlalchemy import inspect, text
 from sqlalchemy.engine import Connection
 
 from .ledger_catalog_sql import EXPECTED, SQL
-from .ledger_work import LedgerWork
+from .ledger_check import LedgerCheck
 from .schema import (
     ADMISSION,
     LEDGER,
@@ -99,7 +99,7 @@ def _postgres_column(row: Mapping[Any, Any]) -> list[Any]:
     ]
 
 
-def _postgres_columns(connection: Connection, table: str, work: LedgerWork) -> list[list[Any]]:
+def _postgres_columns(connection: Connection, table: str, work: LedgerCheck) -> list[list[Any]]:
     rows = connection.execute(text(_POSTGRES_COLUMNS), {"table_name": table}).mappings().all()
     if not 1 <= len(rows) <= 32:
         raise MigrationRefused("schema_incompatible")
@@ -128,7 +128,7 @@ def _gate(connection: Connection, revision: str, name: str) -> None:
 
 
 def _selected_indexes(
-    connection: Connection, revision: str, work: LedgerWork
+    connection: Connection, revision: str, work: LedgerCheck
 ) -> dict[str, list[dict[str, Any]]]:
     identity = (revision, "postgresql", "selected_index_body")
     rows = connection.execute(text(SQL[identity])).mappings().all()
@@ -180,7 +180,7 @@ def _selected_indexes(
     return result
 
 
-def inspect_catalog(connection: Connection, revision: str, work: LedgerWork) -> dict[str, Any]:
+def inspect_catalog(connection: Connection, revision: str, work: LedgerCheck) -> dict[str, Any]:
     """Bound reflected payloads first, then compare actual complete observations."""
     key = {ADMISSION: "ar6", LEDGER: "ar7"}.get(revision)
     if key is None:
@@ -226,7 +226,7 @@ def _observe_catalog(
     connection: Connection,
     indexes_by_table: dict[str, list[dict[str, Any]]],
     revision_key: str,
-    work: LedgerWork,
+    work: LedgerCheck,
 ) -> dict[str, Any]:
     """Read bounded structure and the exact revision-owned executable inventory."""
     name = dialect(connection)

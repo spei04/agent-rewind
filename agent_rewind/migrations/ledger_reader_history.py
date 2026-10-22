@@ -10,6 +10,7 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
+from .ledger_check import LedgerCheck
 from .ledger_history_sql import SQL
 from .ledger_state import (
     ManifestCursor,
@@ -17,7 +18,6 @@ from .ledger_state import (
     validate_ledger_chain,
     validate_progress_row,
 )
-from .ledger_work import LedgerWork
 from .ownership_state import OwnershipState, timestamp, validate_ownership_progress
 from .projection_state import ProjectionState, validate_projection_progress
 from .schema import ADMISSION, LEDGER, MigrationRefused, checksum, dialect
@@ -126,7 +126,7 @@ def _wire_time(value: Any) -> datetime:
 def _read(
     connection: Connection,
     name: str,
-    work: LedgerWork,
+    work: LedgerCheck,
     parameters: dict[str, Any] | None = None,
     *,
     absent: bool = False,
@@ -208,7 +208,7 @@ def _read(
 
 
 def read_history(
-    connection: Connection, revision: str, shape: dict[str, Any], work: LedgerWork
+    connection: Connection, revision: str, shape: dict[str, Any], work: LedgerCheck
 ) -> History:
     for query, field in (
         ("H01_progress_addressability", "invalid_key_exists"),
@@ -285,7 +285,7 @@ def read_history(
     if revision == LEDGER:
         if opening is None:
             raise MigrationRefused("ledger_progress_invalid")
-        head = validate_ledger_chain(manifests, opening)
+        head = validate_ledger_chain(manifests, opening, check=work.check)
         if head.installation_key != adoption["installation_key"]:
             raise MigrationRefused("ledger_progress_invalid")
     return History(adoption, ownership, projection, manifests, opening)
