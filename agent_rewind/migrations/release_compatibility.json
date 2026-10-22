@@ -59,6 +59,25 @@
           "phase": "run_index"
         }
       ]
+    },
+    {
+      "revision": "ar_0007_ledger",
+      "catalog_profile": "ledger_v1",
+      "mode": "migration_only",
+      "required_completed_backfills": [
+        {
+          "revision": "ar_0003_ownership",
+          "phase": "ownership"
+        },
+        {
+          "revision": "ar_0005_run_index",
+          "phase": "run_index"
+        },
+        {
+          "revision": "ar_0007_ledger",
+          "phase": "ledger_opening"
+        }
+      ]
     }
   ]
 }

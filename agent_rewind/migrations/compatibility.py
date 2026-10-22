@@ -27,11 +27,13 @@ from .schema import (
     ADMISSION,
     ARTIFACTS,
     HEAD,
+    LEDGER,
     OWNERSHIP,
     PROJECTION,
     MigrationRefused,
     catalog,
     dialect,
+    schema_table_names,
 )
 from .service import _installed
 
@@ -63,9 +65,10 @@ class RevisionProfile(BaseModel):
         "ar_0004_artifacts",
         "ar_0005_run_index",
         "ar_0006_admission",
+        "ar_0007_ledger",
     ]
     catalog_profile: Literal[
-        "adoption_v1", "ownership_v1", "artifacts_v1", "projection_v1", "admission_v1"
+        "adoption_v1", "ownership_v1", "artifacts_v1", "projection_v1", "admission_v1", "ledger_v1"
     ]
     mode: Literal["migration_only"]
     required_completed_backfills: tuple[BackfillRequirement, ...] = Field(max_length=16)
@@ -78,6 +81,7 @@ class RevisionProfile(BaseModel):
             ARTIFACTS: "artifacts_v1",
             PROJECTION: "projection_v1",
             ADMISSION: "admission_v1",
+            LEDGER: "ledger_v1",
         }[self.revision]
         if self.catalog_profile != expected:
             raise ValueError("Revision catalog profile mismatch")
@@ -86,8 +90,10 @@ class RevisionProfile(BaseModel):
             if self.revision != HEAD
             else ()
         )
-        if self.revision in {PROJECTION, ADMISSION}:
+        if self.revision in {PROJECTION, ADMISSION, LEDGER}:
             requirements += (BackfillRequirement(revision=PROJECTION, phase="run_index"),)
+        if self.revision == LEDGER:
+            requirements += (BackfillRequirement(revision=LEDGER, phase="ledger_opening"),)
         if self.revision != HEAD and self.required_completed_backfills != requirements:
             raise ValueError("Required backfill differs")
         if len(set(self.required_completed_backfills)) != len(self.required_completed_backfills):
@@ -99,7 +105,7 @@ class ReleaseProfile(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
     manifest_version: Literal[1]
     release: Literal["0.1.0"]
-    revisions: tuple[RevisionProfile, ...] = Field(min_length=1, max_length=5)
+    revisions: tuple[RevisionProfile, ...] = Field(min_length=1, max_length=6)
 
     @model_validator(mode="after")
     def unique_revisions(self) -> ReleaseProfile:
@@ -423,19 +429,21 @@ def _check_schema_compatibility(
         # can turn the adoption revision into a customer-ready revision.
         profile = ReleaseProfile.model_validate_json(release_profile.model_dump_json())
         with _inspection(connection, coherent_snapshot=True, checks=checks):
-            shape = catalog(connection)
+            _, revision = schema_table_names(connection)
             checks.check()
-            if "alembic_version" not in shape:
-                return CompatibilityResult("incompatible", "schema_incompatible")
-            revisions: list[str] = list(
-                connection.execute(
-                    text("SELECT version_num FROM alembic_version LIMIT 2")
-                ).scalars()
-            )
-            checks.check()
-            selected = [p for p in profile.revisions if revisions == [p.revision]]
+            selected = [p for p in profile.revisions if revision == p.revision]
             if len(selected) != 1:
                 return CompatibilityResult("incompatible", "schema_incompatible")
+            if revision == LEDGER:
+                # History's existing projection validator imports database tables.
+                # Defer that dependency until database module initialization is complete.
+                from .ledger_compatibility import _validate_ar7_history
+
+                _validate_ar7_history(connection, checks)
+                checks.check()
+                return CompatibilityResult("incompatible", "migration_only")
+            shape = catalog(connection)
+            checks.check()
             _installed(connection, shape)
             checks.check()
             for requirement in selected[0].required_completed_backfills:
