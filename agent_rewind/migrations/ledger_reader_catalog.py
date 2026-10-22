@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+from collections.abc import Mapping
 from typing import Any
 
 from sqlalchemy import inspect, text
@@ -19,6 +21,93 @@ from .schema import (
     schema_table_names,
     verify_installed_profile,
 )
+
+# The generic PG column query has 21 binds for optional identity/collation
+# reflection. The ledger's preceding exact gates exclude those shapes, so this
+# observation preserves the shared 16-bind limit without changing old readers.
+_POSTGRES_COLUMNS = """SELECT a.attname::text AS name,
+       pg_catalog.format_type(a.atttypid,a.atttypmod) AS format_type,
+       a.attnotnull AS not_null,
+       CASE WHEN a.atthasdef THEN
+         (SELECT pg_catalog.pg_get_expr(d.adbin,d.adrelid)
+          FROM pg_catalog.pg_attrdef d
+          WHERE d.adrelid=a.attrelid AND d.adnum=a.attnum)
+       ELSE NULL END AS default_expression,
+       a.attgenerated::text AS generated,
+       a.attidentity::text AS identity_kind,
+       a.attisdropped AS dropped
+FROM pg_catalog.pg_class c
+JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+JOIN pg_catalog.pg_attribute a ON a.attrelid=c.oid
+WHERE n.nspname='public' AND c.relkind='r'
+  AND c.relname=:table_name AND a.attnum>0
+ORDER BY a.attnum
+LIMIT 33
+"""
+_POSTGRES_COLUMN_TYPES = {
+    "bigint": "BIGINT",
+    "boolean": "BOOLEAN",
+    "double precision": "DOUBLE PRECISION",
+    "integer": "INTEGER",
+    "json": "JSON",
+    "text": "TEXT",
+    "timestamp with time zone": "TIMESTAMP WITH TIME ZONE",
+}
+
+
+def _postgres_column(row: Mapping[Any, Any]) -> list[Any]:
+    fields = {
+        "name",
+        "format_type",
+        "not_null",
+        "default_expression",
+        "generated",
+        "identity_kind",
+        "dropped",
+    }
+    if (
+        set(row) != fields
+        or any(
+            type(row[key]) is not str
+            for key in ("name", "format_type", "generated", "identity_kind")
+        )
+        or type(row["not_null"]) is not bool
+        or type(row["dropped"]) is not bool
+        or row["dropped"]
+        or row["generated"] != ""
+        or row["identity_kind"] != ""
+        or (row["default_expression"] is not None and type(row["default_expression"]) is not str)
+    ):
+        raise MigrationRefused("schema_incompatible")
+    observed_type = row["format_type"]
+    normalized_type = _POSTGRES_COLUMN_TYPES.get(observed_type)
+    if normalized_type is None:
+        bounded_text = re.fullmatch(
+            r"(character varying|character)\(([1-9][0-9]*)\)", observed_type
+        )
+        if bounded_text is None:
+            raise MigrationRefused("schema_incompatible")
+        prefix = "VARCHAR" if bounded_text[1] == "character varying" else "CHAR"
+        normalized_type = prefix + "(" + bounded_text[2] + ")"
+    return [
+        row["name"],
+        normalized_type,
+        not row["not_null"],
+        row["default_expression"],
+        None,
+        None,
+    ]
+
+
+def _postgres_columns(connection: Connection, table: str, work: LedgerWork) -> list[list[Any]]:
+    rows = connection.execute(text(_POSTGRES_COLUMNS), {"table_name": table}).mappings().all()
+    if not 1 <= len(rows) <= 32:
+        raise MigrationRefused("schema_incompatible")
+    result = []
+    for row in rows:
+        work.check()
+        result.append(_postgres_column(row))
+    return result
 
 
 def _gate(connection: Connection, revision: str, name: str) -> None:
@@ -203,9 +292,23 @@ def _observe_catalog(
     result: dict[str, Any] = {}
     for table in sorted(tables):
         work.check()
-        columns = inspector.get_columns(table, schema=schema)
-        if len(columns) > 32:
-            raise MigrationRefused("schema_incompatible")
+        if name == "postgresql":
+            column_shape = _postgres_columns(connection, table, work)
+        else:
+            columns = inspector.get_columns(table, schema=schema)
+            if len(columns) > 32:
+                raise MigrationRefused("schema_incompatible")
+            column_shape = [
+                [
+                    c["name"],
+                    str(c["type"].compile(dialect=connection.dialect)).upper(),
+                    c["nullable"],
+                    c.get("default"),
+                    c.get("computed"),
+                    c.get("identity"),
+                ]
+                for c in columns
+            ]
         indexes = (
             indexes_by_table.get(table, [])
             if name == "postgresql"
@@ -268,17 +371,7 @@ def _observe_catalog(
             if len(options) != 1 or tuple(options[0]) != (0, 0):
                 raise MigrationRefused("schema_incompatible")
         result[table] = {
-            "columns": [
-                [
-                    c["name"],
-                    str(c["type"].compile(dialect=connection.dialect)).upper(),
-                    c["nullable"],
-                    c.get("default"),
-                    c.get("computed"),
-                    c.get("identity"),
-                ]
-                for c in columns
-            ],
+            "columns": column_shape,
             "pk": inspector.get_pk_constraint(table, schema=schema)["constrained_columns"],
             "uniques": uniques,
             "foreign_keys": inspector.get_foreign_keys(table, schema=schema),
