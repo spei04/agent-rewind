@@ -287,14 +287,16 @@ def test_postgres_actual_server_major_gate_before_body(engine, native_trace, mon
     assert all(raw.closed for raw in native_trace.handles)
 
 
-@pytest.mark.parametrize("count,complete", [(666, True), (667, False)])
+@pytest.mark.parametrize("count,complete", [(665, True), (666, False), (667, False)])
 def test_postgres_last_complete_native_bundle(engine, native_trace, count, complete):
     outcome = LedgerOutcome()
+    body_completed = []
 
     def run():
         with ledger_transaction(engine, outcome, work=LedgerWork()) as connection:
             for _ in range(count):
                 assert connection.exec_driver_sql("SELECT 67").scalar_one() == 67
+            body_completed.append(True)
 
     if complete:
         run()
@@ -303,10 +305,12 @@ def test_postgres_last_complete_native_bundle(engine, native_trace, count, compl
             run()
     sql = native_trace.sql("ordinary")
     commits = native_trace.count("ordinary", "commit-call")
-    assert sql.count("SELECT 67") == count
+    assert sql.count("SELECT 67") == min(count, 666)
+    assert bool(body_completed) is (count < 667)
     assert commits == int(complete)
-    # PostgreSQL spends one logical BEGIN unit, then indivisible triples.
-    # The last usable total is2026; the next triple exceeds2028.
+    # Publication now consumes one xid triple, leaving one fewer body SELECT.
+    # One logical BEGIN plus indivisible triples reaches2026; the next exceeds2028.
+    assert sql.count("SELECT pg_current_xact_id()::text") == 1
     assert len(sql) + commits + 1 == 2026
     assert outcome.commit_acknowledged is complete
     assert all(raw.closed for raw in native_trace.handles)
