@@ -282,31 +282,66 @@ def test_postgres_authorized_different_writer_owner_refuses_without_writes(
     try:
         manifest = validate_ledger_manifest(intent(case))
         before = postgres_snapshot(case.engine)
+        owner_sql = (
+            "SELECT current_user,pg_get_userbyid(c.relowner),r.rolsuper,o.rolcanlogin "
+            "FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace "
+            "JOIN pg_roles r ON r.rolname=current_user JOIN pg_roles o ON o.oid=c.relowner "
+            "WHERE n.nspname='public' AND c.relname='installation_adoptions'"
+        )
         with pg["admin"].connect() as connection:
-            current, table_owner, superuser = connection.exec_driver_sql(
-                "SELECT current_user,pg_get_userbyid(c.relowner),r.rolsuper "
-                "FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace "
-                "JOIN pg_roles r ON r.rolname=current_user "
-                "WHERE n.nspname='public' AND c.relname='installation_adoptions'"
+            current, table_owner, superuser, original_login = connection.exec_driver_sql(
+                owner_sql
             ).one()
             assert superuser and current != table_owner == pg["owner_role"]
+            assert original_login is True
+            quoted_owner = connection.dialect.identifier_preparer.quote(pg["owner_role"])
+        case.engine.dispose()
+        pg["owner"].dispose()
         drain(pg)
-        engine = create_ledger_engine(pg["admin"].url.render_as_string(hide_password=False))
-        with observe_service(monkeypatch, record_property) as watch:
-            with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
-                invoke_postgres(case, pg, manifest, engine=engine)
-            metrics = watch.verify(committed=[False])
-            sql = watch.trace.sql("ordinary")
-            assert any("owner_compatible" in statement for statement in sql)
-            assert not any(
-                statement.lstrip()
-                .upper()
-                .startswith(
-                    ("INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP", "GRANT", "REVOKE")
+        role_change_attempted = False
+        try:
+            with pg["admin"].begin() as connection:
+                # A different LOGIN owner is correctly rejected as another live writer.
+                # Disable only this owned fixture role before targeting owner compatibility.
+                role_change_attempted = True
+                connection.exec_driver_sql(f"ALTER ROLE {quoted_owner} NOLOGIN")
+            with pg["admin"].connect() as connection:
+                assert tuple(connection.exec_driver_sql(owner_sql).one()) == (
+                    current,
+                    table_owner,
+                    True,
+                    False,
                 )
-                for statement in sql
-            )
-            record_property("service_work", json.dumps(metrics))
+            drain(pg)
+            engine = create_ledger_engine(pg["admin"].url.render_as_string(hide_password=False))
+            with observe_service(monkeypatch, record_property) as watch:
+                with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+                    invoke_postgres(case, pg, manifest, engine=engine)
+                metrics = watch.verify(committed=[False])
+                sql = watch.trace.sql("ordinary")
+                assert any("owner_compatible" in statement for statement in sql)
+                assert not any(
+                    statement.lstrip()
+                    .upper()
+                    .startswith(
+                        ("INSERT", "UPDATE", "DELETE", "CREATE", "ALTER", "DROP", "GRANT", "REVOKE")
+                    )
+                    for statement in sql
+                )
+                record_property("service_work", json.dumps(metrics))
+        finally:
+            if role_change_attempted:
+                with pg["admin"].begin() as connection:
+                    login = "LOGIN" if original_login else "NOLOGIN"
+                    connection.exec_driver_sql(f"ALTER ROLE {quoted_owner} {login}")
+                with pg["admin"].connect() as connection:
+                    assert tuple(connection.exec_driver_sql(owner_sql).one()) == (
+                        current,
+                        table_owner,
+                        True,
+                        original_login,
+                    )
+                drain(pg)
         assert postgres_snapshot(case.engine) == before
         drain(pg)
     finally:
