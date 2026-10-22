@@ -1,13 +1,17 @@
 """Independent full-state reader contracts, not partial-reader substitutions."""
 
 import json
+import sqlite3
+from contextlib import closing
 from copy import deepcopy
 from datetime import datetime
 
 import pytest
 from ledger_fixture import canonical_bytes
 from ledger_reader_fixture import (
+    RowTransferWatch,
     complete_ar6,
+    later_admitted_call,
     original_rows,
     replace_progress,
     seed_ar7,
@@ -143,8 +147,11 @@ def test_complete_reader_returns_exact_immutable_state_without_writes(reader_cas
 
 
 @pytest.mark.parametrize("reader_case", [COMPLETE_CASES[0], COMPLETE_CASES[4]], indirect=True)
-def test_unrelated_bounded_unicode_progress_keys_tolerate_opaque_body(reader_case):
+def test_unrelated_bounded_unicode_progress_body_is_not_transferred(
+    reader_case, monkeypatch, record_property
+):
     case = reader_case
+    opaque = "opaque-unrelated-body" * 100_000
     with case.engine.begin() as connection:
         connection.execute(
             text(
@@ -156,12 +163,15 @@ def test_unrelated_bounded_unicode_progress_keys_tolerate_opaque_body(reader_cas
                 "revision": "unrelated-雪",
                 "phase": "phase-λ",
                 "digest": "a" * 64,
-                "cursor": "opaque-unrelated-body" * 100_000,
+                "cursor": opaque,
                 "time": "2026-01-15T12:00:00+00:00",
             },
         )
     before = sqlite_snapshot(case.path)
+    watch = RowTransferWatch(monkeypatch, {"unrelated-progress-body": opaque})
     assert inspect(case).model_dump(mode="json") == case.expected
+    assert watch.hits == []
+    record_property("forbidden_body_transfers", json.dumps(watch.hits))
     assert sqlite_snapshot(case.path) == before
 
 
@@ -353,13 +363,195 @@ def test_historical_aware_timestamp_grammar_is_preserved(reader_case, representa
 
 @pytest.mark.parametrize("native_value", ["bytes", "huge-text"])
 @pytest.mark.parametrize("reader_case", [COMPLETE_CASES[1]], indirect=True)
-def test_financial_native_job_values_refuse_without_publication(reader_case, native_value):
+def test_financial_native_job_values_refuse_before_body_transfer(
+    reader_case, native_value, monkeypatch, record_property
+):
     value = b"opaque-byte-payload" if native_value == "bytes" else "x" * (2 * 1024 * 1024 + 1)
     with reader_case.engine.begin() as connection:
         job = connection.exec_driver_sql("SELECT id FROM jobs ORDER BY id LIMIT 1").scalar_one()
         connection.execute(
             text("UPDATE jobs SET payload=:value WHERE id=:id"), {"value": value, "id": job}
         )
+    watch = RowTransferWatch(monkeypatch, {"invalid-financial-payload": value})
     refused(
         reader_case, "invalid_source_data" if native_value == "bytes" else "ledger_limit_exceeded"
     )
+    assert watch.hits == []
+    record_property("forbidden_body_transfers", json.dumps(watch.hits))
+
+
+@pytest.fixture(params=["reserved", "settled", "released"])
+def evolved_case(request, tmp_path):
+    case = complete_ar6(tmp_path / "evolved.sqlite")
+    try:
+        seed_ar7(case)
+        identities = later_admitted_call(case, effect=request.param)
+        yield case, identities, request.param
+    finally:
+        case.dispose()
+
+
+def test_evolved_fixture_preserves_opening_and_has_exact_call_triple(evolved_case):
+    case, ids, effect = evolved_case
+    assert case.opening["job_count"] == 0
+    assert case.expected["manifest_count"] == 2 and case.expected["account_count"] == 3
+    with case.engine.connect() as connection:
+        rows = (
+            connection.exec_driver_sql(
+                "SELECT * FROM migration_progress WHERE revision='ar_0007_ledger' ORDER BY phase"
+            )
+            .mappings()
+            .all()
+        )
+        parsed = [validate_progress_row(connection, dict(row)) for row in rows]
+        receipt = validate_ledger_chain(
+            sorted(
+                [value for value in parsed if hasattr(value, "manifest")], key=lambda x: x.sequence
+            ),
+            next(value for value in parsed if hasattr(value, "jobs")),
+        )
+        assert receipt.model_dump(mode="json") == case.expected["head"]
+        job = connection.exec_driver_sql(
+            "SELECT status,owner,payload_version,reserved,legacy_reserved_microusd,"
+            "lease_generation FROM jobs"
+        ).one()
+        assert tuple(job) == ("running", "synthetic-worker", 2, 1, 0, 2)
+        assert (
+            connection.exec_driver_sql("SELECT lease_generation FROM provider_calls").scalar_one()
+            == 1
+        )
+        entries = connection.exec_driver_sql(
+            "SELECT account_id,entry_kind,amount_microusd FROM budget_entries "
+            "ORDER BY entry_kind,account_id"
+        ).all()
+        assert sorted(row[0] for row in entries if row[1] == "reserve") == sorted(ids["accounts"])
+        assert all(row[2] == 1 for row in entries)
+        assert len(entries) == (3 if effect == "reserved" else 6)
+        balances = connection.exec_driver_sql(
+            "SELECT opening_held_microusd,held_microusd,accounted_microusd FROM budget_accounts"
+        ).all()
+        assert (
+            balances == [(0, 1 if effect == "reserved" else 0, 1 if effect == "settled" else 0)] * 3
+        )
+        assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
+
+
+def test_live_v2_job_and_older_call_generation_are_valid_complete_state(evolved_case):
+    case, _, _ = evolved_case
+    before = sqlite_snapshot(case.path)
+    assert inspect(case).model_dump(mode="json") == case.expected
+    assert sqlite_snapshot(case.path) == before
+
+
+@pytest.mark.parametrize("mode", ["iterate", "many", "all"])
+@pytest.mark.parametrize("replace_cells", [False, True])
+def test_transfer_witness_detects_real_fetched_text_and_bytes(
+    tmp_path, monkeypatch, mode, replace_cells
+):
+    from sqlalchemy import create_engine
+
+    engine = create_engine("sqlite:///" + str(tmp_path / "transfer-witness.sqlite"))
+    targets = {"text": "sentinel-雪", "bytes": b"sentinel-bytes"}
+    replacements = {"text": targets["text"] + "!", "bytes": targets["bytes"] + b"!"}
+    watch = RowTransferWatch(
+        monkeypatch, targets, replacements=replacements if replace_cells else None
+    )
+    try:
+        with engine.connect() as connection:
+            result = connection.execute(
+                text("SELECT :text_value,:bytes_value"),
+                {"text_value": targets["text"], "bytes_value": targets["bytes"]},
+            )
+            rows = (
+                list(result)
+                if mode == "iterate"
+                else (result.fetchmany(2) if mode == "many" else result.fetchall())
+            )
+            expected = replacements if replace_cells else targets
+            assert [tuple(row) for row in rows] == [(expected["text"], expected["bytes"])]
+        assert [hit["label"] for hit in watch.hits] == ["text", "bytes"]
+        assert [hit["bytes"] for hit in watch.hits] == [len("sentinel-雪".encode()), 14]
+    finally:
+        engine.dispose()
+
+
+@pytest.mark.parametrize("evolved_case", ["settled"], indirect=True)
+@pytest.mark.parametrize(
+    "damage",
+    [
+        "missing-call-scope",
+        "missing-reserve-level",
+        "missing-evidence-ref",
+        "wrong-evidence-role",
+        "missing-evidence-object",
+        "missing-entry-project",
+    ],
+)
+def test_required_financial_associations_refuse_without_partial_state(evolved_case, damage):
+    case, ids, _ = evolved_case
+    # Deliberately bypass SQLite FK enforcement to model an existing damaged
+    # installation. The inspector must prove required closure independently.
+    with closing(sqlite3.connect(case.path)) as raw:
+        raw.execute("PRAGMA foreign_keys=OFF")
+        if damage == "missing-call-scope":
+            raw.execute(
+                "DELETE FROM resource_scopes WHERE resource_kind='provider_call' AND resource_id=?",
+                (ids["call_id"],),
+            )
+        elif damage == "missing-reserve-level":
+            raw.execute(
+                "DELETE FROM budget_entries WHERE call_id=? AND account_id=? "
+                "AND entry_kind='reserve'",
+                (ids["call_id"], ids["accounts"][2]),
+            )
+        elif damage in {"missing-evidence-ref", "wrong-evidence-role"}:
+            if damage == "missing-evidence-ref":
+                raw.execute("DELETE FROM artifact_refs WHERE artifact_id=?", (ids["evidence_id"],))
+            else:
+                raw.execute(
+                    "UPDATE artifact_refs SET role='unrelated-evidence' WHERE artifact_id=?",
+                    (ids["evidence_id"],),
+                )
+        elif damage == "missing-evidence-object":
+            raw.execute("DELETE FROM artifact_objects WHERE id=?", (ids["evidence_id"],))
+        else:
+            raw.execute(
+                "UPDATE budget_entries SET project_id=? WHERE call_id=?",
+                ("f" * 32, ids["call_id"]),
+            )
+        raw.commit()
+    refused(case, "ledger_history_unsupported")
+
+
+@pytest.mark.parametrize("evolved_case", ["reserved"], indirect=True)
+def test_valid_native_rows_with_carried_exposure_over_job_cap_refuse(evolved_case):
+    case, ids, _ = evolved_case
+    with case.engine.begin() as connection:
+        connection.execute(text("UPDATE jobs SET budget=0 WHERE id=:id"), {"id": ids["job_id"]})
+    refused(case, "ledger_exposure_refused")
+
+
+@pytest.mark.parametrize("extra_whitespace", [0, 1], ids=["unchanged-control", "receipt-mismatch"])
+@pytest.mark.parametrize("reader_case", [COMPLETE_CASES[0]], indirect=True)
+def test_adoption_utf8_receipt_is_checked_before_json_semantics(
+    reader_case, monkeypatch, extra_whitespace, record_property
+):
+    case = reader_case
+    with case.engine.connect() as connection:
+        mapping = connection.exec_driver_sql(
+            "SELECT CAST(mapping AS TEXT) FROM installation_adoptions"
+        ).scalar_one()
+    replacement = mapping + " " * extra_whitespace
+    assert json.loads(replacement) == json.loads(mapping)
+    watch = RowTransferWatch(
+        monkeypatch,
+        {"adoption-mapping": mapping},
+        replacements={"adoption-mapping": replacement},
+    )
+    if extra_whitespace:
+        refused(case, "adoption_metadata_drift")
+    else:
+        assert inspect(case).model_dump(mode="json") == case.expected
+    assert watch.hits, "The intended raw H10 body cell must actually be observed"
+    record_property("mapping_transport_delta", str(extra_whitespace))
+    record_property("mapping_transfers", json.dumps(watch.hits))

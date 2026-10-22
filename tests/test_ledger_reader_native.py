@@ -2,22 +2,26 @@
 
 import json
 import sqlite3
+from uuid import uuid4
 
 import pytest
 import test_migrations_postgres as migration_tests
 from ledger_operator_fixture import SQLiteTrace
 from ledger_reader_fixture import (
+    RowTransferWatch,
     complete_postgres_ar6,
     postgres_snapshot,
     seed_ar7,
     sqlite_snapshot,
 )
-from sqlalchemy import create_engine
+from postgres_control import observe_exclusion_failure, wait_for_database_drain
+from sqlalchemy import create_engine, text
+from sqlalchemy.pool import NullPool
 from test_ledger_operator_postgres import PostgresTrace
 from test_ledger_reader_independent import COMPLETE_CASES, reader_case
 from test_run_projection_postgres import drain, observed_reader
 
-from agent_rewind.migrations import ledger_work
+from agent_rewind.migrations import ledger_work, service
 from agent_rewind.migrations.ledger_transaction import LedgerOutcome, ledger_transaction
 from agent_rewind.migrations.ledger_work import LedgerWork
 from agent_rewind.migrations.schema import MigrationRefused
@@ -271,3 +275,158 @@ def test_postgres_complete_reader_identity_and_unchanged_rows(
     drain(pg)
     assert postgres_snapshot(case.engine) == before
     drain(pg)
+
+
+@pytest.fixture
+def latin1_pg(monkeypatch):
+    """Own a C-locale LATIN1 database and roles, independent of default-encoding cases."""
+    admin = create_engine(
+        migration_tests.POSTGRES, isolation_level="AUTOCOMMIT", poolclass=NullPool
+    )
+    token = "ar_reader_latin1_" + uuid4().hex
+    owner, app, group = token + "_owner", token + "_app", token + "_group"
+    password = "synthetic-test-only"
+    roles, engines = [], []
+    database_created = False
+    exclusion = service._postgres_exclusion
+
+    def observed_exclusion(connection, tables):
+        observe_exclusion_failure(exclusion, connection, tables, control=admin, database=token)
+
+    monkeypatch.setattr(service, "_postgres_exclusion", observed_exclusion)
+    try:
+        with admin.connect() as connection:
+            assert (
+                connection.exec_driver_sql("SHOW server_version_num").scalar_one().startswith("16")
+            )
+            for role, options in (
+                (owner, f"LOGIN PASSWORD '{password}'"),
+                (app, f"LOGIN NOINHERIT PASSWORD '{password}'"),
+                (group, "NOLOGIN"),
+            ):
+                connection.exec_driver_sql(f"CREATE ROLE {role} {options}")
+                roles.append(role)
+            connection.exec_driver_sql(
+                f"CREATE DATABASE {token} OWNER {owner} TEMPLATE template0 "
+                "ENCODING 'LATIN1' LC_COLLATE 'C' LC_CTYPE 'C'"
+            )
+            database_created = True
+        url = admin.url.set(database=token)
+        for identity, secret in ((owner, password), (app, password), (url.username, url.password)):
+            engines.append(
+                create_engine(
+                    url.set(username=identity, password=secret),
+                    poolclass=NullPool,
+                    connect_args={"client_encoding": "UTF8"},
+                )
+            )
+        owner_engine, app_engine, privileged = engines
+        with owner_engine.begin() as connection:
+            connection.exec_driver_sql("REVOKE CREATE ON SCHEMA public FROM PUBLIC")
+            assert tuple(
+                connection.exec_driver_sql(
+                    "SELECT pg_encoding_to_char(encoding),datcollate,datctype "
+                    "FROM pg_database WHERE datname=current_database()"
+                ).one()
+            ) == ("LATIN1", "C", "C")
+            assert connection.exec_driver_sql("SHOW client_encoding").scalar_one() == "UTF8"
+            assert tuple(
+                connection.exec_driver_sql(
+                    "SELECT rolsuper,rolcreaterole FROM pg_roles WHERE rolname=current_user"
+                ).one()
+            ) == (False, False)
+        wait_for_database_drain(admin, token)
+        yield {
+            "owner": owner_engine,
+            "app": app_engine,
+            "admin": privileged,
+            "control": admin,
+            "owner_role": owner,
+            "app_role": app,
+            "group_role": group,
+        }
+    finally:
+        for engine in engines:
+            engine.dispose()
+        with admin.connect() as connection:
+            if database_created:
+                connection.exec_driver_sql(f"DROP DATABASE {token} WITH (FORCE)")
+            for role in reversed(roles):
+                connection.exec_driver_sql(f"DROP ROLE {role}")
+            assert (
+                connection.execute(
+                    text("SELECT count(*) FROM pg_database WHERE datname=:name"), {"name": token}
+                ).scalar_one()
+                == 0
+            )
+            assert (
+                connection.execute(
+                    text("SELECT count(*) FROM pg_roles WHERE rolname IN (:owner,:app,:group)"),
+                    {"owner": owner, "app": app, "group": group},
+                ).scalar_one()
+                == 0
+            )
+        admin.dispose()
+
+
+@postgres_only
+def test_postgres_latin1_native_bytes_and_utf8_transfer_are_distinct(
+    latin1_pg, observed_reader, monkeypatch, record_property
+):
+    from test_ownership import FRESH
+
+    from agent_rewind.migrations.ledger_inspection import inspect_ledger_state
+
+    case = complete_postgres_ar6(latin1_pg, legacy=False)
+    try:
+        with case.engine.begin() as connection:
+            connection.execute(
+                text(
+                    "INSERT INTO jobs(id,kind,created,payload,status,cancel,budget,reserved,actor) "
+                    "VALUES(:id,'run',1700000000.125,:payload,'queued',false,1,0,:actor)"
+                ),
+                {
+                    "id": "e" * 32,
+                    "payload": "café",
+                    "actor": FRESH["principal_grants"][0]["principal_id"],
+                },
+            )
+            connection.execute(
+                text("INSERT INTO resource_scopes VALUES('job',:id,:project)"),
+                {"id": "e" * 32, "project": FRESH["project_id"]},
+            )
+            native, value = connection.exec_driver_sql(
+                "SELECT octet_length(payload),payload FROM jobs"
+            ).one()
+            assert native == 4 and value == "café" and len(value.encode("utf-8")) == 5
+        drain(latin1_pg)
+        before = postgres_snapshot(case.engine)
+        drain(latin1_pg)
+        watch = RowTransferWatch(monkeypatch, {"latin1-financial-payload": "café"})
+        engine, outcome = case.operator_engine(), LedgerOutcome()
+        try:
+            with ledger_transaction(engine, outcome, work=LedgerWork()) as connection:
+                state = inspect_ledger_state(connection)
+                assert state.model_dump(mode="json") == case.expected
+            assert outcome.commit_acknowledged and not outcome.cleanup_failed
+        finally:
+            engine.dispose()
+        # The observed wire cell is UTF-8 sized independently of PostgreSQL octets.
+        assert watch.hits and all(hit["bytes"] == 5 for hit in watch.hits)
+        record_property(
+            "encoding_receipt",
+            json.dumps(
+                {
+                    "server_encoding": "LATIN1",
+                    "native_bytes": native,
+                    "utf8_bytes": 5,
+                    "transport_bound": 4 * native,
+                    "observed_transfers": watch.hits,
+                }
+            ),
+        )
+        drain(latin1_pg)
+        assert postgres_snapshot(case.engine) == before
+        drain(latin1_pg)
+    finally:
+        case.dispose()

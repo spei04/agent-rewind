@@ -6,8 +6,11 @@ not proof of an initialize/provision implementation.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import sqlite3
 from contextlib import closing
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -346,3 +349,265 @@ def complete_postgres_ar6(pg, *, legacy: bool) -> ReaderFixture:
     case = capture_ar6(None, engine, legacy=legacy)
     drain(pg)
     return case
+
+
+def append_provision(case: ReaderFixture, accounts: list[dict[str, Any]]) -> None:
+    """Seed a later immutable receipt, without pretending a provisioner exists."""
+    assert case.manifest is not None and case.opening is not None
+    raw = deepcopy(case.manifest)
+    sequence = case.expected["manifest_count"]
+    raw.update(
+        manifest_id=identifier(1_000_000 + sequence),
+        operation="provision",
+        parent_manifest_digest=digest(case.manifest),
+        accounts=sorted(accounts, key=lambda row: row["id"]),
+        opening_accounts=None,
+    )
+    with case.engine.begin() as connection:
+        raw["source_digest"] = source_digest(connection)
+        role = (
+            connection.exec_driver_sql("SELECT current_user").scalar_one()
+            if connection.dialect.name == "postgresql"
+            else None
+        )
+        cursor = cursor_for(raw, sequence=sequence, role=role)
+        for row in raw["accounts"]:
+            _insert(
+                connection,
+                "budget_accounts",
+                {
+                    **row,
+                    "held_microusd": 0,
+                    "accounted_microusd": 0,
+                    "opening_held_microusd": 0,
+                },
+            )
+        _insert(
+            connection,
+            "migration_progress",
+            progress_row(cursor, postgres=connection.dialect.name == "postgresql"),
+        )
+    case.manifest, case.cursor = raw, cursor
+    case.expected = {
+        **case.expected,
+        "head": {
+            "installation_key": raw["installation_key"],
+            "revision": LEDGER,
+            "manifest_id": raw["manifest_id"],
+            "manifest_digest": digest(raw),
+            "sequence": sequence,
+            "operation": "provision",
+            "source_digest": raw["source_digest"],
+            "account_rows": len(accounts),
+            "imported_jobs": 0,
+            "imported_opening_microusd": 0,
+            "initialized_at": OBSERVED,
+        },
+        "manifest_count": sequence + 1,
+        "account_count": case.expected["account_count"] + len(accounts),
+    }
+
+
+def later_admitted_call(case: ReaderFixture, *, effect: str = "reserved") -> dict[str, Any]:
+    """A complete synthetic post-opening admission and financial closure.
+
+    Artifact helpers establish SQL metadata associations only. No provider,
+    upload, authenticated invoice or production reservation method is invoked.
+    """
+    from test_admission_envelope import descriptor
+    from test_admission_repository import config_refs, prepared
+    from test_admission_schema import PRINCIPAL, operation
+
+    from agent_rewind.artifact_metadata import record_verified, register_ref
+
+    assert case.revision == LEDGER and not case.legacy
+    assert case.expected["account_count"] == 1
+    assert effect in {"reserved", "settled", "released"}
+    project, organization = FRESH["project_id"], FRESH["organization_id"]
+    job, call, operation_id = identifier(2_000_000), identifier(3_000_000), identifier(4_000_000)
+    value, payload = prepared(job=job, ids=tuple(identifier(5_000_000 + i) for i in range(3)))
+    assert value.intent.budget_microusd == 1
+    with case.engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO jobs(id,kind,created,payload,status,cancel,budget,reserved,actor) "
+                "VALUES(:id,'run',1700000000.125,:payload,'queued',false,1,0,:actor)"
+            ),
+            {"id": job, "payload": value.envelope_digest, "actor": PRINCIPAL},
+        )
+        _insert(
+            connection,
+            "resource_scopes",
+            {"resource_kind": "job", "resource_id": job, "project_id": project},
+        )
+        config_refs(connection, value, payload)
+        operation(
+            connection,
+            id=operation_id,
+            job_id=job,
+            client_operation_id=value.intent.client_operation_id,
+            request_digest=value.intent.request_digest,
+            execution_config_digest=value.configuration.digest,
+            accepted_response=canonical_bytes(
+                {"job_id": job, "operation_id": operation_id}
+            ).decode(),
+        )
+    rows = [
+        _account(20_000, organization, "project", project, project=project),
+        _account(30_000, organization, "job", job, project=project, job=job, limit=1),
+    ]
+    append_provision(case, rows)
+    triple = [identifier(10_000), identifier(20_000), identifier(30_000)]
+    with case.engine.begin() as connection:
+        _insert(
+            connection,
+            "provider_calls",
+            {
+                "id": call,
+                "project_id": project,
+                "job_id": job,
+                "logical_call_id": identifier(6_000_000),
+                "purpose": "continuation",
+                "request_digest": "a" * 64,
+                "price_version": json.loads(value.configuration.canonical_bytes)["price_version"],
+                "state": "reserved" if effect == "reserved" else "reconciled",
+                "reserved_microusd": 1,
+                "created_at": OBSERVED,
+                "organization_id": organization,
+                "job_resource_kind": "job",
+                "lease_generation": 1,
+                "organization_account_id": triple[0],
+                "project_account_id": triple[1],
+                "job_account_id": triple[2],
+            },
+        )
+        _insert(
+            connection,
+            "resource_scopes",
+            {"resource_kind": "provider_call", "resource_id": call, "project_id": project},
+        )
+        for account_id in triple:
+            _insert(
+                connection,
+                "budget_entries",
+                {
+                    "call_id": call,
+                    "account_id": account_id,
+                    "entry_kind": "reserve",
+                    "amount_microusd": 1,
+                    "created_at": OBSERVED,
+                    "project_id": project,
+                },
+            )
+        evidence_id = None
+        if effect != "reserved":
+            evidence = descriptor(
+                b"synthetic-accounting-observation",
+                object_id=identifier(7_000_000),
+                project=project,
+            )
+            record_verified(connection, evidence)
+            register_ref(
+                connection,
+                project_id=project,
+                owner_kind="provider_call",
+                owner_id=call,
+                role="budget_evidence",
+                artifact_id=evidence.id,
+            )
+            evidence_id = evidence.id
+            for account_id in triple:
+                _insert(
+                    connection,
+                    "budget_entries",
+                    {
+                        "call_id": call,
+                        "account_id": account_id,
+                        "entry_kind": "settle" if effect == "settled" else "release",
+                        "amount_microusd": 1,
+                        "created_at": OBSERVED,
+                        "project_id": project,
+                        "evidence_ref": evidence.id,
+                        "evidence_owner_kind": "provider_call",
+                        "evidence_role": "budget_evidence",
+                    },
+                )
+        connection.execute(
+            text("UPDATE budget_accounts SET held_microusd=:held,accounted_microusd=:accounted"),
+            {
+                "held": 1 if effect == "reserved" else 0,
+                "accounted": 1 if effect == "settled" else 0,
+            },
+        )
+        connection.execute(
+            text(
+                "UPDATE jobs SET status='running',owner='synthetic-worker',lease_until=1900000000,"
+                "lease_generation=2,reserved=1 WHERE id=:job"
+            ),
+            {"job": job},
+        )
+    return {
+        "job_id": job,
+        "call_id": call,
+        "operation_id": operation_id,
+        "accounts": triple,
+        "evidence_id": evidence_id,
+        "configuration": value.configuration,
+    }
+
+
+class RowTransferWatch:
+    """Observe actual client-buffered DBAPI cells at the pinned fetch boundary.
+
+    This observes row transfer, not server disk reads. It neither accepts SQL
+    prefixes as a read-only proof nor changes the operator engine's listeners.
+    """
+
+    def __init__(
+        self,
+        monkeypatch,
+        targets: dict[str, str | bytes],
+        *,
+        replacements: dict[str, str | bytes] | None = None,
+    ):
+        from sqlalchemy.engine.cursor import CursorFetchStrategy
+
+        self.hits: list[dict[str, Any]] = []
+        self.targets = targets
+        replacements = replacements or {}
+        assert set(replacements) <= set(targets)
+        for method in ("fetchone", "fetchmany", "fetchall"):
+            original = getattr(CursorFetchStrategy, method)
+
+            def observed(
+                strategy, result, cursor, *args, _original=original, _method=method, **kwargs
+            ):
+                value = _original(strategy, result, cursor, *args, **kwargs)
+                rows = [value] if _method == "fetchone" else value
+                changed, substituted = False, []
+                for row in rows or []:
+                    if row is None:
+                        continue
+                    cells = list(row)
+                    for position, cell in enumerate(row):
+                        for label, target in self.targets.items():
+                            if type(cell) is type(target) and cell == target:
+                                wire = cell.encode("utf-8") if isinstance(cell, str) else cell
+                                self.hits.append(
+                                    {
+                                        "label": label,
+                                        "method": _method,
+                                        "bytes": len(wire),
+                                        "sha256": hashlib.sha256(wire).hexdigest(),
+                                    }
+                                )
+                                if label in replacements:
+                                    assert type(replacements[label]) is type(cell)
+                                    cells[position] = replacements[label]
+                                    changed = True
+                    substituted.append(tuple(cells))
+                if changed:
+                    return substituted[0] if _method == "fetchone" else substituted
+                return value
+
+            monkeypatch.setattr(CursorFetchStrategy, method, observed)
