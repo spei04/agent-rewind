@@ -151,7 +151,7 @@ def test_unrelated_bounded_unicode_progress_body_is_not_transferred(
     reader_case, monkeypatch, record_property
 ):
     case = reader_case
-    opaque = "opaque-unrelated-body" * 100_000
+    opaque = json.dumps("opaque-unrelated-body" * 100_000)
     with case.engine.begin() as connection:
         connection.execute(
             text(
@@ -211,10 +211,11 @@ def refused(case, code):
 )
 @pytest.mark.parametrize("reader_case", [COMPLETE_CASES[0]], indirect=True)
 def test_complete_catalog_does_not_mask_durable_adoption_drift(reader_case, column, value, code):
-    with reader_case.engine.begin() as connection:
-        connection.execute(
-            text(f"UPDATE installation_adoptions SET {column}=:value"), {"value": value}
-        )
+    # Model durable pre-existing drift rather than ask a live FK to create it.
+    with closing(sqlite3.connect(reader_case.path)) as raw:
+        raw.execute("PRAGMA foreign_keys=OFF")
+        raw.execute(f"UPDATE installation_adoptions SET {column}=?", (value,))
+        raw.commit()
     refused(reader_case, code)
 
 
@@ -374,7 +375,8 @@ def test_financial_native_job_values_refuse_before_body_transfer(
         )
     watch = RowTransferWatch(monkeypatch, {"invalid-financial-payload": value})
     refused(
-        reader_case, "invalid_source_data" if native_value == "bytes" else "ledger_limit_exceeded"
+        reader_case,
+        "ledger_history_unsupported" if native_value == "bytes" else "ledger_limit_exceeded",
     )
     assert watch.hits == []
     record_property("forbidden_body_transfers", json.dumps(watch.hits))
