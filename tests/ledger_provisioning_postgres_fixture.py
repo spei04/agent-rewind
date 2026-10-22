@@ -1,6 +1,7 @@
 """Native PostgreSQL observations for the independent provisioning oracle."""
 
 import hashlib
+import json
 from datetime import datetime
 
 from ledger_provisioning_fixture import (
@@ -173,7 +174,33 @@ def inspect(fixture, pg):
         drain(pg)
 
 
-def assert_stage(fixture, pg, manifests, receipts):
+def canonical_cursor(raw):
+    """Compare stored JSON values without accepting duplicate keys or nonfinite numbers."""
+
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate progress cursor member")
+            result[key] = value
+        return result
+
+    def reject_constant(value):
+        raise ValueError("nonfinite progress cursor number")
+
+    value = json.loads(raw, object_pairs_hook=unique_object, parse_constant=reject_constant)
+    if type(value) is not dict:
+        raise ValueError("progress cursor must be an object")
+    return canonical(value)
+
+
+def progress_diagnostic(value):
+    if isinstance(value, datetime):
+        return {"native_type": "timestamptz", "iso8601": value.isoformat()}
+    raise TypeError("unsupported progress diagnostic value")
+
+
+def assert_stage(fixture, pg, manifests, receipts, *, record_property):
     """Independent expected values against PostgreSQL's real typed serialization."""
     accounts, progress, state = expected_stage(
         fixture, manifests, receipts, database_role=pg["owner_role"]
@@ -195,8 +222,8 @@ def assert_stage(fixture, pg, manifests, receipts):
                 ).mappings()
             ]
             assert actual_accounts == sorted(expected_accounts, key=lambda row: row["id"])
-            # JSON text retains the writer's canonical bytes; timestamptz is checked
-            # as an instant rather than relying on a session display time zone.
+            # The writer casts through JSONB, which normalizes stored JSON text.
+            # Compare strict JSON values and retain raw native observations first.
             rows = [
                 dict(row)
                 for row in connection.exec_driver_sql(
@@ -205,12 +232,11 @@ def assert_stage(fixture, pg, manifests, receipts):
                     "WHERE revision='ar_0007_ledger' ORDER BY phase"
                 ).mappings()
             ]
-            assert {row["phase"] for row in rows} == set(progress)
-            for row in rows:
-                cursor, count, source = progress[row["phase"]]
-                assert row == {
+            expected_rows = {}
+            for phase, (cursor, count, source) in progress.items():
+                expected_rows[phase] = {
                     "revision": LEDGER,
-                    "phase": row["phase"],
+                    "phase": phase,
                     "source_digest": source,
                     "cursor": canonical(cursor).decode(),
                     "rows_verified": count,
@@ -219,6 +245,23 @@ def assert_stage(fixture, pg, manifests, receipts):
                         cursor["initialized_at"].replace("Z", "+00:00")
                     ),
                 }
+            record_property(
+                "provisioning_progress_rows",
+                json.dumps(
+                    {
+                        "manifest_count": len(manifests),
+                        "actual": rows,
+                        "expected": list(expected_rows.values()),
+                    },
+                    default=progress_diagnostic,
+                    allow_nan=False,
+                ),
+            )
+            assert len(rows) == len(expected_rows)
+            assert {row["phase"] for row in rows} == set(expected_rows)
+            for row in rows:
+                actual = {**row, "cursor": canonical_cursor(row["cursor"]).decode()}
+                assert actual == expected_rows[row["phase"]]
             assert [
                 tuple(row)
                 for row in connection.exec_driver_sql(

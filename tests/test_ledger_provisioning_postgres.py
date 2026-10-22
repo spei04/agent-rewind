@@ -99,7 +99,7 @@ def test_postgres_real_s0_m0_s1_m1_s2_and_older_replay(legacy, pg, monkeypatch, 
     with observe_service(monkeypatch, record_property) as watch:
         original = invoke(legacy, pg, first)
         record_property("initial_work", json.dumps(watch.verify(committed=[True])))
-    assert_stage(legacy, pg, [first], [original])
+    assert_stage(legacy, pg, [first], [original], record_property=record_property)
     s1 = native_snapshot(legacy.case, pg)
 
     later = next_manifest(first)
@@ -107,7 +107,7 @@ def test_postgres_real_s0_m0_s1_m1_s2_and_older_replay(legacy, pg, monkeypatch, 
     with observe_service(monkeypatch, record_property) as watch:
         second = invoke(legacy, pg, later)
         record_property("provision_work", json.dumps(watch.verify(committed=[True])))
-    assert_stage(legacy, pg, [first, later], [original, second])
+    assert_stage(legacy, pg, [first, later], [original, second], record_property=record_property)
     s2 = native_snapshot(legacy.case, pg)
     assert {key: value for key, value in s2.items() if key != "tables"} == {
         key: value for key, value in s1.items() if key != "tables"
@@ -151,7 +151,7 @@ def test_postgres_real_empty_initialize_exact_zero_opening(
         with observe_service(monkeypatch, record_property) as watch:
             receipt = invoke(fixture, pg, manifest)
             record_property("initial_work", json.dumps(watch.verify(committed=[True])))
-        assert_stage(fixture, pg, [manifest], [receipt])
+        assert_stage(fixture, pg, [manifest], [receipt], record_property=record_property)
         assert (receipt.account_rows, receipt.imported_jobs, receipt.imported_opening_microusd) == (
             0,
             0,
@@ -171,7 +171,7 @@ def test_postgres_exact_244999_cap_refuses_245000_without_writes(
     original = None
     if stage == "provision":
         original = invoke(legacy, pg, first)
-        assert_stage(legacy, pg, [first], [original])
+        assert_stage(legacy, pg, [first], [original], record_property=record_property)
         manifest = next_manifest(first)
     else:
         assert inspect(legacy, pg).status == "absent"
@@ -187,7 +187,7 @@ def test_postgres_exact_244999_cap_refuses_245000_without_writes(
         )
     assert native_snapshot(legacy.case, pg) == before
     if original is not None:
-        assert_stage(legacy, pg, [first], [original])
+        assert_stage(legacy, pg, [first], [original], record_property=record_property)
 
 
 @pytest.mark.parametrize("predicate", ["true", "false"])
