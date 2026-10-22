@@ -4,6 +4,50 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. P1 has no accepted product delivery yet; P2 #109 remains **Not started**, waiting for accepted P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
+## Operator native and lifecycle checkpoint — 2026-10-22
+
+The lead and independent reviewers accept source
+80023cbc057dabcef13e8ce760baed757fcfd56b for the bounded factory, work accounting,
+transaction outcomes and lifecycle. Runtime remains the reviewed df55c1f;
+the final lifecycle delta changes tests only. Private lead acceptance digest:
+4e52e10bfd7693607bdaa90f98bb19050f33171d39445c8248f9a9f5b39aef3d.
+
+Independent verification passed 100 SQLite/factory/lifecycle cases on Python
+3.11.17 (3.29 seconds) and 3.12.3 (3.86 seconds), without skips or warnings.
+The 21 new cases cover partial acquisition, callback/listener installation and
+removal, both eight-control cleanup branches, observer failure/exhaustion and
+later-generation callback survival. Native actions and fresh SQL reads are
+observed separately from implementation accounting. Initial 13/8 and 20/1 test
+attempts were fixture/expectation failures; their evidence remains retained.
+
+Separate independent PostgreSQL evidence passed 131 cases together on Python
+3.11 (79 SQLite/factory, 18 independent PostgreSQL and 34 prior PostgreSQL).
+Python 3.12 passed an earlier 47-case selection, then all 18 expanded independent
+cases. This is not one combined 52-case run. Logical BEGIN acknowledgment is
+distinguished from native IDLE/INTRANS; lost commit acknowledgment remains
+uncertain, and fresh connections verify actual effects.
+
+Separate authored checks passed 41 SQLite cases per interpreter and 31 PostgreSQL
+module cases per interpreter: 23 socket-backed cases, six pre-connect refusals and
+two deliberately failed numeric/TLS controls. These are not 31 successful connections
+or proof of successful TLS. Prior regressions passed 206 on Python 3.12 and 204 with
+two intentional Python-3.12-API skips on 3.11. Authored wheel/source-archive proof
+matched 124 runtime files; runtime bytes remain unchanged. Overlapping selections
+are not a new full-suite result.
+
+The exact three-database/fifteen-role baseline was restored and PostgreSQL stopped.
+Lead owns primary for publication; secondary is free after independent verification.
+Both cloud checkouts and their independent environments remain for reuse. No provider
+call or new paid resource.
+
+Next is review of a bounded non-owning reader under operator exclusion. Historical
+ownership/creator provenance and current request authority remain distinct;
+unresolved wider membership policy cannot be bypassed or called a complete audit.
+Compatibility activation is separate. Actual provisioning, 245000 opening/backfill,
+replay, concurrency, maximum-state inspection, child-death/owner-preserving recovery,
+hosted checks, protected merge and candidate proof are still required. P1 remains
+In progress/null acceptance; P2 stays Not started.
+
 ## Operator SQLite verification checkpoint — 2026-10-22
 
 Corrected runtime df55c1fc3a574f66a2ad96ef924cc1e1710c022d is composed with
@@ -180,10 +224,10 @@ Over-bound billing must eventually retain the evidence and block further dispatc
 
 ## Assignment and dependency review
 
-- Planning/verification: 79 independent SQLite/factory checks frozen at 3716811; prepare independent PostgreSQL verification and wait for explicit restored/stopped database handoff.
-- Platform/security: validates corrected runtime df55c1f across native PostgreSQL and both interpreters in the reused secondary; independent QE takes database ownership only after documented restoration, stop and explicit handoff.
-- Delivery reviewer: independently review ledger source, integration and actual delivery evidence; accepted HTTP audit remains predecessor evidence.
-- Lead: integrate reviewed runtime/tests, coordinate checkout and PostgreSQL ownership, maintain issue read-back and require the full P1 acceptance matrix before P2 handoff.
+- Platform/security: review the bounded persisted-inspection/provenance seam before new reader code.
+- Delivery reviewer: independently review progress integration and the next reader design; lifecycle authorship remains separate from peer review.
+- Planning/verification: independently audit matching hosted checks after publication; both-interpreter lifecycle and native PostgreSQL checkpoints are complete.
+- Lead: own primary for publication, reuse secondary sequentially, keep PostgreSQL stopped until a documented test slot, and require full P1 acceptance before P2.
 
 The historical first-fortnight schedules and opening conditions remain unchanged. Accepted HTTP and exact P1 entry satisfy the implementation prerequisites; the lead has issued the P1 handoff. No new calendar allocation or staffed-time conversion follows from the effort totals.
 

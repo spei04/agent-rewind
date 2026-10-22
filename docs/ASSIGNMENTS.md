@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Validate native operator startup, outcomes and cleanup in both Python versions | Corrected runtime df55c1f; owns the reused secondary. PostgreSQL use passes to independent QE after verified restoration and explicit handoff. |
-| Delivery reviewer | Review corrected operator source and native evidence | Initial defects have reviewed corrections; full native-envelope and implementation acceptance remain pending. |
-| Planning/verification | 79 independent SQLite/factory checks frozen; prepare PostgreSQL verification | Reuses primary after the lead progress update; database testing waits for the author to restore and release its slot. |
-| Lead | Review integration, publish the operator checkpoint and coordinate handoffs | P1 #108 remains In progress; P2 #109 stays Not started with null acceptance. |
+| Platform/security | Review the next bounded ledger inspection seam | Preserve historical provenance and current authority separately; source review before reader code. |
+| Delivery reviewer | Review integration and progress documents | Authored 21 lifecycle controls; independent peer review and both-interpreter replay accepted. |
+| Planning/verification | Verify hosted checks after draft P1 publication | 100 affected cases pass per interpreter; native PostgreSQL evidence accepted; secondary released clean. |
+| Lead | Publish reviewed checkpoint and coordinate the next slice | Owns primary for publication. Full P1 remains In progress; P2 remains Not started. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -50,10 +50,10 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** First ledger schema checkpoint b2e19be remains independently accepted. Corrected operator source at 3716811 passes 79 independent SQLite/factory checks; original transaction, setter-expiry and reservation-delay failures remain retained. Platform/security validates PostgreSQL and both interpreters, planning prepares independent PostgreSQL tests, and delivery reviews the evidence. No ledger package is Verified.
+- **Contributor checkpoint:** Schema b2e19be and bounded operator 80023cbc are independently accepted internal checkpoints. All 100 independent SQLite/factory/lifecycle cases pass on both interpreters; separate PostgreSQL evidence is reviewed. Earlier runtime defects and fixture failures retain their distinct evidence. No ledger package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** AR-010-A/P1 #108 reviewed operator work accounting, transaction outcomes and owned engine factory, with independent native fault tests, then the full provisioning/opening/constraint/privilege/bounds/recovery matrix. P2 #109 remains Not started until accepted P1 and its own reservation/fence entry. The accepted schema checkpoint cannot waive those gates.
-- **Current storage and consumers:** Two existing cloud checkouts remain in use. The lead briefly owns primary for this progress update, then returns it to independent QE; platform/security owns secondary for native proof and regression checks. PostgreSQL has one explicitly assigned slot: each handoff requires the restored 3-database/15-role baseline, zero other clients and a stopped server. Secondary also owns an isolated pinned Python 3.11 environment; the existing 3.12 environment is unchanged. Private evidence stays outside the checkouts; no new checkout or paid resource was created.
+- **Next evidence-producing milestone:** AR-010-A/P1 #108 bounded persisted inspection/provenance, followed by actual opening/provisioning/replay, concurrency, capacity and recovery. Review the reader seam before code; require full P1 delivery before P2.
+- **Current storage and consumers:** Two existing cloud checkouts are retained for sequential reuse. Lead owns primary for publication; independent QE released secondary clean, retaining its separate pinned Python 3.11 and 3.12 environments. PostgreSQL is restored to three databases/fifteen roles with zero other clients and stopped. Measured filesystem availability is 101.24 GB. Private evidence remains outside checkouts; no new checkout or paid resource was created.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -902,3 +902,16 @@ envelope and prior ownership/admission regressions remain acceptance gates.
 The isolated Python 3.11.17 environment uses the existing lockfile and has its
 own installed files. No provider calls, new paid resources or partner data.
 P1 stays In progress; P2 stays Not started.
+
+
+## Operator native and lifecycle checkpoint — 2026-10-22
+
+- Platform/security completed corrected operator/native evidence and independently accepted the lifecycle controls.
+- Delivery authored 21 lifecycle cases at 80023cbc; 100 selected checks pass. Primary was released for lead integration.
+- Planning/verification independently passed the same 100 cases on both Python versions and released secondary clean. PostgreSQL stayed stopped.
+- Lead accepted this internal checkpoint, prepares a draft P1 delivery for hosted checks, and assigns review of the next bounded reader.
+
+Separate PostgreSQL evidence is 131 passes together on Python 3.11; Python 3.12
+has an earlier 47-case run and final 18-case extension. Counts overlap other
+selections. Earlier fixture failures are not runtime defects. Full P1 remains
+In progress and P2 Not started.
