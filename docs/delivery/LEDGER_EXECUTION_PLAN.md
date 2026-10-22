@@ -507,3 +507,54 @@ source, wheel and source distribution. The first verifier invocation's
 transient log-download failure remains retained; the successful invocation and
 durable release record are separate. This delivery updates F1 progress only;
 it contains no F2 runtime and cannot accept F2 or P1.
+
+
+## F2 reviewed source and offline verification — 2026-10-22
+
+Independent source review found missing cooperative deadline checks in pure
+study/graph traversal and the separate financial descriptor-validation pass.
+Correction **0ce4c3edc3525197adb354582a96425eaefbd985** adds those checks
+without another work budget or changing SQL. Genuine failing regressions on
+the prior source and passing corrected results remain recorded. Historical
+callers retain their existing behavior when no check callback is supplied.
+
+The real integration fixture contains 4097 valid jobs and scopes. Both Python
+versions traverse 4096+1 job pages and all four terminal empty streams, using
+524534 native financial bytes, 864631 canonical bytes and 686 total ordinary
+units. A separate control spends the remaining work through 677 real SELECT
+queries and refuses at 2028 ordinary units before returning any state. Final
+reentrancy, changed connection options and expiry controls run after real graph
+validation. This establishes representative paging and refusal behavior, not
+maximum joint capacity or detection of hidden raw SQLite transaction changes.
+
+Final offline composition **0638961b3f732b769a16358edea13d27d5bb0c91**
+passes **267 tests on Python 3.12** and **265 on Python 3.11**, with two
+intentional Python-3.12-only autocommit skips, 25 PostgreSQL cases deselected
+and one existing warning per run. Repository formatting, lint, source security,
+types, frozen offline build and package policy pass. All **133 runtime files**
+match Git, disk, wheel and source archive. Collection contains 4715 cases on
+each interpreter; two existing wall-clock-derived IDs differ between collections.
+These results are a selected offline suite, not full hosted CI.
+
+Independent SQLite evidence is separately staged: 78 passes at 11c12bc,
+followed by two cleanup-order cases at 28f5685; the six new authored integration
+cases also pass independently. Earlier fixture, oracle and style failures remain
+retained. The initial pooled-connection test incorrectly required immediate raw
+closure; the corrected test proves restored timeout, no transaction or checked-out
+lease, unchanged rows before disposal and closure after explicit disposal.
+
+The first complete-reader native attempt stops in its first write-witness case.
+The native counter detects exactly three intended job updates, but the deliberate
+ordinary rollback exception is mapped to the existing database-failure category.
+Post-context assertions, the zero-row control and the reader phases do not execute.
+The exact three-database/fifteen-role baseline is restored and the server stopped.
+Reviewed test-only **5e92242937bf96024bf15479ee7589b8d220eaa5** changes only
+that sentinel to a distinct interruption, preserving all assertions and avoiding
+an error expectation that could mask earlier failures. The corrected matrix
+contains 2 write-witness, 17 independent and 6 authored PostgreSQL cases.
+
+Native traces, complete PostgreSQL outcomes, LATIN1 and exact UTF8 receipts,
+then exact protected PR/main/package/candidate evidence remain required.
+Independent native reports measure inspect-only work separately from charged
+observation queries; the authored property records total ordinary work.
+F2/P1 acceptance stays null. F3 and P2 stay Not started.

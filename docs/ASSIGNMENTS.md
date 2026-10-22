@@ -6,9 +6,9 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Frozen complete F2 reader at 90ce951; compose reviewed QE corrections in secondary | Fresh regressions and static checks pass; independent native/source review and delivery remain. |
-| Independent QE | Execute frozen runtime against independently authored reader tests in primary | Correct isolated fixture/oracle failures; complete PostgreSQL, encoding, no-write and boundary proof. |
-| Planning/verification | Independently review frozen F2 source and acceptance coverage | Complete closure, transport/work bounds and historical semantics; preserve null F2/P1 acceptance. |
+| Platform/security | Complete reader corrected at 0ce4c3e; composed source 1004c402 in secondary | Offline checks and 133-file package proof pass; prepare Python 3.11 native verification after exclusive handoff. |
+| Independent QE | Execute the corrected 25-case PostgreSQL matrix at 5e92242 in primary | Own the exclusive database slot; retain failures, restore baseline and stop before release. |
+| Planning/verification | Accepted source/deadline and integration-test corrections; audit native evidence | Verify actual native outcomes and later exact PR/main/candidate evidence; preserve null F2/P1 acceptance. |
 | Lead | Integrate/review source and evidence; coordinate delivery and exclusive database ownership | F2 scoped PR/main/candidate, then F3/full P1 before P2. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
@@ -53,7 +53,7 @@ The managed checkout tool could not operate on the cloud repository from this lo
 - **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
 - **Next evidence-producing milestone:** Implement and independently validate the complete F2 persisted reader under the accepted 2026-10-22 entry; F2 acceptance remains null. F3 trusted provisioning/opening/replay/recovery follows accepted F2. Only complete final P1 acceptance permits P2 entry.
-- **Current storage and consumers:** Platform/security owns secondary for F2 runtime; independent QE owns primary for tests. Planning reviews immutable source without another checkout. The lead briefly owns the two progress documents between source-bound runs. PostgreSQL is stopped and unassigned pending an explicit exclusive native-test handoff. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
+- **Current storage and consumers:** Platform/security owns secondary for F2 runtime; independent QE owns primary for tests. Planning reviews immutable source without another checkout. The lead briefly owns the two progress documents between source-bound runs. PostgreSQL is assigned exclusively to independent QE for the corrected native matrix; platform/security waits for a verified restored/stopped release. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -999,3 +999,29 @@ changed a v2 budget inconsistently with its admitted configuration. Neither
 justifies weakening the production reader. These are intermediate results;
 F2/P1 acceptance remains null. See the
 [delivery checkpoint](delivery/LEDGER_EXECUTION_PLAN.md#f2-source-and-test-handoffs--2026-10-22).
+
+
+## F2 independent verification checkpoint — 2026-10-22
+
+| Owner | Reviewed delivery | Current assignment |
+| --- | --- | --- |
+| Platform/security | Fixed two cooperative deadline gaps at 0ce4c3e; real paging and publication controls at 3212df98; final offline composition 0638961 | Prepare the same native matrix on the existing Python 3.11 environment after QE releases PostgreSQL. |
+| Independent QE | Complete SQLite suite: 78 passes at 11c12bc, then two affected cleanup cases at 28f5685; independently replayed six authored SQLite controls | Execute corrected PostgreSQL controls and complete reader at 5e92242; retain first failure and exact source/baseline evidence. |
+| Planning/verification | Accepted deadline repair and integration controls, including actual 4096+1 pages, four terminal gates and late-budget refusal | Independently inspect native traces, encoding receipts, write witnesses and restored/stopped release. |
+| Lead | Verified source-bound evidence, reviewed the one-line rollback-sentinel correction and kept the two existing checkouts assigned | Update progress, coordinate native handoffs and prepare protected delivery after verification. |
+
+Final combined offline selection at 0638961 passes 267 checks on Python 3.12
+and 265 on Python 3.11, with two intentional older-version autocommit skips;
+25 PostgreSQL cases are deselected and one existing warning remains per run.
+Format, lint, security rules, types, frozen offline build and distribution
+policy pass. All 133 runtime files match Git, disk, wheel and source archive.
+Collection finds 4715 cases per interpreter; two existing time-derived case
+IDs differ, so raw node lists are not claimed identical.
+
+The first native attempt executes one write-witness case: it detects three
+same-value job updates, then fails because its deliberate ordinary exception
+is mapped by the transaction layer. Later assertions and phases do not run.
+Test-only 5e92242 makes the sentinel a distinct interruption; no broad error
+expectation or runtime change hides earlier assertion failures. The exact
+database baseline is restored and PostgreSQL stopped before the corrected
+attempt. F2/P1 acceptance remains null; F3/P2 remain Not started.
