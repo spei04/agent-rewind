@@ -3,8 +3,10 @@
 import hashlib
 import json
 import sqlite3
+from types import SimpleNamespace
 from uuid import uuid4
 
+import psycopg
 import pytest
 import test_migrations_postgres as migration_tests
 from ledger_operator_fixture import SQLiteTrace
@@ -33,6 +35,62 @@ pg = migration_tests.pg
 postgres_only = pytest.mark.skipif(
     not migration_tests.POSTGRES, reason="Opt-in independent PostgreSQL ledger reader"
 )
+
+
+class NativeParameterWatch:
+    """Observe driver arguments without changing the existing native tracer."""
+
+    def __init__(self, monkeypatch, trace):
+        self.trace = trace
+        self.receipts = []
+        delegate = psycopg.Cursor.execute
+
+        def execute(cursor, query, *args, **kwargs):
+            parameters = args[0] if args else kwargs.get("params")
+            count = (
+                0
+                if parameters is None
+                else len(parameters)
+                if type(parameters) in (tuple, list, dict)
+                else None
+            )
+            sql = query.decode() if isinstance(query, bytes) else str(query)
+            receipt = {
+                "phase": trace.phase,
+                "raw_id": id(cursor.connection),
+                "sql_sha256": hashlib.sha256(sql.encode()).hexdigest(),
+                "parameter_type": type(parameters).__name__,
+                "parameter_count": count,
+                "outcome": "pending",
+            }
+            self.receipts.append(receipt)
+            try:
+                result = delegate(cursor, query, *args, **kwargs)
+            except BaseException:
+                receipt["outcome"] = "raise"
+                raise
+            receipt["outcome"] = "return"
+            return result
+
+        monkeypatch.setattr(psycopg.Cursor, "execute", execute)
+
+    def assert_reader_calls(self, raw):
+        receipts = [value for value in self.receipts if value["phase"] == "reader"]
+        expected = [
+            (phase, raw_id, hashlib.sha256(sql.encode()).hexdigest())
+            for phase, kind, raw_id, sql in self.trace.events
+            if phase == "reader" and kind == "sql-call"
+        ]
+        assert receipts and expected
+        assert [
+            (value["phase"], value["raw_id"], value["sql_sha256"]) for value in receipts
+        ] == expected
+        assert all(value["raw_id"] == id(raw) for value in receipts)
+        assert all(value["outcome"] == "return" for value in receipts)
+        assert all(
+            type(value["parameter_count"]) is int and 0 <= value["parameter_count"] <= 16
+            for value in receipts
+        )
 
 
 @pytest.fixture
@@ -249,6 +307,7 @@ def _inspect_postgres_case(case, pg, monkeypatch, record_property):
     before = postgres_snapshot(case.engine)
     drain(pg)
     trace = PostgresTrace(monkeypatch)
+    parameters = NativeParameterWatch(monkeypatch, trace)
     engine = case.operator_engine()
     work, outcome = LedgerWork(), LedgerOutcome()
     try:
@@ -272,6 +331,7 @@ def _inspect_postgres_case(case, pg, monkeypatch, record_property):
             assert _tuple_write_delta(counters_before, counters_after) == {}
             record_property("counter_observer_units", str(before_units + after_units))
             trace.phase = "ordinary"
+        parameters.assert_reader_calls(raw)
         assert len(trace.handles) == 1
         assert raw.closed and outcome.commit_acknowledged and not outcome.cleanup_failed
         assert work.observed_ordinary <= 2028
@@ -299,6 +359,7 @@ def _inspect_postgres_case(case, pg, monkeypatch, record_property):
         engine.dispose()
         trace.stop()
         record_property("reader_native_trace", json.dumps(trace.events))
+        record_property("reader_native_parameters", json.dumps(parameters.receipts))
     drain(pg)
     assert postgres_snapshot(case.engine) == before
     drain(pg)
@@ -573,6 +634,89 @@ def _tuple_write_delta(before, after):
         for key in before.keys() | after.keys()
         if before.get(key, (0, 0, 0)) != after.get(key, (0, 0, 0))
     }
+
+
+@pytest.mark.parametrize("binding", ["omitted", "none", "tuple", "list", "keyword-dict"])
+def test_native_parameter_watch_preserves_exact_driver_arguments(monkeypatch, binding):
+    trace = SimpleNamespace(phase="reader", events=[])
+    raw, result, calls = object(), object(), []
+    cursor, query = SimpleNamespace(connection=raw), b"SELECT driver_fixture"
+    parameters = {
+        "omitted": None,
+        "none": None,
+        "tuple": tuple(range(16)),
+        "list": [1, 2],
+        "keyword-dict": {"value": 1},
+    }[binding]
+    args = () if binding in ("omitted", "keyword-dict") else (parameters,)
+    kwargs = {"prepare": False, "binary": True}
+    if binding == "keyword-dict":
+        kwargs["params"] = parameters
+
+    def delegate(actual_cursor, actual_query, *actual_args, **actual_kwargs):
+        calls.append((actual_cursor, actual_query, actual_args, actual_kwargs))
+        trace.events.append((trace.phase, "sql-call", id(raw), actual_query.decode()))
+        return result
+
+    monkeypatch.setattr(psycopg.Cursor, "execute", delegate)
+    watch = NativeParameterWatch(monkeypatch, trace)
+    assert psycopg.Cursor.execute(cursor, query, *args, **kwargs) is result
+    actual_cursor, actual_query, actual_args, actual_kwargs = calls[0]
+    assert actual_cursor is cursor and actual_query is query
+    assert actual_args == args and actual_kwargs == kwargs
+    if args:
+        assert actual_args[0] is parameters
+    if binding == "keyword-dict":
+        assert actual_kwargs["params"] is parameters
+    watch.assert_reader_calls(raw)
+    assert watch.receipts[0]["parameter_count"] == (0 if parameters is None else len(parameters))
+
+
+@pytest.mark.parametrize(
+    "fault", ["seventeen", "unknown-container", "missing-call", "extra-call", "wrong-raw"]
+)
+def test_native_parameter_watch_refuses_unproved_driver_calls(monkeypatch, fault):
+    trace = SimpleNamespace(phase="reader", events=[])
+    raw, result = object(), object()
+    cursor, query = SimpleNamespace(connection=raw), "SELECT driver_fixture"
+    parameters = (
+        object()
+        if fault == "unknown-container"
+        else tuple(range(17 if fault == "seventeen" else 1))
+    )
+
+    def delegate(actual_cursor, actual_query, *args, **kwargs):
+        trace.events.append((trace.phase, "sql-call", id(raw), actual_query))
+        return result
+
+    monkeypatch.setattr(psycopg.Cursor, "execute", delegate)
+    watch = NativeParameterWatch(monkeypatch, trace)
+    assert psycopg.Cursor.execute(cursor, query, parameters) is result
+    if fault == "missing-call":
+        trace.events.clear()
+    elif fault == "extra-call":
+        trace.events.append(trace.events[0])
+    with pytest.raises(AssertionError):
+        watch.assert_reader_calls(object() if fault == "wrong-raw" else raw)
+
+
+def test_native_parameter_watch_preserves_delegate_interruption(monkeypatch):
+    trace = SimpleNamespace(phase="reader", events=[])
+    raw, interruption = object(), KeyboardInterrupt("driver witness")
+    cursor = SimpleNamespace(connection=raw)
+
+    def delegate(actual_cursor, query, *args, **kwargs):
+        trace.events.append((trace.phase, "sql-call", id(raw), query))
+        raise interruption
+
+    monkeypatch.setattr(psycopg.Cursor, "execute", delegate)
+    watch = NativeParameterWatch(monkeypatch, trace)
+    with pytest.raises(KeyboardInterrupt) as raised:
+        psycopg.Cursor.execute(cursor, "SELECT driver_fixture")
+    assert raised.value is interruption
+    assert watch.receipts[0]["outcome"] == "raise"
+    with pytest.raises(AssertionError):
+        watch.assert_reader_calls(raw)
 
 
 def test_native_cte_policy_binds_reviewed_sql_and_rejects_hidden_dml():
