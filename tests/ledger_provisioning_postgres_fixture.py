@@ -200,7 +200,7 @@ def progress_diagnostic(value):
     raise TypeError("unsupported progress diagnostic value")
 
 
-def assert_stage(fixture, pg, manifests, receipts, *, record_property):
+def assert_stage(fixture, pg, manifests, receipts, *, record_property, observation):
     """Independent expected values against PostgreSQL's real typed serialization."""
     accounts, progress, state = expected_stage(
         fixture, manifests, receipts, database_role=pg["owner_role"]
@@ -246,17 +246,32 @@ def assert_stage(fixture, pg, manifests, receipts, *, record_property):
                     ),
                 }
             record_property(
-                "provisioning_progress_rows",
+                f"provisioning_progress_{observation}_expected",
                 json.dumps(
-                    {
-                        "manifest_count": len(manifests),
-                        "actual": rows,
-                        "expected": list(expected_rows.values()),
-                    },
+                    {"manifest_count": len(manifests), "expected": list(expected_rows.values())},
                     default=progress_diagnostic,
                     allow_nan=False,
                 ),
             )
+            for row in rows:
+                expected = expected_rows.get(row["phase"])
+                record_property(
+                    f"provisioning_progress_{observation}_{row['phase']}",
+                    json.dumps(
+                        {
+                            "actual": row,
+                            "expected": expected,
+                            "actual_types": {
+                                key: type(value).__name__ for key, value in row.items()
+                            },
+                            "expected_types": None
+                            if expected is None
+                            else {key: type(value).__name__ for key, value in expected.items()},
+                        },
+                        default=progress_diagnostic,
+                        allow_nan=False,
+                    ),
+                )
             assert len(rows) == len(expected_rows)
             assert {row["phase"] for row in rows} == set(expected_rows)
             for row in rows:
