@@ -235,10 +235,10 @@ def _unique_members(pairs: list[tuple[str, object]]) -> dict[str, object]:
     return result
 
 
-def _integer(token: str) -> int:
-    if token == "-0":
+def _integer(numeric_lexeme: str) -> int:
+    if numeric_lexeme == "-0":
         raise ValueError("negative zero")
-    return int(token)
+    return int(numeric_lexeme)
 
 
 def _not_integer(token: str) -> int:

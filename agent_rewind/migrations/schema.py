@@ -362,14 +362,16 @@ def schema_table_names(connection: Connection) -> tuple[list[str], str | None]:
     tables = [row[0] for row in rows]
     revision = None
     if "alembic_version" in tables:
-        size = (
-            "octet_length(version_num)"
+        revision_query = (
+            "SELECT CASE WHEN octet_length(version_num)<=32 THEN version_num END "
+            "FROM alembic_version LIMIT 2"
             if name == "postgresql"
-            else ("length(CAST(version_num AS BLOB))")
+            else (
+                "SELECT CASE WHEN length(CAST(version_num AS BLOB))<=32 THEN version_num END "
+                "FROM alembic_version LIMIT 2"
+            )
         )
-        revisions = connection.exec_driver_sql(
-            f"SELECT CASE WHEN {size}<=32 THEN version_num END FROM alembic_version LIMIT 2"
-        ).all()
+        revisions = connection.exec_driver_sql(revision_query).all()
         if len(revisions) == 1 and type(revisions[0][0]) is str:
             revision = revisions[0][0]
     if len(tables) > (20 if revision == LEDGER else 17):
