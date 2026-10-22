@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from bisect import bisect_left
 from collections.abc import Callable, Mapping
 from datetime import UTC, datetime
 from typing import Annotated, Literal
@@ -407,12 +408,21 @@ def validate_ledger_chain(
                     job_ids.add(account.job_id)
                 key = (account.scope, account.scope_id)
                 cohort = periods.setdefault(key, [])
-                for start, end in cohort:
-                    if check is not None:
-                        check()
-                    if start < account.period_end and account.period_start < end:
-                        raise ValueError("overlapping provisioned period")
-                cohort.append((account.period_start, account.period_end))
+                # Prior intervals are disjoint and sorted. Only the adjacent
+                # intervals can overlap this one; reject before later accounts.
+                if check is not None:
+                    check()
+                period = (account.period_start, account.period_end)
+                position = bisect_left(cohort, period)
+                if check is not None:
+                    check()
+                if (position > 0 and cohort[position - 1][1] > account.period_start) or (
+                    position < len(cohort) and cohort[position][0] < account.period_end
+                ):
+                    raise ValueError("overlapping provisioned period")
+                cohort.insert(position, period)
+                if check is not None:
+                    check()
                 exposure = opening_values.get(account.id, 0)
                 if exposure > account.limit_microusd:
                     raise ValueError("opening cap")
