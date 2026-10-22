@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Platform/security | Independently review the candidate verifier and native size controls | Exact source, artifact and bounded-read checks; complete reader design remains held. |
-| Delivery reviewer | Implement and test the private candidate verifier correction | Preserve exact Git/runtime identity and existing delivery gates; independent review before use. |
-| Planning/verification | Prepare source-bound inventory and hosted CI evidence after handoff | Refinement source is frozen; preserve original failed attempts and report actual results. |
-| Lead | Independently review the delivery refinement and compose the foundation update | Reuse the released checkouts; publish reviewed source and verify protected delivery. Full P1 remains In progress; P2 remains Not started. |
+| Platform/security | Prepare exact catalog/preflight query proposals | Independent query-family/native-plan and combined budget review before complete reader implementation. |
+| Delivery reviewer | Prepare a C2 native feasibility harness after accepted partial C2/fingerprint static reviews | Lead harness review before execution; complete F2 and capacity remain unaccepted. |
+| Planning/verification | Compose the accepted F1 progress update in the reused secondary checkout | Preserve null P1 acceptance, unchanged gates and dated history; lead review before publication. |
+| Lead | Review and publish accepted F1 progress; maintain public issue scope and checkout ownership | F2/F3 and final P1 delivery remain required before P2. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -50,10 +50,10 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** Schema/operator and private guard ff65892 are accepted internal checkpoints. The guard selection passed 281 tests on each supported interpreter without skips or warnings. Original hosted run39724247038 passed both database cores, package and isolation but failed static security and the required gate. Fresh exact-source PR/main/candidate evidence remains required; no ledger package is Verified.
+- **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Accept F1 foundation through fresh reviewed PR/main/candidate evidence, then F2 complete bounded reader after exact query-plan review, then F3 trusted provisioning/opening/replay/recovery. Only the complete final P1 gate can populate P1 acceptance and permit P2 entry.
-- **Current storage and consumers:** Two existing cloud checkouts are retained for sequential reuse. The lead holds the released checkouts for composition and verification; planning/verification prepares hosted evidence from the frozen source. PostgreSQL was restored and stopped before handoff; this planning assignment has no database slot. The last recorded filesystem availability was 101.24 GB. Private evidence remains outside checkouts; no new checkout or paid resource was created.
+- **Next evidence-producing milestone:** Complete exact query-family/native-plan and combined work-budget review before F2 persisted-reader implementation, then F3 trusted provisioning/opening/replay/recovery. Accepted F1 satisfies only the F2 predecessor gate. Only the complete final P1 gate can populate P1 acceptance and permit P2 entry.
+- **Current storage and consumers:** Two existing cloud checkouts are retained for sequential reuse. Planning/verification owns secondary for this progress composition; primary remains under lead coordination. Completed A2/B2 native work released the database and primary after restoration and stop; this progress assignment has no database slot. The last recorded filesystem availability was 101.24 GB. Private evidence remains outside checkouts; no new checkout or paid resource was created.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -941,3 +941,25 @@ P1/aggregate/parent stay In progress, P1 acceptance stays null and P2 stays
 Not started. Issue #108 remains open through F1/F2; actual GitHub updates are
 owned by the lead after review. No customer, production, spending or data gate
 is promoted.
+
+## Accepted F1 foundation and progress handoff — 2026-10-22
+
+The lead accepted exact source c6f32cdd, protected merge 2e0eeeab, PR/main
+attempts 39729061054/39733331352 and candidate 12407151544 after independent
+audit and archive verification. [Canonical F1 evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22)
+records counts, limitations and the durable release identity. P1, aggregate
+#107 and parent #10 remain In progress with null P1 acceptance; F2/F3 and P2
+remain Not started.
+
+Planning/verification reuses secondary to record this acceptance after the
+separately reviewed, status-independent backlog fixture correction 31cc325.
+Platform/security prepares exact catalog/preflight proposals. After accepted
+partial C2/fingerprint static reviews, delivery prepares a C2 native feasibility
+harness for lead review before execution. A2/B2 native feasibility is complete only for its
+recorded partial scope; database and primary ownership were released after
+restoration and stop. The lead reviews the progress composition before
+publication. No runtime change, new implementation assignment or full reader,
+capacity, provisioning or recovery acceptance is recorded here.
+
+The lead updated and read back #10/#107/#108 on 2026-10-22; all remain
+open/In progress with accepted F1 evidence. #109 remains open/Not started.
