@@ -512,7 +512,7 @@ def test_required_financial_associations_refuse_without_partial_state(evolved_ca
                 raw.execute("DELETE FROM artifact_refs WHERE artifact_id=?", (ids["evidence_id"],))
             else:
                 raw.execute(
-                    "UPDATE artifact_refs SET role='unrelated-evidence' WHERE artifact_id=?",
+                    "UPDATE artifact_refs SET role='result' WHERE artifact_id=?",
                     (ids["evidence_id"],),
                 )
         elif damage == "missing-evidence-object":
@@ -527,11 +527,13 @@ def test_required_financial_associations_refuse_without_partial_state(evolved_ca
 
 
 @pytest.mark.parametrize("evolved_case", ["reserved"], indirect=True)
-def test_valid_native_rows_with_carried_exposure_over_job_cap_refuse(evolved_case):
+def test_admitted_job_budget_drift_refuses_before_account_exposure(evolved_case):
     case, ids, _ = evolved_case
     with case.engine.begin() as connection:
         connection.execute(text("UPDATE jobs SET budget=0 WHERE id=:id"), {"id": ids["job_id"]})
-    refused(case, "ledger_exposure_refused")
+    # The immutable admitted configuration remains budget=1, so this is an
+    # association mismatch before account exposure arithmetic.
+    refused(case, "ledger_history_unsupported")
 
 
 @pytest.mark.parametrize("extra_whitespace", [0, 1], ids=["unchanged-control", "receipt-mismatch"])
@@ -614,3 +616,22 @@ def test_later_current_reservation_does_not_invalidate_affordable_future_period(
     before = sqlite_snapshot(case.path)
     assert inspect(case).model_dump(mode="json") == case.expected
     assert sqlite_snapshot(case.path) == before
+
+
+@pytest.mark.parametrize("evolved_case", ["settled"], indirect=True)
+def test_complete_equal_amount_cohorts_refuse_gross_settle_plus_release_excess(evolved_case):
+    case, _, _ = evolved_case
+    with case.engine.begin() as connection:
+        result = connection.exec_driver_sql(
+            "INSERT INTO budget_entries "
+            "(call_id,account_id,entry_kind,amount_microusd,evidence_ref,created_at,"
+            "project_id,evidence_owner_kind,evidence_role) "
+            "SELECT call_id,account_id,'release',amount_microusd,evidence_ref,created_at,"
+            "project_id,evidence_owner_kind,evidence_role FROM budget_entries "
+            "WHERE entry_kind='settle'"
+        )
+        assert result.rowcount == 3
+        assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
+    # Both complete cohorts agree at all three levels and each native row is
+    # valid, but settled1 + released1 exceeds the original reservation1.
+    refused(case, "ledger_exposure_refused")
