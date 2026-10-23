@@ -1253,3 +1253,84 @@ evidence and delivery responsibilities. Both existing checkouts are reused.
 F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null
 acceptance; P2/#109 remains **Not started**. Task counts, estimates, dependencies,
 funding, customer-data and production gates are unchanged.
+
+## F3 PostgreSQL competing-command checkpoint — 2026-10-23
+
+Source 351c1c66 adds the native identical-command counterpart to the accepted
+SQLite component. The first native attempt failed the initialize test before
+the loser ran; provision was unrun. Its held-winner trace contains a successful
+same-connection `SET CONSTRAINTS ALL IMMEDIATE\n` after final classification.
+The observer expected the string without its trailing newline. Correction
+4bc9a1dc strips only outer whitespace, preserving the exact statement content,
+raw connection, uniqueness and ordering requirements. The runtime is unchanged.
+
+The exact runtime statement reproduces the assertion failure offline before
+the correction. Fifteen focused controls then pass: three accepted whitespace
+forms, seven different-statement refusals and five duplicate, missing,
+wrong-connection or ordering refusals. The earlier 47 SQLite/native protocol
+controls remain separate evidence. Reinterpreting the retained held witness
+does not turn the failed native attempt into a pass.
+
+The corrected native attempt passes both initialize and provision in **30.36s**
+on Python 3.12. The controller completes in 33.963s. Each scenario has three
+fresh command processes and 12 completed messages; observed group durations
+are 8.825s and 8.475s within the shared 60s work plus 15s cleanup limit.
+Maximum payloads are 2,877,052 and 3,226,423 bytes, below 4 MiB; frame sizes
+include four additional bytes. All six command processes exit normally and
+are reaped with channel EOF.
+
+For each actual absent intent, the winner holds exclusion after final proof
+and native constraint validation, before physical COMMIT. The second command
+attests the actual false `pg_try_advisory_xact_lock` fetch on its owned raw
+connection and backend, then returns `migration_busy` and closes only its own
+resources. Independent observations prove that the loser's exact backend and
+locks disappear naturally while the winner's identity and exclusion remain.
+The winner then commits once. A fresh explicit replay returns the original
+receipt without application DDL/DML; exact state, predecessor data, owners,
+ACLs and protected ciphertexts are preserved.
+
+Independent review reconciles the six final command observations, 8,446 trace
+events and 4,175 ordered SQL receipts. It accepts both case outcomes and the
+restored/stopped database release separately from source/controller review.
+The accepted private result index is 1b7d8f9e, peer index 1e46b276 and stopped
+release cf49d163. The earlier zero-pass result b1814a91 and release 239bfbbb
+remain unchanged. Native evidence binds exact source 4bc9a1dc; subsequent
+documentation composition is not another native execution.
+
+The composition preserves published progress 079a80ec and both test commits.
+Its focused offline selection collects and passes 62 SQLite/native protocol
+and observer controls in 2.50s; 94 backlog consistency tests also pass.
+Full configured Ruff and formatting checks pass. One JUnit
+record_property/xunit2 compatibility warning remains recorded. Runtime and
+lockfile bytes match the published progress base; no actual native case is
+rerun for documentation integration.
+
+Before native execution, controller review also caught cleanup that could
+skip owned-process signals after deadline expiration and timer setup that
+could extend an aggregate deadline. The corrected runner signals only proved
+pidfds, attempts nonblocking reaping after exhaustion and retains unresolved
+ownership instead of claiming release. Two real process controls and four
+clock controls pass; their earlier preparation records remain retained.
+Neither preparation correction changes a service deadline or counts as a
+failed native test. The final two-case controller retains 240s child, 450s
+work, 275s normal cleanup and 850s outer limits.
+
+The next separate contention slice is RC2b2: distinct well-formed intents with
+different manifest IDs that collide on account/period identity. It must prove
+actual busy refusal while the first command holds exclusion, then a fresh
+conflict with the second intent explicitly bound to the current committed
+parent. Include distinct projects sharing an organization; stale-parent
+refusal alone is not identity-conflict evidence. This is a proposal, not an
+implemented or accepted slice.
+
+Restore remains separate: its first S0 attempt failed and S2 was unrun.
+Factory correction dfe7b95b is independently accepted with 100 offline controls
+per interpreter, including nine new controls. Its corrected native attempt is running; independent result acceptance
+remains pending. Remaining writer/privilege/deadline boundaries and final two-interpreter, packaging,
+hosted and protected-candidate delivery also remain open. Capacity's four
+seeded-reader passes at eb2cbc4 retain only about 24ms maximum headroom in one
+run, with no repeatability or broader performance claim.
+
+F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null
+acceptance; P2/#109 remains **Not started**. Counts, estimates, dependency
+edges, budget and customer-data/production gates are unchanged.
