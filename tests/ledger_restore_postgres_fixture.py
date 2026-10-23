@@ -13,7 +13,8 @@ from ledger_provisioning_postgres_fixture import native_snapshot
 from ledger_restore_authority import observe_authority, typed
 from ledger_restore_tools import run_tool, tool_environment
 from legacy_fixture import FIXTURE_ROOT, read_manifest
-from sqlalchemy import create_engine, text
+from sqlalchemy import bindparam, create_engine, text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.pool import NullPool
 from test_run_projection_postgres import drain
@@ -215,13 +216,15 @@ def empty_target(fixture, pg, directory, record_property):
                 raise AssertionError("owned restore target cleanup failed")
 
 
-def denied_probe(engine, sql, parameters):
+def denied_probe(engine, sql, parameters, *, json_parameters=()):
     """Rollback before evaluating the native denial, including unexpected success."""
+    assert set(json_parameters) <= parameters.keys()
+    statement = text(sql).bindparams(*(bindparam(name, type_=JSONB) for name in json_parameters))
     observed = None
     with engine.connect() as connection:
         transaction = connection.begin()
         try:
-            connection.execute(text(sql), parameters)
+            connection.execute(statement, parameters)
         except DBAPIError as error:
             observed = getattr(error.orig, "sqlstate", None)
         finally:
@@ -280,13 +283,18 @@ def assert_application_denials(fixture, pg, directory, record_property):
                 + ")"
             )
             key = "id" if table == "budget_accounts" else "phase"
-            for sql, arguments in [
-                (insert, params),
-                (f"UPDATE {table} SET {key}={key} WHERE {key}=:key", {"key": row[key]}),
-                (f"DELETE FROM {table} WHERE {key}=:key", {"key": row[key]}),
-                (f"TRUNCATE {table}", {}),
+            # Keep the observed native dict; bind JSONB so the driver can reach
+            # the actual permission check instead of refusing an untyped dict.
+            cursor_parameter = ("p" + str(names.index("cursor")),) if "cursor" in row else ()
+            for sql, arguments, json_parameters in [
+                (insert, params, cursor_parameter),
+                (f"UPDATE {table} SET {key}={key} WHERE {key}=:key", {"key": row[key]}, ()),
+                (f"DELETE FROM {table} WHERE {key}=:key", {"key": row[key]}, ()),
+                (f"TRUNCATE {table}", {}, ()),
             ]:
-                probes.append(denied_probe(pg["app"], sql, arguments))
+                probes.append(
+                    denied_probe(pg["app"], sql, arguments, json_parameters=json_parameters)
+                )
                 drain(pg, pg["app"])
         for sql in (
             "ALTER SCHEMA public RENAME TO ar_restore_denied",

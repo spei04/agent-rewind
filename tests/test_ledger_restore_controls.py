@@ -588,3 +588,56 @@ def test_stream_close_failure_does_not_replace_first_error(monkeypatch, tmp_path
     record = json.loads((tmp_path / "close-fault.json").read_text())
     assert record["cleanup_errors"] == ["OSError"] and record["reaped"]
     assert process.stderr.closed
+
+
+def test_jsonb_denial_bind_is_driver_adaptable_without_changing_native_cursor():
+    import psycopg
+    from psycopg.adapt import PyFormat, Transformer
+    from psycopg.types.json import Jsonb, JsonbDumper
+    from sqlalchemy.dialects.postgresql.psycopg import PGDialect_psycopg
+
+    cursor = {"count": 1, "nested": [True, None, "original"], "amount": 245000}
+    retained = deepcopy(cursor)
+    events = []
+    native = Exception("simulated permission verdict after actual bind adaptation")
+    native.sqlstate = "42501"
+    # Retain the failed-original-path control: raw dict is not a default driver bind.
+    with pytest.raises(psycopg.ProgrammingError, match="cannot adapt"):
+        Transformer().get_dumper(cursor, PyFormat.AUTO)
+
+    class Connection:
+        is_active = True
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            events.append("closed")
+
+        def begin(self):
+            return self
+
+        def execute(self, statement, parameters):
+            compiled = statement.compile(dialect=PGDialect_psycopg(dbapi=psycopg))
+            assert "%(cursor)s::JSONB" in str(compiled)
+            assert set(compiled._bind_processors) == {"cursor"}
+            converted = compiled._bind_processors["cursor"](parameters["cursor"])
+            assert type(converted) is Jsonb and converted.obj is cursor
+            encoded = JsonbDumper(Jsonb).dump(converted)
+            assert json.loads(encoded) == retained
+            assert parameters["phase"] == "original"
+            events.append("adapted")
+            raise DBAPIError(str(compiled), {}, native)
+
+        def rollback(self):
+            self.is_active = False
+            events.append("rollback")
+
+    result = denied_probe(
+        SimpleNamespace(connect=Connection),
+        "INSERT INTO migration_progress (phase,cursor) VALUES (:phase,:cursor)",
+        {"phase": "original", "cursor": cursor},
+        json_parameters=("cursor",),
+    )
+    assert result["sqlstate"] == "42501"
+    assert cursor == retained and events == ["adapted", "rollback", "closed"]
