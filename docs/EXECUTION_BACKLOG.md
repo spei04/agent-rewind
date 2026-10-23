@@ -1,6 +1,6 @@
 # Agent Rewind — execution backlog
 
-**Current delivery checkpoint — 2026-10-23:** HTTP P2/AR-008 remain Verified at cefd222; ledger F1 and F2 remain accepted at 2e0eeeab and e8cba52. F3 has 23 passing SQLite recovery cases at 7eccb241 and a reviewed native capacity result at ee2dc3e2: one control pass, one 4,096-account timeout, two unrun cursor cases. Composition d299c559 changes tests only. F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null acceptance; P2/#109 remains **Not started**. [Current evidence and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#f3-recovery-and-native-capacity-checkpoint--2026-10-23). Totals remain **151 tasks / 161 planned PRs / 544 outer edges; 30 Verified / 1 In progress / 120 Not started tasks; 9 Verified / 1 In progress / 5 Not started delivery packages**. Customer, production and spending gates are unchanged.
+**Current delivery checkpoint — 2026-10-23:** HTTP P2/AR-008 remain Verified at cefd222; ledger F1/F2 remain accepted at 2e0eeeab/e8cba52. Native recovery adds 25 PostgreSQL passes at 7738aec6. The exact Unicode-validation optimization at 54844ac passes 312 focused tests on each interpreter, but native capacity still has one control pass, one 4,096-account timeout and two unrun cursor cases. Composition f09c727 combines the reviewed source; runtime and lockfile match 54844ac. F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null acceptance; P2/#109 remains **Not started**. [Current evidence and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#f3-native-recovery-and-capacity-diagnosis--2026-10-23). Totals remain **151 tasks / 161 planned PRs / 544 outer edges; 30 Verified / 1 In progress / 120 Not started tasks; 9 Verified / 1 In progress / 5 Not started delivery packages**. Customer, production and spending gates are unchanged.
 
 **Revision:** 2026-10-23 · **Owner:** spei04 · **Status:** Approved for staged execution; task-specific gates remain applicable.
 
@@ -3842,7 +3842,7 @@ started. Counts, estimates, dependencies, funding and production gates are
 unchanged. See the [current delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-provisioning-and-capacity-checkpoint--2026-10-22).
 
 
-### Current F3 implementation evidence — 2026-10-23
+### F3 recovery evidence before native validation — 2026-10-23
 
 F2 remains accepted at e8cba52. This checkpoint adds actual SQLite recovery
 tests and corrects native capacity observation; runtime files and the lockfile
@@ -3865,3 +3865,29 @@ boundaries and matching two-interpreter protected PR/main/candidate delivery.
 F3/P1/AR-010-A remain **In progress** with null acceptance; P2 is **Not started**.
 Counts, estimates, dependencies, funding and production gates are unchanged.
 See the [delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-recovery-and-native-capacity-checkpoint--2026-10-23).
+
+
+### Current F3 native recovery and capacity evidence — 2026-10-23
+
+F3 now has **25 actual PostgreSQL recovery passes on Python 3.12** at
+7738aec6, alongside the previously accepted 23 SQLite recovery cases. Independent
+review verifies physical outcomes, fresh inspection and service cleanup before
+test-harness disposal. This is component evidence; final matching delivery on
+both supported interpreters remains required.
+
+The exact Unicode-character validation optimization at 54844ac passes **312
+focused tests on each interpreter**. It preserves the accepted character set
+and all parser/deadline rules. The subsequent native capacity run still has
+**one control pass, one 4,096-account timeout and two unrun cursor cases**:
+1.63709s for the control and schema_unavailable at 2.00466s for the maximum.
+The optimization does not close native capacity. Earlier failures remain
+separately recorded; isolated parser timings cannot establish native capacity.
+
+Composition f09c727 combines the native recovery tests and optimization;
+its runtime and lockfile match 54844ac. Native recovery evidence remains bound
+to 7738aec6. Next work is process interruption and competing operators in one
+checkout, with capacity diagnosis in the other. Owner/ACL restore, remaining
+writer boundaries and protected PR/main/candidate delivery remain open.
+F3/P1/AR-010-A stay **In progress** with null acceptance; P2 stays **Not started**.
+Counts, estimates, dependencies, customer/data and spending gates are unchanged.
+See the [delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-native-recovery-and-capacity-diagnosis--2026-10-23).

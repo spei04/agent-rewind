@@ -986,3 +986,75 @@ started**. Native recovery, capacity, process interruption, competing operators,
 owner/ACL-preserving restore, remaining service boundaries and matching
 two-interpreter protected delivery remain required. No task, estimate,
 dependency, funding, deployment or customer-data gate changes.
+
+
+## F3 native recovery and capacity diagnosis — 2026-10-23
+
+### Native recovery component
+
+At 7738aec6, **25 actual PostgreSQL cases pass on Python 3.12 in 207.34s**.
+The bounded controller finishes in 213.42s. The selection includes 23 recovery
+scenarios and two actual-write observer controls, rather than 25 zero-write
+positives. All 37 command observations establish physical raw-connection
+closure and claim release before harness disposal. Twenty-three fresh
+inspections perform zero DDL/DML; the two negative controls detect same-value
+and zero-row UPDATE attempts. Ordered SQL/parameter receipts, physical
+COMMIT/ROLLBACK returns, logical acknowledgements, the first interruption
+object and original persisted receipts are checked independently.
+
+Fresh inspections use separate owned engines/connections, validate complete
+current state and do not retry the writer. Explicitly malformed fixtures are
+not writer-produced state; their temporary trigger bypass is restored on the
+same physical session after COMMIT. The close-acknowledgment fault cases inject a logical close
+error after actual physical closure; this is not proof of recovery from a
+sustained native close failure. Refusal snapshots do not claim a separate
+ciphertext rehash. RC2 process death/concurrency and RC3 restore remain separate.
+
+Independent review verifies 465 unchanged source inputs, 28,822 ordered SQL
+receipts and the exact stopped database/role baseline. The accepted native
+proof is at 7738aec6; SQLite's 23-case corrected run remains separate at
+7eccb241. Final matching Python 3.11/3.12 delivery is still required.
+
+### Exact optimization and unsuccessful native capacity continuation
+
+At 54844ac, a compiled character-range check replaces the repeated Unicode
+category loop in strict JSON string validation. Every Unicode code point
+matches the prior rejection predicate on Python 3.11 and 3.12. All **312
+focused tests pass on each interpreter**, including actual-validator key/value,
+escaped JSON, scalar-type and depth controls; lint, formatting and runtime
+type checks pass. No validation pass, input/work limit or deadline changes.
+
+| Native attempt / source | Result | Evidence boundary |
+| --- | --- | --- |
+| Initial observer, 232130d | One failure; three unrun | Fetch receipts were mistaken for SQL executions; final preservation was not reached. Retained separately. |
+| Corrected observer, ee2dc3e2 | Control passes at 1.40977s; account maximum times out at 2.01115s; two cursor cases unrun | The failed maximum has no final tuple-write delta or strict-preservation result. |
+| Exact predicate optimization, 54844ac | Control passes at 1.63709s; account maximum times out at 2.00466s; two cursor cases unrun | Control completes strict preservation. The maximum transfers all 4,096 account and 48 job rows plus five projection exhaustion receipts, but returns schema_unavailable under the unchanged two-second deadline. |
+
+The last attempt's failed maximum still has a null tuple-write delta and
+unreached final strict-preservation assertions. Transferred rows, rollback/close
+returns and eventual baseline restoration do not replace those assertions.
+Isolated parser timings improved, but they do not prove native capacity or
+attribute the residual time to product parsing, database work, CPU contention
+or observation overhead. The existing process-wide profiling observer is a
+specific diagnostic concern, not an established cause. Further native timing
+requires a separately reviewed proposal; no automatic retry is authorized.
+
+The new recovery and capacity runs both reap their children, restore the
+exact baseline, verify unchanged run inputs and stop PostgreSQL. Failed
+attempts remain immutable evidence. Composition f09c727 contains the reviewed
+native recovery tests and optimization; its runtime and uv.lock match
+54844ac, while the native recovery execution remains bound to 7738aec6.
+
+### Remaining delivery work
+
+The provisioning engineer next owns RC2 process interruption and competing
+operators after the integrated-base handoff. The capacity engineer owns
+bounded diagnosis of the unresolved native timeout. RC3 owner/ACL-preserving
+restore follows when a checkout is free; remaining actual-writer boundaries
+and matching protected PR/main/candidate checks remain required. The same two
+cloud checkouts are reused. No provider calls, paid resources, customer data
+or deployment were added.
+
+F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null
+acceptance; P2/#109 remains **Not started**. Task counts, estimates, contract
+and dependency records, funding and production gates are unchanged.

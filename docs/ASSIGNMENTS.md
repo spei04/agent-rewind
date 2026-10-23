@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Provisioning engineer | SQLite recovery source and evidence accepted at 7eccb241 | Next: actual PostgreSQL recovery, then process interruption and competing operators. |
-| Capacity engineer | Diagnose the native 4,096-account timeout at ee2dc3e2 | Separate product work from observation overhead; review any optimization before another native attempt. Two cursor cases remain unrun. |
-| Independent reviewer | Exact recovery boundaries and native failure/release review complete | Review capacity diagnosis and native recovery source/evidence; preserve unsuccessful attempts. |
-| Lead | Integrate recovery and observer correction; publish consistent progress | F3/P1 acceptance stays null pending all remaining gates and protected delivery. |
+| Provisioning engineer | RC1 SQLite and native recovery accepted; next owns RC2 process interruption and competing operators | Start source work after the integrated-base handoff; native execution requires its own reviewed bounded controller. |
+| Capacity engineer | Diagnose the remaining native 4,096-account timeout at 54844ac | Preserve the one-pass/one-failure/two-unrun result; review any timing experiment before execution. |
+| Independent reviewer | Native RC1 and capacity failure/release audits accepted | Review RC2 design/source, capacity diagnosis and integration evidence independently. |
+| Lead | Integrate f09c727, synchronize progress and hand primary back for RC2 | F3/P1 acceptance stays null; restore, remaining service boundaries and protected delivery stay open. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -50,10 +50,10 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
+- **Contributor checkpoint:** F1/F2 remain accepted at 2e0eeeab/e8cba52. F3 adds scoped native RC1 acceptance at 7738aec6 and the reviewed Unicode optimization at 54844ac; native capacity remains incomplete. [Current evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-native-recovery-and-capacity-diagnosis--2026-10-23). No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Complete native capacity, remaining writer boundaries, uncertain outcomes, concurrent execution, process interruption and owner/ACL recovery. Actual two-account provisioning and older replay now have scoped native evidence. Only complete final P1 acceptance permits P2 entry.
-- **Current storage and consumers:** Two existing cloud checkouts are reused. Both engineers released their completed slices; the lead owns primary for integration and publication. Secondary is available for capacity execution preparation. PostgreSQL access stays exclusive to a reviewed run; completed runs restored the baseline and stopped the server. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
+- **Next evidence-producing milestone:** Resolve native capacity and complete process interruption, competing operators, owner/ACL restore and remaining actual-writer boundaries. RC1 fresh-inspection and uncertain-outcome evidence is accepted as a component. Only complete final P1 acceptance permits P2 entry.
+- **Current storage and consumers:** Two existing cloud checkouts are reused. The lead temporarily owns primary for integration, then returns it to provisioning for RC2; secondary remains assigned to capacity diagnosis. PostgreSQL is stopped and requires an exclusive reviewed run grant. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -1258,3 +1258,20 @@ Two existing cloud checkouts remain assigned and are reused. The original
 cleanup from harness disposal. No runtime file or lockfile changes in this
 checkpoint. [Exact results and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#f3-recovery-and-native-capacity-checkpoint--2026-10-23)
 keep F3/P1 In progress/null acceptance and P2 Not started.
+
+
+## F3 native recovery and capacity diagnosis handoff — 2026-10-23
+
+| Owner | Assigned work | Disposition / next work |
+| --- | --- | --- |
+| Provisioning engineer | Native RC1 physical uncertainty and fresh inspection | 7738aec6 accepted: 25 PostgreSQL cases pass, with 23 zero-write fresh inspections and two actual-write negative controls. Next owns RC2 after integration. |
+| Capacity engineer | Exact Unicode-predicate optimization and native capacity continuation | 54844ac passes 312 focused tests per interpreter; native continuation remains one pass, one timeout and two unrun. Owns further bounded diagnosis; RC3 is deferred. |
+| Independent reviewer | Exact source, physical outcomes, timing scope and stopped releases | Accepted scoped RC1 evidence and honest failed-capacity evidence; next reviews RC2 and diagnostic proposals. |
+| Lead | Composition, validation, publication and checkout ownership | Composed f09c727; temporarily owns primary for integration, then returns it for RC2. Secondary remains assigned to diagnosis. PostgreSQL is stopped/unassigned. |
+
+The optimization preserves parser and deadline rules, but does not resolve
+native capacity. Both new native runs restored the exact baseline and stopped.
+The [delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-native-recovery-and-capacity-diagnosis--2026-10-23)
+retains prior failures and separates run sources from composition. F3/P1 stay
+In progress/null acceptance; P2 stays Not started. No paid resources or
+provider calls were added; both existing cloud checkouts remain in active use.
