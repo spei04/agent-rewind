@@ -18,10 +18,10 @@ partner-data or production authorization.
 
 | Active owner | Cloud path on studio-agent | Current work / next acceptance gate | Concrete blocker |
 | --- | --- | --- | --- |
-| Provisioning engineer | `/home/serenapei/experiments/agent-rewind` | I2: the genuinely admitted queued-v2 positive and isolated queued/running eligibility group, with real Operation/configuration/artifact associations and cohort-derived totals. Accepted distinct-intent collisions remain at 0a6516f/4f1ea4a6. | This is the active narrow source slice; other I2 groups and I3 remain separate and unaccepted. |
-| Restore engineer | `/home/serenapei/experiments/agent-rewind-worktrees/engineer-c` | Compose accepted RC3b1 source 52d289e5 with published c651772d, document the one EOF negative and preserve earlier positive/failure provenance. | Checkpoint review/publication, then RC3b2 owned-tool/backend observation and timeout design; no interrupted-restore implementation or execution yet. |
-| Independent reviewer | `/home/serenapei/experiments/agent-rewind-evidence/review-records` | Accepted RC3b1 result/release and both collision components; reviews exact composition/docs and the next designs. | A single accepted EOF negative does not complete recovery or F3/P1. |
-| Lead | `/home/serenapei/experiments/agent-rewind-evidence/continuation-records` | Own publication, source handoffs and separate native grants; coordinate I2 and the RC3b2 design prerequisite. | Remaining writer, restore-negative and protected-delivery evidence is incomplete; no new external authorization. |
+| Provisioning engineer | `/home/serenapei/experiments/agent-rewind` | Record accepted I2 manifest project-binding source/result at ae4f4922; preserve all earlier executed identities. | Checkpoint review/publication and lead handoff precede the I3 job-cap negative/exact `2**53 + 1` source/offline pair. |
+| Restore engineer | `/home/serenapei/experiments/agent-rewind-worktrees/engineer-c` | Prepare only the RC3b2 stderr-newline source/offline correction after accepted failed-attempt cleanup; final target comparison was unrun. | Exact correction review and a separate execution grant remain required; no interrupted-restore component acceptance or source merge. |
+| Independent reviewer | `/home/serenapei/experiments/agent-rewind-evidence/review-records` | Accepted binding source/result/release; independently reviews this checkpoint and separate restore evidence/controllers. | Remaining I2/I3, recovery and F3/P1 gates stay open. |
+| Lead | `/home/serenapei/experiments/agent-rewind-evidence/continuation-records` | Own publication, source handoffs and separate execution grants; route the I3 prerequisite pair. | No new external authorization; incomplete writer, recovery and protected-delivery evidence. |
 
 The latest ordinary capacity attempt at eb2cbc4 passes all four seeded-reader cases. The maximum took **1.976373s**, leaving about **24ms in one run**; repeatability and broader performance remain unproved. The dated v4 failure remains in the history below. [Capacity evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23) and [SQLite contention evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23) retain their distinct scopes.
 
@@ -64,10 +64,10 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** F1/F2, scoped recovery and both contention dialect components remain accepted at their recorded sources. RC3b1 adds one accepted native EOF negative at 52d289e5 with exact empty-target/source/ciphertext preservation and four confirmed tool exits. S0 dfe7b95b and S2 83c594a2 remain separate positive evidence; earlier failures remain retained. Capacity still has about 24ms headroom in one run. [Current evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-truncated-archive-recovery-checkpoint--2026-10-23). No ledger acceptance package is Verified.
+- **Contributor checkpoint:** I2 adds one accepted actual SQLite project-binding refusal at ae4f4922, separate from cohort 802b24b0 and eligibility 24c7c2dd. The original present-job mismatch, physical rollback and complete preservation are retained in [current evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-manifest-project-binding-checkpoint--2026-10-23). Prior components and all failures keep their scopes; no ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Primary implements only the assigned I2 admitted queued-v2 positive and isolated queued/running eligibility group. Secondary finishes this checkpoint, then prepares RC3b2 design: narrow owned-tool/backend observation while a known child is live, an explicit five-tool profile and reviewed synchronous-runner/lock-timeout handling. Existing four-tool guards and 1000ms tool lock timeout remain unchanged. Later restore corruption, other I2 groups, I3 and protected delivery stay open; only complete P1 acceptance permits P2 entry.
-- **Current storage and consumers:** Both existing cloud checkouts remain assigned and reused: primary owns the narrow I2 source slice; secondary owns this composition/checkpoint and subsequent restore design. At completion of RC3b1, baseline restoration and stopped status were accepted at release 0fa546c5; later attempts require separate reviewed grants. Evidence stays private outside checkouts. No new checkout, environment or paid resource.
+- **Next evidence-producing milestone:** After checkpoint publication/handoff, primary prepares the I3 job-cap negative/exact `2**53 + 1` source/offline pair. Secondary prepares only the RC3b2 stderr-newline source/offline correction after accepted failed-attempt cleanup. Final target comparison was unrun; other I2/I3, recovery and protected delivery stay open. Only full P1 acceptance permits P2 entry.
+- **Current storage and consumers:** Both existing cloud checkouts/environments stay assigned and reused: primary owns this documentation checkpoint, secondary owns separate RC3b2 work. The binding SQLite run completed with collected controller exit 0, child reaping and release 58ecca9e; it used no PostgreSQL. Later native attempts use separate grants. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -1385,3 +1385,40 @@ accepted positive function bodies are unchanged and their S0/S2 evidence stays
 at dfe7b95b/83c594a2. No accepted restore/collision native case or offline control was rerun for composition.
 [Exact scope and next prerequisite](delivery/LEDGER_EXECUTION_PLAN.md#f3-truncated-archive-recovery-checkpoint--2026-10-23)
 keep F3/P1 acceptance null, P2 Not started, all counts/estimates/budget unchanged.
+
+### Admitted-queue eligibility handoff — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Provisioning | I2 group1 source 24c7c2dd and six SQLite cases accepted; original setup failure retained. | Review/publish this composition, then receive the I2 omitted/nonexistent-job source handoff. |
+| Restore | RC3b1 and prior S0/S2 scopes remain accepted separately. | Implement reviewed RC3b2 design V2 and offline controls in secondary; native proof remains pending. |
+| Independent reviewer | Accepted exact I2 source, outcomes, preservation and cleanup. | Review composition/docs and separate restore preparation without repeating completed domain cases. |
+| Lead | Accepted scoped I2 result/release and queued prerequisite-ready work. | Publish this checkpoint, then hand off the next source slice and serialize execution grants. |
+
+[Detailed evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-admitted-queue-eligibility-checkpoint--2026-10-23)
+retains the explicit admission adapter, first failure and unchanged F3/P1 gates.
+
+### Job-cohort checkpoint and next binding slice — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Provisioning | Three I2 cohort cases and release accepted at 802b24b0; earlier six eligibility cases unchanged. | Publish/review this checkpoint, then receive manifest job-to-project binding source/offline handoff. |
+| Restore | Separate RC3b2 design/source preparation; prior recovery evidence unchanged. | Exact controller review and separate native grant; no native result included here. |
+| Independent reviewer | Accepted exact cohort source, branches, preservation and controller wait/reap evidence. | Review this docs checkpoint and the separate restore controller. |
+| Lead | Accepted scoped cohort result/release and wrote a static project-binding prerequisite. | Publish synchronized progress, then issue the next source handoff. |
+
+[Detailed cohort evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-job-cohort-checkpoint--2026-10-23)
+keeps all prior failures, counts, estimates and F3/P1 gates unchanged.
+
+
+### Manifest project-binding checkpoint and I3 handoff — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Provisioning | One actual I2 binding case and release accepted at ae4f4922; existing eligibility/cohort helpers and outcomes unchanged. | Review/publish this checkpoint, then receive the I3 job-cap negative/exact `2**53 + 1` source/offline handoff. |
+| Restore | RC3b2 V1 failed before cancellation; V2 at 4509 reached cancellation but failed its exact stderr/newline oracle, with final target comparison unrun. | Failed V2/release accepted; prepare only the bounded stderr-newline source/offline correction. No new native grant or unfinished source merge. |
+| Independent reviewer | Accepted binding source, actual branch, preservation and direct-parent wait/reap evidence. | Review this docs checkpoint and separate restore result/controller evidence. |
+| Lead | Accepted binding result/release; I3 prerequisite note 304b1d5f and peer dbd38dfc are source-only routing. | Publish synchronized progress and explicitly hand off the next slice; actual execution needs separate review/grant. |
+
+[Detailed binding evidence and restore limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-manifest-project-binding-checkpoint--2026-10-23)
+preserve all prior failures, counts, estimates and null F3/P1 acceptance.
