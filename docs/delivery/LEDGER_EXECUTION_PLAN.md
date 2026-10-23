@@ -1323,13 +1323,18 @@ parent. Include distinct projects sharing an organization; stale-parent
 refusal alone is not identity-conflict evidence. This is a proposal, not an
 implemented or accepted slice.
 
-Restore remains separate: its first S0 attempt failed and S2 was unrun.
+Restore remains separate. Its original S0 failure/S2 unrun are retained.
 Factory correction dfe7b95b is independently accepted with 100 offline controls
-per interpreter, including nine new controls. Its corrected native attempt is running; independent result acceptance
-remains pending. Remaining writer/privilege/deadline boundaries and final two-interpreter, packaging,
-hosted and protected-candidate delivery also remain open. Capacity's four
-seeded-reader passes at eb2cbc4 retain only about 24ms maximum headroom in one
-run, with no repeatability or broader performance claim.
+per interpreter, including nine new controls. The corrected native attempt
+reports S0 passed and S2 failed at a cross-model receipt comparison; component
+success is false. Its result and reported stopped release 101868ca await
+independent/root acceptance. A narrow S2-only observer correction is next;
+no further native retry or whole restore acceptance is implied.
+
+Remaining writer/privilege/deadline boundaries and final two-interpreter,
+packaging, hosted and protected-candidate delivery also remain open.
+Capacity's four seeded-reader passes at eb2cbc4 retain only about 24ms maximum
+headroom in one run, with no repeatability or broader performance claim.
 
 F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null
 acceptance; P2/#109 remains **Not started**. Counts, estimates, dependency
