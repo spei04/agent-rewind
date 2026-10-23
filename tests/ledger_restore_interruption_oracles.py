@@ -51,7 +51,7 @@ def assert_cancelled_restore(error, directory, command, control, owner_role):
     diagnostic = (directory / "data-restore.stderr").read_bytes()
     message = (
         b"pg_restore: error: could not execute query: ERROR:  "
-        b"canceling statement due to user request\nCommand was: " + COPY + b"\n"
+        b"canceling statement due to user request\nCommand was: " + COPY
     )
     # pg_restore's pinned archiver may emit its fixed TOC context before the error.
     context = (

@@ -7,7 +7,7 @@ from types import SimpleNamespace
 
 import ledger_restore_interruption_tool as runner
 import pytest
-from ledger_restore_interruption_contracts import COPY, PROFILE
+from ledger_restore_interruption_contracts import PROFILE
 from ledger_restore_interruption_oracles import assert_cancelled_restore
 from test_ledger_restore_controls import Stream
 from test_ledger_restore_interruption_wire_controls import control
@@ -193,7 +193,8 @@ def make_failure(tmp_path):
     stdout.write_bytes(b"")
     stderr.write_bytes(
         b"pg_restore: error: could not execute query: ERROR:  "
-        b"canceling statement due to user request\nCommand was: " + COPY + b"\n"
+        b"canceling statement due to user request\nCommand was: "
+        b"COPY public.api_keys (id, hash, role, name, expires, revoked) FROM stdin;\n"
     )
     control = SimpleNamespace(
         completed=True,
@@ -303,3 +304,124 @@ def test_data_timeout_override_does_not_change_default_tool_profile(monkeypatch)
     assert {
         key: item for key, item in changed.items() if key not in {"PGOPTIONS", "LC_ALL", "LANG"}
     } == {key: item for key, item in original.items() if key not in {"PGOPTIONS", "LC_ALL", "LANG"}}
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        None,
+        "missing-lf",
+        "extra-lf",
+        "statement-timeout",
+        "wrong-error",
+        "wrong-copy-column",
+        "trailing",
+        "wrong-owner",
+        "wrong-table",
+        "zero-toc-id",
+        "long-toc-id",
+        "wrong-context",
+    ],
+)
+@pytest.mark.parametrize("with_context", [False, True])
+def test_exact_diagnostic_message_context_and_single_trailing_newline(
+    tmp_path, change, with_context
+):
+    value, record = make_failure(tmp_path)
+    path = tmp_path / "data-restore.stderr"
+    diagnostic = path.read_bytes()
+    assert len(diagnostic) == 179 and diagnostic.endswith(b"stdin;\n")
+    context = (
+        b"pg_restore: while PROCESSING TOC:\n"
+        b"pg_restore: from TOC entry 123; 0 456 TABLE DATA api_keys owner\n"
+    )
+    if with_context:
+        diagnostic = context + diagnostic
+    if change == "missing-lf":
+        diagnostic = diagnostic[:-1]
+    elif change == "extra-lf":
+        diagnostic += b"\n"
+    elif change == "statement-timeout":
+        diagnostic = diagnostic.replace(b"due to user request", b"due to statement timeout")
+    elif change == "wrong-error":
+        diagnostic = diagnostic.replace(b"canceling statement", b"connection failed")
+    elif change == "wrong-copy-column":
+        diagnostic = diagnostic.replace(b"(id, hash,", b"(hash, id,")
+    elif change == "trailing":
+        diagnostic += b" "
+    elif change in {"wrong-owner", "wrong-table", "zero-toc-id", "long-toc-id", "wrong-context"}:
+        # These negatives always include the optional context so it is actually exercised.
+        diagnostic = context + path.read_bytes()
+        if change == "wrong-owner":
+            diagnostic = diagnostic.replace(b"api_keys owner\n", b"api_keys other_owner\n")
+        elif change == "wrong-table":
+            diagnostic = diagnostic.replace(b"TABLE DATA api_keys", b"TABLE DATA jobs")
+        elif change == "zero-toc-id":
+            diagnostic = diagnostic.replace(b"entry 123;", b"entry 0;")
+        elif change == "long-toc-id":
+            diagnostic = diagnostic.replace(b"entry 123;", b"entry 12345678901;")
+        else:
+            diagnostic = diagnostic.replace(b"while PROCESSING TOC:", b"while PROCESSING:")
+    path.write_bytes(diagnostic)
+    record["files"][path.name] = {
+        "bytes": len(diagnostic),
+        "sha256": hashlib.sha256(diagnostic).hexdigest(),
+    }
+    (tmp_path / "data-restore.json").write_text(json.dumps(record))
+    if change is None:
+        assert (
+            assert_cancelled_restore(
+                RuntimeError("restore tool failed"), tmp_path, ["exact"], value, "owner"
+            )
+            == record
+        )
+    else:
+        with pytest.raises(AssertionError):
+            assert_cancelled_restore(
+                RuntimeError("restore tool failed"), tmp_path, ["exact"], value, "owner"
+            )
+
+
+@pytest.mark.parametrize(
+    "claim",
+    [
+        "completed",
+        "uncertain",
+        "cancel-attempt",
+        "restore-absence",
+        "owner-resolved",
+        "owner-child-count",
+        "owner-child-exit",
+        "owner-profile",
+        "owner-step",
+        "error-message",
+    ],
+)
+def test_exact_message_cannot_replace_control_or_ownership_evidence(tmp_path, claim):
+    value, record = make_failure(tmp_path)
+    error = RuntimeError("restore tool failed")
+    owner = value.owner.report()
+    if claim == "completed":
+        value.completed = False
+    elif claim == "uncertain":
+        value.uncertain = True
+    elif claim == "cancel-attempt":
+        value.cancel_attempted = False
+    elif claim == "restore-absence":
+        value.restore_absent = False
+    elif claim == "owner-resolved":
+        owner["resolved"] = False
+    elif claim == "owner-child-count":
+        owner["children"].pop()
+    elif claim == "owner-child-exit":
+        owner["children"][-1]["returncode"] = 0
+    elif claim == "owner-profile":
+        owner["profile"] = owner["profile"][:-1]
+    elif claim == "owner-step":
+        owner["steps"][-1]["label"] = "other"
+    else:
+        error = RuntimeError("some other failure")
+    value.owner.report = lambda: owner
+    (tmp_path / "data-restore.json").write_text(json.dumps(record))
+    with pytest.raises(AssertionError):
+        assert_cancelled_restore(error, tmp_path, ["exact"], value, "owner")
