@@ -2,14 +2,26 @@
 
 Execution backlog approved on 2026-10-19. The project lead coordinates three independent contributor slots, reviews each delivery, integrates tested changes, then assigns dependency-ready work to the free slot. These are logical contributor roles, not six confirmed full-time hires; the prior staffing/calendar scenario remains unconfirmed. Task-specific external funding, data, customer and release gates still apply.
 
+## Execution location — 2026-10-23
+
+All Agent Rewind checkouts, dependencies, builds, test execution, datasets,
+media, logs, run outputs and private evidence stay in the existing
+`studio-agent` cloud workspace or existing hosted CI. The Mac is an SSH
+control channel only: no project cloning, installation, builds, research,
+artifact downloads or media staging there. Reuse the two existing cloud
+checkouts and their independent environments. Preserve retained evidence and
+active writers; do not delete other teams' files or touch the separate local
+computer-use project. This rule adds no capacity purchase, budget, provider,
+partner-data or production authorization.
+
 ## Current assignments — 2026-10-23
 
-| Owner | Current work | Review / next gate |
-| --- | --- | --- |
-| Provisioning engineer | PostgreSQL RC2b1 identical competing requests | SQLite counterparts at f4ba97c9 are independently accepted: two real cases and 22 separate protocol controls. Prove native loser-only cleanup, held-winner preservation and original-receipt replay before component acceptance. |
-| Restore engineer | RC3a: two same-cluster S0/S2 owner/ACL-preserving restore positives | Implement and review source and offline controls before a bounded native grant. The four-case seeded-reader capacity result at eb2cbc4 is accepted for its single-run scope. |
-| Independent reviewer | PostgreSQL contention and restore source/evidence reviews | Keep source/controller acceptance separate from execution evidence. Capacity v5 and SQLite RC2b1 have scoped acceptance; PostgreSQL contention, restore and actual-writer gates remain open. |
-| Lead | Maintain current tracking and integrate the next independently reviewed components | Capacity and SQLite contention checkpoints are published at 99c97efb. F3/P1 acceptance stays null; repeatability, PostgreSQL contention, restore, actual-writer boundaries and protected delivery remain open. |
+| Active owner | Cloud path on studio-agent | Current work / next acceptance gate | Concrete blocker |
+| --- | --- | --- | --- |
+| Provisioning engineer | `/home/serenapei/experiments/agent-rewind` | PostgreSQL RC2b1 source351c1c66 and 47 offline controls are reviewed. Correct the frozen controller cleanup, obtain independent review and an exclusive database grant, then validate actual contention. | Controller review found that exhausted cleanup can skip owned-child signals/reaping. Correction pending; native execution has not started. |
+| Restore engineer | `/home/serenapei/experiments/agent-rewind-worktrees/engineer-c` | Corrected RC3a source and 154 controls per interpreter are reviewed. Freeze the S0/S2 restore controller, review its process cleanup and obtain the exclusive grant before native backup/restore. | None reported; native execution has not started. |
+| Independent reviewer | `/home/serenapei/experiments/agent-rewind-evidence/review-records` | Review the contention controller correction and the restore controller freeze, then independently audit native outcomes. Source acceptance does not establish PostgreSQL contention or successful restore. | Contention cleanup correction under review; restore controller preparation continues. |
+| Lead | `/home/serenapei/experiments/agent-rewind-evidence/continuation-records` | Publish this checkpoint, serialize database ownership and integrate accepted components. Preserve F3/P1 null acceptance and final two-interpreter delivery gates. | No external blocker; acceptance evidence remains incomplete. |
 
 The latest ordinary capacity attempt at eb2cbc4 passes all four seeded-reader cases. The maximum took **1.976373s**, leaving about **24ms in one run**; repeatability and broader performance remain unproved. The dated v4 failure remains in the history below. [Capacity evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23) and [SQLite contention evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23) retain their distinct scopes.
 
