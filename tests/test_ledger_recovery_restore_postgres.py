@@ -22,12 +22,17 @@ from ledger_restore_postgres_fixture import (
 from ledger_restore_tools import run_tool, tool_command, tool_environment
 from ledger_service_fixture import invoke_postgres
 from legacy_fixture import FIXTURE_ROOT
+from sqlalchemy import create_engine
 from test_ledger_provisioning_postgres import assert_no_writes, observe_no_writes
 from test_ledger_service_postgres import controlled_database_name, observe_service
 from test_run_projection_postgres import drain, observed_reader
 
 from agent_rewind.migrations import ledger_service
-from agent_rewind.migrations.compatibility import runtime_schema_compatibility
+from agent_rewind.migrations.compatibility import (
+    POOL_TIMEOUT_SECONDS,
+    configure_runtime_engine,
+    runtime_schema_compatibility,
+)
 from agent_rewind.migrations.ledger_inputs import validate_ledger_manifest
 from agent_rewind.migrations.schema import LEDGER, installed_profile
 
@@ -49,8 +54,11 @@ def legacy(pg, observed_reader):
 
 
 def assert_migration_only(fixture, pg):
-    engine = fixture.case.operator_engine()
+    engine = create_engine(
+        fixture.case.engine.url, pool_size=1, max_overflow=0, pool_timeout=POOL_TIMEOUT_SECONDS
+    )
     try:
+        configure_runtime_engine(engine, production=True)
         verdict = runtime_schema_compatibility(engine)
         assert verdict.status == "incompatible" and verdict.code == "migration_only"
     finally:
