@@ -81,6 +81,9 @@ class Conversation:
 class CommandGroup:
     """One shared work deadline and a separate absolute cleanup reserve."""
 
+    message_limit = MAX_MESSAGES
+    conversation_type = Conversation
+
     def __init__(self, directory):
         self.directory = directory
         self.started = monotonic()
@@ -92,7 +95,7 @@ class CommandGroup:
         self.cleanup = []
 
     def count(self, child, direction, payload_bytes):
-        assert len(self.messages) < MAX_MESSAGES, "case message budget exhausted"
+        assert len(self.messages) < self.message_limit, "case message budget exhausted"
         assert 0 < payload_bytes <= FRAME_LIMIT
         self.messages.append(
             {
@@ -185,7 +188,7 @@ class CommandProcess:
                 "role": role,
                 "intent_sha256": intent_sha256,
             }
-            self.protocol = Conversation(self.identity)
+            self.protocol = group.conversation_type(self.identity)
             self.record.update(pid=self.process.pid, identity=self.identity)
             self.record["events"].append("spawned")
             child.close()
