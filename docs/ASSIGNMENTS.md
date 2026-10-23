@@ -18,9 +18,9 @@ partner-data or production authorization.
 
 | Active owner | Cloud path on studio-agent | Current work / next acceptance gate | Concrete blocker |
 | --- | --- | --- | --- |
-| Provisioning engineer | `/home/serenapei/experiments/agent-rewind` | Compose accepted overflow 22926490 and corrupted restore 20a6d7ff; synchronize the four progress docs. | Independent composition review/publication, then scoped carry source/offline handoff incorporating completed prerequisite review; no carry implementation or new execution grant. |
-| Restore engineer | `/home/serenapei/experiments/agent-rewind-worktrees/engineer-c` | RC3b3 exact two-case result/release accepted; now audits PostgreSQL I3 job-cap, exact-integer and overflow prerequisites read-only. | Preserve immutable 20a6d7ff; prerequisite findings require a separate source/execution handoff. |
-| Independent reviewer | `/home/serenapei/experiments/agent-rewind-evidence/review-records` | Accepted both component outcomes/releases and carry prerequisite review; reviews this composition. | Remaining I2/I3, recovery and F3/P1 gates stay open. |
+| Provisioning engineer | `/home/serenapei/experiments/agent-rewind` | SQLite carry 67238638 accepted; compose it with accepted PostgreSQL money b9e2d4c and synchronize four progress docs. | Independent composition review/publication; then hold the clean checkout for an explicit next handoff. |
+| Restore engineer | `/home/serenapei/experiments/agent-rewind-worktrees/engineer-c` | PostgreSQL job-cap/exact-integer pair b9e2d4c and stopped release accepted; preserve exact source/evidence. | Hold the clean reusable checkout; PostgreSQL overflow and remaining matrix work need separate source/execution handoffs. |
+| Independent reviewer | `/home/serenapei/experiments/agent-rewind-evidence/review-records` | Accepted both component outcomes/releases; review exact combined source origins and four-document checkpoint. | Remaining I2/I3, recovery and F3/P1 gates stay open. |
 | Lead | `/home/serenapei/experiments/agent-rewind-evidence/continuation-records` | Own publication, source handoffs and separate execution grants after exact review. | No new external authorization; incomplete writer, recovery and protected-delivery evidence. |
 
 The latest ordinary capacity attempt at eb2cbc4 passes all four seeded-reader cases. The maximum took **1.976373s**, leaving about **24ms in one run**; repeatability and broader performance remain unproved. The dated v4 failure remains in the history below. [Capacity evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23) and [SQLite contention evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23) retain their distinct scopes.
@@ -64,10 +64,10 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** Two SQLite overflow cases at 22926490 and two native corrupted-restore cases at 20a6d7ff are accepted; [current evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-overflow-and-corrupted-restore-checkpoint--2026-10-23) separates source/controller controls from actual executions and preserves all earlier sources/failures. No ledger acceptance package is Verified.
+- **Contributor checkpoint:** One SQLite accounted-only carry case at 67238638 and two PostgreSQL money cases at b9e2d4c are accepted; [current evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-accounted-carry-and-postgresql-money-checkpoint--2026-10-23) separates controls, actual executions and fixture limitations. Original sources/failures remain retained; no ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Complete this reviewed/public combined checkpoint, then receive the scoped carry source/offline handoff incorporating the completed prerequisite review. Secondary audits PostgreSQL money prerequisites read-only. Carry remains unimplemented. Remaining I2/I3, recovery and protected delivery stay open; only full P1 acceptance permits P2 entry.
-- **Current storage and consumers:** Both existing cloud checkouts/environments remain assigned and reused; primary owns combined integration, secondary audits PostgreSQL money prerequisites read-only while preserving tested restore evidence. At completion, overflow SQLite release bc291965 and stopped PostgreSQL release 0bb41f6d were accepted; later runs require separate grants. SQLite pool return precedes harness disposal; these native refused commands physically close before harness cleanup. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
+- **Next evidence-producing milestone:** Finish this reviewed/public combined checkpoint. PostgreSQL overflow, remaining I2/recovery and protected delivery need separate assignments and grants; this integration starts no successor implementation. Only full P1 acceptance permits P2 entry.
+- **Current storage and consumers:** Both existing cloud checkouts/environments are retained for sequential reuse; primary completes this integration and secondary preserves the accepted native money source. At completion of these runs, SQLite release 77c0c777 and stopped PostgreSQL release a35cffd7 were accepted; later runs use separate grants. SQLite clean pool return precedes harness disposal; native money transactions physically close before harness cleanup. Private evidence remains outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -1468,3 +1468,17 @@ null F3/P1 acceptance and P2 Not started.
 [Detailed evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-overflow-and-corrupted-restore-checkpoint--2026-10-23)
 preserve all prior failed attempts, exact executed sources, unchanged counts/estimates/budget,
 null F3/P1 acceptance and P2 Not started.
+
+
+### Accounted carry and PostgreSQL money checkpoint — 2026-10-23
+
+| Engineer | Completed work | Current assignment / next gate |
+| --- | --- | --- |
+| Provisioning | SQLite accounted-only carry at 67238638: one actual pass, four watched commands, direct-parent exit/release accepted. | Complete combined composition review/publication; retain clean primary for a separate handoff. |
+| Restore | PostgreSQL job-cap refusal and exact-integer initialization at b9e2d4c: two actual passes and stopped release accepted. | Retain clean secondary and exact evidence; PostgreSQL overflow/remaining matrix work is not started by this checkpoint. |
+| Independent reviewer | Accepted both exact results, physical cleanup and preservation evidence. | Review source/document composition without domain reruns. |
+| Lead | Accepted carry c55cd783 and native money 780666e8; authorized immutable merge. | Publish/read back the reviewed checkpoint; assign subsequent source work separately. |
+
+[Detailed evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-accounted-carry-and-postgresql-money-checkpoint--2026-10-23)
+retain exact executed sources, synthetic setup distinctions, prior failures, unchanged
+counts/estimates/budget, null F3/P1 acceptance and P2 Not started.
