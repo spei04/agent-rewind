@@ -7,6 +7,7 @@ The count and trailing-padding maxima are separate, shape-specific fixtures.
 import hashlib
 import json
 import time
+from collections import Counter
 from contextlib import contextmanager
 
 import pytest
@@ -70,7 +71,51 @@ def strict_native_snapshot(case, pg):
         drain(pg)
 
 
-def observe_native_capacity(pg, monkeypatch, record_property, *, overflow):
+def projection_observation(trace, receipts, transfers, statements, *, accounts, jobs, overflow):
+    """Count ordered SQL executions independently from individual fetch observations."""
+    bodies = {statement: name for statement, name in statements.items() if name.endswith("_body")}
+    hashes = {
+        hashlib.sha256(statement.encode()).hexdigest(): name for statement, name in bodies.items()
+    }
+    executions = [
+        (raw_id, hashlib.sha256(statement.encode()).hexdigest(), bodies[statement])
+        for phase, kind, raw_id, statement in trace
+        if phase == "compatibility" and kind == "sql-call" and statement in bodies
+    ]
+    parameters = [
+        (row["raw_id"], row["sql_sha256"])
+        for row in receipts
+        if row["phase"] == "compatibility" and row["sql_sha256"] in hashes
+    ]
+    assert [(raw_id, sql_hash) for raw_id, sql_hash, _ in executions] == parameters
+    calls = Counter(name for _, _, name in executions)
+    assert dict(calls) == (
+        {} if overflow else {"pg_immutable_accounts_body": 1, "pg_original_jobs_body": 4}
+    )
+    fetches = [row for row in transfers if row["name"] in hashes.values()]
+    assert all(
+        row["method"] == "fetchone" and type(row["rows"]) is int and row["rows"] in (0, 1)
+        for row in fetches
+    )
+    rows, exhausted = Counter(), Counter()
+    for fetch in fetches:
+        rows[fetch["name"]] += fetch["rows"]
+        if fetch["rows"] == 0:
+            exhausted[fetch["name"]] += 1
+    assert dict(rows) == (
+        {} if overflow else {"pg_immutable_accounts_body": accounts, "pg_original_jobs_body": jobs}
+    )
+    assert dict(exhausted) == dict(calls)
+    return {
+        "projection_body_calls": len(executions),
+        "projection_body_calls_by_name": dict(calls),
+        "projection_fetch_receipts": len(fetches),
+        "projection_rows": dict(rows),
+        "projection_zero_row_fetches": dict(exhausted),
+    }
+
+
+def observe_native_capacity(pg, monkeypatch, record_property, *, overflow, accounts, jobs):
     measurements = []
 
     def configure(local, probe):
@@ -155,11 +200,16 @@ def observe_native_capacity(pg, monkeypatch, record_property, *, overflow):
         )
     )
     history_bodies = probe.trace.sql("compatibility").count(history_body)
-    projection_bodies = [
-        hit for hit in probe.transfer.statement_hits if hit["name"].endswith("_body")
-    ]
+    projection = projection_observation(
+        probe.trace.events,
+        probe.parameters.receipts,
+        probe.transfer.statement_hits,
+        native._statements(pg["owner"]),
+        accounts=accounts,
+        jobs=jobs,
+        overflow=overflow,
+    )
     assert history_bodies == (0 if overflow else 1)
-    assert len(projection_bodies) == (0 if overflow else 5)
     projection_hashes = {
         hashlib.sha256(statement.encode()).hexdigest()
         for statement in native._statements(pg["owner"])
@@ -178,7 +228,7 @@ def observe_native_capacity(pg, monkeypatch, record_property, *, overflow):
         json.dumps(
             {
                 "history_body_calls": history_bodies,
-                "projection_body_calls": len(projection_bodies),
+                **projection,
                 "maximum_projection_binds": maximum_binds,
                 "tuple_write_delta": probe.counters,
                 "raw_closed": probe.raw.closed,
@@ -221,7 +271,14 @@ def test_postgres_complete_capacity_and_cursor_gate(
         fingerprint = adoption["columns"].index("installed_schema_fingerprint")
         assert adoption["rows"][0][fingerprint] == digest(before["catalog"])
         record_property("native_capacity_fixture_seconds", time.monotonic() - fixture_started)
-        observe_native_capacity(pg, monkeypatch, record_property, overflow=shape == "cursor-over")
+        observe_native_capacity(
+            pg,
+            monkeypatch,
+            record_property,
+            overflow=shape == "cursor-over",
+            accounts=witness["accounts"],
+            jobs=witness["opening_jobs"],
+        )
         assert strict_native_snapshot(case, pg) == before
         assert assert_capacity_history(case, expected) == witness
         record_property(
