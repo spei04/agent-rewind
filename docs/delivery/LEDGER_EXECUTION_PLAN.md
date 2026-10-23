@@ -4,7 +4,7 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2 is **Merged; checkpoint accepted** at e8cba52; [accepted evidence](#accepted-f2-reader-and-f3-handoff--2026-10-22) binds source ac3b0a31, exact PR/main attempts and verified candidate 12431486551. The lead explicitly started F3 on 2026-10-22 with the shared-check kernel first; F3 is **In progress** with null checkpoint acceptance. P2 #109 remains **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
-**Current component checkpoint — 2026-10-23:** One actual I2 SQLite manifest project-binding case is accepted at ae4f4922 (1 pass, 3.48s), separate from cohort 802b24b0 and eligibility 24c7c2dd. [Exact branch, preservation and controller evidence](#f3-manifest-project-binding-checkpoint--2026-10-23) binds a successful real-project check followed by original line117's present-job mismatch. RC3b2 V1 failed before cancellation; V2 reached cancellation but failed the exact stderr/newline oracle, with final target comparison unrun. No unfinished secondary source is merged or interrupted-restore component accepted. After publication/handoff, primary prepares only the I3 job-cap negative/exact `2**53 + 1` source/offline pair. Remaining I2/I3, recovery and protected delivery stay open; F3/P1 acceptance remains null.
+**Current component checkpoint — 2026-10-23:** RC3b2 V3 at 1d6df2a0 passes one bounded same-cluster blocked-COPY cancellation case with exact raw target/source preservation, 18 unchanged ciphertexts and five reaped tool handles. [Exact result, prior failures and limits](#f3-interrupted-data-restore-checkpoint--2026-10-23) records accepted stopped release ece4bdd1 and distinct 14.289s suite / 12.671s case / 18.825s controller / 19.477s parent timings. Earlier S0/S2, truncated-negative and I2 results retain their original sources; V1/V2 failed restore attempts stay failed. Primary's separate I3 a29ebb92 source has 38 distinct offline controls but two unexecuted actual cases awaiting source/controller review and a separate grant. Secondary owns this integration, then RC3b3 source/offline negatives after publication/handoff. Remaining writer, recovery and protected delivery stay open; F3/P1 acceptance remains null.
 
 ## Current P1 implementation sequence — 2026-10-22
 
@@ -1875,3 +1875,98 @@ repeatability proof. F3/P1/#108, aggregate #107 and parent #10 remain
 estimates, dependencies, budget and external gates are unchanged. Two existing
 cloud checkouts/environments are reused. No provider call, paid resource,
 partner data, runtime change or deployment was added.
+
+
+## F3 interrupted data-restore checkpoint — 2026-10-23
+
+RC3b2 now has one accepted actual PostgreSQL 16.15 same-cluster case at
+**1d6df2a05125a3b63a9741cee52a78804b907204**. The owned data-only restore
+was observed blocked on the exact six-column `public.api_keys` COPY after
+schema-only restore. One conditional cancellation matched the original backend,
+database, role, application, start and query identity. Native exit 1 and the exact
+179-byte user-cancellation diagnostic were required; timeout or unrelated
+failure cannot satisfy the oracle. The final raw schema-only target bytes and
+source bytes are unchanged, including all 20 zero-row table witnesses and the
+18 source ciphertexts.
+
+### Exact records and retained failures
+
+| Record | Retained identity / outcome |
+| --- | --- |
+| V1 at d7aa4810 | Zero passes / one failure before data restore or cancellation: five exact CHECK definitions had different varchar/text-array cast placement after native schema restore. Index f08b7a4e and release 3fcc3703 remain intact; no cancellation credit. |
+| Closed cast-form correction at 4509a58e | Only the five fixed relation/constraint/column/literal tuples and two complete observed definitions are equivalent in cross-database comparison copies. Flags, inventory, local OID associations and raw same-target equality stay exact. 177 offline controls per interpreter; peer 5ea1d617. |
+| V2 at 4509a58e | Zero passes / one failure after acknowledged cancellation: the diagnostic oracle expected a redundant newline. Final target comparison was unrun. Index 5e36aad1, peer 8b38e72a and release 20ab6624 retain that failed scope. |
+| Newline correction at 1d6df2a0 | Only the redundant newline is removed from the exact diagnostic expectation. Full message/COPY/context/exit/identity/ownership checks remain; 65 offline controls per interpreter, including the retained native bytes and malformed-diagnostic negatives. Source index 59c18420; peer 126a238f; lead abc16e6a. |
+| Exact V3 execution | Controller a99801da and prep 966a8094; peer 98416190; separate one-attempt grant c94db3d8. One selected case, one pass, no retry. |
+| V3 outcome package | Index 3d7f4cc0618378a823d45885d26708c547ed2282792255bc3d3d4ca2632f4b97: 117 private files, 21,327,869 bytes, one symlink and 521 executed source inputs. Peer 26c1ee286bf2f6ea86f9009cd1b0480a7b25360aba3b4b6d694d82c0c1353491. |
+| V3 stopped release | ece4bdd1b50d7cb1ac1a3c957d27b5831b06500a511bf543e955f19dd1b0ad31; baseline, memberships and source restored exactly, no cleanup errors, status 3 and PID/socket/lock absent. Lead acceptance 61e91471aacb26c23e560d755bb642322aba5afb9158e122cc0735defc8cd6e6 includes fresh stopped verification. |
+| Timings | Pytest suite **14.289s**, testcase **12.671s**, controller **18.825s**, direct-parent wait **19.477s**. Controller exit 0 was directly collected and reaped. These are one-attempt observations of different scopes. |
+
+The original 145 V1 and 116 V2 evidence files are reverified unchanged. They are
+not relabeled as passes. Earlier S0 at dfe7b95b, S2 at 83c594a2 and the truncated
+negative at 52d289e5 keep their separate evidence and were not rerun.
+
+### What the successful case proves
+
+The five-tool profile retains two version commands, custom dump, schema-only
+restore and the intentionally cancelled data-only restore. All five owned
+handles have confirmed exit/reaping, with no signals or tool cleanup errors.
+The exact native cancellation diagnostic is SHA
+`7eb58e49b43d4d7eec078211ff50336ea416e06a2447b88d4dd072c98920a8d6`.
+
+Fifty control events contain 13 bounded queries, two candidate observations,
+one acknowledged conditional cancellation and two absence queries. Three
+connection constructions and three physical closes are retained, with no
+pending or uncertain control connection. The final observer proves the former
+control/restore backends absent, fully drains its sole SELECT, reaches IDLE
+and physically closes before the continuous database fence is discharged.
+Its own immediate server disappearance is not claimed; the later exact outer
+baseline is the all-client cleanup witness. Setup observations retain 5,762
+native events and 2,827 ordered SQL call/return/parameter receipts.
+
+Same-target raw schema before/after SHA is
+`1ae96a56e6e361f279ccf0663dd5e27708c20b2dced14fdc9d194d5043546580`;
+source before/after SHA is
+`f6f86caf7d5446c1227cb8052f93a4883dfdc2c1d1369f88f238ff7b9fbfc745`.
+The source receipts bind all 18 unchanged ciphertext hashes. Raw authority,
+constraints, local associations and table witnesses remain in the private
+package; cross-database cast-form handling does not alter either raw target
+snapshot.
+
+### Bounds, limits and subsequent work
+
+The selector retains the five-second observed-COPY intervention window,
+30-second work limit and launch-anchored 40-second cleanup limit. The controller
+keeps the original child 360s / case 380s / selected-work 535s / work 950s /
+cleanup 260s / reserve 20s / outer 1230s envelope, with no deadline refresh.
+Owned test/tool descendants are reaped before catalog reconciliation.
+The accepted four-tool positive/truncated paths are unchanged.
+
+Pinned pg_restore resets its server timeout settings. Requested PGOPTIONS are
+launch provenance only, not effective server timeout evidence. Native
+LIMIT 1025 bounds rows; per-cell and 8MiB snapshot-byte checks apply after
+driver receipt and before retained snapshot accumulation, not to wire bytes.
+This case does not establish earlier data writes, restore rollback
+acknowledgment, successful completion of an intact data-only restore with
+preinstalled constraints, arbitrary ACL/cross-cluster recovery, repeatability
+or complete recovery readiness.
+
+Composition merges published a7c83200 into the accepted restore source at
+96a962a0 and then changes only these four progress documents. All prior source
+identities and accepted component evidence remain unchanged. Primary's separate
+I3 source a29ebb92 and 38 distinct offline controls are not merged here; its
+job-cap negative and exact **2^53 + 1 (9007199254740993)** actual cases remain
+unexecuted pending source/controller review and a separate grant. After this
+checkpoint's review/publication and explicit handoff, secondary's next scope
+is RC3b3 source/offline corruption negatives, using independent raw corrupt-state
+witnesses so catalog validation cannot prevent reaching the intended service
+entry. No corrupt-state execution is included here.
+
+Capacity remains **1.976373s/about 24ms headroom in one eb2cbc4 run**, without
+repeatability proof. F3/P1/#108, aggregate #107 and parent #10 remain
+**In progress** with null acceptance; P2/#109 remains **Not started**.
+Remaining I2/I3, recovery, matching two-interpreter/package/hosted evidence and
+protected delivery stay open. Counts, estimates, dependencies, budget and
+external gates are unchanged. Two existing cloud checkouts/environments are
+reused; no provider call, paid resource, partner data, runtime change or
+deployment was added.
