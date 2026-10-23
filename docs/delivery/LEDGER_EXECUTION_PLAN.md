@@ -4,6 +4,8 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2 is **Merged; checkpoint accepted** at e8cba52; [accepted evidence](#accepted-f2-reader-and-f3-handoff--2026-10-22) binds source ac3b0a31, exact PR/main attempts and verified candidate 12431486551. The lead explicitly started F3 on 2026-10-22 with the shared-check kernel first; F3 is **In progress** with null checkpoint acceptance. P2 #109 remains **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
+**Current component checkpoint — 2026-10-23:** Distinct-intent provision collisions are independently accepted for three SQLite cases at 0a6516f and three PostgreSQL cases at 4f1ea4a6, nine commands per dialect. The final request proves a conflict at the actual current parent, not identical replay. [Scope and remaining gates](#f3-distinct-intent-collision-checkpoint--2026-10-23) retain the prior failures and separate executed identities. Restore guard source 52d289e5 is accepted with 33 offline controls per interpreter; controller review/grant remain open, with no truncated-negative native proof. After documentation publication, primary takes only the missing I2 admitted queued-v2 positive and isolated queued/running eligibility group. Other I2 groups, I3, restore negatives and protected delivery remain open; F3/P1 acceptance stays null.
+
 ## Current P1 implementation sequence — 2026-10-22
 
 The lead accepted a scope-preserving delivery refinement: three independently
@@ -1401,3 +1403,91 @@ repeatability or broader performance claim. F3/P1/#108, aggregate #107 and paren
 Task counts, estimates, dependency edges, budget and external gates are unchanged.
 The two existing cloud checkouts are reused; no provider calls, paid resources,
 customer data or deployment were added.
+
+## F3 distinct-intent collision checkpoint — 2026-10-23
+
+Both RC2b2 dialect components are independently accepted. Each is one actual
+ordered three-case, fail-fast execution; no completed case was rerun for this
+documentation checkpoint.
+
+| Dialect | Executed source | Actual result | Private result index / peer review |
+| --- | --- | --- | --- |
+| SQLite | 0a6516f | 3 passed in 45.67s; nine commands reaped with EOF | ba06f137 / 4cc5c425 |
+| PostgreSQL | 4f1ea4a6 | 3 passed in 51.28s; nine commands reaped with EOF | aaf5632a / b5623a5f |
+
+These are provision-only cases covering an account ID collision, a scope/start
+key collision, and distinct projects sharing an organization. Their manifest
+IDs differ. The first command holds real exclusion before physical COMMIT;
+the second receives actual busy refusal and cleans up only its own resources.
+The parent independently proves the winner remains held before allowing it
+to commit. PostgreSQL additionally binds the fetched false try-lock result to
+the losing raw/backend identity and observes its natural disappearance while
+the exact winning backend/exclusion survive.
+
+The third command retains the losing account intent and unused manifest ID
+but explicitly binds its parent to the newly committed head. It is a new
+current-parent conflict request, despite the reused protocol role named
+replay. The actual delegated classifier input/outcome proves the precise
+collision, excluding stale parent, installation mismatch and known manifest
+ID as earlier explanations. The account-ID case uses nonoverlapping periods.
+The shared-organization case has distinct project and account IDs, disjoint
+project start keys and only the intended organization start-key collision.
+Same-start periods overlap by definition; refusal occurs in the classifier
+before preparation, not because later overlap checks were proven absent.
+
+Fresh refusal issues zero application DDL/DML and preserves the winner's
+original receipt, timestamps, full state and source rows. Native refusal
+retains actual rollback and physical close before the service/harness exit
+boundaries. The original ciphertext hashes are compared during the run.
+Independent later native review verifies the retained hash values and passing
+preservation assertions; it does not rehash temporary native fixture bytes
+after teardown. This is bounded component evidence, not a general recovery
+or concurrency guarantee.
+
+The SQLite run retains 30 total messages and scenario elapsed times
+12.302/12.112/12.151s. PostgreSQL retains 36 messages, elapsed times
+9.832/9.105/9.377s, nine final observations, 12,648 ordered native events,
+6,252 SQL receipts and 24 strict progress rows. Its largest payload is
+3,226,433 bytes, with four additional framing bytes. Per-scenario limits stay
+60s work plus 15s cleanup, three commands and 4 MiB payload; SQLite uses
+10 messages and PostgreSQL 12. All nine native commands exit normally and
+are reaped with EOF; no controller descendant cleanup is needed for success.
+
+The three-case native controller adds exactly one 75-second scenario to the
+accepted two-case watchdogs: child 315s, work 525s and outer 925s, with the
+same 275s cleanup allowance and unchanged ownership/emergency logic. Its
+recovery phase is 335s; these are test watchdogs, not service deadlines or
+performance guarantees. Four pure native frame-profile controls pass; the
+37 native source controls and 43 SQLite source controls remain separate.
+Earlier accepted lifecycle/accounting controls were reused by exact hashes
+and AST equivalence, without rerunning them.
+
+Native controller PID 3648244 exited and was reaped after 55.688s. Exact
+database/role baseline restoration, 501 unchanged source inputs and no
+remaining owned child processes are recorded. Stopped release 442b4639 has
+status 3 and no PID/socket/lock. Independent review b5623a5f and lead
+acceptance e745c3c0 bind that release; SQLite lead acceptance is 4ff321c5.
+These shortened identities name retained owner-only records, not downloadable
+private artifacts. PostgreSQL is stopped and unassigned.
+
+Primary now prepares this docs-only checkpoint, followed after publication
+and lead handoff by the missing I2 genuinely admitted queued-v2 positive and
+isolated queued/running eligibility group. That slice requires actual
+Operation/configuration/artifact associations and cohort-derived totals.
+Other I2 groups and I3 remain separate. Secondary finalizes the single RC3b1
+truncated-archive controller. Guard source 52d289e5 is accepted by peer
+9a214056 with 33 offline controls per interpreter; controller review and its
+separate native grant remain open. This source/control acceptance provides no
+truncated-negative native proof. The independent
+reviewer owns review, while the lead owns publication and exclusive grants.
+
+RC3a's accepted S0/S2 positives, both failed restore attempts, the original
+native identical-command failure and all dated capacity failures remain
+unchanged. Capacity retains only the four-case eb2cbc4 attempt with maximum
+1.976373s/about 24ms headroom; repeatability is unproved. Remaining writer and
+restore-negative gates plus matching two-interpreter, packaging, hosted and
+protected-candidate delivery stay open. F3/P1/#108, aggregate #107 and parent
+#10 remain **In progress** with null acceptance; P2/#109 remains **Not started**.
+All task/package counts, estimates, dependencies, budget and external gates
+are unchanged. Both existing cloud checkouts are reused; this checkpoint
+adds no runtime change, model call, paid resource, partner data or deployment.
