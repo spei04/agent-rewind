@@ -916,3 +916,73 @@ PR/main/candidate delivery. F3/P1/AR-010-A remain **In progress** with null
 acceptance; P2 remains **Not started**. Task counts, estimates, dependencies and
 funding/deployment/data gates are unchanged. This checkpoint made no provider
 calls and created no paid resources.
+
+
+## F3 recovery and native capacity checkpoint — 2026-10-23
+
+This checkpoint composes recovery source 7eccb241 and the test-only
+capacity correction ee2dc3e2. All runtime files and the lockfile remain equal
+to 232130d. Earlier period/parser optimizations retain their separately bound
+evidence; no new performance correction or full capacity acceptance follows.
+
+### Actual SQLite recovery
+
+The final 23-case Python 3.12 selection passes in **70.69 seconds**. It covers
+original M0/M1 receipt recovery after actual S2, genuine absence at the exact
+parent, changed intent, advanced parent, partial identity collisions and corrupt
+current state. Initialization and provisioning each exercise failures before
+physical COMMIT, loss after physical COMMIT acknowledgement, acknowledged
+COMMIT followed by close failure, failures before/after native ROLLBACK, and
+preservation of the first BaseException through a later cleanup interruption.
+A failed writer returns no successful receipt. Every explicit recovery uses a
+distinct engine and raw connection; no hidden writer retry is permitted.
+
+The 35 observed commands include 23 fresh inspections with zero DDL/DML.
+Before harness disposal, 10 cleanup-fault paths have physically closed and
+quarantined their handles; 25 healthy paths have clean idle pool returns.
+Actual C-level acknowledgements, transaction outcomes, original receipts and
+independent SQL state are checked separately. Caller cleanup is labeled as its
+own trace phase. Clean SQLite QueuePool return does not require physical closure.
+
+The first run passed the same 23 cases in 70.25 seconds but checked final handle
+closure after test-owned disposal. Review retained its state/outcome evidence
+and corrected that attribution gap in the helper only. The final run rechecks
+the shared observer; these are **23 cases rerun**, not 46 distinct passing cases.
+All 463 source inputs remained unchanged during each run. Lint, formatting and
+type checks pass. Native recovery and final matching Python 3.11 delivery are
+still required. SQL snapshots on refusals do not claim a separate ciphertext
+rehash.
+
+### Native capacity result
+
+| Attempt / source | Result | Evidence boundary |
+| --- | --- | --- |
+| Initial observer at 232130d | One failure; three unrun | The test confused 372 fetch observations with five SQL body executions. The wrapper returned migration_only in 1.38219s, but later strict preservation checks were not reached. |
+| Corrected observer at ee2dc3e2 | Control passed in 1.40977s | One history body, five projection executions, 372 fetch observations transferring 319 accounts and 48 jobs; exact native rows, JSON values/bytes, owner/ACL/catalog and ciphertext preservation pass. |
+| Same corrected attempt | 4,096-account positive failed at 2.01115s | The real whole wrapper returned schema_unavailable after the unchanged two-second deadline. The 16 MiB and one-byte-over cases were not run. |
+
+The correction matches ordered exact SQL executions to parameter receipts,
+separates them from fetch observations, retains row bounds and exhaustion
+counts, and rejects missing/duplicated/reordered evidence in 12 offline controls
+against the original trace. No SQL, product limit, parser, transaction behavior
+or runtime file changed.
+
+The failed maximum records ordered native SQL and rollback/close returns, with
+no COMMIT. Its tuple-write delta and final strict preservation assertions were
+not reached and are not claimed. Traces have no per-event timings; the failure
+does not isolate product parsing, database time or observation overhead.
+Diagnosis must precede an optimization or a separately reviewed diagnostic run.
+A passing control and earlier already-connected SQLite timings do not close
+this whole PostgreSQL capacity gate.
+
+Both native attempts restored the exact database/role baseline, reaped their
+children, verified unchanged source inputs and stopped PostgreSQL. The original
+failed attempt remains immutable evidence. Two existing cloud checkouts are
+retained for active recovery and capacity work; no provider calls or paid
+resources were added.
+
+F3/P1/AR-010-A remain **In progress** with null acceptance; P2 remains **Not
+started**. Native recovery, capacity, process interruption, competing operators,
+owner/ACL-preserving restore, remaining service boundaries and matching
+two-interpreter protected delivery remain required. No task, estimate,
+dependency, funding, deployment or customer-data gate changes.

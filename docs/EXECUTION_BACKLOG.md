@@ -1,8 +1,8 @@
 # Agent Rewind — execution backlog
 
-**Current delivery checkpoint — 2026-10-22:** HTTP P2 and AR-008 remain Verified at cefd222. Ledger F1 [PR #111](https://github.com/spei04/agent-rewind/pull/111) is **Merged; checkpoint accepted** at 2e0eeeab after exact PR/main checks and candidate verification. Ledger P1 #108, aggregate #107 and parent #10 remain **In progress** with null P1 acceptance. F2 complete persisted reader is **Merged; checkpoint accepted** at e8cba52 after reviewed source ac3b0a31, PR/main attempts 39780954252/39786131008 and verified candidate 12431486551. F3 trusted provisioning/opening/replay/recovery is **In progress** under the explicit 2026-10-22 handoff, beginning with the shared-check kernel; its acceptance remains null. The earlier failed main attempt 39773689705/1 and interrupted candidate verification are retained separately. P2 #109 stays Not started/null acceptance. See [accepted F2 evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f2-reader-and-f3-handoff--2026-10-22) for source, runs, candidate and retained failed history. Totals: **151 tasks / 161 planned PRs / 544 outer edges; 30 Verified / 1 In progress / 120 Not started tasks; 9 Verified / 1 In progress / 5 Not started delivery packages**. Customer, production and spending gates are unchanged.
+**Current delivery checkpoint — 2026-10-23:** HTTP P2/AR-008 remain Verified at cefd222; ledger F1 and F2 remain accepted at 2e0eeeab and e8cba52. F3 has 23 passing SQLite recovery cases at 7eccb241 and a reviewed native capacity result at ee2dc3e2: one control pass, one 4,096-account timeout, two unrun cursor cases. Composition d299c559 changes tests only. F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null acceptance; P2/#109 remains **Not started**. [Current evidence and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#f3-recovery-and-native-capacity-checkpoint--2026-10-23). Totals remain **151 tasks / 161 planned PRs / 544 outer edges; 30 Verified / 1 In progress / 120 Not started tasks; 9 Verified / 1 In progress / 5 Not started delivery packages**. Customer, production and spending gates are unchanged.
 
-**Revision:** 2026-10-22 · **Owner:** spei04 · **Status:** Approved for staged execution; task-specific gates remain applicable.
+**Revision:** 2026-10-23 · **Owner:** spei04 · **Status:** Approved for staged execution; task-specific gates remain applicable.
 
 This is the assignable execution companion to [the roadmap](PLAN.md). It covers 52 work packages as 151 aggregate tasks and 161 planned delivery PRs. No application implementation, production provisioning or paid inference was started in preparing this packet. E0 is satisfied by explicit project-owner approval on 2026-10-19. Initial assignments and subsequent reviews are tracked in [ASSIGNMENTS.md](ASSIGNMENTS.md). Task cards and the machine-readable ledger record current status. Existing product code and historical test evidence are the starting point, not completion evidence for these tasks.
 
@@ -3820,7 +3820,7 @@ records exact results, remaining gates and the structural-versus-authenticated
 evidence distinction.
 
 
-### Current F3 implementation evidence — 2026-10-22
+### F3 implementation checkpoint — 2026-10-22
 
 F2 remains accepted at e8cba52. Composition 5f575667 includes actual provisioning
 and two reviewed runtime performance fixes. Eight SQLite provisioning cases
@@ -3840,3 +3840,28 @@ concurrency, process death, owner/ACL restore and protected PR/main/candidate
 delivery. F3/P1/AR-010-A remain In progress with null acceptance; P2 is Not
 started. Counts, estimates, dependencies, funding and production gates are
 unchanged. See the [current delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-provisioning-and-capacity-checkpoint--2026-10-22).
+
+
+### Current F3 implementation evidence — 2026-10-23
+
+F2 remains accepted at e8cba52. This checkpoint adds actual SQLite recovery
+tests and corrects native capacity observation; runtime files and the lockfile
+are unchanged from 232130d. The corrected recovery selection passes **23 cases
+on Python 3.12** in 70.69 seconds. Thirty-five command observations distinguish
+10 service closures after cleanup failure from 25 clean idle pool returns.
+All 23 fresh inspections perform zero DDL/DML.
+
+Native capacity at ee2dc3e2 has **one control pass, one 4,096-account timeout,
+and two unrun cursor cases**. The whole instrumented runtime wrapper took
+1.40977 seconds for the control and returned schema_unavailable at 2.01115
+seconds for the account maximum under the unchanged two-second deadline.
+The earlier fetch-count observer failure remains separate. These results
+do not establish complete native capacity; retained traces cannot isolate
+product CPU time from observer overhead.
+
+Next work is diagnosis of the capacity failure and native recovery validation,
+then process interruption, concurrency, owner/ACL restore, remaining writer
+boundaries and matching two-interpreter protected PR/main/candidate delivery.
+F3/P1/AR-010-A remain **In progress** with null acceptance; P2 is **Not started**.
+Counts, estimates, dependencies, funding and production gates are unchanged.
+See the [delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-recovery-and-native-capacity-checkpoint--2026-10-23).

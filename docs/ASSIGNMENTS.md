@@ -2,14 +2,14 @@
 
 Execution backlog approved on 2026-10-19. The project lead coordinates three independent contributor slots, reviews each delivery, integrates tested changes, then assigns dependency-ready work to the free slot. These are logical contributor roles, not six confirmed full-time hires; the prior staffing/calendar scenario remains unconfirmed. Task-specific external funding, data, customer and release gates still apply.
 
-## Current assignments — 2026-10-22
+## Current assignments — 2026-10-23
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Provisioning engineer | SQLite and native provisioning/preservation slice complete | Next: fresh inspection after uncertain outcomes, then process interruption and concurrency. |
-| Capacity engineer | Runtime performance fixes reviewed; native capacity test source prepared | Four native cases still need a reviewed controller and exclusive execution. |
-| Independent reviewer | Review exact source, native evidence and capacity preparation | Preserve failed attempts; component evidence does not complete F3/P1. |
-| Lead | Compose source and synchronize roadmap, backlog and progress issue | Keep acceptance null until recovery, remaining boundaries and protected delivery pass. |
+| Provisioning engineer | SQLite recovery source and evidence accepted at 7eccb241 | Next: actual PostgreSQL recovery, then process interruption and competing operators. |
+| Capacity engineer | Diagnose the native 4,096-account timeout at ee2dc3e2 | Separate product work from observation overhead; review any optimization before another native attempt. Two cursor cases remain unrun. |
+| Independent reviewer | Exact recovery boundaries and native failure/release review complete | Review capacity diagnosis and native recovery source/evidence; preserve unsuccessful attempts. |
+| Lead | Integrate recovery and observer correction; publish consistent progress | F3/P1 acceptance stays null pending all remaining gates and protected delivery. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -1243,3 +1243,18 @@ execution preparation and fresh-inspection/uncertain-outcome controls, followed
 by process death, concurrency and owner/ACL restore. Both existing checkouts
 remain available for that work. [Exact evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-provisioning-and-capacity-checkpoint--2026-10-22)
 keep F3/P1 In progress with null acceptance and P2 Not started.
+
+## F3 recovery and native capacity handoff — 2026-10-23
+
+| Owner | Assigned work | Disposition / next work |
+| --- | --- | --- |
+| Provisioning engineer | RC1: actual SQLite reentry and transaction uncertainty | 7eccb241 accepted after 23 corrected passes and independent boundary review; next owns native RC1. |
+| Capacity engineer | Four-case native capacity execution | First attempt failed its fetch-count observer; ee2dc3e2 corrected that observer. Control passes, account maximum times out, two cursor cases remain unrun. Next owns diagnosis. |
+| Independent reviewer | Source, physical outcomes, cleanup and native release | Accepted scoped evidence and retained failed attempts; next reviews diagnosis and native RC1. |
+| Lead | Source composition, progress consistency and ownership | Composed d299c559; temporarily owns primary for publication, then returns it to provisioning. PostgreSQL is stopped/unassigned. |
+
+Two existing cloud checkouts remain assigned and are reused. The original
+23-case SQLite run is retained; its corrected rerun distinguishes service
+cleanup from harness disposal. No runtime file or lockfile changes in this
+checkpoint. [Exact results and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#f3-recovery-and-native-capacity-checkpoint--2026-10-23)
+keep F3/P1 In progress/null acceptance and P2 Not started.
