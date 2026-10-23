@@ -66,6 +66,67 @@ WHERE n.nspname='public' ORDER BY c.relname,k.conname
 }
 
 
+# Only these five retained PostgreSQL 16 deparse pairs are equivalent here.
+# The varchar-to-text cast is binary compatible; both fixed literal arrays match.
+# Raw snapshots and every field outside this comparison copy remain untouched.
+CHECK_CAST_FORMS = {
+    ("installation_adoptions", "installation_adoptions_source_kind_check"): (
+        (
+            "CHECK (((source_kind)::text = ANY ((ARRAY['fresh'::character varying, "
+            "'legacy'::character varying])::text[])))"
+        ),
+        (
+            "CHECK (((source_kind)::text = ANY (ARRAY[('fresh'::character varying)::text, "
+            "('legacy'::character varying)::text])))"
+        ),
+    ),
+    ("installation_adoptions", "installation_adoptions_state_check"): (
+        (
+            "CHECK (((state)::text = ANY ((ARRAY['prepared'::character varying, "
+            "'ownership_complete'::character varying])::text[])))"
+        ),
+        (
+            "CHECK (((state)::text = ANY (ARRAY[('prepared'::character varying)::text, "
+            "('ownership_complete'::character varying)::text])))"
+        ),
+    ),
+    ("migration_progress", "migration_progress_status_check"): (
+        (
+            "CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, "
+            "'running'::character varying, 'complete'::character varying, 'blocked'::character "
+            "varying])::text[])))"
+        ),
+        (
+            "CHECK (((status)::text = ANY (ARRAY[('pending'::character varying)::text, "
+            "('running'::character varying)::text, ('complete'::character varying)::text, "
+            "('blocked'::character varying)::text])))"
+        ),
+    ),
+    ("project_memberships", "project_memberships_role_check"): (
+        (
+            "CHECK (((role)::text = ANY ((ARRAY['viewer'::character varying, "
+            "'operator'::character varying, 'maintainer'::character varying])::text[])))"
+        ),
+        (
+            "CHECK (((role)::text = ANY (ARRAY[('viewer'::character varying)::text, "
+            "('operator'::character varying)::text, ('maintainer'::character varying)::text])))"
+        ),
+    ),
+    ("resource_scopes", "resource_scopes_resource_kind_check"): (
+        (
+            "CHECK (((resource_kind)::text = ANY ((ARRAY['run'::character varying, "
+            "'study'::character varying, 'job'::character varying, 'key'::character varying, "
+            "'provider_call'::character varying])::text[])))"
+        ),
+        (
+            "CHECK (((resource_kind)::text = ANY (ARRAY[('run'::character varying)::text, "
+            "('study'::character varying)::text, ('job'::character varying)::text, "
+            "('key'::character varying)::text, ('provider_call'::character varying)::text])))"
+        ),
+    ),
+}
+
+
 MAX_SNAPSHOT = 8 * 1024 * 1024
 
 
@@ -138,6 +199,19 @@ def observe_schema_only(fixture, pg, directory, name, record_property):
     return budget.value
 
 
+def compare_check_casts(rows):
+    """Recognize complete pinned forms without dropping fields or constraints."""
+    seen = set()
+    for row in rows:
+        identity = (row["relation"], row["name"])
+        forms = CHECK_CAST_FORMS.get(identity)
+        if forms is not None:
+            assert identity not in seen, "duplicate pinned CHECK identity"
+            seen.add(identity)
+            assert type(row["definition"]) is str and row["definition"] in forms
+            row["definition"] = forms[0]
+
+
 def structure(value):
     """Verify local OID associations before comparing cross-database identities."""
     result = deepcopy(value)
@@ -174,6 +248,7 @@ def structure(value):
             for key in tuple(row):
                 if key == "oid" or key.endswith("_oid"):
                     del row[key]
+    compare_check_casts(result["constraint_definitions"])
     return typed(result)
 
 
