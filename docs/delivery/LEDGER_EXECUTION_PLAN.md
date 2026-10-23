@@ -1339,3 +1339,65 @@ headroom in one run, with no repeatability or broader performance claim.
 F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null
 acceptance; P2/#109 remains **Not started**. Counts, estimates, dependency
 edges, budget and customer-data/production gates are unchanged.
+
+## F3 owner/ACL-preserving restore positives — 2026-10-23
+
+RC3a's two same-cluster positive cases are independently accepted, with separate
+executed source identities. The restore branch now composes published progress
+4933da5c through ordinary merge d0f59733; this composition is not a new native run.
+
+| Native attempt | Executed source | Retained outcome | Private result index / stopped release |
+| --- | --- | --- | --- |
+| First two-case attempt | fc3842fc | S0 failed; S2 unrun | c346b9b6 / 8b3c9de2 |
+| Corrected runtime-engine attempt | dfe7b95b | S0 passed; S2 failed | e627a71d / 101868ca |
+| S2-only receipt-contract continuation | 83c594a2 | S2 passed; S0 not rerun | bf7946fe / 174c1328 |
+
+The first failure was a test factory mismatch: runtime inspection received an
+operator engine requiring a migration claim. The normal bounded runtime factory
+correction preserves that guard and the strict incompatible/migration_only
+verdict; 100 focused controls pass per interpreter. The next failure compared
+an inspection receipt directly with the provisioning result that adds outcome.
+The S2-only correction requires the exact two model types, complete outcome,
+all 11 declared receipt fields with strict value types, and no extra/missing
+fields; 117 focused controls pass per interpreter. Both full receipt values
+are retained before comparison. Neither failed native attempt was relabeled.
+
+S0's accepted case restores the actual ar6 predecessor, then performs real M0
+initialization. S2 restores actual M0/M1 state and replays both original commands
+with their original receipts/timestamps and zero-write observations. Distinct
+fresh inspections recover every receipt field without writer work. S2's final
+attempt reconciles six ordered observations, 11,196 native events and 5,507 SQL
+receipts. The full native test's S0 path and its runtime/fixture inputs remain
+unchanged by the S2-only correction; S0 evidence remains at dfe7b95b, not the later source.
+
+Each accepted case uses actual custom pg_dump and transactional pg_restore with
+owners/ACLs retained. Source-derived rows, raw progress, owner/ACL grant identities,
+function/trigger associations, all 18 ciphertext objects and source preservation
+pass. All ten application-role DML/schema/function probes return native 42501
+and roll back without state changes. Runtime compatibility stays migration_only.
+S2's restored, replayed and final target snapshots are identical. The controller
+reaps its owned children, restores the exact database/role/membership baseline
+and stops PostgreSQL with no cleanup errors.
+
+Independent S0 review is 73ec628a; S2/positive-component review is 07716611.
+Lead acceptance 4a696c36 follows fresh stopped verification of release 174c1328.
+These private hash identities refer to retained owner-only evidence, not public
+artifact downloads. The scope is existing synthetic roles in one cluster with
+default database ACLs; arbitrary column/default privileges, global-role
+recreation and cross-cluster disaster recovery are not established.
+
+Next restore work is the approved RC3b1 single truncated-archive negative:
+actual native failure with no partial user objects and unchanged source.
+Interrupted data-only restore and explicit provenance/ACL corruption remain
+separate later slices. Distinct-intent collisions and the remaining actual-writer
+eligibility, arithmetic, identity, evolved replay, fault, bound and authority
+gates remain open. Final matching two-interpreter, packaging, hosted and
+protected-candidate delivery remains required.
+
+The earlier four-case seeded-reader capacity result remains bound to eb2cbc4:
+1.976373s for the maximum-account case, about 24ms headroom in one run, with no
+repeatability or broader performance claim. F3/P1/#108, aggregate #107 and parent
+#10 remain **In progress** with null acceptance; P2/#109 remains **Not started**.
+Task counts, estimates, dependency edges, budget and external gates are unchanged.
+The two existing cloud checkouts are reused; no provider calls, paid resources,
+customer data or deployment were added.
