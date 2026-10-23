@@ -1209,3 +1209,47 @@ F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null
 acceptance; P2/#109 remains **Not started**. Both existing cloud checkouts are
 reused. No provider calls, paid resources, customer data or deployment were
 added; task counts, estimates, dependencies and external gates are unchanged.
+
+## F3 SQLite competing-command checkpoint — 2026-10-23
+
+Source f4ba97c9 adds four test-only files. The first fail-fast execution passes
+both actual SQLite cases—initialize and provision—in 28.18s on Python 3.12.
+The bounded controller completes in 31.121s. The separate corrected protocol
+selection passes 22 controls; it is not another execution of the real cases.
+
+Each case proves the manifest and requested account identities are absent,
+then holds the first real command after final validation and before physical
+COMMIT. A second process submits the identical command. Its native SQLITE_BUSY
+maps to migration_busy, it performs no application DDL/DML, and it cleans up
+only its own connection and process.
+
+Before releasing the winner, the harness verifies that its recorded held
+state is unchanged and that a separate BEGIN EXCLUSIVE still receives
+SQLITE_BUSY. The winner then commits exactly once. A third fresh process
+replays the original request, returns the exact original receipt and performs
+zero application DDL/DML. Exact resulting state, original source projections
+and protected ciphertexts are preserved.
+
+Independent review verifies the nonce/PID/intent-bound exchange, physical
+transaction observations, source inputs, child reaping and empty cleanup
+errors. Review first caught an expired-cleanup path that could omit KILL.
+The corrected helper still signals its owned child after expiration, uses
+only a zero-time wait, and retains an unreaped/closed=false state if it cannot
+confirm cleanup. Its control labels the later harness reap separately. The
+original preparation remains retained; neither preparation was a failed
+real-case execution.
+
+This accepts only SQLite identical-command recovery. PostgreSQL counterparts
+and the separate identity-collision cases remain open, along with restore,
+remaining actual-writer boundaries and protected delivery. Capacity's earlier
+four-case PostgreSQL pass remains bound to eb2cbc4, with about 24ms maximum
+headroom in one execution; no repeatability claim is added.
+
+The provisioning engineer next owns PostgreSQL identical-command cases.
+The restore engineer owns the two same-cluster S0/S2 restore positives and
+their offline controls. The lead and independent reviewer retain composition,
+evidence and delivery responsibilities. Both existing checkouts are reused.
+
+F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null
+acceptance; P2/#109 remains **Not started**. Task counts, estimates, dependencies,
+funding, customer-data and production gates are unchanged.

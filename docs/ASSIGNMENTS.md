@@ -1297,3 +1297,15 @@ provider calls were added; both existing cloud checkouts remain in active use.
 [Exact results and remaining limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23)
 retain all failed attempts. No deadline, observer, task count, estimate,
 dependency or external gate changed.
+
+### SQLite competing-command handoff — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Provisioning | Two actual SQLite identical-command cases at f4ba97c9 pass in one execution; 22 corrected protocol controls pass separately. Review caught and resolved an expired-cleanup termination gap before the real run. | PostgreSQL counterparts on the integrated base; identity collisions remain a separate later slice. |
+| Restore | RC3a design accepted for two same-cluster S0/S2 owner/ACL-preserving restore positives. | Implement focused helpers and offline controls; freeze source/controller before native execution. |
+| Independent reviewer | Reviews actual outcomes separately from source/controller acceptance. | Native competing-command and restore source/evidence reviews. |
+| Lead | Composes accepted test files and synchronizes roadmap, backlog, issue and assignment status. | Continue dependency-ready work without changing F3/P1 acceptance or external gates. |
+
+[Evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23)
+keep PostgreSQL concurrency, restore and final delivery open.
