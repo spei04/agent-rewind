@@ -13,7 +13,9 @@ MAX_BLOCKED = 128
 
 
 class ToolOwnership:
-    def __init__(self, popen, runner):
+    def __init__(self, popen, runner, *, tool_limit=MAX_TOOLS):
+        assert type(tool_limit) is int and tool_limit in (4, 5)
+        self.tool_limit = tool_limit
         self.popen, self.runner = popen, runner
         self.children = []
         self.pending = False
@@ -57,7 +59,7 @@ class ToolOwnership:
 
     def spawn(self, *args, **kwargs):
         self.before_database("next-tool-launch")
-        assert len(self.children) < MAX_TOOLS, "restore tool launch bound exceeded"
+        assert len(self.children) < self.tool_limit, "restore tool launch bound exceeded"
         self.pending = True
         try:
             child = self.popen(*args, **kwargs)
@@ -100,15 +102,17 @@ class ToolOwnership:
             "children": self.last_status,
             "first_error": None if self.first_error is None else type(self.first_error).__name__,
             "blocked": self.blocked,
-            "limits": {"tools": MAX_TOOLS, "blocked_records": MAX_BLOCKED},
+            "limits": {"tools": self.tool_limit, "blocked_records": MAX_BLOCKED},
             "authority": "retained Popen handles and nonblocking poll; not tool receipts",
         }
 
 
-def install_tool_guard(patch, native_module):
+def install_tool_guard(patch, native_module, *, owner=None):
     """Install before pg/legacy setup and retain until their finalizers complete."""
     subprocess = tools.subprocess
-    owner = ToolOwnership(subprocess.Popen, tools.run_tool)
+    if owner is None:
+        owner = ToolOwnership(subprocess.Popen, tools.run_tool)
+    assert isinstance(owner, ToolOwnership)
     patch.setattr(
         tools,
         "subprocess",
