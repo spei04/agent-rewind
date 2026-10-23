@@ -63,6 +63,11 @@ def _read(
     maximum = 4096 if accounts else 12
     per_row = 255 if accounts else 115
     fields = _ACCOUNT_FIELDS if accounts else _JOB_FIELDS
+    field_names = set(fields)
+    field_rules = tuple(
+        (field, field.endswith("microusd"), accounts and field in {"project_id", "job_id"})
+        for field in fields
+    )
     gate = _query(connection, family + "_gate", parameters, checks)
     if (
         len(gate) != 1
@@ -100,12 +105,10 @@ def _read(
     receipt = 0
     for row in rows:
         checks.check()
-        if set(row) != set(fields):
+        if set(row) != field_names:
             _refuse()
-        for field in fields:
+        for field, money, nullable in field_rules:
             value = row[field]
-            money = field.endswith("microusd")
-            nullable = accounts and field in {"project_id", "job_id"}
             if money:
                 if type(value) is not int or not 0 <= value <= MAX_MONEY:
                     _refuse()
