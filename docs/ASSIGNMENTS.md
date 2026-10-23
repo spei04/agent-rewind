@@ -6,10 +6,10 @@ Execution backlog approved on 2026-10-19. The project lead coordinates three ind
 
 | Owner | Current work | Review / next gate |
 | --- | --- | --- |
-| Provisioning engineer | RC2a SQLite process death accepted at 80704bd; next owns PostgreSQL counterparts, then competing operators | Start after primary handoff; each native run needs a reviewed controller and exclusive database slot. |
-| Capacity engineer | Private bounded timing diagnostic for the unresolved 4,096-account timeout | Complete independent coverage/validator review before one native diagnostic attempt; keep observers and two-second deadline. |
-| Independent reviewer | RC2a source and SQLite evidence accepted | Review diagnostic corrections, native process-death source and remaining actual-service boundaries. |
-| Lead | Publish the reviewed process-death checkpoint and return primary | F3/P1 acceptance stays null; native interruption, concurrency, restore and protected delivery remain open. |
+| Provisioning engineer | RC2a accepted on SQLite and PostgreSQL; next RC2b1 identical competing requests | Resume source work after primary handoff. Prove loser-only cleanup, winner still held, and fresh immutable-receipt replay; each native run has an exclusive reviewed slot. |
+| Capacity engineer | Precompute fixed projection field metadata once per read | Retain every row/type/byte/deadline check. Exact source and negative controls need review before another native attempt. Capacity remains incomplete. |
+| Independent reviewer | Native RC2a and capacity v4 evidence accepted for their respective scopes | Review the next source changes, RC2b bounds and loser/winner ownership; capacity v4 remains one pass, one timeout and two unrun cases. |
+| Lead | Integrate and publish the reviewed native process-death checkpoint | Keep roadmap/backlog/issue status consistent. F3/P1 acceptance stays null; concurrency, restore, capacity and remaining writer gates stay open. |
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -50,10 +50,10 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** F1/F2 remain accepted at 2e0eeeab/e8cba52. F3 adds scoped RC2a SQLite process-death acceptance at 80704bd, following native RC1 at 7738aec6 and the Unicode optimization at 54844ac. Native capacity remains incomplete. [Current evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-process-death-checkpoint--2026-10-23). No ledger acceptance package is Verified.
+- **Contributor checkpoint:** F1/F2 remain accepted at 2e0eeeab/e8cba52. RC2a has four independently reviewed SQLite process-death cases at 80704bd and four PostgreSQL cases at 291ff467. Native capacity v4 at 1a0ab2c remains one pass, one timeout and two unrun cases. [Current evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-postgresql-process-death-checkpoint--2026-10-23). No ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Resolve native capacity and complete PostgreSQL process interruption, competing operators, owner/ACL restore and remaining actual-writer boundaries. RC1 recovery and RC2a SQLite process-death evidence are accepted as components. Only complete final P1 acceptance permits P2 entry.
-- **Current storage and consumers:** Two existing cloud checkouts are reused. The lead temporarily owns primary for process-death progress integration, then returns it for the PostgreSQL counterpart; secondary remains assigned to capacity diagnosis. PostgreSQL is stopped and requires an exclusive reviewed run grant. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
+- **Next evidence-producing milestone:** Resolve native capacity and complete competing operators, owner/ACL restore and remaining actual-writer boundaries. RC1 and both RC2a dialect components are accepted separately. Only complete final P1 acceptance permits P2 entry.
+- **Current storage and consumers:** Two existing cloud checkouts are reused. The lead integrates the native process-death checkpoint, then returns primary for competing-operator source work; secondary remains assigned to capacity. PostgreSQL is stopped and requires an exclusive reviewed run grant. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
@@ -1275,3 +1275,12 @@ The [delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-native-recovery-and-c
 retains prior failures and separates run sources from composition. F3/P1 stay
 In progress/null acceptance; P2 stays Not started. No paid resources or
 provider calls were added; both existing cloud checkouts remain in active use.
+
+### Native process-death and capacity handoffs — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Provisioning | Four actual PostgreSQL process-death cases at 291ff467 accepted after independent state, lock, child-exit and cleanup review; earlier SQLite cases stay separate. | RC2b1: identical competing initialize/provision requests, loser-only cleanup and fresh original-receipt replay. |
+| Capacity | Test-only empty-target observer 1a0ab2c accepted with 33 focused passes per interpreter. Ordinary v4 still has one pass, one timeout and two unrun cases. | One runtime change: hoist fixed field metadata once per read, preserving all row checks. Private JSON-key inlining was rejected after recursion-boundary differences. |
+| Independent reviewer | Accepted native RC2a and the honest failed-capacity evidence. RC2b review requires explicit cross-project coverage, numeric bounds and proof that loser cleanup preserves the held winner. | Review each frozen source and result; no source/controller acceptance substitutes for native execution. |
+| Lead | Composed accepted test changes at ddb8f278 and synchronized progress. F3/P1 and external gates remain open. | Publish the checkpoint, return primary and continue dependency-ready assignments. |

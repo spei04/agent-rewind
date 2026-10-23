@@ -1110,3 +1110,57 @@ acceptance; P2/#109 remains **Not started**. Matching protected PR/main/candidat
 checks are still required. The two existing cloud checkouts are reused; no
 new paid resources, provider calls, customer data or deployment were added.
 Task counts, estimates, dependencies and external gates are unchanged.
+
+## F3 PostgreSQL process-death checkpoint — 2026-10-23
+
+Source 291ff467 adds three test-only files. Integration ddb8f278 combines
+those files with the accepted observer change; the native execution remains
+bound to 291ff467 and production code and uv.lock are unchanged. **Four actual PostgreSQL
+process-death cases pass on Python 3.12 in 44.57s** in one execution. They
+cover initialize and provision immediately before physical COMMIT and after
+its actual return, before the service publishes a response or cleans up.
+The earlier four-case SQLite result at 80704bd and 25-case native RC1 result
+at 7738aec6 remain separate evidence.
+
+Each case binds the child PID and nonce to the actual backend identity,
+database, role and transaction phase. Before COMMIT, the backend holds the
+required exclusion locks; after COMMIT returns, it is idle with those locks
+released. SIGKILL, exit -9, reaping and channel EOF precede natural backend
+and lock disappearance. Administrative cleanup does not supply the recovery
+success condition. Fresh inspection then verifies the exact predecessor or
+expected committed state, original receipt, protected ciphertexts and zero
+application DDL/DML.
+
+The bounded controller also passed a process-only timeout control: it
+discovered a previously unclaimed adopted worker, killed and reaped it
+through owned pidfds, left an unrelated process alive and restored the prior
+subreaper setting. The earlier preparation and focused control correction
+are not extra native attempts. All source inputs remained unchanged; the
+database baseline was restored and the server stopped without cleanup errors.
+
+Capacity remains open. The completed additive diagnostic at 54844ac retained
+the original failure while passing its coverage checks; its nested timings
+are not a causal decomposition or an adjusted capacity result. Independently
+reviewed test-only source 1a0ab2c skips unused cell scanning when the transfer
+observer has no targets, after unchanged row/EOF accounting. All 33 focused
+controls pass on each interpreter, including existing text/bytes substitutions.
+
+The subsequent ordinary four-case attempt has **one pass, one timeout and
+two unrun cases**. Its control completes in 0.783569s with strict preservation.
+The 4,096-account case times out at 2.005614s after fetching all account/job
+rows and EOFs; its tuple delta is null and final strict preservation is
+unreached. This does not establish maximum capacity. No observer, deadline
+or assertion was removed, and no retry was performed.
+
+The provisioning engineer next owns competing-operator recovery. The capacity
+engineer now owns one scoped optimization: precompute fixed projection field
+metadata once per read, retaining every per-row validation and deadline check. Owner/ACL-preserving restore and the remaining actual-writer
+eligibility, arithmetic, identity, evolved replay, fault, bound and authority
+gates remain open. Pure helper tests and seeded reader fixtures do not satisfy
+writer gates.
+
+F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null
+acceptance; P2/#109 remains **Not started**. Final protected PR/main/candidate
+checks are still required. The two existing cloud checkouts are reused. No
+new paid resources, provider calls, customer data or deployment were added;
+task counts, estimates, dependencies and external gates are unchanged.
