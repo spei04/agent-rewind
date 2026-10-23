@@ -626,6 +626,8 @@ class RowTransferWatch:
                                 "rows": sum(row is not None for row in rows or []),
                             }
                         )
+                if not self.targets:
+                    return value
                 changed, substituted = False, []
                 for row in rows or []:
                     if row is None:
