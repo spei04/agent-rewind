@@ -4,7 +4,7 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2 is **Merged; checkpoint accepted** at e8cba52; [accepted evidence](#accepted-f2-reader-and-f3-handoff--2026-10-22) binds source ac3b0a31, exact PR/main attempts and verified candidate 12431486551. The lead explicitly started F3 on 2026-10-22 with the shared-check kernel first; F3 is **In progress** with null checkpoint acceptance. P2 #109 remains **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
-**Current component checkpoint — 2026-10-23:** I2 group1 has six accepted SQLite/Python 3.12 cases at 24c7c2dd: admitted queued-v2 initialization plus five exact eligibility refusals. [Scope, failure history and physical evidence](#f3-admitted-queue-eligibility-checkpoint--2026-10-23) distinguish the controlled admission adapter and unchanged original setup failure. Composition 06c6362b preserves the executed I2 files and published da1d157a restore/runtime files without domain reruns. The next primary cohort slice waits for checkpoint publication/handoff; secondary implements reviewed RC3b2 design V2 and offline controls. Remaining I2/I3, recovery and protected-delivery gates stay open; F3/P1 acceptance remains null.
+**Current component checkpoint — 2026-10-23:** Three I2 SQLite cohort cases are accepted at 802b24b0, separate from six eligibility cases at 24c7c2dd. [Exact branches, preservation and controller evidence](#f3-job-cohort-checkpoint--2026-10-23) record two line-149 omissions and one line-117 nonexistent job, with direct controller exit 0. This docs-only checkpoint preserves all executed source; unexecuted RC3b2 source is not merged. Primary's next manifest job-to-project binding source/offline work waits for publication/handoff. Secondary is at separate RC3b2 controller review; remaining I2/I3, recovery and protected delivery remain open and F3/P1 acceptance is null.
 
 ## Current P1 implementation sequence — 2026-10-22
 
@@ -1695,3 +1695,90 @@ aggregate #107 and parent #10 stay **In progress** with null acceptance;
 P2/#109 stays **Not started**. Counts, estimates, dependencies, budget and all
 external gates are unchanged. Both cloud checkouts are reused; this checkpoint
 adds no runtime change, provider call, paid resource, partner data or deployment.
+
+## F3 job-cohort checkpoint — 2026-10-23
+
+The first actual I2 cohort selection is independently accepted at
+**802b24b0bae1cc1c0d2eee1fd2b420388bfbf63c**: **three SQLite/Python 3.12
+cases pass in 7.55s**. This component reuses the accepted admitted predecessor
+and physical observer without changing or rerunning the six eligibility cases
+at 24c7c2dd. This checkpoint changes only the four progress documents; no
+unexecuted RC3b2 source is merged.
+
+| Record | Retained identity / result |
+| --- | --- |
+| Source / peer | ca6e1e69 / e0fab4bc; four additive files, 36 offline controls |
+| Controller / peer | c17606cd / a6cb25cb; fixed three-node selection, three new count/profile controls |
+| Actual result / peer | 11ebb1dc / b526a603; three passes, no failures, unrun or unreported slots |
+| Release / lead acceptance | 9bf7bd1c / bc87a40d; exact source, owned cleanup and collected controller exit 0 |
+
+These shortened identities name owner-only records, not downloadable private
+artifacts. The result index binds **187 files** and all **516 source inputs**.
+Thirty-six source controls and three selection/count controls remain separate
+from the actual service cases; unchanged older controls were reused by exact
+source bindings.
+
+| Case | Original delegated preparation refusal |
+| --- | --- |
+| Omit the admitted zero-reserved job account | Line 149: complete actual job set differs from requested assignments |
+| Omit one reserved legacy job account | Line 149: the exact selected legacy job is absent from assignments |
+| Add a nonexistent requested job | Line 117: requested job is absent, with an actual existing project and valid manifest syntax |
+
+Each case changes exactly one requested account while preserving all actual
+source jobs, the valid refreshed fingerprint, organization/project opening
+caps and opening destinations. A remaining job account keeps each requested
+project parser-valid. The new nonexistent account has a unique sorted ID and
+matching job_id/scope_id. The zero-reserved omission leaves money totals
+unchanged, so a totals-only check cannot stand in for complete membership.
+
+The observer delegates the original preparation once and retains its original
+exception identity, full actual job/scope/current-account state, manifest,
+raw/work/engine identity and traceback. Omission frames contain the exact
+assignments; the absent-job frame contains the specific account and job=None.
+Earlier parser, project, compatibility or eligibility failure cannot receive
+cohort credit. All three return ledger_history_unsupported at their exact
+149/149/117 sites.
+
+Three watched initialize commands reconcile **8769 physical events** and
+**24318 authorizer entries**. Each has actual BEGIN EXCLUSIVE, acknowledged
+service rollback, no application writer DDL/DML and a clean QueuePool return
+before harness disposal. Subsequent harness raw closure is recorded separately;
+bootstrap no-op rollback is not credited as the service outcome. Full
+predecessor/schema/source rows, **all 21 ciphertexts per case** and admission
+journal bytes/hashes remain unchanged. Setup and inspection sessions are
+separate from the three-command accounting.
+
+The pytest child returned 0 and was reaped. The attached direct parent also
+waited for and reaped the controller with **exit code 0**, preserving that wait
+result; controller, child and launcher PIDs were later absent. Controller
+elapsed was **9.508s**, parent elapsed **9.608s**. Release records no cleanup
+errors, no remaining owned descendants and 516 unchanged inputs. Child 390s,
+work 430s, cleanup 50s and outer 480s watchdogs are unchanged and do not alter
+product deadlines.
+
+The admitted fixture still uses its explicit synthetic policy/readiness/schema
+adapter solely for setup; actual associations, encrypted publication and ledger
+initialization are exercised. No activation or PostgreSQL claim follows.
+The original eligibility setup failure at 23bd616f remains zero passed/one
+failed/five unrun, with unknown actual compatibility verdict; its 94 indexed
+files were verified unchanged. The accepted six-case correction, prior restore
+and contention results, controller-preparation corrections and all dated
+capacity failures retain their separate identities.
+
+After checkpoint publication and explicit handoff, primary's next source/offline
+slice is manifest job-to-project binding. Static prerequisite note 52cc5759
+requires a second genuine project and the complete parser-valid project account
+and opening support, while retaining the existing job/scope/artifact associations.
+The intended line-117 proof must have the job present and its actual project
+different from the requested project; the same-line absent-job proof above does
+not establish that operand. The note is not an actual execution grant.
+Persisted graph/association/native-money cases, I3 and PostgreSQL stay separate.
+
+Secondary is at RC3b2 controller review; no interrupted-restore native result
+is included in this checkpoint. Remaining writer, recovery and protected delivery
+stay open. Capacity retains 1.976373s/about 24ms headroom in one eb2cbc4 run,
+without repeatability proof. F3/P1/#108, aggregate #107 and parent #10 remain
+**In progress** with null acceptance; P2/#109 remains **Not started**. Counts,
+estimates, dependencies, budget and external gates are unchanged. Two existing
+cloud checkouts/environments are reused. No provider call, paid resource,
+partner data, runtime change or deployment was added.
