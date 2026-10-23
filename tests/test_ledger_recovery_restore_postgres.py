@@ -19,6 +19,7 @@ from ledger_restore_postgres_fixture import (
     save,
     tool_configuration,
 )
+from ledger_restore_receipts import assert_original_receipt
 from ledger_restore_tools import run_tool, tool_command, tool_environment
 from ledger_service_fixture import invoke_postgres
 from legacy_fixture import FIXTURE_ROOT
@@ -81,7 +82,7 @@ def replay_original(fixture, pg, manifest, original, monkeypatch, record_propert
                 json.dumps(assert_no_writes(watch, counters, units, committed=True)),
             )
     recovered, _ = fresh_reentry(fixture, pg, manifest, monkeypatch, record_property)
-    assert recovered == original
+    assert_original_receipt(recovered, original, record_property)
 
 
 @pytest.mark.parametrize("stage", ["s0", "s2"])
