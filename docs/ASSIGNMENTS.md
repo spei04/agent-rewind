@@ -2,14 +2,28 @@
 
 Execution backlog approved on 2026-10-19. The project lead coordinates three independent contributor slots, reviews each delivery, integrates tested changes, then assigns dependency-ready work to the free slot. These are logical contributor roles, not six confirmed full-time hires; the prior staffing/calendar scenario remains unconfirmed. Task-specific external funding, data, customer and release gates still apply.
 
+## Execution location — 2026-10-23
+
+All Agent Rewind checkouts, dependencies, builds, test execution, datasets,
+media, logs, run outputs and private evidence stay in the existing
+`studio-agent` cloud workspace or existing hosted CI. The Mac is an SSH
+control channel only: no project cloning, installation, builds, research,
+artifact downloads or media staging there. Reuse the two existing cloud
+checkouts and their independent environments. Preserve retained evidence and
+active writers; do not delete other teams' files or touch the separate local
+computer-use project. This rule adds no capacity purchase, budget, provider,
+partner-data or production authorization.
+
 ## Current assignments — 2026-10-23
 
-| Owner | Current work | Review / next gate |
-| --- | --- | --- |
-| Provisioning engineer | RC2a accepted on SQLite and PostgreSQL; next RC2b1 identical competing requests | Resume source work after primary handoff. Prove loser-only cleanup, winner still held, and fresh immutable-receipt replay; each native run has an exclusive reviewed slot. |
-| Capacity engineer | Precompute fixed projection field metadata once per read | Retain every row/type/byte/deadline check. Exact source and negative controls need review before another native attempt. Capacity remains incomplete. |
-| Independent reviewer | Native RC2a and capacity v4 evidence accepted for their respective scopes | Review the next source changes, RC2b bounds and loser/winner ownership; capacity v4 remains one pass, one timeout and two unrun cases. |
-| Lead | Integrate and publish the reviewed native process-death checkpoint | Keep roadmap/backlog/issue status consistent. F3/P1 acceptance stays null; concurrency, restore, capacity and remaining writer gates stay open. |
+| Active owner | Cloud path on studio-agent | Current work / next acceptance gate | Concrete blocker |
+| --- | --- | --- | --- |
+| Provisioning engineer | `/home/serenapei/experiments/agent-rewind` | PostgreSQL RC2b1 source351c1c66 and 47 offline controls are reviewed. Correct the frozen controller cleanup, obtain independent review and an exclusive database grant, then validate actual contention. | Controller review found that exhausted cleanup can skip owned-child signals/reaping. Correction pending; native execution has not started. |
+| Restore engineer | `/home/serenapei/experiments/agent-rewind-worktrees/engineer-c` | Corrected RC3a source and 154 controls per interpreter are reviewed. Freeze the S0/S2 restore controller, review its process cleanup and obtain the exclusive grant before native backup/restore. | None reported; native execution has not started. |
+| Independent reviewer | `/home/serenapei/experiments/agent-rewind-evidence/review-records` | Review the contention controller correction and the restore controller freeze, then independently audit native outcomes. Source acceptance does not establish PostgreSQL contention or successful restore. | Contention cleanup correction under review; restore controller preparation continues. |
+| Lead | `/home/serenapei/experiments/agent-rewind-evidence/continuation-records` | Publish this checkpoint, serialize database ownership and integrate accepted components. Preserve F3/P1 null acceptance and final two-interpreter delivery gates. | No external blocker; acceptance evidence remains incomplete. |
+
+The latest ordinary capacity attempt at eb2cbc4 passes all four seeded-reader cases. The maximum took **1.976373s**, leaving about **24ms in one run**; repeatability and broader performance remain unproved. The dated v4 failure remains in the history below. [Capacity evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23) and [SQLite contention evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23) retain their distinct scopes.
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
@@ -50,10 +64,10 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** F1/F2 remain accepted at 2e0eeeab/e8cba52. RC2a has four independently reviewed SQLite process-death cases at 80704bd and four PostgreSQL cases at 291ff467. Native capacity v4 at 1a0ab2c remains one pass, one timeout and two unrun cases. [Current evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-postgresql-process-death-checkpoint--2026-10-23). No ledger acceptance package is Verified.
+- **Contributor checkpoint:** F1/F2 remain accepted at 2e0eeeab/e8cba52. RC2a has four independently reviewed process-death cases on each dialect. Capacity v5 at eb2cbc4 passes all four ordinary seeded-reader cases; its 1.976373s maximum leaves about 24ms in one execution, without a repeatability claim. SQLite RC2b1 at f4ba97c9 has two accepted real contention cases and 22 separate protocol controls. [Current evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23). Earlier v4 failure evidence is retained; no ledger acceptance package is Verified.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Resolve native capacity and complete competing operators, owner/ACL restore and remaining actual-writer boundaries. RC1 and both RC2a dialect components are accepted separately. Only complete final P1 acceptance permits P2 entry.
-- **Current storage and consumers:** Two existing cloud checkouts are reused. The lead integrates the native process-death checkpoint, then returns primary for competing-operator source work; secondary remains assigned to capacity. PostgreSQL is stopped and requires an exclusive reviewed run grant. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
+- **Next evidence-producing milestone:** Complete PostgreSQL contention, owner/ACL restore and remaining actual-writer boundaries, then matching protected delivery with capacity repeatability still an open risk. RC1, both RC2a dialect components, one seeded-reader capacity attempt and SQLite RC2b1 are accepted separately. Only complete final P1 acceptance permits P2 entry.
+- **Current storage and consumers:** Two existing cloud checkouts are reused. Primary is assigned to PostgreSQL competing-command source work; secondary is assigned to restore source and offline controls. PostgreSQL is stopped and requires an exclusive reviewed run grant. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
 - **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
