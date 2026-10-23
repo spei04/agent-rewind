@@ -1284,3 +1284,16 @@ provider calls were added; both existing cloud checkouts remain in active use.
 | Capacity | Test-only empty-target observer 1a0ab2c accepted with 33 focused passes per interpreter. Ordinary v4 still has one pass, one timeout and two unrun cases. | One runtime change: hoist fixed field metadata once per read, preserving all row checks. Private JSON-key inlining was rejected after recursion-boundary differences. |
 | Independent reviewer | Accepted native RC2a and the honest failed-capacity evidence. RC2b review requires explicit cross-project coverage, numeric bounds and proof that loser cleanup preserves the held winner. | Review each frozen source and result; no source/controller acceptance substitutes for native execution. |
 | Lead | Composed accepted test changes at ddb8f278 and synchronized progress. F3/P1 and external gates remain open. | Publish the checkpoint, return primary and continue dependency-ready assignments. |
+
+### Seeded reader capacity and restore handoff — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Capacity | Projection metadata hoist eb2cbc4 has 281 focused passes per interpreter; one ordinary PostgreSQL attempt passes all four seeded-reader cases. Maximum-account headroom is about 24ms, so repeatability remains a delivery risk. | RC3: owner/ACL-preserving backup/restore, starting with a bounded independently reviewable slice after integration. |
+| Provisioning | RC2a remains accepted for its SQLite and PostgreSQL process-death components. | RC2b1: real identical competing initialize/provision commands, loser-only cleanup, held-winner proof and fresh original-receipt replay. |
+| Independent reviewer | Reviews frozen source, native receipts, preservation and stopped release separately. | Audit competing-command and restore controls before their execution; preserve the distinction between component and delivery acceptance. |
+| Lead | Integrates the accepted metadata change, updates progress and keeps both checkouts assigned. | Publish consistent evidence and continue prerequisite-ready assignments; F3/P1 acceptance stays null. |
+
+[Exact results and remaining limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23)
+retain all failed attempts. No deadline, observer, task count, estimate,
+dependency or external gate changed.

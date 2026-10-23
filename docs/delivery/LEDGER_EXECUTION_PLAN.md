@@ -1164,3 +1164,48 @@ acceptance; P2/#109 remains **Not started**. Final protected PR/main/candidate
 checks are still required. The two existing cloud checkouts are reused. No
 new paid resources, provider calls, customer data or deployment were added;
 task counts, estimates, dependencies and external gates are unchanged.
+
+## F3 seeded reader capacity checkpoint — 2026-10-23
+
+Source eb2cbc4 hoists fixed projection field metadata once per read, while
+retaining every row validation, query and deadline check. All 281 focused
+controls pass on each supported Python version. Of these, 249 exercise the
+actual projection reader; the same 249 also pass against the exact parent
+implementation. Whole-project lint, formatting, type and contract checks
+pass. This is the only production change in this capacity continuation.
+
+One ordinary PostgreSQL attempt on Python 3.12 passes all four cases with the
+original two-second deadline, observers and preservation assertions:
+
+| Case | Whole wrapper elapsed | Result |
+| --- | --- | --- |
+| 319-account control | 0.828335s | migration_only; full preservation passes. |
+| 4,096-account maximum | 1.976373s | migration_only; full preservation passes. |
+| 16 MiB cursor | 1.092626s | migration_only; full preservation passes. |
+| Cursor one byte over | 0.517268s | schema_incompatible; no history or projection body fetches; full preservation passes. |
+
+All four record empty tuple-write deltas, exact protected state and ciphertext
+preservation, transaction rollback and physical connection closure. The source
+inputs remain unchanged; the controller reaps its children, restores the exact
+database/role baseline and stops PostgreSQL without cleanup errors. Independent
+review binds the result to this source and controller. Earlier failed attempts
+remain retained and are not converted into passing evidence.
+
+The maximum passes with only about **24ms of headroom**. This is one execution,
+not a repeatability, throughput or general performance result. The cursor
+positive uses trailing padding; it does not cover every legal whitespace
+distribution. These are seeded reader fixtures, not service-created maximum
+history, simultaneous maximum dimensions or actual writer capacity. Matching
+Python 3.11/3.12 protected PR/main/candidate delivery is still required.
+
+The provisioning engineer owns RC2b1 identical competing commands in primary.
+The capacity engineer moves to RC3 owner/ACL-preserving restore preparation
+after handing secondary to the lead for integration. The independent reviewer
+continues source and evidence review. Remaining actual-service eligibility,
+arithmetic, identity, evolved replay, fault, bound and authority gates retain
+their criteria; this component does not close F3 or P1.
+
+F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null
+acceptance; P2/#109 remains **Not started**. Both existing cloud checkouts are
+reused. No provider calls, paid resources, customer data or deployment were
+added; task counts, estimates, dependencies and external gates are unchanged.
