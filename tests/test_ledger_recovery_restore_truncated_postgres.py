@@ -15,6 +15,7 @@ from ledger_restore_postgres_fixture import (
     save,
     tool_configuration,
 )
+from ledger_restore_tool_ownership import restore_tool_ownership
 from ledger_restore_tools import run_tool, tool_command, tool_environment
 from ledger_restore_truncation import (
     assert_archive_pair,
@@ -32,7 +33,14 @@ from test_ledger_recovery_restore_postgres import (
 from test_ledger_service_postgres import observe_service
 from test_run_projection_postgres import drain
 
-__all__ = ["controlled_database_name", "legacy", "observed_reader", "pg", "pytestmark"]
+__all__ = [
+    "controlled_database_name",
+    "legacy",
+    "observed_reader",
+    "pg",
+    "pytestmark",
+    "restore_tool_ownership",
+]
 
 
 def test_truncated_custom_archive_leaves_empty_target(
