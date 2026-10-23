@@ -4,7 +4,7 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2 is **Merged; checkpoint accepted** at e8cba52; [accepted evidence](#accepted-f2-reader-and-f3-handoff--2026-10-22) binds source ac3b0a31, exact PR/main attempts and verified candidate 12431486551. The lead explicitly started F3 on 2026-10-22 with the shared-check kernel first; F3 is **In progress** with null checkpoint acceptance. P2 #109 remains **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
-**Current component checkpoint — 2026-10-23:** RC3b1 now has one accepted native truncated-archive negative at 52d289e5: exact EOF/exit 1, unchanged empty target/source, 18 ciphertexts and four terminal tool handles. [Scope, provenance and next design prerequisite](#f3-truncated-archive-recovery-checkpoint--2026-10-23) retain prior S0/S2 positives, failed attempts and both dialects of accepted distinct-intent collisions. Primary owns the active narrow I2 admitted queued-v2 positive/queued-running eligibility slice. Secondary composes this checkpoint before RC3b2 observation/timeout design; no interrupted-restore implementation follows automatically. Remaining writer/restore/protected-delivery gates stay open and F3/P1 acceptance remains null.
+**Current component checkpoint — 2026-10-23:** I2 group1 has six accepted SQLite/Python 3.12 cases at 24c7c2dd: admitted queued-v2 initialization plus five exact eligibility refusals. [Scope, failure history and physical evidence](#f3-admitted-queue-eligibility-checkpoint--2026-10-23) distinguish the controlled admission adapter and unchanged original setup failure. Composition 06c6362b preserves the executed I2 files and published da1d157a restore/runtime files without domain reruns. The next primary cohort slice waits for checkpoint publication/handoff; secondary implements reviewed RC3b2 design V2 and offline controls. Remaining I2/I3, recovery and protected-delivery gates stay open; F3/P1 acceptance remains null.
 
 ## Current P1 implementation sequence — 2026-10-22
 
@@ -1598,3 +1598,100 @@ aggregate #107 and parent #10 stay **In progress** with null acceptance; P2/#109
 stays **Not started**. Counts, estimates, dependencies, budget and all external
 gates are unchanged. No provider calls, paid resources, customer data or deployment
 were added.
+
+## F3 admitted-queue eligibility checkpoint — 2026-10-23
+
+I2 group1 is independently accepted at executed source
+**24c7c2dd5ba568b4684dcb79ab8af5bf9a0c21b1**. Six actual SQLite cases on
+Python 3.12 pass in **15.46s**. Ordinary merge **06c6362b** composes that source
+with published **da1d157a**; it does not rename the tested source or constitute
+a new domain run. The four I2 files retain exact 24c7c2dd bytes; the eight
+accepted restore files and all runtime/dependency files retain da1d157a bytes.
+
+| Record | Retained identity / result |
+| --- | --- |
+| Original source / failed attempt | 23bd616f / a5b3d955; zero passed, first setup failed, five unrun |
+| Fixture correction / peer | 4cf89dfc / 8d88e516; committed as 24c7c2dd |
+| Corrected controller / peer | dcc7e094 / e94e6755; unchanged six nodes and lifecycle |
+| Corrected result / peer | 6ff07cb6 / 003227f8; six passed, no failed or unrun cases |
+| Release / lead acceptance | 75ab7599 / 82b2ea94; owned subtree finalized and 505 source inputs unchanged |
+
+These shortened hashes identify retained private records, not public artifact
+downloads. The result index covers 287 files; all 94 files in the original
+failed-attempt index remain unchanged.
+
+The fixture performs real AdmissionCoordinator submission, encrypted artifact
+publication and persisted Operation/configuration/job associations. Its explicit
+synthetic policy/readiness/schema adapter is limited to admission setup. Before
+that override, each corrected case records and requires the actual
+migration-only compatibility verdict. The existing mapped maintainer is reused;
+no ownership membership is inserted. Actual connection foreign_keys=1 is
+observed, and the dedicated admission engine returns all checkouts and is
+disposed before ledger initialization. This is controlled migration evidence,
+with no product activation or PostgreSQL coverage claim.
+
+The positive preserves the admitted queued-v2 job with zero reservation and no
+owner/lease. Actual predecessor SQL supplies the complete four-job cohort,
+refreshed source fingerprint, organization/project caps and opening totals.
+The committed receipt imports **4 jobs**, creates **6 accounts** and records
+**245000 opening microusd**. Complete account/cursor/progress state, the original
+job fields, associations and original/admitted ciphertexts are checked.
+
+| Case | Actual service outcome |
+| --- | --- |
+| Admitted queued-v2 | Initialization succeeds; physical COMMIT acknowledgment and exact receipt/state retained |
+| Running | Target job rejected at the actual eligibility Raise |
+| Queued owner | Only the owner cell is changed; same eligibility Raise |
+| Queued lease | Only the lease marker is changed; same eligibility Raise |
+| Queued reservation | Only the reservation is changed; same eligibility Raise |
+| Queued-v1 | Separately observed valid terminal-v1 predecessor changes status alone; admitted-v2 associations remain unchanged |
+
+All five refusals preserve the original ledger_history_unsupported exception
+at ledger_provisioning.py line 161, its actual job/assignment/frame and the
+delegated preparation context. Earlier association, cohort or compatibility
+refusals cannot satisfy this oracle. Each negative retains zero application
+DDL/DML, acknowledged physical rollback and exact predecessor/ciphertext
+preservation. The refreshed fingerprint is independently supplied; these
+refusals do not claim the later service fingerprint check executed.
+
+Six observed initialize commands reconcile **21491 physical events** and
+**67568 authorizer entries**. Actual BEGIN EXCLUSIVE, one service COMMIT and
+five service ROLLBACK outcomes are distinguished from bootstrap no-op rollback.
+Clean QueuePool returns occur before caller harness disposal; later raw closes
+are not credited to the service. Setup/inspection connections are separate
+from the six-command accounting.
+
+The pytest child returned 0 and was reaped. The controller records success,
+release and **17.824s** elapsed; both controller and child PIDs were subsequently
+absent. The detached launcher did not independently collect the controller's
+OS wait status. No cleanup errors, leftover descendants or source changes are
+recorded. Watchdogs remain child 390s, work 430s, cleanup 50s, outer 480s; these
+are test limits and do not alter LedgerWork deadlines.
+
+The original run failed at a fixture compatibility equality assertion before
+admission submission or watched initialization. Its actual compatibility
+verdict was not retained and remains unknown. Static diagnosis identified an
+extra fixture membership inconsistent with the immutable adoption mapping;
+the corrected fixture instead attests the existing maintainer and uses an
+FK-enabled admission engine. The strict migration-only assertion and runtime
+remain unchanged. Forty-one original controls, fifteen correction controls and
+eight accounting controls retain their separate evidence; unchanged controls
+and domain cases were not rerun solely for composition.
+
+After checkpoint review/publication and explicit primary handoff, the next
+small I2 group will omit the zero-reserved job account, omit one reserved
+legacy job account, and add one syntactically valid nonexistent job. It must
+preserve the actual source jobs, valid fingerprint and parser-valid project
+coverage, while proving the exact delegated cohort/missing-job branch.
+Prerequisite routing b67d6a3e and peer 9e0d1746 add no task, estimate or acceptance.
+Other binding/association/native-money groups and I3 remain separate.
+
+Secondary continues reviewed RC3b2 design V2 and offline source preparation;
+no interrupted-restore native result is included here. Accepted S0/S2, RC3b1
+EOF-negative, both contention dialects and all dated failures retain their
+original provenance. Capacity remains one four-case attempt at eb2cbc4 with
+maximum 1.976373s/about 24ms headroom, without repeatability proof. F3/P1/#108,
+aggregate #107 and parent #10 stay **In progress** with null acceptance;
+P2/#109 stays **Not started**. Counts, estimates, dependencies, budget and all
+external gates are unchanged. Both cloud checkouts are reused; this checkpoint
+adds no runtime change, provider call, paid resource, partner data or deployment.
