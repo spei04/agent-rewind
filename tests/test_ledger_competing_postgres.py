@@ -128,7 +128,9 @@ def assert_held(message, *, winner):
     constraints = [
         i
         for i, (_, kind, actual_raw, sql) in enumerate(events)
-        if kind == "sql-return" and actual_raw == raw and sql == "SET CONSTRAINTS ALL IMMEDIATE"
+        if kind == "sql-return"
+        and actual_raw == raw
+        and sql.strip() == "SET CONSTRAINTS ALL IMMEDIATE"
     ]
     assert len(constraints) == 1 and classified[1] <= constraints[0] < marker[0][2]
     assert observed["xids"] and {row[0] for row in observed["xids"]} == {raw}
