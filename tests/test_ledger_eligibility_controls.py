@@ -384,3 +384,174 @@ def test_refusal_oracle_rejects_earlier_or_wrong_job_and_physical_outcome(change
         watch.markers[1], watch.markers[2] = watch.markers[2], watch.markers[1]
     with pytest.raises(AssertionError):
         assert_eligibility_refusal(entry, stages, error, watch, target_job=target)
+
+
+def mapped_fixture():
+    fixture, _, principal, _, _ = example()
+    grant = {"principal_id": principal, "role": "maintainer", "legacy_default": True}
+    fixture.case.adoption["mapping"] = json.dumps({"principal_grants": [grant]})
+    fixture.before["tables"]["project_memberships"] = table(
+        [
+            {
+                "project_id": fixture.project,
+                "principal_id": principal,
+                "role": "maintainer",
+                "revoked_at": None,
+                "legacy_default": 1,
+            }
+        ]
+    )
+    return fixture, grant
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "valid",
+        "extra-member",
+        "wrong-project",
+        "wrong-role",
+        "revoked",
+        "wrong-principal",
+        "invalid-principal",
+        "not-default",
+        "extra-grant",
+    ],
+)
+def test_existing_admission_principal_requires_exact_immutable_membership(change):
+    from ledger_eligibility_fixture import existing_admission_principal
+
+    fixture, grant = mapped_fixture()
+    before = deepcopy(fixture.before)
+    if change == "extra-member":
+        fixture.before["tables"]["project_memberships"]["rows"] *= 2
+    elif change == "wrong-project":
+        replace_cell(fixture.before, "project_memberships", 0, "project_id", identity(99))
+    elif change == "wrong-role":
+        replace_cell(fixture.before, "project_memberships", 0, "role", "operator")
+    elif change == "revoked":
+        replace_cell(fixture.before, "project_memberships", 0, "revoked_at", "2026-01-01")
+    elif change == "wrong-principal":
+        replace_cell(fixture.before, "project_memberships", 0, "principal_id", "oidc:" + "b" * 64)
+    elif change == "invalid-principal":
+        grant["principal_id"] = "oidc:invalid"
+        fixture.case.adoption["mapping"] = {"principal_grants": [grant]}
+        replace_cell(
+            fixture.before, "project_memberships", 0, "principal_id", grant["principal_id"]
+        )
+    elif change == "not-default":
+        grant["legacy_default"] = False
+        fixture.case.adoption["mapping"] = {"principal_grants": [grant]}
+    elif change == "extra-grant":
+        fixture.case.adoption["mapping"] = {"principal_grants": [grant, grant]}
+    if change == "valid":
+        principal, binding = existing_admission_principal(fixture)
+        assert principal.principal_id == grant["principal_id"]
+        assert binding["mapping_grant"] == grant
+        assert fixture.before == before
+    else:
+        from agent_rewind.request_identity import IdentityInvalid
+
+        with pytest.raises((AssertionError, ValueError, IdentityInvalid)):
+            existing_admission_principal(fixture)
+
+
+@pytest.mark.parametrize(
+    "status,code",
+    [
+        ("incompatible", "migration_only"),
+        ("ready", "ready"),
+        ("incompatible", "schema_incompatible"),
+        ("unavailable", "schema_unavailable"),
+    ],
+)
+def test_predecessor_compatibility_records_complete_verdict_before_strict_assertion(status, code):
+    from ledger_eligibility_fixture import predecessor_compatibility
+
+    from agent_rewind.migrations.compatibility import CompatibilityResult
+
+    observed = CompatibilityResult(status, code)
+    calls, records = [], []
+
+    def delegate():
+        calls.append("actual-delegate")
+        return observed
+
+    service = SimpleNamespace(schema_compatibility=delegate)
+    if code == "migration_only":
+        assert predecessor_compatibility(service, lambda *row: records.append(row)) is observed
+    else:
+        with pytest.raises(AssertionError) as failed:
+            predecessor_compatibility(service, lambda *row: records.append(row))
+        assert failed.value.args == (observed,)
+    assert calls == ["actual-delegate"]
+    assert records == [
+        (
+            "predecessor_compatibility",
+            {
+                "status": status,
+                "code": code,
+                "installation_key": None,
+            },
+        )
+    ]
+
+
+def test_admission_engine_registers_foreign_keys_before_any_checkout(monkeypatch):
+    import ledger_eligibility_fixture as adapter
+
+    calls, callbacks = [], []
+    engine = SimpleNamespace()
+    fixture = SimpleNamespace(
+        case=SimpleNamespace(engine=SimpleNamespace(url="sqlite:///existing"))
+    )
+
+    def create(url):
+        calls.append(("create", url))
+        return engine
+
+    def listens_for(target, event_name):
+        assert target is engine and event_name == "connect"
+        calls.append(("register", event_name))
+
+        def register(callback):
+            callbacks.append(callback)
+            return callback
+
+        return register
+
+    monkeypatch.setattr(adapter, "create_engine", create)
+    monkeypatch.setattr(adapter.event, "listens_for", listens_for)
+    assert adapter.admission_engine(fixture) is engine
+    assert calls == [("create", fixture.case.engine.url), ("register", "connect")]
+    for number in range(2):
+        raw = SimpleNamespace(
+            execute=lambda statement, selected=number: calls.append((selected, statement))
+        )
+        callbacks[0](raw, object())
+    assert calls[-2:] == [(0, "PRAGMA foreign_keys=ON"), (1, "PRAGMA foreign_keys=ON")]
+
+
+def test_admission_setup_disposes_its_engine_and_preserves_original_failure(monkeypatch):
+    import ledger_eligibility_fixture as adapter
+    from test_admission_configuration import configuration
+
+    events = []
+    fixture = SimpleNamespace(close=lambda: events.append("predecessor-disposed"))
+    engine = SimpleNamespace(
+        pool=SimpleNamespace(checkedout=lambda: 0),
+        dispose=lambda: events.append("admission-disposed"),
+    )
+    original = KeyboardInterrupt("controlled setup interruption")
+
+    def refuse(_fixture):
+        raise original
+
+    monkeypatch.setattr(adapter, "build_case", lambda path: fixture)
+    monkeypatch.setattr(adapter, "admission_engine", lambda value: engine)
+    monkeypatch.setattr(adapter, "existing_admission_principal", refuse)
+    monkeypatch.setattr(adapter, "configuration", configuration)
+    with pytest.raises(KeyboardInterrupt) as failed:
+        adapter.admitted_predecessor("no-database", monkeypatch, lambda *args: None)
+    assert failed.value is original
+    assert events == ["predecessor-disposed", "admission-disposed"]

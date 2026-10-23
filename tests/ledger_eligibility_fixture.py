@@ -9,14 +9,13 @@ from types import SimpleNamespace
 from ledger_provisioning_fixture import (
     build_case,
     ciphertexts,
-    identity,
     initial_manifest,
     reader,
     snapshot,
     source_fingerprint,
     source_rows,
 )
-from sqlalchemy import text
+from sqlalchemy import create_engine, event, text
 from test_admission_configuration import configuration
 from test_admission_request import submission
 from test_admission_submit import Policy, Ready, Storage
@@ -135,22 +134,66 @@ def assert_admitted(state, accepted, *, project, principal, config_digest, budge
     }
 
 
-def admitted_predecessor(path, monkeypatch):
+def existing_admission_principal(fixture):
+    mapping = fixture.case.adoption["mapping"]
+    if isinstance(mapping, str):
+        mapping = json.loads(mapping)
+    (grant,) = mapping["principal_grants"]
+    (member,) = rows(fixture.before, "project_memberships")
+    assert grant["role"] == "maintainer" and grant["legacy_default"] is True
+    assert member == {
+        "project_id": fixture.project,
+        "principal_id": grant["principal_id"],
+        "role": grant["role"],
+        "revoked_at": None,
+        "legacy_default": 1,
+    }
+    principal = VerifiedPrincipal(grant["principal_id"])
+    return principal, {"mapping_grant": grant, "persisted_membership": member}
+
+
+def admission_engine(fixture):
+    """Fixture-only connection configuration; no ledger-operator factory change."""
+    engine = create_engine(fixture.case.engine.url)
+
+    @event.listens_for(engine, "connect")
+    def foreign_keys(raw, _record):
+        raw.execute("PRAGMA foreign_keys=ON")
+
+    return engine
+
+
+def predecessor_compatibility(service, record):
+    result = service.schema_compatibility()
+    record("predecessor_compatibility", asdict(result))
+    assert result == CompatibilityResult("incompatible", "migration_only"), result
+    return result
+
+
+def admitted_predecessor(path, monkeypatch, record):
     # The accepted builder's three-legacy-job assertions remain unchanged.
     fixture = build_case(path)
+    engine = None
     try:
-        f = SimpleNamespace(engine=fixture.case.engine, config=configuration())
-        f.principal = VerifiedPrincipal("oidc:" + identity(9001) * 2)
-        with f.engine.begin() as connection:
-            connection.execute(
-                text("INSERT INTO project_memberships VALUES(:p,:id,'operator',NULL,false)"),
-                {"p": fixture.project, "id": f.principal.principal_id},
+        engine = admission_engine(fixture)
+        f = SimpleNamespace(engine=engine, config=configuration())
+        f.principal, authority_binding = existing_admission_principal(fixture)
+        record("predecessor_authority_binding", authority_binding)
+        with f.engine.connect() as connection:
+            foreign_keys = connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one()
+            record(
+                "admission_connection_prerequisite",
+                {
+                    "foreign_keys": foreign_keys,
+                    "raw_id": id(connection.connection.driver_connection),
+                },
             )
+            assert foreign_keys == 1
             f.name = connection.execute(
                 text("SELECT name FROM projects WHERE id=:p"), {"p": fixture.project}
             ).scalar_one()
         f.authority = RequestAuthority(f.engine)
-        f.context = f.authority.named(f.principal, fixture.project).context
+        f.context = f.authority.named(f.principal, fixture.project, action="record").context
         f.intent = parse_submit(canonical(submission()))
         f.root = fixture.case.path.parent / "admission-journal"
         objects = fixture.case.path.parent / "admission-objects"
@@ -167,8 +210,7 @@ def admitted_predecessor(path, monkeypatch):
             storage=f.storage,
             journal=f.journal,
         )
-        compatibility = f.service.schema_compatibility()
-        assert compatibility == CompatibilityResult("incompatible", "migration_only")
+        compatibility = predecessor_compatibility(f.service, record)
         # Only predecessor admission uses the established synthetic readiness
         # adapter. Ledger initialization receives no compatibility override.
         with monkeypatch.context() as patch:
@@ -193,10 +235,23 @@ def admitted_predecessor(path, monkeypatch):
             budget=f.intent.budget_microusd,
         )
         assert len(result.jobs) == len(fixture.jobs) + 1
+        assert (
+            result.before["tables"]["project_memberships"]
+            == fixture.before["tables"]["project_memberships"]
+        )
         assert [
             row for row in rows(result.before, "jobs") if row["id"] != accepted["job_id"]
         ] == rows(fixture.before, "jobs")
         assert ciphertexts(result.case) == fixture.encrypted
+        assert engine is not fixture.case.engine and engine.pool.checkedout() == 0
+        record(
+            "admission_engine_return",
+            {
+                "admission_engine_id": id(engine),
+                "predecessor_engine_id": id(fixture.case.engine),
+                "checkedout": engine.pool.checkedout(),
+            },
+        )
         return result, SimpleNamespace(
             accepted=accepted,
             association=association,
@@ -213,6 +268,9 @@ def admitted_predecessor(path, monkeypatch):
     except BaseException:
         fixture.close()
         raise
+    finally:
+        if engine is not None:
+            engine.dispose()
 
 
 def assert_single_cell_change(before, after, job_id, field, value):

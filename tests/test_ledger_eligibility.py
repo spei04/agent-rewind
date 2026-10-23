@@ -37,7 +37,7 @@ def test_admitted_queue_initialization_eligibility(tmp_path, monkeypatch, record
     def record(name, value):
         record_property(name, json.dumps(value, allow_nan=False))
 
-    fixture, admission = admitted_predecessor(tmp_path / "eligibility.sqlite", monkeypatch)
+    fixture, admission = admitted_predecessor(tmp_path / "eligibility.sqlite", monkeypatch, record)
     try:
         record("admission_association", admission.association)
         record("pre_admission_legacy_jobs", admission.original_legacy_jobs)
