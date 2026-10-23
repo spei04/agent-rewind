@@ -4,7 +4,7 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2 is **Merged; checkpoint accepted** at e8cba52; [accepted evidence](#accepted-f2-reader-and-f3-handoff--2026-10-22) binds source ac3b0a31, exact PR/main attempts and verified candidate 12431486551. The lead explicitly started F3 on 2026-10-22 with the shared-check kernel first; F3 is **In progress** with null checkpoint acceptance. P2 #109 remains **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
-**Current component checkpoint — 2026-10-23:** Three I2 SQLite cohort cases are accepted at 802b24b0, separate from six eligibility cases at 24c7c2dd. [Exact branches, preservation and controller evidence](#f3-job-cohort-checkpoint--2026-10-23) record two line-149 omissions and one line-117 nonexistent job, with direct controller exit 0. This docs-only checkpoint preserves all executed source; unexecuted RC3b2 source is not merged. Primary's next manifest job-to-project binding source/offline work waits for publication/handoff. Secondary is at separate RC3b2 controller review; remaining I2/I3, recovery and protected delivery remain open and F3/P1 acceptance is null.
+**Current component checkpoint — 2026-10-23:** One actual I2 SQLite manifest project-binding case is accepted at ae4f4922 (1 pass, 3.48s), separate from cohort 802b24b0 and eligibility 24c7c2dd. [Exact branch, preservation and controller evidence](#f3-manifest-project-binding-checkpoint--2026-10-23) binds a successful real-project check followed by original line117's present-job mismatch. RC3b2 V1 failed before cancellation; V2 reached cancellation but failed the exact stderr/newline oracle, with final target comparison unrun. No unfinished secondary source is merged or interrupted-restore component accepted. After publication/handoff, primary prepares only the I3 job-cap negative/exact `2**53 + 1` source/offline pair. Remaining I2/I3, recovery and protected delivery stay open; F3/P1 acceptance remains null.
 
 ## Current P1 implementation sequence — 2026-10-22
 
@@ -1778,6 +1778,99 @@ Secondary is at RC3b2 controller review; no interrupted-restore native result
 is included in this checkpoint. Remaining writer, recovery and protected delivery
 stay open. Capacity retains 1.976373s/about 24ms headroom in one eb2cbc4 run,
 without repeatability proof. F3/P1/#108, aggregate #107 and parent #10 remain
+**In progress** with null acceptance; P2/#109 remains **Not started**. Counts,
+estimates, dependencies, budget and external gates are unchanged. Two existing
+cloud checkouts/environments are reused. No provider call, paid resource,
+partner data, runtime change or deployment was added.
+
+
+## F3 manifest project-binding checkpoint — 2026-10-23
+
+The first actual I2 manifest job-to-project binding selection is independently
+accepted at **ae4f49221abdcdb59c9fe7fdd40ad31708892196**: **one SQLite/Python 3.12
+case passes in 3.48s**. Three additive test files reuse the unchanged admitted
+predecessor, shared-project setup, preparation observer and physical observer.
+The six eligibility cases at 24c7c2dd and three cohort cases at 802b24b0 were
+not rerun or relabeled. This integration changes only four progress documents;
+unfinished secondary restore source is not merged.
+
+| Record | Retained identity / result |
+| --- | --- |
+| Source / peer | 3851dc0d / d76a30bc; three additive files, 32 offline controls |
+| Controller / peer | 5e94af0a / 0c024a94; exact one-node selection, nine focused profile controls |
+| Actual result / peer | 61637f41 / aa2bbc2c; one passed watched initializer, no failures/unrun/unreported slots |
+| Release / lead acceptance | 58ecca9e / a70bc4f6; unchanged source, owned cleanup and collected controller exit 0 |
+
+These shortened identities name owner-only records, not downloadable private
+artifacts. The result index binds **112 files** and all **519 source inputs**.
+Initial formatting diagnostics and all earlier failed attempts remain retained.
+The new controller changes the one-slot/refusal profile for an unparameterized
+node; lifecycle, owned-process helpers and interrupted accounting remain unchanged.
+
+The admitted queued-v2 job still exists in its original project with zero
+reservation and no owner/lease. Unchanged setup adds a second genuine project
+in the same organization. The requested manifest points the target job account
+at that other project and adds its required unique zero-cap project account and
+opening destination. This is a complete supporting manifest change, not a
+one-cell-only mutation. All original account identities, other jobs, source
+digest, organization cap and original project cap remain intact.
+
+Actual _projects returns successfully at trace position 2913, after entering
+at 2897. The delegated original preparation then refuses at
+ledger_provisioning.py line **117**, with the job present, its actual scope
+still the original project, and the requested account naming the other project.
+The original exception identity, full financial jobs/scopes, manifest and
+raw/work/connection/engine identities are retained. Earlier parser, project-gate
+or absent-job failures cannot satisfy this oracle.
+
+One watched initialize command reconciles **2923 physical events** and
+**8106 authorizer entries**. It has an actual BEGIN EXCLUSIVE, acknowledged
+service rollback, no application writer DDL/DML and no commit attempt. The idle
+raw handle returns cleanly to QueuePool before harness disposal; the later two
+raw-close C events are separate. Bootstrap no-op rollback is not the service
+outcome. Full post-setup predecessor/schema and source rows remain identical.
+All **21 ciphertexts** and **15 admission-journal files** were rehashed against
+their original recorded values. Independent source fingerprint comparison also
+passes; the service's later source_digest gate was not reached by this refusal.
+
+The pytest child was reaped, and the recorded direct parent waited for and
+reaped the controller with **exit code 0**. Controller, child and launcher
+PIDs were subsequently absent. Controller elapsed was **5.529s**, parent
+elapsed **5.622s**; no cleanup errors or remaining owned descendants were
+reported. Child 390s, work 430s, cleanup 50s and outer 480s watchdogs remain unchanged and
+do not alter product deadlines. The inherited release flag native_execution=false
+means no PostgreSQL mode; this result is an actual SQLite service execution,
+not an offline-only control.
+
+The real admission setup still uses the explicitly synthetic policy/readiness/
+schema adapter, without an activation claim. The original eligibility setup
+failure at 23bd616f retains zero passes/one failure/five unrun and an unknown
+actual compatibility verdict; all 94 indexed files remain unchanged. Earlier
+eligibility, cohort, contention, restore and capacity evidence keeps its
+original source and failure history.
+
+### Separate interrupted-restore status and next scope
+
+At this checkpoint, RC3b2 V1 failed before cancellation; its cleanup release
+3fcc is accepted. Corrected source 4509 has accepted source/offline evidence,
+including 177 controls per interpreter. V2 reached cancellation but failed the
+exact stderr/newline oracle at line 62; its final target comparison was unrun.
+V2 records zero passes/one failure, 50 control events, 13 queries and one
+acknowledged owned cancellation; controller exit 1 was reaped. Release 20ab6624
+and failed-attempt cleanup are accepted by peer 8b38e72a and lead 7f874c7d.
+Baseline/source, 18 restore ciphertexts and all 145 original V1 evidence files
+remain preserved. Neither attempt establishes the interrupted-restore component.
+Secondary now prepares only the one-newline source/offline diagnostic correction;
+there is no successor native grant or unfinished source incorporation here.
+
+After publication and explicit handoff, primary's next source/offline pair is
+the I3 job-cap negative and exact **2^53 + 1 (9007199254740993)** successful initialization.
+Static routing note 304b1d5f and peer dbd38dfc are prerequisites, not actual
+execution authority. Persisted I2 graph/association/native-money and remaining
+I3 cases, recovery and protected delivery retain separate gates.
+
+Capacity remains **1.976373s/about 24ms headroom in one eb2cbc4 run**, without
+repeatability proof. F3/P1/#108, aggregate #107 and parent #10 remain
 **In progress** with null acceptance; P2/#109 remains **Not started**. Counts,
 estimates, dependencies, budget and external gates are unchanged. Two existing
 cloud checkouts/environments are reused. No provider call, paid resource,
