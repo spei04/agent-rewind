@@ -18,10 +18,10 @@ partner-data or production authorization.
 
 | Active owner | Cloud path on studio-agent | Current work / next acceptance gate | Concrete blocker |
 | --- | --- | --- | --- |
-| Provisioning engineer | `/home/serenapei/experiments/agent-rewind` | SQLite carry 67238638 accepted; compose it with accepted PostgreSQL money b9e2d4c and synchronize four progress docs. | Independent composition review/publication; then hold the clean checkout for an explicit next handoff. |
-| Restore engineer | `/home/serenapei/experiments/agent-rewind-worktrees/engineer-c` | PostgreSQL job-cap/exact-integer pair b9e2d4c and stopped release accepted; preserve exact source/evidence. | Hold the clean reusable checkout; PostgreSQL overflow and remaining matrix work need separate source/execution handoffs. |
-| Independent reviewer | `/home/serenapei/experiments/agent-rewind-evidence/review-records` | Accepted both component outcomes/releases; review exact combined source origins and four-document checkpoint. | Remaining I2/I3, recovery and F3/P1 gates stay open. |
-| Lead | `/home/serenapei/experiments/agent-rewind-evidence/continuation-records` | Own publication, source handoffs and separate execution grants after exact review. | No new external authorization; incomplete writer, recovery and protected-delivery evidence. |
+| Provisioning engineer | `/home/serenapei/experiments/agent-rewind` | Audit remaining recovery/writer boundaries against accepted evidence; select one concrete missing slice. | Source handoff follows the focused gap review; no repeat of accepted domain cases. |
+| PostgreSQL engineer | `/home/serenapei/experiments/agent-rewind-worktrees/engineer-c` | Implement the project and organization aggregate-overflow counterparts using accepted native money infrastructure. | Exact source/offline review and bounded runner review precede isolated native execution. |
+| Independent reviewer | `/home/serenapei/experiments/agent-rewind-evidence/review-records` | Review the writer-boundary gap proposal and new PostgreSQL overflow source independently. | Source-specific outcomes, cleanup and remaining protected delivery are required before F3/P1 closure. |
+| Lead | `/home/serenapei/experiments/agent-rewind-evidence/continuation-records` | Coordinate two existing checkouts, exclusive database runs and reviewed checkpoint publication. | P2 remains unstarted; reconcile spending before paid work. |
 
 The latest ordinary capacity attempt at eb2cbc4 passes all four seeded-reader cases. The maximum took **1.976373s**, leaving about **24ms in one run**; repeatability and broader performance remain unproved. The dated v4 failure remains in the history below. [Capacity evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23) and [SQLite contention evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23) retain their distinct scopes.
 
@@ -1482,3 +1482,12 @@ null F3/P1 acceptance and P2 Not started.
 [Detailed evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-accounted-carry-and-postgresql-money-checkpoint--2026-10-23)
 retain exact executed sources, synthetic setup distinctions, prior failures, unchanged
 counts/estimates/budget, null F3/P1 acceptance and P2 Not started.
+
+
+### PostgreSQL overflow and writer-boundary assignments — 2026-10-23
+
+- Lead verified public checkpoint a49f24ec, both clean cloud checkouts, no checkout consumers or index locks, and PostgreSQL stopped with no PID/socket/lock. Existing environments and private evidence are retained for reuse.
+- PostgreSQL engineer owns the two aggregate-overflow counterparts in the secondary checkout: original project overflow, then original organization overflow after valid individual project reductions. Native money and SQLite overflow evidence are reused without repeating accepted cases.
+- Provisioning engineer owns a focused audit of remaining writer-stage rollback and intent boundaries in the primary checkout. The next source slice must identify the concrete missing proof and avoid duplicating accepted recovery, interruption, restore and replay cases.
+- Independent reviewer assesses each source and its evidence; the lead coordinates bounded database execution and publication.
+- F3/P1 remain In progress with null acceptance; P2 remains Not started. The $200 authorization and $36.567974 unreconciled reservations are unchanged. No paid work or production access is added.
