@@ -4,7 +4,7 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2 is **Merged; checkpoint accepted** at e8cba52; [accepted evidence](#accepted-f2-reader-and-f3-handoff--2026-10-22) binds source ac3b0a31, exact PR/main attempts and verified candidate 12431486551. The lead explicitly started F3 on 2026-10-22 with the shared-check kernel first; F3 is **In progress** with null checkpoint acceptance. P2 #109 remains **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
-**Current component checkpoint — 2026-10-23:** Distinct-intent provision collisions are independently accepted for three SQLite cases at 0a6516f and three PostgreSQL cases at 4f1ea4a6, nine commands per dialect. The final request proves a conflict at the actual current parent, not identical replay. [Scope and remaining gates](#f3-distinct-intent-collision-checkpoint--2026-10-23) retain the prior failures and separate executed identities. Restore guard source 52d289e5 is accepted with 33 offline controls per interpreter; controller review/grant remain open, with no truncated-negative native proof. After documentation publication, primary takes only the missing I2 admitted queued-v2 positive and isolated queued/running eligibility group. Other I2 groups, I3, restore negatives and protected delivery remain open; F3/P1 acceptance stays null.
+**Current component checkpoint — 2026-10-23:** Distinct-intent provision collisions are independently accepted for three SQLite cases at 0a6516f and three PostgreSQL cases at 4f1ea4a6, nine commands per dialect. The final request proves a conflict at the actual current parent, not identical replay. [Scope and remaining gates](#f3-distinct-intent-collision-checkpoint--2026-10-23) retain the prior failures and separate executed identities. Restore guard source 52d289e5 is accepted with 33 offline controls per interpreter. The separately reviewed/granted truncated-archive run is a distinct validation; no native result is included in this collision checkpoint. After documentation publication, primary takes only the missing I2 admitted queued-v2 positive and isolated queued/running eligibility group. Other I2 groups, I3, restore negatives and protected delivery remain open; F3/P1 acceptance stays null.
 
 ## Current P1 implementation sequence — 2026-10-22
 
@@ -1468,17 +1468,17 @@ remaining owned child processes are recorded. Stopped release 442b4639 has
 status 3 and no PID/socket/lock. Independent review b5623a5f and lead
 acceptance e745c3c0 bind that release; SQLite lead acceptance is 4ff321c5.
 These shortened identities name retained owner-only records, not downloadable
-private artifacts. PostgreSQL is stopped and unassigned.
+private artifacts. At completion of the collision run, PostgreSQL was stopped
+and released at 442b4639; later runs use separate grants.
 
 Primary now prepares this docs-only checkpoint, followed after publication
 and lead handoff by the missing I2 genuinely admitted queued-v2 positive and
 isolated queued/running eligibility group. That slice requires actual
 Operation/configuration/artifact associations and cohort-derived totals.
-Other I2 groups and I3 remain separate. Secondary finalizes the single RC3b1
-truncated-archive controller. Guard source 52d289e5 is accepted by peer
-9a214056 with 33 offline controls per interpreter; controller review and its
-separate native grant remain open. This source/control acceptance provides no
-truncated-negative native proof. The independent
+Other I2 groups and I3 remain separate. Guard source 52d289e5 is accepted by
+peer 9a214056 with 33 offline controls per interpreter. The separately
+reviewed/granted truncated-archive run is a distinct validation; no native
+result is included in this collision checkpoint. The independent
 reviewer owns review, while the lead owns publication and exclusive grants.
 
 RC3a's accepted S0/S2 positives, both failed restore attempts, the original
