@@ -7,7 +7,6 @@ import json
 import os
 import re
 import stat
-import unicodedata
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Literal
@@ -19,6 +18,8 @@ from .schema import MigrationRefused, canonical
 MAX_MANIFEST_BYTES = 32768
 MAX_MONEY = 2**63 - 1
 MAX_DEPTH = 8
+# Unicode Cc and Cs consist exactly of these control and surrogate ranges.
+_FORBIDDEN_JSON_CHARACTER = re.compile(r"[\x00-\x1f\x7f-\x9f\ud800-\udfff]")
 Identifier = Annotated[str, Field(pattern=r"^[0-9a-f]{32}$")]
 Digest = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 InstallationKey = Annotated[str, Field(pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$")]
@@ -44,7 +45,7 @@ def validate_json_value(value: object, *, depth: int = 0) -> None:
     if value is None or type(value) is bool or type(value) is int:
         return
     if type(value) is str:
-        if any(unicodedata.category(char) in {"Cc", "Cs"} for char in value):
+        if _FORBIDDEN_JSON_CHARACTER.search(value) is not None:
             raise ValueError("control or surrogate")
         return
     if type(value) is list:
