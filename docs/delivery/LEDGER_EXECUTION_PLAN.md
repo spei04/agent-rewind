@@ -1058,3 +1058,55 @@ or deployment were added.
 F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null
 acceptance; P2/#109 remains **Not started**. Task counts, estimates, contract
 and dependency records, funding and production gates are unchanged.
+
+## F3 SQLite process-death checkpoint — 2026-10-23
+
+Source 80704bd adds four test-only files; runtime and uv.lock remain unchanged
+from the reviewed ce82a2c composition. **Four actual SQLite process-death cases
+pass on Python 3.12 in 20.58s**. The bounded runner exits successfully in
+22.36s. Eight final-source IPC controls pass separately in 0.10s.
+
+Initialize and provision each run in a fresh process, stopped immediately
+before physical COMMIT or after its actual return but before the service
+publishes a response or cleans up. The parent validates a nonce/PID-bound
+socket message, sends SIGKILL and verifies exit -9, reaping and channel EOF.
+A fresh physical connection then completes BEGIN EXCLUSIVE and ROLLBACK,
+proving the killed process no longer holds the SQLite lock. No journal file
+is removed by the harness; SQLite performs any required native recovery.
+
+Both pre-COMMIT cases reproduce the exact predecessor state. Both post-ACK
+cases preserve the complete expected committed state and original receipt.
+All four fresh inspections perform zero application DDL/DML and preserve
+original source projections and all 18 protected ciphertexts per case.
+Application zero-DML inspection does not imply that native hot-journal
+recovery performs no file writes.
+
+Independent review verifies 470 unchanged source inputs and all 138 retained
+evidence files. Observed frame payloads are 2,424,817–2,762,051 bytes under the
+4 MiB cap; child lifecycles are 2.38–2.64s under the 35s work plus 10s cleanup
+bound. The first source review caught a cursor-close/connection-close
+conflation before execution. The two earlier source snapshots are unexecuted
+preparations, not failed crash-test attempts. Only the corrected source was
+used for the four-case run.
+
+This accepts the SQLite part of RC2a only. PostgreSQL process death,
+competing operators and RC3 owner/ACL-preserving restore remain open. Native
+RC1's 25 passes remain bound to 7738aec6. The latest uninstrumented native
+capacity attempt at 54844ac remains one pass, one timeout and two unrun
+cases. A private timing diagnostic preserves all observers and the
+two-second deadline; its completeness checks are being reviewed before
+any execution. Diagnostic timings cannot be adjusted by subtracting guessed
+observer overhead.
+
+The provisioning engineer next owns the PostgreSQL counterparts, then
+competing operators as a separate slice. The capacity engineer owns timing
+diagnosis; the independent reviewer checks each frozen source and result.
+Remaining actual-service eligibility, arithmetic, identity, evolved replay,
+fault, capacity and authority boundaries retain their original criteria.
+Pure helper tests and seeded reader fixtures do not satisfy writer gates.
+
+F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null
+acceptance; P2/#109 remains **Not started**. Matching protected PR/main/candidate
+checks are still required. The two existing cloud checkouts are reused; no
+new paid resources, provider calls, customer data or deployment were added.
+Task counts, estimates, dependencies and external gates are unchanged.
