@@ -20,6 +20,7 @@ from ledger_restore_postgres_fixture import (
     tool_configuration,
 )
 from ledger_restore_receipts import assert_original_receipt
+from ledger_restore_tool_ownership import restore_tool_ownership
 from ledger_restore_tools import run_tool, tool_command, tool_environment
 from ledger_service_fixture import invoke_postgres
 from legacy_fixture import FIXTURE_ROOT
@@ -37,7 +38,7 @@ from agent_rewind.migrations.compatibility import (
 from agent_rewind.migrations.ledger_inputs import validate_ledger_manifest
 from agent_rewind.migrations.schema import LEDGER, installed_profile
 
-__all__ = ["controlled_database_name", "observed_reader"]
+__all__ = ["controlled_database_name", "observed_reader", "restore_tool_ownership"]
 pg = migration_tests.pg
 pytestmark = pytest.mark.skipif(
     not migration_tests.POSTGRES or not os.environ.get(TOOLS_ENV),

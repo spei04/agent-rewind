@@ -4,7 +4,7 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2 is **Merged; checkpoint accepted** at e8cba52; [accepted evidence](#accepted-f2-reader-and-f3-handoff--2026-10-22) binds source ac3b0a31, exact PR/main attempts and verified candidate 12431486551. The lead explicitly started F3 on 2026-10-22 with the shared-check kernel first; F3 is **In progress** with null checkpoint acceptance. P2 #109 remains **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
-**Current component checkpoint — 2026-10-23:** Distinct-intent provision collisions are independently accepted for three SQLite cases at 0a6516f and three PostgreSQL cases at 4f1ea4a6, nine commands per dialect. The final request proves a conflict at the actual current parent, not identical replay. [Scope and remaining gates](#f3-distinct-intent-collision-checkpoint--2026-10-23) retain the prior failures and separate executed identities. Restore guard source 52d289e5 is accepted with 33 offline controls per interpreter. The separately reviewed/granted truncated-archive run is a distinct validation; no native result is included in this collision checkpoint. After documentation publication, primary takes only the missing I2 admitted queued-v2 positive and isolated queued/running eligibility group. Other I2 groups, I3, restore negatives and protected delivery remain open; F3/P1 acceptance stays null.
+**Current component checkpoint — 2026-10-23:** RC3b1 now has one accepted native truncated-archive negative at 52d289e5: exact EOF/exit 1, unchanged empty target/source, 18 ciphertexts and four terminal tool handles. [Scope, provenance and next design prerequisite](#f3-truncated-archive-recovery-checkpoint--2026-10-23) retain prior S0/S2 positives, failed attempts and both dialects of accepted distinct-intent collisions. Primary owns the active narrow I2 admitted queued-v2 positive/queued-running eligibility slice. Secondary composes this checkpoint before RC3b2 observation/timeout design; no interrupted-restore implementation follows automatically. Remaining writer/restore/protected-delivery gates stay open and F3/P1 acceptance remains null.
 
 ## Current P1 implementation sequence — 2026-10-22
 
@@ -1491,3 +1491,110 @@ protected-candidate delivery stay open. F3/P1/#108, aggregate #107 and parent
 All task/package counts, estimates, dependencies, budget and external gates
 are unchanged. Both existing cloud checkouts are reused; this checkpoint
 adds no runtime change, model call, paid resource, partner data or deployment.
+
+## F3 truncated-archive recovery checkpoint — 2026-10-23
+
+RC3b1's single native negative is independently accepted at executed source
+**52d289e5f4cca2bf8148b35bf895c40ca8964f8c**. Ordinary merge **658e3e22**
+composes it with published **c651772d**; this composition is not a new run.
+All eight restore paths remain exact 52d289e5 and all eight collision paths
+remain exact c651772d/4f1ea4a6. Runtime, dependencies and deadlines are unchanged.
+
+| Record | Retained identity / result |
+| --- | --- |
+| Guard source / peer | 195c662d / 9a214056; 33 controls pass per interpreter, three native nodes collected only |
+| Exact controller / peer | fa82dd1e / 699ef3e4; one negative node, no positive selection or automatic retry |
+| Actual result / peer | 01224a35 / 09b0793b; one passed, case 10.252s, suite 11.601s |
+| Stopped release / lead acceptance | 0fa546c5 / bac028fa; exact baseline/memberships and stopped status 3 with no PID/socket/lock |
+
+These shortened hashes identify retained owner-only records, not public artifact
+downloads. The controller completed in 14.454s; its launcher was reaped after
+14.769s. Work remains bounded by 950s, cleanup by 260s and record-only reserve
+by 20s, outer 1230s; child 360s is nested within case 380s. These are watchdogs,
+not performance guarantees. At completion, the recorded release verified the
+stopped database and finalized all owned children; later runs need their own grants.
+
+The real custom pg_dump produced **86,338 bytes**. A separate exact prefix of
+**86,274 bytes** removed precisely the final **64 bytes**, preserving the intact
+archive. Exactly one real pg_restore used --single-transaction and --exit-on-error
+with owners/ACLs retained. It returned **1**, retaining the original
+RuntimeError("restore tool failed") and complete **63-byte** C-locale stderr:
+`pg_restore: error: could not read from input file: end of file` plus newline.
+No timeout, overflow, signal, cleanup error or successful restore retry is used
+as the expected result. All argv, tool, stream and archive hashes remain bound.
+
+Typed empty-target observations are byte-identical before and after the failed
+restore. The fixed bounded inventory independently requires the expected public
+namespace/default plpgsql extension, exact database/schema owners and raw/exploded
+ACL identities, and no extra namespace, relation of any kind, routine, type,
+constraint, noninternal trigger or default grant. Complete source rows, raw
+progress and authority observations are also byte-identical; both real M0/M1
+source receipts and all **18 ciphertext hashes** are preserved. Independent
+review rehashes the retained backup objects, distinct from later rehashing the
+removed live fixture paths. Two setup observations reconcile **5,762 native
+events and 2,827 ordered SQL calls/returns/parameter receipts**; three progress
+rows retain their exact provenance.
+
+The new test-only guard retains actual Popen handles rather than trusting
+serialized receipts. All **four tools** (two version probes, dump and restore)
+are confirmed terminal with return codes 0/0/0/1. Constructor/poll uncertainty
+blocks all reachable source/target/fixture SQL before delegation. The guard
+outlives pg/legacy teardown, preserves the first error and permits physical
+close/dispose without treating it as exit proof. Normal target/source cleanup
+completed; outer owned-subtree finalization and the exact database/role/membership
+baseline passed with no leftovers. All 500 executed source inputs stayed exact.
+
+The original RC3b1 V1 review found unsafe cleanup after unconfirmed tool reaping;
+that source and its evidence remain preserved. The narrow guard correction has
+33 passing controls per interpreter, including actual helper finalizers and
+both modules' fixture registrations. The original 98 truncation/catalog controls
+per interpreter remain bound to their unchanged helper source. Shared registration
+adds protection to future positive runs; accepted S0/S2 function bodies and their
+original evidence at **dfe7b95b / 83c594a2** are unchanged. Both failed positive
+attempts, original contention failure and all dated capacity failures remain
+separate. No accepted restore/collision native case or offline control was rerun solely for composition.
+
+This establishes one same-cluster EOF negative with existing synthetic roles and
+default database ACLs. It does **not** establish reached user DDL/data, acknowledged
+rollback, an observed blocked COPY, restored corrupt-state refusal, arbitrary
+column/default-privilege recovery or cross-cluster restoration. Full RC3 recovery
+and final protected delivery remain incomplete.
+
+### Next restore prerequisite: RC3b2 interrupted data-only restore
+
+Before implementation, freeze a narrow test-owned observation/control design.
+A known live data-restore child needs positively correlated backend identity,
+actual blocked COPY/lock evidence and bounded selected cancellation/termination.
+The accepted guard deliberately blocks ordinary SQL while a tool is live or
+launch/reaping is uncertain. A broad allow-SQL switch or unchecked bypass is not
+acceptable: any new control interface must constrain queries to the owned control
+connection and observed backend, while normal target/source/fixture cleanup stays
+blocked until both child and backend are finalized. Pending constructors still
+fail closed.
+
+Schema-only setup plus interrupted data-only restore requires an explicit
+**five-tool case profile**: two versions, dump, schema restore and data restore.
+The accepted four-tool positive/truncated profile is unchanged. Existing run_tool
+is synchronous and tool lock_timeout is **1000ms**; an intentional blocked-COPY
+case therefore needs a reviewed observer/timeout design within fixed parent
+budgets before source work. This checkpoint changes neither runner nor timeout.
+All output, observation and cleanup must stay bounded; no deadline reset, repeated
+cancellation or hidden successful retry. Require preserved schema/owner/ACL,
+zero partial data and unchanged source/ciphertexts only after the actual reached
+interruption and native failure/reaping are established. The older container
+helper strips owner/ACL and retries successfully, so it cannot supply this proof.
+Private prerequisite note ffe28a98 records this boundary. Explicit provenance/ACL
+corruption remains a later dependent slice.
+
+Primary is actively assigned only the I2 admitted queued-v2 positive and isolated
+queued/running eligibility group, with actual Operation/configuration/artifact
+associations and cohort-derived totals. Other I2 groups and I3 remain separate.
+Secondary owns this checkpoint then RC3b2 design; the lead owns publication and
+separate exact native grants. Two existing checkouts/environments remain reused.
+
+Capacity retains the four seeded-reader passes at eb2cbc4, maximum **1.976373s**
+and about **24ms headroom in one run**; repeatability remains unproved. F3/P1/#108,
+aggregate #107 and parent #10 stay **In progress** with null acceptance; P2/#109
+stays **Not started**. Counts, estimates, dependencies, budget and all external
+gates are unchanged. No provider calls, paid resources, customer data or deployment
+were added.
