@@ -306,7 +306,7 @@ def test_backfill_oracle_requires_the_exact_first_native_row_update(mutation):
     elif mutation == "earlier-execution":
         execution["entered_at"] = 0
     elif mutation in {"native-error", "wrong-sql"}:
-        offset = 2 if mutation == "native-error" else 1
+        offset = 5 if mutation == "native-error" else 4
         event = list(watch.trace.events[write["entered_at"] + offset])
         if mutation == "native-error":
             event[0] = "c_exception"
