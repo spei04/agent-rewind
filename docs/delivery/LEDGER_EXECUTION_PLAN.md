@@ -4,7 +4,7 @@
 
 **State:** The owner approved [proposal 882fa139](https://github.com/spei04/agent-rewind/blob/882fa139946dd31f401a5518a7b24750cbe88e25/docs/delivery/LEDGER_EXECUTION_PLAN.md), including the finite execution window and two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. P1 entry 51af77dc and HTTP delivery cefd222 are accepted. The lead assigned AR-010-A/P1 #108 to platform/security; P1, aggregate #107 and parent #10 are **In progress**. F1 dormant foundation is **Merged; checkpoint accepted** at 2e0eeeab; the full P1 package has no accepted product delivery yet. F2 is **Merged; checkpoint accepted** at e8cba52; [accepted evidence](#accepted-f2-reader-and-f3-handoff--2026-10-22) binds source ac3b0a31, exact PR/main attempts and verified candidate 12431486551. The lead explicitly started F3 on 2026-10-22 with the shared-check kernel first; F3 is **In progress** with null checkpoint acceptance. P2 #109 remains **Not started**; P2 waits for accepted full P1 and its own reservation/fence entry review. Both packages retain null acceptance. No public/native-v1 contract, ready-profile or external gate changes follow.
 
-**Current component checkpoint — 2026-10-23:** RC3b2 V3 at 1d6df2a0 passes one bounded same-cluster blocked-COPY cancellation case with exact raw target/source preservation, 18 unchanged ciphertexts and five reaped tool handles. [Exact result, prior failures and limits](#f3-interrupted-data-restore-checkpoint--2026-10-23) records accepted stopped release ece4bdd1 and distinct 14.289s suite / 12.671s case / 18.825s controller / 19.477s parent timings. Earlier S0/S2, truncated-negative and I2 results retain their original sources; V1/V2 failed restore attempts stay failed. Primary's separate I3 a29ebb92 source has 38 distinct offline controls but two unexecuted actual cases awaiting source/controller review and a separate grant. Secondary owns this integration, then RC3b3 source/offline negatives after publication/handoff. Remaining writer, recovery and protected delivery stay open; F3/P1 acceptance remains null.
+**Current component checkpoint — 2026-10-23:** Two single-project SQLite Python 3.12 I3 cases at a29ebb92 are accepted: original job-cap refusal and exact 9007199254740993 initialization. [Exact records and limits](#f3-job-cap-and-exact-integer-checkpoint--2026-10-23) distinguish 38 source controls, 18 controller controls, two actual passes in 5.98s, one rollback and one commit. Composition preserves published restore e9bd1c7f and all previous failure/source identities; no domain cases reran. Primary completes this checkpoint before overflow source/offline handoff; secondary separately prepares RC3b3 source/offline cases. Remaining I2/I3, recovery and protected delivery stay open; F3/P1 acceptance remains null and P2 remains Not started.
 
 ## Current P1 implementation sequence — 2026-10-22
 
@@ -1970,3 +1970,67 @@ protected delivery stay open. Counts, estimates, dependencies, budget and
 external gates are unchanged. Two existing cloud checkouts/environments are
 reused; no provider call, paid resource, partner data, runtime change or
 deployment was added.
+
+
+## F3 job-cap and exact-integer checkpoint — 2026-10-23
+
+Two actual single-project SQLite Python 3.12 cases are accepted at
+**a29ebb92375c28ed45d882a4079b889193e49e38**. They validate the original
+job-cap refusal and exact **2^53 + 1 (9007199254740993)** committed initialization.
+This is neither overflow coverage nor PostgreSQL evidence.
+
+### Cases, setup and retained physical proof
+
+| Case | Actual result and preservation |
+| --- | --- |
+| Job-cap negative | The original delegated `_prepare_ledger` raises `ledger_exposure_refused` at line **177**, with budget **10000000**, reserved **125000** and requested job cap **124999**. Original exception identity, full cohort/assignments and native operands are retained; an earlier same-code refusal cannot substitute. The transaction acknowledges rollback, performs no writer DDL/DML and leaves the entire predecessor unchanged. |
+| Exact-integer positive | The unchanged three-job legacy fixture is built first. Exactly four source cells change: first job budget/reserved become **9007199254740993**, and the other two reservations become zero. Their budgets and all unrelated source/schema fields stay exact. The refreshed full source fingerprint, native integer types, parsed manifest, five account rows, opening/manifest cursors, receipt and fresh inspection preserve the exact integer. The service acknowledges one commit. |
+| Economic total | Three jobs produce five accounts. Job exposure sums to **9007199254740993**; project and organization each represent that same exposure. These three account levels are not summed into three times the economic amount. |
+| Protected bytes | All **18 original ciphertexts per case** remain equal through setup/service and were rehashed from retained files. The negative whole predecessor and positive exact setup/ledger snapshots, original job fields and source fingerprints are retained for independent inspection. |
+
+The two watched initialization commands retain **9,783 native events** and
+**35,142 authorizer entries**. Each logical connection returned cleanly to its
+idle QueuePool before the service-exit boundary. Physical raw close occurred
+later in harness disposal and is not attributed to service cleanup. The one
+rollback and one commit are actual delegated native acknowledgments; bootstrap
+or harness activity is not counted as another service transaction.
+
+### Exact source, control and outcome records
+
+| Record | Identity / scope |
+| --- | --- |
+| Source/offline freeze | Index 770ebd20; peer 64a6fae7; root b6084142. Four additive test files, **523 executed inputs**, with all 519 predecessor blobs unchanged. |
+| Source controls | **38 distinct offline controls**: 27 passed before one synthetic receipt-model fixture failure; a narrow correction to the actual `LedgerProvisioning` return model was followed by 11 affected/unrun passes. The unchanged 27 were not rerun. Original failed control and preparation records remain intact; they are not actual service failures or retroactive passes. |
+| Controller | 981272e3; preparation 9d321ff9; peer baf2fdf1; separate one-attempt grant 2589d743. **18 new offline mixed-outcome controls** remain distinct from source controls and actual service cases. |
+| Actual attempt | **2 passes in 5.98s**, no failed/unrun/unreported slot; exactly one watched initializer per case. Setup and independent inspection sessions are separate. |
+| Result index | 07741b84881d37d43c0e5eef5585405115750a41ebf01b6d66c735b27f488f99: **149 private files**, 6,463,749 bytes. |
+| Independent acceptance | Peer b0cc1117659285502c15732a1efce0897ce3361238d14e9545936ad946ef14a7; root 643a1472804a3b1e204b0b97013cb4e939d6e5dffd488e21a902fa5273b8ad33. |
+| Release | 5e02783af5264ba8b3065cc14f81ebd130f2cd8e20112d111cd8f078e04dc66e: unchanged source, no cleanup errors, owned pytest child reaped and primary released. The inherited `native_execution: false` means no PostgreSQL; these are real SQLite service executions. |
+| Timing and process exit | Suite **5.98s**; cases **1.939s / 3.162s**; controller **8.084s**; recorded direct-parent wait **8.178s**. The parent collected controller exit **0** and reaped it; subsequent checks found launcher/controller/test PIDs absent. These are distinct scopes, not interchangeable performance claims. |
+
+The controller retained child **390s**, work **430s**, cleanup **50s** and
+outer **480s** ceilings, fixed absolute phase deadlines and owned-process
+emergency cleanup. No deadline was relaxed and no automatic retry occurred.
+
+### Composition and remaining gates
+
+Ordinary merge **36ff46c1** preserves executed I3 a29ebb92 and immutable
+published restore **e9bd1c7f**. All four I3 test files remain byte-identical to
+the actual run; all accepted restore files and runtime/lockfiles retain the
+published bytes. This checkpoint changes only the four progress documents
+after that merge. Earlier I2 and recovery sources, failed attempts and
+[RC3b2 limits](#f3-interrupted-data-restore-checkpoint--2026-10-23) remain intact;
+no earlier domain case was rerun to rename its provenance.
+
+Primary's next scope is the separately handed-off overflow source/offline
+slice after this checkpoint is reviewed and published. Secondary independently
+prepares RC3b3 source/offline cases; its moving branch is not merged here.
+Other I2/I3 groups, PostgreSQL money coverage, overflow, recovery completeness,
+matching two-interpreter/package/hosted evidence and protected delivery stay open.
+
+F3/P1/#108, aggregate #107 and parent #10 remain **In progress** with null
+acceptance; P2/#109 remains **Not started**. Counts, estimates, dependencies,
+budget and external gates are unchanged. Capacity still has only the
+**1.976373s/about 24ms headroom in one eb2cbc4 run**, without repeatability
+proof. Both existing cloud checkouts/environments remain assigned; this
+checkpoint adds no provider call, resource, partner data or deployment.
