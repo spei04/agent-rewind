@@ -1379,7 +1379,7 @@ restore negatives and final delivery remain open.
 | Independent reviewer | Guard/source/controller/result and stopped RC3b1 release accepted separately. | Review exact integration and future observer/timeout design. |
 | Lead | Accepted result 01224a35, peer 09b0793b and release 0fa546c5 after fresh stopped verification; root record bac028fa. | Publish after composition review, hand off subsequent design and retain exclusive-grant control. |
 
-The failed V1 cleanup path and its correction stay in the private evidence.
+The blocked V1 source review and its guard correction stay in the private evidence.
 Shared guard registration protects future positive and negative test executions;
 accepted positive function bodies are unchanged and their S0/S2 evidence stays
 at dfe7b95b/83c594a2. No accepted restore/collision native case or offline control was rerun for composition.
