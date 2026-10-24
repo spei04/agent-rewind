@@ -128,6 +128,9 @@ def assert_hash_span(hashed, original, raw_id, events, parameters, calls):
                 values, parameter_type = None, "NoneType"
             else:
                 assert sql == expected
+                captured = calls[ordinal]["parameters"]
+                assert type(captured) is dict
+                assert all(type(value) is int for value in captured.values())
                 values, parameter_type = expected_parameters, "dict"
             native = selected[ordinal]
             assert native == {

@@ -255,3 +255,25 @@ def test_physical_profile_rejects_false_or_late_close_evidence(fault):
         watch.physical[2]["trace_end"] = watch.command_boundary["trace_end"] + 1
     with pytest.raises(AssertionError):
         assert_physical_completion(watch, "rollback")
+
+
+@pytest.mark.parametrize(
+    "key,substitute",
+    [
+        ("remaining_rows_plus_one", float),
+        ("selected_count", float),
+        ("selected_count", bool),
+    ],
+    ids=["count-float", "selected-float", "selected-bool"],
+)
+def test_source_bind_requires_native_integer_type(key, substitute):
+    args = witness()
+    assert_hash_span(*args)
+    selected = next(row for row in args[-1] if row["parameters"] and key in row["parameters"])
+    original = selected["parameters"][key]
+    assert type(original) is int
+    replacement = substitute(original)
+    assert replacement == original and type(replacement) is not int
+    selected["parameters"][key] = replacement
+    with pytest.raises(AssertionError):
+        assert_hash_span(*args)
