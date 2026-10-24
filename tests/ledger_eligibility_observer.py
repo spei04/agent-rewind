@@ -62,7 +62,7 @@ def refusal_trace(error, code):
 
 
 @contextmanager
-def observe_preparation(watch, monkeypatch, record_property):
+def observe_preparation(watch, monkeypatch, record_property, *, raw_handle=None):
     records, stages = [], []
     code, refusal_line = eligibility_site()
     original = ledger_service._prepare_ledger
@@ -70,7 +70,7 @@ def observe_preparation(watch, monkeypatch, record_property):
 
     def prepare(context, manifest, work):
         assert work is watch.work and work._connection.engine is watch.engine
-        assert work._raw is watch.trace.raws[0]
+        assert work._raw is (watch.trace.raws[0] if raw_handle is None else raw_handle(watch))
         entry = {
             "raw_id": id(work._raw),
             "work_id": id(work),
