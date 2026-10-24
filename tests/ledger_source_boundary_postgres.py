@@ -9,9 +9,27 @@ import psycopg
 from ledger_source_boundary import assert_provenance, observe_source
 from sqlalchemy import text
 from sqlalchemy.dialects.postgresql.psycopg import PGDialect_psycopg
+from test_ledger_reader_native import _assert_reviewed_ctes
 
 from agent_rewind.migrations import ledger_source
 from agent_rewind.migrations.schema import TABLES, MigrationRefused
+
+# Independently reviewed first-page source CTEs; do not derive this policy from
+# the runtime SQL map that the witness checks.
+_SOURCE_CTE_HASHES = frozenset(
+    {
+        "23c3799e3a8b77e84d17bde08a56ad2b50cf9b4d0da1cfba6e00de5d13648b01",
+        "47c091e1430f32b97dc26b152f4197b9310108af0ed193069a2bd2444f6a0bfc",
+        "6bb9547afe5d3f951ce95e18e29fdb28390d0dd25e1bb2ed60230bdb09ca952a",
+        "73e9b898c8085f9a541c12e69c357c1b25fab775afc817e74fe09586a488e715",
+        "943a916da9ff9f547954a63549e42486d5588c0fd11c10a7ce425018f5aebb80",
+        "9468ce35d24c94474233a70c2631c424cf6b5aff61ccfa0ff4a8ec4c23b068ee",
+        "94de355532e38b46f9a93d671a19c1819aa1b24e16c2bee4ba7b55c6cf00e33b",
+        "9c94abb681fb197f985655ac7218e7f51994e3cbcabc0a709f96513ec912bf19",
+        "ceae90e7c8a6e9774d68205415b452febc3984b68909665db00f51aae9588c8c",
+        "e603e37994a8a8cdc589f855b5a9ec458ba60813279072c65fdabd2cecf97848",
+    }
+)
 
 
 def native_identity(watch):
@@ -153,10 +171,37 @@ def assert_hash_span(hashed, original, raw_id, events, parameters, calls):
             }
 
 
+def assert_source_no_writes(hashed, original, calls, watch):
+    events = watch.trace.events
+    assert_hash_span(
+        hashed, original, id(watch.work._raw), events, watch.parameters.receipts, calls
+    )
+    assert watch.observer_units == [6, 3]
+    assert all(type(value) is int for value in watch.observer_units)
+    assert watch.counters == [{}], "native tuple writes observed"
+    start, end = hashed["entered_at"], hashed["returned_at"]
+    commands, reader_commands = [], []
+    for position, (phase, kind, _, sql) in enumerate(events):
+        if phase == "ordinary" and kind == "sql-call":
+            commands.append(sql)
+            reviewed_source = (
+                start <= position < end
+                and hashlib.sha256(sql.encode()).hexdigest() in _SOURCE_CTE_HASHES
+            )
+            if not reviewed_source:
+                reader_commands.append(sql)
+    # Only a fixed reviewed query inside the already-proven original hash span
+    # receives the local allowance. Every other CTE keeps the reader policy.
+    _assert_reviewed_ctes(reader_commands)
+    assert commands and all(
+        sql.lstrip().upper().startswith(("SELECT", "WITH", "SET", "SHOW", "LOCK"))
+        for sql in commands
+    ), "native write-capable statement observed"
+
+
 def assert_physical_completion(watch, action):
     assert action in {"rollback", "commit"}
     watch.assert_single_attempt()
-    watch.assert_no_writes()
     assert not watch.outcome.cleanup_failed and watch.faults == []
     assert [row["action"] for row in watch.physical] == [action, "close", "close"]
     transaction, close, released = watch.physical
@@ -202,8 +247,6 @@ def assert_refusal(receipt, original, manifest, expected_source, error, calls, w
     assert type(error) is MigrationRefused and error.code == "source_digest_mismatch"
     assert_provenance(receipt, manifest, expected_source, native_identity(watch), id(error))
     (hashed,) = receipt["hashes"]
-    assert_hash_span(
-        hashed, original, id(watch.work._raw), watch.trace.events, watch.parameters.receipts, calls
-    )
+    assert_source_no_writes(hashed, original, calls, watch)
     assert_physical_completion(watch, "rollback")
     assert receipt["refusals"][0]["position"] <= watch.markers[0][2]

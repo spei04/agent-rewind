@@ -6,12 +6,15 @@ from types import SimpleNamespace
 
 import pytest
 from ledger_source_boundary_postgres import (
+    _SOURCE_CTE_HASHES,
     assert_hash_span,
     assert_physical_completion,
+    assert_source_no_writes,
     native_identity,
     source_profile,
 )
 
+from agent_rewind.migrations import ledger_source
 from agent_rewind.migrations.schema import TABLES
 
 
@@ -228,7 +231,6 @@ def physical_witness(action):
         markers=[(name, id(raw), 10 + i) for i, name in enumerate(names)],
         command_boundary={"trace_end": 18, "engine_poisoned": False},
         assert_single_attempt=lambda: seen.append("single_attempt"),
-        assert_no_writes=lambda: seen.append("no_writes"),
     )
     return watch, seen
 
@@ -237,7 +239,7 @@ def physical_witness(action):
 def test_native_physical_profile_keeps_first_close_and_later_registry_release(action):
     watch, seen = physical_witness(action)
     assert_physical_completion(watch, action)
-    assert seen == ["single_attempt", "no_writes"]
+    assert seen == ["single_attempt"]
 
 
 @pytest.mark.parametrize(
@@ -277,3 +279,140 @@ def test_source_bind_requires_native_integer_type(key, substitute):
     selected["parameters"][key] = replacement
     with pytest.raises(AssertionError):
         assert_hash_span(*args)
+
+
+def composition_witness():
+    hashed, original, _, events, parameters, calls = witness()
+    raw = object()
+    events = [(phase, kind, id(raw), sql) for phase, kind, _, sql in events]
+    for row in parameters + calls:
+        row["raw_id"] = id(raw)
+    watch = SimpleNamespace(
+        work=SimpleNamespace(_raw=raw),
+        trace=SimpleNamespace(events=events),
+        parameters=SimpleNamespace(receipts=parameters),
+        observer_units=[6, 3],
+        counters=[{}],
+    )
+    return hashed, original, calls, watch
+
+
+def prefix_query(args, sql):
+    hashed, _, calls, watch = args
+    raw = id(watch.work._raw)
+    watch.trace.events[:0] = [
+        ("ordinary", "sql-call", raw, sql),
+        ("ordinary", "sql-return", raw, sql),
+    ]
+    watch.parameters.receipts.insert(
+        0,
+        {
+            "phase": "ordinary",
+            "raw_id": raw,
+            "sql_sha256": hashlib.sha256(sql.encode()).hexdigest(),
+            "parameter_type": "dict",
+            "parameter_count": 0,
+            "outcome": "return",
+        },
+    )
+    hashed["entered_at"] += 2
+    hashed["returned_at"] += 2
+    for call in calls:
+        call["entered_at"] += 2
+        call["returned_at"] += 2
+
+
+def test_exact_reviewed_source_span_composes_without_mutating_native_observations():
+    args = composition_witness()
+    prefix_query(args, "SELECT 1")
+    watch = args[-1]
+    before = deepcopy((watch.trace.events, watch.parameters.receipts, args[2]))
+    assert_source_no_writes(*args)
+    assert (watch.trace.events, watch.parameters.receipts, args[2]) == before
+
+
+def test_local_reviewed_source_ctes_bind_the_original_first_page_inventory():
+    original = {table: [None] for table in TABLES}
+    from test_ledger_reader_native import _PG_REVIEWED_CTES
+
+    hashes = {
+        hashlib.sha256(sql.encode()).hexdigest()
+        for sql, _ in source_profile(original)
+        if sql.lstrip().upper().startswith("WITH")
+    }
+    assert hashes - _PG_REVIEWED_CTES == _SOURCE_CTE_HASHES
+    assert len(_SOURCE_CTE_HASHES) == 10
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "outside-source-cte",
+        "changed-source-cte",
+        "hidden-write-cte",
+        "zero-row-update",
+        "expanded-span",
+        "tuple-write",
+        "missing-counter",
+    ],
+)
+def test_source_composition_preserves_write_and_span_boundaries(fault):
+    args = composition_witness()
+    assert_source_no_writes(*args)
+    hashed, _, calls, watch = args
+    source_call = next(
+        row
+        for row in calls
+        if hashlib.sha256(row["sql"].encode()).hexdigest() in _SOURCE_CTE_HASHES
+    )
+    if fault == "outside-source-cte":
+        prefix_query(args, source_call["sql"])
+    elif fault == "changed-source-cte":
+        sql = source_call["sql"].replace(
+            "WITH ", "WITH changed AS (DELETE FROM jobs WHERE false RETURNING id), ", 1
+        )
+        position = source_call["entered_at"]
+        raw = id(watch.work._raw)
+        watch.trace.events[position : position + 2] = [
+            ("ordinary", "sql-call", raw, sql),
+            ("ordinary", "sql-return", raw, sql),
+        ]
+        source_call["sql"] = sql
+        watch.parameters.receipts[position // 2]["sql_sha256"] = hashlib.sha256(
+            sql.encode()
+        ).hexdigest()
+    elif fault == "hidden-write-cte":
+        prefix_query(
+            args,
+            "WITH changed AS (DELETE FROM jobs WHERE false RETURNING id) SELECT * FROM changed",
+        )
+    elif fault == "zero-row-update":
+        prefix_query(args, "UPDATE jobs SET reserved=reserved WHERE false")
+    elif fault == "expanded-span":
+        prefix_query(args, "SELECT 1")
+        hashed["entered_at"] = 0
+    elif fault == "tuple-write":
+        watch.counters = [{("public", "jobs", 1): (0, 1, 0)}]
+    else:
+        watch.observer_units = []
+    with pytest.raises(AssertionError):
+        assert_source_no_writes(*args)
+
+
+def test_runtime_map_and_observed_zero_row_dml_cannot_redefine_reviewed_source(monkeypatch):
+    key = ("postgresql", "source_gate_api_keys_first")
+    original = ledger_source.SQL[key]
+    changed = original.replace(
+        "WITH ", "WITH changed AS (UPDATE jobs SET reserved=reserved WHERE false RETURNING id), ", 1
+    )
+    assert changed != original
+    monkeypatch.setitem(ledger_source.SQL, key, changed)
+    args = composition_witness()
+    hashed, rows, calls, watch = args
+    # Both expected and observed SQL now agree: only the independent fixed
+    # provenance rule can reject this otherwise consistent zero-row write.
+    assert_hash_span(
+        hashed, rows, id(watch.work._raw), watch.trace.events, watch.parameters.receipts, calls
+    )
+    with pytest.raises(AssertionError):
+        assert_source_no_writes(*args)
