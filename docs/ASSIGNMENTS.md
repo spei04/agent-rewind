@@ -18,9 +18,9 @@ partner-data or production authorization.
 
 | Active owner | Cloud path on studio-agent | Current work / next acceptance gate | Concrete blocker |
 | --- | --- | --- | --- |
-| Provisioning engineer | `/home/serenapei/experiments/agent-rewind` | Assigned one SQLite R2 new-provision source-digest refusal at valid S1; reuse original fixtures/observer. | Source/offline and bounded controller review precede one explicit execution grant; PostgreSQL counterpart separate. |
-| Integration / planning engineer | `/home/serenapei/experiments/agent-rewind-worktrees/engineer-c` | Reconcile original MATRIX.v3 with accepted evidence through a9e46322; maintain one current remaining matrix. | Exact documentation and dependency review before commit/publication; no runtime/test work. |
-| Independent reviewer | `/home/serenapei/experiments/agent-rewind-evidence/review-records` | Review current coverage/gap mapping and the bounded R2 slice independently. | Reuse accepted post-write, concurrency, process-death and restore families; no broad reruns. |
+| Provisioning engineer | `/home/serenapei/experiments/agent-rewind` | Completed accepted SQLite R2 source, controller and one actual attempt; independently reviewing the corrected C2 ownership/release design. | No C2 source/native execution until the next explicit handoff; PostgreSQL R2 remains separate. |
+| Integration / planning engineer | `/home/serenapei/experiments/agent-rewind-worktrees/engineer-c` | Composed R2 at b1049812; completed missing 3.11 controls, C2/D2 mapping and private C2 design; updating four-doc checkpoint. | Exact documentation/composition review before publication; source/runtime frozen, no native grant. |
+| Independent reviewer | `/home/serenapei/experiments/agent-rewind-evidence/review-records` | Accepted R2 source/controller/actual/composition evidence; reviews C2 design and this four-doc integration. | Scope remains one SQLite actual case, two planned C2 acquisition cases and one planned D2 missing-opening case; final delivery separate. |
 | Lead | `/home/serenapei/experiments/agent-rewind-evidence/continuation-records` | Coordinate explicit source handoffs, one exclusive native slot and final matching-source delivery. | Full F3/P1 acceptance remains null; product P2 stays unstarted. |
 
 The latest ordinary capacity attempt at eb2cbc4 passes all four seeded-reader cases. The maximum took **1.976373s**, leaving about **24ms in one run**; repeatability and broader performance remain unproved. The dated v4 failure remains in the history below. [Capacity evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23) and [SQLite contention evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23) retain their distinct scopes.
@@ -1506,3 +1506,15 @@ The two database attempts remain four distinct cases at their original commits, 
 ## Current matrix and next source assignment — 2026-10-23
 
 After accepted/published a9e46322, the lead assigns primary one SQLite R2 new-provision source-digest refusal and secondary the [current remaining F3/P1 matrix](delivery/LEDGER_EXECUTION_PLAN.md#current-remaining-f3p1-acceptance-matrix--2026-10-23). Reviewer checks original-gate provenance and prevents duplicate accepted cases. Native source mismatch remains a separate counterpart. Internal matrix P2 identities is unrelated to starting product P2/#109. Two checkouts are reused; source/controller review and separate execution grants remain required. No runtime change, database run, new paid resources, model calls or external-gate change follows from this consolidation.
+
+
+## R2 completion and next bounded assignments — 2026-10-23
+
+| Engineer | Completed assignment | Next gate |
+| --- | --- | --- |
+| Provisioning | Original-source SQLite R2 case, 3.12 controls and one accepted actual attempt at 9df3f829; first-gate refusal and fresh absence preserve complete S1. | Independent review of the C2 design; further source/native work needs its explicit handoff. |
+| Integration / planning | Normal merge b1049812, missing owned 3.11 source/controller controls (25/22), accepted C2/D2 mapping, private two-case C2 design and four-doc progress update. | Independent composition/document review, then lead publication; no runtime or native execution. |
+| Independent reviewer | Accepted exact R2 source/controller, both-interpreter pure controls, one actual SQLite outcome/release and source composition. | Review C2 design and current documentation; preserve PostgreSQL R2 and full delivery gates. |
+| Lead | Accepted R2 actual result and scoped C2/D2 disposition; coordinates the one exclusive native slot. | Next source slice is C2 after corrected ownership/release design review; no native grant is outstanding for it. |
+
+The [current matrix](delivery/LEDGER_EXECUTION_PLAN.md#current-remaining-f3p1-acceptance-matrix--2026-10-23) retains exactly two C2 acquisition cases and one D2 missing-opening restore case. Final matching-source verification must run the six existing restore nodes with the native socket/tools on both interpreters; hosted skips are separate. Two existing checkouts remain in use. No new paid resources, provider calls, partner data or production activation were added. F3/P1 remains In progress/null acceptance and product P2 remains Not started.
