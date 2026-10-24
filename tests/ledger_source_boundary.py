@@ -50,7 +50,7 @@ def assert_new_intent(first, valid, changed):
 
 
 @contextmanager
-def observe_source(watch, monkeypatch, record):
+def observe_source(watch, monkeypatch, record, *, identify=identity):
     prepare, source = ledger_service._prepare_ledger, ledger_service.source_digest
     assert source is ledger_source.source_digest
     caller = ledger_service.initialize_ledger.__code__
@@ -59,7 +59,7 @@ def observe_source(watch, monkeypatch, record):
 
     def bound(work):
         assert work is watch.work
-        return identity(watch)
+        return identify(watch)
 
     def preparing(context, manifest, work):
         frame = inspect.currentframe().f_back
@@ -127,7 +127,7 @@ def observe_source(watch, monkeypatch, record):
     assert gate_line < refusal_line
 
 
-def assert_witness(receipt, manifest, expected_source, expected_identity, exception_id, events):
+def assert_provenance(receipt, manifest, expected_source, expected_identity, exception_id):
     (prepared,) = receipt["preparation"]
     (hashed,) = receipt["hashes"]
     (refused,) = receipt["refusals"]
@@ -158,6 +158,11 @@ def assert_witness(receipt, manifest, expected_source, expected_identity, except
         "code": "source_digest_mismatch",
         "position": hashed["returned_at"],
     }
+
+
+def assert_witness(receipt, manifest, expected_source, expected_identity, exception_id, events):
+    assert_provenance(receipt, manifest, expected_source, expected_identity, exception_id)
+    (hashed,) = receipt["hashes"]
     sql = returned_sql(
         events[hashed["entered_at"] : hashed["returned_at"]], expected_identity["raw_id"]
     )
