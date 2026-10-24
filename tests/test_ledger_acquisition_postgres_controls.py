@@ -3,6 +3,7 @@
 import ast
 import hashlib
 import inspect
+import re
 from copy import deepcopy
 
 import pytest
@@ -10,6 +11,7 @@ from ledger_acquisition_postgres_fixture import (
     BOOTSTRAP,
     EXCLUSION_QUERIES,
     MODES,
+    OBSERVE_SQL,
     PRE_LOCK,
     AcquisitionObserver,
     assert_absent,
@@ -677,3 +679,51 @@ def test_final_native_prefix_must_be_the_exact_held_observation():
     assert_native_contract(observed, final["witness"]["parameters"], lock_sql(TABLES), final=True)
     with pytest.raises(AssertionError):
         assert_result(final, held, "lock-expiry")
+
+
+def test_observer_projects_all_oid_fields_as_numbers_without_changing_query_scope():
+    # The original query produced JSON strings for oid fields. Pin every
+    # projection and alias without changing predicates, limits or selected rows.
+    projected = re.findall(r"\b(datid|database|relation)::bigint AS (\w+)", OBSERVE_SQL)
+    assert projected == [
+        ("datid", "datid"),
+        ("database", "database"),
+        ("relation", "relation"),
+        ("datid", "datid"),
+        ("database", "database"),
+        ("relation", "relation"),
+    ]
+    original = re.sub(r"\b(datid|database|relation)::bigint AS \1\b", r"\1", OBSERVE_SQL)
+    assert hashlib.sha256(" ".join(original.split()).encode()).hexdigest() == (
+        "032bf808628950705b4062ccd181a543b22e1acdccf8b1242bb30d8318a4016c"
+    )
+    compiled = text(OBSERVE_SQL).compile(dialect=PGDialect_psycopg())
+    assert set(compiled.params) == {"pid", "blocker", "database"}
+
+
+@pytest.mark.parametrize(
+    "collection,field",
+    [
+        ("activity", "datid"),
+        ("blocker_activity", "datid"),
+        ("locks", "database"),
+        ("locks", "relation"),
+        ("blocker_locks", "database"),
+        ("blocker_locks", "relation"),
+    ],
+)
+def test_observer_does_not_normalize_string_oids_or_credit_them_as_owned_waits(
+    monkeypatch, collection, field
+):
+    import ledger_acquisition_postgres_fixture as module
+
+    clock, journal = [10.0], []
+    monkeypatch.setattr(module, "monotonic", lambda: clock[0])
+    row, operator, blocker = waiting_fixture()
+    row[collection][0][field] = str(row[collection][0][field])
+    observer = AcquisitionObserver(FakeControl(clock, [0.05], row), "owned", 19, journal)
+    captured = observer.observe(31, 32)
+    assert type(captured[collection][0][field]) is str
+    assert journal[0]["row"] == [captured]
+    with pytest.raises(AssertionError):
+        assert_waiting(captured, operator, blocker, 51, lock_sql(TABLES))

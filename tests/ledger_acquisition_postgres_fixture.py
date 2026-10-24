@@ -244,22 +244,24 @@ def assert_result(message, held, mode):
 
 # One autocommit statement observes PID identity and all its locks together.
 # A different live identity at a reused PID is deliberately not filtered away.
+# PostgreSQL JSON encodes oid as text; bigint preserves its full unsigned range
+# as a JSON number. Keep nullable lock OIDs null and downstream type checks strict.
 OBSERVE_SQL = """
 SELECT json_build_object(
  'activity', (SELECT coalesce(json_agg(a), '[]'::json) FROM (
-   SELECT pid, backend_start::text, datid, datname, usename, state, wait_event_type,
-          query, query_start::text,
+   SELECT pid, backend_start::text, datid::bigint AS datid, datname, usename, state,
+          wait_event_type, query, query_start::text,
           extract(epoch FROM clock_timestamp()-query_start)::float8 AS age,
           pg_blocking_pids(pid) AS blockers
    FROM pg_stat_activity WHERE pid=:pid LIMIT 2) a),
  'locks', (SELECT coalesce(json_agg(l), '[]'::json) FROM (
-   SELECT pid, locktype, database, relation, mode, granted
+   SELECT pid, locktype, database::bigint AS database, relation::bigint AS relation, mode, granted
    FROM pg_locks WHERE pid=:pid ORDER BY locktype, relation, mode LIMIT 129) l),
  'blocker_activity', (SELECT coalesce(json_agg(a), '[]'::json) FROM (
-   SELECT pid, backend_start::text, datid, datname, usename
+   SELECT pid, backend_start::text, datid::bigint AS datid, datname, usename
    FROM pg_stat_activity WHERE pid=:blocker LIMIT 2) a),
  'blocker_locks', (SELECT coalesce(json_agg(l), '[]'::json) FROM (
-   SELECT pid, locktype, database, relation, mode, granted
+   SELECT pid, locktype, database::bigint AS database, relation::bigint AS relation, mode, granted
    FROM pg_locks WHERE pid=:blocker ORDER BY locktype, relation, mode LIMIT 129) l),
  'target_pids', (SELECT coalesce(json_agg(pid ORDER BY pid), '[]'::json) FROM (
    SELECT pid FROM pg_stat_activity WHERE datname=:database LIMIT 4) a))
