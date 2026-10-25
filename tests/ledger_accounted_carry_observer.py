@@ -13,7 +13,7 @@ from agent_rewind.migrations.schema import LEDGER
 
 
 @contextmanager
-def observe_carry(watch, monkeypatch, record):
+def observe_carry(watch, monkeypatch, record, *, raw_handle=None):
     entries, sources = [], []
     original = ledger_service._prepare_ledger
     summation = ledger_provisioning._sum_money
@@ -22,7 +22,8 @@ def observe_carry(watch, monkeypatch, record):
 
     def bound(work):
         assert work is watch.work and work._connection.engine is watch.engine
-        assert work._raw is watch.trace.raws[0]
+        raw = watch.trace.raws[0] if raw_handle is None else raw_handle(watch)
+        assert work._raw is raw
         return {"work_id": id(work), "raw_id": id(work._raw), "engine_id": id(watch.engine)}
 
     def total(values, work):

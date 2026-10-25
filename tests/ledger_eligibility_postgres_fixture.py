@@ -156,8 +156,8 @@ def terminal_precursor(fixture, pg, job_id):
     return result
 
 
-def admitted_predecessor(pg, root, monkeypatch, record):
-    fixture = build_postgres_case(pg)
+def admitted_predecessor(pg, root, monkeypatch, record, *, legacy=True):
+    fixture = build_postgres_case(pg, legacy=legacy)
     engine = None
     try:
         # The setup adapters require checkedout(); the attested operator stays unchanged.
@@ -249,6 +249,9 @@ def admitted_predecessor(pg, root, monkeypatch, record):
         return result, SimpleNamespace(
             accepted=accepted,
             association=association,
+            config=f.config,
+            storage=f.storage.local,
+            descriptors=tuple(f.storage.calls),
             objects=objects,
             journal=f.root,
             ciphertexts=file_hashes(objects),
