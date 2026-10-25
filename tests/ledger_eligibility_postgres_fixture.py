@@ -34,7 +34,8 @@ from agent_rewind.admission_envelope import OriginCorrelation
 from agent_rewind.admission_journal import AdmissionJournal
 from agent_rewind.admission_request import parse_submit
 from agent_rewind.migrations.compatibility import CompatibilityResult
-from agent_rewind.migrations.schema import LEDGER, installed_profile
+from agent_rewind.migrations.ownership_state import validate_ownership_progress
+from agent_rewind.migrations.schema import LEDGER, OWNERSHIP, installed_profile
 from agent_rewind.models import canonical
 from agent_rewind.request_authority import RequestAuthority
 from agent_rewind.request_identity import VerifiedPrincipal
@@ -46,10 +47,29 @@ def native_handle(watch):
 
 
 def native_principal(fixture):
-    mapping = fixture.case.adoption["mapping"]
+    adoption = fixture.case.adoption
+    mapping = adoption["mapping"]
     if type(mapping) is str:
         mapping = json.loads(mapping)
-    (grant,) = mapping["principal_grants"]
+    if adoption.get("source_kind") == "fresh":
+        assert typed(mapping) == typed({"schema": 1, "source_kind": "fresh"})
+        (progress,) = [
+            row
+            for row in rows(fixture.before, "migration_progress")
+            if row["revision"] == OWNERSHIP and row["phase"] == "ownership"
+        ]
+        parsed_progress = dict(progress)
+        if type(parsed_progress["cursor"]) is dict:
+            parsed_progress["cursor"] = canonical(parsed_progress["cursor"]).decode()
+        state = validate_ownership_progress(adoption, parsed_progress)
+        assert state.status == "complete"
+        assert state.organization_id == fixture.organization and state.project_id == fixture.project
+        (validated,) = state.grants
+        grant = validated.model_dump(mode="json")
+        grant_key = "ownership_grant"
+    else:
+        (grant,) = mapping["principal_grants"]
+        grant_key = "mapping_grant"
     (member,) = rows(fixture.before, "project_memberships")
     assert grant["role"] == "maintainer" and grant["legacy_default"] is True
     assert typed(member) == typed(
@@ -62,7 +82,7 @@ def native_principal(fixture):
         }
     )
     principal = VerifiedPrincipal(grant["principal_id"])
-    return principal, {"mapping_grant": grant, "persisted_membership": member}
+    return principal, {grant_key: grant, "persisted_membership": member}
 
 
 def assert_native_jobs(state):

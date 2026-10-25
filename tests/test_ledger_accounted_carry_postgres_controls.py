@@ -269,3 +269,164 @@ def test_raw_progress_preserves_exact_old_jsonb_text(mutation):
     else:
         with pytest.raises(AssertionError):
             assert_raw_progress(old, new, "new_manifest")
+
+
+def fresh_principal_fixture(*, cursor_text=False):
+    from test_ownership import FRESH
+
+    from agent_rewind.migrations.inputs import empty_source_digest
+    from agent_rewind.migrations.schema import OWNERSHIP, checksum
+
+    intent = {"source_kind": "fresh", "input": deepcopy(FRESH)}
+    grant = intent["input"]["principal_grants"][0]
+    cursor = {
+        "schema_version": 1,
+        "intent": intent,
+        "intent_digest": checksum(intent),
+        "closure_digest": "c" * 64,
+        "total_resources": 0,
+        "last_resource": None,
+        "initialized_at": OBSERVED,
+    }
+    progress = {
+        "revision": OWNERSHIP,
+        "phase": "ownership",
+        "source_digest": empty_source_digest(),
+        "cursor": canonical(cursor).decode() if cursor_text else cursor,
+        "rows_verified": 0,
+        "status": "complete",
+        "updated_at": native_time(OBSERVED),
+    }
+    adoption = {
+        "source_kind": "fresh",
+        "mapping": {"schema": 1, "source_kind": "fresh"},
+        "installation_key": FRESH["installation_key"],
+        "organization_id": FRESH["organization_id"],
+        "project_id": FRESH["project_id"],
+        "state": "ownership_complete",
+    }
+    member = {
+        "project_id": FRESH["project_id"],
+        "principal_id": grant["principal_id"],
+        "role": grant["role"],
+        "revoked_at": None,
+        "legacy_default": True,
+    }
+    fixture = SimpleNamespace(
+        case=SimpleNamespace(adoption=adoption),
+        organization=FRESH["organization_id"],
+        project=FRESH["project_id"],
+        before={
+            "tables": {
+                "migration_progress": table([progress]),
+                "project_memberships": table([member]),
+            }
+        },
+    )
+    return fixture, deepcopy(grant), deepcopy(member)
+
+
+@pytest.mark.parametrize("cursor_text", [False, True])
+def test_fresh_principal_uses_original_ownership_progress(monkeypatch, cursor_text):
+    import ledger_eligibility_postgres_fixture as native
+
+    fixture, grant, member = fresh_principal_fixture(cursor_text=cursor_text)
+    before = deepcopy(fixture.before)
+    adoption = deepcopy(fixture.case.adoption)
+    original = native.validate_ownership_progress
+    observed = []
+
+    def validate(row, progress):
+        assert row is fixture.case.adoption
+        assert type(progress["cursor"]) is str
+        value = original(row, progress)
+        observed.append(value)
+        return value
+
+    monkeypatch.setattr(native, "validate_ownership_progress", validate)
+    principal, binding = native.native_principal(fixture)
+    assert len(observed) == 1 and observed[0].status == "complete"
+    assert principal.principal_id == grant["principal_id"]
+    assert typed(binding) == typed({"ownership_grant": grant, "persisted_membership": member})
+    assert typed(fixture.before) == typed(before)
+    assert typed(fixture.case.adoption) == typed(adoption)
+    assert "principal_grants" not in fixture.case.adoption["mapping"]
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "missing-progress",
+        "duplicate-progress",
+        "bad-digest",
+        "missing-grant",
+        "duplicate-grant",
+        "wrong-grant",
+        "wrong-member",
+        "bool-member",
+        "incomplete",
+        "wrong-project",
+        "wrong-organization",
+        "forged-mapping",
+    ],
+)
+def test_fresh_principal_rejects_unbound_intent_or_membership(mutation):
+    from ledger_eligibility_postgres_fixture import native_principal
+
+    from agent_rewind.migrations.schema import MigrationRefused, checksum
+
+    fixture, grant, _ = fresh_principal_fixture()
+    values = deepcopy(rows(fixture.before, "migration_progress"))
+    progress = values[0]
+    cursor = progress["cursor"]
+    if mutation == "missing-progress":
+        values.clear()
+    elif mutation == "duplicate-progress":
+        values.append(deepcopy(progress))
+    elif mutation == "bad-digest":
+        cursor["intent_digest"] = "0" * 64
+    elif mutation in {"missing-grant", "duplicate-grant", "wrong-grant"}:
+        grants = cursor["intent"]["input"]["principal_grants"]
+        if mutation == "missing-grant":
+            grants.clear()
+        elif mutation == "duplicate-grant":
+            grants.append(deepcopy(grants[0]))
+        else:
+            grants[0]["principal_id"] = "oidc:" + "f" * 64
+        cursor["intent_digest"] = checksum(cursor["intent"])
+    elif mutation in {"wrong-member", "bool-member"}:
+        members = rows(fixture.before, "project_memberships")
+        members[0]["role" if mutation == "wrong-member" else "legacy_default"] = (
+            "operator" if mutation == "wrong-member" else 1
+        )
+        replace_rows(fixture.before, "project_memberships", members)
+    elif mutation == "incomplete":
+        progress["status"] = "running"
+        cursor["total_resources"] = 1
+        fixture.case.adoption["state"] = "prepared"
+    elif mutation == "wrong-project":
+        fixture.project = "f" * 32
+    elif mutation == "wrong-organization":
+        fixture.organization = "f" * 32
+    else:
+        fixture.case.adoption["mapping"]["principal_grants"] = [grant]
+    replace_rows(fixture.before, "migration_progress", values)
+    if mutation in {"missing-progress", "duplicate-progress"}:
+        error = ValueError
+    elif mutation in {"bad-digest", "missing-grant", "duplicate-grant"}:
+        error = MigrationRefused
+    else:
+        error = AssertionError
+    with pytest.raises(error):
+        native_principal(fixture)
+
+
+def test_legacy_principal_retains_mapping_grant_without_fresh_progress():
+    from ledger_eligibility_postgres_fixture import native_principal
+
+    fixture, grant, member = fresh_principal_fixture()
+    fixture.case.adoption = {"source_kind": "legacy", "mapping": {"principal_grants": [grant]}}
+    del fixture.before["tables"]["migration_progress"]
+    principal, binding = native_principal(fixture)
+    assert principal.principal_id == grant["principal_id"]
+    assert typed(binding) == typed({"mapping_grant": grant, "persisted_membership": member})
