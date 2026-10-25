@@ -69,8 +69,11 @@ def native_example():
     return frozen, first, initial, before, additions, evolved, second, written, state
 
 
-def observed(monkeypatch, *, handles=1):
+def observed(monkeypatch, *, handles=1, selective_objects=False):
     frozen, first, _, _, _, evolved, second, _, state = native_example()
+    reader_objects = None
+    if selective_objects:
+        evolved, reader_objects = selective_object_example(evolved)
     work, raw, engine = LedgerWork(), object(), object()
     work._raw, work._connection = raw, SimpleNamespace(engine=engine)
     trace = SimpleNamespace(
@@ -78,6 +81,8 @@ def observed(monkeypatch, *, handles=1):
     )
     watch = SimpleNamespace(work=work, engine=engine, trace=trace)
     _, financial = financial_projection(evolved.before)
+    if reader_objects is not None:
+        financial["object"] = reader_objects
     context = SimpleNamespace(
         state=LedgerState.model_validate(state),
         financial=deepcopy(financial),
@@ -97,6 +102,178 @@ def observed(monkeypatch, *, handles=1):
     # Explicit synthetic receipts test accounting; they do not claim real source reads.
     sources.extend([{**identity_values, "value": evolved.source, "position": 0} for _ in range(2)])
     return entries[0], sources, evolved, first, second, state, watch
+
+
+def selective_object_example(evolved):
+    """Four native descriptors; the observed financial subset is independently literal."""
+    evolved = deepcopy(evolved)
+    project = "9" * 32
+    objects = [
+        {
+            "id": "a" * 32,
+            "project_id": project,
+            "digest": "a" * 64,
+            "locator": "objects/" + project + "/v1/" + "a" * 64,
+            "format_version": 1,
+            "byte_count": 11,
+            "created_at": native_time(OBSERVED),
+        },
+        {
+            "id": "000000000000000000000000006acfc0",
+            "project_id": project,
+            "digest": "e" * 64,
+            "locator": "objects/" + project + "/v1/" + "e" * 64,
+            "format_version": 1,
+            "byte_count": 22,
+            "created_at": native_time(OBSERVED),
+        },
+        {
+            "id": "b" * 32,
+            "project_id": project,
+            "digest": "b" * 64,
+            "locator": "objects/" + project + "/v1/" + "b" * 64,
+            "format_version": 1,
+            "byte_count": 33,
+            "created_at": native_time(OBSERVED),
+        },
+        {
+            "id": "c" * 32,
+            "project_id": project,
+            "digest": "c" * 64,
+            "locator": "objects/" + project + "/v1/" + "c" * 64,
+            "format_version": 1,
+            "byte_count": 44,
+            "created_at": native_time(OBSERVED),
+        },
+    ]
+    (job,) = rows(evolved.before, "jobs")
+    (call,) = rows(evolved.before, "provider_calls")
+    references = [
+        {
+            "project_id": project,
+            "owner_kind": owner_kind,
+            "owner_id": owner_id,
+            "artifact_id": artifact_id,
+            "role": role,
+        }
+        for owner_kind, owner_id, artifact_id, role in (
+            ("job", job["id"], "a" * 32, "admission_config"),
+            ("provider_call", call["id"], "000000000000000000000000006acfc0", "budget_evidence"),
+            ("job", job["id"], "b" * 32, "payload"),
+            ("job", job["id"], "c" * 32, "task"),
+        )
+    ]
+    replace_rows(evolved.before, "artifact_objects", objects)
+    replace_rows(evolved.before, "artifact_refs", references)
+    # Deliberately do not derive these reader rows from financial_projection or objects.
+    observed_objects = [
+        {
+            "id": "000000000000000000000000006acfc0",
+            "project_id": "9" * 32,
+            "digest": "e" * 64,
+            "locator": "objects/" + "9" * 32 + "/v1/" + "e" * 64,
+            "format_version": 1,
+            "byte_count": 22,
+            "created_at": "2026-10-23T00:00:00.000000Z",
+        },
+        {
+            "id": "a" * 32,
+            "project_id": "9" * 32,
+            "digest": "a" * 64,
+            "locator": "objects/" + "9" * 32 + "/v1/" + "a" * 64,
+            "format_version": 1,
+            "byte_count": 11,
+            "created_at": "2026-10-23T00:00:00.000000Z",
+        },
+    ]
+    return evolved, observed_objects
+
+
+def test_native_reader_object_subset_preserves_complete_native_objects(monkeypatch):
+    entry, sources, evolved, first, second, state, watch = observed(
+        monkeypatch, selective_objects=True
+    )
+    original = deepcopy(evolved.before)
+    assert [row["id"] for row in entry["financial"]["object"]] == [
+        "000000000000000000000000006acfc0",
+        "a" * 32,
+    ]
+    assert len(rows(evolved.before, "artifact_objects")) == 4
+    assert len(rows(evolved.before, "artifact_refs")) == 4
+    assert_native_carry(entry, sources, evolved, first, second, state, watch)
+    assert typed(evolved.before) == typed(original)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "excluded-object",
+        "missing-object",
+        "duplicate-object",
+        "wrong-project",
+        "byte-float",
+        "version-bool",
+        "native-time",
+    ],
+)
+def test_native_reader_object_subset_rejects_independent_reader_corruption(monkeypatch, mutation):
+    entry, sources, evolved, first, second, state, watch = observed(
+        monkeypatch, selective_objects=True
+    )
+    entry = deepcopy(entry)
+    values = entry["financial"]["object"]
+    if mutation == "excluded-object":
+        payload = next(
+            row for row in rows(evolved.before, "artifact_objects") if row["id"] == "b" * 32
+        )
+        payload["created_at"] = "2026-10-23T00:00:00.000000Z"
+        values.append(payload)
+    elif mutation == "missing-object":
+        values.pop()
+    elif mutation == "duplicate-object":
+        values.append(deepcopy(values[0]))
+    elif mutation == "wrong-project":
+        values[0]["project_id"] = "8" * 32
+    elif mutation == "byte-float":
+        values[0]["byte_count"] = 22.0
+    elif mutation == "version-bool":
+        values[0]["format_version"] = True
+    else:
+        values[0]["created_at"] = native_time(OBSERVED)
+    with pytest.raises(AssertionError):
+        assert_native_carry(entry, sources, evolved, first, second, state, watch)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "missing-descriptor",
+        "duplicate-descriptor",
+        "wrong-descriptor-project",
+        "conflicting-reference-project",
+        "unknown-reference",
+    ],
+)
+def test_native_object_projection_rejects_invalid_required_binding(mutation):
+    evolved, _ = selective_object_example(native_example()[5])
+    objects = rows(evolved.before, "artifact_objects")
+    references = rows(evolved.before, "artifact_refs")
+    selected = next(row for row in objects if row["id"] == "a" * 32)
+    reference = next(row for row in references if row["role"] == "admission_config")
+    if mutation == "missing-descriptor":
+        objects.remove(selected)
+    elif mutation == "duplicate-descriptor":
+        objects.append(deepcopy(selected))
+    elif mutation == "wrong-descriptor-project":
+        selected["project_id"] = "8" * 32
+    elif mutation == "conflicting-reference-project":
+        references.append({**reference, "project_id": "8" * 32})
+    else:
+        reference["artifact_id"] = "f" * 32
+    replace_rows(evolved.before, "artifact_objects", objects)
+    replace_rows(evolved.before, "artifact_refs", references)
+    with pytest.raises(AssertionError):
+        financial_projection(evolved.before)
 
 
 def test_native_setup_and_final_projection_keep_original_opening():

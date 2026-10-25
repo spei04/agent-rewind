@@ -31,11 +31,24 @@ TIME_FIELDS = {
 
 
 def financial_projection(before):
-    """Only declared reader timestamps and project/organization column projections change."""
+    """Project the financial reader subset without changing the complete native snapshot."""
     projected = deepcopy(before)
     result = {}
     for domain, table in FINANCIAL_TABLES.items():
         values = rows(before, table)
+        if domain == "object":
+            required = {}
+            for reference in rows(before, "artifact_refs"):
+                if reference["role"] in {"admission_config", "budget_evidence"}:
+                    required.setdefault(reference["artifact_id"], set()).add(
+                        reference["project_id"]
+                    )
+            values = [row for row in values if row["id"] in required]
+            assert len(values) == len(required) and {row["id"] for row in values} == set(required)
+            for row in values:
+                projects = required[row["id"]]
+                assert len(projects) == 1
+                assert typed(next(iter(projects))) == typed(row["project_id"])
         for row in values:
             for name in TIME_FIELDS.get(domain, ()):
                 row[name] = canonical_time(row[name])
