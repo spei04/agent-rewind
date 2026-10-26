@@ -84,9 +84,12 @@ Do not expand these to directory-wide ignores. Remove an exception if its
 assumption stops being true; changes require the same review as runtime code.
 Runtime assertion guards remain active when Python optimization is enabled.
 
-The build backend is pinned to setuptools 83.0.0 in both build-system and build
-group, addressing [GHSA-h35f-9h28-mq5c](https://github.com/advisories/GHSA-h35f-9h28-mq5c).
-Cryptography is locked to 50.0.2. These updates are included in the unsuppressed
+The build backend is pinned to setuptools 84.1.0 in both build-system and build
+group, addressing [GHSA-xmj3-9gf7-h52w](https://github.com/advisories/GHSA-xmj3-9gf7-h52w)
+and retaining the earlier [GHSA-h35f-9h28-mq5c](https://github.com/advisories/GHSA-h35f-9h28-mq5c)
+repair. The runtime lock uses opentelemetry-api 1.45.1 for
+[CVE-2026-114603](https://github.com/open-telemetry/opentelemetry-python/security/advisories/GHSA-xcq7-p3pf-p88h).
+Cryptography remains locked to 50.0.2. These updates are included in the unsuppressed
 audit; a prior GitHub alert read-back is not proof of the current complete lock.
 
 The build tool is pinned to uv 0.13.4 to address
