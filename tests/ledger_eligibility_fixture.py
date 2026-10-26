@@ -173,6 +173,15 @@ def predecessor_compatibility(service, record):
 def admitted_predecessor(path, monkeypatch, record):
     # The accepted builder's three-legacy-job assertions remain unchanged.
     fixture = build_case(path)
+    try:
+        return admit_existing_fixture(fixture, monkeypatch, record)
+    except BaseException:
+        fixture.close()
+        raise
+
+
+def admit_existing_fixture(fixture, monkeypatch, record):
+    """Publish one job; the caller retains ownership of the supplied fixture."""
     engine = None
     try:
         engine = admission_engine(fixture)
@@ -265,9 +274,6 @@ def admitted_predecessor(path, monkeypatch, record):
             adapter_scope="Synthetic policy/readiness/schema only for predecessor admission; "
             "actual encrypted publication and actual ledger initialization",
         )
-    except BaseException:
-        fixture.close()
-        raise
     finally:
         if engine is not None:
             engine.dispose()

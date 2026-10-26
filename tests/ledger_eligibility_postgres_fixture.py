@@ -178,6 +178,15 @@ def terminal_precursor(fixture, pg, job_id):
 
 def admitted_predecessor(pg, root, monkeypatch, record, *, legacy=True):
     fixture = build_postgres_case(pg, legacy=legacy)
+    try:
+        return admit_existing_fixture(fixture, pg, root, monkeypatch, record)
+    except BaseException:
+        fixture.close()
+        raise
+
+
+def admit_existing_fixture(fixture, pg, root, monkeypatch, record):
+    """Publish one job; native fixture lifetime remains with the caller."""
     engine = None
     try:
         # The setup adapters require checkedout(); the attested operator stays unchanged.
@@ -282,9 +291,6 @@ def admitted_predecessor(pg, root, monkeypatch, record, *, legacy=True):
             adapter_scope="Synthetic policy/readiness/schema only for predecessor admission; "
             "actual encrypted publication and actual ledger initialization",
         )
-    except BaseException:
-        fixture.close()
-        raise
     finally:
         if engine is not None:
             engine.dispose()
