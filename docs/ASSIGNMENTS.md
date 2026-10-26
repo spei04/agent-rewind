@@ -14,14 +14,14 @@ active writers; do not delete other teams' files or touch the separate local
 computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
-## Current assignments — 2026-10-24
+## Current assignments — 2026-10-25
 
 | Active owner | Cloud path on studio-agent | Current work / next acceptance gate | Concrete blocker |
 | --- | --- | --- | --- |
-| Provisioning engineer | /home/serenapei/experiments/agent-rewind | Completed persisted-money source 1a524580, PostgreSQL controller/actual case and independent SQLite controller matching. | Preserve source and stopped PostgreSQL release 62b167e6; no new native case assigned. |
-| Integration / planning engineer | /home/serenapei/experiments/agent-rewind-worktrees/engineer-c | Completed matching source/PostgreSQL controls, SQLite controller/actual case and four-document synchronization. | Documentation validation/freeze and independent review precede lead commit/publication; no actual rerun. |
-| Independent reviewer | /home/serenapei/experiments/agent-rewind-evidence/review-records | Accepted evidence mapping, source, both controllers and both actual complete-reader outcomes. | Bind final documents, exact issue prose/publication scripts and preserved histories/cards; full delivery remains separate. |
-| Lead | /home/serenapei/experiments/agent-rewind-evidence/continuation-records | Accepted both narrow actual outcomes at 1a524580; owns publication and subsequent dependency-ready assignments. | No grant outstanding or next case assigned. F3/P1 acceptance is null and product P2 Not started. |
+| Provisioning engineer | /home/serenapei/experiments/agent-rewind | Completed native carry source and reviewed provenance/object-projection corrections; final 103 source controls and independent 82 controller controls on Python 3.12. | Preserve source 592f5842 and accepted actual evidence; no new native case assigned. |
+| Integration / planning engineer | /home/serenapei/experiments/agent-rewind-worktrees/engineer-c | Completed matching source controls, successor controller, accepted second actual attempt and four-document synchronization. | Final 94 documentation controls, exact-byte review and lead commit/publication; no source/native rerun. |
+| Independent reviewer | /home/serenapei/experiments/agent-rewind-evidence/review-records | Accepted corrected source, successor controller and complete actual evidence, including preserved failed first attempt. | Bind final four documents, issue prose/publication scripts and untouched history/cards; full delivery remains separate. |
+| Lead | /home/serenapei/experiments/agent-rewind-evidence/continuation-records | Accepted the narrow PostgreSQL carry result at 592f5842; owns publication and subsequent dependency-ready assignments. | No grant outstanding or next case assigned. F3/P1 acceptance is null and product P2 Not started. |
 
 The latest ordinary capacity attempt at eb2cbc4 passes all four seeded-reader cases. The maximum took **1.976373s**, leaving about **24ms in one run**; repeatability and broader performance remain unproved. The dated v4 failure remains in the history below. [Capacity evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23) and [SQLite contention evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23) retain their distinct scopes.
 
@@ -1604,3 +1604,17 @@ Each final source/controller selection passed once per interpreter: 59 source co
 | Lead | Accepted narrow PostgreSQL actual 58c1700d / peer 46a89f4d and SQLite actual 74920ec6 / peer 8dd1db08. | Publish reviewed checkpoint; then select dependency-ready remaining matrix work. No native grant remains outstanding. |
 
 Each actual Python 3.12 case passed on its first attempt. The final offline selections passed once per interpreter: 28 source, 27 PostgreSQL controller and 40 SQLite controller controls. SQLite's original pooled return and later caller physical disposal remain separately attributed. The initial 39-pass/1-fail control and its test-only safe plugin-disable correction are retained; earlier accepted cases and failures were reused without rerun. Both cloud checkouts and owned environments remain for sequential reuse. F3/P1 acceptance is null, P2 Not started; counts, estimates, the $200 cap, explicitly unreconciled $36.567974 reservations and external gates are unchanged.
+
+
+## PostgreSQL accounted-only carry checkpoint — 2026-10-25
+
+| Engineer / owner | Completed scoped assignment | Next boundary |
+| --- | --- | --- |
+| Provisioning engineer | Native fixture/observer/test and corrected fresh-ownership/object-reader provenance; final source 103 controls on Python 3.12; independent successor 82-control matching and actual spot-check. | Preserve exact source and evidence; no new case assigned. |
+| Integration / planning engineer | Matching source 103 controls on Python 3.11; private controller and 82 final controls; two separately granted actual attempts, then four-document synchronization. | Documentation checks/freeze and peer review before lead commit/publication. |
+| Independent reviewer | Accepted final source, controller and actual evidence; verified both failed and successful actual records and lifecycle cleanup. | Bind exact document/issue/publication bytes and retained history. |
+| Lead | Scoped corrections/grants and successor acceptance 3d42e765; owns publication and subsequent dependency-ready work. | No grant remains outstanding; select a remaining matrix item only through its prerequisites. |
+
+Source checkpoints 75→90→103 controls remain distinct. Controller history retains 4 passes/60 fixture errors, an interrupted attempt without completed XML, then 72 passes per interpreter. The first native attempt failed after two physical commits with 24/30 properties and zero semantic credit. A corrected object projection and independent literal reader witness precede successor preparation: 81 passes/1 metadata-shape failure, metadata-only correction, then 82 passes per interpreter. The second total native attempt passed with 30 properties and two semantic commits; no receipt replay. Freeze-only classname diagnostics remain separate from test outcomes.
+
+Both owned cloud checkouts and environments remain for sequential reuse. Stopped release c78b46c8 binds restored baseline/memberships and reaped processes. Full F3/P1 acceptance is null, P2 Not started; counts, estimates, the $200 cap, unreconciled $36.567974 reservations and external gates are unchanged.
