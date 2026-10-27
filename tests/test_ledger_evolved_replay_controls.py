@@ -29,7 +29,13 @@ from ledger_evolved_replay_fixture import (
     source_rows_from_state,
     timestamp,
 )
-from ledger_evolved_replay_observer import anchor, assert_observation, observe_replay, sites
+from ledger_evolved_replay_observer import (
+    anchor,
+    assert_observation,
+    observe_replay,
+    replay_financial,
+    sites,
+)
 from ledger_provisioning_fixture import identity
 from ledger_restore_authority import typed
 
@@ -864,3 +870,79 @@ def test_actual_native_collection_requires_bounded_runner_key(
             equal(
                 dispatch(supplied, 1001), {"started": 1000.0, "entered": 1001, "deadline": 1360.0}
             )
+
+
+def mixed_scope_reader_witness(*, reserved=True):
+    """Literal selected identities plus unrelated persisted run/key scopes."""
+    value = witness()
+    full = deepcopy(value.reserved if reserved else value.before)
+    project = identity(2)
+    jobs = [
+        {"resource_kind": "job", "resource_id": identity(i), "project_id": project}
+        for i in (3, 4, 5, 6)
+    ]
+    selected = jobs + (
+        [{"resource_kind": "provider_call", "resource_id": CALL, "project_id": project}]
+        if reserved
+        else []
+    )
+    unrelated = [
+        {"resource_kind": "key", "resource_id": identity(31), "project_id": project},
+        {"resource_kind": "key", "resource_id": identity(32), "project_id": project},
+        {"resource_kind": "run", "resource_id": identity(41), "project_id": project},
+        {"resource_kind": "run", "resource_id": identity(42), "project_id": project},
+    ]
+    replace_rows(full, "resource_scopes", selected + unrelated)
+    return full, selected, unrelated
+
+
+@pytest.mark.parametrize("reserved", [False, True])
+def test_replay_reader_scope_subset_preserves_complete_native_state(reserved):
+    full, selected, unrelated = mixed_scope_reader_witness(reserved=reserved)
+    before = deepcopy(full)
+    actual = replay_financial(full)
+    equal(actual["scope"], selected)
+    equal(full, before)
+    assert len(rows(full, "resource_scopes")) == len(selected) + 4
+    equal(
+        [row for row in rows(full, "resource_scopes") if row["resource_kind"] in {"key", "run"}],
+        unrelated,
+    )
+
+
+def test_complete_reader_accepts_independently_selected_scope_observation():
+    full, selected, _ = mixed_scope_reader_witness()
+    manifest, receipt, state, identity_values, observed = observation_witness()
+    observed["inspection"][0]["financial"]["scope"] = typed(selected)
+    expected = {**financial_witness(), "scope": replay_financial(full)["scope"]}
+    assert_observation(observed, manifest, receipt, state, identity_values, 110, expected)
+
+
+@pytest.mark.parametrize("damage", ["unfiltered", "key", "missing-job", "missing-call"])
+def test_complete_reader_rejects_wrong_scope_domain(damage):
+    full, selected, unrelated = mixed_scope_reader_witness()
+    manifest, receipt, state, identity_values, observed = observation_witness()
+    wrong = deepcopy(selected)
+    if damage == "unfiltered":
+        wrong += unrelated
+    elif damage == "key":
+        wrong += unrelated[:1]
+    elif damage == "missing-job":
+        wrong.pop(0)
+    else:
+        wrong.pop()
+    observed["inspection"][0]["financial"]["scope"] = typed(wrong)
+    expected = {**financial_witness(), "scope": replay_financial(full)["scope"]}
+    with pytest.raises(AssertionError):
+        assert_observation(observed, manifest, receipt, state, identity_values, 110, expected)
+
+
+def test_reader_scope_subset_does_not_permit_full_state_deletion():
+    full, selected, _ = mixed_scope_reader_witness()
+    damaged = deepcopy(full)
+    replace_rows(damaged, "resource_scopes", selected)
+    receipt = {"sequence": 0, "outcome": "complete"}
+    with pytest.raises(AssertionError):
+        assert_replay_preservation(
+            full, damaged, receipt, receipt, source_rows_from_state(full), {}, {}
+        )

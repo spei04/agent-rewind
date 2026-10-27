@@ -6,7 +6,7 @@ import sys
 from contextlib import contextmanager
 from copy import deepcopy
 
-from ledger_accounted_carry_postgres_observer import ordered
+from ledger_accounted_carry_postgres_observer import financial_projection, ordered
 from ledger_evolved_replay_fixture import equal
 from ledger_restore_authority import typed
 
@@ -21,6 +21,15 @@ NEW_INTENT = (
     "_ledger_cursors",
     "_finalize",
 )
+
+
+def replay_financial(before):
+    """Select the original ar7 reader scopes; retain the complete snapshot separately."""
+    _, financial = financial_projection(before)
+    financial["scope"] = [
+        row for row in financial["scope"] if row["resource_kind"] in {"job", "provider_call"}
+    ]
+    return financial
 
 
 def sites():

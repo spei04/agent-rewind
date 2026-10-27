@@ -15,7 +15,6 @@ from cryptography.fernet import Fernet
 from ledger_account_identity_fixture import assert_admission_delta, assert_stores, job_intents
 from ledger_account_identity_postgres_fixture import expected_native_first
 from ledger_accounted_carry_postgres_fixture import assert_raw_progress
-from ledger_accounted_carry_postgres_observer import financial_projection
 from ledger_eligibility_fixture import file_hashes, rows
 from ledger_evolved_replay_fixture import (
     CASES,
@@ -39,7 +38,12 @@ from ledger_evolved_replay_fixture import (
     source_rows_from_state,
     timestamp,
 )
-from ledger_evolved_replay_observer import anchor, assert_observation, observe_replay
+from ledger_evolved_replay_observer import (
+    anchor,
+    assert_observation,
+    observe_replay,
+    replay_financial,
+)
 from ledger_overflow_postgres_fixture import raw_progress
 from ledger_provisioning_fixture import expected_stage, source_fingerprint
 from ledger_provisioning_postgres_fixture import (
@@ -353,7 +357,7 @@ def replay(
 ):
     before = native_snapshot(fixture.case, pg)
     source = source_rows_from_state(before)
-    _, financial = financial_projection(before)
+    financial = replay_financial(before)
     storage = stored(fixture, admission, settlement)
     checked = read_ledger_manifest(path)
     equal(checked.model_dump(mode="json"), manifest)
