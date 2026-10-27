@@ -176,9 +176,9 @@ def _delivery_packet(packet):
         end = heading.end() + following.start() if following else len(markdown)
         body, count = re.subn(
             r"(?m)^(- \*\*(?:Progress|Status):\*\* ).*$",
-            lambda match, status=current["status"]: match[1]
-            + status
-            + "; synthetic sequencing fixture.",
+            lambda match, status=current["status"]: (
+                match[1] + status + "; synthetic sequencing fixture."
+            ),
             markdown[heading.end() : end],
         )
         assert count == 1

@@ -23,17 +23,24 @@ Proposed focused service in `agent_rewind/operation_service.py`:
 ```python
 class OperationService:
     def __init__(
-        self, engine: Engine, authority: RequestAuthority,
-        *, artifact_loader: ArtifactLoader | None = None,
+        self,
+        engine: Engine,
+        authority: RequestAuthority,
+        *,
+        artifact_loader: ArtifactLoader | None = None,
     ) -> None: ...
 
     def read_operation(
-        self, principal: VerifiedPrincipal, context: ProjectContext,
+        self,
+        principal: VerifiedPrincipal,
+        context: ProjectContext,
         operation_id: str,
     ) -> OperationView: ...
 
     def cancel_operation(
-        self, principal: VerifiedPrincipal, context: ProjectContext,
+        self,
+        principal: VerifiedPrincipal,
+        context: ProjectContext,
         operation_id: str,
     ) -> CancellationView: ...
 ```
