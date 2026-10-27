@@ -946,3 +946,145 @@ def test_reader_scope_subset_does_not_permit_full_state_deletion():
         assert_replay_preservation(
             full, damaged, receipt, receipt, source_rows_from_state(full), {}, {}
         )
+
+
+@pytest.mark.parametrize(
+    ("case_name", "expected"),
+    [
+        (
+            "evolved-original-and-whitespace",
+            (
+                "replay_case",
+                "schedule",
+                "original_predecessor",
+                "M0_manifest",
+                "M0_service",
+                "M0_stage",
+                "M0_receipt",
+                "M0_state",
+                "admission_setup",
+                "M1_manifest",
+                "M1_service",
+                "M1_stage",
+                "M1_receipt",
+                "M1_state",
+                "cohort",
+                "reserved_setup",
+                "reserved_observation",
+                "reserved_service",
+                "reserved_result",
+                "settled_setup",
+                "canonical_observation",
+                "canonical_service",
+                "canonical_result",
+                "whitespace_observation",
+                "whitespace_service",
+                "whitespace_result",
+                "final_preservation",
+            ),
+        ),
+        (
+            "expired-opening-original-replay",
+            (
+                "replay_case",
+                "schedule",
+                "original_predecessor",
+                "clock_anchor",
+                "M0_manifest",
+                "M0_service",
+                "M0_stage",
+                "M0_receipt",
+                "M0_state",
+                "expiry_clock",
+                "expired_observation",
+                "expired_service",
+                "expired_result",
+                "final_preservation",
+            ),
+        ),
+    ],
+)
+def test_property_contract_matches_independent_emission_order(case_name, expected):
+    # Mixed order is literal from the retained native XML b3cd104e; expiry uses
+    # the same replay emitter, whose context-exit behavior is checked below.
+    from test_ledger_evolved_replay_postgres import PROPERTY_CONTRACT
+
+    assert len(expected) == len(set(expected))
+    equal(PROPERTY_CONTRACT[case_name], expected)
+
+
+@pytest.mark.parametrize("label", ["reserved", "canonical", "whitespace", "expired"])
+def test_original_replay_emits_observation_before_service(monkeypatch, tmp_path, label):
+    """Exercise original replay/observer context exits, with no native service."""
+    import json
+    import time
+    from contextlib import contextmanager
+
+    import test_ledger_evolved_replay_postgres as native
+
+    value = witness()
+    path = tmp_path / "manifest.json"
+    path.write_bytes(file_bytes(value.first)[0])
+    path.chmod(0o600)
+    fixture = SimpleNamespace(case=object())
+    watch = SimpleNamespace(engine=object())
+    properties = []
+    service_calls = []
+    completed = RuntimeError("stop after both original replay contexts have finalized")
+
+    def record_property(name, encoded):
+        properties.append((name, json.loads(encoded)))
+
+    @contextmanager
+    def inert_command(actual_fixture, pg, patch, save, *, label, observe_writes):
+        assert actual_fixture is fixture and pg is None and patch is monkeypatch
+        assert observe_writes is True
+        try:
+            yield watch
+        finally:
+            save(label, '{"synthetic_command": true}')
+
+    def inert_service(engine, manifest):
+        assert engine is watch.engine
+        equal(manifest.model_dump(mode="json"), value.first)
+        service_calls.append(manifest)
+        return object()
+
+    def stop_after_contexts(actual_watch, action):
+        assert actual_watch is watch and action == "commit"
+        raise completed
+
+    monkeypatch.setattr(native, "native_snapshot", lambda *_: deepcopy(value.before))
+    monkeypatch.setattr(native, "stored", lambda *_: {})
+    monkeypatch.setattr(native, "observe_command", inert_command)
+    monkeypatch.setattr(native.ledger_service, "initialize_ledger", inert_service)
+    monkeypatch.setattr(native, "assert_physical_completion", stop_after_contexts)
+    started = time.monotonic()
+    with pytest.raises(RuntimeError) as caught:
+        native.replay(
+            fixture,
+            None,
+            value.first,
+            path,
+            object(),
+            {},
+            dispatch(str(started), started),
+            monkeypatch,
+            record_property,
+            native.recorder(record_property),
+            label,
+            expired=label == "expired",
+        )
+    assert caught.value is completed
+    assert len(service_calls) == 1
+    names = tuple(name for name, _ in properties)
+    equal(names, (label + "_observation", label + "_service"))
+    equal(properties[0][1], {"inspection": [], "classification": [], "new_intent": []})
+    case_name = (
+        "expired-opening-original-replay"
+        if label == "expired"
+        else "evolved-original-and-whitespace"
+    )
+    contract = native.PROPERTY_CONTRACT[case_name]
+    position = contract.index(label + "_observation")
+    equal(contract[position : position + 2], names)
