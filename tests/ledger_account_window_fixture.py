@@ -1,12 +1,21 @@
 """Independent manifests and exact original refusal oracles for finite windows."""
 
 import ast
+import hashlib
 import inspect
+import re
 from copy import deepcopy
 from datetime import UTC, datetime
 
 from ledger_eligibility_fixture import rows
-from ledger_provisioning_fixture import ROLLOVER, START, digest, identity, initial_manifest
+from ledger_provisioning_fixture import (
+    ROLLOVER,
+    START,
+    digest,
+    identity,
+    initial_manifest,
+    source_fingerprint,
+)
 from ledger_restore_authority import typed
 
 from agent_rewind.migrations import ledger_provisioning
@@ -30,6 +39,12 @@ INSERT_SQL = (
     "CAST(%(period_end)s::VARCHAR AS TIMESTAMP WITH TIME ZONE), "
     "%(limit_microusd)s::BIGINT, %(opening_held_microusd)s::BIGINT, "
     "%(held_microusd)s::BIGINT, %(accounted_microusd)s::BIGINT\n)\n"
+)
+
+PROVENANCE_SQL = (
+    "SELECT to_char(clock_timestamp() AT TIME ZONE 'UTC', "
+    '\'YYYY-MM-DD"T"HH24:MI:SS.US"Z"\') AS initialized_at,\n'
+    "  CAST(current_user AS TEXT) AS database_role\n"
 )
 
 
@@ -190,6 +205,54 @@ def assert_intent(first, requested, before, case, target_job, observed):
             )
 
 
+def assert_guarded_body(execution, body, watch):
+    """Join the exact body to original raw setter pairs without filtering the trace."""
+    events = watch.trace.events
+    start, end = execution["entered_at"], execution["returned_at"]
+    assert type(start) is int and type(end) is int
+    assert 0 <= start < end <= len(events) and end == start + 6
+    equal(body["entered_at"], start + 4)
+    equal(body["returned_at"], end)
+    equal(execution["rowcount"], 1)
+    equal(body["rowcount"], 1)
+    equal(watch.work.timeout_seconds, 5)
+    raw_id = id(watch.work._raw)
+    all_calls = [(i, row) for i, row in enumerate(events) if row[1] == "sql-call"]
+    selected = [
+        (position, row, receipt)
+        for (position, row), receipt in zip(all_calls, watch.parameters.receipts, strict=True)
+        if start <= position < end
+    ]
+    assert len(selected) == 3
+    for ordinal, (position, row, receipt) in enumerate(selected):
+        equal(position, start + ordinal * 2)
+        phase, kind, raw, sql = row
+        equal((phase, kind, raw), ("ordinary", "sql-call", raw_id))
+        equal(events[position + 1], ("ordinary", "sql-return", raw_id, sql))
+        if ordinal < 2:
+            setting, cap = (
+                ("statement_timeout", 20_000) if ordinal == 0 else ("lock_timeout", 5_000)
+            )
+            match = re.fullmatch(r"SET LOCAL " + setting + r" = '([1-9][0-9]*)ms'", sql)
+            assert match and int(match[1]) <= cap
+            parameter_type, parameter_count = "NoneType", 0
+        else:
+            equal(sql, body["sql"])
+            assert type(body["parameters"]) is dict
+            parameter_type, parameter_count = "dict", len(body["parameters"])
+        equal(
+            receipt,
+            {
+                "phase": "ordinary",
+                "raw_id": raw_id,
+                "sql_sha256": hashlib.sha256(sql.encode()).hexdigest(),
+                "parameter_type": parameter_type,
+                "parameter_count": parameter_count,
+                "outcome": "return",
+            },
+        )
+
+
 def assert_refusal(
     first, requested, prior, observations, projects, entries, stages, error, watch, case
 ):
@@ -281,7 +344,7 @@ def assert_refusal(
             for row in observations["executions"]
         )
         assert not observations["provenance"] and not observations["cursors"]
-        assert not observations["native_calls"]
+        assert not observations["native_calls"] and not observations["source_hashes"]
         refused_at = preparation["refusal_trace_position"]
     else:
         equal(stages, ["prepare.enter", "prepare.return"])
@@ -341,7 +404,13 @@ def assert_refusal(
             <= execution["returned_at"]
         )
         assert execution["returned_at"] <= write["returned_at"]
+        equal(calls[1]["sql"], PROVENANCE_SQL)
+        equal(calls[1]["parameters"], {})
         for call in calls:
+            (original_execution,) = [
+                row for row in observations["executions"] if row["name"] == call["name"]
+            ]
+            assert_guarded_body(original_execution, call, watch)
             assert call["returned_at"] == call["entered_at"] + 2
             equal(
                 watch.trace.events[call["entered_at"] : call["returned_at"]],
@@ -380,3 +449,83 @@ def assert_preservation(before, after, source_before, source_after, stores_befor
     equal(after, before)
     equal(source_after, source_before)
     equal(stores_after, stores_before)
+
+
+def assert_expiry_source(observations, original, manifest, events, parameters, expected_identity):
+    """Allow fixed source CTEs only inside the proven original pre-INSERT hash."""
+    from ledger_source_boundary import source_site
+    from ledger_source_boundary_postgres import _SOURCE_CTE_HASHES, assert_hash_span
+    from test_ledger_reader_native import _assert_reviewed_ctes
+
+    (hashed,) = observations["source_hashes"]
+    (prepared,) = hashed["preparation"]
+    (insertion,) = [row for row in observations["executions"] if row["name"] == "accounts.insert"]
+    (insert_call,) = [
+        row for row in observations["native_calls"] if row["name"] == "accounts.insert"
+    ]
+    for entry in (prepared, hashed, insertion, insert_call):
+        for key, value in expected_identity.items():
+            assert type(value) is int and value > 0
+            equal(entry[key], value)
+    gate, _ = source_site()
+    assert prepared["original_caller"] is True and prepared["completed"] is True
+    assert hashed["original_caller"] is True
+    equal(prepared["line"], gate - 1)
+    equal(hashed["line"], gate)
+    equal(prepared["manifest"], manifest)
+    expected_source = source_fingerprint(original)
+    equal(hashed["result"], expected_source)
+    equal(manifest["source_digest"], expected_source)
+    for position in (
+        prepared["entered_at"],
+        prepared["returned_at"],
+        hashed["entered_at"],
+        hashed["returned_at"],
+        insertion["entered_at"],
+        insert_call["entered_at"],
+        insert_call["returned_at"],
+    ):
+        assert type(position) is int and 0 <= position <= len(events)
+    for key in ("work_before", "work_after"):
+        assert type(hashed[key]) is int and 0 <= hashed[key] <= 2028
+    assert (
+        prepared["entered_at"]
+        <= prepared["returned_at"]
+        <= hashed["entered_at"]
+        < hashed["returned_at"]
+        <= insertion["entered_at"]
+        < insert_call["entered_at"]
+        < insert_call["returned_at"]
+    )
+    assert_hash_span(
+        hashed, original, expected_identity["raw_id"], events, parameters, hashed["native_calls"]
+    )
+    equal(insert_call["sql"], INSERT_SQL)
+    equal(insert_call["rowcount"], 1)
+    body_position = insert_call["entered_at"]
+    equal(events[body_position], ("ordinary", "sql-call", expected_identity["raw_id"], INSERT_SQL))
+    equal(
+        events[body_position + 1],
+        ("ordinary", "sql-return", expected_identity["raw_id"], INSERT_SQL),
+    )
+    equal(insert_call["returned_at"], body_position + 2)
+    reader_commands = []
+    writes = 0
+    start, end = hashed["entered_at"], hashed["returned_at"]
+    for position, (phase, kind, raw, sql) in enumerate(events):
+        if phase != "ordinary" or kind != "sql-call":
+            continue
+        equal(raw, expected_identity["raw_id"])
+        if position == body_position:
+            equal(sql, INSERT_SQL)
+            writes += 1
+            continue
+        reviewed_source = (
+            start <= position < end
+            and hashlib.sha256(sql.encode()).hexdigest() in _SOURCE_CTE_HASHES
+        )
+        if not reviewed_source:
+            reader_commands.append(sql)
+        assert sql.lstrip().upper().startswith(("SELECT", "WITH", "SET", "SHOW", "LOCK"))
+    equal(writes, 1)
+    _assert_reviewed_ctes(reader_commands)

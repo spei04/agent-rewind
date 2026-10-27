@@ -3,8 +3,6 @@
 from contextlib import contextmanager
 from copy import deepcopy
 
-import psycopg
-
 from agent_rewind.migrations import ledger_provisioning, ledger_service
 
 
@@ -49,12 +47,14 @@ def observe_window(watch, monkeypatch, record):
         "provenance": [],
         "cursors": [],
         "native_calls": [],
+        "source_hashes": [],
     }
     delegates = {
         name: getattr(ledger_service, name)
         for name in ("_classify_manifest", "_write", "_execute", "_provenance", "_ledger_cursors")
     }
-    native_execute = psycopg.Cursor.execute
+    # The owned dialect body runs after LedgerWork._before applies raw timeout setters.
+    native_execute = watch.engine.dialect.do_execute
     active = []
 
     def entry():
@@ -179,8 +179,27 @@ def observe_window(watch, monkeypatch, record):
             ("_ledger_cursors", cursors),
         ):
             patch.setattr(ledger_service, name, function)
-        patch.setattr(psycopg.Cursor, "execute", native)
+        patch.setattr(watch.engine.dialect, "do_execute", native)
         try:
             yield observations
         finally:
             record("window_observation", observations)
+
+
+@contextmanager
+def observe_window_source(watch, monkeypatch, observations):
+    """Retain the unchanged native source observer only for the post-prepare path."""
+    from ledger_source_boundary_postgres import observe_native_source
+
+    with observe_native_source(watch, monkeypatch, lambda *_: None) as (boundary, calls):
+        try:
+            yield
+        finally:
+            observations["source_hashes"] = [
+                {
+                    **deepcopy(hashed),
+                    "native_calls": deepcopy(calls),
+                    "preparation": deepcopy(boundary["preparation"]),
+                }
+                for hashed in boundary["hashes"]
+            ]

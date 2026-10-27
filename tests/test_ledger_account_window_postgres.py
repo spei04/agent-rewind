@@ -1,6 +1,7 @@
 """Three original PostgreSQL window refusals; native execution is explicitly opt-in."""
 
 import json
+from contextlib import nullcontext
 
 import ledger_eligibility_postgres_fixture as admission_helpers
 import pytest
@@ -8,7 +9,7 @@ import test_migrations_postgres as migration_tests
 from ledger_account_identity_fixture import assert_admission_delta, assert_stores
 from ledger_account_window_fixture import (
     CASES,
-    INSERT_SQL,
+    assert_expiry_source,
     assert_intent,
     assert_preservation,
     assert_refusal,
@@ -16,7 +17,7 @@ from ledger_account_window_fixture import (
     initial_window,
     window_intent,
 )
-from ledger_account_window_observer import observe_window
+from ledger_account_window_observer import identity, observe_window, observe_window_source
 from ledger_cohort_observer import observe_cohort
 from ledger_eligibility_fixture import file_hashes
 from ledger_eligibility_postgres_fixture import assert_typed_initialization, native_handle
@@ -35,7 +36,6 @@ from ledger_provisioning_postgres_fixture import (
 from ledger_recovery_postgres_fixture import observe_command
 from ledger_restore_authority import typed
 from ledger_source_boundary_postgres import assert_physical_completion
-from test_ledger_reader_native import _assert_reviewed_ctes
 from test_ledger_service_postgres import controlled_database_name
 from test_run_projection_postgres import drain, observed_reader
 
@@ -143,6 +143,11 @@ def test_postgres_account_window_refusal(
                 phases,
             ),
             observe_window(watch, monkeypatch, record) as observations,
+            (
+                observe_window_source(watch, monkeypatch, observations)
+                if case == CASES[2]
+                else nullcontext()
+            ),
             pytest.raises(MigrationRefused) as refusal,
         ):
             ledger_service.initialize_ledger(watch.engine, validate_ledger_manifest(requested))
@@ -167,13 +172,14 @@ def test_postgres_account_window_refusal(
             (relation,) = delta
             assert type(relation[0]) is int and relation[1:] == ("public", "budget_accounts")
             equal(delta[relation], (1, 0, 0))
-            commands = watch.trace.sql("ordinary")
-            assert commands.count(INSERT_SQL) == 1
-            other = [sql for sql in commands if sql != INSERT_SQL]
-            _assert_reviewed_ctes(other)
-            assert all(
-                sql.lstrip().upper().startswith(("SELECT", "WITH", "SET", "SHOW", "LOCK"))
-                for sql in other
+            equal(observations["source_hashes"][0]["preparation"][0]["state"], prior)
+            assert_expiry_source(
+                observations,
+                evolved.original,
+                requested,
+                watch.trace.events,
+                watch.parameters.receipts,
+                identity(watch),
             )
         assert initial.work is not watch.work and initial.work._raw is not watch.work._raw
         after = native_snapshot(fixture.case, pg)

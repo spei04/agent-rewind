@@ -1,5 +1,6 @@
 """Pure original-gate and independent witness controls; no native database evidence."""
 
+import hashlib
 from copy import deepcopy
 from datetime import UTC, datetime
 from types import SimpleNamespace
@@ -10,6 +11,8 @@ from ledger_account_window_fixture import (
     CASES,
     EXPIRED,
     INSERT_SQL,
+    PROVENANCE_SQL,
+    assert_expiry_source,
     assert_intent,
     assert_preservation,
     assert_refusal,
@@ -18,17 +21,19 @@ from ledger_account_window_fixture import (
     site,
     window_intent,
 )
+from ledger_account_window_observer import identity as window_identity
 from ledger_account_window_observer import observe_window
 from ledger_cohort_observer import observe_cohort
 from ledger_project_binding import observe_projects
-from ledger_provisioning_fixture import digest, identity
+from ledger_provisioning_fixture import digest, identity, source_fingerprint
 from sqlalchemy import bindparam, text
 from sqlalchemy.dialects.postgresql.psycopg import PGDialect_psycopg
 
-from agent_rewind.migrations import ledger_service
+from agent_rewind.migrations import ledger_service, ledger_source
 from agent_rewind.migrations.ledger_inputs import validate_ledger_manifest
+from agent_rewind.migrations.ledger_work import LedgerWork
 from agent_rewind.migrations.ledger_writer_sql import PARAMETER_TYPES, SQL
-from agent_rewind.migrations.schema import LEDGER, MigrationRefused
+from agent_rewind.migrations.schema import COLUMNS, LEDGER, MigrationRefused
 
 ORG, PROJECT, OLD_JOB, NEW_JOB = (identity(i) for i in (11, 22, 33, 44))
 OBSERVED = "2026-10-27T12:00:00.000000Z"
@@ -199,14 +204,20 @@ class Result:
     def all(self):
         return deepcopy(self.rows)
 
+    def __iter__(self):
+        return iter(deepcopy(self.rows))
+
 
 def delegated(case, monkeypatch, *, earlier=None):
     first, requested, before, jobs, scopes, accounts, target = independent_state(case)
-    raw, engine = object(), object()
+    raw = SimpleNamespace()
+    engine = SimpleNamespace(dialect=PGDialect_psycopg())
+    engine.dialect.server_version_info = (16, 0)
     connection = SimpleNamespace(
-        engine=engine, dialect=SimpleNamespace(name="postgresql", server_version_info=(16, 0))
+        engine=engine, dialect=engine.dialect, invalidated=False, closed=False
     )
-    work = SimpleNamespace(_raw=raw, _connection=connection, timeout_seconds=5, check=lambda: None)
+    work = LedgerWork()
+    work._raw, work._connection = raw, connection
     prior = {"revision": LEDGER, "status": "ready", "manifest_count": 1, "account_count": 3}
     state = SimpleNamespace(
         **prior,
@@ -235,6 +246,7 @@ def delegated(case, monkeypatch, *, earlier=None):
             cleanup_failed=False,
         ),
         markers=[],
+        parameters=SimpleNamespace(receipts=[]),
     )
     if earlier == "organization":
         context.history.ownership.organization_id = identity(99)
@@ -249,7 +261,34 @@ def delegated(case, monkeypatch, *, earlier=None):
                 ("ordinary", "sql-return", id(raw), query),
             ]
         )
+        watch.parameters.receipts.append(
+            {
+                "phase": "ordinary",
+                "raw_id": id(raw),
+                "sql_sha256": hashlib.sha256(query.encode()).hexdigest(),
+                "parameter_type": type(parameters).__name__,
+                "parameter_count": 0 if parameters is None else len(parameters),
+                "outcome": "return",
+            }
+        )
         return cursor
+
+    class InertCursor:
+        connection = raw
+
+        def __init__(self, rowcount=-1):
+            self.rowcount = rowcount
+
+        def execute(self, query, parameters=None):
+            return psycopg.Cursor.execute(self, query, parameters)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+    raw.cursor = InertCursor
 
     def inert_execute(statement, parameters):
         names = [
@@ -271,9 +310,11 @@ def delegated(case, monkeypatch, *, earlier=None):
             ),
         }
         rows, count = fixtures[name]
-        cursor = SimpleNamespace(connection=raw, rowcount=count)
-        query = str(statement.compile(dialect=PGDialect_psycopg()))
-        psycopg.Cursor.execute(cursor, query, parameters)
+        cursor = InertCursor(count)
+        query = str(statement.compile(dialect=engine.dialect))
+        work._before(connection, cursor, query, parameters, None, False)
+        engine.dialect.do_execute(cursor, query, parameters)
+        work._after()
         return Result(rows, count)
 
     connection.execute = inert_execute
@@ -665,7 +706,7 @@ def test_timestamp_normalization_preserves_native_utc_without_accepting_numeric(
 @pytest.mark.parametrize("kind", [KeyboardInterrupt, SystemExit])
 def test_cursor_observer_preserves_interrupt_object(kind, monkeypatch):
     first, requested, *_ = independent_state(CASES[2])
-    engine, raw = object(), object()
+    engine, raw = SimpleNamespace(dialect=PGDialect_psycopg()), object()
     connection = SimpleNamespace(engine=engine)
     error = kind("window-control")
 
@@ -685,3 +726,440 @@ def test_cursor_observer_preserves_interrupt_object(kind, monkeypatch):
     assert caught.value is error
     assert observed["cursors"][0]["error"]["identity"] == id(error)
     assert recorded[0][0] == "window_observation"
+
+
+def test_original_work_guard_precedes_installed_dialect_body_capture(monkeypatch):
+    value = delegated(CASES[2], monkeypatch)
+    accept(value, CASES[2])
+    calls = value.observations["native_calls"]
+    assert [row["name"] for row in calls] == ["accounts.insert", "provenance.observe"]
+    executions = [
+        row
+        for row in value.observations["executions"]
+        if row["name"] in {"accounts.insert", "provenance.observe"}
+    ]
+    start, end = executions[0]["entered_at"], executions[-1]["returned_at"]
+    span = value.watch.trace.events[start:end]
+    # Six original physical queries remain; the body observer records only two.
+    assert len(span) == 12
+    assert [row[3] for row in span[::2]] == [
+        "SET LOCAL statement_timeout = '20000ms'",
+        "SET LOCAL lock_timeout = '5000ms'",
+        INSERT_SQL,
+        "SET LOCAL statement_timeout = '20000ms'",
+        "SET LOCAL lock_timeout = '5000ms'",
+        PROVENANCE_SQL,
+    ]
+    assert value.watch.work.observed_ordinary == 12  # Two projects queries and two targets.
+    assert value.watch.work._deadline > 0
+
+
+@pytest.mark.parametrize("name", ["accounts.insert", "provenance.observe"])
+@pytest.mark.parametrize(
+    "change",
+    [
+        "missing-setter",
+        "wrong-setting",
+        "reversed-settings",
+        "statement-over-cap",
+        "lock-over-cap",
+        "zero-timeout",
+        "noncanonical-timeout",
+        "setter-raw-float",
+        "setter-return-missing",
+        "setter-parameter",
+        "setter-count-bool",
+        "setter-raise",
+        "body-includes-setters",
+        "execution-end",
+        "unreported-extra-query",
+    ],
+)
+def test_guarded_body_rejects_missing_foreign_or_invalid_setters(name, change, monkeypatch):
+    value = delegated(CASES[2], monkeypatch)
+    execution = next(row for row in value.observations["executions"] if row["name"] == name)
+    body = next(row for row in value.observations["native_calls"] if row["name"] == name)
+    events = value.watch.trace.events
+    start = execution["entered_at"]
+    index = sum(row[1] == "sql-call" for row in events[:start])
+    receipts = value.watch.parameters.receipts
+
+    def replace_query(position, query):
+        for offset in (0, 1):
+            phase, kind, raw, _ = events[position + offset]
+            events[position + offset] = (phase, kind, raw, query)
+        ordinal = sum(row[1] == "sql-call" for row in events[:position])
+        receipts[ordinal]["sql_sha256"] = hashlib.sha256(query.encode()).hexdigest()
+
+    if change == "missing-setter":
+        execution["entered_at"] += 2
+    elif change == "wrong-setting":
+        replace_query(start, "SET LOCAL application_name = '20000ms'")
+    elif change == "reversed-settings":
+        a, b = events[start][3], events[start + 2][3]
+        replace_query(start, b)
+        replace_query(start + 2, a)
+    elif change == "statement-over-cap":
+        replace_query(start, "SET LOCAL statement_timeout = '20001ms'")
+    elif change == "lock-over-cap":
+        replace_query(start + 2, "SET LOCAL lock_timeout = '5001ms'")
+    elif change == "zero-timeout":
+        replace_query(start, "SET LOCAL statement_timeout = '0ms'")
+    elif change == "noncanonical-timeout":
+        replace_query(start, "SET LOCAL statement_timeout = '020000ms'")
+    elif change == "setter-raw-float":
+        phase, kind, raw, query = events[start]
+        events[start] = (phase, kind, float(raw), query)
+    elif change == "setter-return-missing":
+        phase, _, raw, query = events[start + 1]
+        events[start + 1] = (phase, "sql-raise", raw, query)
+    elif change == "setter-parameter":
+        receipts[index]["parameter_type"] = "dict"
+    elif change == "setter-count-bool":
+        receipts[index]["parameter_count"] = False
+    elif change == "setter-raise":
+        receipts[index]["outcome"] = "raise"
+    elif change == "body-includes-setters":
+        body["entered_at"] = start
+    elif change == "execution-end":
+        execution["returned_at"] -= 2
+    else:
+        replace_query(start, "SELECT 1")
+    with pytest.raises((AssertionError, ValueError)):
+        accept(value, CASES[2])
+
+
+@pytest.mark.parametrize("name", ["accounts.insert", "provenance.observe"])
+def test_guarded_body_accepts_strictly_reduced_remaining_time_setters(name, monkeypatch):
+    value = delegated(CASES[2], monkeypatch)
+    execution = next(row for row in value.observations["executions"] if row["name"] == name)
+    events = value.watch.trace.events
+    for offset, query in [
+        (0, "SET LOCAL statement_timeout = '4567ms'"),
+        (2, "SET LOCAL lock_timeout = '4566ms'"),
+    ]:
+        position = execution["entered_at"] + offset
+        ordinal = sum(row[1] == "sql-call" for row in events[:position])
+        for i in (position, position + 1):
+            phase, kind, raw, _ = events[i]
+            events[i] = (phase, kind, raw, query)
+        value.watch.parameters.receipts[ordinal]["sql_sha256"] = hashlib.sha256(
+            query.encode()
+        ).hexdigest()
+    accept(value, CASES[2])
+
+
+def test_exact_provenance_literal_matches_original_postgresql_compiler():
+    key = ("postgresql", "provenance.observe")
+    assert str(text(SQL[key]).compile(dialect=PGDialect_psycopg())) == PROVENANCE_SQL
+
+
+def source_span(monkeypatch):
+    """Original hasher/guard/dialect on inert data, with synthetic caller metadata.
+
+    Observed SQL/binds come from the original hasher, never source_profile().
+    The literal rows and caller fields establish only this pure serialization control.
+    """
+    from ledger_source_boundary import source_site
+    from ledger_source_boundary_postgres import observe_native_source
+
+    original = {
+        "api_keys": [("a" * 32, "hash", "admin", "key", None, 0)],
+        "audit": [(1, 1.0, "actor", "action", "target")],
+        "events": [("run", 1, "artifact", "hash")],
+        "jobs": [
+            ("b" * 32, "run", 1.0, "{}", "failed", None, None, 0, 1, 0, None, "error", "actor")
+        ],
+        "records": [("c" * 32, "task", 1.0, {})],
+    }
+    dialect = PGDialect_psycopg()
+    dialect.server_version_info = (16, 0)
+    engine, raw = SimpleNamespace(dialect=dialect), SimpleNamespace()
+    connection = SimpleNamespace(engine=engine, dialect=dialect, invalidated=False, closed=False)
+    work = LedgerWork()
+    work._connection, work._raw, work._attached = connection, raw, True
+    events, receipts, executed = [], [], []
+    watch = SimpleNamespace(
+        engine=engine,
+        work=work,
+        trace=SimpleNamespace(events=events, handles=[raw], phase="ordinary"),
+        parameters=SimpleNamespace(receipts=receipts),
+        owns=lambda candidate: candidate is raw,
+    )
+
+    def physical(cursor, query, parameters=None):
+        assert cursor.connection is raw
+        events.extend(
+            [
+                ("ordinary", "sql-call", id(raw), query),
+                ("ordinary", "sql-return", id(raw), query),
+            ]
+        )
+        receipts.append(
+            {
+                "phase": "ordinary",
+                "raw_id": id(raw),
+                "sql_sha256": hashlib.sha256(query.encode()).hexdigest(),
+                "parameter_type": type(parameters).__name__,
+                "parameter_count": 0 if parameters is None else len(parameters),
+                "outcome": "return",
+            }
+        )
+        return cursor
+
+    class Cursor:
+        connection = raw
+
+        def __init__(self, rowcount=-1):
+            self.rowcount = rowcount
+
+        def execute(self, query, parameters=None):
+            return psycopg.Cursor.execute(self, query, parameters)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+    raw.cursor = Cursor
+    statements = {
+        sql: name
+        for (kind, backend, name), sql in ledger_source.SOURCE_PREFLIGHT_SQL.items()
+        if kind == "all" and backend == "postgresql"
+    }
+    statements.update(
+        {sql: name for (backend, name), sql in ledger_source.SQL.items() if backend == "postgresql"}
+    )
+    statements[SQL[("postgresql", "accounts.insert")]] = "accounts.insert"
+
+    def execute(statement, parameters):
+        name = statements[statement.text]
+        if name == "accounts.insert":
+            result = []
+        elif name.startswith("source_count_"):
+            result = [{"candidate_rows": 1}]
+        elif name.startswith("source_stats_"):
+            result = [
+                {
+                    "observed_rows": 1,
+                    "graph_invalid_rows": 0,
+                    "original_native_bytes": 1,
+                    "max_original_native_bytes": 1,
+                }
+            ]
+        elif name.startswith("source_gate_"):
+            result = [
+                {
+                    "candidate_count": 1,
+                    "invalid_rows": 0,
+                    "max_row_bytes": 1,
+                    "selected_count": 1,
+                    "selected_bytes": 1,
+                }
+            ]
+        else:
+            assert name.startswith("source_body_") and name.endswith("_first")
+            table_name = name.removeprefix("source_body_").removesuffix("_first")
+            fields = [column[0] for column in COLUMNS[table_name]]
+            result = [
+                {
+                    **dict(zip(fields, original[table_name][0], strict=True)),
+                    "source_ordinal": 1,
+                    "native_row_bytes": 1,
+                    "invalid_row": 0,
+                }
+            ]
+        cursor = Cursor(1)
+        query = str(statement.compile(dialect=dialect))
+        value = {
+            **window_identity(watch),
+            "name": name,
+            "entered_at": len(events),
+            "values": deepcopy(parameters),
+        }
+        work._before(connection, cursor, query, parameters, None, False)
+        body_start = len(events)
+        dialect.do_execute(cursor, query, parameters)
+        body_end = len(events)
+        work._after()
+        value.update(returned_at=len(events), rowcount=cursor.rowcount)
+        executed.append(
+            (
+                value,
+                {
+                    **window_identity(watch),
+                    "name": name,
+                    "sql": query,
+                    "parameters": deepcopy(parameters),
+                    "rowcount": cursor.rowcount,
+                    "entered_at": body_start,
+                    "returned_at": body_end,
+                },
+            )
+        )
+        return Result(result, cursor.rowcount)
+
+    connection.execute = execute
+    with monkeypatch.context() as patch:
+        patch.setattr(psycopg.Cursor, "execute", physical)
+        with observe_native_source(watch, patch, lambda *_: None) as (boundary, calls):
+            result = ledger_service.source_digest(connection, work)
+        (observed_hash,) = boundary["hashes"]
+        # The actual call here is from this control, not initialize_ledger.
+        assert observed_hash["original_caller"] is False
+        first, manifest, *_ = independent_state(CASES[2])
+        manifest["source_digest"] = source_fingerprint(original)
+        assert result == manifest["source_digest"]
+        values = {
+            **manifest["accounts"][0],
+            "opening_held_microusd": 0,
+            "held_microusd": 0,
+            "accounted_microusd": 0,
+        }
+        ledger_service._write(connection, "accounts.insert", values)
+    gate, _ = source_site()
+    anchor = window_identity(watch)
+    prepared = {
+        **anchor,
+        "original_caller": True,
+        "line": gate - 1,
+        "entered_at": 0,
+        "returned_at": 0,
+        "completed": True,
+        "manifest": deepcopy(manifest),
+        "state": {"manifest_count": 1},
+    }
+    hashed = {
+        **observed_hash,
+        "original_caller": True,
+        "line": gate,
+        "preparation": [prepared],
+        "native_calls": calls,
+    }
+    execution, body = executed[-1]
+    observations = {"source_hashes": [hashed], "executions": [execution], "native_calls": [body]}
+    return observations, original, manifest, events, receipts, anchor
+
+
+def test_original_source_hash_with_one_exact_insert_uses_only_local_cte_allowance(monkeypatch):
+    args = source_span(monkeypatch)
+    before = deepcopy(args)
+    assert_expiry_source(*args)
+    assert args == before
+    assert len(args[0]["source_hashes"][0]["native_calls"]) == 60
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "missing-hash",
+        "duplicate-hash",
+        "wrong-caller",
+        "caller-int",
+        "wrong-line",
+        "wrong-prepare-caller",
+        "incomplete-prepare",
+        "wrong-prepare-manifest",
+        "foreign-work",
+        "raw-float",
+        "source-result",
+        "manifest-source",
+        "source-row",
+        "before-prepare",
+        "after-insert",
+        "work-float",
+        "work-undercount",
+        "native-param-float",
+        "native-param-wrong",
+        "changed-source-cte",
+        "outside-source-cte",
+        "extra-insert",
+        "unknown-outside-cte",
+        "wrong-insert-position",
+        "wrong-insert-rowcount",
+    ],
+)
+def test_source_allowance_rejects_wrong_provenance_span_bindings_and_extra_queries(
+    change, monkeypatch
+):
+    args = source_span(monkeypatch)
+    assert_expiry_source(*args)
+    observations, original, manifest, events, parameters, _ = args
+    hashed = observations["source_hashes"][0]
+    prepared = hashed["preparation"][0]
+    calls = hashed["native_calls"]
+    if change == "missing-hash":
+        observations["source_hashes"].clear()
+    elif change == "duplicate-hash":
+        observations["source_hashes"].append(deepcopy(hashed))
+    elif change == "wrong-caller":
+        hashed["original_caller"] = False
+    elif change == "caller-int":
+        hashed["original_caller"] = 1
+    elif change == "wrong-line":
+        hashed["line"] += 1
+    elif change == "wrong-prepare-caller":
+        prepared["original_caller"] = False
+    elif change == "incomplete-prepare":
+        prepared["completed"] = False
+    elif change == "wrong-prepare-manifest":
+        prepared["manifest"]["source_digest"] = "e" * 64
+    elif change == "foreign-work":
+        hashed["work_id"] += 1
+    elif change == "raw-float":
+        hashed["raw_id"] = float(hashed["raw_id"])
+    elif change == "source-result":
+        hashed["result"] = "e" * 64
+    elif change == "manifest-source":
+        manifest["source_digest"] = "e" * 64
+    elif change == "source-row":
+        original["records"][0][-1]["changed"] = True
+    elif change == "before-prepare":
+        prepared["returned_at"] = hashed["entered_at"] + 1
+    elif change == "after-insert":
+        observations["executions"][0]["entered_at"] = hashed["returned_at"] - 1
+    elif change == "work-float":
+        hashed["work_before"] = float(hashed["work_before"])
+    elif change == "work-undercount":
+        hashed["work_after"] -= 1
+    elif change in {"native-param-float", "native-param-wrong"}:
+        call = next(
+            row for row in calls if row["parameters"] and "selected_count" in row["parameters"]
+        )
+        call["parameters"]["selected_count"] = 1.0 if change.endswith("float") else 2
+    elif change == "changed-source-cte":
+        call = next(row for row in calls if row["sql"].startswith("WITH"))
+        sql = call["sql"] + " "
+        position = call["entered_at"]
+        call["sql"] = sql
+        for offset in (0, 1):
+            phase, kind, raw, _ = events[position + offset]
+            events[position + offset] = (phase, kind, raw, sql)
+        parameters[position // 2]["sql_sha256"] = hashlib.sha256(sql.encode()).hexdigest()
+    elif change in {"outside-source-cte", "extra-insert", "unknown-outside-cte"}:
+        sql = (
+            next(row["sql"] for row in calls if row["sql"].startswith("WITH"))
+            if change == "outside-source-cte"
+            else INSERT_SQL
+            if change == "extra-insert"
+            else "WITH changed AS (DELETE FROM jobs RETURNING id) SELECT * FROM changed"
+        )
+        raw = args[-1]["raw_id"]
+        events.extend([("ordinary", "sql-call", raw, sql), ("ordinary", "sql-return", raw, sql)])
+        parameters.append(
+            {
+                "phase": "ordinary",
+                "raw_id": raw,
+                "sql_sha256": hashlib.sha256(sql.encode()).hexdigest(),
+                "parameter_type": "dict",
+                "parameter_count": 0,
+                "outcome": "return",
+            }
+        )
+    elif change == "wrong-insert-position":
+        observations["native_calls"][0]["entered_at"] += 2
+    else:
+        observations["native_calls"][0]["rowcount"] = True
+    with pytest.raises((AssertionError, ValueError)):
+        assert_expiry_source(*args)
