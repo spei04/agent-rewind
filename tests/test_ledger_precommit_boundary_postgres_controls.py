@@ -13,6 +13,9 @@ from ledger_precommit_boundary_postgres_fixture import (
 )
 from ledger_precommit_boundary_postgres_observer import assert_boundary, observe_boundary
 from ledger_provisioning_fixture import SOURCE_FIELDS, source_fingerprint
+from psycopg._queries import PostgresQuery
+from psycopg.adapt import Transformer
+from sqlalchemy.util import immutabledict
 from test_ledger_source_boundary_postgres_controls import physical_witness
 
 from agent_rewind.migrations import ledger_service, ledger_work
@@ -577,6 +580,15 @@ def test_equal_valued_numeric_substitutions_do_not_establish_native_identity(fie
         target[key] = float(target[key])
     with pytest.raises(AssertionError):
         check(items)
+
+
+def test_native_stage_probes_accept_original_empty_driver_parameters():
+    # exec_driver_sql passes an empty mapping, so literal percent signs are parsed.
+    for _, sql in ALL_PROBES:
+        query = PostgresQuery(Transformer())
+        query.convert(sql, immutabledict())
+        assert query.query == sql.encode()
+        assert query.params is not None and len(query.params) == 0
 
 
 def test_statement_ceiling_preserves_original_policy_and_tighter_remaining_time(monkeypatch):

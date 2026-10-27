@@ -62,7 +62,7 @@ AND a.attname IN ('lease_generation','legacy_reserved_microusd') ORDER BY a.attn
  WHERE n.nspname='public' AND p.proname='ar7_ledger_constraint'),
 (SELECT count(*) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid
  JOIN pg_namespace n ON n.oid=c.relnamespace
- WHERE n.nspname='public' AND NOT t.tgisinternal AND t.tgname LIKE 'ar7_%')""",
+ WHERE n.nspname='public' AND NOT t.tgisinternal AND left(t.tgname::text, 4) = 'ar7_')""",
     ),
 )
 ALL_PROBES = (*PROBES, *CATALOG_PROBES)
