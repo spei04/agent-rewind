@@ -1,6 +1,6 @@
 # Engineering assignment log
 
-**PostgreSQL account-window checkpoint — 2026-10-27:** Overlap and expired-window renewal are accepted at d740246e. The expiry-after-INSERT successor passed at ff89edf3 with 22 properties and two validated service outcomes; independent review de292191 and lead fb132837 accept this bounded component. The earlier failed expiry attempt remains retained. [Evidence and remaining scope](delivery/LEDGER_EXECUTION_PLAN.md#postgresql-account-window-checkpoint--2026-10-27) keep SQLite windows, evolved replay, missing-opening restore and full matching-source delivery open. F3/P1 acceptance remains null; product P2/#109 is Not started. The [public-corpus proposal](research/PUBLIC_CORPUS_PROPOSAL_2026-10-27.md) remains **PROPOSED**, pending the owner’s reply; it authorizes no implementation, capture or paid study.
+**SQLite account-window checkpoint — 2026-10-27:** All three SQLite cases passed at baa05fd9, each with 22 properties and two validated physical and semantic service outcomes. Independent review **9422335c** and lead **ace6ce9d** accept these bounded components. The earlier M0-only failed attempt and cursor-close source hold remain retained. [Evidence and remaining scope](delivery/LEDGER_EXECUTION_PLAN.md#sqlite-account-window-checkpoint--2026-10-27) preserve accepted PostgreSQL windows and leave evolved replay, missing-opening restore and full matching-source delivery open. F3/P1 acceptance remains null; product P2/#109 is Not started. The [public-corpus proposal](research/PUBLIC_CORPUS_PROPOSAL_2026-10-27.md) remains **PROPOSED**, pending the owner’s reply; it authorizes no implementation, capture or paid study.
 
 Execution backlog approved on 2026-10-19. The project lead coordinates three independent contributor slots, reviews each delivery, integrates tested changes, then assigns dependency-ready work to the free slot. These are logical contributor roles, not six confirmed full-time hires; the prior staffing/calendar scenario remains unconfirmed. Task-specific external funding, data, customer and release gates still apply.
 
@@ -20,10 +20,10 @@ partner-data or production authorization.
 
 | Active owner | Cloud path on studio-agent | Current work / next acceptance gate | Concrete blocker |
 | --- | --- | --- | --- |
-| Platform engineer | reused PRIMARY checkout | Prepared the window controllers, preserved the failed third case and froze the one-case successor actual packet; prepared this four-document progress checkpoint. | Window components accepted; full F3/P1 delivery remains separate. |
-| Integration engineer | reused SECONDARY checkout | Delivered d740246e and corrected ff89edf3 source, including owned native body capture and local source-hash proof; 178 final controls passed per interpreter. | SQLite counterpart source is In progress; all three actual cases remain unexecuted. No product P2 work. |
-| Independent reviewer | read-only evidence review | Reviewed source and executable boundaries, matched final affected 37 plus isolated 1, and accepted the first two original cases. | Accepted successor actual de292191; complete matching-source delivery remains open. |
-| Lead | existing cloud workspace | Granted the original three-case batch and exactly one corrected third-case selection, retaining every outcome. | Accepts and publishes reviewed component evidence; remaining matrix and delivery gates are unchanged. |
+| Platform engineer | reused PRIMARY checkout | Corrected deferred SQLite observer work binding, prepared the config-only successor, and froze all three passing actual cases plus this four-document checkpoint. | Actual accepted by peer 9422335c and lead ace6ce9d; full F3/P1 delivery remains separate. |
+| Integration engineer | reused SECONDARY checkout | Delivered SQLite source and cursor-close correction; now prepares the separate R1 evolved-replay source. | Initial R1 candidate's 100 controls per interpreter are retained. Corrected opt-in candidate passed 114 on Python 3.11; final matching/source acceptance remains pending. No R1 source commit or native case is claimed. |
+| Independent reviewer | read-only evidence review | Accepted source baa05fd9 and the config-only successor; matched final-binding 1 plus isolated import 1, reusing 28 unchanged behavioral controls. | Final actual accepted by peer 9422335c and lead ace6ce9d; full matching-source delivery remains open. |
+| Lead | existing cloud workspace | Granted each SQLite attempt once and preserved the original M0-only failure separately from the three-case successor. | Owns component acceptance, reviewed publication and remaining matrix/delivery gates. |
 
 The latest ordinary capacity attempt at eb2cbc4 passes all four seeded-reader cases. The maximum took **1.976373s**, leaving about **24ms in one run**; repeatability and broader performance remain unproved. The dated v4 failure remains in the history below. [Capacity evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23) and [SQLite contention evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23) retain their distinct scopes.
 
@@ -56,6 +56,12 @@ Only two existing cloud checkouts are retained and reused. C07 and C15 are accep
 - The lead owns exact grants, component acceptance and publication. SQLite-window work, R1/D2 and full F3/P1 delivery remain separate.
 
 [Window evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#postgresql-account-window-checkpoint--2026-10-27).
+
+### SQLite window assignment checkpoint — 2026-10-27 UTC
+
+The Platform engineer preserved the failed first SQLite attempt, corrected deferred work binding and prepared the config-only successor. The Integration engineer supplied the SQLite source/cursor-close correction and now owns the separate R1 candidate. The Independent reviewer accepted the corrected source and runner; actual acceptance is recorded by peer 9422335c and lead ace6ce9d. The Lead owns grants and publication. Three cases passed at baa05fd9 with six validated service outcomes; the original failure remains one M0 physical receipt and zero semantic credit. [Component evidence](delivery/LEDGER_EXECUTION_PLAN.md#sqlite-account-window-checkpoint--2026-10-27) retains exact lifecycle attribution.
+
+R1's initial 100-control results per interpreter remain retained. The corrected ordinary-CI opt-in candidate passed 114 controls on Python 3.11; final matching/source acceptance remains pending, with no committed R1 source or native execution claimed. Both checkouts and their owned environments remain in use. Existing task counts, estimates, $200 cap and explicitly unreconciled $36.567974 reservations are unchanged; reservations are not available cash. Full F3/P1 acceptance remains null and product P2 is Not started.
 
 ## Assignment history
 
