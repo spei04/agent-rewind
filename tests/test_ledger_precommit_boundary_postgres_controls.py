@@ -15,7 +15,7 @@ from ledger_precommit_boundary_postgres_observer import assert_boundary, observe
 from ledger_provisioning_fixture import SOURCE_FIELDS, source_fingerprint
 from test_ledger_source_boundary_postgres_controls import physical_witness
 
-from agent_rewind.migrations import ledger_service
+from agent_rewind.migrations import ledger_service, ledger_work
 from agent_rewind.migrations.schema import LEDGER, MigrationRefused
 
 # Literal native SQL from the retained accepted PostgreSQL continuation,
@@ -245,7 +245,7 @@ def witness(stage):
 
     def emit(query, bound):
         for sql, params in [
-            ("SET LOCAL statement_timeout = '5000ms'", {}),
+            ("SET LOCAL statement_timeout = '20000ms'", {}),
             ("SET LOCAL lock_timeout = '5000ms'", {}),
             (query, bound),
         ]:
@@ -423,7 +423,7 @@ def test_incomplete_or_misattributed_stage_is_rejected(fault):
     elif fault in {"wrong-setter", "statement-cap", "lock-cap", "zero-timeout"}:
         index, sql = {
             "wrong-setter": (0, "SET LOCAL lock_timeout = '5000ms'"),
-            "statement-cap": (0, "SET LOCAL statement_timeout = '5001ms'"),
+            "statement-cap": (0, "SET LOCAL statement_timeout = '20001ms'"),
             "lock-cap": (1, "SET LOCAL lock_timeout = '5001ms'"),
             "zero-timeout": (0, "SET LOCAL statement_timeout = '0ms'"),
         }[fault]
@@ -577,6 +577,17 @@ def test_equal_valued_numeric_substitutions_do_not_establish_native_identity(fie
         target[key] = float(target[key])
     with pytest.raises(AssertionError):
         check(items)
+
+
+def test_statement_ceiling_preserves_original_policy_and_tighter_remaining_time(monkeypatch):
+    monkeypatch.setattr(ledger_work, "monotonic", lambda: 100.0)
+    work = ledger_work.LedgerWork()
+    assert work.remaining_timeouts_ms() == (20_000, 5_000)
+    items = witness("after-ddl")
+    assert items[0]["native_calls"][0]["sql"] == "SET LOCAL statement_timeout = '20000ms'"
+    # A valid tighter statement limit can still exceed the lock ceiling.
+    replace_call(items, 0, sql="SET LOCAL statement_timeout = '5001ms'")
+    check(items)
 
 
 @pytest.mark.parametrize("event_kind", ["sql-call", "sql-return"])

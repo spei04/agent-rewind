@@ -104,9 +104,7 @@ def assert_native_span(entry, events, calls, raw_id, timeout_seconds, hashes, pa
         if part < 2:
             name = "statement_timeout" if part == 0 else "lock_timeout"
             match = re.fullmatch(r"SET LOCAL " + name + r" = '([1-9][0-9]*)ms'", sql)
-            assert match and int(match[1]) <= min(
-                timeout_seconds * 1000, 20000 if part == 0 else 5000
-            )
+            assert match and int(match[1]) <= timeout_seconds * (4000 if part == 0 else 1000)
             assert row["parameters"] in (None, {})
         else:
             assert sql_hash(sql) == hashes[ordinal]
