@@ -16,6 +16,7 @@ from agent_rewind.migrations.schema import LEDGER, installed_profile
 CASES = ("evolved-original-and-whitespace", "expired-opening-original-replay")
 CHILD_SECONDS = 360
 CLOCK_SQL = "SELECT clock_timestamp(), current_user, current_database()"
+SQLITE_CLOCK_SQL = "SELECT STRFTIME('%Y-%m-%dT%H:%M:%f000Z','now')"
 CALL = "00000000000000000000000000910001"
 LOGICAL_CALL = "00000000000000000000000000910002"
 EVIDENCE = "00000000000000000000000000910003"
@@ -97,9 +98,15 @@ def _one(values):
     return value
 
 
-def _state(before):
-    assert set(before) == {"catalog", "tables", "authority", "role"}
-    profile = installed_profile("postgresql", LEDGER)
+def _state(before, backend):
+    assert backend in {"postgresql", "sqlite"}
+    if backend == "postgresql":
+        assert set(before) == {"catalog", "tables", "authority", "role"}
+    else:
+        assert set(before) == {"schema", "tables"}
+        assert type(before["schema"]) is tuple
+        assert all(type(row) is tuple and len(row) == 4 for row in before["schema"])
+    profile = installed_profile(backend, LEDGER)
     assert set(before["tables"]) == {name for name in profile if not name.startswith("$")}
     assert len(before["tables"]) == 20
     for table, value in before["tables"].items():
@@ -107,9 +114,9 @@ def _state(before):
         assert type(value["rows"]) is tuple
 
 
-def cohort(before, first, one, admitted_job, price, observed):
+def cohort(before, first, one, admitted_job, price, observed, *, backend="postgresql"):
     """Freeze three explicit account IDs; never update an entire mixed table."""
-    _state(before)
+    _state(before, backend)
     job = _one([row for row in rows(before, "jobs") if row["id"] == admitted_job])
     equal(
         [
@@ -152,9 +159,11 @@ def cohort(before, first, one, admitted_job, price, observed):
     }
 
 
-def reservation_rows(identity):
+def reservation_rows(identity, *, backend="postgresql"):
     """Declared producer inputs; independent control observations are literal."""
-    observed = instant(identity["observed"])
+    assert backend in {"postgresql", "sqlite"}
+    moment = instant(identity["observed"])
+    observed = moment if backend == "postgresql" else identity["observed"]
     call = {
         "id": identity["call"],
         "project_id": identity["project"],
@@ -206,8 +215,8 @@ def reservation_rows(identity):
     }
 
 
-def expected_reserved(before, identity):
-    _state(before)
+def expected_reserved(before, identity, *, backend="postgresql"):
+    _state(before, backend)
     jobs = rows(before, "jobs")
     admitted = _one([row for row in jobs if row["id"] == identity["job"]])
     legacy = [row for row in jobs if row["id"] != identity["job"]]
@@ -262,7 +271,10 @@ def expected_reserved(before, identity):
             ],
             [1 if scope == "job" else 245001, held, held, 0],
         )
-        assert account["period_start"] <= instant(identity["observed"]) < account["period_end"]
+        start, end = account["period_start"], account["period_end"]
+        if backend == "sqlite":
+            start, end = instant(start), instant(end)
+        assert start <= instant(identity["observed"]) < end
     equal(rows(before, "provider_calls"), [])
     equal(rows(before, "budget_entries"), [])
     equal(identity["call"], CALL)
@@ -270,7 +282,7 @@ def expected_reserved(before, identity):
     assert type(identity["lease_until"]) is float and math.isfinite(identity["lease_until"])
     equal(identity["lease_until"], float(instant(identity["observed"]).timestamp() + 3600))
     result = deepcopy(before)
-    for table, added in reservation_rows(identity).items():
+    for table, added in reservation_rows(identity, backend=backend).items():
         replace_rows(result, table, rows(before, table) + added)
     replace_rows(
         result,
@@ -302,9 +314,9 @@ def expected_reserved(before, identity):
     return result
 
 
-def expected_settled(before, identity, evidence, legacy_job, membership):
+def expected_settled(before, identity, evidence, legacy_job, membership, *, backend="postgresql"):
     """Expected cumulative delta, independently bounded to the selected rows."""
-    result = expected_reserved(before, identity)
+    result = expected_reserved(before, identity, backend=backend)
     assert type(evidence) is dict and evidence["id"] == EVIDENCE
     equal(evidence["project_id"], identity["project"])
     assert type(evidence["created_at"]) is datetime
@@ -350,7 +362,12 @@ def expected_settled(before, identity, evidence, legacy_job, membership):
             for row in rows(result, "budget_accounts")
         ],
     )
-    replace_rows(result, "artifact_objects", rows(before, "artifact_objects") + [evidence])
+    persisted_evidence = deepcopy(evidence)
+    if backend == "sqlite":
+        persisted_evidence["created_at"] = evidence["created_at"].isoformat()
+    replace_rows(
+        result, "artifact_objects", rows(before, "artifact_objects") + [persisted_evidence]
+    )
     replace_rows(
         result,
         "artifact_refs",
@@ -368,11 +385,20 @@ def expected_settled(before, identity, evidence, legacy_job, membership):
     return result
 
 
-def assert_evolution(before, after, identity, *, evidence=None, legacy_job=None, membership=None):
+def assert_evolution(
+    before,
+    after,
+    identity,
+    *,
+    evidence=None,
+    legacy_job=None,
+    membership=None,
+    backend="postgresql",
+):
     expected = (
-        expected_reserved(before, identity)
+        expected_reserved(before, identity, backend=backend)
         if evidence is None
-        else expected_settled(before, identity, evidence, legacy_job, membership)
+        else expected_settled(before, identity, evidence, legacy_job, membership, backend=backend)
     )
     equal(after, expected)
 
@@ -409,36 +435,36 @@ def file_bytes(manifest):
     return plain, spaced
 
 
-def assert_clock_sample(sample, *, anchor=None):
-    assert set(sample) == {
-        "before",
-        "after",
-        "database",
-        "sql",
-        "role",
-        "database_name",
-        "connection_closed",
-        "drained",
-    }
+def assert_clock_sample(sample, *, anchor=None, backend="postgresql"):
+    assert backend in {"postgresql", "sqlite"}
+    common = {"before", "after", "database", "sql", "connection_closed"}
+    specific = {"role", "database_name", "drained"} if backend == "postgresql" else {"query_only"}
+    assert set(sample) == common | specific
     before, after = number(sample["before"]), number(sample["after"])
     assert before <= after <= before + 5
     instant(sample["database"])
-    equal(sample["sql"], CLOCK_SQL)
-    assert type(sample["role"]) is type(sample["database_name"]) is str
-    assert sample["role"] and sample["database_name"]
+    equal(sample["sql"], CLOCK_SQL if backend == "postgresql" else SQLITE_CLOCK_SQL)
     equal(sample["connection_closed"], True)
-    equal(sample["drained"], True)
+    if backend == "postgresql":
+        assert type(sample["role"]) is type(sample["database_name"]) is str
+        assert sample["role"] and sample["database_name"]
+        equal(sample["drained"], True)
+    else:
+        equal(sample["query_only"], 1)
     if anchor is not None:
         delta = (instant(sample["database"]) - instant(anchor["database"])).total_seconds()
         assert max(0, before - anchor["after"] - 2) <= delta <= after - anchor["before"] + 2
-        equal(sample["role"], anchor["role"])
-        equal(sample["database_name"], anchor["database_name"])
+        if backend == "postgresql":
+            equal(sample["role"], anchor["role"])
+            equal(sample["database_name"], anchor["database_name"])
 
 
-def assert_expiry_clock(schedule, manifest, receipt, samples, m0_start, m0_end, replay_entry):
+def assert_expiry_clock(
+    schedule, manifest, receipt, samples, m0_start, m0_end, replay_entry, *, backend="postgresql"
+):
     assert 2 <= len(samples) <= 166
     anchor = samples[0]
-    assert_clock_sample(anchor)
+    assert_clock_sample(anchor, backend=backend)
     a = anchor["before"]
     assert schedule["entered"] <= a <= schedule["entered"] + 20
     assert a <= schedule["started"] + 35
@@ -459,7 +485,7 @@ def assert_expiry_clock(schedule, manifest, receipt, samples, m0_start, m0_end, 
     assert start <= instant(receipt["initialized_at"]) < end
     previous = anchor
     for sample in samples[1:]:
-        assert_clock_sample(sample, anchor=anchor)
+        assert_clock_sample(sample, anchor=anchor, backend=backend)
         assert sample["before"] >= previous["after"] + 1
         assert instant(sample["database"]) >= instant(previous["database"])
         assert sample["after"] <= a + 165
