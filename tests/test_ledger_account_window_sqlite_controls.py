@@ -21,6 +21,7 @@ from ledger_account_window_sqlite import (
 from ledger_cohort_observer import observe_cohort
 from ledger_project_binding import observe_projects
 from ledger_provisioning_fixture import digest, source_fingerprint
+from ledger_recovery_fixture import RecoveryWatch
 from ledger_source_boundary import source_site
 from sqlalchemy import text
 from sqlalchemy.dialects.sqlite.pysqlite import SQLiteDialect_pysqlite
@@ -33,7 +34,7 @@ from agent_rewind.migrations import ledger_service, ledger_source
 from agent_rewind.migrations.ledger_inputs import validate_ledger_manifest
 from agent_rewind.migrations.ledger_work import LedgerWork
 from agent_rewind.migrations.ledger_writer_sql import SQL
-from agent_rewind.migrations.schema import COLUMNS, LEDGER, MigrationRefused
+from agent_rewind.migrations.schema import ADMISSION, COLUMNS, LEDGER, MigrationRefused
 
 
 def inert_sqlite(results):
@@ -847,3 +848,73 @@ def test_sqlite_return_and_disposal_obligations_remain_separate(fault):
 def test_sqlite_expiry_authorization_never_substitutes_for_exact_insert(writes):
     with pytest.raises(AssertionError):
         assert_target_actions(writes, inserted=True)
+
+
+@pytest.mark.parametrize("refused", [False, True])
+def test_window_registration_defers_work_until_original_classification(monkeypatch, refused):
+    engine = SimpleNamespace(dialect=SQLiteDialect_pysqlite())
+    watch = RecoveryWatch(engine)
+    first = independent_state(CASES[0])[0]
+    manifest = validate_ledger_manifest(first)
+    context = SimpleNamespace(
+        state=SimpleNamespace(
+            installation_key="other-installation" if refused else manifest.installation_key,
+            revision=ADMISSION,
+        ),
+        history=SimpleNamespace(manifests=()),
+    )
+    original = ledger_service._classify_manifest
+    recorded = []
+    with observe_window(
+        watch, monkeypatch, lambda *row: recorded.append(row), backend="sqlite"
+    ) as observations:
+        # RecoveryWatch.work is deliberately unavailable during registration.
+        assert watch.works == []
+        work = LedgerWork()
+        work._raw = object()
+        work._connection = SimpleNamespace(engine=engine, dialect=engine.dialect)
+        watch.works.append(work)
+        if refused:
+            with pytest.raises(MigrationRefused) as failure:
+                ledger_service._classify_manifest(context, manifest, work)
+            error = failure.value
+            assert error.code == "ledger_manifest_conflict"
+            row = observations["classification"][0]
+            assert row["error"]["identity"] == id(error)
+            trace = error.__traceback__
+            frames = []
+            while trace is not None:
+                frames.append(trace.tb_frame.f_code)
+                trace = trace.tb_next
+            assert original.__code__ in frames
+        else:
+            assert ledger_service._classify_manifest(context, manifest, work) is None
+            row = observations["classification"][0]
+            assert row["receipt"] is None and "error" not in row
+        assert {key: row[key] for key in identity(watch)} == identity(watch)
+    assert ledger_service._classify_manifest is original
+    assert recorded == [("window_observation", observations)]
+
+
+@pytest.mark.parametrize("mismatch", ["connection-dialect", "connection-engine", "work"])
+def test_window_deferred_callback_retains_owned_work_and_dialect_checks(monkeypatch, mismatch):
+    engine = SimpleNamespace(dialect=SQLiteDialect_pysqlite())
+    watch = RecoveryWatch(engine)
+    manifest = validate_ledger_manifest(independent_state(CASES[0])[0])
+    with observe_window(watch, monkeypatch, lambda *_: None, backend="sqlite") as observed:
+        assert watch.works == []
+        work = LedgerWork()
+        work._raw = object()
+        work._connection = SimpleNamespace(engine=engine, dialect=engine.dialect)
+        watch.works.append(work)
+        argument = work
+        if mismatch == "connection-dialect":
+            work._connection.dialect = SimpleNamespace(name="postgresql")
+        elif mismatch == "connection-engine":
+            work._connection.engine = SimpleNamespace(dialect=engine.dialect)
+        else:
+            argument = LedgerWork()
+        # No context can be inspected: ownership must refuse before delegation.
+        with pytest.raises(AssertionError):
+            ledger_service._classify_manifest(None, manifest, argument)
+        assert observed["classification"] == []

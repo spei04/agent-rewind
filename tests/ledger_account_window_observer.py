@@ -42,7 +42,7 @@ def cursor_frames(error):
 def observe_window(watch, monkeypatch, record, *, backend="postgresql"):
     assert backend in {"postgresql", "sqlite"}
     if backend == "sqlite":
-        assert watch.engine.dialect.name == watch.work._connection.dialect.name == backend
+        assert watch.engine.dialect.name == backend
     observations = {
         "classification": [],
         "writes": [],
@@ -61,6 +61,8 @@ def observe_window(watch, monkeypatch, record, *, backend="postgresql"):
     active = []
 
     def entry():
+        if backend == "sqlite":
+            assert watch.engine.dialect.name == watch.work._connection.dialect.name == backend
         return {**identity(watch), "entered_at": len(watch.trace.events)}
 
     def finish(value):
