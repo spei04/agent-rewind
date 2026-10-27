@@ -8,6 +8,7 @@ import pytest
 from ledger_precommit_boundary_fixture import INDEXES, STAGES, TABLES
 from ledger_precommit_boundary_postgres_fixture import (
     ALL_PROBES,
+    BACKFILL_SQL,
     REFLECTION_PARAMETERS,
     assert_preservation_values,
 )
@@ -15,6 +16,8 @@ from ledger_precommit_boundary_postgres_observer import assert_boundary, observe
 from ledger_provisioning_fixture import SOURCE_FIELDS, source_fingerprint
 from psycopg._queries import PostgresQuery
 from psycopg.adapt import Transformer
+from sqlalchemy import BigInteger, String
+from sqlalchemy.dialects.postgresql.psycopg import PGDialect_psycopg
 from sqlalchemy.util import immutabledict
 from test_ledger_source_boundary_postgres_controls import physical_witness
 
@@ -290,7 +293,7 @@ def witness(stage):
         execution = {**entry(), "name": "jobs.backfill", "values": deepcopy(values)}
         emit(
             "UPDATE jobs SET legacy_reserved_microusd=%(opening)s::BIGINT, lease_generation=0 "
-            "WHERE id=%(id)s::VARCHAR",
+            "WHERE id=%(id)s::VARCHAR\n",
             values,
         )
         returned(write)
@@ -491,6 +494,7 @@ def test_incomplete_or_misattributed_stage_is_rejected(fault):
         "wrong-line",
         "native-bind",
         "missing-real-update",
+        "missing-terminal-newline",
         "second-job-changed",
         "same-code-new-error",
     ],
@@ -525,6 +529,10 @@ def test_first_backfill_requires_only_the_original_first_real_write(fault):
         replace_call(items, 41, parameters={"id": "b" * 32, "opening": 35000})
     elif fault == "missing-real-update":
         replace_call(items, 41, sql="SELECT 1")
+    elif fault == "missing-terminal-newline":
+        sql = receipt["native_calls"][41]["sql"]
+        assert sql.endswith("\n")
+        replace_call(items, 41, sql=sql[:-1])
     elif fault == "second-job-changed":
         row = receipt["probes"][1]["rows"][1]
         receipt["probes"][1]["rows"][1] = (row[0], 0, 85000)
@@ -589,6 +597,36 @@ def test_native_stage_probes_accept_original_empty_driver_parameters():
         query.convert(sql, immutabledict())
         assert query.query == sql.encode()
         assert query.params is not None and len(query.params) == 0
+
+
+def test_backfill_statement_preserves_original_compiler_bytes_and_bind_types():
+    dialect = PGDialect_psycopg()
+    dialect.server_version_info = (16, 15)
+    values = {"id": "a" * 32, "opening": 125000}
+    native_sql = (
+        "UPDATE jobs SET legacy_reserved_microusd=%(opening)s::BIGINT, lease_generation=0 "
+        "WHERE id=%(id)s::VARCHAR\n"
+    )
+    result = object()
+
+    def execute(statement, parameters):
+        compiled = statement.compile(dialect=dialect)
+        assert str(compiled) == native_sql == BACKFILL_SQL
+        assert type(compiled.binds["id"].type) is String
+        assert type(compiled.binds["opening"].type) is BigInteger
+        bound = compiled.construct_params(parameters)
+        assert bound == values and type(bound["id"]) is str and type(bound["opening"]) is int
+        query = PostgresQuery(Transformer())
+        query.convert(str(compiled), bound)
+        assert query.query == (
+            b"UPDATE jobs SET legacy_reserved_microusd=$1::BIGINT, lease_generation=0 "
+            b"WHERE id=$2::VARCHAR\n"
+        )
+        assert query.params is not None and len(query.params) == 2
+        return result
+
+    connection = SimpleNamespace(dialect=dialect, execute=execute)
+    assert ledger_service._execute(connection, "jobs.backfill", values) is result
 
 
 def test_statement_ceiling_preserves_original_policy_and_tighter_remaining_time(monkeypatch):

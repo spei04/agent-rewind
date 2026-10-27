@@ -68,7 +68,7 @@ AND a.attname IN ('lease_generation','legacy_reserved_microusd') ORDER BY a.attn
 ALL_PROBES = (*PROBES, *CATALOG_PROBES)
 BACKFILL_SQL = (
     "UPDATE jobs SET legacy_reserved_microusd=%(opening)s::BIGINT, lease_generation=0 "
-    "WHERE id=%(id)s::VARCHAR"
+    "WHERE id=%(id)s::VARCHAR\n"
 )
 
 
