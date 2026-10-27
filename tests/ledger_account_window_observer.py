@@ -39,7 +39,10 @@ def cursor_frames(error):
 
 
 @contextmanager
-def observe_window(watch, monkeypatch, record):
+def observe_window(watch, monkeypatch, record, *, backend="postgresql"):
+    assert backend in {"postgresql", "sqlite"}
+    if backend == "sqlite":
+        assert watch.engine.dialect.name == watch.work._connection.dialect.name == backend
     observations = {
         "classification": [],
         "writes": [],
@@ -160,6 +163,8 @@ def observe_window(watch, monkeypatch, record):
             "sql": query.decode() if isinstance(query, bytes) else str(query),
             "parameters": deepcopy(args[0] if args else kwargs.get("params")),
         }
+        if backend == "sqlite":
+            value["cursor_id"] = id(cursor)
         observations["native_calls"].append(value)
         try:
             result = native_execute(cursor, query, *args, **kwargs)
@@ -187,11 +192,17 @@ def observe_window(watch, monkeypatch, record):
 
 
 @contextmanager
-def observe_window_source(watch, monkeypatch, observations):
+def observe_window_source(watch, monkeypatch, observations, *, backend="postgresql"):
     """Retain the unchanged native source observer only for the post-prepare path."""
     from ledger_source_boundary_postgres import observe_native_source
 
-    with observe_native_source(watch, monkeypatch, lambda *_: None) as (boundary, calls):
+    assert backend in {"postgresql", "sqlite"}
+    observer = observe_native_source
+    if backend == "sqlite":
+        from ledger_account_window_sqlite import observe_sqlite_source
+
+        observer = observe_sqlite_source
+    with observer(watch, monkeypatch, lambda *_: None) as (boundary, calls):
         try:
             yield
         finally:

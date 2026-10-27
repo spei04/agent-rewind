@@ -254,12 +254,23 @@ def assert_guarded_body(execution, body, watch):
 
 
 def assert_refusal(
-    first, requested, prior, observations, projects, entries, stages, error, watch, case
+    first,
+    requested,
+    prior,
+    observations,
+    projects,
+    entries,
+    stages,
+    error,
+    watch,
+    case,
+    *,
+    backend="postgresql",
 ):
     """Check serialized joins and also the unmodified live original exception frame."""
     from ledger_account_window_observer import identity
 
-    assert case in CASES
+    assert case in CASES and backend in {"postgresql", "sqlite"}
     anchor = identity(watch)
     equal(watch.work.timeout_seconds, 5)
     for collection in observations.values():
@@ -367,7 +378,10 @@ def assert_refusal(
         assert provenance["returned_at"] <= cursor["entered_at"]
         validate_time(provenance["observed"])
         assert account["period_end"] <= provenance["observed"]
-        assert type(provenance["database_role"]) is str and provenance["database_role"]
+        if backend == "sqlite":
+            assert provenance["database_role"] is None
+        else:
+            assert type(provenance["database_role"]) is str and provenance["database_role"]
         assert type(provenance["os_uid"]) is int and provenance["os_uid"] >= 0
         for key in ("observed", "database_role", "os_uid"):
             equal(cursor[key], provenance[key])
@@ -394,8 +408,9 @@ def assert_refusal(
         calls = observations["native_calls"]
         assert [row["name"] for row in calls] == ["accounts.insert", "provenance.observe"]
         insert = calls[0]
-        equal(insert["sql"], INSERT_SQL)
-        equal(insert["parameters"], expected_values)
+        if backend == "postgresql":
+            equal(insert["sql"], INSERT_SQL)
+            equal(insert["parameters"], expected_values)
         equal(insert["rowcount"], 1)
         assert (
             execution["entered_at"]
@@ -404,21 +419,26 @@ def assert_refusal(
             <= execution["returned_at"]
         )
         assert execution["returned_at"] <= write["returned_at"]
-        equal(calls[1]["sql"], PROVENANCE_SQL)
-        equal(calls[1]["parameters"], {})
-        for call in calls:
-            (original_execution,) = [
-                row for row in observations["executions"] if row["name"] == call["name"]
-            ]
-            assert_guarded_body(original_execution, call, watch)
-            assert call["returned_at"] == call["entered_at"] + 2
-            equal(
-                watch.trace.events[call["entered_at"] : call["returned_at"]],
-                [
-                    ("ordinary", "sql-call", anchor["raw_id"], call["sql"]),
-                    ("ordinary", "sql-return", anchor["raw_id"], call["sql"]),
-                ],
-            )
+        if backend == "sqlite":
+            from ledger_account_window_sqlite import assert_native_calls
+
+            assert_native_calls(observations, expected_values, watch)
+        else:
+            equal(calls[1]["sql"], PROVENANCE_SQL)
+            equal(calls[1]["parameters"], {})
+            for call in calls:
+                (original_execution,) = [
+                    row for row in observations["executions"] if row["name"] == call["name"]
+                ]
+                assert_guarded_body(original_execution, call, watch)
+                assert call["returned_at"] == call["entered_at"] + 2
+                equal(
+                    watch.trace.events[call["entered_at"] : call["returned_at"]],
+                    [
+                        ("ordinary", "sql-call", anchor["raw_id"], call["sql"]),
+                        ("ordinary", "sql-return", anchor["raw_id"], call["sql"]),
+                    ],
+                )
         assert not any(
             row["name"] in {"progress.insert", "adoption.publish_fingerprint", "jobs.backfill"}
             for row in observations["executions"]
@@ -451,12 +471,15 @@ def assert_preservation(before, after, source_before, source_after, stores_befor
     equal(stores_after, stores_before)
 
 
-def assert_expiry_source(observations, original, manifest, events, parameters, expected_identity):
+def assert_expiry_source(
+    observations, original, manifest, events, parameters, expected_identity, *, backend="postgresql"
+):
     """Allow fixed source CTEs only inside the proven original pre-INSERT hash."""
     from ledger_source_boundary import source_site
     from ledger_source_boundary_postgres import _SOURCE_CTE_HASHES, assert_hash_span
     from test_ledger_reader_native import _assert_reviewed_ctes
 
+    assert backend in {"postgresql", "sqlite"}
     (hashed,) = observations["source_hashes"]
     (prepared,) = hashed["preparation"]
     (insertion,) = [row for row in observations["executions"] if row["name"] == "accounts.insert"]
@@ -497,6 +520,12 @@ def assert_expiry_source(observations, original, manifest, events, parameters, e
         < insert_call["entered_at"]
         < insert_call["returned_at"]
     )
+    if backend == "sqlite":
+        from ledger_account_window_sqlite import assert_expiry_span
+
+        assert parameters is None
+        assert_expiry_span(observations, original, events, expected_identity)
+        return
     assert_hash_span(
         hashed, original, expected_identity["raw_id"], events, parameters, hashed["native_calls"]
     )
