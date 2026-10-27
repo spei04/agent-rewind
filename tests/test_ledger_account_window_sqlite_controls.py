@@ -13,7 +13,9 @@ from ledger_account_window_sqlite import (
     PROVENANCE_SQL,
     assert_pooled_rollback,
     assert_target_actions,
+    cursor_close,
     expanded,
+    guarded_body,
     observe_sqlite_source,
 )
 from ledger_cohort_observer import observe_cohort
@@ -22,6 +24,9 @@ from ledger_provisioning_fixture import digest, source_fingerprint
 from ledger_source_boundary import source_site
 from sqlalchemy import text
 from sqlalchemy.dialects.sqlite.pysqlite import SQLiteDialect_pysqlite
+from sqlalchemy.engine import Connection
+from sqlalchemy.engine.cursor import CursorFetchStrategy, CursorResult
+from sqlalchemy.engine.default import DefaultExecutionContext
 from test_ledger_account_window_controls import OBSERVED, ORG, PROJECT, Result, independent_state
 
 from agent_rewind.migrations import ledger_service, ledger_source
@@ -35,7 +40,10 @@ def inert_sqlite(results):
     """Original work guard and installed do_execute, with literal inert native responses."""
     dialect = SQLiteDialect_pysqlite()
     engine, raw = SimpleNamespace(dialect=dialect), SimpleNamespace()
-    connection = SimpleNamespace(engine=engine, dialect=dialect, invalidated=False, closed=False)
+    connection = SimpleNamespace(
+        engine=engine, dialect=dialect, invalidated=False, closed=False, _echo=False
+    )
+    connection._safe_close_cursor = lambda cursor: Connection._safe_close_cursor(connection, cursor)
     work = LedgerWork()
     work._connection, work._raw, work._attached = connection, raw, True
     events, executed = [], []
@@ -80,6 +88,31 @@ def inert_sqlite(results):
             )
             return self
 
+        def close(self):
+            events.extend(
+                [
+                    ("c_call", "bootstrap", id(raw), "close"),
+                    ("c_return", "bootstrap", id(raw), "close"),
+                ]
+            )
+
+    class ConsumedResult(Result):
+        def __init__(self, rows, count, native_result):
+            super().__init__(rows, count)
+            self.native_result = native_result
+
+        def __exit__(self, *args):
+            self.native_result.close()
+
+        def all(self):
+            values = super().all()
+            self.native_result._soft_close()
+            return values
+
+        def __iter__(self):
+            yield from super().__iter__()
+            self.native_result._soft_close()
+
     raw.execute = lambda query: Cursor().execute(query)
     statements = {sql: name for (backend, name), sql in SQL.items() if backend == "sqlite"}
     statements.update(
@@ -111,7 +144,29 @@ def inert_sqlite(results):
         dialect.do_execute(cursor, query, positional)
         end = len(events)
         work._after()
-        entry.update(returned_at=end, rowcount=count)
+        context = SimpleNamespace(
+            dialect=dialect,
+            cursor=cursor,
+            root_connection=connection,
+            engine=engine,
+            compiled=None,
+            cursor_fetch_strategy=CursorFetchStrategy(),
+            isinsert=False,
+            _is_server_side=False,
+            _num_sentinel_cols=0,
+            _is_implicit_returning=False,
+            _rowcount=None,
+            isupdate=False,
+            isdelete=False,
+        )
+        cursor.description = None
+        if name == "accounts.insert":
+            # Installed SQLAlchemy closes a no-row text result before execute returns.
+            native_result = DefaultExecutionContext._setup_dml_or_text_result(context)
+        else:
+            # Value iteration below owns SELECT exhaustion; no database is opened.
+            native_result = CursorResult(context, CursorFetchStrategy(), None)
+        entry.update(returned_at=len(events), rowcount=count)
         executed.append(
             (
                 entry,
@@ -127,7 +182,7 @@ def inert_sqlite(results):
                 },
             )
         )
-        return Result(result, count)
+        return ConsumedResult(result, count, native_result)
 
     connection.execute = execute
     return watch, connection, executed
@@ -348,6 +403,165 @@ def test_sqlite_expansion_retains_quotes_nulls_and_exact_whitespace():
         expanded("SELECT ?", (1.0,))
 
 
+def retained_cursor_witness():
+    # Literal slices from retained SQLite M1, with only raw identity rebased.
+    # Source query3500:3508; INSERT3660:3668; provenance3668:3676.
+    # These observations are independent of the source profile and SQL expander.
+    events = [
+        ("c_call", "bootstrap", 77, "execute"),
+        ("sql", "bootstrap", 77, "PRAGMA busy_timeout=5000"),
+        ("c_return", "bootstrap", 77, "execute"),
+        ("c_call", "bootstrap", 77, "execute"),
+        (
+            "sql",
+            "bootstrap",
+            77,
+            (
+                'SELECT count(*) AS candidate_rows FROM (SELECT 1 FROM "api_k'
+                'eys" ORDER BY "id" LIMIT 1000001) AS bounded\n'
+            ),
+        ),
+        ("c_return", "bootstrap", 77, "execute"),
+        ("c_call", "bootstrap", 77, "close"),
+        ("c_return", "bootstrap", 77, "close"),
+        ("c_call", "bootstrap", 77, "execute"),
+        ("sql", "bootstrap", 77, "PRAGMA busy_timeout=5000"),
+        ("c_return", "bootstrap", 77, "execute"),
+        ("c_call", "bootstrap", 77, "execute"),
+        (
+            "sql",
+            "bootstrap",
+            77,
+            (
+                "INSERT INTO budget_accounts (\n  id, organization_id, scope, "
+                "scope_id, project_id, job_id, period_start, period_end, limi"
+                "t_microusd, opening_held_microusd, held_microusd, accounted_"
+                "microusd\n) VALUES (\n  '00000000000000000000000000001f41', '8"
+                "8888888888888888888888888888888', 'job', 'a394e311ebd24a47a5"
+                "4f67a12a48a6ef', '99999999999999999999999999999999', 'a394e3"
+                "11ebd24a47a54f67a12a48a6ef', '2000-01-01T00:00:00.000000Z', "
+                "'2100-01-01T00:00:00.000000Z', 1, 0, 0, 0\n)\n"
+            ),
+        ),
+        ("c_return", "bootstrap", 77, "execute"),
+        ("c_call", "bootstrap", 77, "close"),
+        ("c_return", "bootstrap", 77, "close"),
+        ("c_call", "bootstrap", 77, "execute"),
+        ("sql", "bootstrap", 77, "PRAGMA busy_timeout=5000"),
+        ("c_return", "bootstrap", 77, "execute"),
+        ("c_call", "bootstrap", 77, "execute"),
+        (
+            "sql",
+            "bootstrap",
+            77,
+            (
+                "SELECT strftime('%Y-%m-%dT%H:%M:%f000Z', 'now') AS initializ"
+                "ed_at,\n  NULL AS database_role\n"
+            ),
+        ),
+        ("c_return", "bootstrap", 77, "execute"),
+        ("c_call", "bootstrap", 77, "close"),
+        ("c_return", "bootstrap", 77, "close"),
+    ]
+    bodies = [
+        {
+            "name": "source_count_api_keys",
+            "sql": (
+                'SELECT count(*) AS candidate_rows FROM (SELECT 1 FROM "api_k'
+                'eys" ORDER BY "id" LIMIT ?) AS bounded\n'
+            ),
+            "parameters": (1000001,),
+            "cursor_id": 91,
+            "entered_at": 3,
+            "returned_at": 6,
+        },
+        {
+            "name": "accounts.insert",
+            "sql": INSERT_SQL,
+            "parameters": (
+                "00000000000000000000000000001f41",
+                "88888888888888888888888888888888",
+                "job",
+                "a394e311ebd24a47a54f67a12a48a6ef",
+                "99999999999999999999999999999999",
+                "a394e311ebd24a47a54f67a12a48a6ef",
+                "2000-01-01T00:00:00.000000Z",
+                "2100-01-01T00:00:00.000000Z",
+                1,
+                0,
+                0,
+                0,
+            ),
+            "cursor_id": 92,
+            "entered_at": 11,
+            "returned_at": 14,
+        },
+        {
+            "name": "provenance.observe",
+            "sql": PROVENANCE_SQL,
+            "parameters": (),
+            "cursor_id": 93,
+            "entered_at": 19,
+            "returned_at": 22,
+        },
+    ]
+    executions = [
+        {"entered_at": 0, "returned_at": 6},
+        {"entered_at": 8, "returned_at": 16},
+        {"entered_at": 16, "returned_at": 22},
+    ]
+    return events, bodies, executions
+
+
+def test_sqlite_retained_cursor_returns_distinguish_body_execute_and_consumption():
+    events, bodies, executions = retained_cursor_witness()
+    for body, execution in zip(bodies, executions, strict=True):
+        guarded_body(execution, body, events, 77)
+    cursor_close(events, 6, 8, 77)
+    cursor_close(events, 22, 24, 77)
+    assert [x["returned_at"] - x["entered_at"] for x in bodies] == [3, 3, 3]
+    assert [x["returned_at"] - x["entered_at"] for x in executions] == [6, 8, 6]
+
+
+@pytest.mark.parametrize("phase", ["source", "insert", "provenance"])
+@pytest.mark.parametrize("fault", ["missing_return", "wrong_raw", "wrong_phase", "extra_close"])
+def test_sqlite_retained_cursor_close_requires_exact_pair(phase, fault):
+    events, bodies, executions = retained_cursor_witness()
+    index = {"source": 0, "insert": 1, "provenance": 2}[phase]
+    start = (6, 14, 22)[index]
+    end = start + 2
+    if fault == "missing_return":
+        events[start + 1] = ("c_exception", *events[start + 1][1:])
+    elif fault == "wrong_raw":
+        events[start] = ("c_call", "bootstrap", 78, "close")
+    elif fault == "wrong_phase":
+        events[start] = ("c_call", "harness-dispose", 77, "close")
+    else:
+        events.insert(end, ("c_return", "bootstrap", 77, "close"))
+        end += 1
+        if phase == "insert":
+            executions[index]["returned_at"] += 1
+    with pytest.raises(AssertionError):
+        if phase == "insert":
+            guarded_body(executions[index], bodies[index], events, 77)
+        else:
+            cursor_close(events, start, end, 77)
+
+
+def test_sqlite_installed_result_cleanup_preserves_execute_vs_consume_boundaries(monkeypatch):
+    value = delegated(CASES[2], monkeypatch)
+    accept(value, CASES[2])
+    calls = value.observations["native_calls"]
+    executions = [
+        next(row for row in value.observations["executions"] if row["name"] == call["name"])
+        for call in calls
+    ]
+    assert [row["returned_at"] - row["entered_at"] for row in executions] == [8, 6]
+    assert calls[0]["returned_at"] + 2 == executions[0]["returned_at"]
+    assert calls[1]["returned_at"] == executions[1]["returned_at"]
+    assert value.observations["provenance"][0]["returned_at"] == calls[1]["returned_at"] + 2
+
+
 def source_span(monkeypatch):
     original = {
         "api_keys": [("a" * 32, "hash", "admin", "key", None, 0)],
@@ -441,7 +655,7 @@ def test_sqlite_original_hash_uses_positional_bodies_and_exact_work(monkeypatch)
     hashed = data[0]["source_hashes"][0]
     assert len(hashed["native_calls"]) == 20
     assert hashed["work_after"] - hashed["work_before"] == 40
-    assert hashed["returned_at"] - hashed["entered_at"] == 120
+    assert hashed["returned_at"] - hashed["entered_at"] == 160
 
 
 @pytest.mark.parametrize(
@@ -455,6 +669,9 @@ def test_sqlite_original_hash_uses_positional_bodies_and_exact_work(monkeypatch)
         "range_float",
         "work_float",
         "missing_call",
+        "missing_close",
+        "wrong_close",
+        "extra_close",
         "mapping",
         "float_bind",
         "wrong_bound",
@@ -489,6 +706,13 @@ def test_sqlite_hash_span_rejects_provenance_bind_and_locality_corruption(fault,
         hashed["work_after"] = float(hashed["work_after"])
     elif fault == "missing_call":
         hashed["native_calls"].pop()
+    elif fault == "missing_close":
+        del events[6:8]
+    elif fault == "wrong_close":
+        events[7] = ("c_exception", *events[7][1:])
+    elif fault == "extra_close":
+        events.insert(8, ("c_return", "bootstrap", anchor["raw_id"], "close"))
+        hashed["returned_at"] += 1
     elif fault == "mapping":
         call["parameters"] = {"remaining_rows_plus_one": 1000001}
     elif fault == "float_bind":

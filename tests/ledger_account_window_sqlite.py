@@ -77,18 +77,31 @@ def returned_body(events, start, end, raw, query):
     assert statement["outcome"] == "c_return"
 
 
+def cursor_close(events, start, end, raw):
+    """Cursor cleanup is separate from both body return and later connection disposal."""
+    assert type(start) is type(end) is type(raw) is int and raw > 0
+    assert 0 <= start < end <= len(events) and end == start + 2
+    equal(
+        events[start:end],
+        [("c_call", "bootstrap", raw, "close"), ("c_return", "bootstrap", raw, "close")],
+    )
+
+
 def guarded_body(execution, body, events, raw):
     start, end = execution["entered_at"], execution["returned_at"]
-    assert type(start) is type(end) is int and end == start + 6
+    auto_closed = body.get("name") == "accounts.insert"
+    assert type(start) is type(end) is int and end == start + (8 if auto_closed else 6)
     equal(body["entered_at"], start + 3)
-    equal(body["returned_at"], end)
+    equal(body["returned_at"], start + 6)
     assert type(body["cursor_id"]) is int and body["cursor_id"] > 0
     assert 0 <= start < end <= len(events)
     setter = events[start + 1][3]
     match = re.fullmatch(r"PRAGMA busy_timeout=([1-9][0-9]*)", setter)
     assert match and int(match[1]) <= 5000
     returned_body(events, start, start + 3, raw, setter)
-    returned_body(events, start + 3, end, raw, expanded(body["sql"], body["parameters"]))
+    returned_body(events, start + 3, start + 6, raw, expanded(body["sql"], body["parameters"]))
+    if auto_closed:
+        cursor_close(events, start + 6, end, raw)
 
 
 def assert_native_calls(observations, values, watch):
@@ -107,6 +120,13 @@ def assert_native_calls(observations, values, watch):
         (execution,) = [row for row in observations["executions"] if row["name"] == body["name"]]
         equal(execution["rowcount"], count)
         guarded_body(execution, body, watch.trace.events, id(watch.work._raw))
+    (provenance,) = observations["provenance"]
+    cursor_close(
+        watch.trace.events,
+        calls[1]["returned_at"],
+        provenance["returned_at"],
+        id(watch.work._raw),
+    )
     equal(watch.work.timeout_seconds, 5)
 
 
@@ -182,7 +202,7 @@ def assert_expiry_span(observations, original, events, anchor):
     profile = source_profile(original)
     calls = hashed["native_calls"]
     assert len(calls) == len(profile)
-    equal(end - start, len(profile) * 6)
+    equal(end - start, len(profile) * 8)
     equal(hashed["work_after"] - hashed["work_before"], len(profile) * 2)
     source_ctes = set()
     for ordinal, ((query, parameters), call) in enumerate(zip(profile, calls, strict=True)):
@@ -193,20 +213,17 @@ def assert_expiry_span(observations, original, events, anchor):
         equal(call["parameters"], parameters)
         assert all(type(value) is int for value in call["parameters"])
         equal(call["outcome"], "return")
-        execution = {"entered_at": start + ordinal * 6, "returned_at": start + (ordinal + 1) * 6}
+        query_start = start + ordinal * 8
+        execution = {"entered_at": query_start, "returned_at": query_start + 6}
         guarded_body(execution, call, events, raw)
+        cursor_close(events, query_start + 6, query_start + 8, raw)
         if query.lstrip().upper().startswith("WITH"):
             source_ctes.add(expanded(query, parameters))
     (insert,) = [row for row in observations["native_calls"] if row["name"] == "accounts.insert"]
     equal(insert["sql"], INSERT_SQL)
     equal(insert["rowcount"], 1)
-    returned_body(
-        events,
-        insert["entered_at"],
-        insert["returned_at"],
-        raw,
-        expanded(INSERT_SQL, insert["parameters"]),
-    )
+    (execution,) = [row for row in observations["executions"] if row["name"] == "accounts.insert"]
+    guarded_body(execution, insert, events, raw)
     for position, event in enumerate(events):
         if len(event) == 4 and event[0] == "sql" and event[3] in source_ctes:
             equal(event[2], raw)
