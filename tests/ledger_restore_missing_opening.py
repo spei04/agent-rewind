@@ -92,7 +92,9 @@ def delete_opening(fixture, pg, before):
             )
             assert identity == (pg["owner_role"], pg["owner"].url.database, "origin")
             parameters = {"revision": REVISION, "phase": OPENING}
-            result = connection.execute(text(DELETE_OPENING), parameters)
+            result = connection.execute(
+                text(DELETE_OPENING), parameters, execution_options={"preserve_rowcount": True}
+            )
             returned = [dict(row) for row in result.mappings()]
             assert type(result.rowcount) is int and result.rowcount == 1
             assert len(returned) == 1 and typed(returned[0]) == typed(original)

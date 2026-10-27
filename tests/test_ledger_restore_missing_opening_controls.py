@@ -10,7 +10,11 @@ import ledger_restore_missing_opening as subject
 import pytest
 from ledger_restore_authority import typed
 from ledger_restore_interruption_raw import TABLES
+from sqlalchemy import text
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.dialects.postgresql import psycopg
+from sqlalchemy.engine import CursorResult
+from sqlalchemy.util import immutabledict
 
 from agent_rewind.migrations import (
     ledger_catalog,
@@ -161,7 +165,9 @@ def test_deletion_receipt_is_typed_and_exact(fault):
         subject.assert_deletion_receipt(before, mutation, "owner", "database")
 
 
-def mutation_adapter(monkeypatch, *, fail_exit=False, rowcount=1, returned_count=1):
+def mutation_adapter(
+    monkeypatch, *, fail_exit=False, rowcount=1, returned_count=1, real_result=False
+):
     before, _, receipt = literal_state()
     calls, exits = [], []
 
@@ -177,8 +183,19 @@ def mutation_adapter(monkeypatch, *, fail_exit=False, rowcount=1, returned_count
             calls.append((sql, None))
             return SimpleNamespace(one=lambda: ("owner", "database", "origin"))
 
-        def execute(self, statement, parameters):
+        def execute(self, statement, parameters, *, execution_options):
             calls.append((str(statement), deepcopy(parameters)))
+            assert execution_options == {"preserve_rowcount": True}
+            if real_result:
+                result, _ = returning_text_result(
+                    statement,
+                    parameters,
+                    receipt["returned"],
+                    execution_options=execution_options,
+                    initial_rowcount=rowcount,
+                    returned_count=returned_count,
+                )
+                return result
             return Result()
 
     @contextmanager
@@ -446,3 +463,82 @@ def test_native_module_keeps_existing_restore_opt_in():
     assert actual.pytestmark is pytestmark
     assert pytestmark.name == "skipif"
     assert pytestmark.kwargs["reason"] == "Opt-in same-cluster owner-preserving ledger restore"
+
+
+def returning_text_result(
+    statement, parameters, row, *, execution_options, initial_rowcount=1, returned_count=1
+):
+    """Real pinned result/context; inert cursor follows psycopg close/reset semantics."""
+    columns = tuple(row)
+
+    class Cursor:
+        description = [(name, None, None, None, None, None, None) for name in columns]
+
+        def __init__(self):
+            self.rows = [
+                tuple(deepcopy(row[name]) for name in columns) for _ in range(returned_count)
+            ]
+            self.rowcount = initial_rowcount
+            self.closed = False
+
+        def fetchone(self):
+            return self.rows.pop(0) if self.rows else None
+
+        def close(self):
+            self.closed = True
+            # psycopg BaseCursor._close calls _reset, which restores this sentinel.
+            self.rowcount = -1
+
+    cursor = Cursor()
+    dialect = psycopg.dialect()
+    connection = SimpleNamespace(
+        dialect=dialect, _echo=False, _safe_close_cursor=lambda actual: actual.close()
+    )
+    compiled = statement.compile(dialect=dialect)
+    context = dialect.execution_ctx_cls._init_compiled(
+        dialect,
+        connection,
+        SimpleNamespace(cursor=lambda: cursor),
+        immutabledict(execution_options),
+        compiled,
+        [parameters],
+        statement,
+        None,
+    )
+    assert context.is_text and not context.isdelete
+    result = context._setup_result_proxy()
+    assert type(result) is CursorResult
+    return result, cursor
+
+
+@pytest.mark.parametrize("preserve, expected", [(False, -1), (True, 1)])
+def test_real_text_result_preserves_rowcount_before_cursor_exhaustion(preserve, expected):
+    _, _, receipt = literal_state()
+    result, cursor = returning_text_result(
+        text(subject.DELETE_OPENING),
+        {"revision": "ar_0007_ledger", "phase": "ledger_opening"},
+        receipt["returned"],
+        execution_options={"preserve_rowcount": preserve},
+    )
+    # Do not read result.rowcount before exhaustion: that would mask the original bug.
+    returned = [dict(row) for row in result.mappings()]
+    assert cursor.closed and cursor.rowcount == -1
+    assert typed(returned) == typed([receipt["returned"]])
+    assert type(result.rowcount) is int and result.rowcount == expected
+
+
+@pytest.mark.parametrize("initial_rowcount, accepted", [(1, True), (-1, False)])
+def test_original_deletion_uses_real_result_and_rejects_unsupported_count(
+    monkeypatch, initial_rowcount, accepted
+):
+    before, fixture, pg, _, exits = mutation_adapter(
+        monkeypatch, rowcount=initial_rowcount, real_result=True
+    )
+    if accepted:
+        observed = subject.delete_opening(fixture, pg, before)
+        assert exits == ["commit"] and type(observed["rowcount"]) is int
+        assert observed["rowcount"] == 1
+    else:
+        with pytest.raises(AssertionError):
+            subject.delete_opening(fixture, pg, before)
+        assert exits == []
