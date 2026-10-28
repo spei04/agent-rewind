@@ -6,7 +6,7 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-from sqlalchemy import inspect, text
+from sqlalchemy import Integer, String, TupleType, bindparam, inspect, text
 from sqlalchemy.engine import Connection
 from sqlalchemy.engine.reflection import Inspector, ObjectKind, ObjectScope
 
@@ -268,10 +268,17 @@ def _sqlite_table_options(connection: Connection, tables: list[str], revision: s
     selected = sorted(installed_profile("sqlite", revision))
     if len(tables) != len(selected) or set(tables) != set(selected):
         raise MigrationRefused("schema_incompatible")
-    names = ",".join("'" + name.replace("'", "''") + "'" for name in selected)
-    rows = connection.exec_driver_sql(
+    # The typed compiler renders these proven profile names as SQL literals,
+    # keeping the existing 16-wire-bind ceiling without handwritten quoting.
+    statement = text(
         "SELECT name,wr,strict FROM pragma_table_list WHERE schema='main' "
-        f"AND name IN ({names}) LIMIT {len(selected) + 1}"
+        "AND name IN :table_names LIMIT :row_limit"
+    ).bindparams(
+        bindparam("table_names", type_=String(), expanding=True, literal_execute=True),
+        bindparam("row_limit", type_=Integer()),
+    )
+    rows = connection.execute(
+        statement, {"table_names": selected, "row_limit": len(selected) + 1}
     ).all()
     if (
         len(rows) != len(selected)
@@ -297,19 +304,30 @@ def _sqlite_native_indexes(
     part_count = EXPECTED[(revision_key, "sqlite", "sqlite_index_parts_gate")]["candidate_rows"]
     if type(index_count) is not int or type(part_count) is not int:
         raise MigrationRefused("schema_incompatible")
-    values = ",".join("('" + name.replace("'", "''") + "')" for name in selected)
-    tables = f"WITH tables(table_name) AS (VALUES {values})"
+    # A one-column expanding tuple retains the VALUES CTE. SQLAlchemy's
+    # String literal compiler handles names; only integer limits are wire binds.
+    names = bindparam(
+        "table_names", type_=TupleType(String()), expanding=True, literal_execute=True
+    )
+    index_limit = bindparam("index_limit", type_=Integer())
+    parameters = {"table_names": [(name,) for name in selected], "index_limit": index_count + 1}
+    tables = "WITH tables(table_name) AS :table_names"
     indexes_sql = (
         'SELECT t.table_name,p.seq,p.name,p."unique",p.origin,p.partial '
         "FROM tables t JOIN pragma_index_list(t.table_name,'main') p "
-        f"ORDER BY t.table_name,p.seq LIMIT {index_count + 1}"
+        "ORDER BY t.table_name,p.seq LIMIT :index_limit"
     )
-    indexes = connection.exec_driver_sql(tables + " " + indexes_sql).all()
-    parts = connection.exec_driver_sql(
-        tables + ", indexes AS MATERIALIZED (" + indexes_sql + ") "
-        'SELECT i.table_name,i.name,p.seqno,p.cid,p.name,p."desc",p.coll,p."key" '
-        "FROM indexes i JOIN pragma_index_xinfo(i.name,'main') p "
-        f"ORDER BY i.table_name,i.name,p.seqno LIMIT {part_count + 1}"
+    indexes = connection.execute(
+        text(tables + " " + indexes_sql).bindparams(names, index_limit), parameters
+    ).all()
+    parts = connection.execute(
+        text(
+            tables + ", indexes AS MATERIALIZED (" + indexes_sql + ") "
+            'SELECT i.table_name,i.name,p.seqno,p.cid,p.name,p."desc",p.coll,p."key" '
+            "FROM indexes i JOIN pragma_index_xinfo(i.name,'main') p "
+            "ORDER BY i.table_name,i.name,p.seqno LIMIT :part_limit"
+        ).bindparams(names, index_limit, bindparam("part_limit", type_=Integer())),
+        {**parameters, "part_limit": part_count + 1},
     ).all()
     if (
         len(indexes) != index_count

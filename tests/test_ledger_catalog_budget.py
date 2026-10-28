@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 from ledger_reader_fixture import complete_ar6, seed_ar7, sqlite_snapshot
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Connection
 
 from agent_rewind.migrations.ledger_reader_catalog import (
@@ -60,9 +60,23 @@ def test_optimized_catalog_keeps_complete_original_and_literal_profile_equality(
             independent = catalog(connection)
             names = sorted(independent)
             original_indexes, original_parts = original_native_rows(connection, names)
+            batches = []
+
+            @event.listens_for(connection, "before_cursor_execute")
+            def observe_parameters(conn, cursor, statement, parameters, context, many):
+                if statement.startswith(
+                    ("SELECT name,wr,strict FROM pragma_table_list", "WITH tables(table_name)")
+                ):
+                    batches.append((statement, parameters))
+
+            from agent_rewind.migrations.ledger_reader_catalog import _sqlite_table_options
+
+            assert _sqlite_table_options(connection, names, revision) == names
             grouped_indexes, grouped_parts = _sqlite_native_indexes(
                 connection, names, "ar7" if revision == LEDGER else "ar6", LedgerWork()
             )
+            assert [len(parameters) for _, parameters in batches] == [1, 1, 2]
+            assert all(type(value) is int for _, parameters in batches for value in parameters)
         assert (
             sorted((table, *row) for table, rows in grouped_indexes.items() for row in rows)
             == original_indexes
@@ -195,7 +209,7 @@ def test_table_options_batch_rejects_incomplete_or_invalid_rows(fault):
         rows[-1] = (names[-1], 0, 1)
     else:
         rows[-1] = (names[-1], False, 0)
-    connection = SimpleNamespace(exec_driver_sql=lambda sql: SimpleNamespace(all=lambda: rows))
+    connection = SimpleNamespace(execute=lambda sql, params: SimpleNamespace(all=lambda: rows))
     with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
         _sqlite_table_options(connection, names, LEDGER)
 
@@ -203,13 +217,11 @@ def test_table_options_batch_rejects_incomplete_or_invalid_rows(fault):
 def test_table_options_rejects_unowned_names_before_query():
     from agent_rewind.migrations.ledger_reader_catalog import _sqlite_table_options
 
-    def unexpected_query(sql):
+    def unexpected_query(sql, params):
         pytest.fail("Unowned table names must never reach SQL construction")
 
     with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
-        _sqlite_table_options(
-            SimpleNamespace(exec_driver_sql=unexpected_query), ["unowned'"], LEDGER
-        )
+        _sqlite_table_options(SimpleNamespace(execute=unexpected_query), ["unowned'"], LEDGER)
 
 
 @pytest.fixture(scope="module")
@@ -277,7 +289,50 @@ def test_native_index_batch_refuses_incomplete_duplicate_or_misowned_rows(
         parts[0] = (*parts[0][:6], None, parts[0][7])
     results = iter([indexes, parts])
     connection = SimpleNamespace(
-        exec_driver_sql=lambda sql: SimpleNamespace(all=lambda: next(results))
+        execute=lambda sql, params: SimpleNamespace(all=lambda: next(results))
     )
     with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
         _sqlite_native_indexes(connection, names, "ar7", LedgerWork())
+
+
+def test_typed_catalog_names_remain_values_and_limits_remain_native_binds(monkeypatch):
+    from agent_rewind.migrations import ledger_reader_catalog as reader
+
+    # Exercise the real three statement builders with hostile compiler inputs.
+    # This substitutes a private profile only for compilation; it grants no
+    # catalog acceptance to the deliberately unsupported names.
+    names = [f"fixture_{number}" for number in range(18)]
+    names += ["quoted'); DROP TABLE sentinel; --", "表'名"]
+    names.sort()
+    captured = []
+
+    def capture(statement, parameters):
+        captured.append((statement, parameters))
+        rows = [(name, 0, 0) for name in names] if len(captured) == 1 else []
+        return SimpleNamespace(all=lambda: rows)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(reader, "installed_profile", lambda dialect, revision: dict.fromkeys(names))
+        assert (
+            reader._sqlite_table_options(SimpleNamespace(execute=capture), names, LEDGER) == names
+        )
+    with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+        reader._sqlite_native_indexes(SimpleNamespace(execute=capture), names, "ar7", LedgerWork())
+    assert len(captured) == 3
+
+    engine = create_engine("sqlite://")
+    try:
+        with engine.begin() as connection:
+            connection.exec_driver_sql("CREATE TABLE sentinel (value INTEGER)")
+            connection.exec_driver_sql("INSERT INTO sentinel VALUES (7)")
+            for (statement, parameters), bound_count in zip(captured, [1, 1, 2], strict=True):
+                compiled = statement.compile(dialect=connection.dialect)
+                expanded = compiled.construct_expanded_state(parameters)
+                assert len(expanded.parameters) == bound_count
+                assert all(type(value) is int for value in expanded.parameters.values())
+                assert "DROP TABLE sentinel" in expanded.statement
+                assert "表''名" in expanded.statement
+                assert connection.execute(statement, parameters).all() == []
+            assert connection.exec_driver_sql("SELECT value FROM sentinel").all() == [(7,)]
+    finally:
+        engine.dispose()
