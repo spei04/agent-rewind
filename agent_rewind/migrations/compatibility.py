@@ -7,7 +7,7 @@ import math
 import os
 import sqlite3
 import time
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
 from importlib.resources import files
@@ -46,6 +46,7 @@ _CONNECT_HOOK_LOCK = Lock()
 @dataclass
 class _RuntimePolicy:
     production: bool
+    connect_hook: Callable[..., Any] | None = None
 
 
 _RUNTIME_POLICIES: WeakKeyDictionary[Engine, _RuntimePolicy] = WeakKeyDictionary()
@@ -222,9 +223,28 @@ def configure_runtime_engine(engine: Engine, *, production: bool = False) -> Non
                     dialect, record, arguments, parameters, production=policy.production
                 )
 
+            policy.connect_hook = connect
             event.listen(engine, "do_connect", connect)
         else:
             policy.production = policy.production or production
+
+
+def require_bounded_runtime_engine(engine: Engine) -> None:
+    """Opt-in proof that the existing final PostgreSQL connect hook is intact."""
+    with _CONNECT_HOOK_LOCK:
+        policy = _RUNTIME_POLICIES.get(engine)
+        if (
+            policy is None
+            or policy.connect_hook is None
+            or engine.dialect.name != "postgresql"
+            or engine.dialect.driver != "psycopg"
+            or tuple(engine.dialect.dispatch.do_connect) != (policy.connect_hook,)
+        ):
+            raise MigrationRefused("unsupported_runtime_endpoint")
+    arguments, parameters = engine.dialect.create_connect_args(engine.url)
+    if arguments:
+        raise MigrationRefused("unsupported_runtime_endpoint")
+    _validate_runtime_endpoint(parameters, production=policy.production)
 
 
 @dataclass(frozen=True)

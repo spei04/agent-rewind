@@ -9,6 +9,8 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 from .admission_transaction import AdmissionCode, AdmissionError, TransactionOutcome
+from .request_identity import VerifiedPrincipal
+from .scoped_repositories import ProjectContext
 
 MAX_MONEY = 2**63 - 1
 RefusalReason = Literal[
@@ -286,3 +288,25 @@ class TransactionFacts:
     @property
     def confirmed_precommit_rollback(self) -> bool:
         return self.begun and not self.commit_attempted and self.rollback_acknowledged
+
+
+@dataclass(frozen=True)
+class ReservationScope:
+    """Original caller context carried only by a privately issued body."""
+
+    principal: VerifiedPrincipal
+    context: ProjectContext
+    job_id: str
+
+    def __post_init__(self) -> None:
+        if (
+            type(self.principal) is not VerifiedPrincipal
+            or type(self.context) is not ProjectContext
+        ):
+            raise ReservationRefusal("invalid_intent")
+        self.principal.__post_init__()
+        _identifier(self.context.organization_id)
+        _identifier(self.context.project_id)
+        _identifier(self.job_id)
+        if self.context.principal_id != self.principal.principal_id:
+            raise ReservationRefusal("invalid_intent")

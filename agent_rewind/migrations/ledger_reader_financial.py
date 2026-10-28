@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, NoReturn
 
@@ -18,10 +19,10 @@ from ..operation_reads import (
     validate_association,
     validate_job_row,
 )
+from .ledger_check import LedgerCheck
 from .ledger_financial_sql import SQL
 from .ledger_inputs import MAX_MONEY
 from .ledger_reader_history import History
-from .ledger_work import LedgerWork
 from .schema import LEDGER, MigrationRefused, canonical, dialect
 
 CAP = 2097152
@@ -213,9 +214,24 @@ def _query(connection: Connection, revision: str, name: str) -> list[dict[str, A
     ]
 
 
+@dataclass(frozen=True)
+class FinancialProjection:
+    rows: dict[str, list[dict[str, Any]]]
+    native_bytes: int
+    canonical_bytes: int
+    row_count: int
+
+
 def read_financial(
-    connection: Connection, revision: str, work: LedgerWork
+    connection: Connection, revision: str, work: LedgerCheck
 ) -> dict[str, list[dict[str, Any]]]:
+    return read_financial_projection(connection, revision, work).rows
+
+
+def read_financial_projection(
+    connection: Connection, revision: str, work: LedgerCheck
+) -> FinancialProjection:
+    """Retain the same native/framing observations with their exact size receipt."""
     key = "ar7" if revision == LEDGER else "ar6"
     base = (
         ("account", "call", "entry", "job", "operation", "scope", "organization")
@@ -287,7 +303,37 @@ def read_financial(
             if canonical_bytes > CAP:
                 raise MigrationRefused("ledger_limit_exceeded")
         result[domain] = rows
-    return result
+    return FinancialProjection(result, native_bytes, canonical_bytes, total_rows)
+
+
+def financial_size(data: dict[str, list[dict[str, Any]]], revision: str, work: LedgerCheck) -> int:
+    """Check a prospective after-image against the inherited canonical framing."""
+    key = "ar7" if revision == LEDGER else "ar6"
+    if set(data) != set(_ORDER):
+        _refuse()
+    size, total = 2, 0
+    for domain in _ORDER:
+        rows = data[domain]
+        if len(rows) > (4096 if domain == "account" else 65536):
+            raise MigrationRefused("ledger_limit_exceeded")
+        fields = _FIELDS.get((key, domain))
+        if fields is None:
+            if rows:
+                _refuse()
+            continue
+        for row in rows:
+            work.check()
+            if set(row) != set(fields):
+                _refuse()
+            try:
+                frame = canonical([domain, [row[field] for field in fields]])
+            except (ValueError, TypeError, OverflowError, UnicodeError, RecursionError):
+                raise MigrationRefused("ledger_history_unsupported") from None
+            size += len(frame) + bool(total)
+            total += 1
+            if size > CAP or total > 65536:
+                raise MigrationRefused("ledger_limit_exceeded")
+    return size
 
 
 def _indexed(rows: list[dict[str, Any]], field: str) -> dict[str, dict[str, Any]]:
@@ -300,7 +346,7 @@ def _indexed(rows: list[dict[str, Any]], field: str) -> dict[str, dict[str, Any]
 def validate_financial(
     data: dict[str, list[dict[str, Any]]],
     history: History,
-    work: LedgerWork,
+    work: LedgerCheck,
 ) -> None:
     """Validate retained relationships, not initialization eligibility or invoices."""
     organization = history.ownership.organization_id
@@ -416,7 +462,7 @@ def _validate_accounts(
     scopes: dict[tuple[str, str], str],
     projects: dict[str, dict[str, Any]],
     history: History,
-    work: LedgerWork,
+    work: LedgerCheck,
 ) -> None:
     opening = history.opening
     if opening is None:
@@ -479,7 +525,7 @@ def _validate_calls(
     entries: list[dict[str, Any]],
     ref_keys: set[tuple[Any, ...]],
     organization: str,
-    work: LedgerWork,
+    work: LedgerCheck,
 ) -> None:
     cohorts: dict[str, dict[str, list[dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
     entry_keys = set()

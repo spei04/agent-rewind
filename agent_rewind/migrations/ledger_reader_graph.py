@@ -11,9 +11,9 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
 from .inputs import validate_mapping
+from .ledger_check import LedgerCheck
 from .ledger_graph_sql import SQL
 from .ledger_reader_history import History
-from .ledger_work import LedgerWork
 from .ownership_lineage import Closure, reduce_relational_closure
 from .schema import MigrationRefused, dialect
 
@@ -46,9 +46,21 @@ def _query(connection: Connection, name: str, parameters: dict[str, Any]) -> lis
     ]
 
 
-def source_bounds(connection: Connection, work: LedgerWork) -> dict[str, int]:
+@dataclass(frozen=True)
+class SourceBounds:
+    rows: int
+    native_bytes: int
+    max_native_bytes: int
+
+
+def source_bounds(connection: Connection, work: LedgerCheck) -> dict[str, int]:
+    return {name: receipt.rows for name, receipt in read_source_bounds(connection, work).items()}
+
+
+def read_source_bounds(connection: Connection, work: LedgerCheck) -> dict[str, SourceBounds]:
+    """Expose the existing complete native receipts without transferring row bodies."""
     total_rows = total_bytes = 0
-    counts = {}
+    receipts = {}
     for table in ("api_keys", "audit", "events", "jobs", "records"):
         work.check()
         rows = _query(
@@ -71,8 +83,10 @@ def source_bounds(connection: Connection, work: LedgerWork) -> dict[str, int]:
         total_bytes += receipt["original_native_bytes"]
         if total_bytes > 1073741824 or receipt["max_original_native_bytes"] > 16777216:
             raise MigrationRefused("source_limit_exceeded")
-        counts[table] = count
-    return counts
+        receipts[table] = SourceBounds(
+            count, receipt["original_native_bytes"], receipt["max_original_native_bytes"]
+        )
+    return receipts
 
 
 def read_graph(
@@ -80,7 +94,7 @@ def read_graph(
     counts: dict[str, int],
     history: History,
     financial: dict[str, list[dict[str, Any]]],
-    work: LedgerWork,
+    work: LedgerCheck,
 ) -> Graph:
     projects: dict[tuple[str, str], str] = {}
     organization = history.ownership.organization_id

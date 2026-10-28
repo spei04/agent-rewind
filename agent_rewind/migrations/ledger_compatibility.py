@@ -256,6 +256,11 @@ def _validate_native_projection(
 
 def _validate_ar7_history(connection: Connection, checks: LedgerCheck) -> None:
     """Validate immutable native history; never return a ready result or ledger state."""
+    validated_ar7_history(connection, checks)
+
+
+def validated_ar7_history(connection: Connection, checks: LedgerCheck) -> History:
+    """Return immutable provenance only; no ready result or operator body rights."""
     checks.check()
     if read_revision(connection) != LEDGER:
         raise MigrationRefused("schema_incompatible")
@@ -265,3 +270,4 @@ def _validate_ar7_history(connection: Connection, checks: LedgerCheck) -> None:
     checks.check()
     _validate_native_projection(connection, history, checks)
     checks.check()
+    return history
