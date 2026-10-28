@@ -14,12 +14,19 @@ env:
   PYTHONDONTWRITEBYTECODE: '1'
 jobs:
   core:
+    name: core (${{ matrix.python }}, ${{ matrix.leg }})
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.11', '3.12']
+        include:
+          - python: '3.11'
+            leg: early
+          - python: '3.11'
+            leg: late
+          - python: '3.12'
+            leg: all
     services:
       postgres:
         image: postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
@@ -35,6 +42,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 2
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '${{ matrix.python }}'
@@ -56,12 +64,26 @@ jobs:
       - run: uv run --no-sync mypy agent_rewind
       - name: Validate M1 contracts and frozen fixtures
         run: uv run --no-sync python scripts/check_m1_contracts.py --openapi-model
-      - run: uv run --no-sync pytest -q -p no:cacheprovider
+      - name: Run core tests
+        run: >-
+          uv run --no-sync python -m pytest -q -p no:cacheprovider -p scripts.ci_core
+          --core-leg "${{ matrix.leg }}"
+          --core-receipt "$RUNNER_TEMP/core-receipt/receipt.json"
         env:
+          CI_SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
           REWIND_TEST_POSTGRES: postgresql+psycopg://postgres:test-only@127.0.0.1:5432/rewind
           REWIND_TEST_POSTGRES_URL: postgresql+psycopg://postgres:test-only@127.0.0.1:5432/rewind
           REWIND_TEST_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
       - run: node --check agent_rewind/web/app.js
+      - name: Upload core receipt
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: core-receipt-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}-py${{ matrix.python }}-${{ matrix.leg }}
+          path: ${{ runner.temp }}/core-receipt/receipt.json
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 7
   isolation:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -149,14 +171,20 @@ jobs:
     needs: [core, isolation, security, package]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Require every check to succeed
+          fetch-depth: 2
+      - name: Require every check and core receipt to succeed
         env:
           CI_JOB_RESULTS: ${{ toJSON(needs) }}
-        run: python3 scripts/ci_gate.py
+          CI_SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 -m scripts.ci_gate
   delivery:
     name: Main candidate delivery
     needs: [ci-gate]
