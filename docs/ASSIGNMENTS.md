@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** P1/F3 is delivered; [PR #118](https://github.com/spei04/agent-rewind/pull/118) records accepted engineering CI. P2 is in progress; research advantage and live readiness remain unproven.
-- **Next:** Backend completes reservations and fences; qualification checks concurrency and uncertain commits; the reviewer verifies source and evidence.
-- **Open gate:** P2 review, PostgreSQL and integrated runtime validation remain. The $200 cap, unreconciled $36.567974 reservations, corpus preparation-only scope, and production/provider activation gates remain unchanged.
+- **Verified components:** P1/F3 is delivered. P2 has 115 local passes (24 pure, 91 SQLite), 91 supported Python 3.11 passes, PostgreSQL owner/key paths and two setup/restore passes.
+- **Next:** Backend finishes packaging; qualification freezes inventory; the lead owns hosted CI and publication. Ten native adversarial cases have independent component acceptance.
+- **Open gate:** P2 remains In progress with null accepted merge; full CI, review and delivery remain. The $200 cap, unreconciled $36.567974 reservations, corpus preparation-only scope and production/provider gates are unchanged. Research advantage and live readiness remain unproven.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -24,6 +24,8 @@ partner-data or production authorization.
 
 <details>
 <summary>Earlier assignments, approvals and delivery records</summary>
+
+**P2 component assignment checkpoint — 2026-10-28:** Backend delivered reviewed bounded owner/key execution and the shared offline fixture/restore consumer at 300a606a and 0ee4e577. Independent reviews 22c3439b and a97a2be1 accept those original native components; prior failures remain retained. QE’s ten native adversarial cases have independent component acceptance (peer 626dc015); backend owns integration checks and the lead owns publication. P2 delivery acceptance remains null. [Evidence and scope](delivery/LEDGER_EXECUTION_PLAN.md#p2-implementation-checkpoint--2026-10-28).
 
 **Current P1 status:** AR-010-A/P1 #108: Verified; F3: Merged; checkpoint accepted at protected merge b214f21b from reviewed source 1c6e30e0. Aggregate AR-010-A/#107 and parent AR-010/#10 remain In progress; product P2/#109 is In progress after independently accepted entry v7 and implementation assignment; its accepted merge and delivery review evidence remain null. The approved scope, task graph, effort estimates and funding/data/production gates are unchanged. [Delivery record](delivery/LEDGER_EXECUTION_PLAN.md#p1-delivery-record--2026-10-28).
 

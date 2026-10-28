@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** P1/F3 is delivered; [PR #118](https://github.com/spei04/agent-rewind/pull/118) records accepted engineering CI. P2 is in progress; research advantage and live readiness remain unproven.
-- **Next:** Backend completes reservations and fences; qualification checks concurrency and uncertain commits; the reviewer verifies source and evidence.
-- **Open gate:** P2 review, PostgreSQL and integrated runtime validation remain. The $200 cap, unreconciled $36.567974 reservations, corpus preparation-only scope, and production/provider activation gates remain unchanged.
+- **Verified components:** P1/F3 is delivered. P2 has 115 local passes (24 pure, 91 SQLite), 91 supported Python 3.11 passes, PostgreSQL owner/key paths and two setup/restore passes.
+- **Next:** Backend finishes packaging; qualification freezes inventory; the lead owns hosted CI and publication. Ten native adversarial cases have independent component acceptance.
+- **Open gate:** P2 remains In progress with null accepted merge; full CI, review and delivery remain. The $200 cap, unreconciled $36.567974 reservations, corpus preparation-only scope and production/provider gates are unchanged. Research advantage and live readiness remain unproven.
 
 [Active backlog](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Retained history](#143-dated-progress-ledger)
 

@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** P1/F3 is delivered; [PR #118](https://github.com/spei04/agent-rewind/pull/118) records accepted engineering CI. P2 is in progress; research advantage and live readiness remain unproven.
-- **Next:** Backend completes reservations and fences; qualification checks concurrency and uncertain commits; the reviewer verifies source and evidence.
-- **Open gate:** P2 review, PostgreSQL and integrated runtime validation remain. The $200 cap, unreconciled $36.567974 reservations, corpus preparation-only scope, and production/provider activation gates remain unchanged.
+- **Verified components:** P1/F3 is delivered. P2 has 115 local passes (24 pure, 91 SQLite), 91 supported Python 3.11 passes, PostgreSQL owner/key paths and two setup/restore passes.
+- **Next:** Backend finishes packaging; qualification freezes inventory; the lead owns hosted CI and publication. Ten native adversarial cases have independent component acceptance.
+- **Open gate:** P2 remains In progress with null accepted merge; full CI, review and delivery remain. The $200 cap, unreconciled $36.567974 reservations, corpus preparation-only scope and production/provider gates are unchanged. Research advantage and live readiness remain unproven.
 
 [Current task contract](../EXECUTION_BACKLOG.md#ar-010-a-p2) · [Approved plan and evidence](#p2-implementation-checkpoint--2026-10-28)
 
@@ -20,6 +20,8 @@ The component operates on named admitted version-2 run jobs and existing P1-prov
 Concurrent additive admission, metadata, artifact, projection, audit, key, legacy and operator writers remain outside this internal component. AR-010-B/AR-012-B must establish shared headroom for the complete participating writer set before live integration. Finite cancellation/revocation/generation adversaries do not establish unrestricted writer support. Admission's 200,000,000 microUSD job cap is unchanged; wide signed-integer tests use legitimate account/legacy exposure and real over-cap reservation refusal.
 
 SQLite and actual PostgreSQL behavior, independent source/security review, both-version collection/baseline review and matching hosted delivery evidence remain required. Customer compatibility stays migration-only. No new paid/provider, production or corpus activity is authorized by this implementation handoff. The historical P1 delivery record follows.
+
+**P2 component evidence — 2026-10-28:** Reviewed PostgreSQL owner claim/reserve used 420/444 work units and service-key paths 435/459 under the unchanged 512-unit limit (peer 22c3439b). Two subsequent setup/restore cases passed: real second-project admission/provisioning, exact offline ACL restoration after a body failure, and physical restore preserving original P1/P2 receipts, identity, balances and ciphertexts (peer a97a2be1; source 0ee4e577). All four restore tools exited successfully and the cluster returned to its stopped baseline. Earlier ACL, work-capacity and offline-guard failures remain retained. Ten native adversarial cases also have independent component acceptance (peer 626dc015). These are component outcomes; full P2 delivery and live integration remain open.
 
 ## P1 delivery record — 2026-10-28
 
