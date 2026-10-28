@@ -226,3 +226,87 @@ def test_postgres_service_key_claim_and_reserve_keep_native_work_bounds(
     pg, tmp_path, monkeypatch, record_property
 ):
     _complete_claim_and_reserve(pg, tmp_path, monkeypatch, record_property, service_key=True)
+
+
+def test_postgres_second_project_has_real_admission_and_accounts(
+    pg, tmp_path, monkeypatch, record_property
+):
+    from ledger_provisioning_fixture import identity
+    from ledger_provisioning_postgres_fixture import inspect
+    from reservation_postgres_fixture import (
+        offline_postgres_ledger,
+        with_postgres_second_project,
+    )
+
+    def record(name, value):
+        record_property(name, json.dumps(typed(value), allow_nan=False))
+
+    first = build_postgres_reservation_case(
+        pg, tmp_path, monkeypatch, account_limit=10, record=record
+    )
+    try:
+        before = first.snapshot()
+        second = with_postgres_second_project(first, tmp_path, monkeypatch, record)
+        after = second.snapshot()
+        record("before", before)
+        record("after", after)
+        assert first.engine is second.engine and first.case is second.case
+        assert first.project_id != second.project_id and first.job_id != second.job_id
+        assert first.organization_id == second.organization_id
+        assert first.account_ids[0] == second.account_ids[0]
+        assert first.principal is second.principal
+        assert second.admission.compatibility["code"] == "migration_only"
+        assert first.admission.objects != second.admission.objects
+        assert first.admission.journal != second.admission.journal
+        assert first.admission.ciphertexts and second.admission.ciphertexts
+        original_accounts = {row["id"]: row for row in rows(before, "budget_accounts")}
+        current_accounts = {row["id"]: row for row in rows(after, "budget_accounts")}
+        assert set(current_accounts) == set(original_accounts) | {identity(9001), identity(9002)}
+        assert all(
+            typed(current_accounts[key]) == typed(value) for key, value in original_accounts.items()
+        )
+        assert current_accounts[identity(9001)]["limit_microusd"] == 10
+        assert (
+            current_accounts[identity(9002)]["limit_microusd"]
+            == first.admission.association["job"]["budget"]
+        )
+        for account_id in (identity(9001), identity(9002)):
+            account = current_accounts[account_id]
+            assert account["project_id"] == second.project_id
+            assert all(
+                account[name] == 0
+                for name in ("held_microusd", "opening_held_microusd", "accounted_microusd")
+            )
+        old_jobs = {row["id"]: row for row in rows(before, "jobs")}
+        new_jobs = {row["id"]: row for row in rows(after, "jobs")}
+        assert all(typed(new_jobs[key]) == typed(value) for key, value in old_jobs.items())
+        assert set(new_jobs) == set(old_jobs) | {second.job_id}
+        assert new_jobs[second.job_id]["payload_version"] == 2
+        assert new_jobs[second.job_id]["status"] == "queued"
+        assert new_jobs[second.job_id]["reserved"] == 0
+        assert len(rows(after, "organizations")) == 1
+        assert len(rows(after, "projects")) == 2
+        assert typed(before["catalog"]) == typed(after["catalog"])
+        assert typed(before["authority"]) == typed(after["authority"])
+        with offline_postgres_ledger(second, record):
+            observed = inspect(second.provisioning, pg)
+        record("inspection", observed.model_dump(mode="json"))
+        assert observed.account_count == 5 and observed.manifest_count == 2
+        failure_before = second.snapshot()
+        original_error = RuntimeError("synthetic offline operator body failure")
+        with pytest.raises(RuntimeError) as caught, offline_postgres_ledger(second, record):
+            raise original_error
+        assert caught.value is original_error
+        failure_after = second.snapshot()
+        assert typed(failure_after) == typed(failure_before)
+        record(
+            "offline_body_failure",
+            {
+                "original_exception_identity": caught.value is original_error,
+                "before": failure_before,
+                "after": failure_after,
+            },
+        )
+        assert first.engine.pool.checkedout() == 0
+    finally:
+        first.close()

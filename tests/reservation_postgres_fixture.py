@@ -2,6 +2,7 @@
 
 import json
 import time
+from contextlib import contextmanager
 from dataclasses import dataclass, replace
 from types import SimpleNamespace
 
@@ -278,3 +279,211 @@ def with_postgres_service_key(case):
     except BaseException:
         case.close()
         raise
+
+
+def with_postgres_second_project(case, tmp_path, monkeypatch, record=None):
+    """Add one real post-P1 admitted/provisioned target in the same organization.
+
+    Both returned views share the original engine and fixture lifetime. The
+    caller closes the original case once, after all operations have finished.
+    The existing migration-only test adapter remains confined to admission.
+    """
+    from datetime import UTC, datetime
+
+    from ledger_eligibility_fixture import rows
+    from ledger_provisioning_fixture import digest, identity
+    from ledger_restore_authority import typed
+
+    events = list(case.setup_events)
+
+    def observed(name, value):
+        events.append(("second_" + name, value))
+        if record is not None:
+            record("second_" + name, value)
+
+    assert case.engine.pool.checkedout() == 0
+    case.engine.dispose()
+    fixture = eligibility.refreshed(case.provisioning, case.pg)
+    initialized = fixture.before
+    project = "8" * 32
+    with case.pg["owner"].begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO projects(id,organization_id,name,created_at) "
+                "VALUES(:id,:organization,:name,:created)"
+            ),
+            {
+                "id": project,
+                "organization": case.organization_id,
+                "name": "second-project",
+                "created": datetime.now(UTC).isoformat(),
+            },
+        )
+        connection.execute(
+            members.insert().values(
+                project_id=project,
+                principal_id=case.principal.principal_id,
+                role="maintainer",
+                revoked_at=None,
+                legacy_default=False,
+            )
+        )
+    fixture = eligibility.refreshed(fixture, case.pg)
+    namespace = tmp_path / "second-admission"
+    namespace.mkdir(mode=0o700)
+    body = submission()
+    body["budget_microusd"] = case.admission.association["job"]["budget"]
+    with monkeypatch.context() as patch:
+        patch.setattr(eligibility, "submission", lambda: body)
+        fixture, admission = eligibility.admit_existing_fixture(
+            fixture,
+            case.pg,
+            tmp_path,
+            patch,
+            observed,
+            principal=case.principal,
+            project_id=project,
+            client_operation_id="2" * 32,
+            key_hash="3" * 64,
+            admission_root=namespace,
+        )
+    assert admission.compatibility == {
+        "status": "incompatible",
+        "code": "migration_only",
+        "installation_key": None,
+    }
+    assert admission.accepted["job_id"] != case.job_id
+    for name in ("budget_accounts", "migration_progress"):
+        assert typed(rows(fixture.before, name)) == typed(rows(initialized, name))
+    initial = case.admission.manifest
+    original_project = next(row for row in initial["accounts"] if row["scope"] == "project")
+    original_job = next(row for row in initial["accounts"] if row["job_id"] == case.job_id)
+    manifest = {
+        **initial,
+        "manifest_id": identity(9000),
+        "operation": "provision",
+        "source_digest": fixture.source,
+        "parent_manifest_digest": digest(initial),
+        "opening_accounts": None,
+        "accounts": [
+            {
+                **original_project,
+                "id": identity(9001),
+                "scope_id": project,
+                "project_id": project,
+            },
+            {
+                **original_job,
+                "id": identity(9002),
+                "scope_id": admission.accepted["job_id"],
+                "project_id": project,
+                "job_id": admission.accepted["job_id"],
+                "limit_microusd": admission.association["job"]["budget"],
+            },
+        ],
+    }
+    with offline_postgres_ledger(case, observed):
+        receipt = invoke(fixture, case.pg, manifest)
+    assert receipt.sequence == 1 and receipt.account_rows == 2
+    assert receipt.imported_jobs == receipt.imported_opening_microusd == 0
+    observed("association", admission.association)
+    observed("manifest", manifest)
+    observed("receipt", receipt.model_dump(mode="json"))
+    context = case.authority.named(case.principal, project, action="record").context
+    case.engine.dispose()
+    return replace(
+        case,
+        context=context,
+        project_id=project,
+        job_id=admission.accepted["job_id"],
+        account_ids=(case.account_ids[0], identity(9001), identity(9002)),
+        provisioning=fixture,
+        admission=SimpleNamespace(
+            **vars(admission), manifest=manifest, initialization_receipt=receipt
+        ),
+        setup_events=events,
+    )
+
+
+@contextmanager
+def offline_postgres_ledger(case, record=None):
+    """Temporarily remove exactly the fixture app's writes for offline P1.
+
+    This is test-only operator sequencing. No schema/privilege guard is patched,
+    and application work resumes only after its original ACL is restored.
+    """
+    from test_run_projection_postgres import drain
+
+    updates = {
+        "projects": ("id",),
+        "organizations": ("id",),
+        "api_keys": ("id",),
+        "project_memberships": ("principal_id",),
+        "resource_scopes": ("resource_id",),
+        "jobs": ("owner", "status", "lease_until", "lease_generation", "reserved"),
+        "budget_accounts": ("held_microusd",),
+    }
+    inserts = ("provider_calls", "resource_scopes", "budget_entries")
+    pg = case.pg
+    expected = {
+        ("column", table, column, "UPDATE", False, pg["owner_role"])
+        for table, columns in updates.items()
+        for column in columns
+    } | {("table", table, "", "INSERT", False, pg["owner_role"]) for table in inserts}
+    before = None
+    primary = None
+    witness = {}
+    try:
+        assert case.engine.pool.checkedout() == 0
+        case.engine.dispose()
+        drain(pg)
+        with pg["owner"].begin() as connection:
+            role = connection.dialect.identifier_preparer.quote(pg["app_role"])
+            observed = _application_acl(connection, pg["app_role"])
+            (original_acl,) = [value for name, value in case.setup_events if name == "grant_acl"]
+            assert observed == {tuple(row) for row in original_acl}
+            mutable = {row for row in observed if row[3] not in {"USAGE", "SELECT"}}
+            assert mutable == expected
+            before = observed
+            for table in inserts:
+                connection.exec_driver_sql(f"REVOKE INSERT ON {table} FROM {role}")
+            for table, columns in updates.items():
+                connection.exec_driver_sql(
+                    f"REVOKE UPDATE({','.join(columns)}) ON {table} FROM {role}"
+                )
+            suspended = _application_acl(connection, pg["app_role"])
+            assert suspended == before - expected
+            witness = {"before": sorted(before), "suspended": sorted(suspended)}
+        drain(pg)
+        if record is not None:
+            record("offline_acl_suspended", witness)
+        yield
+    except BaseException as error:
+        primary = error
+        raise
+    finally:
+        if before is not None:
+            try:
+                assert case.engine.pool.checkedout() == 0
+                case.engine.dispose()
+                drain(pg)
+                with pg["owner"].begin() as connection:
+                    role = connection.dialect.identifier_preparer.quote(pg["app_role"])
+                    for table in inserts:
+                        connection.exec_driver_sql(f"GRANT INSERT ON {table} TO {role}")
+                    for table, columns in updates.items():
+                        connection.exec_driver_sql(
+                            f"GRANT UPDATE({','.join(columns)}) ON {table} TO {role}"
+                        )
+                    restored = _application_acl(connection, pg["app_role"])
+                    assert restored == before
+                drain(pg)
+                if record is not None:
+                    record("offline_acl_restored", {**witness, "restored": sorted(restored)})
+            except BaseException as error:
+                if primary is not None:
+                    primary.add_note(
+                        "offline fixture ACL restoration failed: " + type(error).__name__
+                    )
+                    raise primary from error
+                raise
