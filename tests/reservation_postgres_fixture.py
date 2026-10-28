@@ -1,7 +1,8 @@
 """Real PostgreSQL admission/P1 setup, with the existing synthetic setup adapter."""
 
 import json
-from dataclasses import dataclass
+import time
+from dataclasses import dataclass, replace
 from types import SimpleNamespace
 
 import ledger_eligibility_postgres_fixture as eligibility
@@ -13,8 +14,11 @@ from sqlalchemy.pool import QueuePool
 from test_admission_configuration import configuration
 from test_admission_request import submission
 
+from agent_rewind.database import keys
 from agent_rewind.migrations.compatibility import configure_runtime_engine
 from agent_rewind.request_authority import RequestAuthority
+from agent_rewind.request_identity import VerifiedPrincipal
+from agent_rewind.scoped_repositories import members, scopes
 
 
 @dataclass
@@ -230,4 +234,47 @@ def build_postgres_reservation_case(
         if engine is not None:
             engine.dispose()
         fixture.close()
+        raise
+
+
+def with_postgres_service_key(case):
+    """Persist one synthetic current key; P2 still uses the restricted app role.
+
+    This is test setup using the fixture owner, not HTTP token authentication.
+    The production authority reads the actual key, scope and membership rows.
+    """
+    key_id = f"{120001:032x}"
+    principal = VerifiedPrincipal.service_key(key_id)
+    try:
+        with case.pg["owner"].begin() as connection:
+            connection.execute(
+                keys.insert().values(
+                    id=key_id,
+                    hash="a" * 64,
+                    role="operator",
+                    name="synthetic-p2-key",
+                    expires=time.time() + 3600,
+                    revoked=False,
+                )
+            )
+            connection.execute(
+                scopes.insert().values(
+                    resource_kind="key",
+                    resource_id=key_id,
+                    project_id=case.project_id,
+                )
+            )
+            connection.execute(
+                members.insert().values(
+                    project_id=case.project_id,
+                    principal_id=principal.principal_id,
+                    role="operator",
+                    revoked_at=None,
+                    legacy_default=False,
+                )
+            )
+        context = case.authority.named(principal, case.project_id, action="record").context
+        return replace(case, principal=principal, context=context)
+    except BaseException:
+        case.close()
         raise

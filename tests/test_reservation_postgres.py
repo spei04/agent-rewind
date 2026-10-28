@@ -9,7 +9,10 @@ import test_migrations_postgres as migrations
 from ledger_eligibility_fixture import rows
 from ledger_eligibility_postgres_fixture import assert_job_change
 from ledger_restore_authority import typed
-from reservation_postgres_fixture import build_postgres_reservation_case
+from reservation_postgres_fixture import (
+    build_postgres_reservation_case,
+    with_postgres_service_key,
+)
 from sqlalchemy import event
 
 from agent_rewind import reservation_rows
@@ -24,15 +27,16 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def test_postgres_complete_claim_and_reserve_keep_native_work_bounds(
-    pg, tmp_path, monkeypatch, record_property
-):
+def _complete_claim_and_reserve(pg, tmp_path, monkeypatch, record_property, *, service_key=False):
     def record(name, value):
         record_property(name, json.dumps(typed(value), allow_nan=False))
 
     case = build_postgres_reservation_case(
         pg, tmp_path, monkeypatch, record=lambda name, value: record("setup_" + name, value)
     )
+    if service_key:
+        case = with_postgres_service_key(case)
+    record("principal_kind", "synthetic-service-key" if service_key else "original-owner")
     queries = []
     stages = []
     mode = ["setup"]
@@ -147,6 +151,29 @@ def test_postgres_complete_claim_and_reserve_keep_native_work_bounds(
         mode[0] = "reserve"
         try:
             result = owner.reserve(case.principal, case.context, fence, intent)
+        except BaseException as error:
+            # Preserve the original failed attempt and traceback. Observe the
+            # whole database while it still exists, after coordinator cleanup.
+            record(
+                "reserve_original_failure",
+                {
+                    "type": type(error).__module__ + "." + type(error).__qualname__,
+                    "code": getattr(error, "code", None),
+                    "reason": getattr(error, "reason", None),
+                },
+            )
+            mode[0] = "observation"
+            try:
+                failed_after = case.snapshot()
+                record("reserve_failed_after", failed_after)
+                record("reserve_failure_whole_state_equal", typed(failed_after) == typed(claimed))
+            except BaseException as diagnostic_error:
+                # A snapshot failure cannot replace the original exception.
+                record(
+                    "reserve_failure_snapshot_error",
+                    type(diagnostic_error).__module__ + "." + type(diagnostic_error).__qualname__,
+                )
+            raise
         finally:
             report(owner, "reserve")
         assert isinstance(result, CreatedReservation) and result.record.identity == intent
@@ -187,3 +214,15 @@ def test_postgres_complete_claim_and_reserve_keep_native_work_bounds(
     finally:
         event.remove(case.engine, "before_cursor_execute", observe)
         case.close()
+
+
+def test_postgres_complete_claim_and_reserve_keep_native_work_bounds(
+    pg, tmp_path, monkeypatch, record_property
+):
+    _complete_claim_and_reserve(pg, tmp_path, monkeypatch, record_property)
+
+
+def test_postgres_service_key_claim_and_reserve_keep_native_work_bounds(
+    pg, tmp_path, monkeypatch, record_property
+):
+    _complete_claim_and_reserve(pg, tmp_path, monkeypatch, record_property, service_key=True)
