@@ -185,20 +185,56 @@ def admitted_predecessor(pg, root, monkeypatch, record, *, legacy=True):
         raise
 
 
-def admit_existing_fixture(fixture, pg, root, monkeypatch, record):
+def admit_existing_fixture(
+    fixture,
+    pg,
+    root,
+    monkeypatch,
+    record,
+    *,
+    principal=None,
+    project_id=None,
+    client_operation_id=None,
+    key_hash=None,
+    admission_root=None,
+):
     """Publish one job; native fixture lifetime remains with the caller."""
     engine = None
     try:
         # The setup adapters require checkedout(); the attested operator stays unchanged.
         engine = create_engine(fixture.case.engine.url, poolclass=QueuePool)
         f = SimpleNamespace(engine=engine, config=configuration())
-        f.principal, authority_binding = native_principal(fixture)
+        explicit = any(
+            value is not None
+            for value in (principal, project_id, client_operation_id, key_hash, admission_root)
+        )
+        if explicit:
+            assert all(
+                value is not None
+                for value in (principal, project_id, client_operation_id, key_hash, admission_root)
+            )
+            assert type(principal) is VerifiedPrincipal
+            principal.__post_init__()
+            for value, width in ((project_id, 32), (client_operation_id, 32), (key_hash, 64)):
+                assert type(value) is str and len(value) == width
+                assert all(char in "0123456789abcdef" for char in value)
+            f.principal = principal
+            selected_project = project_id
+            authority_binding = {
+                "route": "explicit_predecessor_project",
+                "principal_id": principal.principal_id,
+                "project_id": selected_project,
+                "authorization": "fresh actual record authority below",
+            }
+        else:
+            f.principal, authority_binding = native_principal(fixture)
+            selected_project = fixture.project
         record("predecessor_authority_binding", typed(authority_binding))
         with engine.connect() as connection:
             role = connection.exec_driver_sql("SELECT current_user").scalar_one()
             assert role == pg["owner_role"]
             f.name = connection.execute(
-                text("SELECT name FROM projects WHERE id=:p"), {"p": fixture.project}
+                text("SELECT name FROM projects WHERE id=:p"), {"p": selected_project}
             ).scalar_one()
         record(
             "admission_connection_prerequisite",
@@ -210,9 +246,13 @@ def admit_existing_fixture(fixture, pg, root, monkeypatch, record):
             },
         )
         f.authority = RequestAuthority(engine)
-        f.context = f.authority.named(f.principal, fixture.project, action="record").context
-        f.intent = parse_submit(canonical(submission()))
-        f.root, objects = root / "admission-journal", root / "admission-objects"
+        f.context = f.authority.named(f.principal, selected_project, action="record").context
+        request = submission()
+        if explicit:
+            request["client_operation_id"] = client_operation_id
+        f.intent = parse_submit(canonical(request))
+        selected_root = admission_root if explicit else root
+        f.root, objects = selected_root / "admission-journal", selected_root / "admission-objects"
         f.root.mkdir(mode=0o700)
         objects.mkdir(mode=0o700)
         f.policy, f.ready = Policy(f), Ready(f)
@@ -233,7 +273,11 @@ def admit_existing_fixture(fixture, pg, root, monkeypatch, record):
                 f.service, "schema_compatibility", lambda: CompatibilityResult("ready", "ready")
             )
             accepted = f.service.submit(
-                f.principal, f.context, f.intent, "7" * 64, OriginCorrelation("6" * 32)
+                f.principal,
+                f.context,
+                f.intent,
+                key_hash if explicit else "7" * 64,
+                OriginCorrelation("6" * 32),
             )
         assert len(f.storage.calls) == 3 and f.ready.calls == 1
         for descriptor in f.storage.calls:
@@ -259,7 +303,7 @@ def admit_existing_fixture(fixture, pg, root, monkeypatch, record):
         association = assert_admitted(
             result.before,
             accepted,
-            project=result.project,
+            project=selected_project,
             principal=f.principal.principal_id,
             config_digest=f.config.digest,
             budget=f.intent.budget_microusd,
