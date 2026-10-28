@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+from typing import Any
 from weakref import WeakSet
 
 from sqlalchemy.engine import Connection
@@ -9,7 +11,7 @@ from sqlalchemy.engine import Connection
 from .ledger_reader_catalog import inspect_catalog
 from .ledger_reader_financial import read_financial, validate_financial
 from .ledger_reader_graph import read_graph, source_bounds
-from .ledger_reader_history import read_history, read_revision
+from .ledger_reader_history import History, read_history, read_revision
 from .ledger_state import LedgerState, validate_ledger_chain
 from .ledger_transaction import _require_ledger_body
 from .schema import ADMISSION, MigrationRefused, dialect, schema_table_names
@@ -17,7 +19,16 @@ from .schema import ADMISSION, MigrationRefused, dialect, schema_table_names
 _ACTIVE: WeakSet[Connection] = WeakSet()
 
 
-def inspect_ledger_state(connection: Connection) -> LedgerState:
+@dataclass(frozen=True)
+class _LedgerContext:
+    """Private completed proof; retained rows never establish new caller rights."""
+
+    state: LedgerState
+    history: History
+    financial: dict[str, list[dict[str, Any]]]
+
+
+def _inspect_ledger_context(connection: Connection) -> _LedgerContext:
     """Prove the whole retained state using the caller's issued exclusion and budget.
 
     This does not establish current request authority or initialization eligibility.
@@ -59,7 +70,7 @@ def inspect_ledger_state(connection: Connection) -> LedgerState:
                 status="complete",
                 installation_key=history.adoption["installation_key"],
                 revision="ar_0007_ledger",
-                head=validate_ledger_chain(history.manifests, history.opening),
+                head=validate_ledger_chain(history.manifests, history.opening, check=work.check),
                 manifest_count=len(history.manifests),
                 account_count=len(financial["account"]),
                 opening=history.opening,
@@ -67,6 +78,11 @@ def inspect_ledger_state(connection: Connection) -> LedgerState:
         if _require_ledger_body(connection) is not work:
             raise MigrationRefused("transactional_connection_required")
         work.check()
-        return state
+        return _LedgerContext(state, history, financial)
     finally:
         _ACTIVE.remove(connection)
+
+
+def inspect_ledger_state(connection: Connection) -> LedgerState:
+    """Return only complete public state from the caller's issued transaction."""
+    return _inspect_ledger_context(connection).state

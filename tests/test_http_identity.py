@@ -74,7 +74,7 @@ def test_cookie_v2_issuer_binding_and_no_bootstrap(settings, storage):
         ("expires", b""),
         ("expires", math.inf),
         ("expires", -math.inf),
-        ("expires", time.time() - 1),
+        pytest.param("expires", time.time() - 1, id="expires-expired"),
         ("revoked", ""),
         ("revoked", b""),
         ("revoked", 1),

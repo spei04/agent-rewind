@@ -1,19 +1,83 @@
 # Engineering assignment log
 
+**Full-order CI follow-up — 2026-10-27:** The original e67f2b5d attempt passed both Python 3.11 partitions. Python 3.12 was cancelled at 45m0s after 6,912 reported outcomes (86%), including one failure in the native-protocol deadline/message-limit control; no traceback survived, so its assertion cause remains unproved. All installed-listing cases reported passes. The successor preserves full 3.12 order with a bounded 60-minute job/receipt allowance and first-failure traceback reporting; 3.11 remains at 45 minutes per leg. Passing coverage still requires three complete current-attempt receipts. Both-version collection and baseline review remain required after test changes. Full PR/main/native delivery and candidate verification remain pending; F3/P1 acceptance is null and P2 remains Not started. Counts, acquisition gates and spending limits are unchanged.
+
+**CI capacity follow-up — 2026-10-27:** The first CI attempt for draft PR #117 tested 8fd8bf19. Its 18-node PostgreSQL campaign has independent component acceptance, while hosted Python 3.12 reported three failures and Python 3.11 reached the unchanged 45-minute limit. The successor corrects two stale eligibility controls, adds bounded installed-listing observations without claiming a root cause, and implements separate Python 3.11 early/late jobs while preserving the full Python 3.12 order. [Core receipt maintenance](delivery/CI_CORE_RECEIPTS.md) requires independently reviewed collection baselines for both versions and three complete current-attempt receipts. Full PR/main/native delivery and candidate verification remain pending; F3/P1 acceptance is null and P2 remains Not started. Counts, estimates, corpus acquisition gates and spending limits are unchanged.
+
+**Replay and restore checkpoint — 2026-10-27:** The PostgreSQL replay and missing-opening restore components are accepted. The SQLite replay counterparts are accepted at 2370665a after 142 offline controls and the two original-service cases passed on each interpreter. Final matching-source delivery remains open. F3/P1 acceptance stays null and product P2/#109 remains Not started. Counts, F3/P1 estimates and funding/data gates are unchanged. The public-corpus amendment now has preparation-only approval; acquisition and study gates remain closed. [Detailed evidence and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#r1-source-and-controller-checkpoint--2026-10-27).
+
+One combined draft PR will carry the reviewed source and this checkpoint. Exact latest-source hosted CI, the established 18-node PostgreSQL campaign, protected-main CI and candidate verification remain required; a draft PR is not F3/P1 acceptance.
+
+**SQLite account-window checkpoint — 2026-10-27:** All three SQLite cases passed at baa05fd9, each with 22 properties and two validated physical and semantic service outcomes. Independent review **9422335c** and lead **ace6ce9d** accept these bounded components. The earlier M0-only failed attempt and cursor-close source hold remain retained. [Evidence and remaining scope](delivery/LEDGER_EXECUTION_PLAN.md#sqlite-account-window-checkpoint--2026-10-27) preserve accepted PostgreSQL windows and leave evolved replay, missing-opening restore and full matching-source delivery open. F3/P1 acceptance remains null; product P2/#109 is Not started. The [public-corpus proposal](research/PUBLIC_CORPUS_PROPOSAL_2026-10-27.md) remains **PROPOSED**, pending the owner’s reply; it authorizes no implementation, capture or paid study.
+
 Execution backlog approved on 2026-10-19. The project lead coordinates three independent contributor slots, reviews each delivery, integrates tested changes, then assigns dependency-ready work to the free slot. These are logical contributor roles, not six confirmed full-time hires; the prior staffing/calendar scenario remains unconfirmed. Task-specific external funding, data, customer and release gates still apply.
 
-## Current assignments — 2026-10-22
+## Execution location — 2026-10-23
 
-| Owner | Current work | Review / next gate |
-| --- | --- | --- |
-| Platform/security | Writer feasibility component passed 20 SQLite and 23 PostgreSQL asserted case groups; restored/stopped release recorded | Prepare reviewed F3 components only; compatibility cleanup corrections and implementation gates remain open. |
-| Independent QE | Frozen isolated listing-test clock correction after the protected-main failure | Independent source review and Python 3.11 checks before integration; runtime two-second limit remains unchanged. |
-| Planning/verification | Final PR/main audits frozen; current progress reconciliation in secondary | Review the test correction and release secondary for lead composition and fresh delivery. |
-| Lead | PR #113 merged at 08234c; F2 acceptance remains null after the main gate failed | Compose reviewed correction and progress, then require fresh PR/main/candidate evidence; F3/full P1 still precede P2. |
+All Agent Rewind checkouts, dependencies, builds, test execution, datasets,
+media, logs, run outputs and private evidence stay in the existing
+`studio-agent` cloud workspace or existing hosted CI. The Mac is an SSH
+control channel only: no project cloning, installation, builds, research,
+artifact downloads or media staging there. Reuse the two existing cloud
+checkouts and their independent environments. Preserve retained evidence and
+active writers; do not delete other teams' files or touch the separate local
+computer-use project. This rule adds no capacity purchase, budget, provider,
+partner-data or production authorization.
+
+## Current assignments — 2026-10-27 UTC
+
+| Active owner | Cloud path on studio-agent | Current work / next acceptance gate | Concrete blocker |
+| --- | --- | --- | --- |
+| Platform engineer | existing secondary checkout | Qualify the narrow native-protocol control correction and preserve original hosted failures; adapt stopped verification only after source acceptance. | The mapped hosted failure has no surviving traceback; no corpus acquisition or study is authorized. |
+| Integration engineer | existing primary checkout | Add the bounded full-order Python 3.12 CI allowance and first-failure diagnostics with exact per-leg receipt and incomplete-session controls. | Preserve both 3.11 bounds and all native deadlines; leave baseline regeneration and publication to the lead after composed-source review. |
+| Independent reviewer | read-only frozen source and evidence | Review receipt identity, exact phase outcomes, artifact bounds/history and collection equivalence independently. | Final code, both-version inventory, complete hosted/native runs and candidate validation remain separate acceptance gates. |
+| Lead | publication ownership and source-specific execution grants | Preserve failed hosted attempts and accepted historical components; coordinate the final baseline and corrected-source validation. | Require exact-source review before publication and complete current-attempt evidence before protected-main delivery; no F3/P1 completion credit yet. |
+
+
+The latest ordinary capacity attempt at eb2cbc4 passes all four seeded-reader cases. The maximum took **1.976373s**, leaving about **24ms in one run**; repeatability and broader performance remain unproved. The dated v4 failure remains in the history below. [Capacity evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23) and [SQLite contention evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23) retain their distinct scopes.
 
 Only two existing cloud checkouts are retained and reused. C07 and C15 are accepted offline contracts. Neither establishes runtime availability or production approval.
 
+
+### Maintenance assignment checkpoint — 2026-10-27 UTC
+
+- Formatter/platform engineer: prepared the two-file PR32 correction; the lead pushed it. All six required jobs passed and independent review accepted the exact CI evidence. The engineer then received the private F1 runner assignment.
+- Integration engineer: established the PR31 version-contract mismatch and retained the stopped diagnostic/restoration. Next implemented the four-file F1 source slice, corrected the typed-ID and timeout-oracle findings, and delivered 38a95531. Following the retained native probe failure, the engineer delivered the narrow 0be77406 query correction and driver regression; 80 source controls passed per interpreter. The engineer then delivered the exact-newline correction at 833220b5 with 82 passing source controls per interpreter. The engineer also completed the independently reviewed B1 mapping and exact source bridge, then matched the 37-control successor runners.
+- Independent reviewer: accepted the maintenance evidence and corrected F1 source, then reviewed the separate runner and actual results. The after-DDL case at 0be77406 and corrected first-backfill case at 833220b5 are accepted separately; both earlier failures remain retained.
+- Lead: matched the F1 controls on Python 3.12, executed the reviewed native selections and preserved each outcome. The lead accepted the after-DDL component and clean release, assigned the first-backfill-only continuation, and accepted its passing result after independent review. Final progress reconciliation and ordinary branch publication remain lead-owned.
+
+[Maintenance evidence and next gates](delivery/LEDGER_EXECUTION_PLAN.md#dependency-follow-up--2026-10-27).
+
+### B1 assignment checkpoint — 2026-10-27 UTC
+
+- Integration engineer: implemented the shared typed multi-project oracle, then the two native PostgreSQL cases. The source-stage controls passed 102 and 64 per interpreter respectively; unchanged earlier source evidence was reused explicitly. The engineer then matched the corrected 49-control runner and isolated standalone-import check.
+- Platform engineer: derived manifest/cursor/work feasibility, implemented the private controller, preserved the first controller failure, and corrected its standalone import path. Separate saved-record validation recovered evidence from the first passing testcase without rerunning it; the successor executed only the previously unrun second cohort.
+- Independent reviewer: reviewed source and execution boundaries, accepted the original cleanup facts, and independently accepted the separate saved-record and successor-native evidence. Reviewed the remaining-window mapping without starting those cases.
+- Lead: integrated 4547b099 and 0fcb0d43, ran matching Python 3.12 source checks, issued two bounded execution grants and accepted the resulting components. Owns this publication and the next dependency-ready window slice.
+
+[Accepted B1 evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#b1-writer-capacity-checkpoint--2026-10-27). [Path to the first budget-matched experiment](delivery/LEDGER_EXECUTION_PLAN.md#path-to-the-first-budget-matched-repair-experiment--2026-10-27).
+
+### PostgreSQL window assignment checkpoint — 2026-10-27 UTC
+
+- The integration engineer authored the four-file source slice and narrow capture/source-span corrections; original 118 and final 178 control selections remain distinct.
+- The platform engineer prepared the private controllers and evidence accounting, retained the failed expiry record and offline-only hash/namespace defects, and froze the third-only successor evidence. No successful earlier case was repeated.
+- The independent reviewer reviewed source/controllers, matched final affected 37 plus isolated 1, and accepted the first two actual cases. Accepted the corrected third case at ff89edf3 (peer de292191); earlier source-specific outcomes remain separate.
+- The lead owns exact grants, component acceptance and publication. SQLite-window work, R1/D2 and full F3/P1 delivery remain separate.
+
+[Window evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#postgresql-account-window-checkpoint--2026-10-27).
+
+### SQLite window assignment checkpoint — 2026-10-27 UTC
+
+The Platform engineer preserved the failed first SQLite attempt, corrected deferred work binding and prepared the config-only successor. The Integration engineer supplied the SQLite source/cursor-close correction and now owns the separate R1 candidate. The Independent reviewer accepted the corrected source and runner; actual acceptance is recorded by peer 9422335c and lead ace6ce9d. The Lead owns grants and publication. Three cases passed at baa05fd9 with six validated service outcomes; the original failure remains one M0 physical receipt and zero semantic credit. [Component evidence](delivery/LEDGER_EXECUTION_PLAN.md#sqlite-account-window-checkpoint--2026-10-27) retains exact lifecycle attribution.
+
+R1's initial 100-control results per interpreter remain retained. The corrected ordinary-CI opt-in candidate passed 114 controls on Python 3.11; final matching/source acceptance remains pending, with no committed R1 source or native execution claimed. Both checkouts and their owned environments remain in use. Existing task counts, estimates, $200 cap and explicitly unreconciled $36.567974 reservations are unchanged; reservations are not available cash. Full F3/P1 acceptance remains null and product P2 is Not started.
+
+### Replay, restore and SQLite assignment checkpoint — 2026-10-27 UTC
+
+The PostgreSQL mixed replay component is accepted through the original passing testcase and separate saved-record accounting, retaining the failed controller without a native repeat. The separately granted expiry-only case and corrected missing-opening restore are also accepted. SQLite replay is accepted at 2370665a with 142 controls and two original-service passes per interpreter. Both original runners released cleanly, independent evidence review is complete for these components, and integration owns the reviewed four-document checkpoint and compact final-source bindings. Full F3/P1 delivery acceptance remains null.
+
 ## Assignment history
+
 
 | Date | Engineer | Task | Branch | Status / next action |
 | --- | --- | --- | --- | --- |
@@ -50,11 +114,11 @@ The managed checkout tool could not operate on the cloud repository from this lo
 
 - **Goal:** durable failed-run capture, checkpoint restoration, useful intervention selection and honest matched-trial evidence; enterprise readiness still requires the later deployment/security/recovery gates.
 - **Verified delta:** HTTP P2, aggregate AR-008-B and parent AR-008 are Verified at cefd222 after reviewed source 065df8c, exact PR/main attempts 39683408934/39686498691 and candidate 12387716715; [accepted evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21). P1 #94/03a8e074 remains unchanged. Prior accepted scopes and dated failures retain their separate evidence.
-- **Contributor checkpoint:** F1 dormant schema/operator/guard foundation is accepted at 2e0eeeab after reviewed source c6f32cdd, exact PR/main attempts 39729061054/39733331352 and verified candidate 12407151544; [accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f1-foundation-checkpoint--2026-10-22). The original failed run and earlier local/native checkpoints remain separate history. No ledger acceptance package is Verified.
+- **Contributor checkpoint:** Account-window components in both dialects, PostgreSQL evolved/expired replay and missing-opening restore retain accepted evidence. SQLite replay is accepted at 2370665a with 142 controls and two original-service passes per interpreter. Original failed controllers, source corrections and saved-record recovery remain separately recorded.
 - **Capacity risk:** CAP-01 identifies repeated unchanged-file uploads; retained bytes alone do not predict object-operation cost. Reviewed C04 assigns the publication/read controls; measured throughput and cost evidence are still required before production sizing.
-- **Next evidence-producing milestone:** Independently review and integrate the isolated listing-test clock correction, then complete fresh protected delivery for F2. F2 acceptance remains null despite the PR merge. F3 trusted provisioning/opening/replay/recovery follows accepted F2. Only complete final P1 acceptance permits P2 entry.
-- **Current storage and consumers:** The two existing cloud checkouts are reused: independent QE owns the test correction in primary; planning owns the narrow progress update in secondary until release to the lead. The original 29-case PostgreSQL matrix and the five added complete-reader boundary cases pass separately on both interpreters. The writer feasibility component also has a restored/stopped release; no database consumer remains from those runs. Private evidence stays outside checkouts; no new checkout, environment or paid resource.
-- **Budget:** existing validation authorization remains $200. Last recorded conservative reservations are $36.567974; invoice-level actual spend has not been reconciled, so $163.432026 is only provisional remaining authorization. This execution batch made zero provider calls and provisioned zero paid resources. Reconcile before any new live experiment; production/study funding remains separately gated.
+- **Next evidence-producing milestone:** Publish the reviewed source/checkpoint as one draft PR, qualify compact final-source bindings and run the established 18 special PostgreSQL nodes. Preserve the unchanged hosted PR/protected-main/candidate gates. The two SQLite cases also run in ordinary pytest CI; no new special-node family or funding authority is introduced.
+- **Current storage and consumers:** Reuse the two cloud checkouts with independently owned environments. Both original SQLite runners have completed cleanup and release with all 616 tracked files preserved; the lead assigns the released checkouts for the next source consumers. Latest accepted PostgreSQL release 29af95b5 preserves baseline, memberships and absent PID/socket/lock, with the direct parent reaped. No new checkout or disk saving is claimed. Private indexed evidence remains outside the checkouts with review date 2026-11-26.
+- **Budget:** The authorization remains $200. Historical conservative reservations of $36.567974 are unreconciled, not invoice spend or verified available cash. This window work made no provider calls and provisioned no paid resources. Funding, partner-data and production gates are unchanged.
 
 - 2026-10-19 lead dependency review: 514 edges pass acyclic/producer/schedule checks after three missing prerequisite links. Conditional first-fortnight work now finishes freeze; readiness follows revision guards. Total effort remains 427 days; longest effort path is 146 days. Current capacity remains three contributor slots.
 
@@ -1114,3 +1178,517 @@ PostgreSQL** asserted component case groups and restored/stopped release **1161b
 Reviewed writer, compatibility and recovery preparation does not start F3;
 compatibility controller cleanup corrections remain pending. F2/P1 acceptance
 stays null; F3/P2 stay Not started.
+
+## Accepted F2 and F3 assignment — 2026-10-22
+
+Reviewed source **ac3b0a31** passed PR #114 attempt **39780954252/1** and
+protected-main attempt **39786131008/1** after normal merge **e8cba52**.
+Both runs passed **4738 / 32 skipped** on Python 3.11 and **4749 / 21 skipped**
+on Python 3.12, one existing warning each; package, security, native PostgreSQL,
+three gVisor cases and the gates passed. The main candidate was rebuilt and
+uploaded, then independently verified as artifact **12431486551**, **853440
+bytes**, with **133 exact runtime members**. [Accepted evidence](delivery/LEDGER_EXECUTION_PLAN.md#accepted-f2-reader-and-f3-handoff--2026-10-22)
+retains exact identities, timings and prior failures.
+
+The first candidate verification stopped on SSH exit 255 before its source/merge
+check completed; the unchanged verifier's separate second attempt passed.
+The original failed main attempt 39773689705/1 remains retained. Neither
+interruption is relabeled as successful evidence.
+
+F2 is Merged; checkpoint accepted. The lead explicitly starts F3 within the
+existing build/test scope: QE owns the shared-check kernel then compatibility
+adapter in secondary; platform/security owns the guarded writer/service and
+finalization/recovery in primary after progress release and kernel review.
+Planning reviews integration; the lead owns policy and delivery. Writer
+**20 SQLite / 23 PostgreSQL** component groups and compatibility **27 cases on
+each dialect** have scoped peer acceptance only. Full adapter deadline,
+capacity, real initialization and owner/ACL financial recovery still need
+implementation evidence. P1/AR-010-A remain In progress/null acceptance;
+F3 is In progress/null acceptance; P2 remains Not started.
+
+## F3 shared interface handoff — 2026-10-22
+
+The shared check-only interface at 0d59d1e passed independent review and was
+composed unchanged with accepted progress at aa2d784. Each supported Python
+version passed 429 selected cases, with 23 explicit PostgreSQL opt-in skips
+and 17 deselections; the 42 warnings per run concern existing JUnit reporting.
+The 14 focused cases cover interruption during serialization, opening traversal,
+period comparisons and final return. Offline distributions match all 134 runtime
+files against Git; whole-project type checking passes across 118 source files.
+
+QE now owns compatibility implementation in secondary. Platform/security owns
+the independent counted source-fingerprint component in primary, followed by
+guarded context and service integration after composing the reviewed interface.
+Planning reviews source and evidence; the lead owns package policy and delivery.
+No PostgreSQL or hosted run is claimed for this component. The full adapter
+deadline, writer, concurrency and recovery gates remain open; F3/P1 acceptance
+is null and P2 remains Not started.
+
+## F3 component review and reassignment — 2026-10-22
+
+Platform/security's counted fingerprint at a50b11fb and complete context at
+36eee0e9 have independent source/evidence acceptance. Their Python 3.12 SQLite
+selections passed 33 and 86 cases respectively; these are separate selections.
+All 40 fingerprint statements match the reviewed packet. The context preserves
+the full reader proof and retains no extra graph or caller authority.
+
+QE's compatibility adapter at b7f7ea4 passed 180 cases on Python 3.12 and
+177 with three explicit version skips on Python 3.11, one existing warning each.
+All eight projection statements match their reviewed packet. Independent review
+caught a native-autocommit SQLite transaction leak at 8d57c885; correction
+63e069f7 owns the explicit rollback and quarantines failed cleanup. Original
+failed controls and the separate test-pool correction remain recorded.
+
+The default inspection context also retains its original None return after
+the narrow integration correction a197989; the paired snapshot controls pass
+on both interpreters. Pure intent preparation at 090d22c has independent review
+and 18 passing direct tests; its 16 SQL/type records match the frozen packet.
+
+The lead takes released secondary for package policy and integration. QE is
+reassigned to native and recovery controls; planning reviews service/integration
+evidence while platform/security prepares PostgreSQL service controls.
+Seeded history checks do not establish service-created state, native PostgreSQL,
+whole-command capacity or recovery. F3/P1 remain In progress with null acceptance;
+P2 remains Not started. No provider calls or new paid resources were added.
+
+## F3 composed local checkpoint — 2026-10-22
+
+Source 8708b8f composes the reviewed writer, source transport, preparation,
+context and adapter. Combined checks pass 251 cases on Python 3.12 and 248 with
+three explicit Python-version skips on Python 3.11, one existing warning each.
+The unchanged backlog checker and 94 backlog tests pass; formatting, lint,
+security and whole-project type checking pass. Offline wheel/sdist validation
+matches all 141 runtime files byte for byte against Git. The first local build
+wrapper omitted the existing no-gitignore flag and correctly failed the exact
+output-directory check; its separate corrected build passed without test or
+product changes. No installed-package or hosted delivery is inferred.
+
+The service's earlier 20 controls comprise 15 actual SQLite cases and five
+pre-checkout refusals. Real legacy opening is 245000, and original fields remain
+unchanged. Native PostgreSQL, independent zero-write replay accounting,
+concurrency, process interruption, owner/ACL restore and supported capacity
+proof remain required. The lead returns secondary to QE after this documentation
+handoff; platform/security owns primary native-test authoring, and planning
+reviews source/controller evidence. Database execution still requires a reviewed
+exclusive handoff. F3/P1 acceptance remains null and P2 is Not started.
+
+
+## F3 native validation and next assignments — 2026-10-22
+
+QE delivered 33 passing PostgreSQL compatibility cases at 001e0bd (22 new and
+11 existing). Platform delivered four service passes at a6456ca and five
+remaining passes at 00e568a; these are separate runs, not a single nine-pass
+attempt. The original newline assertion and earlier live-writer refusal remain
+recorded failures; both corrections changed test fixtures/assertions only.
+Native runs restored the baseline and stopped PostgreSQL.
+
+The lead composes these sources with all 141 runtime files unchanged from
+8708b8f. Next, the provisioning engineer builds the independent two-account S2
+case in primary, QE measures complete adapter capacity in secondary, and
+platform/security reviews their work. Concurrency, uncertainty, process death,
+owner/ACL restore and protected delivery remain open. F3/P1 stays In progress
+with null acceptance; P2 stays Not started.
+
+## F3 provisioning and capacity handoff — 2026-10-22
+
+Provisioning delivered eight SQLite passes on each supported Python version.
+Native validation comprises two passes at 015ac758 followed by six continuation
+passes at 42ec316a. Both failed attempts remain recorded; their JSON-oracle and
+read-query observer corrections changed tests only.
+
+Capacity delivered two reviewed runtime fixes with 337 focused passes on each
+interpreter, then prepared four PostgreSQL cases at e4600298. Native collection
+passes on both versions and four affected SQLite regressions pass; PostgreSQL
+capacity execution remains pending. Review removed a premature preservation
+report before source acceptance.
+
+The lead composes these slices at 5f575667. Next assignments are native capacity
+execution preparation and fresh-inspection/uncertain-outcome controls, followed
+by process death, concurrency and owner/ACL restore. Both existing checkouts
+remain available for that work. [Exact evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-provisioning-and-capacity-checkpoint--2026-10-22)
+keep F3/P1 In progress with null acceptance and P2 Not started.
+
+## F3 recovery and native capacity handoff — 2026-10-23
+
+| Owner | Assigned work | Disposition / next work |
+| --- | --- | --- |
+| Provisioning engineer | RC1: actual SQLite reentry and transaction uncertainty | 7eccb241 accepted after 23 corrected passes and independent boundary review; next owns native RC1. |
+| Capacity engineer | Four-case native capacity execution | First attempt failed its fetch-count observer; ee2dc3e2 corrected that observer. Control passes, account maximum times out, two cursor cases remain unrun. Next owns diagnosis. |
+| Independent reviewer | Source, physical outcomes, cleanup and native release | Accepted scoped evidence and retained failed attempts; next reviews diagnosis and native RC1. |
+| Lead | Source composition, progress consistency and ownership | Composed d299c559; temporarily owns primary for publication, then returns it to provisioning. PostgreSQL is stopped/unassigned. |
+
+Two existing cloud checkouts remain assigned and are reused. The original
+23-case SQLite run is retained; its corrected rerun distinguishes service
+cleanup from harness disposal. No runtime file or lockfile changes in this
+checkpoint. [Exact results and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#f3-recovery-and-native-capacity-checkpoint--2026-10-23)
+keep F3/P1 In progress/null acceptance and P2 Not started.
+
+
+## F3 native recovery and capacity diagnosis handoff — 2026-10-23
+
+| Owner | Assigned work | Disposition / next work |
+| --- | --- | --- |
+| Provisioning engineer | Native RC1 physical uncertainty and fresh inspection | 7738aec6 accepted: 25 PostgreSQL cases pass, with 23 zero-write fresh inspections and two actual-write negative controls. Next owns RC2 after integration. |
+| Capacity engineer | Exact Unicode-predicate optimization and native capacity continuation | 54844ac passes 312 focused tests per interpreter; native continuation remains one pass, one timeout and two unrun. Owns further bounded diagnosis; RC3 is deferred. |
+| Independent reviewer | Exact source, physical outcomes, timing scope and stopped releases | Accepted scoped RC1 evidence and honest failed-capacity evidence; next reviews RC2 and diagnostic proposals. |
+| Lead | Composition, validation, publication and checkout ownership | Composed f09c727; temporarily owns primary for integration, then returns it for RC2. Secondary remains assigned to diagnosis. PostgreSQL is stopped/unassigned. |
+
+The optimization preserves parser and deadline rules, but does not resolve
+native capacity. Both new native runs restored the exact baseline and stopped.
+The [delivery record](delivery/LEDGER_EXECUTION_PLAN.md#f3-native-recovery-and-capacity-diagnosis--2026-10-23)
+retains prior failures and separates run sources from composition. F3/P1 stay
+In progress/null acceptance; P2 stays Not started. No paid resources or
+provider calls were added; both existing cloud checkouts remain in active use.
+
+### Native process-death and capacity handoffs — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Provisioning | Four actual PostgreSQL process-death cases at 291ff467 accepted after independent state, lock, child-exit and cleanup review; earlier SQLite cases stay separate. | RC2b1: identical competing initialize/provision requests, loser-only cleanup and fresh original-receipt replay. |
+| Capacity | Test-only empty-target observer 1a0ab2c accepted with 33 focused passes per interpreter. Ordinary v4 still has one pass, one timeout and two unrun cases. | One runtime change: hoist fixed field metadata once per read, preserving all row checks. Private JSON-key inlining was rejected after recursion-boundary differences. |
+| Independent reviewer | Accepted native RC2a and the honest failed-capacity evidence. RC2b review requires explicit cross-project coverage, numeric bounds and proof that loser cleanup preserves the held winner. | Review each frozen source and result; no source/controller acceptance substitutes for native execution. |
+| Lead | Composed accepted test changes at ddb8f278 and synchronized progress. F3/P1 and external gates remain open. | Publish the checkpoint, return primary and continue dependency-ready assignments. |
+
+### Seeded reader capacity and restore handoff — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Capacity | Projection metadata hoist eb2cbc4 has 281 focused passes per interpreter; one ordinary PostgreSQL attempt passes all four seeded-reader cases. Maximum-account headroom is about 24ms, so repeatability remains a delivery risk. | RC3: owner/ACL-preserving backup/restore, starting with a bounded independently reviewable slice after integration. |
+| Provisioning | RC2a remains accepted for its SQLite and PostgreSQL process-death components. | RC2b1: real identical competing initialize/provision commands, loser-only cleanup, held-winner proof and fresh original-receipt replay. |
+| Independent reviewer | Reviews frozen source, native receipts, preservation and stopped release separately. | Audit competing-command and restore controls before their execution; preserve the distinction between component and delivery acceptance. |
+| Lead | Integrates the accepted metadata change, updates progress and keeps both checkouts assigned. | Publish consistent evidence and continue prerequisite-ready assignments; F3/P1 acceptance stays null. |
+
+[Exact results and remaining limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23)
+retain all failed attempts. No deadline, observer, task count, estimate,
+dependency or external gate changed.
+
+### SQLite competing-command handoff — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Provisioning | Two actual SQLite identical-command cases at f4ba97c9 pass in one execution; 22 corrected protocol controls pass separately. Review caught and resolved an expired-cleanup termination gap before the real run. | PostgreSQL counterparts on the integrated base; identity collisions remain a separate later slice. |
+| Restore | RC3a design accepted for two same-cluster S0/S2 owner/ACL-preserving restore positives. | Implement focused helpers and offline controls; freeze source/controller before native execution. |
+| Independent reviewer | Reviews actual outcomes separately from source/controller acceptance. | Native competing-command and restore source/evidence reviews. |
+| Lead | Composes accepted test files and synchronizes roadmap, backlog, issue and assignment status. | Continue dependency-ready work without changing F3/P1 acceptance or external gates. |
+
+[Evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23)
+keep PostgreSQL concurrency, restore and final delivery open.
+
+### PostgreSQL competing-command integration — 2026-10-23
+
+| Engineer | Completed work | Current assignment |
+| --- | --- | --- |
+| Provisioning | Native RC2b1 source 351c1c66, narrow observer correction 4bc9a1dc and two actual PostgreSQL cases are independently accepted. The original failed attempt remains recorded. | Compose published progress 079a80ec with the accepted tests, verify the focused selection and synchronize this checkpoint for review. RC2b2 is a separate next proposal. |
+| Restore | Original S0 failure/S2 unrun are retained. The corrected dfe7b95b attempt reports S0 passed/S2 failed at cross-model receipt comparison; component success is false. | Result/stopped-release acceptance is pending. Prepare and review the S2-only observer correction; no further native retry or whole restore acceptance is implied. |
+| Independent reviewer | Verified both contention outcomes, owned cleanup and exact stopped release; accepted the failed attempt separately. | Review the integration source/docs and the next restore source/controller. |
+| Lead | Accepted the native component and stopped database, retaining both existing checkouts and unchanged external gates. | Publish after integration review and assign the next dependency-ready slice. |
+
+[Native contention evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-postgresql-competing-command-checkpoint--2026-10-23)
+keep identity collisions, restore, remaining writer boundaries and full delivery
+open. This checkpoint does not mark F3 or P1 accepted.
+
+### Owner/ACL-preserving restore positives — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Restore | RC3a positives accepted: S0 at dfe7b95b and S2-only continuation at 83c594a2, with both earlier failed attempts retained. | Merge published 4933da5c into reused secondary, prepare this reviewed checkpoint, then implement the approved one-case RC3b1 truncated-archive negative. |
+| Provisioning | Identical-command contention remains accepted for both dialects. | RC2b2a distinct-intent identity-collision source/offline work in primary; native acceptance stays separate. |
+| Independent reviewer | Verified exact restored state, owners/ACLs, original receipts, native denials, ciphertexts and stopped release; accepted source and execution separately. | Review integration and each next negative/collision source/controller/result. |
+| Lead | Accepted scoped positives and release 174c1328 after fresh stopped verification; PostgreSQL is unassigned. | Publish the reviewed checkpoint and serialize later exact native grants. |
+
+[Accepted results and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-owneracl-preserving-restore-positives--2026-10-23)
+retain per-case source provenance. RC3 negatives, remaining actual-writer boundaries
+and matching protected delivery remain open; F3/P1 acceptance stays null. Both
+existing cloud checkouts are reused; no provider calls or paid resources were added.
+
+### Distinct-intent collision checkpoint and next handoffs — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Provisioning | Three actual SQLite cases at 0a6516f and three actual PostgreSQL cases at 4f1ea4a6 accepted independently, with nine child commands per dialect and exact current-parent collision proofs. | Complete this docs-only checkpoint; after publication and lead handoff, implement the missing I2 admitted queued-v2 positive and isolated queued/running eligibility group. |
+| Restore | Scoped S0/S2 positives remain accepted with both earlier failed attempts retained. Guard source 52d289e5 is accepted with 33 offline controls per interpreter. | The separately reviewed/granted truncated-archive run is a distinct validation; no native result is included in this collision checkpoint. |
+| Independent reviewer | Verified collision source, actual outcomes, scoped cleanup and stopped release separately. | Remain independent on restore guard/controller and native evidence; no implementation ownership. |
+| Lead | Accepted both distinct-collision components and freshly verified stopped release 442b4639. | Review/publish this checkpoint, hand off I2 and serialize subsequent native grants. |
+
+[Scope, evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-distinct-intent-collision-checkpoint--2026-10-23)
+preserve SQLite 0a6516f and PostgreSQL 4f1ea4a6 as separate executed identities.
+The third command is a changed-parent identity-conflict request, not identical
+replay. Native ciphertext preservation was asserted during execution; later
+review uses retained hashes/assertions rather than rehashing removed fixture
+bytes. Source, tests, runtime, lockfile, task counts, estimates and acceptance
+statuses are unchanged by this documentation checkpoint. F3/P1 remain
+In progress/null acceptance; P2 remains Not started. Other I2 groups, I3,
+restore negatives and final delivery remain open.
+
+## Truncated-archive recovery and next design handoff — 2026-10-23
+
+| Engineer | Completed work | Current assignment / next gate |
+| --- | --- | --- |
+| Restore | RC3b1 source 52d289e5 and one native negative accepted: exact EOF/nonzero exit, unchanged empty target/source, 18 ciphertexts and four terminal tool handles. | Merge published c651772d at 658e3e22; prepare this four-document checkpoint. RC3b2 design must precede its implementation. |
+| Provisioning | Three distinct-intent collision cases/nine commands per dialect remain accepted at 0a6516f/4f1ea4a6. | Active I2 admitted queued-v2 positive and isolated queued/running eligibility, preserving real associations/cohort totals; other groups remain separate. |
+| Independent reviewer | Guard/source/controller/result and stopped RC3b1 release accepted separately. | Review exact integration and future observer/timeout design. |
+| Lead | Accepted result 01224a35, peer 09b0793b and release 0fa546c5 after fresh stopped verification; root record bac028fa. | Publish after composition review, hand off subsequent design and retain exclusive-grant control. |
+
+The blocked V1 source review and its guard correction stay in the private evidence.
+Shared guard registration protects future positive and negative test executions;
+accepted positive function bodies are unchanged and their S0/S2 evidence stays
+at dfe7b95b/83c594a2. No accepted restore/collision native case or offline control was rerun for composition.
+[Exact scope and next prerequisite](delivery/LEDGER_EXECUTION_PLAN.md#f3-truncated-archive-recovery-checkpoint--2026-10-23)
+keep F3/P1 acceptance null, P2 Not started, all counts/estimates/budget unchanged.
+
+### Admitted-queue eligibility handoff — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Provisioning | I2 group1 source 24c7c2dd and six SQLite cases accepted; original setup failure retained. | Review/publish this composition, then receive the I2 omitted/nonexistent-job source handoff. |
+| Restore | RC3b1 and prior S0/S2 scopes remain accepted separately. | Implement reviewed RC3b2 design V2 and offline controls in secondary; native proof remains pending. |
+| Independent reviewer | Accepted exact I2 source, outcomes, preservation and cleanup. | Review composition/docs and separate restore preparation without repeating completed domain cases. |
+| Lead | Accepted scoped I2 result/release and queued prerequisite-ready work. | Publish this checkpoint, then hand off the next source slice and serialize execution grants. |
+
+[Detailed evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-admitted-queue-eligibility-checkpoint--2026-10-23)
+retains the explicit admission adapter, first failure and unchanged F3/P1 gates.
+
+### Job-cohort checkpoint and next binding slice — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Provisioning | Three I2 cohort cases and release accepted at 802b24b0; earlier six eligibility cases unchanged. | Publish/review this checkpoint, then receive manifest job-to-project binding source/offline handoff. |
+| Restore | Separate RC3b2 design/source preparation; prior recovery evidence unchanged. | Exact controller review and separate native grant; no native result included here. |
+| Independent reviewer | Accepted exact cohort source, branches, preservation and controller wait/reap evidence. | Review this docs checkpoint and the separate restore controller. |
+| Lead | Accepted scoped cohort result/release and wrote a static project-binding prerequisite. | Publish synchronized progress, then issue the next source handoff. |
+
+[Detailed cohort evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-job-cohort-checkpoint--2026-10-23)
+keeps all prior failures, counts, estimates and F3/P1 gates unchanged.
+
+
+### Manifest project-binding checkpoint and I3 handoff — 2026-10-23
+
+| Engineer | Completed work | Next assignment |
+| --- | --- | --- |
+| Provisioning | One actual I2 binding case and release accepted at ae4f4922; existing eligibility/cohort helpers and outcomes unchanged. | Review/publish this checkpoint, then receive the I3 job-cap negative/exact `2**53 + 1` source/offline handoff. |
+| Restore | RC3b2 V1 failed before cancellation; V2 at 4509 reached cancellation but failed its exact stderr/newline oracle, with final target comparison unrun. | Failed V2/release accepted; prepare only the bounded stderr-newline source/offline correction. No new native grant or unfinished source merge. |
+| Independent reviewer | Accepted binding source, actual branch, preservation and direct-parent wait/reap evidence. | Review this docs checkpoint and separate restore result/controller evidence. |
+| Lead | Accepted binding result/release; I3 prerequisite note 304b1d5f and peer dbd38dfc are source-only routing. | Publish synchronized progress and explicitly hand off the next slice; actual execution needs separate review/grant. |
+
+[Detailed binding evidence and restore limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-manifest-project-binding-checkpoint--2026-10-23)
+preserve all prior failures, counts, estimates and null F3/P1 acceptance.
+
+
+### Interrupted data-restore checkpoint and next handoff — 2026-10-23
+
+| Engineer | Completed work | Current assignment / next gate |
+| --- | --- | --- |
+| Restore | RC3b2 V3 at 1d6df2a0: one accepted blocked-COPY cancellation case, exact target/source/18-ciphertext preservation and five reaped tool handles. | Merge published a7c83200 at 96a962a0; review/publish this four-document checkpoint, then receive RC3b3 source/offline handoff. |
+| Provisioning | Separate I3 source a29ebb92 and 38 distinct offline controls; neither of its two actual cases has executed. | Source/controller review and explicit execution grant; active primary source is not part of this composition. |
+| Independent reviewer | Accepted exact V3 result/release at peer 26c1ee28; prior failed attempts retain their own reviews. | Review composition/docs and separate I3 source/controller; no repeated domain cases for a merge. |
+| Lead | Accepted scoped V3 evidence 3d7f4cc0 and stopped release ece4bdd1 in 61e91471 after fresh stopped verification. | Publish after integration review, hand off next source work and serialize any later native grants. |
+
+The test's 12.671s, suite's 14.289s, controller's 18.825s and direct-parent wait's
+19.477s measure different scopes. V1 failed before cancellation; V2 reached
+cancellation but failed its exact diagnostic and never reached final target
+comparison. Their immutable evidence remains separate from V3. Accepted
+S0/S2/truncated-negative and I2 identities remain unchanged.
+[Detailed scope and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#f3-interrupted-data-restore-checkpoint--2026-10-23)
+retain null F3/P1 acceptance, unchanged counts/estimates/budget and no general
+recovery, earlier data-write or restore rollback-acknowledgment claim.
+
+
+### Job-cap and exact-integer checkpoint — 2026-10-23
+
+| Engineer | Completed work | Current assignment / next gate |
+| --- | --- | --- |
+| Provisioning | Two actual single-project I3 cases at a29ebb92 and release accepted; 38 source controls and 18 controller controls retain separate scope. | Compose immutable e9bd1c7f, review/publish four progress docs, then receive the overflow source/offline handoff. |
+| Restore | Accepted RC3b2 V3 and prior failure history published at e9bd1c7f. | Separate RC3b3 source/offline preparation in secondary; no moving source or new native result included here. |
+| Independent reviewer | Accepted I3 exact source, original refusal, integer derivation, physical outcomes and direct-parent wait/reap. | Review this source composition/docs and separate RC3b3 preparation; no completed domain cases repeated. |
+| Lead | Accepted the scoped I3 outcome/release at 643a1472 and authorized the immutable merge. | Publish after review, then hand off the next source slice and serialize any actual execution grants. |
+
+[Detailed I3 evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-job-cap-and-exact-integer-checkpoint--2026-10-23)
+preserve all prior failures and executed sources, unchanged counts/estimates/budget,
+null F3/P1 acceptance and P2 Not started.
+
+### Overflow and corrupted-restore checkpoint — 2026-10-23
+
+| Engineer | Completed work | Current assignment / next gate |
+| --- | --- | --- |
+| Provisioning | Two SQLite overflow refusals at 22926490 and direct-parent exit/release accepted. | Complete combined composition/publication, then receive scoped carry source/offline handoff after accepted prerequisite review; no carry implementation yet. |
+| Restore | Two same-cluster corrupted-restore refusals at 20a6d7ff and stopped release accepted. | Audit PostgreSQL I3 job-cap, exact-integer and overflow prerequisites read-only; preserve exact tested source/evidence. |
+| Independent reviewer | Accepted both exact component outcomes and physical cleanup. | Carry prerequisite review accepted; review this source/document composition with no domain reruns. |
+| Lead | Accepted overflow a610530d and corrupted restore 0b24f94d; authorized immutable merge. | Publish after composition review; retain separate source and execution handoffs. |
+
+[Detailed evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-overflow-and-corrupted-restore-checkpoint--2026-10-23)
+preserve all prior failed attempts, exact executed sources, unchanged counts/estimates/budget,
+null F3/P1 acceptance and P2 Not started.
+
+
+### Accounted carry and PostgreSQL money checkpoint — 2026-10-23
+
+| Engineer | Completed work | Current assignment / next gate |
+| --- | --- | --- |
+| Provisioning | SQLite accounted-only carry at 67238638: one actual pass, four watched commands, direct-parent exit/release accepted. | Complete combined composition review/publication; retain clean primary for a separate handoff. |
+| Restore | PostgreSQL job-cap refusal and exact-integer initialization at b9e2d4c: two actual passes and stopped release accepted. | Retain clean secondary and exact evidence; PostgreSQL overflow/remaining matrix work is not started by this checkpoint. |
+| Independent reviewer | Accepted both exact results, physical cleanup and preservation evidence. | Review source/document composition without domain reruns. |
+| Lead | Accepted carry c55cd783 and native money 780666e8; authorized immutable merge. | Publish/read back the reviewed checkpoint; assign subsequent source work separately. |
+
+[Detailed evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-accounted-carry-and-postgresql-money-checkpoint--2026-10-23)
+retain exact executed sources, synthetic setup distinctions, prior failures, unchanged
+counts/estimates/budget, null F3/P1 acceptance and P2 Not started.
+
+
+### PostgreSQL overflow and writer-boundary assignments — 2026-10-23
+
+- Lead verified public checkpoint a49f24ec, both clean cloud checkouts, no checkout consumers or index locks, and PostgreSQL stopped with no PID/socket/lock. Existing environments and private evidence are retained for reuse.
+- PostgreSQL engineer owns the two aggregate-overflow counterparts in the secondary checkout: original project overflow, then original organization overflow after valid individual project reductions. Native money and SQLite overflow evidence are reused without repeating accepted cases.
+- Provisioning engineer owns a focused audit of remaining writer-stage rollback and intent boundaries in the primary checkout. The next source slice must identify the concrete missing proof and avoid duplicating accepted recovery, interruption, restore and replay cases.
+- Independent reviewer assesses each source and its evidence; the lead coordinates bounded database execution and publication.
+- F3/P1 remain In progress with null acceptance; P2 remains Not started. The $200 authorization and $36.567974 unreconciled reservations are unchanged. No paid work or production access is added.
+
+## PostgreSQL overflow and SQLite initialization handoff — 2026-10-23
+
+| Engineer | Completed assignment | Current handoff / next gate |
+| --- | --- | --- |
+| Provisioning | Two SQLite boundary cases at 31de4c86: interruption after original DDL or first real native backfill. Peer f11a7567/lead 44ed2de9 accept rollback, full preservation and fresh read-only absence inspection. | Preserve source/failures; no further source or database assignment during integration. |
+| PostgreSQL | Two native project/organization overflow cases at 51abf0cb. Peer e31f741e/lead 09dbbff4 accept original overflow, zero writes, typed preservation and physical rollback/closure. | Compose at 88623d98, complete missing Python 3.11 controls and four-document update. |
+| Independent reviewer | Accepted original source/controller/result chains independently. | Review eight-file origins, 79 source/130 controller Python 3.11 passes, document baseline/diff and remaining gates without domain reruns. |
+| Lead | Accepted SQLite release 36579090 and stopped PostgreSQL release acfee142; authorized bounded composition/progress edits. | Final integration acceptance/publication and separate dependency-ready handoffs; no outstanding native execution grant. |
+
+The two database attempts remain four distinct cases at their original commits, not a combined execution at the merge. SQLite interruption is synthetic after real writes, not a native timeout. Complete Python 3.11 source/profile controls pass, alongside 94 backlog controls and configured static checks. The integration preparation path error is retained; no database case ran for composition. [Exact evidence and limits](delivery/LEDGER_EXECUTION_PLAN.md#f3-postgresql-overflow-and-sqlite-initialization-boundaries--2026-10-23) preserve earlier failures, the about-24ms single-attempt capacity limit and remaining protected-delivery requirements. F3/P1 acceptance stays null; P2 stays Not started. Counts, estimates, budget and external gates are unchanged.
+
+## Current matrix and next source assignment — 2026-10-23
+
+After accepted/published a9e46322, the lead assigns primary one SQLite R2 new-provision source-digest refusal and secondary the [current remaining F3/P1 matrix](delivery/LEDGER_EXECUTION_PLAN.md#current-remaining-f3p1-acceptance-matrix--2026-10-23). Reviewer checks original-gate provenance and prevents duplicate accepted cases. Native source mismatch remains a separate counterpart. Internal matrix P2 identities is unrelated to starting product P2/#109. Two checkouts are reused; source/controller review and separate execution grants remain required. No runtime change, database run, new paid resources, model calls or external-gate change follows from this consolidation.
+
+
+## R2 completion and next bounded assignments — 2026-10-23
+
+| Engineer | Completed assignment | Next gate |
+| --- | --- | --- |
+| Provisioning | Original-source SQLite R2 case, 3.12 controls and one accepted actual attempt at 9df3f829; first-gate refusal and fresh absence preserve complete S1. | Independent review of the C2 design; further source/native work needs its explicit handoff. |
+| Integration / planning | Normal merge b1049812, missing owned 3.11 source/controller controls (25/22), accepted C2/D2 mapping, private two-case C2 design and four-doc progress update. | Independent composition/document review, then lead publication; no runtime or native execution. |
+| Independent reviewer | Accepted exact R2 source/controller, both-interpreter pure controls, one actual SQLite outcome/release and source composition. | Review C2 design and current documentation; preserve PostgreSQL R2 and full delivery gates. |
+| Lead | Accepted R2 actual result and scoped C2/D2 disposition; coordinates the one exclusive native slot. | Next source slice is C2 after corrected ownership/release design review; no native grant is outstanding for it. |
+
+The [current matrix](delivery/LEDGER_EXECUTION_PLAN.md#current-remaining-f3p1-acceptance-matrix--2026-10-23) retains exactly two C2 acquisition cases and one D2 missing-opening restore case. Final matching-source verification must run the six existing restore nodes with the native socket/tools on both interpreters; hosted skips are separate. Two existing checkouts remain in use. No new paid resources, provider calls, partner data or production activation were added. F3/P1 remains In progress/null acceptance and product P2 remains Not started.
+
+
+## C2 acquisition completion and next assignment gate — 2026-10-23
+
+| Engineer | Completed assignment | Next gate |
+| --- | --- | --- |
+| Provisioning | Original C2 source, six bigint OID projection correction, reviewed v2 controller and two accepted actual Python 3.12 cases at 05442ac4. Failed v1 remains retained. | Preserve executed source/evidence; PostgreSQL R2 requires the next explicit handoff. |
+| Integration / planning | Accepted I2 mapping; preserved-draft fast-forwards; matching 3.11 controls (76 inherited source, seven new correction, 60 v2 controller); four-doc checkpoint. | Validate/freeze this checkpoint, then independent review and lead publication; no new native work. |
+| Independent reviewer | Accepted source/controller/offline records, failed-v1 preservation and successful-v2 original-gate/release evidence. | Review exact final histories/cards, counts and source/evidence bindings. |
+| Lead | Accepted two v2 cases and clean stopped release; retains one exclusive native slot and publication ownership. | Select PostgreSQL R2 only through its explicit source/controller/execution handoffs; I2/D2 remain queued. |
+
+Failed v1 records 0 passed/1 failed/1 unrun at 8335bed9 before original LOCK; accepted v2 records 2 passed/0 failed/0 unrun at 05442ac4. Neither both-interpreter offline controls nor this component closes final delivery. Two existing cloud checkouts/environments remain retained for reuse. No new paid resources, model calls, partner data or production activation. Prior history, counts and estimates are unchanged; F3/P1 acceptance is null and product P2 Not started.
+
+
+## PostgreSQL R2 counterpart assignment — 2026-10-24
+
+The lead assigns provisioning one native source-fingerprint counterpart to accepted SQLite R2. Integration/planning owns the read-only genuine-S1/original-gate prerequisite audit, matching scoped Python 3.11 controls after frozen-source handoff, and final checkpoint documents. The independent reviewer owns source/controller/actual review; the lead retains one exclusive execution slot. Existing native fixture/lifecycle and accepted SQLite cases are reused without reruns. This assignment draft remains unpublished until the checkpoint.
+
+F3/P1 acceptance remains null, product P2 Not started, and all historical records, counts, estimates and funding/data/production gates remain unchanged. The two cloud checkouts and owned environments are reused; no new resources, dependencies or provider calls.
+
+
+## PostgreSQL R2 source correction handoff — 2026-10-24
+
+Provisioning froze source 71a6094e with 25 shared and 30 native controls passing on each interpreter. Independent review found that equal-value float/bool binds could satisfy the native witness comparison; provisioning corrected only the native helper/control files at 730e08d1. The complete corrected native module passed 33 controls per interpreter, including three new strict-type negatives. The 25 shared controls and helper are unchanged and inherited, not rerun at the corrected source; both prior 55-control records remain immutable at 71a6094e. Exactly one actual node was collected without execution. Integration preserved the assignment draft through both fast-forwards, with scoped lint, formatting and diff checks passing.
+
+Independent peer ee62484c and lead source gate c6954241 accept this source/offline scope. Provisioning now owns private one-case controller preparation; integration awaits its frozen 3.11 handoff, the reviewer owns controller/actual review, and the lead retains the exclusive native slot. No native outcome, final documentation validation, commit or publication is part of this handoff; historical acceptance, counts, budget and F3/P1/P2 status are unchanged.
+
+
+## PostgreSQL R2 completion and next assignment gate — 2026-10-24
+
+| Engineer | Completed assignment | Next gate |
+| --- | --- | --- |
+| Provisioning | Source 71a6094e, strict-bind correction 730e08d1, local source-CTE composition 7ff291ef, private controller/token correction and one accepted actual Python 3.12 v2 case. | Preserve failed preparation and first native setup error; first I2 eligibility group requires a separate source handoff. |
+| Integration / planning | Preserved-draft fast-forwards; matched 3.11 source controls (historical 55/33, final 43 with 25 shared inherited), controller controls (39 then final 43), and four-document synchronization. | Final documentation validation/freeze, independent review and lead publication; no native rerun. |
+| Independent reviewer | Accepted source/corrections, both-interpreter controls, first setup failure/release and successful v2 original-gate/preservation/release evidence. | Review exact final histories/cards, counts and source/evidence bindings. |
+| Lead | Accepted one actual v2 case and stopped release ee4e429c; retains the exclusive native slot and publication ownership. | Recommend first six-case PostgreSQL I2 eligibility group under accepted 6+3+1 mapping; no new native grant. |
+
+The first native attempt remains one setup error before M0/watched commands because the private token had 28 rather than 32 characters. Successful v2 at 7ff291ef reaches original 244→245→246 refusal then separate fresh absence, preserving complete typed state/source/18 ciphertexts. Source evidence is 43 current plus 25 inherited controls per interpreter (68 distinct, no new 68-run); final controller evidence is 43 per interpreter. Both existing cloud checkouts/environments remain retained for reuse. Histories/cards, counts, estimates, budget reconciliation and external gates are unchanged; F3/P1 acceptance remains null and product P2 Not started.
+
+
+## PostgreSQL I2 eligibility completion — 2026-10-24
+
+| Engineer | Completed assignment | Next gate |
+| --- | --- | --- |
+| Provisioning | Source 83f8242a/native admission adapter, retained fake-model correction, v1 execution, inter-case collision diagnosis and corrected remaining-four v2 batch. | Preserve both batches; three complete-cohort cases need a separate source handoff. |
+| Integration / planning | Prerequisite/accounting review, full 92 source controls on 3.11, matching 55 v1 and 58 v2 controller controls, and four-document synchronization. | Documentation validation/freeze and independent review before lead publication. |
+| Independent reviewer | Accepted source/controls, two initial outcomes, retained collision, corrected real-loop regression and four remaining outcomes. | Bind final histories/cards, counts and exact evidence. |
+| Lead | Accepted six distinct Python 3.12 outcomes across two batches and stopped release 2d57b0f4; retains publication/native-slot ownership. | Recommend three complete-cohort counterparts; no new native grant. |
+
+The first native batch remains two passed/four unrun with a controller FileExistsError; the first two were not rerun. Source 3.12 evidence is 86 retained plus six corrected controls, while 3.11 ran all 92; final v2 controller controls are 58 per interpreter, separate from prior 55. Both cloud checkouts/environments remain for sequential reuse. Histories/cards, counts, estimates, budget reconciliation and external gates are unchanged; F3/P1 acceptance is null and product P2 Not started.
+
+
+## PostgreSQL I2 complete-cohort checkpoint — 2026-10-24
+
+| Engineer | Completed assignment | Next gate |
+| --- | --- | --- |
+| Provisioning | Source d7e63b68; 50 source controls on 3.12; private controller with retained preparation failures; one granted batch of three actual cohort cases. | Preserve frozen source and stopped release df79c317; next project-binding source handoff is separate. |
+| Integration / planning | Matching 50 source/64 controller controls on 3.11, 23-property accounting review and four-document synchronization. | Retain metadata diagnostic; documentation checks and independent review before lead commit/publication. |
+| Independent reviewer | Frozen source/controller and all three actual original-guard outcomes, preservation and stopped cleanup accepted. | Bind final documents, exact issue prose/publication scripts and preserved histories/cards. |
+| Lead | Reviewed source/controller, granted one bounded batch and accepted actual 43be98f5/peer 583fc055 with release df79c317. | Publish reviewed checkpoint; next one-case recommendation needs a separate handoff/grant. |
+
+Each interpreter has 50 source and 64 final controller control passes. The syntax-only collection failure, partial 18/accounting failure and correction, source freeze metadata diagnostic and 3.11 controller node-format metadata diagnostic remain distinct; the latter reused passing XML without a rerun. The three native cases passed once on Python 3.12; the prior six eligibility outcomes were not rerun. Both cloud checkouts/environments remain for sequential reuse. F3/P1 acceptance is null and P2 Not started; counts, estimates, $200 cap, explicitly unreconciled $36.567974 reservations and external gates are unchanged.
+
+
+## PostgreSQL I2 project-binding checkpoint — 2026-10-24
+
+| Engineer | Completed assignment | Next gate |
+| --- | --- | --- |
+| Provisioning | Source 180f95b7; 59 source controls on 3.12; reviewed single-case controller and one granted actual batch. | Preserve source and stopped release 8e307992; no successor native assignment. |
+| Integration / planning | Matching 59 source/73 controller controls on 3.11, 25-property accounting review, bounded next-scope mapping and four-document synchronization. | Documentation checks and independent review before lead commit/publication. |
+| Independent reviewer | Frozen source/controller and original successful project gate, present-job line 117 refusal, preservation and cleanup accepted. | Bind exact final documents, issue prose/publication scripts and preserved histories/cards. |
+| Lead | Granted one attempt and accepted actual c3d51b0b / peer d58e4704 with stopped release 8e307992. | Publish reviewed checkpoint; next equivalent-evidence review remains recommended/unassigned. |
+
+Each final source/controller selection passed once per interpreter: 59 source controls and 73 controller controls. The source style correction preceded testing; read-only metadata diagnostics are retained. One native case passed on Python 3.12; prior nine cases were reused. Both existing cloud checkouts and owned environments remain for sequential reuse. No next native grant is outstanding; counts, estimates, F3/P1 null acceptance, P2 Not started, $200 cap, explicitly unreconciled $36.567974 reservations and external gates are unchanged.
+
+
+## Persisted-money complete-reader checkpoint — 2026-10-24
+
+| Engineer | Completed assignment | Next gate |
+| --- | --- | --- |
+| Provisioning | Source 1a524580 with 28 controls on 3.12; PostgreSQL controller and one granted actual case; independent 40-control SQLite match on 3.12. | Preserve source and PostgreSQL stopped release 62b167e6; no new case assigned. |
+| Integration / planning | Matching 28 source/27 PostgreSQL controller controls on 3.11; SQLite controller, final 40 controls and one granted actual case; four-document synchronization. | Retain original 39-pass/1-fail test-oracle diagnostic; documentation checks and independent review precede lead commit/publication. |
+| Independent reviewer | Reused-versus-missing mapping, source, both controllers and both exact original-reader outcomes/lifecycle accepted. | Bind final documents, issue prose/publication scripts and preserved histories/cards. |
+| Lead | Accepted narrow PostgreSQL actual 58c1700d / peer 46a89f4d and SQLite actual 74920ec6 / peer 8dd1db08. | Publish reviewed checkpoint; then select dependency-ready remaining matrix work. No native grant remains outstanding. |
+
+Each actual Python 3.12 case passed on its first attempt. The final offline selections passed once per interpreter: 28 source, 27 PostgreSQL controller and 40 SQLite controller controls. SQLite's original pooled return and later caller physical disposal remain separately attributed. The initial 39-pass/1-fail control and its test-only safe plugin-disable correction are retained; earlier accepted cases and failures were reused without rerun. Both cloud checkouts and owned environments remain for sequential reuse. F3/P1 acceptance is null, P2 Not started; counts, estimates, the $200 cap, explicitly unreconciled $36.567974 reservations and external gates are unchanged.
+
+
+## PostgreSQL accounted-only carry checkpoint — 2026-10-25
+
+| Engineer / owner | Completed scoped assignment | Next boundary |
+| --- | --- | --- |
+| Provisioning engineer | Native fixture/observer/test and corrected fresh-ownership/object-reader provenance; final source 103 controls on Python 3.12; independent successor 82-control matching and actual spot-check. | Preserve exact source and evidence; no new case assigned. |
+| Integration / planning engineer | Matching source 103 controls on Python 3.11; private controller and 82 final controls; two separately granted actual attempts, then four-document synchronization. | Documentation checks/freeze and peer review before lead commit/publication. |
+| Independent reviewer | Accepted final source, controller and actual evidence; verified both failed and successful actual records and lifecycle cleanup. | Bind exact document/issue/publication bytes and retained history. |
+| Lead | Scoped corrections/grants and successor acceptance 3d42e765; owns publication and subsequent dependency-ready work. | No grant remains outstanding; select a remaining matrix item only through its prerequisites. |
+
+Source checkpoints 75→90→103 controls remain distinct. Controller history retains 4 passes/60 fixture errors, an interrupted attempt without completed XML, then 72 passes per interpreter. The first native attempt failed after two physical commits with 24/30 properties and zero semantic credit. A corrected object projection and independent literal reader witness precede successor preparation: 81 passes/1 metadata-shape failure, metadata-only correction, then 82 passes per interpreter. The second total native attempt passed with 30 properties and two semantic commits; no receipt replay. Freeze-only classname diagnostics remain separate from test outcomes.
+
+Both owned cloud checkouts and environments remain for sequential reuse. Stopped release c78b46c8 binds restored baseline/memberships and reaped processes. Full F3/P1 acceptance is null, P2 Not started; counts, estimates, the $200 cap, unreconciled $36.567974 reservations and external gates are unchanged.
+
+## Dependency security maintenance assignments — 2026-10-26
+
+| Engineer | Assigned work | Result / next gate |
+| --- | --- | --- |
+| Platform/security | Diagnose the two strict audit findings and align build/runtime dependency pins on PR #115. | Lead published 0a14eb9a after independent review; 54 local delivery/workflow/lock controls, strict all-group audit, static/type/contracts and isolated package/runtime smoke passed. All six required hosted jobs passed on attempt 1; merge/protected-main delivery remain pending. |
+| Integration | Apply the identical reviewed dependency repair to PR #116 without changing its original action update. | Lead published 3dbd3e8e after 54 local controls and checks; the metadata-comparison diagnostic is retained separately. All six required hosted jobs passed on attempt 1; merge/protected-main delivery remain pending. |
+| Independent reviewer | Verify upstream advisory/release metadata, exact pin/lock scope and unchanged CI gates; review maintenance documentation. | Source and final hosted review accepted; 94 documentation controls and backlog checks passed. Publication requires peer acceptance of the final frozen document bytes. |
+| Lead | Publish only reviewed branch updates and reconcile CI; control subsequent integration and dependency-ready F3 assignment. | No merge, new native run, production deployment or P2 start is implied. |
+
+[The maintenance checkpoint](delivery/LEDGER_EXECUTION_PLAN.md#dependency-security-maintenance-checkpoint--2026-10-26) preserves original failed audits, exact fixes and branch/environment boundaries. Counts, estimates, external gates and budget remain unchanged.
+
+## Dependency integration and account identity assignments — 2026-10-26
+
+| Engineer | Completed bounded work | Remaining boundary |
+| --- | --- | --- |
+| Platform/security | Authored the six-file account-identity source at ec19eabe and its PostgreSQL component; preserved reviewed source and native evidence. | The PostgreSQL case passed on its first actual attempt (17.11s); final component acceptance: accepted by independent review 65cb7d72 and lead receipt 7abd0e8b for this bounded component only. No further native grant remains. |
+| Integration | Merged exact main into PR #116 for reviewed lead publication; preserved final hosted logs/artifact, prepared the reviewed two-case F1 scope and current documentation patch. | Checkouts remain released. F1 implementation has not started; lead owns document application/publication. |
+| Independent reviewer | Reviewed source, controller corrections, saved-record semantics and candidate bindings; binds final actual and publication evidence. | Full F3/P1 acceptance remains a separate combined-source gate. |
+| Lead | Completed protected ordinary merges d46e9122/1908dbd6, accepted scoped evidence and controls publication. | Candidate 12679323736 passed the exact-source artifact verifier on one invocation; final acceptance: accepted by independent review 6487674a and lead receipt 063abccd for dependency delivery only. Only the approved bounded successor may start through its own gates. |
+
+Source controls pass 33 per interpreter. Initial controller selections passed 59 per dialect/interpreter; after the actual SQLite projection diagnostic, corrected selections passed 66 per dialect/interpreter. One actual SQLite testcase passed with 29 properties and three physical receipts, but original controller exit 1/component false/zero semantic credit remains retained. Separate corrected offline evaluation accepted the same record with three semantic commands; no second database run occurred. The PostgreSQL case passed on its first actual attempt (17.11s); final component acceptance: accepted by independent review 65cb7d72 and lead receipt 7abd0e8b for this bounded component only.
+
+Both existing cloud checkouts and independently owned environments are retained for sequential reuse and aligned with the integrated ec19eabe lock using uv 0.13.4. Latest stopped release is 0d07f951; no new grant remains. The earlier maintenance cleanup figures remain historical. Counts, estimates, $200 cap, unreconciled $36.567974 reservations, null F3/P1 acceptance and product P2 Not started remain unchanged.

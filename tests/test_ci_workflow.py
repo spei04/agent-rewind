@@ -19,8 +19,14 @@ def test_pr_workflow_has_no_privileged_trigger_or_token():
     )
     for job_id, job in WORKFLOW["jobs"].items():
         assert job["runs-on"] == "ubuntu-24.04"
-        assert 0 < job["timeout-minutes"] <= (45 if job_id == "core" else 20)
-        assert "permissions" not in job
+        if job_id == "core":
+            assert job["timeout-minutes"] == "${{ matrix.timeout }}"
+        else:
+            assert 0 < job["timeout-minutes"] <= 20
+        if job_id == "ci-gate":
+            assert job["permissions"] == {"contents": "read", "actions": "read"}
+        else:
+            assert "permissions" not in job
         assert "continue-on-error" not in job
         for step in job["steps"]:
             assert "continue-on-error" not in step
@@ -40,11 +46,11 @@ def test_combined_gate_cannot_skip_a_required_job():
     assert gate["if"] == "${{ always() }}"
     assert set(gate["needs"]) == set(jobs) - {"ci-gate", "delivery"}
     step = gate["steps"][-1]
-    assert step["run"] == "python3 scripts/ci_gate.py"
+    assert step["run"] == "python3 -m scripts.ci_gate"
     assert step["env"]["CI_JOB_RESULTS"] == "${{ toJSON(needs) }}"
 
 
-def test_only_protected_main_delivery_uploads_explicit_candidate_files():
+def test_protected_main_candidate_and_core_receipts_have_separate_exact_uploads():
     jobs = WORKFLOW["jobs"]
     delivery = jobs["delivery"]
     assert delivery["needs"] == ["ci-gate"]
@@ -58,9 +64,19 @@ def test_only_protected_main_delivery_uploads_explicit_candidate_files():
         for step in job["steps"]
         if step.get("uses", "").startswith("actions/upload-artifact@")
     ]
-    assert len(uploads) == 1
-    assert uploads[0][0] == "delivery"
-    upload = uploads[0][1]["with"]
+    assert [name for name, _ in uploads] == ["core", "delivery"]
+    receipt_step = uploads[0][1]
+    assert receipt_step["if"] == "${{ always() }}"
+    receipt = receipt_step["with"]
+    assert receipt == {
+        "name": "core-receipt-${{ github.run_id }}-${{ github.run_attempt }}-"
+        "${{ github.sha }}-py${{ matrix.python }}-${{ matrix.leg }}",
+        "path": "${{ runner.temp }}/core-receipt/receipt.json",
+        "if-no-files-found": "error",
+        "include-hidden-files": False,
+        "retention-days": 7,
+    }
+    upload = uploads[1][1]["with"]
     assert upload["retention-days"] == 7
     assert upload["include-hidden-files"] is False
     assert upload["if-no-files-found"] == "error"
@@ -86,7 +102,18 @@ def test_dependency_security_scan_is_locked_and_fails_on_findings():
 
 def test_tested_python_versions_and_pinned_external_inputs():
     core = WORKFLOW["jobs"]["core"]
-    assert core["strategy"]["matrix"]["python"] == ["3.11", "3.12"]
+    assert core["strategy"]["matrix"] == {
+        "include": [
+            {"python": "3.11", "leg": "early", "timeout": 45},
+            {"python": "3.11", "leg": "late", "timeout": 45},
+            {"python": "3.12", "leg": "all", "timeout": 60},
+        ]
+    }
+    assert core["strategy"]["fail-fast"] is False
+    assert core["timeout-minutes"] == "${{ matrix.timeout }}"
+    command = next(step["run"] for step in core["steps"] if step.get("name") == "Run core tests")
+    assert command.split().count("--maxfail=1") == 1
+    assert core["name"] == "core (${{ matrix.python }}, ${{ matrix.leg }})"
     assert re.fullmatch(
         r"postgres:16-alpine@sha256:[0-9a-f]{64}", core["services"]["postgres"]["image"]
     )

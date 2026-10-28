@@ -24,7 +24,7 @@ from ledger_reader_fixture import (
     sqlite_snapshot,
 )
 from postgres_control import observe_exclusion_failure, wait_for_database_drain
-from sqlalchemy import create_engine, text
+from sqlalchemy import String, bindparam, create_engine, text
 from sqlalchemy.pool import NullPool
 from sqlalchemy.util import immutabledict
 from test_ledger_operator_postgres import PostgresTrace
@@ -548,6 +548,7 @@ _PG_REVIEWED_CTES = frozenset(
         "04a6ecc08f204b8de307841b490d7f665ab582c6f60a45f99da044fe9bd6bc9c",
         "04d0fc26d0163f2e2a554ccd96e6b698e2b794e6f970e99953fee10eefb88905",
         "05a93e12f6928096606e618fd47e4122593693f3a3fc2cf03a0bf3d75d043c5d",
+        "06082f6c813a1610b57e112a69c41f69602a2efc7c7d0e271e0e90f27280ffdc",
         "11c9b46d16957de029b731072904c1a00a7a690cb93d800e16da5728212271d1",
         "12d6f884a520068b019979a881787565441818c7866f8bace81bb792a2dead79",
         "180d03b404731aaba6b5f4b9c2270a35207729f2b82e390683d88c1e26900ff3",
@@ -608,6 +609,7 @@ _PG_REVIEWED_CTES = frozenset(
         "ee75b988bdaf066d4a5199aaece1c2dd255d7d9b338a37c64694752e8c647d18",
         "f1b1ee5489902b1ebf17937b2a28d3fd93d2b5617c053cef37ab5dc89b654626",
         "f4b315e6f37857bd3090c6f2cdfa4c1d765cdcda0592bbd2e82241b544cd9949",
+        "ff1d90d97dcee3e4650d9548583bc2c583dc8ab357bae9cf2cb3d2c67975982d",
     }
 )
 
@@ -745,6 +747,7 @@ def test_native_cte_policy_binds_reviewed_sql_and_rejects_hidden_dml():
         ledger_financial_sql,
         ledger_graph_sql,
         ledger_history_sql,
+        ledger_writer_sql,
     )
 
     actual = set()
@@ -754,6 +757,25 @@ def test_native_cte_policy_binds_reviewed_sql_and_rejects_hidden_dml():
                 command = str(text(query).compile(dialect=PGDialect_psycopg()))
                 _assert_reviewed_ctes([command])
                 actual.add(hashlib.sha256(command.encode()).hexdigest())
+    # The service validates requested projects before refusing an invalid cap.
+    # Review only these SELECT packets, including the driver's typed bind syntax.
+    for name in ("projects.gate", "projects.body"):
+        statement = text(ledger_writer_sql.SQL[("postgresql", name)]).bindparams(
+            *(bindparam(f"project_{index:02}", type_=String) for index in range(16))
+        )
+        command = str(statement.compile(dialect=PGDialect_psycopg()))
+        _assert_reviewed_ctes([command])
+        actual.add(hashlib.sha256(command.encode()).hexdigest())
+        for predicate in ("true", "false"):
+            mutated = command.replace(
+                "WITH requested",
+                "WITH changed AS (UPDATE jobs SET reserved=reserved WHERE "
+                + predicate
+                + " RETURNING id), requested",
+                1,
+            )
+            with pytest.raises(AssertionError):
+                _assert_reviewed_ctes([mutated])
     assert actual == _PG_REVIEWED_CTES
     for predicate in ("true", "false"):
         command = (
