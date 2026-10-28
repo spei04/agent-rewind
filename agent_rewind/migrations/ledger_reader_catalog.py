@@ -18,6 +18,7 @@ from .schema import (
     _canonicalize_postgresql_enum_checks,
     _sqlite_supported_clauses,
     dialect,
+    installed_profile,
     schema_table_names,
     verify_installed_profile,
 )
@@ -222,6 +223,116 @@ def inspect_catalog(connection: Connection, revision: str, work: LedgerCheck) ->
     return shape
 
 
+def _sqlite_table_options(connection: Connection, tables: list[str], revision: str) -> list[str]:
+    # Use only the revision-owned literals, after proving the fresh table set.
+    selected = sorted(installed_profile("sqlite", revision))
+    if len(tables) != len(selected) or set(tables) != set(selected):
+        raise MigrationRefused("schema_incompatible")
+    names = ",".join("'" + name.replace("'", "''") + "'" for name in selected)
+    rows = connection.exec_driver_sql(
+        "SELECT name,wr,strict FROM pragma_table_list WHERE schema='main' "
+        f"AND name IN ({names}) LIMIT {len(selected) + 1}"
+    ).all()
+    if (
+        len(rows) != len(selected)
+        or any(
+            len(row) != 3
+            or type(row[0]) is not str
+            or type(row[1]) is not int
+            or type(row[2]) is not int
+            or row[1:] != (0, 0)
+            for row in rows
+        )
+        or {row[0] for row in rows} != set(selected)
+    ):
+        raise MigrationRefused("schema_incompatible")
+    return selected
+
+
+def _sqlite_native_indexes(
+    connection: Connection, selected: list[str], revision_key: str, work: LedgerCheck
+) -> tuple[dict[str, list[tuple[Any, ...]]], dict[tuple[str, str], list[tuple[Any, ...]]]]:
+    """Observe the same native index rows once, within the preceding exact gates."""
+    index_count = EXPECTED[(revision_key, "sqlite", "sqlite_index_gate")]["candidate_rows"]
+    part_count = EXPECTED[(revision_key, "sqlite", "sqlite_index_parts_gate")]["candidate_rows"]
+    if type(index_count) is not int or type(part_count) is not int:
+        raise MigrationRefused("schema_incompatible")
+    values = ",".join("('" + name.replace("'", "''") + "')" for name in selected)
+    tables = f"WITH tables(table_name) AS (VALUES {values})"
+    indexes_sql = (
+        'SELECT t.table_name,p.seq,p.name,p."unique",p.origin,p.partial '
+        "FROM tables t JOIN pragma_index_list(t.table_name,'main') p "
+        f"ORDER BY t.table_name,p.seq LIMIT {index_count + 1}"
+    )
+    indexes = connection.exec_driver_sql(tables + " " + indexes_sql).all()
+    parts = connection.exec_driver_sql(
+        tables + ", indexes AS MATERIALIZED (" + indexes_sql + ") "
+        'SELECT i.table_name,i.name,p.seqno,p.cid,p.name,p."desc",p.coll,p."key" '
+        "FROM indexes i JOIN pragma_index_xinfo(i.name,'main') p "
+        f"ORDER BY i.table_name,i.name,p.seqno LIMIT {part_count + 1}"
+    ).all()
+    if (
+        len(indexes) != index_count
+        or len(parts) != part_count
+        or any(
+            len(row) != 6
+            or type(row[0]) is not str
+            or row[0] not in selected
+            or type(row[1]) is not int
+            or type(row[2]) is not str
+            or type(row[3]) is not int
+            or row[3] not in (0, 1)
+            or type(row[4]) is not str
+            or row[4] not in ("c", "u", "pk")
+            or type(row[5]) is not int
+            or row[5] not in (0, 1)
+            for row in indexes
+        )
+        or any(
+            len(row) != 8
+            or type(row[0]) is not str
+            or type(row[1]) is not str
+            or type(row[2]) is not int
+            or type(row[3]) is not int
+            or (row[4] is not None and type(row[4]) is not str)
+            or type(row[5]) is not int
+            or row[5] not in (0, 1)
+            or type(row[6]) is not str
+            or row[6] != "BINARY"
+            or type(row[7]) is not int
+            or row[7] not in (0, 1)
+            or (row[4] is None and (row[3], row[5], row[7]) != (-1, 0, 0))
+            for row in parts
+        )
+    ):
+        raise MigrationRefused("schema_incompatible")
+    keys = {(row[0], row[2]) for row in indexes}
+    if (
+        len(keys) != index_count
+        or len({row[2] for row in indexes}) != index_count
+        or {(row[0], row[1]) for row in parts} != keys
+    ):
+        raise MigrationRefused("schema_incompatible")
+    # Prove multiplicity and complete native ordinals before grouping any rows.
+    for table in selected:
+        work.check()
+        ordinals = [row[1] for row in indexes if row[0] == table]
+        if ordinals != list(range(len(ordinals))):
+            raise MigrationRefused("schema_incompatible")
+    for table, index in sorted(keys):
+        work.check()
+        ordinals = [row[2] for row in parts if row[0] == table and row[1] == index]
+        if not ordinals or ordinals != list(range(len(ordinals))):
+            raise MigrationRefused("schema_incompatible")
+    return (
+        {table: [tuple(row[1:]) for row in indexes if row[0] == table] for table in selected},
+        {
+            (table, index): [tuple(row[2:]) for row in parts if row[0] == table and row[1] == index]
+            for table, index in sorted(keys)
+        },
+    )
+
+
 def _observe_catalog(
     connection: Connection,
     indexes_by_table: dict[str, list[dict[str, Any]]],
@@ -236,6 +347,9 @@ def _observe_catalog(
     ledger = revision == LEDGER
     executable_profile = None
     if name == "sqlite":
+        selected = _sqlite_table_options(
+            connection, tables, {"ar6": ADMISSION, "ar7": LEDGER}[revision_key]
+        )
         _sqlite_supported_clauses(
             connection, tables, admission=revision == ADMISSION, ledger=ledger
         )
@@ -244,6 +358,9 @@ def _observe_catalog(
         ).first()
         if extras or connection.exec_driver_sql("SELECT 1 FROM sqlite_temp_master LIMIT 1").first():
             raise MigrationRefused("schema_incompatible")
+        native_by_table, parts_by_index = _sqlite_native_indexes(
+            connection, selected, revision_key, work
+        )
     else:
         if connection.execute(
             text("SELECT 1 FROM pg_class WHERE relnamespace=pg_my_temp_schema() LIMIT 1")
@@ -309,28 +426,23 @@ def _observe_catalog(
                 ]
                 for c in columns
             ]
-        indexes = (
-            indexes_by_table.get(table, [])
+        indexes = indexes_by_table.get(table, []) if name == "postgresql" else []
+        # SQLite uniqueness is observed below from its native index catalog;
+        # generic reflection would only repeat reads whose result is discarded.
+        uniques = (
+            sorted(
+                [c["column_names"] for c in inspector.get_unique_constraints(table, schema=schema)]
+            )
             if name == "postgresql"
-            else inspector.get_indexes(table, schema=schema)
-        )
-        for reflected_index in indexes:
-            if "dialect_options" in reflected_index:
-                reflected_index["dialect_options"] = {
-                    key: str(value) if key.endswith("_where") else value
-                    for key, value in reflected_index["dialect_options"].items()
-                }
-        uniques = sorted(
-            [c["column_names"] for c in inspector.get_unique_constraints(table, schema=schema)]
+            else []
         )
         if name == "sqlite":
             # SQLAlchemy's SQLite SQL parser misses inline UNIQUE declarations in the
             # frozen fixture. SQLite's own index catalog is the structural authority.
-            quoted = connection.dialect.identifier_preparer.quote_identifier(table)
             uniques = []
-            for index in connection.exec_driver_sql(f"PRAGMA index_list({quoted})"):
-                index_name = connection.dialect.identifier_preparer.quote_identifier(index[1])
-                parts = list(connection.exec_driver_sql(f"PRAGMA index_xinfo({index_name})"))
+            native_indexes = native_by_table[table]
+            for index in native_indexes:
+                parts = parts_by_index[(table, index[1])]
                 allowed_partial = (
                     table == "project_memberships"
                     and index[1] == "membership_active_legacy_default"
@@ -364,15 +476,34 @@ def _observe_catalog(
                 if index[3] == "u":
                     uniques.append([part[2] for part in parts if part[5]])
             uniques.sort()
-            options = connection.execute(
-                text(SQL[(revision_key, "sqlite", "sqlite_selected_table_options")]),
-                {"table_name": table},
-            ).all()
-            if len(options) != 1 or tuple(options[0]) != (0, 0):
-                raise MigrationRefused("schema_incompatible")
+            # Generic reflection excludes autoindexes, and otherwise repeats
+            # index_list plus has_table reads to return the same empty list.
+            if any(not index[1].startswith("sqlite_autoindex") for index in native_indexes):
+                indexes = [dict(index) for index in inspector.get_indexes(table, schema=schema)]
+        for reflected_index in indexes:
+            if "dialect_options" in reflected_index:
+                reflected_index["dialect_options"] = {
+                    key: str(value) if key.endswith("_where") else value
+                    for key, value in reflected_index["dialect_options"].items()
+                }
+        # SQLite's PK reflection uses these same fresh column ordinals; its
+        # additional DDL read supplies only the unused constraint name.
+        if name == "postgresql":
+            primary_key = inspector.get_pk_constraint(table, schema=schema)["constrained_columns"]
+        else:
+            primary_columns: list[tuple[int, str]] = []
+            for column in columns:
+                ordinal = column.get("primary_key", 0)
+                if type(ordinal) is not int:
+                    raise MigrationRefused("schema_incompatible")
+                if ordinal > 0:
+                    primary_columns.append((ordinal, column["name"]))
+            primary_key = [
+                column for _, column in sorted(primary_columns, key=lambda pair: pair[0])
+            ]
         result[table] = {
             "columns": column_shape,
-            "pk": inspector.get_pk_constraint(table, schema=schema)["constrained_columns"],
+            "pk": primary_key,
             "uniques": uniques,
             "foreign_keys": inspector.get_foreign_keys(table, schema=schema),
             "checks": inspector.get_check_constraints(table, schema=schema),
