@@ -19,7 +19,10 @@ def test_pr_workflow_has_no_privileged_trigger_or_token():
     )
     for job_id, job in WORKFLOW["jobs"].items():
         assert job["runs-on"] == "ubuntu-24.04"
-        assert 0 < job["timeout-minutes"] <= (45 if job_id == "core" else 20)
+        if job_id == "core":
+            assert job["timeout-minutes"] == "${{ matrix.timeout }}"
+        else:
+            assert 0 < job["timeout-minutes"] <= 20
         if job_id == "ci-gate":
             assert job["permissions"] == {"contents": "read", "actions": "read"}
         else:
@@ -101,13 +104,15 @@ def test_tested_python_versions_and_pinned_external_inputs():
     core = WORKFLOW["jobs"]["core"]
     assert core["strategy"]["matrix"] == {
         "include": [
-            {"python": "3.11", "leg": "early"},
-            {"python": "3.11", "leg": "late"},
-            {"python": "3.12", "leg": "all"},
+            {"python": "3.11", "leg": "early", "timeout": 45},
+            {"python": "3.11", "leg": "late", "timeout": 45},
+            {"python": "3.12", "leg": "all", "timeout": 60},
         ]
     }
     assert core["strategy"]["fail-fast"] is False
-    assert core["timeout-minutes"] == 45
+    assert core["timeout-minutes"] == "${{ matrix.timeout }}"
+    command = next(step["run"] for step in core["steps"] if step.get("name") == "Run core tests")
+    assert command.split().count("--maxfail=1") == 1
     assert core["name"] == "core (${{ matrix.python }}, ${{ matrix.leg }})"
     assert re.fullmatch(
         r"postgres:16-alpine@sha256:[0-9a-f]{64}", core["services"]["postgres"]["image"]

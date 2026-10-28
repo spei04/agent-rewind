@@ -16,17 +16,20 @@ jobs:
   core:
     name: core (${{ matrix.python }}, ${{ matrix.leg }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: ${{ matrix.timeout }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - python: '3.11'
             leg: early
+            timeout: 45
           - python: '3.11'
             leg: late
+            timeout: 45
           - python: '3.12'
             leg: all
+            timeout: 60
     services:
       postgres:
         image: postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
@@ -66,7 +69,7 @@ jobs:
         run: uv run --no-sync python scripts/check_m1_contracts.py --openapi-model
       - name: Run core tests
         run: >-
-          uv run --no-sync python -m pytest -q -p no:cacheprovider -p scripts.ci_core
+          uv run --no-sync python -m pytest -q --maxfail=1 -p no:cacheprovider -p scripts.ci_core
           --core-leg "${{ matrix.leg }}"
           --core-receipt "$RUNNER_TEMP/core-receipt/receipt.json"
         env:

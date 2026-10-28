@@ -12,6 +12,7 @@ import traceback
 import urllib.error
 import zipfile
 from copy import deepcopy
+from datetime import datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -330,6 +331,29 @@ def test_baseline_must_be_final_reviewed_exact_inventory(variant):
         baseline["versions"]["3.11"]["sha256"] = "f" * 64
     with pytest.raises(ValueError):
         check(items, baseline)
+
+
+@pytest.mark.parametrize(
+    "python,leg,seconds", [("3.11", "early", 2700), ("3.11", "late", 2700), ("3.12", "all", 3600)]
+)
+@pytest.mark.parametrize("position", ["negative", "zero", "exact", "over"])
+def test_session_duration_has_exact_per_leg_bound(python, leg, seconds, position):
+    items, baseline = campaign()
+    receipt = next(item for item in items if (item["python"], item["leg"]) == (python, leg))
+    microseconds = {
+        "negative": -1,
+        "zero": 0,
+        "exact": seconds * 1_000_000,
+        "over": seconds * 1_000_000 + 1,
+    }[position]
+    receipt["finished_at"] = (
+        datetime.fromisoformat(receipt["started_at"]) + timedelta(microseconds=microseconds)
+    ).isoformat()
+    if position in ("zero", "exact"):
+        assert check(items, baseline)[(python, leg)] == receipt
+    else:
+        with pytest.raises(ValueError, match="Session exceeded core leg bound"):
+            check(items, baseline)
 
 
 @pytest.mark.parametrize(
@@ -755,21 +779,31 @@ def test_real_pytest_plugin_collection_phases_skips_and_terminal_validation(tmp_
         (fixture / "scripts" / filename).write_bytes((root / "scripts" / filename).read_bytes())
     (fixture / "pytest.ini").write_text("[pytest]\ntestpaths = tests\n")
     (fixture / "conftest.py").write_text(
-        "import os\nimport pytest\n"
+        "import os\nfrom pathlib import Path\nimport pytest\n"
+        "def record(stage, node):\n"
+        "    with Path(os.environ['CI_FIXTURE_EVENTS']).open('a') as output:\n"
+        "        output.write(stage + ':' + node + '\\n')\n"
+        "def pytest_runtest_call(item):\n"
+        "    record('call', item.nodeid)\n"
         "@pytest.fixture(autouse=True)\n"
-        "def cleanup_probe():\n"
+        "def cleanup_probe(request):\n"
         "    yield\n"
+        "    record('teardown', request.node.nodeid)\n"
         "    if os.environ.get('CI_FIXTURE_FAIL_TEARDOWN') == '1':\n"
         "        raise RuntimeError('controlled teardown')\n"
     )
     (fixture / "tests/test_alpha.py").write_text(
-        "import pytest\n"
-        "def test_alpha():\n    assert True\n"
+        "import os\nimport pytest\n"
+        "def test_alpha():\n"
+        "    assert os.environ.get('CI_FIXTURE_FAIL_CALL') != '1', 'controlled call'\n"
         "@pytest.mark.skip(reason='controlled skip')\n"
         "def test_skip():\n    raise AssertionError('must stay skipped')\n"
     )
     (fixture / "tests/test_ledger_recovery.py").write_text(
-        "def test_boundary():\n    assert True\ndef test_last():\n    assert True\n"
+        "import os\n"
+        "def test_boundary():\n"
+        "    assert os.environ.get('CI_FIXTURE_FAIL_CALL') != '1', 'controlled call'\n"
+        "def test_last():\n    assert True\n"
     )
     env = {key: value for key, value in os.environ.items() if not key.startswith("REWIND_TEST_")}
     env.update(
@@ -835,14 +869,17 @@ def test_real_pytest_plugin_collection_phases_skips_and_terminal_validation(tmp_
     python = ".".join(map(str, sys.version_info[:2]))
     legs = ("all",) if python == "3.12" else ("early", "late")
     for leg in legs:
-        for failing in (False, True):
-            output = tmp_path / (leg + ("-negative" if failing else "-positive")) / "receipt.json"
+        for failing in (None, "teardown", "call"):
+            output = tmp_path / (leg + "-" + (failing or "positive")) / "receipt.json"
+            output.parent.mkdir()
+            events = output.parent / "events.txt"
             command = [
                 sys.executable,
                 "-B",
                 "-m",
                 "pytest",
                 "-q",
+                "--maxfail=1",
                 "-p",
                 "no:cacheprovider",
                 "-p",
@@ -855,7 +892,12 @@ def test_real_pytest_plugin_collection_phases_skips_and_terminal_validation(tmp_
             result = subprocess.run(
                 command,
                 cwd=fixture,
-                env={**env, "CI_FIXTURE_FAIL_TEARDOWN": "1" if failing else "0"},
+                env={
+                    **env,
+                    "CI_FIXTURE_FAIL_TEARDOWN": "1" if failing == "teardown" else "0",
+                    "CI_FIXTURE_FAIL_CALL": "1" if failing == "call" else "0",
+                    "CI_FIXTURE_EVENTS": str(events),
+                },
                 capture_output=True,
                 text=True,
                 timeout=45,
@@ -865,15 +907,28 @@ def test_real_pytest_plugin_collection_phases_skips_and_terminal_validation(tmp_
             assert actual["selected"] == receipts.select_nodes(expected, python, leg)
             if failing:
                 assert result.returncode == actual["pytest_exit_code"] == 1
-                assert actual["complete"] is False
-                assert any(
-                    {"when": "call", "outcome": "passed"} in row["phases"]
-                    and {"when": "teardown", "outcome": "failed"} in row["phases"]
-                    for row in actual["outcomes"]
-                )
-                assert b"controlled teardown" not in output.read_bytes()
+                assert actual["session_finished"] is True and actual["complete"] is False
+                assert len(actual["outcomes"]) == 1 < len(actual["selected"])
+                first = actual["selected"][0]
+                assert events.read_text().splitlines() == [f"call:{first}", f"teardown:{first}"]
+                phases = actual["outcomes"][0]["phases"]
+                if failing == "teardown":
+                    assert {"when": "call", "outcome": "passed"} in phases
+                    assert {"when": "teardown", "outcome": "failed"} in phases
+                    assert "RuntimeError: controlled teardown" in result.stdout
+                else:
+                    assert {"when": "call", "outcome": "failed"} in phases
+                    assert {"when": "teardown", "outcome": "passed"} in phases
+                    assert "AssertionError: controlled call" in result.stdout
+                assert "stopping after 1 failures" in result.stdout
+                assert b"controlled " not in output.read_bytes()
                 with pytest.raises(ValueError):
                     receipts.validate_receipt(actual, identity, versions, tracked)
+                for exit_code in (1, 0):
+                    forged = deepcopy(actual)
+                    forged.update(complete=True, pytest_exit_code=exit_code)
+                    with pytest.raises(ValueError):
+                        receipts.validate_receipt(forged, identity, versions, tracked)
             else:
                 assert result.returncode == 0, result.stdout + result.stderr
                 assert receipts.validate_receipt(actual, identity, versions, tracked) == actual
