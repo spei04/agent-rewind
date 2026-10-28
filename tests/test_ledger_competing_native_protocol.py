@@ -90,10 +90,13 @@ def test_native_result_cannot_change_attested_identity(field):
 
 
 @pytest.mark.parametrize("kind,limit", [(CommandGroup, 10), (NativeCommandGroup, 12)])
-def test_native_profile_keeps_explicit_message_and_time_limits(tmp_path, kind, limit):
+def test_native_profile_keeps_explicit_message_and_time_limits(tmp_path, monkeypatch, kind, limit):
+    # Cross a float precision boundary without subtracting rounded clock values.
+    monkeypatch.setattr("ledger_competing_process.monotonic", lambda: 1023.9999999999999)
     group = kind(tmp_path)
-    assert group.work_deadline - group.started == 60
-    assert group.deadline - group.work_deadline == 15
+    assert group.started == 1023.9999999999999
+    assert group.work_deadline == 1084.0
+    assert group.deadline == 1099.0
     child = SimpleNamespace(process=SimpleNamespace(pid=123))
     for index in range(limit):
         group.count(child, "parent-to-child" if index % 2 else "child-to-parent", 1)
