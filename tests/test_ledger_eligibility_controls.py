@@ -554,4 +554,4 @@ def test_admission_setup_disposes_its_engine_and_preserves_original_failure(monk
     with pytest.raises(KeyboardInterrupt) as failed:
         adapter.admitted_predecessor("no-database", monkeypatch, lambda *args: None)
     assert failed.value is original
-    assert events == ["predecessor-disposed", "admission-disposed"]
+    assert events == ["admission-disposed", "predecessor-disposed"]

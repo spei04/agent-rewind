@@ -329,11 +329,15 @@ def test_failed_admission_setup_disposes_pool_before_drain_and_keeps_original_er
     def refuse(_):
         raise original
 
-    monkeypatch.setattr(adapter, "build_postgres_case", lambda pg: fixture)
+    def build_predecessor(_pg, *, legacy):
+        assert legacy is False
+        return fixture
+
+    monkeypatch.setattr(adapter, "build_postgres_case", build_predecessor)
     monkeypatch.setattr(adapter, "create_engine", lambda *args, **kwargs: engine)
     monkeypatch.setattr(adapter, "native_principal", refuse)
     monkeypatch.setattr(adapter, "drain", lambda pg: events.append("drain"))
     with pytest.raises(KeyboardInterrupt) as caught:
-        adapter.admitted_predecessor({}, tmp_path, monkeypatch, lambda *row: None)
+        adapter.admitted_predecessor({}, tmp_path, monkeypatch, lambda *row: None, legacy=False)
     assert caught.value is original
-    assert events == ["predecessor-disposed", "admission-disposed", "drain"]
+    assert events == ["admission-disposed", "drain", "predecessor-disposed"]
