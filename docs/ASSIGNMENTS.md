@@ -1,6 +1,31 @@
 # Engineering assignment log
 
-**Current P1 status:** AR-010-A/P1 #108: Verified; F3: Merged; checkpoint accepted at protected merge b214f21b from reviewed source 1c6e30e0. Aggregate AR-010-A/#107 and parent AR-010/#10 remain In progress; product P2/#109 remains Not started with null acceptance until its separate entry review. The approved scope, task graph, effort estimates and funding/data/production gates are unchanged. [Delivery record](delivery/LEDGER_EXECUTION_PLAN.md#p1-delivery-record--2026-10-28).
+## Current status
+
+- **Verified:** P1/F3 is delivered; [PR #118](https://github.com/spei04/agent-rewind/pull/118) records accepted engineering CI. P2 is in progress; research advantage and live readiness remain unproven.
+- **Next:** Backend completes reservations and fences; qualification checks concurrency and uncertain commits; the reviewer verifies source and evidence.
+- **Open gate:** P2 review, PostgreSQL and integrated runtime validation remain. The $200 cap, unreconciled $36.567974 reservations, corpus preparation-only scope, and production/provider activation gates remain unchanged.
+
+[Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
+
+## Execution location — 2026-10-23
+
+All Agent Rewind checkouts, dependencies, builds, test execution, datasets,
+media, logs, run outputs and private evidence stay in the existing
+`studio-agent` cloud workspace or existing hosted CI. The Mac is an SSH
+control channel only: no project cloning, installation, builds, research,
+artifact downloads or media staging there. Reuse the two existing cloud
+checkouts and their independent environments. Preserve retained evidence and
+active writers; do not delete other teams' files or touch the separate local
+computer-use project. This rule adds no capacity purchase, budget, provider,
+partner-data or production authorization.
+
+## Assignment history
+
+<details>
+<summary>Earlier assignments, approvals and delivery records</summary>
+
+**Current P1 status:** AR-010-A/P1 #108: Verified; F3: Merged; checkpoint accepted at protected merge b214f21b from reviewed source 1c6e30e0. Aggregate AR-010-A/#107 and parent AR-010/#10 remain In progress; product P2/#109 is In progress after independently accepted entry v7 and implementation assignment; its accepted merge and delivery review evidence remain null. The approved scope, task graph, effort estimates and funding/data/production gates are unchanged. [Delivery record](delivery/LEDGER_EXECUTION_PLAN.md#p1-delivery-record--2026-10-28).
 
 **Historical walkthrough and live-demo path — 2026-10-28:** Three existing preservation tests passed in one invocation (3 passed in 0.58s; actual 4336cfec, independent review 97f4a187). They reconstruct a frozen synthetic parent, branch, checkpoint and 245,000 microUSD of historical holds; no new replay, provider call, sandbox or P2 reservation ran. P2 entry design and independent review are assigned; implementation remains Not started. The remaining integration path is [AR-010-A/P2](EXECUTION_BACKLOG.md#ar-010-a-p2) → [AR-010-B](EXECUTION_BACKLOG.md#ar-010-b) → [AR-011-C](EXECUTION_BACKLOG.md#ar-011-c) / [AR-012-B](EXECUTION_BACKLOG.md#ar-012-b), followed by reviewed customer-ready activation. Customer routes still return HTTP 503 and worker claims remain blocked. This checkpoint establishes no live-demo or production readiness; the enterprise production objective is unchanged. The $200 cap and unreconciled $36.567974 reservations remain unchanged, with no new paid inference, corpus capture, held-out access or resources authorized.
 
@@ -16,26 +41,14 @@ One combined draft PR will carry the reviewed source and this checkpoint. Exact 
 
 Execution backlog approved on 2026-10-19. The project lead coordinates three independent contributor slots, reviews each delivery, integrates tested changes, then assigns dependency-ready work to the free slot. These are logical contributor roles, not six confirmed full-time hires; the prior staffing/calendar scenario remains unconfirmed. Task-specific external funding, data, customer and release gates still apply.
 
-## Execution location — 2026-10-23
-
-All Agent Rewind checkouts, dependencies, builds, test execution, datasets,
-media, logs, run outputs and private evidence stay in the existing
-`studio-agent` cloud workspace or existing hosted CI. The Mac is an SSH
-control channel only: no project cloning, installation, builds, research,
-artifact downloads or media staging there. Reuse the two existing cloud
-checkouts and their independent environments. Preserve retained evidence and
-active writers; do not delete other teams' files or touch the separate local
-computer-use project. This rule adds no capacity purchase, budget, provider,
-partner-data or production authorization.
-
 ## Current assignments — 2026-10-28 UTC
 
 | Active owner | Cloud path on studio-agent | Current work / next acceptance gate | Concrete blocker |
 | --- | --- | --- | --- |
-| Platform engineer | existing secondary checkout | Prepare the assigned P2 entry design against accepted P1; preserve source and owned environment until implementation handoff. | P2 implementation remains Not started; corpus acquisition and study remain unauthorized. |
-| Integration engineer | existing primary checkout | Maintain the source-bound P1 delivery record and preserve original failures and component evidence. | No P2 implementation or new native execution follows this checkpoint. |
-| Independent reviewer | read-only frozen source and evidence | Review the assigned P2 entry design and retain accepted P1 delivery evidence. | P2 implementation remains Not started; its entry design needs an independent disposition. |
-| Lead | publication ownership and source-specific execution grants | Publish the accepted P1 status and reconcile #108 only against actual closure readback. | closed as completed at 2026-10-28T18:01:43Z; read back by the lead (bae9970b); #107/#10 stay In progress and #109 Not started. |
+| Backend engineer | existing secondary checkout | Implement P2 coordinator, reservation/generation primitives and focused tests against the accepted v7 entry. | Full P2 implementation and native delivery evidence remain pending. |
+| Quality engineer | existing primary checkout | Build independent atomicity, contention, wait-time, uncertainty and consumer-boundary tests against the frozen callable seam. | Execute against reviewed author source; no fixture-only completion credit. |
+| Independent reviewer | read-only source and evidence | Review each coherent implementation checkpoint and the integrated P2 slice. | Entry acceptance is complete; implementation acceptance remains pending. |
+| Lead | integration and publication ownership | Preserve accepted P1, integrate P2 contributions and maintain issues and roadmap. | Customer activation and later live-writer composition remain separately gated. |
 
 
 The latest ordinary capacity attempt at eb2cbc4 passes all four seeded-reader cases. The maximum took **1.976373s**, leaving about **24ms in one run**; repeatability and broader performance remain unproved. The dated v4 failure remains in the history below. [Capacity evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-seeded-reader-capacity-checkpoint--2026-10-23) and [SQLite contention evidence](delivery/LEDGER_EXECUTION_PLAN.md#f3-sqlite-competing-command-checkpoint--2026-10-23) retain their distinct scopes.
@@ -80,7 +93,6 @@ R1's initial 100-control results per interpreter remain retained. The corrected 
 
 The PostgreSQL mixed replay component is accepted through the original passing testcase and separate saved-record accounting, retaining the failed controller without a native repeat. The separately granted expiry-only case and corrected missing-opening restore are also accepted. SQLite replay is accepted at 2370665a with 142 controls and two original-service passes per interpreter. Both original runners released cleanly, independent evidence review is complete for these components, and integration owns the reviewed four-document checkpoint and compact final-source bindings. Full F3/P1 delivery acceptance remains null.
 
-## Assignment history
 
 
 | Date | Engineer | Task | Branch | Status / next action |
@@ -1696,3 +1708,5 @@ Both owned cloud checkouts and environments remain for sequential reuse. Stopped
 Source controls pass 33 per interpreter. Initial controller selections passed 59 per dialect/interpreter; after the actual SQLite projection diagnostic, corrected selections passed 66 per dialect/interpreter. One actual SQLite testcase passed with 29 properties and three physical receipts, but original controller exit 1/component false/zero semantic credit remains retained. Separate corrected offline evaluation accepted the same record with three semantic commands; no second database run occurred. The PostgreSQL case passed on its first actual attempt (17.11s); final component acceptance: accepted by independent review 65cb7d72 and lead receipt 7abd0e8b for this bounded component only.
 
 Both existing cloud checkouts and independently owned environments are retained for sequential reuse and aligned with the integrated ec19eabe lock using uv 0.13.4. Latest stopped release is 0d07f951; no new grant remains. The earlier maintenance cleanup figures remain historical. Counts, estimates, $200 cap, unreconciled $36.567974 reservations, null F3/P1 acceptance and product P2 Not started remain unchanged.
+
+</details>

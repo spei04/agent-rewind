@@ -501,6 +501,7 @@ def pre_p1_packet(packet):
     task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
     p1, p2 = task["delivery_packages"]
     p1.update(status="In progress", accepted_merge_commit=None, review_evidence=None)
+    p2.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
     p1["implementation_prs"][-1].update(
         status="In progress",
         source_commit=None,
