@@ -494,8 +494,26 @@ def test_observability_successor_requires_accepted_merge_and_all_aggregate_input
     assert task["status"] != "Verified"
 
 
-def test_implementation_pr_refinement_counts_prs_without_completing_package(packet):
-    data, markdown, plan = packet
+@pytest.fixture
+def pre_p1_packet(packet):
+    """Freeze the historical F1/F2-complete, P1/F3-pending test state."""
+    data, markdown, plan = deepcopy(packet)
+    task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
+    p1, p2 = task["delivery_packages"]
+    p1.update(status="In progress", accepted_merge_commit=None, review_evidence=None)
+    p1["implementation_prs"][-1].update(
+        status="In progress",
+        source_commit=None,
+        accepted_merge_commit=None,
+        review_evidence=None,
+        tracking_pr=None,
+    )
+    markdown = _sync_package_cards(_sync_implementation_cards(markdown, p1), [p1, p2])
+    return data, markdown, plan
+
+
+def test_implementation_pr_refinement_counts_prs_without_completing_package(pre_p1_packet):
+    data, markdown, plan = pre_p1_packet
     result = CHECK.validate(data, markdown, plan)
     assert result["delivery_pr_count"] == 161
     task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
@@ -548,8 +566,8 @@ def _accept_implementation_pr(pr, number):
 
 
 @pytest.mark.parametrize("completed", [1, 2, 3])
-def test_implementation_pr_acceptance_does_not_complete_parent_package(packet, completed):
-    data, markdown, plan = deepcopy(packet)
+def test_implementation_pr_acceptance_does_not_complete_parent_package(pre_p1_packet, completed):
+    data, markdown, plan = deepcopy(pre_p1_packet)
     task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
     p1, p2 = task["delivery_packages"]
     for number, pr in enumerate(p1["implementation_prs"][:completed], 1):
@@ -622,8 +640,8 @@ def test_final_implementation_evidence_allows_explicit_p1_acceptance_and_p2_star
         ("reused_tracking", "Implementation PRs reuse tracking identity"),
     ],
 )
-def test_implementation_pr_invalid_claims_reach_the_intended_gate(packet, variant, message):
-    data, markdown, plan = deepcopy(packet)
+def test_implementation_pr_invalid_claims_reach_the_intended_gate(pre_p1_packet, variant, message):
+    data, markdown, plan = deepcopy(pre_p1_packet)
     assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
     task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
     p1, p2 = task["delivery_packages"]

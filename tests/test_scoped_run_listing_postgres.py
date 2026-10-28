@@ -189,8 +189,14 @@ def test_postgres_permission_failure_is_fixed_and_counter_regression_refuses(pg_
 
 
 @pytest.mark.parametrize("created", ["infinity", "-infinity", "10000-01-01 00:00:00+00"])
-def test_postgres_unrepresentable_order_cell_refuses_before_cursor_filter(pg_listing, created):
+def test_postgres_unrepresentable_order_cell_refuses_before_cursor_filter(
+    pg_listing, monkeypatch, created
+):
     pg, reader = pg_listing
+    # Prove timestamp rejection and recovery independently of host scheduling.
+    # Native PostgreSQL timeouts remain real; session tests retain native
+    # timeout, cumulative deadline and cleanup coverage.
+    monkeypatch.setattr(listing_session, "time", SimpleNamespace(monotonic=lambda: 0.0))
     first = reader.list(PRINCIPAL, PROJECT, now=NOW, limit=1)
     assert first.next_cursor and first.items[0]["id"] == RUN2
     with pg["owner"].begin() as writer:
