@@ -8,6 +8,7 @@ from typing import Any
 
 from sqlalchemy import inspect, text
 from sqlalchemy.engine import Connection
+from sqlalchemy.engine.reflection import Inspector, ObjectKind, ObjectScope
 
 from .ledger_catalog_sql import EXPECTED, SQL
 from .ledger_check import LedgerCheck
@@ -333,6 +334,66 @@ def _sqlite_native_indexes(
     )
 
 
+def _postgres_constraints(
+    inspector: Inspector, selected: list[str], work: LedgerCheck
+) -> dict[str, dict[str, Any]]:
+    """Reuse the same fresh parsers without repeating each table's queries."""
+    result: dict[str, dict[str, Any]] = {"pk": {}, "uniques": {}, "foreign_keys": {}, "checks": {}}
+
+    def retain(kind: str, rows: Mapping[Any, Any], names: list[str]) -> None:
+        work.check()
+        if set(rows) != {("public", table) for table in names} or any(
+            type(value) is not (dict if kind == "pk" else list) for value in rows.values()
+        ):
+            raise MigrationRefused("schema_incompatible")
+        for (_, table), value in rows.items():
+            result[kind][table] = value
+
+    # The pinned PostgreSQL dialect expands both names and OIDs. Ten names
+    # retain the operator reader's 16-bind ceiling (15 for OIDs, 13 for keys).
+    # This Inspector belongs only to this observation; no prior approval is reused.
+    for start in range(0, len(selected), 10):
+        batch = selected[start : start + 10]
+        retain(
+            "pk",
+            inspector.get_multi_pk_constraint(
+                schema="public",
+                filter_names=batch,
+                scope=ObjectScope.DEFAULT,
+                kind=ObjectKind.TABLE,
+            ),
+            batch,
+        )
+        retain(
+            "uniques",
+            inspector.get_multi_unique_constraints(
+                schema="public",
+                filter_names=batch,
+                scope=ObjectScope.DEFAULT,
+                kind=ObjectKind.TABLE,
+            ),
+            batch,
+        )
+    # The preceding native gates and exact table set already bound all public
+    # tables. Omitting the name filter preserves eight fixed binds for these
+    # two parsers; the complete returned public keyset must still match.
+    retain(
+        "foreign_keys",
+        inspector.get_multi_foreign_keys(
+            schema="public", scope=ObjectScope.DEFAULT, kind=ObjectKind.TABLE
+        ),
+        selected,
+    )
+    retain(
+        "checks",
+        inspector.get_multi_check_constraints(
+            schema="public", scope=ObjectScope.DEFAULT, kind=ObjectKind.TABLE
+        ),
+        selected,
+    )
+    return result
+
+
 def _observe_catalog(
     connection: Connection,
     indexes_by_table: dict[str, list[dict[str, Any]]],
@@ -406,6 +467,14 @@ def _observe_catalog(
         )
         if extras or executable:
             raise MigrationRefused("schema_incompatible")
+        selected = sorted(
+            table
+            for table in installed_profile(name, {"ar6": ADMISSION, "ar7": LEDGER}[revision_key])
+            if not table.startswith("$")
+        )
+        if tables != selected:
+            raise MigrationRefused("schema_incompatible")
+        constraints = _postgres_constraints(inspector, selected, work)
     result: dict[str, Any] = {}
     for table in sorted(tables):
         work.check()
@@ -430,9 +499,7 @@ def _observe_catalog(
         # SQLite uniqueness is observed below from its native index catalog;
         # generic reflection would only repeat reads whose result is discarded.
         uniques = (
-            sorted(
-                [c["column_names"] for c in inspector.get_unique_constraints(table, schema=schema)]
-            )
+            sorted([c["column_names"] for c in constraints["uniques"][table]])
             if name == "postgresql"
             else []
         )
@@ -489,7 +556,7 @@ def _observe_catalog(
         # SQLite's PK reflection uses these same fresh column ordinals; its
         # additional DDL read supplies only the unused constraint name.
         if name == "postgresql":
-            primary_key = inspector.get_pk_constraint(table, schema=schema)["constrained_columns"]
+            primary_key = constraints["pk"][table]["constrained_columns"]
         else:
             primary_columns: list[tuple[int, str]] = []
             for column in columns:
@@ -505,8 +572,16 @@ def _observe_catalog(
             "columns": column_shape,
             "pk": primary_key,
             "uniques": uniques,
-            "foreign_keys": inspector.get_foreign_keys(table, schema=schema),
-            "checks": inspector.get_check_constraints(table, schema=schema),
+            "foreign_keys": (
+                constraints["foreign_keys"][table]
+                if name == "postgresql"
+                else inspector.get_foreign_keys(table, schema=schema)
+            ),
+            "checks": (
+                constraints["checks"][table]
+                if name == "postgresql"
+                else inspector.get_check_constraints(table, schema=schema)
+            ),
             # Reflection values retain their SQLAlchemy types; the persisted
             # catalog uses JSON arrays without dropping sort/null-order modifiers.
             "indexes": [
