@@ -30,6 +30,8 @@ def lock_authority(
     context: ProjectContext,
     kind: str | None,
     resource_id: str | None,
+    *,
+    exclusive_organization: bool = False,
 ) -> None:
     # No cached role or changed default is substituted for the original
     # context. Visibility comes before action classification, including for
@@ -46,7 +48,8 @@ def lock_authority(
     _lock_row(
         connection,
         select(organizations.c.id).where(organizations.c.id == context.organization_id),
-        shared=True,
+        # P2 selects its strongest organization mode on the first acquisition.
+        shared=not exclusive_organization,
     )
     _lock_row(
         connection,
