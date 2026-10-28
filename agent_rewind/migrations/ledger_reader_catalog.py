@@ -27,7 +27,8 @@ from .schema import (
 # The generic PG column query has 21 binds for optional identity/collation
 # reflection. The ledger's preceding exact gates exclude those shapes, so this
 # observation preserves the shared 16-bind limit without changing old readers.
-_POSTGRES_COLUMNS = """SELECT a.attname::text AS name,
+_POSTGRES_COLUMNS = """SELECT c.relname::text AS table_name, a.attnum AS ordinal,
+       a.attname::text AS name,
        pg_catalog.format_type(a.atttypid,a.atttypmod) AS format_type,
        a.attnotnull AS not_null,
        CASE WHEN a.atthasdef THEN
@@ -42,9 +43,9 @@ FROM pg_catalog.pg_class c
 JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
 JOIN pg_catalog.pg_attribute a ON a.attrelid=c.oid
 WHERE n.nspname='public' AND c.relkind='r'
-  AND c.relname=:table_name AND a.attnum>0
-ORDER BY a.attnum
-LIMIT 33
+  AND a.attnum>0
+ORDER BY c.relname,a.attnum
+LIMIT :row_limit
 """
 _POSTGRES_COLUMN_TYPES = {
     "bigint": "BIGINT",
@@ -101,15 +102,53 @@ def _postgres_column(row: Mapping[Any, Any]) -> list[Any]:
     ]
 
 
-def _postgres_columns(connection: Connection, table: str, work: LedgerCheck) -> list[list[Any]]:
-    rows = connection.execute(text(_POSTGRES_COLUMNS), {"table_name": table}).mappings().all()
-    if not 1 <= len(rows) <= 32:
+def _postgres_columns(
+    connection: Connection, selected: list[str], revision_key: str, work: LedgerCheck
+) -> dict[str, list[list[Any]]]:
+    revision = {"ar6": ADMISSION, "ar7": LEDGER}[revision_key]
+    expected = sorted(
+        table for table in installed_profile("postgresql", revision) if not table.startswith("$")
+    )
+    if selected != expected:
         raise MigrationRefused("schema_incompatible")
-    result = []
+    count = EXPECTED[(revision_key, "postgresql", "catalog_column_count")]["candidate_rows"]
+    if type(count) is not int:
+        raise MigrationRefused("schema_incompatible")
+    rows = connection.execute(text(_POSTGRES_COLUMNS), {"row_limit": count + 1}).mappings().all()
+    if len(rows) != count:
+        raise MigrationRefused("schema_incompatible")
+    ordinals = {table: 0 for table in selected}
+    names: set[tuple[str, str]] = set()
+    columns: list[tuple[str, list[Any]]] = []
+    previous = ("", 0)
     for row in rows:
         work.check()
-        result.append(_postgres_column(row))
-    return result
+        table_name, ordinal = row.get("table_name"), row.get("ordinal")
+        if (
+            type(table_name) is not str
+            or table_name not in ordinals
+            or type(ordinal) is not int
+            or ordinal != ordinals[table_name] + 1
+            or not 1 <= ordinal <= 32
+            or (table_name, ordinal) <= previous
+        ):
+            raise MigrationRefused("schema_incompatible")
+        # Keep the complete original scalar parser; no unsupported native
+        # column is filtered out or repaired by batching.
+        column = _postgres_column(
+            {key: value for key, value in row.items() if key not in {"table_name", "ordinal"}}
+        )
+        identity = (table_name, column[0])
+        if identity in names:
+            raise MigrationRefused("schema_incompatible")
+        names.add(identity)
+        ordinals[table_name] = ordinal
+        previous = table_name, ordinal
+        columns.append((table_name, column))
+    if any(value == 0 for value in ordinals.values()):
+        raise MigrationRefused("schema_incompatible")
+    # Group only after complete ownership, order, multiplicity and type checks.
+    return {table: [column for owner, column in columns if owner == table] for table in selected}
 
 
 def _gate(connection: Connection, revision: str, name: str) -> None:
@@ -475,11 +514,12 @@ def _observe_catalog(
         if tables != selected:
             raise MigrationRefused("schema_incompatible")
         constraints = _postgres_constraints(inspector, selected, work)
+        columns_by_table = _postgres_columns(connection, selected, revision_key, work)
     result: dict[str, Any] = {}
     for table in sorted(tables):
         work.check()
         if name == "postgresql":
-            column_shape = _postgres_columns(connection, table, work)
+            column_shape = columns_by_table[table]
         else:
             columns = inspector.get_columns(table, schema=schema)
             if len(columns) > 32:
