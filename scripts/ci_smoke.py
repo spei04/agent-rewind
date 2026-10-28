@@ -844,6 +844,7 @@ def run_listing_smoke(engine: Engine) -> None:
     from pathlib import Path
 
     from cryptography.fernet import Fernet
+    from fastapi import FastAPI
     from fastapi.testclient import TestClient
     from pydantic import SecretStr
     from sqlalchemy import text
@@ -855,6 +856,91 @@ def run_listing_smoke(engine: Engine) -> None:
     from agent_rewind.request_identity import SessionIdentity, VerifiedPrincipal, encode_v2_session
     from agent_rewind.run_cursor import CursorPosition, initial_expiry
     from agent_rewind.scoped_run_listing import ScopedRunReader
+
+    def check_real_guard(
+        application: FastAPI, route_client: TestClient, path: str, phase: str
+    ) -> None:
+        from time import monotonic
+
+        original = application.state.db.schema_compatibility
+        calls = 0
+        observed: CompatibilityResult | None = None
+        elapsed = 0.0
+        started: float | None = None
+        completed = False
+        raised = False
+
+        def observe() -> CompatibilityResult:
+            nonlocal calls, observed, elapsed, started, completed, raised
+            calls += 1
+            started = monotonic()
+            try:
+                observed = original()
+                return observed
+            except BaseException:
+                raised = True
+                raise
+            finally:
+                elapsed = monotonic() - started
+                completed = True
+
+        # Observe the existing call only. Restore even if the request or guard raises.
+        application.state.db.schema_compatibility = observe
+        try:
+            response = route_client.get(path)
+        finally:
+            application.state.db.schema_compatibility = original
+        try:
+            body = response.json()
+        except ValueError:
+            body = None
+        code = body.get("code") if isinstance(body, dict) else None
+        if response.status_code == 503 and code == "schema_incompatible":
+            return
+
+        # Only fixed protocol labels enter packaging diagnostics, never response
+        # messages, credentials, URLs, exception text or arbitrary guard codes.
+        safe_codes = {
+            "schema_incompatible",
+            "dependency_unavailable",
+            "unauthenticated",
+            "not_found",
+            "migration_only",
+            "schema_unavailable",
+            "schema_probe_capacity",
+            "release_profile_or_connection_invalid",
+            "release_profile_invalid",
+            "backfill_incomplete",
+        }
+
+        def safe_code(value: object) -> str:
+            return value if isinstance(value, str) and value in safe_codes else "unknown"
+
+        status = response.status_code
+        http_status = str(status) if type(status) is int and 100 <= status <= 599 else "unknown"
+        probe_status = "not_invoked"
+        probe_code = "unknown"
+        if started is not None:
+            # A bounded API request may return while its existing probe is still
+            # running. Report elapsed time so far without joining or probing again.
+            probe_status = "raised" if raised else "unknown"
+            if not completed:
+                probe_status = "pending"
+                elapsed = monotonic() - started
+        if completed and isinstance(observed, CompatibilityResult):
+            probe_status = (
+                observed.status
+                if isinstance(observed.status, str)
+                and observed.status in {"ready", "incompatible", "unavailable"}
+                else "unknown"
+            )
+            probe_code = safe_code(observed.code)
+        raise RuntimeError(
+            f"Installed listing {phase} guard mismatch: "
+            f"http_status={http_status} http_code={safe_code(code)} "
+            f"probe_calls={calls} probe_status={probe_status} probe_code={probe_code} "
+            f"probe_elapsed_ms={elapsed * 1000:.3f}"
+        )
 
     settings = Settings(
         _env_file=None,
@@ -897,9 +983,7 @@ def run_listing_smoke(engine: Engine) -> None:
     original_guard = app.state.db.schema_compatibility
     base = "/api/v1/projects/" + "9" * 32 + "/runs"
     try:
-        response = client.get(base)
-        if response.status_code != 503 or response.json()["code"] != "schema_incompatible":
-            raise RuntimeError("Installed route bypassed the real migration-only guard")
+        check_real_guard(app, client, base, "first")
         with engine.begin() as connection:
             connection.execute(
                 text("INSERT INTO project_memberships VALUES(:p,:id,'viewer',NULL,false)"),
@@ -912,12 +996,7 @@ def run_listing_smoke(engine: Engine) -> None:
         guarded_app = create_app(settings)
         guarded_client = TestClient(guarded_app)
         try:
-            guarded_response = guarded_client.get(base)
-            if (
-                guarded_response.status_code != 503
-                or guarded_response.json()["code"] != "schema_incompatible"
-            ):
-                raise RuntimeError("Synthetic installed route guard leaked across app instances")
+            check_real_guard(guarded_app, guarded_client, base, "fresh-instance")
         finally:
             guarded_client.close()
             guarded_app.state.db.engine.dispose()
