@@ -1,1 +1,314 @@
-{"schema":1,"status":"accepted","versions":{"3.11":{"count":8029,"sha256":"d3999bbbcb9da88721f4837b763ce9189054318f95ed004788293ea94fd63026","skips":[{"nodeid":"tests/test_admission_transaction.py::test_unsupported_or_dirty_physical_mode_refuses_before_body[autocommit_true]","reason":"sqlite3 autocommit modes require Python 3.12"},{"nodeid":"tests/test_admission_transaction.py::test_unsupported_or_dirty_physical_mode_refuses_before_body[autocommit_false]","reason":"sqlite3 autocommit modes require Python 3.12"},{"nodeid":"tests/test_compatibility_snapshot.py::test_native_autocommit_explicit_begin_is_owned_and_rolled_back[none]","reason":"sqlite3 native autocommit is Python 3.12+"},{"nodeid":"tests/test_compatibility_snapshot.py::test_native_autocommit_explicit_begin_is_owned_and_rolled_back[after_begin]","reason":"sqlite3 native autocommit is Python 3.12+"},{"nodeid":"tests/test_compatibility_snapshot.py::test_native_autocommit_explicit_begin_is_owned_and_rolled_back[rollback]","reason":"sqlite3 native autocommit is Python 3.12+"},{"nodeid":"tests/test_docker.py::test_actual_code_execution_and_round_trip","reason":"Opt-in Docker integration"},{"nodeid":"tests/test_docker.py::test_evaluator_is_read_only_and_not_available_to_agent","reason":"Opt-in Docker integration"},{"nodeid":"tests/test_docker.py::test_timeout_and_escape_rejection","reason":"Opt-in Docker integration"},{"nodeid":"tests/test_ledger_evolved_replay_postgres.py::test_postgres_evolved_original_and_whitespace_replay","reason":"Requires reviewed R1 bounded runner; ordinary CI gives no native coverage"},{"nodeid":"tests/test_ledger_evolved_replay_postgres.py::test_postgres_expired_opening_original_replay","reason":"Requires reviewed R1 bounded runner; ordinary CI gives no native coverage"},{"nodeid":"tests/test_ledger_recovery_restore_corrupt_postgres.py::test_restored_corruption_reaches_service_refusal[cursor]","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_recovery_restore_corrupt_postgres.py::test_restored_corruption_reaches_service_refusal[acl]","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_recovery_restore_interrupted_postgres.py::test_cancelled_data_restore_preserves_schema_only_state","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_recovery_restore_missing_opening_postgres.py::test_restored_s2_missing_opening_refuses_without_mutation","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_recovery_restore_postgres.py::test_owner_preserving_full_restore[s0]","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_recovery_restore_postgres.py::test_owner_preserving_full_restore[s2]","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_recovery_restore_truncated_postgres.py::test_truncated_custom_archive_leaves_empty_target","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-02-29T00:00:00.000000Z]","reason":"SQLite lexical representation; PG validates native timestamptz"},{"nodeid":"tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T24:00:00.000000Z]","reason":"SQLite lexical representation; PG validates native timestamptz"},{"nodeid":"tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T00:60:00.000000Z]","reason":"SQLite lexical representation; PG validates native timestamptz"},{"nodeid":"tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T00:00:60.000000Z]","reason":"SQLite lexical representation; PG validates native timestamptz"},{"nodeid":"tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-0000-01-01T00:00:00.000000Z]","reason":"SQLite lexical representation; PG validates native timestamptz"},{"nodeid":"tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T00:00:00Z]","reason":"SQLite lexical representation; PG validates native timestamptz"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-missing_scope]","reason":"PostgreSQL deferred constraints; SQLite operator validation is separate"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-two_reserves]","reason":"PostgreSQL deferred constraints; SQLite operator validation is separate"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-immutable_account]","reason":"PostgreSQL deferred constraints; SQLite operator validation is separate"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-job_cap]","reason":"PostgreSQL deferred constraints; SQLite operator validation is separate"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_valid_call_and_parent_scope_retention[sqlite]","reason":"PostgreSQL deferred final state"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-delete_reinsert]","reason":"PostgreSQL deferred OLD/NEW identity retention"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-project_revert]","reason":"PostgreSQL deferred OLD/NEW identity retention"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-kind_revert]","reason":"PostgreSQL deferred OLD/NEW identity retention"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-identity_revert]","reason":"PostgreSQL deferred OLD/NEW identity retention"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_scope_guard_preserves_noop_and_unconstrained_scopes[sqlite]","reason":"PostgreSQL deferred scope identity controls"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_executable_policy_drift_refuses[sqlite-public_execute]","reason":"PostgreSQL executable inventory"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_executable_policy_drift_refuses[sqlite-disabled_trigger]","reason":"PostgreSQL executable inventory"},{"nodeid":"tests/test_listing_session.py::test_unsupported_sqlite_mode_discards_physical_connection[autocommit_true]","reason":"Python 3.12 sqlite3 driver modes"},{"nodeid":"tests/test_listing_session.py::test_unsupported_sqlite_mode_discards_physical_connection[autocommit_false]","reason":"Python 3.12 sqlite3 driver modes"},{"nodeid":"tests/test_projection_source.py::test_read_snapshot_refuses_and_discards_sqlite_autocommit[driver_autocommit]","reason":"sqlite3 driver autocommit is a Python3.12 boundary"},{"nodeid":"tests/test_projection_source.py::test_read_snapshot_refuses_and_discards_sqlite_autocommit[driver_autocommit_false]","reason":"sqlite3 driver autocommit is a Python3.12 boundary"},{"nodeid":"tests/test_projection_source.py::test_owned_pep249_mode_is_quarantined_before_snapshot","reason":"sqlite3 driver autocommit is a Python3.12 boundary"},{"nodeid":"tests/test_run_projection_backfill.py::test_projection_initializer_discards_unsupported_sqlite_mode_before_ddl[driver_true]","reason":"sqlite3 driver autocommit is a Python3.12 boundary"},{"nodeid":"tests/test_run_projection_backfill.py::test_projection_initializer_discards_unsupported_sqlite_mode_before_ddl[driver_false]","reason":"sqlite3 driver autocommit is a Python3.12 boundary"},{"nodeid":"tests/test_scoped_actions.py::test_unsupported_sqlite_modes_refuse_without_mutation[autocommit_true]","reason":"sqlite3 explicit autocommit modes require Python 3.12"},{"nodeid":"tests/test_scoped_actions.py::test_unsupported_sqlite_modes_refuse_without_mutation[autocommit_false]","reason":"sqlite3 explicit autocommit modes require Python 3.12"}]},"3.12":{"count":8029,"sha256":"d3999bbbcb9da88721f4837b763ce9189054318f95ed004788293ea94fd63026","skips":[{"nodeid":"tests/test_docker.py::test_actual_code_execution_and_round_trip","reason":"Opt-in Docker integration"},{"nodeid":"tests/test_docker.py::test_evaluator_is_read_only_and_not_available_to_agent","reason":"Opt-in Docker integration"},{"nodeid":"tests/test_docker.py::test_timeout_and_escape_rejection","reason":"Opt-in Docker integration"},{"nodeid":"tests/test_ledger_evolved_replay_postgres.py::test_postgres_evolved_original_and_whitespace_replay","reason":"Requires reviewed R1 bounded runner; ordinary CI gives no native coverage"},{"nodeid":"tests/test_ledger_evolved_replay_postgres.py::test_postgres_expired_opening_original_replay","reason":"Requires reviewed R1 bounded runner; ordinary CI gives no native coverage"},{"nodeid":"tests/test_ledger_recovery_restore_corrupt_postgres.py::test_restored_corruption_reaches_service_refusal[cursor]","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_recovery_restore_corrupt_postgres.py::test_restored_corruption_reaches_service_refusal[acl]","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_recovery_restore_interrupted_postgres.py::test_cancelled_data_restore_preserves_schema_only_state","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_recovery_restore_missing_opening_postgres.py::test_restored_s2_missing_opening_refuses_without_mutation","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_recovery_restore_postgres.py::test_owner_preserving_full_restore[s0]","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_recovery_restore_postgres.py::test_owner_preserving_full_restore[s2]","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_recovery_restore_truncated_postgres.py::test_truncated_custom_archive_leaves_empty_target","reason":"Opt-in same-cluster owner-preserving ledger restore"},{"nodeid":"tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-02-29T00:00:00.000000Z]","reason":"SQLite lexical representation; PG validates native timestamptz"},{"nodeid":"tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T24:00:00.000000Z]","reason":"SQLite lexical representation; PG validates native timestamptz"},{"nodeid":"tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T00:60:00.000000Z]","reason":"SQLite lexical representation; PG validates native timestamptz"},{"nodeid":"tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T00:00:60.000000Z]","reason":"SQLite lexical representation; PG validates native timestamptz"},{"nodeid":"tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-0000-01-01T00:00:00.000000Z]","reason":"SQLite lexical representation; PG validates native timestamptz"},{"nodeid":"tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T00:00:00Z]","reason":"SQLite lexical representation; PG validates native timestamptz"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-missing_scope]","reason":"PostgreSQL deferred constraints; SQLite operator validation is separate"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-two_reserves]","reason":"PostgreSQL deferred constraints; SQLite operator validation is separate"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-immutable_account]","reason":"PostgreSQL deferred constraints; SQLite operator validation is separate"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-job_cap]","reason":"PostgreSQL deferred constraints; SQLite operator validation is separate"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_valid_call_and_parent_scope_retention[sqlite]","reason":"PostgreSQL deferred final state"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-delete_reinsert]","reason":"PostgreSQL deferred OLD/NEW identity retention"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-project_revert]","reason":"PostgreSQL deferred OLD/NEW identity retention"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-kind_revert]","reason":"PostgreSQL deferred OLD/NEW identity retention"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-identity_revert]","reason":"PostgreSQL deferred OLD/NEW identity retention"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_scope_guard_preserves_noop_and_unconstrained_scopes[sqlite]","reason":"PostgreSQL deferred scope identity controls"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_executable_policy_drift_refuses[sqlite-public_execute]","reason":"PostgreSQL executable inventory"},{"nodeid":"tests/test_ledger_schema.py::test_postgres_executable_policy_drift_refuses[sqlite-disabled_trigger]","reason":"PostgreSQL executable inventory"}]}}}
+{
+  "schema": 1,
+  "status": "accepted",
+  "versions": {
+    "3.11": {
+      "count": 8041,
+      "sha256": "629681d4936e12bd2c1cfe5f7084a9b922373af43db6c9b32bc2efe65c19d88c",
+      "skips": [
+        {
+          "nodeid": "tests/test_admission_transaction.py::test_unsupported_or_dirty_physical_mode_refuses_before_body[autocommit_true]",
+          "reason": "sqlite3 autocommit modes require Python 3.12"
+        },
+        {
+          "nodeid": "tests/test_admission_transaction.py::test_unsupported_or_dirty_physical_mode_refuses_before_body[autocommit_false]",
+          "reason": "sqlite3 autocommit modes require Python 3.12"
+        },
+        {
+          "nodeid": "tests/test_compatibility_snapshot.py::test_native_autocommit_explicit_begin_is_owned_and_rolled_back[none]",
+          "reason": "sqlite3 native autocommit is Python 3.12+"
+        },
+        {
+          "nodeid": "tests/test_compatibility_snapshot.py::test_native_autocommit_explicit_begin_is_owned_and_rolled_back[after_begin]",
+          "reason": "sqlite3 native autocommit is Python 3.12+"
+        },
+        {
+          "nodeid": "tests/test_compatibility_snapshot.py::test_native_autocommit_explicit_begin_is_owned_and_rolled_back[rollback]",
+          "reason": "sqlite3 native autocommit is Python 3.12+"
+        },
+        {
+          "nodeid": "tests/test_docker.py::test_actual_code_execution_and_round_trip",
+          "reason": "Opt-in Docker integration"
+        },
+        {
+          "nodeid": "tests/test_docker.py::test_evaluator_is_read_only_and_not_available_to_agent",
+          "reason": "Opt-in Docker integration"
+        },
+        {
+          "nodeid": "tests/test_docker.py::test_timeout_and_escape_rejection",
+          "reason": "Opt-in Docker integration"
+        },
+        {
+          "nodeid": "tests/test_ledger_evolved_replay_postgres.py::test_postgres_evolved_original_and_whitespace_replay",
+          "reason": "Requires reviewed R1 bounded runner; ordinary CI gives no native coverage"
+        },
+        {
+          "nodeid": "tests/test_ledger_evolved_replay_postgres.py::test_postgres_expired_opening_original_replay",
+          "reason": "Requires reviewed R1 bounded runner; ordinary CI gives no native coverage"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_corrupt_postgres.py::test_restored_corruption_reaches_service_refusal[cursor]",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_corrupt_postgres.py::test_restored_corruption_reaches_service_refusal[acl]",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_interrupted_postgres.py::test_cancelled_data_restore_preserves_schema_only_state",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_missing_opening_postgres.py::test_restored_s2_missing_opening_refuses_without_mutation",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_postgres.py::test_owner_preserving_full_restore[s0]",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_postgres.py::test_owner_preserving_full_restore[s2]",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_truncated_postgres.py::test_truncated_custom_archive_leaves_empty_target",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-02-29T00:00:00.000000Z]",
+          "reason": "SQLite lexical representation; PG validates native timestamptz"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T24:00:00.000000Z]",
+          "reason": "SQLite lexical representation; PG validates native timestamptz"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T00:60:00.000000Z]",
+          "reason": "SQLite lexical representation; PG validates native timestamptz"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T00:00:60.000000Z]",
+          "reason": "SQLite lexical representation; PG validates native timestamptz"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-0000-01-01T00:00:00.000000Z]",
+          "reason": "SQLite lexical representation; PG validates native timestamptz"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T00:00:00Z]",
+          "reason": "SQLite lexical representation; PG validates native timestamptz"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-missing_scope]",
+          "reason": "PostgreSQL deferred constraints; SQLite operator validation is separate"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-two_reserves]",
+          "reason": "PostgreSQL deferred constraints; SQLite operator validation is separate"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-immutable_account]",
+          "reason": "PostgreSQL deferred constraints; SQLite operator validation is separate"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-job_cap]",
+          "reason": "PostgreSQL deferred constraints; SQLite operator validation is separate"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_valid_call_and_parent_scope_retention[sqlite]",
+          "reason": "PostgreSQL deferred final state"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-delete_reinsert]",
+          "reason": "PostgreSQL deferred OLD/NEW identity retention"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-project_revert]",
+          "reason": "PostgreSQL deferred OLD/NEW identity retention"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-kind_revert]",
+          "reason": "PostgreSQL deferred OLD/NEW identity retention"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-identity_revert]",
+          "reason": "PostgreSQL deferred OLD/NEW identity retention"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_scope_guard_preserves_noop_and_unconstrained_scopes[sqlite]",
+          "reason": "PostgreSQL deferred scope identity controls"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_executable_policy_drift_refuses[sqlite-public_execute]",
+          "reason": "PostgreSQL executable inventory"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_executable_policy_drift_refuses[sqlite-disabled_trigger]",
+          "reason": "PostgreSQL executable inventory"
+        },
+        {
+          "nodeid": "tests/test_listing_session.py::test_unsupported_sqlite_mode_discards_physical_connection[autocommit_true]",
+          "reason": "Python 3.12 sqlite3 driver modes"
+        },
+        {
+          "nodeid": "tests/test_listing_session.py::test_unsupported_sqlite_mode_discards_physical_connection[autocommit_false]",
+          "reason": "Python 3.12 sqlite3 driver modes"
+        },
+        {
+          "nodeid": "tests/test_projection_source.py::test_read_snapshot_refuses_and_discards_sqlite_autocommit[driver_autocommit]",
+          "reason": "sqlite3 driver autocommit is a Python3.12 boundary"
+        },
+        {
+          "nodeid": "tests/test_projection_source.py::test_read_snapshot_refuses_and_discards_sqlite_autocommit[driver_autocommit_false]",
+          "reason": "sqlite3 driver autocommit is a Python3.12 boundary"
+        },
+        {
+          "nodeid": "tests/test_projection_source.py::test_owned_pep249_mode_is_quarantined_before_snapshot",
+          "reason": "sqlite3 driver autocommit is a Python3.12 boundary"
+        },
+        {
+          "nodeid": "tests/test_run_projection_backfill.py::test_projection_initializer_discards_unsupported_sqlite_mode_before_ddl[driver_true]",
+          "reason": "sqlite3 driver autocommit is a Python3.12 boundary"
+        },
+        {
+          "nodeid": "tests/test_run_projection_backfill.py::test_projection_initializer_discards_unsupported_sqlite_mode_before_ddl[driver_false]",
+          "reason": "sqlite3 driver autocommit is a Python3.12 boundary"
+        },
+        {
+          "nodeid": "tests/test_scoped_actions.py::test_unsupported_sqlite_modes_refuse_without_mutation[autocommit_true]",
+          "reason": "sqlite3 explicit autocommit modes require Python 3.12"
+        },
+        {
+          "nodeid": "tests/test_scoped_actions.py::test_unsupported_sqlite_modes_refuse_without_mutation[autocommit_false]",
+          "reason": "sqlite3 explicit autocommit modes require Python 3.12"
+        }
+      ]
+    },
+    "3.12": {
+      "count": 8041,
+      "sha256": "629681d4936e12bd2c1cfe5f7084a9b922373af43db6c9b32bc2efe65c19d88c",
+      "skips": [
+        {
+          "nodeid": "tests/test_docker.py::test_actual_code_execution_and_round_trip",
+          "reason": "Opt-in Docker integration"
+        },
+        {
+          "nodeid": "tests/test_docker.py::test_evaluator_is_read_only_and_not_available_to_agent",
+          "reason": "Opt-in Docker integration"
+        },
+        {
+          "nodeid": "tests/test_docker.py::test_timeout_and_escape_rejection",
+          "reason": "Opt-in Docker integration"
+        },
+        {
+          "nodeid": "tests/test_ledger_evolved_replay_postgres.py::test_postgres_evolved_original_and_whitespace_replay",
+          "reason": "Requires reviewed R1 bounded runner; ordinary CI gives no native coverage"
+        },
+        {
+          "nodeid": "tests/test_ledger_evolved_replay_postgres.py::test_postgres_expired_opening_original_replay",
+          "reason": "Requires reviewed R1 bounded runner; ordinary CI gives no native coverage"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_corrupt_postgres.py::test_restored_corruption_reaches_service_refusal[cursor]",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_corrupt_postgres.py::test_restored_corruption_reaches_service_refusal[acl]",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_interrupted_postgres.py::test_cancelled_data_restore_preserves_schema_only_state",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_missing_opening_postgres.py::test_restored_s2_missing_opening_refuses_without_mutation",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_postgres.py::test_owner_preserving_full_restore[s0]",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_postgres.py::test_owner_preserving_full_restore[s2]",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_recovery_restore_truncated_postgres.py::test_truncated_custom_archive_leaves_empty_target",
+          "reason": "Opt-in same-cluster owner-preserving ledger restore"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-02-29T00:00:00.000000Z]",
+          "reason": "SQLite lexical representation; PG validates native timestamptz"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T24:00:00.000000Z]",
+          "reason": "SQLite lexical representation; PG validates native timestamptz"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T00:60:00.000000Z]",
+          "reason": "SQLite lexical representation; PG validates native timestamptz"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T00:00:60.000000Z]",
+          "reason": "SQLite lexical representation; PG validates native timestamptz"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-0000-01-01T00:00:00.000000Z]",
+          "reason": "SQLite lexical representation; PG validates native timestamptz"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_sqlite_canonical_time_is_native_not_lossy_cast[postgresql-2026-01-01T00:00:00Z]",
+          "reason": "SQLite lexical representation; PG validates native timestamptz"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-missing_scope]",
+          "reason": "PostgreSQL deferred constraints; SQLite operator validation is separate"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-two_reserves]",
+          "reason": "PostgreSQL deferred constraints; SQLite operator validation is separate"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-immutable_account]",
+          "reason": "PostgreSQL deferred constraints; SQLite operator validation is separate"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_deferred_constraints_reject_at_commit[sqlite-job_cap]",
+          "reason": "PostgreSQL deferred constraints; SQLite operator validation is separate"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_valid_call_and_parent_scope_retention[sqlite]",
+          "reason": "PostgreSQL deferred final state"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-delete_reinsert]",
+          "reason": "PostgreSQL deferred OLD/NEW identity retention"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-project_revert]",
+          "reason": "PostgreSQL deferred OLD/NEW identity retention"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-kind_revert]",
+          "reason": "PostgreSQL deferred OLD/NEW identity retention"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_call_scope_identity_change_cannot_be_reversed[sqlite-identity_revert]",
+          "reason": "PostgreSQL deferred OLD/NEW identity retention"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_scope_guard_preserves_noop_and_unconstrained_scopes[sqlite]",
+          "reason": "PostgreSQL deferred scope identity controls"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_executable_policy_drift_refuses[sqlite-public_execute]",
+          "reason": "PostgreSQL executable inventory"
+        },
+        {
+          "nodeid": "tests/test_ledger_schema.py::test_postgres_executable_policy_drift_refuses[sqlite-disabled_trigger]",
+          "reason": "PostgreSQL executable inventory"
+        }
+      ]
+    }
+  }
+}
