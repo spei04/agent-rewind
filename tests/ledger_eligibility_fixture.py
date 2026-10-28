@@ -19,6 +19,7 @@ from sqlalchemy import create_engine, event, text
 from test_admission_configuration import configuration
 from test_admission_request import submission
 from test_admission_submit import Policy, Ready, Storage
+from test_ownership import FRESH
 
 from agent_rewind.admission_configuration import NativeRegistry
 from agent_rewind.admission_coordinator import AdmissionCoordinator
@@ -138,7 +139,14 @@ def existing_admission_principal(fixture):
     mapping = fixture.case.adoption["mapping"]
     if isinstance(mapping, str):
         mapping = json.loads(mapping)
-    (grant,) = mapping["principal_grants"]
+    if fixture.case.adoption["source_kind"] == "fresh":
+        assert mapping == {"schema": 1, "source_kind": "fresh"}
+        assert fixture.case.adoption["installation_key"] == FRESH["installation_key"]
+        assert fixture.organization == FRESH["organization_id"]
+        assert fixture.project == FRESH["project_id"]
+        (grant,) = FRESH["principal_grants"]
+    else:
+        (grant,) = mapping["principal_grants"]
     (member,) = rows(fixture.before, "project_memberships")
     assert grant["role"] == "maintainer" and grant["legacy_default"] is True
     assert member == {
