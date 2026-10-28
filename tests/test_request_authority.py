@@ -156,7 +156,7 @@ def test_key_authority_is_live_intersection_and_never_key_administration(
         ("expires", b""),
         ("expires", math.inf),
         ("expires", -math.inf),
-        ("expires", time.time() - 10),
+        pytest.param("expires", time.time() - 10, id="expires-expired"),
         ("revoked", ""),
         ("revoked", b""),
         ("revoked", True),
