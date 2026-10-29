@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** [Original M121 main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970) passed all eight jobs. One synthetic Python 3.12 fixture reproduced an extra jobs CHECK accepted by the complete inspector.
-- **Next:** Backend implements scoped CHECK declaration, name and body validation; Review verifies the reproduction and repair. Quality maintains corpus handoff and documentation; the lead integrates.
-- **Blocker:** Independent review confirmed the reproduced gap. Repair acceptance and matching delivery evidence remain pending. P2, worker, corpus and production gates remain unmet.
+- **Verified:** Cloud access and the preserved regression file are verified. [PR #121 and main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970) passed; independent review confirmed the separate synthetic CHECK gap.
+- **Next:** Backend resumes native CHECK declaration validation and both regressions. Quality checks parser boundaries; Review verifies the implementation and original results.
+- **Blocker:** P2 requires the accepted repair and matching CI/artifact evidence. Worker, corpus and production prerequisites remain unchanged.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -21,6 +21,19 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+### Access restored; preserved repair resumed — 2026-10-29
+
+Cloud SSH access is restored. The lead independently verified PRIMARY at M121 on `work/sqlite-check-correspondence`, with the exact preserved regression file and no runtime changes at resumption; the planning checkout remains clean at `b541deb9`. Backend resumes the already authorized repair and scoped original/final tests. Quality checks parser boundaries, and Review verifies implementation and source-bound evidence. The authentication interruption remains in history. No new checkout, resources, budget or downstream gate was authorized.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** [Original M121 main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970) passed all eight jobs. One synthetic Python 3.12 fixture reproduced an extra jobs CHECK accepted by the complete inspector.
+- **Next:** Backend implements scoped CHECK declaration, name and body validation; Review verifies the reproduction and repair. Quality maintains corpus handoff and documentation; the lead integrates.
+- **Blocker:** Independent review confirmed the reproduced gap. Repair acceptance and matching delivery evidence remain pending. P2, worker, corpus and production gates remain unmet.
+
+</details>
 
 ### Jobs CHECK reproduced; delivery hold retained — 2026-10-29
 
