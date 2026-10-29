@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger foundations and the worker planning reforecast are delivered. The paging correction passed seven targeted checks on each Python version and independent review.
-- **Next:** Backend monitors CI and designs worker authority. Quality specifies bounded consumers; Review checks source and evidence. The lead integrates reviewed work.
-- **Blocker:** [Fresh full CI](https://github.com/spei04/agent-rewind/actions/runs/40825337038) checks the correction. The previous elapsed refusal is identified, but its delay remains unexplained. Passing PR/main checks and matching artifacts are still required; downstream gates remain unmet.
+- **Verified:** Ledger foundations are delivered. P2's PR CI and original receipts were accepted, and the PR merged. The worker failure design and corpus candidate source are reviewed.
+- **Next:** Backend monitors main CI; Review verifies results and installed artifacts. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Passing main CI and matching installed artifacts are required before P2 delivery. Earlier delays and unwitnessed HTTP failures remain unexplained; downstream gates remain unmet.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -21,6 +21,21 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+### PR merge and worker failure entry design — 2026-10-29
+
+Original [PR119 run 40825337038](https://github.com/spei04/agent-rewind/actions/runs/40825337038), attempt 1, passed the full 8,327-case P2 CI profile. Its original receipts were independently accepted, including exact phases for all 17 native cases on both Python versions. [PR119](https://github.com/spei04/agent-rewind/pull/119) merged at [286980ac](https://github.com/spei04/agent-rewind/commit/286980ac5b591af243a68715035c2bc1b6753aa4) at 06:37 UTC. Main CI and matching installed-candidate acceptance remain pending; ledger P2 delivery is not yet accepted. This does not establish the cause of earlier delays or unwitnessed HTTP failures.
+
+The [worker failure entry design](delivery/WORKER_FAILURE_ENTRY_DESIGN.md) consolidates the independently reviewed and adopted D1–D4 interfaces. P1 and P2 remain Not started with null acceptance; whole ledger prerequisites, the exact successor revision and implementation assignment remain pending. Actual successor wheel/profile and native-fit evidence belong to implementation/delivery. Backend handles CI and later implementation; Quality prepares corpus delivery and independent evidence; Review verifies results; the lead owns prerequisite/revision decisions and integration. No runtime, estimate, budget, data or activation gate changes follow.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** Ledger foundations and the worker planning reforecast are delivered. The paging correction passed seven targeted checks on each Python version and independent review.
+- **Next:** Backend monitors CI and designs worker authority. Quality specifies bounded consumers; Review checks source and evidence. The lead integrates reviewed work.
+- **Blocker:** [Fresh full CI](https://github.com/spei04/agent-rewind/actions/runs/40825337038) checks the correction. The previous elapsed refusal is identified, but its delay remains unexplained. Passing PR/main checks and matching artifacts are still required; downstream gates remain unmet.
+
+</details>
 
 ### Paging correction and next assignments — 2026-10-29
 

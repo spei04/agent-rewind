@@ -16,6 +16,8 @@ P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2
 
 ## Entry, ownership and acceptance
 
+The [concrete worker failure entry design](WORKER_FAILURE_ENTRY_DESIGN.md) specifies the adopted schema, producer, reader and operator interfaces. Complete prerequisite entry, the successor revision and implementation assignment remain pending.
+
 Before any checkpoint code, require accepted whole AR-010-A including P2 and AR-005-C, complete independently reviewed entry design, lead migration owner/revision decision against the accepted predecessor, this adopted reforecast and source-bound native validation plan. No precursor is an early-entry exception. Each F2–F5 requires the preceding accepted merge. Backend owns implementation/migration, Quality independent behavior/native evidence, Review independent source/security and the lead revision/integration. These are logical roles for later assignment.
 
 Retain accepted C04, AR-005-C guard/recovery, AR-008-B bounded Operation/HTTP and AR-011-B safe-vocabulary producer reviews. Pin the accepted whole AR-010-A source/profile, PR/main receipts and installed artifact before code. Review the exact query/frame/capability and migration/privilege/restore plans; do not assign a revision name now. Actual producer, race, preservation and native capacity proofs are earned during implementation and required for acceptance, not before unimplemented code.
