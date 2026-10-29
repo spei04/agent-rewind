@@ -1,5 +1,5 @@
 {
-  "revision": "2026-10-22",
+  "revision": "2026-10-27",
   "approval_status": "Execution backlog approved; task-specific architecture, funding, data and release gates remain applicable.",
   "baseline": "8f1ae757005c95c50a789e4fa0a10aae9b3c4024",
   "parents": {
@@ -18,12 +18,13 @@
       "milestone": "M0",
       "priority": "P0",
       "objective": "Protect corpus rights and establish a credible natural-failure evaluation protocol.",
-      "base_effort_days": 2.0,
+      "base_effort_days": 5,
       "children": [
         "AR-002-A",
-        "AR-002-B"
+        "AR-002-B",
+        "AR-002-C"
       ],
-      "status": "Verified"
+      "status": "In progress"
     },
     "AR-003": {
       "milestone": "M0",
@@ -621,6 +622,18 @@
         "RA-01-B"
       ],
       "status": "Verified"
+    },
+    "PUBCAP": {
+      "milestone": "M2/M5",
+      "priority": "P0",
+      "objective": "Qualify a supported public-corpus acquisition route without bypassing rights, runtime, funding or study gates.",
+      "base_effort_days": 5,
+      "children": [
+        "PUBCAP-A",
+        "PUBCAP-B",
+        "PUBCAP-C"
+      ],
+      "status": "Not started"
     }
   },
   "tasks": [
@@ -3839,7 +3852,8 @@
         "AR-024-C",
         "AR-025-B",
         "AR-002-B",
-        "AR-024-D"
+        "AR-024-D",
+        "PUBCAP-B"
       ],
       "contracts": [
         "C02",
@@ -5228,14 +5242,12 @@
       "confidence": "low",
       "dependencies": [
         "AR-026-A",
-        "AR-036-C",
-        "AR-037-C",
-        "DATA0"
+        "PUBLICDATA0",
+        "PUBCAP-C"
       ],
       "contracts": [
         "C02",
-        "C09",
-        "C17"
+        "C09"
       ],
       "scope": "Curate allowed naturally failed runs, deduplicate task families, freeze splits and evaluator identities",
       "acceptance": "Provenance/permissions complete; no injected-stop substitution; insufficient corpus blocks broad claim",
@@ -5268,11 +5280,12 @@
       "dependencies": [
         "AR-038-A",
         "STUDYFUNDS0",
-        "AR-026-C"
+        "AR-026-C",
+        "G3"
       ],
       "contracts": [
-        "C09",
-        "C17"
+        "C02",
+        "C09"
       ],
       "scope": "Execute bounded cost-matched location study with fixed candidates, controls, attempts and stopping rules",
       "acceptance": "All assigned trials and failures reported; intervals and costs recompute; nulls retained",
@@ -6832,6 +6845,223 @@
         "RB-11A"
       ],
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/66"
+    },
+    {
+      "id": "AR-002-C",
+      "parent": "AR-002",
+      "milestone": "M0",
+      "priority": "P0",
+      "title": "Versioned public-source admission and C02 operating supplement",
+      "objective": "Versioned public-source admission and C02 operating supplement.",
+      "role": "RS",
+      "effort_days": 3,
+      "effort_range_days": [
+        3,
+        6
+      ],
+      "confidence": "low",
+      "dependencies": [
+        "AR-002-B",
+        "PUBLICPREP0",
+        "PCA1"
+      ],
+      "contracts": [
+        "C02"
+      ],
+      "scope": "Deliver a versioned public-derived declaration and source-neutral C02 operating supplement. Include PCA1 and document/graph reconciliation; retain v1 unchanged. Define rights, custody, source/evaluator identities, accounting, retention and operator duties. No public row is relabeled customer-permitted.",
+      "acceptance": "PCA1 accepted, candidate-versus-recorded distinction explicit, public operating duties and source routing independently reviewed; unknown rights remain quarantined. A declaration is not permission.",
+      "tests": "Schema/runtime parity, v1 compatibility and malformed/unknown/duplicate input refusal in PCA1; review supplement duties, route ancestry, effort overlap and preserved historical bytes.",
+      "security_reliability": "Default deny; preserve complete denominators and private custody; no approval inferred from syntactic validity or an available resource.",
+      "out_of_scope": "No acquisition, real rows/images, capture, held-out access, paid calls, study execution, new resources or cap increase.",
+      "status": "Not started",
+      "definition_of_done": "Accepted source, independent review, required checks and delivery evidence recorded for this exact boundary. Every separate execution gate remains required.",
+      "review_roles": [
+        "QE",
+        "TL"
+      ],
+      "pull_request_boundary": "One residual aggregate delivery PR, after its explicit preparatory PR where present; completion does not authorize dependent execution.",
+      "contracts_status": "C02 v1 remains available only at its established scope; the public supplement and any C06/runtime consumers require their actual producer acceptance.",
+      "preparatory_prs": [
+        {
+          "id": "PCA1",
+          "aggregate_id": "AR-002-C",
+          "kind": "offline_preparation",
+          "title": "Public-source declaration and schema preserving corpus v1",
+          "role": "RS",
+          "dependencies": [
+            "AR-002-B",
+            "PUBLICPREP0"
+          ],
+          "contracts": [
+            "C02"
+          ],
+          "effort_days": 1,
+          "effort_range_days": [
+            1,
+            2
+          ],
+          "confidence": "medium",
+          "scope": "Versioned public-source C02 contract/schema; separate pre-recording candidate type without run/checkpoint IDs; private rights/provenance/policy references and fail-closed caller-owned permission checks.",
+          "out_of_scope": "No acquisition, real rows/images, capture, held-out access, paid calls, study execution, new resources or cap increase.",
+          "acceptance": "Independent source review, required offline checks and accepted delivery; no aggregate or external gate completion implied.",
+          "tests": "Schema/runtime parity; unchanged v1; duplicate/unknown fields; malformed identities/paths; wrong processor/purpose/storage; expired/revoked rights; safe errors.",
+          "status": "Not started",
+          "source_commit": null,
+          "accepted_merge_commit": null,
+          "review_evidence": null,
+          "objective": "Define strict public declaration types that preserve corpus v1 and distinguish candidates from recorded entries.",
+          "security_reliability": "A declaration cannot grant rights, fabricate native identity or broaden trusted policy; reject duplicate/unknown input and expose only safe errors.",
+          "definition_of_done": "All package acceptance and meaningful offline tests pass at recorded source; independent review and accepted delivery are recorded; inputs/schema identities and scope limits are documented. No aggregate or external gate is promoted."
+        }
+      ]
+    },
+    {
+      "id": "PUBCAP-A",
+      "parent": "PUBCAP",
+      "milestone": "M2",
+      "priority": "P0",
+      "title": "Supported public-corpus adapter and native acquisition preflight",
+      "objective": "Supported public-corpus adapter and native acquisition preflight.",
+      "role": "BE",
+      "effort_days": 3,
+      "effort_range_days": [
+        3,
+        5
+      ],
+      "confidence": "low",
+      "dependencies": [
+        "PUBLICDATA0",
+        "G2",
+        "PCA2"
+      ],
+      "contracts": [
+        "C02",
+        "C06"
+      ],
+      "scope": "Include PCA2 pure normalization, then separately integrate accepted source/evaluator manifests with one supported native adapter, private custody and acquisition preflight. Require qualified source/image/transitive contents and actual consumer separation.",
+      "acceptance": "PCA2 accepted; qualified native consumer, restore, grader isolation, provenance/resource and interrupted/uncertain-accounting evidence accepted. Pure adapter tests cannot complete this aggregate.",
+      "tests": "Native consumer separation, faithful restoration, resource ceilings, grade isolation and provenance/accounting interruption cases after actual contracts exist.",
+      "security_reliability": "Default deny; preserve complete denominators and private custody; no approval inferred from syntactic validity or an available resource.",
+      "out_of_scope": "No execution under the preparation decision; native integration waits for PUBLICDATA0/G2. No second adapter, enlarged limits, task omission or study/capture authority.",
+      "status": "Not started",
+      "definition_of_done": "Accepted source, independent review, required checks and delivery evidence recorded for this exact boundary. Every separate execution gate remains required.",
+      "review_roles": [
+        "QE",
+        "TL"
+      ],
+      "pull_request_boundary": "One residual aggregate delivery PR, after its explicit preparatory PR where present; completion does not authorize dependent execution.",
+      "contracts_status": "C02 v1 remains available only at its established scope; the public supplement and any C06/runtime consumers require their actual producer acceptance.",
+      "preparatory_prs": [
+        {
+          "id": "PCA2",
+          "aggregate_id": "PUBCAP-A",
+          "kind": "offline_preparation",
+          "title": "Disconnected SWE-rebench V2 typed normalizer",
+          "role": "BE",
+          "dependencies": [
+            "PCA1",
+            "PUBLICPREP0"
+          ],
+          "contracts": [
+            "C02"
+          ],
+          "effort_days": 2,
+          "effort_range_days": [
+            2,
+            3
+          ],
+          "confidence": "medium",
+          "scope": "Pure offline translation of supplied synthetic pinned Python-row fixtures into distinct inference and evaluator manifests. Independently constructed qualification receipts bind exact policy/source/schema/normalizer/context/image/evaluator identities. Honest next-gate/quarantine/unsupported decisions; no fetching, import, execution or Engine.run connection.",
+          "out_of_scope": "No acquisition, real rows/images, capture, held-out access, paid calls, study execution, new resources or cap increase.",
+          "acceptance": "Independent source review, required offline checks and accepted delivery; no aggregate or external gate completion implied.",
+          "tests": "Independent valid/invalid qualification fixtures; original-fail/reference-pass/invalid/tamper controls; separately qualified hidden variants noninterference; stale receipt refusal; cache identity; canary leakage; unknown/duplicate/null/type/timestamp ambiguity; unsupported/oversize state; all denominators.",
+          "status": "Not started",
+          "source_commit": null,
+          "accepted_merge_commit": null,
+          "review_evidence": null,
+          "objective": "Translate supplied synthetic source rows into separate answer-blind inference and private evaluator views, using the accepted PCA1 public interface.",
+          "security_reliability": "Remain disconnected from acquisition and runtime; consume accepted PCA1 types/schema and independent qualification; refuse stale, leaking, unsupported or untrusted input while retaining denominators.",
+          "definition_of_done": "All package acceptance and meaningful offline tests pass at recorded source; independent review and accepted delivery are recorded; inputs/schema identities and scope limits are documented. No aggregate or external gate is promoted."
+        }
+      ]
+    },
+    {
+      "id": "PUBCAP-B",
+      "parent": "PUBCAP",
+      "milestone": "M2",
+      "priority": "P0",
+      "title": "Authorized development capture and feasibility evidence",
+      "objective": "Authorized development capture and feasibility evidence.",
+      "role": "RS",
+      "effort_days": 1,
+      "effort_range_days": [
+        1,
+        2
+      ],
+      "confidence": "low",
+      "dependencies": [
+        "PUBCAP-A",
+        "G2",
+        "PUBLICDATA0",
+        "CAPTUREFUNDS0"
+      ],
+      "contracts": [
+        "C02",
+        "C06"
+      ],
+      "scope": "Under a separately authorized bounded development allocation, retain every ordinary baseline and evaluator-qualification outcome and measure exclusion, failure yield and full cost for AR-026-A.",
+      "acceptance": "Approved development limits and predeclared allocations enforced; all success/failure/capture/evaluator/infrastructure/unknown outcomes retained. Independent feasibility evidence has no held-out tuning.",
+      "tests": "Control receipt coverage, complete attempt denominators, uncertainty accounting and bounded-cost stop checks.",
+      "security_reliability": "Default deny; preserve complete denominators and private custody; no approval inferred from syntactic validity or an available resource.",
+      "out_of_scope": "Not authorized by PUBLICPREP0; no held-out or sealed capture, favorable-seed search, unbounded acquisition or powered-study claim.",
+      "status": "Not started",
+      "definition_of_done": "Accepted source, independent review, required checks and delivery evidence recorded for this exact boundary. Every separate execution gate remains required.",
+      "review_roles": [
+        "QE",
+        "TL"
+      ],
+      "pull_request_boundary": "One residual aggregate delivery PR, after its explicit preparatory PR where present; completion does not authorize dependent execution.",
+      "contracts_status": "C02 v1 remains available only at its established scope; the public supplement and any C06/runtime consumers require their actual producer acceptance."
+    },
+    {
+      "id": "PUBCAP-C",
+      "parent": "PUBCAP",
+      "milestone": "M5",
+      "priority": "P0",
+      "title": "Authorized sealed baseline capture",
+      "objective": "Authorized sealed baseline capture.",
+      "role": "RS",
+      "effort_days": 1,
+      "effort_range_days": [
+        1,
+        2
+      ],
+      "confidence": "low",
+      "dependencies": [
+        "PUBCAP-A",
+        "AR-026-A",
+        "G2",
+        "PUBLICDATA0",
+        "CAPTUREFUNDS0"
+      ],
+      "contracts": [
+        "C02",
+        "C06",
+        "C09"
+      ],
+      "scope": "Only after accepted AR-026-A, separate sealed-phase allocation and explicit sealed-capture authorization, collect ordinary prospective baselines under the frozen protocol and sealed custody.",
+      "acceptance": "All attempted outcomes retained; exact protocol/permission/source/evaluator/native identities and phase authorization verified; no adaptive held-out screening.",
+      "tests": "Phase-separation, frozen protocol, sealed custody, complete denominators and uncertain dispatch accounting.",
+      "security_reliability": "Default deny; preserve complete denominators and private custody; no approval inferred from syntactic validity or an available resource.",
+      "out_of_scope": "Not authorized by PUBLICPREP0; no outcome-driven tuning, invented native run/checkpoint IDs, study execution or automatic phase promotion.",
+      "status": "Not started",
+      "definition_of_done": "Accepted source, independent review, required checks and delivery evidence recorded for this exact boundary. Every separate execution gate remains required.",
+      "review_roles": [
+        "QE",
+        "TL"
+      ],
+      "pull_request_boundary": "One residual aggregate delivery PR, after its explicit preparatory PR where present; completion does not authorize dependent execution.",
+      "contracts_status": "C02 v1 remains available only at its established scope; the public supplement and any C06/runtime consumers require their actual producer acceptance."
     }
   ],
   "gates": [
@@ -7336,6 +7566,46 @@
       "effort_days": 0,
       "decision_record": "contracts/research/owner-decision.v1.json",
       "decision_sha256": "e91f9a83224edd806c934b3378436da87cf792ab4682d782da4947b4152feda0"
+    },
+    {
+      "id": "PUBLICPREP0",
+      "dependencies": [
+        "AR-002-B"
+      ],
+      "owner": "Project owner",
+      "criteria": "Only the versioned decision's plan reconciliation, PCA1 and disconnected PCA2 are authorized; native/external gates remain separate.",
+      "kind": "external",
+      "minimum_elapsed_days": null,
+      "status": "Satisfied",
+      "effort_days": 0,
+      "decision_record": "contracts/research/public-corpus-preparation.v1.json",
+      "decision_sha256": "8c3b7c95db2da979d8161a442321f103f2eed3b363fbd2fe3c5d9f602ba1f76f"
+    },
+    {
+      "id": "PUBLICDATA0",
+      "dependencies": [
+        "AR-002-C"
+      ],
+      "owner": "Rights owner/RS/PL",
+      "criteria": "Independently reviewed rights, provenance, evaluator access, processors, purposes, storage and retention for the exact public source. No execution authorization.",
+      "kind": "external",
+      "minimum_elapsed_days": null,
+      "status": "Not satisfied",
+      "effort_days": 0
+    },
+    {
+      "id": "CAPTUREFUNDS0",
+      "dependencies": [
+        "PAID0",
+        "PUBLICDATA0",
+        "PUBCAP-A"
+      ],
+      "owner": "Project owner/RS/PL",
+      "criteria": "Approve separately bounded development and sealed-baseline capture allocations from reconciled existing funds. Sealed allocation cannot dispatch before accepted AR-026-A and explicit sealed-capture authorization. No new ceiling or confirmatory-study authority.",
+      "kind": "external",
+      "minimum_elapsed_days": null,
+      "status": "Not satisfied",
+      "effort_days": 0
     }
   ],
   "contracts": [
@@ -7583,35 +7853,35 @@
   },
   "estimate_policy": "Engineering effort includes implementation or design, task tests, ordinary review/rework and documentation. Six logical role totals are demand estimates, not six funded human FTEs. Three contributor slots are active; no measured conversion from those slots to engineering days or a launch calendar is assumed. A hypothetical human role at 3.5 delivery days/week is shown only as a capacity lower bound. Ranges are planning bounds, not probabilities; RA-01 uses approved 2–3 and 2–4 day design ranges. The 25% integration reserve is alternative to summed upper ranges, not additive. External review/operations/funding waits and unestimated follow-up implementation remain excluded.",
   "validation": {
-    "task_count": 151,
-    "parent_count": 52,
-    "gate_count": 27,
-    "edge_count": 544,
+    "task_count": 155,
+    "parent_count": 53,
+    "gate_count": 30,
+    "edge_count": 569,
     "dag_acyclic": true,
     "contract_producers_available_before_consumers": true,
     "schedule_no_predecessor_violations_conditional_on_stated_approvals": true,
     "max_scheduled_delivery_days_per_role_per_day": 0.5,
     "milestone_effort_days": {
-      "M0": 8.5,
+      "M0": 11.5,
       "M1": 65.5,
-      "M2": 69.0,
+      "M2": 73.0,
       "M3": 81.0,
       "M4": 82.0,
-      "M5": 50.0,
+      "M5": 51.0,
       "M6": 78.0,
       "M7": 30.0
     },
     "role_effort_days": {
       "TL": 75.0,
       "FE": 23.0,
-      "RS": 66.0,
+      "RS": 71.0,
       "PL": 90.0,
-      "BE": 97.5,
+      "BE": 100.5,
       "QE": 112.5
     },
-    "base_effort_days": 464.0,
-    "upper_range_days": 784.6,
-    "effort_only_critical_path_days": 176.5,
+    "base_effort_days": 472.0,
+    "upper_range_days": 799.6,
+    "effort_only_critical_path_days": 173.5,
     "effort_only_critical_path": [
       "E0",
       "AR-005-A",
@@ -7655,9 +7925,8 @@
       "AR-036-A",
       "AR-036-B",
       "AR-036-C",
-      "AR-038-A",
-      "AR-038-B",
-      "AR-038-C",
+      "AR-039-A",
+      "AR-039-B",
       "AR-039-C",
       "G5",
       "AR-047-C",
@@ -7674,11 +7943,12 @@
       "G7"
     ],
     "critical_path_excludes_external_waits": true,
-    "revision_notes": "2026-10-21 separate AR-006-B planning reconciliation replaces 2 [2–3] with two sequential packages totaling 4 [4–6] TL days. Existing aggregate prerequisites, outer graph, statuses, contracts and frozen history remain unchanged. Dedicated cursor lifecycle, finite suppression and bounded SQL receipt/work evidence precede HTTP integration; no runtime assignment or activation follows. The separate 2026-10-21 AR-008-B amendment reforecasts the existing three-operation scope from 3 [3–5] to two sequential 2 [2–3] BE packages, total 4 [4–6]. Both remain Not started; outer edges, other tasks/statuses, gates/contracts and dated evidence are unchanged. Stored-failure producer support is an explicit pre-runtime checkpoint, not claimed availability. The separate 2026-10-21 worker-failure ownership reconciliation replaces AR-010-B 2 [2–3] with two sequential 2 [2–3] BE packages, total 4 [4–6], medium-low. Both inherit AR-010-A and AR-005-C; P2 waits for accepted merged P1. This assigns existing C04 producer/provenance/marker obligations without changing outer edges, statuses, historical evidence or activation gates. The ownership amendment reforecasts only AR-008-B/P1 from 2 [2–3] to 3 [3–5] and aggregate B from 4 [4–6] to 5 [5–8] BE days, medium-low; P2 remains 2 [2–3]. Factory-born SQLite capability/lease and explicit lifecycle/caller proof respond to the measured first-checkpoint ownership gap. Entry review by B/lead is pending before ownership implementation; no status, edge, package, gate or frozen contract changes. The subsequent post-close review makes the full 33-site/14-module context adaptation explicit: P1 is now 4 [4–7], aggregate B 6 [6–10], P2 unchanged 2 [2–3], medium-low. The earlier 3 [3–5]/5 [5–8] values are the superseded first ownership draft. Entry remains pending B/lead exact-source acceptance before ownership/factory code. The owner-approved 2026-10-21 ledger amendment replaces AR-010-A 3 [3–4.5] with two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. Both remain Not started with null acceptance; P2 waits for accepted merged P1 and the whole implementation waits for accepted AR-008-B protected-main delivery plus exact manifest/interface/SQL entry review. The finite nonrenewable execution-window interpretation is approved at proposal 882fa139; no repeated semantic approval or public/native-v1 change is required. Existing AR-023-A/C cards now name historical-opening/actual-transfer evidence ownership without a new task/table/fake call or reverse edge. Current totals are 151 tasks, 159 planned PRs, 544 edges, 464 base / 784.6 upper / 580 alternate allowance / 176.5 effort-path days, M1 65.5 and BE 97.5; parent AR-010 is 10 days across four PRs. Historical schedules, other estimates/statuses, frozen contracts and external gates are unchanged; no calendar or spending promise follows. The 2026-10-22 delivery-sequencing refinement preserves approved P1/P2 scope, status and effort while splitting P1 into F1 foundation, F2 complete reader and F3 provisioning/opening/replay/recovery. Current forecast is 161 PRs, AR-010-A four and parent AR-010 six; task/package identity, 544 outer edges and all full-package acceptance gates are unchanged. Earlier 159/four-PR values remain historical.",
+    "revision_notes": "2026-10-21 separate AR-006-B planning reconciliation replaces 2 [2–3] with two sequential packages totaling 4 [4–6] TL days. Existing aggregate prerequisites, outer graph, statuses, contracts and frozen history remain unchanged. Dedicated cursor lifecycle, finite suppression and bounded SQL receipt/work evidence precede HTTP integration; no runtime assignment or activation follows. The separate 2026-10-21 AR-008-B amendment reforecasts the existing three-operation scope from 3 [3–5] to two sequential 2 [2–3] BE packages, total 4 [4–6]. Both remain Not started; outer edges, other tasks/statuses, gates/contracts and dated evidence are unchanged. Stored-failure producer support is an explicit pre-runtime checkpoint, not claimed availability. The separate 2026-10-21 worker-failure ownership reconciliation replaces AR-010-B 2 [2–3] with two sequential 2 [2–3] BE packages, total 4 [4–6], medium-low. Both inherit AR-010-A and AR-005-C; P2 waits for accepted merged P1. This assigns existing C04 producer/provenance/marker obligations without changing outer edges, statuses, historical evidence or activation gates. The ownership amendment reforecasts only AR-008-B/P1 from 2 [2–3] to 3 [3–5] and aggregate B from 4 [4–6] to 5 [5–8] BE days, medium-low; P2 remains 2 [2–3]. Factory-born SQLite capability/lease and explicit lifecycle/caller proof respond to the measured first-checkpoint ownership gap. Entry review by B/lead is pending before ownership implementation; no status, edge, package, gate or frozen contract changes. The subsequent post-close review makes the full 33-site/14-module context adaptation explicit: P1 is now 4 [4–7], aggregate B 6 [6–10], P2 unchanged 2 [2–3], medium-low. The earlier 3 [3–5]/5 [5–8] values are the superseded first ownership draft. Entry remains pending B/lead exact-source acceptance before ownership/factory code. The owner-approved 2026-10-21 ledger amendment replaces AR-010-A 3 [3–4.5] with two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low. Both remain Not started with null acceptance; P2 waits for accepted merged P1 and the whole implementation waits for accepted AR-008-B protected-main delivery plus exact manifest/interface/SQL entry review. The finite nonrenewable execution-window interpretation is approved at proposal 882fa139; no repeated semantic approval or public/native-v1 change is required. Existing AR-023-A/C cards now name historical-opening/actual-transfer evidence ownership without a new task/table/fake call or reverse edge. Current totals are 151 tasks, 159 planned PRs, 544 edges, 464 base / 784.6 upper / 580 alternate allowance / 176.5 effort-path days, M1 65.5 and BE 97.5; parent AR-010 is 10 days across four PRs. Historical schedules, other estimates/statuses, frozen contracts and external gates are unchanged; no calendar or spending promise follows. The 2026-10-22 delivery-sequencing refinement preserves approved P1/P2 scope, status and effort while splitting P1 into F1 foundation, F2 complete reader and F3 provisioning/opening/replay/recovery. Current forecast is 161 PRs, AR-010-A four and parent AR-010 six; task/package identity, 544 outer edges and all full-package acceptance gates are unchanged. Earlier 159/four-PR values remain historical. The 2026-10-27 public-corpus preparation amendment adds four aggregates and two explicit nested offline preparation PRs, three gates and one parent. Counts include preparation dependency edges; aggregate path weights exclude their included preparation effort. No previous task status, effort or acceptance evidence changes.",
     "independent_review": "A/C independently accepted admission plan 1d284ba and observability plan 9a70fdc; A accepted the final admission-history clarification f08b1ca. A independently passed 54 backlog cases and all three planning/evaluation/M1 OpenAPI validators at 9a70fdc with unchanged owned source/environment. Historical planning estimates/decisions and evidence remain auditable; no runtime authority is added by these planning checks. PR #79 reviewed source db5f992582c0d925a7921d26ae231312eaa41107 and accepted merge e117aaae0ef1f4ff4c293747482364a0791bc5d0 have identical trees. PR run 39535364867 and protected-main run 39536476328 passed 2013/2019 core tests on Python 3.11/3.12, with 9/3 expected skips and one warning per job; actual PostgreSQL, three separate gVisor tests, package/security/CI gate and main delivery passed. A accepted identity/read/mutation/UI security; B accepted C transaction consumption; C accepted interface and compatibility/OpenAPI corrections; lead integrated and verified delivery. Lead independently verified candidate 12318112434 (470334 bytes), archive/API digest, exact four files, source/manifests/package hashes; private indexed record reviewed-delivery-20261021-pr79-e117aaa.json is retained outside checkouts. P2 and aggregate AR-007-C are Verified for preparatory existing-route scope only. Customer-ready admission, full CT-M1-007/008/009, G1 and external production/funding/data gates remain open. A independently accepted status checkpoint c94b9b0 with 54 backlog passes and three validators; the one-line live admission correction is c390726. A authored AR-006-B plan 9b97a09; B independently accepted its contract, dependency and arithmetic review, and the lead accepted the plan. Tracking #86/#87/#88 does not start runtime or establish implementation acceptance. Listing P2 and aggregate AR-006-B were subsequently accepted on 2026-10-21: B audited reviewed source 5ab8984 and PR/main runs 39556621316/39558270300; lead verified accepted merge cd021542 and candidate 12327092547. The earlier plan/tracking statements remain historical; current delivery evidence is in RUN_LISTING_EXECUTION_PLAN.md and the package record. Parent AR-006 and repair AR-006-C remain open.",
     "contract_count": 20,
     "verification": "Two-PR reconciliation passed execution/evaluation/M1 OpenAPI validators and 296 focused tests, including 41 backlog tests with package-order, inherited-input, effort, merge-evidence, aggregate-completion and PR-count refusal cases. Ruff lint/security/format, strict checker types and whitespace passed. Aggregate DAG/effort/status, gates, historical schedules/C21/owner/API/acceptance bytes are unchanged from b42f00b. These are historical planning-check results; current runtime evidence and remaining acceptance gates are recorded in each delivery package and planning_status. The 2026-10-21 admission reconciliation passed the unchanged execution/evaluation/M1 OpenAPI validators and 256 focused tests, including 47 backlog cases (six new third-stage sequencing/input/effort refusals). Final 47-case backlog rerun, Ruff/format and whitespace pass. A separate comparison confirmed identical task IDs/statuses/outer dependencies, gates/contracts, historical schedules, frozen contract/research records and runtime/checker bytes; +6 base/+10 upper/+2 PRs only. Exact-source admission review was subsequently accepted by A/C at 1d284ba. The separate AR-011-C amendment passed all three validators and 263 focused backlog/evaluation/M1 tests, including seven new package producer/merge-gate cases (54 backlog cases total). Configured test lint/format and whitespace passed. A separate comparison confirmed only AR-011-C changes, exactly one added AR-010-B prerequisite, no removed edges, unchanged statuses/gates/contracts/history and frozen runtime/checker/research bytes. Generic validation is unchanged; exact-source observability review was subsequently accepted by A/C at 9a70fdc and A at clarification f08b1ca. The 2026-10-21 P2 acceptance/admission assignment reconciliation passed 54 backlog cases (1.33 seconds), all three execution/evaluation/M1 OpenAPI validators, configured checker/test lint and format, and whitespace. A historical package fixture now also resets downstream admission packages when rewinding AR-007-C; checker behavior and assertions are unchanged. Independent comparison confirms unchanged task IDs, effort, dependencies, gates/contracts, history, AR-006-B scope/estimate and runtime source; only acceptance/assignment metadata changes. The 2026-10-21 AR-006-B planning amendment passed all three execution/evaluation/M1 OpenAPI validators and the existing 54 backlog cases in 1.56 seconds, using the primary owned interpreter with PYTHONPATH unset and bytecode/cache disabled. Existing checker/test Ruff lint and format plus whitespace passed; no checker or test-source changes were needed. Separate comparison confirms identical outer dependencies, statuses, gates/contracts, historical schedules/research records and every other task, with +2 base/+3 upper/+1 delivery PR and the identical 168.5-day path. Runtime and frozen contract bytes are unchanged; independent plan review remains pending.",
-    "delivery_pr_count": 161
+    "delivery_pr_count": 167,
+    "preparatory_pr_count": 2
   },
   "review_findings": [
     {
@@ -7787,7 +8057,7 @@
       "resolution": "Retain AR-010-B identity, C04 and outer prerequisites; two sequential 2 [2–3] BE packages total 4 [4–6], medium-low. P1 owns the complete chosen representation/provenance/parser/consumer and operator-only historical marker, including reviewed migration ownership/evidence if needed; P2 integrates permits and both distinct failure fences. AR-008-B retains unsupported-evidence refusal and AR-011-C/AR-012-B wait for the whole aggregate"
     }
   ],
-  "planning_status": "AR-010-A/P1 #108: Verified; F3: Merged; checkpoint accepted at protected merge b214f21b from reviewed source 1c6e30e0. Aggregate AR-010-A/#107 and parent AR-010/#10 remain In progress; product P2/#109 is In progress after independently accepted entry v7 and implementation assignment; its accepted merge and delivery review evidence remain null. The approved scope, task graph, effort estimates and funding/data/production gates are unchanged. Totals remain 151 tasks, 161 planned PRs, 544 outer edges and 15 delivery packages; aggregate tasks remain 30 Verified / 1 In progress / 120 Not started. Current package status totals: 10 Verified / 1 In progress / 4 Not started. Accepted F1/F2 checkpoint evidence remains unchanged in the implementation records. The final P1 delivery record is in docs/delivery/LEDGER_EXECUTION_PLAN.md. Historical dated failures remain historical. Default adapters, customer admission, worker integration and full M1/G1 acceptance remain unavailable or open.",
+  "planning_status": "AR-010-A/P1 #108: Verified; F3: Merged; checkpoint accepted at protected merge b214f21b from reviewed source 1c6e30e0. Aggregate AR-010-A/#107 and parent AR-010/#10 remain In progress; product P2/#109 is In progress after independently accepted entry v7 and implementation assignment; its accepted merge and delivery review evidence remain null. The approved scope, task graph, effort estimates and funding/data/production gates are unchanged. Totals remain 155 tasks, 167 planned PRs, 569 dependency edges and 15 delivery packages; aggregate tasks remain 30 Verified / 1 In progress / 124 Not started. Current package status totals: 10 Verified / 1 In progress / 4 Not started. Accepted F1/F2 checkpoint evidence remains unchanged in the implementation records. The final P1 delivery record is in docs/delivery/LEDGER_EXECUTION_PLAN.md. Historical dated failures remain historical. Default adapters, customer admission, worker integration and full M1/G1 acceptance remain unavailable or open. The separately approved public-corpus preparation adds four Not started aggregates and two Not started preparation nodes; PCA1/PCA2 acceptance remains null. The 3–5 day preparation allocation is included in the 8–15 day corpus increment. Native acquisition, capture, held-out, funding and study gates remain closed.",
   "github_tracking": {
     "parent_issues": [
       1,
@@ -8182,5 +8452,9 @@
     "contingency": "Upper ranges may need two extra half-day allocations per task in days6–7. Days8–10 retain integration/reforecast capacity. Do not start any dependent on a planned date alone.",
     "unscheduled_approved_queue": [],
     "unscheduled_queue_policy": "Assign only dependency-ready approved work after accepted producer delivery and task-specific entry review. AR-010-A/P1 #108, aggregate #107 and parent #10 remain In progress with null P1 acceptance. P1 entry policy 51af77dc, the HTTP prerequisite and F1 are accepted. F2 is Merged; checkpoint accepted at e8cba52 after reviewed source ac3b0a31, matching PR/main checks and verified candidate 12431486551. The failed 39773689705/1 attempt and interrupted verifier invocation remain retained. The lead explicitly started F3: independent QE owns the shared-check kernel then compatibility adapter in secondary; platform/security owns the guarded writer/service and finalization/recovery in primary after progress release and reviewed kernel composition. Planning reviews integration and the lead owns policy/delivery. F3 remains In progress with null acceptance; component proofs do not establish full adapter, capacity or recovery acceptance. P2 #109 is Not started/null acceptance behind accepted full P1 and its own reservation/fence entry review. Historical schedules and opening conditions remain unchanged; no new calendar allocation or staffed-time conversion is made. Default adapters, customer admission, worker integration, full M1/G1 acceptance and external funding/data/production gates remain unavailable or open. Earlier dated failures and component evidence remain historical, not current status."
+  },
+  "public_corpus_amendment": {
+    "record": "contracts/research/public-corpus-plan.v1.json",
+    "sha256": "124f6c79a3c224537614442b9d22aaa78adbb1f7f2502ea29aa7cbcea823a3be"
   }
 }

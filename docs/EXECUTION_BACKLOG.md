@@ -47,15 +47,15 @@ Reviewed PLAN, README and the current-release architecture, deployment, security
 
 Engineering effort includes implementation or design, task tests, ordinary review/rework and documentation. Six logical role totals are demand estimates, not six funded human FTEs. Three contributor slots are active; no measured conversion from those slots to engineering days or a launch calendar is assumed. A hypothetical human role at 3.5 delivery days/week is shown only as a capacity lower bound. Ranges are planning bounds, not probabilities; RA-01 uses approved 2–3 and 2–4 day design ranges. The 25% integration reserve is alternative to summed upper ranges, not additive. External review/operations/funding waits and unestimated follow-up implementation remain excluded.
 
-Base effort: **464 engineering days**. A 25% integration/rework allowance gives **580 days**; summing task upper planning bounds gives **784.6 days**. These are alternative views of uncertainty, not budgets to add together and not calendar commitments. Earlier 430-day/538-day totals are superseded. Research execution time and model charges, external assessment lead time/fees, unknown security fixes, customer-required gaps and ongoing support are not disguised inside a fixed ten-day task. An unknown required fix becomes a new ID/PR with scope and tests before its gate can close.
+Base effort: **472 engineering days**. A 25% integration/rework allowance gives **590 days**; summing task upper planning bounds gives **799.6 days**. These are alternative views of uncertainty, not budgets to add together and not calendar commitments. Earlier 430-day/538-day totals are superseded. Research execution time and model charges, external assessment lead time/fees, unknown security fixes, customer-required gaps and ongoing support are not disguised inside a fixed ten-day task. An unknown required fix becomes a new ID/PR with scope and tests before its gate can close.
 
 | Primary role | Base delivery days | Single-role capacity lower bound at 3.5 days/week |
 | --- | ---: | ---: |
 | TL | 75 | 21.4 weeks |
 | FE | 23 | 6.6 weeks |
-| RS | 66 | 18.9 weeks |
+| RS | 71 | 20.3 weeks |
 | PL | 90 | 25.7 weeks |
-| BE | 97.5 | 27.9 weeks |
+| BE | 100.5 | 28.7 weeks |
 | QE | 112.5 | 32.1 weeks |
 
 Roles: TL technical lead/backend, BE execution/backend, PL platform/SRE, FE frontend, RS research, QE quality. PM and SEC are shared reviewers/decision owners; actual names and independent statistical/security reviewers are not yet confirmed. Task effort includes ordinary verification and review work; the 30% availability reserve covers coordination, support and interruptions. Do not double-book primary tasks or assume the six roles are six available employees. QE ownership includes independent integration/rehearsal evidence, while every implementing engineer still writes their task tests.
@@ -64,23 +64,12 @@ QE and PL are material resource constraints. At the Day 10 review, redistribute 
 
 ## Critical path, parallel tracks and contingencies
 
-The task DAG has **544 edges**, **27 explicit gates**, no cycles and a **176.5-engineering-day longest effort path**. Under a hypothetical human role at 3.5 delivery days/week this is about 50.4 workweeks before contention and external waits; the three contributor slots have no validated conversion to that staffing scenario. It is a lower bound, not a launch forecast. Zero effort on an external gate means engineering effort is not estimated; it never means the gate is already satisfied or has zero lead time.
+The task DAG includes two nested preparation nodes and has **569 edges**, **30 explicit gates**, no cycles and a **173.5-engineering-day longest effort path**. Under a hypothetical human role at 3.5 delivery days/week this is about 49.6 workweeks before contention and external waits; the three contributor slots have no validated conversion to that staffing scenario. It is a lower bound, not a launch forecast. Zero effort on an external gate means engineering effort is not estimated; it never means the gate is already satisfied or has zero lead time.
 
 The computed effort path, including integration joins, is:
 
 ```text
-E0 → AR-005-A → AR-012-A → AR-004-B → AR-004-C →
-G0 → AR-005-B → AR-005-C → AR-011-B → AR-009-A →
-AR-009-B → AR-007-C → AR-008-A → AR-008-B → AR-010-A → AR-010-B →
-AR-011-C → AR-012-B → AR-014-A → AR-014-B → AR-017-A →
-AR-023-A → AR-023-B → AR-023-C → AR-021-A → AR-021-B →
-AR-021-C → AR-022-B → AR-022-C → AR-026-B → AR-026-C →
-AR-029-B → AR-030-B → AR-031-B → AR-031-C → AR-034-D →
-G4 → AR-035-B → AR-035-C → AR-036-A → AR-036-B →
-AR-036-C → AR-038-A → AR-038-B → AR-038-C → AR-039-C →
-G5 → AR-047-C → G6 → AR-048-A → AR-048-B →
-AR-048-C → AR-049-A → AR-049-B → AR-049-C → AR-050-A →
-AR-050-B → AR-050-C → G7
+E0 → AR-005-A → AR-012-A → AR-004-B → AR-004-C → G0 → AR-005-B → AR-005-C → AR-011-B → AR-009-A → AR-009-B → AR-007-C → AR-008-A → AR-008-B → AR-010-A → AR-010-B → AR-011-C → AR-012-B → AR-014-A → AR-014-B → AR-017-A → AR-023-A → AR-023-B → AR-023-C → AR-021-A → AR-021-B → AR-021-C → AR-022-B → AR-022-C → AR-026-B → AR-026-C → AR-029-B → AR-030-B → AR-031-B → AR-031-C → AR-034-D → G4 → AR-035-B → AR-035-C → AR-036-A → AR-036-B → AR-036-C → AR-039-A → AR-039-B → AR-039-C → G5 → AR-047-C → G6 → AR-048-A → AR-048-B → AR-048-C → AR-049-A → AR-049-B → AR-049-C → AR-050-A → AR-050-B → AR-050-C → G7
 ```
 
 Calendar-critical competitors include ENV0/IDP0 provisioning, PARTNER0/DATA0 access, affordable sample design, independent assessor availability/remediation, P28 (28 days after both partner onboarding measurements begin), funded support and D30 (30 days after accepted rollout). The longest calendar path can change after any of these resolves.
@@ -102,12 +91,12 @@ After the first two weeks, use dependency-ready milestone scheduling. The former
 
 | Milestone | Base effort | Scheduling after Day 10 | Explicit exit / integration checkpoint |
 | --- | ---: | --- | --- |
-| M0 | 8.5 days | Internal development freeze verified; external production conditions remain separate | [G0](#g0): M0 accepted; schemas and initial migration scope reviewed. |
+| M0 | 11.5 days | Internal development freeze verified; external production conditions remain separate | [G0](#g0): M0 accepted; schemas and initial migration scope reviewed. |
 | M1 | 65.5 days | Preparatory projection, existing-route scope, admission P1/P2/P3 and aggregate A Verified; listing P1/P2 and aggregate Verified; Operation adapter P1 Verified; HTTP route P2 Verified; repair AR-006-C remains gated | [G1](#g1): Historical identities, 24 behavioral cases, scope/lease/budget compatibility, required CI and installable main candidate evidence pass. |
-| M2 | 69 days | Start each task after its foundation inputs; joins G1 plus early staging | [G2](#g2): Real gVisor isolation/restore/cleanup, cloud store/key rotation, fail-closed lease and accounted live smoke verified. |
+| M2 | 73 days | Start each task after its foundation inputs; joins G1 plus early staging | [G2](#g2): Real gVisor isolation/restore/cleanup, cloud store/key rotation, fail-closed lease and accounted live smoke verified. |
 | M3 | 81 days | Includes 4 base days of RA-01 design before C08/C09 producers; runtime follows its original prerequisites and G2 | [G3](#g3): Resumable distributed studies preserve frozen protocol, missingness and all call accounting; reports independently recompute. |
 | M4 | 82 days | Early IaC after G0; UI/SDK after producer APIs; complete after G3 | [G4](#g4): Independent full browser/SDK workflow and fresh install pass with real IdP/GCS/KMS/gVisor and selected adapter. |
-| M5 | 50 days | Only after G4 and funded customer/data/recovery gates; >=28-day measurement | [G5](#g5): Two partners, four calendar weeks, supported denominator/product metrics and natural-failure claim review accepted; no pilot blockers. |
+| M5 | 51 days | Only after G4 and funded customer/data/recovery gates; >=28-day measurement | [G5](#g5): Two partners, four calendar weeks, supported denominator/product metrics and natural-failure claim review accepted; no pilot blockers. |
 | M6 | 78 days | Hardening overlaps stable M3–M5; readiness closure only after G5 | [G6](#g6): Forecast load/24h soak, zone/regional recovery, independent security retest, procurement, support and upgrade evidence pass with no prohibited blocker. |
 | M7 | 30 days | Only after G6 and launch approval; >=30-day operating review | [G7](#g7): Controlled launch accepted and 30-day operating review complete; next scope separately approved. |
 
@@ -372,7 +361,7 @@ M0 / P0 · 2 PRs · 2 engineering days · Verified · [Tracking issue #1](https:
 
 ### AR-002 — Protect corpus rights and establish a credible natural-failure evaluation protocol
 
-M0 / P0 · 2 PRs · 2 engineering days · Verified · [Tracking issue #2](https://github.com/spei04/agent-rewind/issues/2)
+M0 / P0 · 4 PRs · 5 engineering days · In progress · [Tracking issue #2](https://github.com/spei04/agent-rewind/issues/2)
 
 <a id="ar-002-a"></a>
 
@@ -407,6 +396,44 @@ M0 / P0 · 2 PRs · 2 engineering days · Verified · [Tracking issue #2](https:
 - **Responsible role:** RS; required reviewers: QE, independent statistical reviewer. Assigned contributor: Engineer A — research protocol.
 - **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
 - **Progress:** Verified; current assignment, checks and review in [ASSIGNMENTS.md](ASSIGNMENTS.md).
+
+<a id="ar-002-c"></a>
+
+#### AR-002-C — Versioned public-source admission and C02 operating supplement
+
+- **Objective:** Versioned public-source admission and C02 operating supplement.
+- **Implementation scope / PR boundary:** Deliver a versioned public-derived declaration and source-neutral C02 operating supplement. Include PCA1 and document/graph reconciliation; retain v1 unchanged. Define rights, custody, source/evaluator identities, accounting, retention and operator duties. No public row is relabeled customer-permitted.
+- **Out of scope:** No acquisition, real rows/images, capture, held-out access, paid calls, study execution, new resources or cap increase.
+- **Prerequisites:** [AR-002-B](#ar-002-b), [PUBLICPREP0](#publicprep0), [PCA1](#pca1).
+- **Required contracts:** C02; producer ancestry and exact version acceptance remain required.
+- **Acceptance criteria:** PCA1 accepted, candidate-versus-recorded distinction explicit, public operating duties and source routing independently reviewed; unknown rights remain quarantined. A declaration is not permission.
+- **Required automated tests:** Schema/runtime parity, v1 compatibility and malformed/unknown/duplicate input refusal in PCA1; review supplement duties, route ancestry, effort overlap and preserved historical bytes.
+- **Security and reliability:** Default deny; preserve complete denominators and private custody; no approval inferred from syntactic validity or an available resource.
+- **Effort / confidence:** 3 engineering days; planning range 3–6; low confidence.
+- **Responsible role:** RS; required reviewers: QE, TL.
+- **Definition of done:** Accepted source, independent review, required checks and delivery evidence recorded for this exact boundary. Every separate execution gate remains required.
+- **Progress:** Not started.
+
+<a id="pca1"></a>
+
+#### PCA1 — Public-source declaration and schema preserving corpus v1
+
+- **Objective:** Define strict public declaration types that preserve corpus v1 and distinguish candidates from recorded entries.
+- **Kind:** Offline preparation only; distinct machine dependency node, included in aggregate effort.
+- **Aggregate:** AR-002-C.
+- **Scope:** Versioned public-source C02 contract/schema; separate pre-recording candidate type without run/checkpoint IDs; private rights/provenance/policy references and fail-closed caller-owned permission checks.
+- **Prerequisites:** [AR-002-B](#ar-002-b), [PUBLICPREP0](#publicprep0).
+- **Required contracts:** C02.
+- **Out of scope:** No acquisition, real rows/images, capture, held-out access, paid calls, study execution, new resources or cap increase.
+- **Acceptance criteria:** Independent source review, required offline checks and accepted delivery; no aggregate or external gate completion implied.
+- **Required automated tests:** Schema/runtime parity; unchanged v1; duplicate/unknown fields; malformed identities/paths; wrong processor/purpose/storage; expired/revoked rights; safe errors.
+- **Security and reliability:** A declaration cannot grant rights, fabricate native identity or broaden trusted policy; reject duplicate/unknown input and expose only safe errors.
+- **Confidence:** medium.
+- **Effort allocation:** 1 engineering days; planning range 1–2; included in AR-002-C.
+- **Responsible role:** RS.
+- **Definition of done:** All package acceptance and meaningful offline tests pass at recorded source; independent review and accepted delivery are recorded; inputs/schema identities and scope limits are documented. No aggregate or external gate is promoted.
+- **Progress:** Not started.
+- **Delivery evidence:** Pending; no accepted source/merge/review.
 
 <a id="ar-003"></a>
 
@@ -2058,20 +2085,18 @@ M3 / P0 · 3 PRs · 10 engineering days · Not started
 
 #### AR-026-A — Frozen evaluation and power decision
 
-- **Tracking issue:** [#67](https://github.com/spei04/agent-rewind/issues/67); blocked until the prerequisites below are accepted.
-
 - **Objective:** Establish experiment correctness before relying on research conclusions. This task delivers frozen evaluation and power decision.
 - **Implementation scope / PR boundary:** Preregister useful-location metric, minimum effect, task sample, multiple comparisons and stop/invalidation rules. Approved RB-11B addition: Run the reviewed development harness and independently review its evidence; freeze sample, threshold and affordability decisions or explicitly narrow/block the claim. Consume reviewed AR-024-D harness evidence in this separate feasibility PR; do not hide harness implementation in the decision or infer approval of a paid study.
 - **Out of scope:** No promise that 100 failures fit existing budget. No held-out tuning, paid trials or guarantee from nominal sample counts.
-- **Prerequisites:** [AR-024-C](#ar-024-c), [AR-025-B](#ar-025-b), [AR-002-B](#ar-002-b), [AR-024-D](#ar-024-d). E0 applies transitively; required producers must be accepted.
-- **Required contracts:** C02, C09, C21; future interfaces remain unavailable until their own producer review.
+- **Prerequisites:** [AR-024-C](#ar-024-c), [AR-025-B](#ar-025-b), [AR-002-B](#ar-002-b), [AR-024-D](#ar-024-d), [PUBCAP-B](#pubcap-b).
+- **Required contracts:** C02, C09, C21; producer ancestry and exact version acceptance remain required.
 - **Acceptance criteria:** Protocol frozen before held-out access; affordable sample supports claim or scope explicitly narrows. Independent reviewer accepts tolerances and affordable sample or explicitly narrows/blocks the claim.
 - **Required automated tests:** Leakage guard, power arithmetic and protocol immutability checks; Recompute evidence hashes, null/coverage summaries, sample/cost arithmetic and immutable protocol identity.
 - **Security and reliability:** No open-ended model spend; paid evaluation gated separately. No primary threshold changes after held-out unsealing; any revision needs new data/protocol.
 - **Effort / confidence:** 3 engineering days; planning range 3–6; low confidence.
-- **Responsible role:** RS; required reviewers: QE, independent statistical reviewer. Named assignee at dependency-ready handoff.
+- **Responsible role:** RS; required reviewers: QE, independent statistical reviewer.
 - **Definition of done:** Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.
-- **Progress:** Not started; original prerequisites and task-specific review gates apply.
+- **Progress:** Not started.
 
 <a id="ar-026-b"></a>
 
@@ -2782,15 +2807,15 @@ M5 / P0 · 3 PRs · 10 engineering days · Not started
 - **Objective:** Measure natural-failure intervention usefulness under a frozen affordable protocol. This task delivers permitted natural-failure corpus freeze.
 - **Implementation scope / PR boundary:** Curate allowed naturally failed runs, deduplicate task families, freeze splits and evaluator identities.
 - **Out of scope:** No real paid trials yet.
-- **Prerequisites:** [AR-026-A](#ar-026-a), [AR-036-C](#ar-036-c), [AR-037-C](#ar-037-c), [DATA0](#data0). E0 applies transitively; required producer contracts must be reviewed.
-- **Required contracts:** C02, C09, C17; definitions and producer availability in the contract register.
+- **Prerequisites:** [AR-026-A](#ar-026-a), [PUBLICDATA0](#publicdata0), [PUBCAP-C](#pubcap-c).
+- **Required contracts:** C02, C09; producer ancestry and exact version acceptance remain required.
 - **Acceptance criteria:** Provenance/permissions complete; no injected-stop substitution; insufficient corpus blocks broad claim.
 - **Required automated tests:** Manifest validation, leakage/duplicate task checks and evaluator stability tests.
 - **Security and reliability:** Minimize source retention; no held-out outcomes in selection.
 - **Effort / confidence:** 3 engineering days; planning range 3–6; low confidence.
-- **Responsible role:** RS; required reviewers: QE, independent statistical reviewer. Named assignee pending staffing.
-- **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Responsible role:** RS; required reviewers: QE, independent statistical reviewer.
+- **Definition of done:** Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.
+- **Progress:** Not started.
 
 <a id="ar-038-b"></a>
 
@@ -2799,15 +2824,15 @@ M5 / P0 · 3 PRs · 10 engineering days · Not started
 - **Objective:** Measure natural-failure intervention usefulness under a frozen affordable protocol. This task delivers preregistered useful-location evaluation.
 - **Implementation scope / PR boundary:** Execute bounded cost-matched location study with fixed candidates, controls, attempts and stopping rules.
 - **Out of scope:** No guaranteed positive result or unsupported cross-task generalization.
-- **Prerequisites:** [AR-038-A](#ar-038-a), [STUDYFUNDS0](#studyfunds0), [AR-026-C](#ar-026-c). E0 applies transitively; required producer contracts must be reviewed.
-- **Required contracts:** C09, C17; definitions and producer availability in the contract register.
+- **Prerequisites:** [AR-038-A](#ar-038-a), [STUDYFUNDS0](#studyfunds0), [AR-026-C](#ar-026-c), [G3](#g3).
+- **Required contracts:** C02, C09; producer ancestry and exact version acceptance remain required.
 - **Acceptance criteria:** All assigned trials and failures reported; intervals and costs recompute; nulls retained.
 - **Required automated tests:** Automated protocol/ledger/verifier checks plus frozen statistical pipeline.
 - **Security and reliability:** Funding gate before dispatch; no optional stopping or holdout leakage.
 - **Effort / confidence:** 4 engineering days; planning range 4–8; low confidence.
-- **Responsible role:** RS; required reviewers: QE, independent statistical reviewer. Named assignee pending staffing.
-- **Definition of done:** All task-specific acceptance and tests above, plus the common DoD; actual sign-off/evidence required. No other task is implicitly included.
-- **Progress:** Not started; approval/prerequisite gates apply.
+- **Responsible role:** RS; required reviewers: QE, independent statistical reviewer.
+- **Definition of done:** Task acceptance and automated checks pass at a recorded commit; independent reviewer disposition, safe diagnostic evidence, documentation and compatibility/recovery impact are recorded; roadmap/backlog status and dependency evidence updated. Decisions require actual authorized sign-off.
+- **Progress:** Not started.
 
 <a id="ar-038-c"></a>
 
@@ -3552,6 +3577,8 @@ No question above asks to reapprove accepted architecture or issue #51 choices. 
 <details>
 <summary>Superseded status snapshots</summary>
 
+**Public-corpus planning integration — 2026-10-28:** The preparation-only decision and reviewed reconciliation are being integrated with current delivery records. Planning/checker review precedes PCA1; PCA2 also requires accepted PCA1 source and schema. All new aggregates and PCA1/PCA2 remain Not started. The 3–5 day preparation allocation is included in the 8–15 day corpus increment. P1 remains Verified and product P2 remains In progress with null acceptance. Acquisition, capture, held-out access, paid calls, study and new resources remain unauthorized. The $200 cap and unreconciled historical reservations are unchanged. [Scope and dependency record](delivery/PUBLIC_CORPUS_PREPARATION_PLAN.md).
+
 **Current P1 status:** AR-010-A/P1 #108: Verified; F3: Merged; checkpoint accepted at protected merge b214f21b from reviewed source 1c6e30e0. Aggregate AR-010-A/#107 and parent AR-010/#10 remain In progress; product P2/#109 is In progress after independently accepted entry v7 and implementation assignment; its accepted merge and delivery review evidence remain null. The approved scope, task graph, effort estimates and funding/data/production gates are unchanged. [Delivery record](delivery/LEDGER_EXECUTION_PLAN.md#p1-delivery-record--2026-10-28).
 
 **Replay and restore checkpoint — 2026-10-27:** The PostgreSQL replay and missing-opening restore components are accepted. The SQLite replay counterparts are accepted at 2370665a after 142 offline controls and the two original-service cases passed on each interpreter. Final matching-source delivery remains open. F3/P1 acceptance stays null and product P2/#109 remains Not started. Counts, F3/P1 estimates and funding/data gates are unchanged. The public-corpus amendment now has preparation-only approval; acquisition and study gates remain closed. [Detailed evidence and remaining gates](delivery/LEDGER_EXECUTION_PLAN.md#r1-source-and-controller-checkpoint--2026-10-27).
@@ -3992,5 +4019,107 @@ PR #115 was normally merged at d46e9122; PR #116 incorporated that exact main th
 Integrated source ec19eabe adds first finite job-account creation and refusal of a second disjoint account. SQLite ran once: its testcase passed, while the original controller rejected an overbroad financial-scope projection and returned 1. A reviewed private correction separately validated the retained original record; no database retry or rewrite of the failed controller result occurred. The PostgreSQL case passed on its first actual attempt (17.11s); final component acceptance: accepted by independent review 65cb7d72 and lead receipt 7abd0e8b for this bounded component only. Final source controls pass 33 per interpreter; corrected private controllers pass 66 per dialect/interpreter. [Detailed evidence](delivery/LEDGER_EXECUTION_PLAN.md#dependency-integration-and-account-identity-checkpoint--2026-10-26) keeps original and corrected accounting distinct.
 
 Only these first/second-account obligations receive component credit. Overlap/renewal and other matrix obligations remain open; the reviewed two-case F1 PostgreSQL early-interruption scope has not started. Full F3/P1 matching-source delivery remains unaccepted and product P2 remains Not started. Task cards, counts, estimates, budget and external gates are unchanged.
+
+## Public-corpus preparation amendment — 2026-10-27
+
+<a id="pubcap"></a>
+
+### PUBCAP — Qualify a supported public-corpus acquisition route
+
+M2/M5 / P0 · 4 PRs · 5 engineering days · Not started. No native implementation or capture is assigned by this preparation decision.
+
+<a id="pubcap-a"></a>
+
+#### PUBCAP-A — Supported public-corpus adapter and native acquisition preflight
+
+- **Objective:** Supported public-corpus adapter and native acquisition preflight.
+- **Implementation scope / PR boundary:** Include PCA2 pure normalization, then separately integrate accepted source/evaluator manifests with one supported native adapter, private custody and acquisition preflight. Require qualified source/image/transitive contents and actual consumer separation.
+- **Out of scope:** No execution under the preparation decision; native integration waits for PUBLICDATA0/G2. No second adapter, enlarged limits, task omission or study/capture authority.
+- **Prerequisites:** [PUBLICDATA0](#publicdata0), [G2](#g2), [PCA2](#pca2).
+- **Required contracts:** C02, C06; producer ancestry and exact version acceptance remain required.
+- **Acceptance criteria:** PCA2 accepted; qualified native consumer, restore, grader isolation, provenance/resource and interrupted/uncertain-accounting evidence accepted. Pure adapter tests cannot complete this aggregate.
+- **Required automated tests:** Native consumer separation, faithful restoration, resource ceilings, grade isolation and provenance/accounting interruption cases after actual contracts exist.
+- **Security and reliability:** Default deny; preserve complete denominators and private custody; no approval inferred from syntactic validity or an available resource.
+- **Effort / confidence:** 3 engineering days; planning range 3–5; low confidence.
+- **Responsible role:** BE; required reviewers: QE, TL.
+- **Definition of done:** Accepted source, independent review, required checks and delivery evidence recorded for this exact boundary. Every separate execution gate remains required.
+- **Progress:** Not started.
+
+<a id="pca2"></a>
+
+#### PCA2 — Disconnected SWE-rebench V2 typed normalizer
+
+- **Objective:** Translate supplied synthetic source rows into separate answer-blind inference and private evaluator views, using the accepted PCA1 public interface.
+- **Kind:** Offline preparation only; distinct machine dependency node, included in aggregate effort.
+- **Aggregate:** PUBCAP-A.
+- **Scope:** Pure offline translation of supplied synthetic pinned Python-row fixtures into distinct inference and evaluator manifests. Independently constructed qualification receipts bind exact policy/source/schema/normalizer/context/image/evaluator identities. Honest next-gate/quarantine/unsupported decisions; no fetching, import, execution or Engine.run connection.
+- **Prerequisites:** [PCA1](#pca1), [PUBLICPREP0](#publicprep0).
+- **Required contracts:** C02.
+- **Out of scope:** No acquisition, real rows/images, capture, held-out access, paid calls, study execution, new resources or cap increase.
+- **Acceptance criteria:** Independent source review, required offline checks and accepted delivery; no aggregate or external gate completion implied.
+- **Required automated tests:** Independent valid/invalid qualification fixtures; original-fail/reference-pass/invalid/tamper controls; separately qualified hidden variants noninterference; stale receipt refusal; cache identity; canary leakage; unknown/duplicate/null/type/timestamp ambiguity; unsupported/oversize state; all denominators.
+- **Security and reliability:** Remain disconnected from acquisition and runtime; consume accepted PCA1 types/schema and independent qualification; refuse stale, leaking, unsupported or untrusted input while retaining denominators.
+- **Confidence:** medium.
+- **Effort allocation:** 2 engineering days; planning range 2–3; included in PUBCAP-A.
+- **Responsible role:** BE.
+- **Definition of done:** All package acceptance and meaningful offline tests pass at recorded source; independent review and accepted delivery are recorded; inputs/schema identities and scope limits are documented. No aggregate or external gate is promoted.
+- **Progress:** Not started.
+- **Delivery evidence:** Pending; no accepted source/merge/review.
+
+<a id="pubcap-b"></a>
+
+#### PUBCAP-B — Authorized development capture and feasibility evidence
+
+- **Objective:** Authorized development capture and feasibility evidence.
+- **Implementation scope / PR boundary:** Under a separately authorized bounded development allocation, retain every ordinary baseline and evaluator-qualification outcome and measure exclusion, failure yield and full cost for AR-026-A.
+- **Out of scope:** Not authorized by PUBLICPREP0; no held-out or sealed capture, favorable-seed search, unbounded acquisition or powered-study claim.
+- **Prerequisites:** [PUBCAP-A](#pubcap-a), [G2](#g2), [PUBLICDATA0](#publicdata0), [CAPTUREFUNDS0](#capturefunds0).
+- **Required contracts:** C02, C06; producer ancestry and exact version acceptance remain required.
+- **Acceptance criteria:** Approved development limits and predeclared allocations enforced; all success/failure/capture/evaluator/infrastructure/unknown outcomes retained. Independent feasibility evidence has no held-out tuning.
+- **Required automated tests:** Control receipt coverage, complete attempt denominators, uncertainty accounting and bounded-cost stop checks.
+- **Security and reliability:** Default deny; preserve complete denominators and private custody; no approval inferred from syntactic validity or an available resource.
+- **Effort / confidence:** 1 engineering days; planning range 1–2; low confidence.
+- **Responsible role:** RS; required reviewers: QE, TL.
+- **Definition of done:** Accepted source, independent review, required checks and delivery evidence recorded for this exact boundary. Every separate execution gate remains required.
+- **Progress:** Not started.
+
+<a id="pubcap-c"></a>
+
+#### PUBCAP-C — Authorized sealed baseline capture
+
+- **Objective:** Authorized sealed baseline capture.
+- **Implementation scope / PR boundary:** Only after accepted AR-026-A, separate sealed-phase allocation and explicit sealed-capture authorization, collect ordinary prospective baselines under the frozen protocol and sealed custody.
+- **Out of scope:** Not authorized by PUBLICPREP0; no outcome-driven tuning, invented native run/checkpoint IDs, study execution or automatic phase promotion.
+- **Prerequisites:** [PUBCAP-A](#pubcap-a), [AR-026-A](#ar-026-a), [G2](#g2), [PUBLICDATA0](#publicdata0), [CAPTUREFUNDS0](#capturefunds0).
+- **Required contracts:** C02, C06, C09; producer ancestry and exact version acceptance remain required.
+- **Acceptance criteria:** All attempted outcomes retained; exact protocol/permission/source/evaluator/native identities and phase authorization verified; no adaptive held-out screening.
+- **Required automated tests:** Phase-separation, frozen protocol, sealed custody, complete denominators and uncertain dispatch accounting.
+- **Security and reliability:** Default deny; preserve complete denominators and private custody; no approval inferred from syntactic validity or an available resource.
+- **Effort / confidence:** 1 engineering days; planning range 1–2; low confidence.
+- **Responsible role:** RS; required reviewers: QE, TL.
+- **Definition of done:** Accepted source, independent review, required checks and delivery evidence recorded for this exact boundary. Every separate execution gate remains required.
+- **Progress:** Not started.
+
+<a id="publicprep0"></a>
+
+**PUBLICPREP0 — external gate; owner: Project owner.** Prerequisites: [AR-002-B](#ar-002-b). Only the versioned decision's plan reconciliation, PCA1 and disconnected PCA2 are authorized; native/external gates remain separate. Status: Satisfied.
+
+<a id="publicdata0"></a>
+
+**PUBLICDATA0 — external gate; owner: Rights owner/RS/PL.** Prerequisites: [AR-002-C](#ar-002-c). Independently reviewed rights, provenance, evaluator access, processors, purposes, storage and retention for the exact public source. No execution authorization. Status: Not satisfied.
+
+<a id="capturefunds0"></a>
+
+**CAPTUREFUNDS0 — external gate; owner: Project owner/RS/PL.** Prerequisites: [PAID0](#paid0), [PUBLICDATA0](#publicdata0), [PUBCAP-A](#pubcap-a). Approve separately bounded development and sealed-baseline capture allocations from reconciled existing funds. Sealed allocation cannot dispatch before accepted AR-026-A and explicit sealed-capture authorization. No new ceiling or confirmatory-study authority. Status: Not satisfied.
+
+Preparation nodes are an explicit, narrow exception to ordinary inherited delivery packages. PCA1 requires PUBLICPREP0 and AR-002-B. PCA2 requires PUBLICPREP0 and accepted PCA1. They cannot be used as runtime packages or release gates. Native PUBCAP-A requires PUBLICDATA0, G2 and accepted PCA2; its aggregate status remains Not started during PCA2. Existing delivery_packages and implementation_prs retain all prior inheritance and acceptance rules.
+
+AR-002-C 3 [3–6] includes PCA1 1 [1–2] plus 2 [2–4] residual effort. PUBCAP-A 3 [3–5] includes PCA2 2 [2–3] plus 1 [1–2] native residual effort. PUBCAP-B and PUBCAP-C each add 1 [1–2]. Total delta is 8 [8–15]; preparation 3 [3–5] is included. Role demand is RS +5 and BE +3. Four aggregate tasks and two preparation nodes add six delivery PRs. Native runtime/evaluator/statistics work already owned by AR-014/018/026/038 is retained, with no duplicated effort or claimed savings.
+
+The active AR-038 public route replaces only its customer-specific dependencies and C17 consumption with the reviewed public operating supplement and capture route. The exact prior AR-038-A/B records are preserved in the versioned plan amendment. Global customer/data/partner contracts, AR-035/036/037, pilot and G4/G5 remain unchanged. New gates do not inherit funding or research approval from PUBLICPREP0.
+
+The new PUBCAP parent covers three aggregate tasks and four planned PRs. AR-002 now has three aggregate tasks and four PRs; its earlier two Verified children remain accepted. Adding AR-002-C makes the parent In progress for its expanded scope; it does not revoke the original acceptance. PCA1/PCA2 are explicit preparation nodes whose successful delivery does not start or complete native PUBCAP-A. Each has its own prerequisites and accepted delivery evidence. Their included effort is subtracted from the aggregate's path weight, and remains counted once in total effort and role/milestone demand.
+
+The reconciled backlog contains **155 aggregate tasks and 167 planned delivery PRs**, including 2 nested preparation nodes, across 53 parents, 30 gates, 20 contracts and 569 dependency edges. There are 30 Verified, 1 In progress and 124 Not started aggregates; PCA1/PCA2 are both Not started. Existing delivery-package statuses and F3/P1/P2 acceptance remain unchanged. The total increment is **+8 base / +15 upper**; the 3–5 day preparation allocation is included. The 173.5-day effort-only longest path still traverses enterprise G4 and G5. Its reduction from 176.5 follows the reviewed change in research dependencies, not completed work or deleted enterprise effort. No calendar or staffing conversion follows.
 
 </details>

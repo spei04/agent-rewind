@@ -6,9 +6,17 @@ import hashlib
 import json
 import os
 import stat
+import sys
 from graphlib import CycleError, TopologicalSorter
 from pathlib import Path
 from typing import Any
+
+# Direct CLI and importlib-loaded checkers share the same planning-only module.
+if __package__:
+    from scripts import public_corpus_plan
+else:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from scripts import public_corpus_plan
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_BYTES = 2_097_152
@@ -355,9 +363,10 @@ def consumer_ready(gate: dict[str, Any]) -> bool:
 
 
 def validate_followups(data: dict[str, Any], ledger: dict[str, Any], document: str) -> None:
-    original = {row["id"]: row for row in ledger["tasks"] + ledger["gates"]}
+    original = public_corpus_plan.graph_nodes(ledger)
     require(
-        len(original) == len(ledger["tasks"]) + len(ledger["gates"]), "duplicate ledger identity"
+        len(original) == len(ledger["tasks"]) + len(ledger["gates"]) + 2,
+        "duplicate ledger identity",
     )
     rows = data["followups"]
     cards = {row["id"]: row for row in rows}
@@ -726,6 +735,7 @@ def validate_activation(
         baseline["commit"] == C21_COMMIT and digest == BASELINE_PROJECTION_SHA256,
         "pinned original work/dependency projection",
     )
+    ledger = public_corpus_plan.legacy_comparison(ledger)
     tasks = {row["id"]: row for row in ledger["tasks"]}
     gates = {row["id"]: row for row in ledger["gates"]}
     require(
@@ -814,7 +824,9 @@ def validate_activation(
         and "AR-024-D" in tasks["AR-026-A"]["dependencies"],
         "accounting/harness integration boundary bypass",
     )
-    graph = {row["id"]: row["dependencies"] for row in ledger["tasks"] + ledger["gates"]}
+    graph = {
+        key: row["dependencies"] for key, row in public_corpus_plan.graph_nodes(ledger).items()
+    }
     try:
         list(TopologicalSorter(graph).static_order())
     except CycleError as error:
