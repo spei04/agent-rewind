@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Cloud access and the preserved regression file are verified. [PR #121 and main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970) passed; independent review confirmed the separate synthetic CHECK gap.
-- **Next:** Backend resumes native CHECK declaration validation and both regressions. Quality checks parser boundaries; Review verifies the implementation and original results.
-- **Blocker:** P2 requires the accepted repair and matching CI/artifact evidence. Worker, corpus and production prerequisites remain unchanged.
+- **Verified:** [PR #122](https://github.com/spei04/agent-rewind/pull/122) contains the independently reviewed repair. All 97 focused tests passed per Python version; the 8,382-case inventory and 16 baseline controls are accepted.
+- **Next:** Backend tracks [original CI](https://github.com/spei04/agent-rewind/actions/runs/40921709077); Review checks source-bound receipts and artifacts. Quality updates future integration requirements; the lead owns delivery.
+- **Blocker:** Repaired-source PR/main checks and installed-artifact acceptance remain pending before P2 delivery. Worker, corpus and production prerequisites remain unchanged.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -21,6 +21,23 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+### CHECK correspondence repair published; fresh CI pending — 2026-10-29
+
+[PR #122](https://github.com/spei04/agent-rewind/pull/122) publishes [source `e3c879ce`](https://github.com/spei04/agent-rewind/commit/e3c879cef68415b5cfa777f50c8b789811518448). Independent review accepted 97 selected controls on each supported Python version, actual collect-only inventories of 8,382 nodes each (all 8,334 prior IDs retained in order plus 48 additions), and 16 baseline controls. Original failures, corrected outcomes and their qualifications remain retained; these are not full-suite or delivery acceptance.
+
+[Original CI run 40921709077](https://github.com/spei04/agent-rewind/actions/runs/40921709077) is running at this checkpoint. Earlier PR121/main success remains historical evidence for its own source. Fresh PR/main and matching installed artifacts are still required before P2 delivery; worker, corpus and production prerequisites remain unmet. Backend monitors CI and handles failures; Review checks receipts and artifacts; Quality prepares corpus delivery and this documentation; the lead owns integration and prerequisite decisions.
+
+The immutable corpus/repair merge preview found only the inventory-baseline conflict. Actual integration and combined-source collection remain pending after corrected P2 delivery; no combined count is inferred.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** Cloud access and the preserved regression file are verified. [PR #121 and main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970) passed; independent review confirmed the separate synthetic CHECK gap.
+- **Next:** Backend resumes native CHECK declaration validation and both regressions. Quality checks parser boundaries; Review verifies the implementation and original results.
+- **Blocker:** P2 requires the accepted repair and matching CI/artifact evidence. Worker, corpus and production prerequisites remain unchanged.
+
+</details>
 
 ### Access restored; preserved repair resumed — 2026-10-29
 

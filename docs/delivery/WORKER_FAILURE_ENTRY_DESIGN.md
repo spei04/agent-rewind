@@ -10,6 +10,14 @@ Before any checkpoint code: accepted whole AR-010-A and AR-005-C, independently 
 
 F1 covers existing ar6/ar7 SQLite catalog equivalence/capacity; F2 an empty dormant successor; F3 internal trusted persistence; F4 complete bounded consumers; F5 explicit marking/restore and complete P1 acceptance. Each follows the preceding accepted merge. Live worker integration remains P2. Migration-only/default customer and worker blocking remain through every checkpoint. No provider-durability reverse dependency, early-entry exception or new approval gate is introduced.
 
+### F1 interface reconciliation after CHECK correspondence — 2026-10-29
+
+The [reviewed repair `80f388bd`](https://github.com/spei04/agent-rewind/commit/80f388bd4ed69d1f1dd21ea16144c653a3720e4d) makes the copied clause policy and native CHECK correspondence inherited predecessor behavior. F1 must preserve them, not recreate them as new work.
+
+The fused options/DDL observer must return selected names and the native declaration map: `tuple[list[str], dict[str, tuple[tuple[str | None, str], ...]]]`. The per-table policy/parser helper retains the copied restriction policy and existing `_sqlite_check_declarations` tuples. General `_sqlite_supported_clauses` keeps its independent bounded per-table SQL; fusion assembles the same map from validated rows. Both catalog paths still call `_sqlite_require_reflected_checks` before accepting shape. Preserve null versus empty names, stable duplicate/anonymous order, exact stripped body text and strict reflected record keys/types. Reflection remains the canonical catalog value, never the source of the native map; counts alone are insufficient.
+
+Release complete DDL rows after parsing, but charge the retained declaration name/body slices and Python overhead. A fetch-one loop does not establish unbuffered driver memory. Observed revision flags, membership, transfer/row/sentinel bounds, close/primary-exception rules and PostgreSQL behavior remain unchanged. The execution plan below remains responsible for new-source equivalence and complete-path measurements; this reconciliation grants no F1 implementation or fit acceptance.
+
 ## Authoritative storage and native schema — adopted D1v2
 
 Safe failure semantics live only in the selected job_failure_evidence relation. Verified rows require jobs.error/result SQL NULL and no result reference. Legacy text is never parsed or relabeled as authenticated failure. A historical marker records unknown provenance and is not an Error.
@@ -153,6 +161,10 @@ At [source `0be52817`](https://github.com/spei04/agent-rewind/commit/0be5281750b
 | 3.12 | 3.45.1 | 488 | 504 |
 
 These are original cumulative post-cleanup counters; an ordinary/control/cleanup decomposition was not collected. Both calls acknowledged their commits, preserved all unrelated typed state, and passed exact claim/reservation delta and release checks. The source and owned environments stayed unchanged. Each row is one sample of the current predecessor, with its own native build. F1, the successor schema and broader capacity acceptance still require their planned measurements under unchanged limits. Historical 502/470 arithmetic remains separate from these observations.
+
+### CHECK-repaired predecessor samples — 2026-10-29
+
+The separately reviewed samples on [repair `80f388bd`](https://github.com/spei04/agent-rewind/commit/80f388bd4ed69d1f1dd21ea16144c653a3720e4d) again observed 488 claim / 504 reserve Work units, cumulatively after cleanup, once on each supported interpreter with its own native build. Exact whole-state deltas, transaction outcomes and release were checked. These finite samples do not supply an ordinary/control/cleanup decomposition, reliability or remaining-capacity claim, measured fusion savings, or F1/successor fit. Keep the earlier samples and static estimates above distinct; F1 still needs complete principal/service-key measurements on its own source under unchanged limits.
 
 One online Work:504 ordinary/512 total,8 cleanup,10s/20M SQLite VM. Offline2048/120s is never borrowed. Keep259 identities,4096 selected job/frame,4MiB complete retained book,64 compiled binds,260 sentinel,2048 response; financial2MiB/65,536 rows/4,096 accounts and original source/page bounds unchanged.
 

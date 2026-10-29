@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Cloud access and the preserved regression file are verified. [PR #121 and main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970) passed; independent review confirmed the separate synthetic CHECK gap.
-- **Next:** Backend resumes native CHECK declaration validation and both regressions. Quality checks parser boundaries; Review verifies the implementation and original results.
-- **Blocker:** P2 requires the accepted repair and matching CI/artifact evidence. Worker, corpus and production prerequisites remain unchanged.
+- **Verified:** [PR #122](https://github.com/spei04/agent-rewind/pull/122) contains the independently reviewed repair. All 97 focused tests passed per Python version; the 8,382-case inventory and 16 baseline controls are accepted.
+- **Next:** Backend tracks [original CI](https://github.com/spei04/agent-rewind/actions/runs/40921709077); Review checks source-bound receipts and artifacts. Quality updates future integration requirements; the lead owns delivery.
+- **Blocker:** Repaired-source PR/main checks and installed-artifact acceptance remain pending before P2 delivery. Worker, corpus and production prerequisites remain unchanged.
 
 [P2 task and dependencies](#ar-010-a-p2) · [History and maintenance](#dependency-review-progress-and-maintenance)
 
@@ -968,7 +968,7 @@ Tracking: [#107](https://github.com/spei04/agent-rewind/issues/107) · In progre
 - **Effort / confidence:** 6 engineering days; planning range 6–10; medium-low confidence.
 - **Responsible role:** BE; platform/security owns P1 runtime in secondary work/ledger-schema. Planning/verification owns independent tests after accepted progress handoff and stable interfaces; lead integrates, with independent delivery/security review.
 - **Definition of done:** Both packages require independent exact-entry/source review, local and hosted SQLite/actual PostgreSQL evidence, installed-package/security checks and accepted merged-source/candidate evidence in order. AR-008-B must have accepted protected-main delivery before implementation; P2 additionally waits for accepted merged P1. The whole aggregate precedes AR-010-B; later worker, reconciliation and full M1/customer gates remain separate.
-- **Progress:** In progress in #107 under the explicit P1 #108 assignment after accepted HTTP delivery and P1 entry 51af77dc. P1/P2 acceptance remains null; P2 #109 is Not started until accepted P1 and its own entry review. Parent #10 remains open/In progress.
+- **Progress:** In progress in #107. [P1 #108](#ar-010-a-p1) is Verified: protected merge b214f21b and final lead acceptance 4d157d97 are recorded below; the issue closed as completed at 2026-10-28T18:01:43Z, confirmed by lead readback bae9970b. [P2 #109](#ar-010-a-p2) is In progress after accepted entry v7, with the reviewed CHECK correspondence repair published in [PR #122](https://github.com/spei04/agent-rewind/pull/122). P2 accepted merge and delivery review evidence remain null pending required PR/main and matching installed-artifact acceptance. Whole AR-010-A and parent #10 remain In progress; downstream gates remain unmet.
 - **Delivery boundary:** Two sequential acceptance packages across four BE PRs: P1 has F1 dormant schema/operator/guard foundation, F2 complete bounded persisted reader, and F3 trusted provisioning/opening/replay/recovery; P2 reservation/minimum generation/rollover remains one PR after accepted full P1. P1 and P2 each retain 3 [3–5] days, total 6 [6–10], medium-low, with inherited AR-008-B and no early package acceptance.
 - **Contract readiness:** Frozen C04 remains authoritative. The owner approved proposal 882fa139 on 2026-10-21: fixed job lifetime is one finite immutable authorized execution window from trusted provisioning, not an observed completion interval or renewable worker timeout. Exact P1 manifest/schema/authority/native bounds/replay, SQL privilege and outcome/recovery policy is independently accepted at 51af77dc. Implementation must prove exact DDL/catalog, constraints, bounds and recovery against that policy. P2 reservation/fence entry requires separate review after accepted P1. No public API/native configuration or ready-profile amendment is made.
 
@@ -3674,6 +3674,32 @@ M1 / P0 · 1 PR · 2 engineering days · Verified · [Tracking issue #26](https:
 No question above asks to reapprove accepted architecture or issue #51 choices. The nine selected engineering scopes and calibration targets are approved; optional adapters/reuse, held-out execution, actual study funding/data, independent statistics and production remain separate.
 
 ## Dependency review, progress and maintenance
+
+### CHECK correspondence repair published; fresh CI pending — 2026-10-29
+
+[PR #122](https://github.com/spei04/agent-rewind/pull/122) publishes [source `e3c879ce`](https://github.com/spei04/agent-rewind/commit/e3c879cef68415b5cfa777f50c8b789811518448). Independent review accepted 97 selected controls on each supported Python version, actual collect-only inventories of 8,382 nodes each (all 8,334 prior IDs retained in order plus 48 additions), and 16 baseline controls. Original failures, corrected outcomes and their qualifications remain retained; these are not full-suite or delivery acceptance.
+
+[Original CI run 40921709077](https://github.com/spei04/agent-rewind/actions/runs/40921709077) is running at this checkpoint. Earlier PR121/main success remains historical evidence for its own source. Fresh PR/main and matching installed artifacts are still required before P2 delivery; worker, corpus and production prerequisites remain unmet. Backend monitors CI and handles failures; Review checks receipts and artifacts; Quality prepares corpus delivery and this documentation; the lead owns integration and prerequisite decisions.
+
+The immutable corpus/repair merge preview found only the inventory-baseline conflict. Actual integration and combined-source collection remain pending after corrected P2 delivery; no combined count is inferred.
+
+The aggregate AR-010-A progress narrative now reflects the recorded P1 acceptance and P2 In progress status. Its earlier paragraph is superseded below. The adjacent P2 progress already reports In progress with null delivery acceptance and remains unchanged; no machine status, acceptance field, dependency, estimate or gate is advanced.
+
+<details>
+<summary>Superseded AR-010-A aggregate progress — 2026-10-29</summary>
+
+- **Progress:** In progress in #107 under the explicit P1 #108 assignment after accepted HTTP delivery and P1 entry 51af77dc. P1/P2 acceptance remains null; P2 #109 is Not started until accepted P1 and its own entry review. Parent #10 remains open/In progress.
+
+</details>
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** Cloud access and the preserved regression file are verified. [PR #121 and main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970) passed; independent review confirmed the separate synthetic CHECK gap.
+- **Next:** Backend resumes native CHECK declaration validation and both regressions. Quality checks parser boundaries; Review verifies the implementation and original results.
+- **Blocker:** P2 requires the accepted repair and matching CI/artifact evidence. Worker, corpus and production prerequisites remain unchanged.
+
+</details>
 
 ### Access restored; preserved repair resumed — 2026-10-29
 

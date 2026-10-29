@@ -44,11 +44,15 @@ Historical markers retain an immutable operator intent and full bounded selected
 
 ### F1 — Existing-profile SQLite catalog equivalence and capacity precursor
 
-Proposed source boundary: `agent_rewind/migrations/ledger_reader_catalog.py`, `tests/test_ledger_catalog_budget.py`, `focused existing catalog fixtures/controls only if needed`. Names are planning seams, not assigned files/revisions.
+Proposed source boundary: `agent_rewind/migrations/schema.py`, `agent_rewind/migrations/ledger_reader_catalog.py`, `tests/test_ledger_catalog_budget.py`, `focused existing catalog fixtures/controls only if needed`. Names are planning seams, not assigned files/revisions.
 
 Owner: Backend; lead owns scope; Quality raw/whole-path oracles; Review SQL/security.
 
 All common pre-code prerequisites. Review accepts exact query/projection/sentinel and old-observer equivalence design. Lead owns this prerequisite as P1/F1 rather than an early AR-010-A exception.
+
+The CHECK correspondence repair is inherited predecessor work. Preserve its native declaration map alongside selected names in the fused observer and both general/bounded reflected comparisons; the [entry interface reconciliation](WORKER_FAILURE_ENTRY_DESIGN.md#f1-interface-reconciliation-after-check-correspondence--2026-10-29) specifies the return shape and retained-slice accounting. Do not duplicate standalone DDL queries to recover a discarded map.
+
+Carry forward the 48 CHECK regression IDs and seven earlier clause-policy regressions. Retain both real jobs rebuilds, positive complete inspection, fresh general/bounded observers, unchanged provenance and refusal/rollback/whole-state assertions; retain the six parser families, digit-bearing ar7 identifier, FOREIGN-name reset and four fresh/legacy ar6/ar7 equality cases. Adapt only the earlier audit regression's passive per-table-query witness to actual fused SQL; one fused SQL trace does not prove fetched row order. Independent general SQL remains a structural oracle; shared policy/parser code is not an independent semantic oracle.
 
 Actual ar6/ar7 fresh/legacy raw native-observer equality; missing/extra/duplicate table, invalid options/type/null/oversize and forbidden-clause negatives; preserved independent catalog mismatch detection. Measure complete immutable-history and complete principal/key claim/reserve paths under same Work, both supported SQLite interpreters/native versions, recording every target/control/row/bind charge, cleanup, time and VM. Existing PostgreSQL old-profile controls establish unchanged branch behavior; no new PG batching.
 
@@ -124,6 +128,10 @@ At [source `0be52817`](https://github.com/spei04/agent-rewind/commit/0be5281750b
 | 3.12 | 3.45.1 | 488 | 504 |
 
 These are original cumulative post-cleanup counters; an ordinary/control/cleanup decomposition was not collected. Both calls acknowledged their commits, preserved all unrelated typed state, and passed exact claim/reservation delta and release checks. The source and owned environments stayed unchanged. Each row is one sample of the current predecessor, with its own native build. F1, the successor schema and broader capacity acceptance still require their planned measurements under unchanged limits. Historical 502/470 arithmetic remains separate from these observations.
+
+### CHECK-repaired predecessor samples — 2026-10-29
+
+The separately reviewed samples on [repair `80f388bd`](https://github.com/spei04/agent-rewind/commit/80f388bd4ed69d1f1dd21ea16144c653a3720e4d) again observed 488 claim / 504 reserve Work units, cumulatively after cleanup, once on each supported interpreter with its own native build. Exact whole-state deltas, transaction outcomes and release were checked. These finite samples do not supply an ordinary/control/cleanup decomposition, reliability or remaining-capacity claim, measured fusion savings, or F1/successor fit. Keep the earlier samples and static estimates above distinct; F1 still needs complete principal/service-key measurements on its own source under unchanged limits.
 
 The retained owner reservation measured 492 ordinary / 494 total Work units. Key-route 502 and hypothetical fused 470 are static arithmetic, not measured fit, savings, latency, VM or memory proof. F1 targets only existing ar6/ar7 SQLite observation, leaving the independent schema.catalog per-table observer and PostgreSQL path intact. Preserve every table-specific supported-clause restriction, exact membership/multiplicity/options, null/invalid/oversize refusal, <=65536 bytes per DDL and <=1310720 cumulative ar7 transfer. No hidden out-of-Work query, stale/global cache or budget relaxation is allowed.
 
