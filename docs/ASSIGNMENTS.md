@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** [Repair PR #121](https://github.com/spei04/agent-rewind/pull/121) contains the reviewed schema fix and 8,334-test inventory. Independent review also accepted one existing service-key claim/reserve sample on Python 3.11 and 3.12.
-- **Next:** Backend monitors [fresh CI](https://github.com/spei04/agent-rewind/actions/runs/40837589029); Review checks delivery evidence. Quality prepares the corpus integration handoff, and the lead integrates accepted work.
-- **Blocker:** Corrected PR/main checks and matching installed artifacts remain unmet. F1 implementation, corpus delivery and downstream gates retain their prerequisites.
+- **Verified:** [Repair PR #121](https://github.com/spei04/agent-rewind/pull/121) merged; its original CI evidence is independently accepted. The PR-side blocker is cleared.
+- **Next:** Backend monitors [fresh main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970); Review checks receipts and artifacts. Quality prepares corpus delivery and documentation; the lead owns protected delivery and prerequisites.
+- **Blocker:** Fresh main checks and matching installed artifacts remain before P2 delivery. Worker, corpus and production gates retain their prerequisites.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -21,6 +21,23 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+### Repair PR merged; fresh main validation — 2026-10-29
+
+[PR #121](https://github.com/spei04/agent-rewind/pull/121) merged as [M121 ae6a3987](https://github.com/spei04/agent-rewind/commit/ae6a3987ba20a9f1203564c2e8a24a6134d71bb0) at 08:35:33 UTC. Independent review accepted [original PR run 40837589029](https://github.com/spei04/agent-rewind/actions/runs/40837589029), attempt 1: the exact 8,334-case inventory, all 102 setup/call/teardown phase records for 17 native cases across both supported Python versions, the corrected persisted-money R3 controls, and all seven clause-policy repair cases.
+
+The PR-side blocker is cleared. At this checkpoint, [fresh main run 40843248970](https://github.com/spei04/agent-rewind/actions/runs/40843248970), attempt 1, is running. Only this new main validation and matching installed artifacts remain before P2 delivery. The earlier green PR119 main run covers its older source; it does not validate M121. Worker implementation, corpus delivery and production gates retain their prerequisites; task statuses, estimates, budgets and acceptance fields are unchanged.
+
+Backend owns the main collectors and monitoring; Review verifies receipts and artifacts. Quality has prepared the corpus integration handoff and owns this documentation update. The lead owns protected delivery and prerequisite decisions.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** [Repair PR #121](https://github.com/spei04/agent-rewind/pull/121) contains the reviewed schema fix and 8,334-test inventory. Independent review also accepted one existing service-key claim/reserve sample on Python 3.11 and 3.12.
+- **Next:** Backend monitors [fresh CI](https://github.com/spei04/agent-rewind/actions/runs/40837589029); Review checks delivery evidence. Quality prepares the corpus integration handoff, and the lead integrates accepted work.
+- **Blocker:** Corrected PR/main checks and matching installed artifacts remain unmet. F1 implementation, corpus delivery and downstream gates retain their prerequisites.
+
+</details>
 
 ### Current-source service-key baseline — 2026-10-29
 
