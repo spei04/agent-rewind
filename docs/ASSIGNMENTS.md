@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger foundations are delivered. Review of merged P2 found a SQLite clause-policy defect; its minimal correction and complete persisted-inspector regression passed independent review on both supported Python versions.
-- **Next:** Quality reconciles the full test inventory. Backend prepares fresh CI validation; Review checks the evidence, and the lead integrates the repair and maintains this log.
-- **Blocker:** Corrected PR/main CI and matching installed artifacts are required before P2 delivery. Earlier-source CI cannot validate the repair; downstream gates remain unmet.
+- **Verified:** [Repair PR #121](https://github.com/spei04/agent-rewind/pull/121) contains the reviewed schema fix, regressions and reconciled 8,334-test inventory. Targeted checks passed; the earlier main run passed for its older source.
+- **Next:** Backend monitors [fresh CI](https://github.com/spei04/agent-rewind/actions/runs/40837589029). Quality prepares bounded service-key measurements; Review verifies evidence, and the lead integrates delivery.
+- **Blocker:** Corrected PR/main checks and matching installed artifacts remain unmet. Worker implementation, corpus delivery and downstream gates retain their prerequisites.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -21,6 +21,28 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+### Repair PR and next validation assignments — 2026-10-29
+
+[PR #121](https://github.com/spei04/agent-rewind/pull/121), head `0be5281750b494729d2aa6e8c64e13bf50f1042b`, publishes the schema correction. Independent review accepted 48 focused checks plus the separate persisted-inspector regression on both Python versions. Both original collections contain 8,334 cases, retaining all 8,327 prior IDs in order plus seven additions. The four-field inventory update passed 16 existing controls on Python 3.12, with skip rules preserved. All 652 committed files match the reviewed source. [Fresh CI](https://github.com/spei04/agent-rewind/actions/runs/40837589029) is running; successful earlier-source main jobs do not validate the repair.
+
+Parallel preparation now targets the existing repaired predecessor's actual service-key claim/reserve path on a bounded synthetic SQLite fixture. It must report observed counters and outcomes, including refusal if the path does not fit. This is qualification preparation, not worker F1 implementation or successor-revision selection. Runtime, data, budget and production gates stay unchanged. The corpus integration preview found only the shared test-inventory conflict; no checkout merge or new inventory adoption has occurred.
+
+| Engineer role | Current assignment | Completion boundary |
+| --- | --- | --- |
+| Backend | Monitor PR #121 and prepare source-matched CI/artifact validation. | Original required results and exact delivered artifacts. |
+| Quality | Prepare bounded measurement of the existing service-key claim/reserve path. | Reviewed execution scope, then observed outcomes under unchanged limits. |
+| Review | Check CI receipts, artifact identity and measurement preparation/results. | Independent evidence for the exact source and scope. |
+| Project lead | Own protected delivery, prerequisite decisions and corpus integration preparation. | Accepted gates before dependent implementation or delivery. |
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** Ledger foundations are delivered. Review of merged P2 found a SQLite clause-policy defect; its minimal correction and complete persisted-inspector regression passed independent review on both supported Python versions.
+- **Next:** Quality reconciles the full test inventory. Backend prepares fresh CI validation; Review checks the evidence, and the lead integrates the repair and maintains this log.
+- **Blocker:** Corrected PR/main CI and matching installed artifacts are required before P2 delivery. Earlier-source CI cannot validate the repair; downstream gates remain unmet.
+
+</details>
 
 ### SQLite clause-policy correction — 2026-10-29
 
