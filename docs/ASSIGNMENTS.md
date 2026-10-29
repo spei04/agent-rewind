@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger foundations are delivered. PCA1 source is independently reviewed and published; its collection and baseline are complete.
-- **Next:** Backend prepares the test-clock correction and fresh CI; Review checks source and results. Quality maintains documentation and corpus delivery; the lead integrates.
-- **Blocker:** P2's Python 3.11 late partition failed a semantic test's elapsed-time limit. The earlier HTTP 503 remains unexplained. Full CI and installed-artifact acceptance are pending.
+- **Verified:** Ledger foundations are delivered. P2 corrections and PCA1 source have independent review; final delivery remains pending.
+- **Next:** Backend monitors CI and handles failures; Review verifies source and results. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Complete passing PR and main CI and matching artifacts are still required. The earlier HTTP 503 remains unexplained; downstream gates remain unmet.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -24,6 +24,14 @@ partner-data or production authorization.
 
 <details>
 <summary>Earlier assignments, approvals and delivery records</summary>
+
+**Prior clock-isolation current view — retained 2026-10-29 UTC:**
+
+- **Verified:** Ledger foundations are delivered. PCA1 source is independently reviewed and published; its collection and baseline are complete.
+- **Next:** Backend prepares the test-clock correction and fresh CI; Review checks source and results. Quality maintains documentation and corpus delivery; the lead integrates.
+- **Blocker:** P2's Python 3.11 late partition failed a semantic test's elapsed-time limit. The earlier HTTP 503 remains unexplained. Full CI and installed-artifact acceptance are pending.
+
+**Delivery and CI headroom assignment — 2026-10-29 UTC:** Original [P2 CI 40801845500](https://github.com/spei04/agent-rewind/actions/runs/40801845500), attempt 1, finished with failure in the Python 3.11 late cohort semantic test; Python 3.12 completed with 8,292 passes and 31 skips. Independent review covers the cohort clock correction's eight existing cases per interpreter and the CI outer 75-minute/session 60-minute correction's 20 cases per interpreter. Runtime bytes remain unchanged. Backend monitors CI and handles failures, Review verifies source/results, Quality prepares corpus delivery, and the lead integrates reviewed changes. Passing full PR/main CI and matching artifacts remain required; no delivery acceptance is claimed.
 
 **Prior corpus delivery current view — retained 2026-10-29 UTC:**
 

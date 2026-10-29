@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger foundations are delivered. PCA1 source is independently reviewed and published; its collection and baseline are complete.
-- **Next:** Backend prepares the test-clock correction and fresh CI; Review checks source and results. Quality maintains documentation and corpus delivery; the lead integrates.
-- **Blocker:** P2's Python 3.11 late partition failed a semantic test's elapsed-time limit. The earlier HTTP 503 remains unexplained. Full CI and installed-artifact acceptance are pending.
+- **Verified:** Ledger foundations are delivered. P2 corrections and PCA1 source have independent review; final delivery remains pending.
+- **Next:** Backend monitors CI and handles failures; Review verifies source and results. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Complete passing PR and main CI and matching artifacts are still required. The earlier HTTP 503 remains unexplained; downstream gates remain unmet.
 
 [Active backlog](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Retained history](#143-dated-progress-ledger)
 
@@ -898,6 +898,12 @@ The original brief is filled in this single roadmap. The later request explicitl
 
 <details>
 <summary>Prior status snapshots and dated records</summary>
+
+**Prior clock-isolation current view — retained 2026-10-29 UTC:**
+
+- **Verified:** Ledger foundations are delivered. PCA1 source is independently reviewed and published; its collection and baseline are complete.
+- **Next:** Backend prepares the test-clock correction and fresh CI; Review checks source and results. Quality maintains documentation and corpus delivery; the lead integrates.
+- **Blocker:** P2's Python 3.11 late partition failed a semantic test's elapsed-time limit. The earlier HTTP 503 remains unexplained. Full CI and installed-artifact acceptance are pending.
 
 **Prior corpus delivery current view — retained 2026-10-29 UTC:**
 
