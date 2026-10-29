@@ -29,10 +29,21 @@ def financial_statements(dialect):
 
 
 def refusal_sites():
-    source, first = inspect.getsourcelines(ledger_reader_financial.read_financial)
+    source, first = inspect.getsourcelines(ledger_reader_financial.read_financial_projection)
+    (gate,) = [
+        node
+        for node in ast.parse("".join(source)).body[0].body
+        if isinstance(node, ast.FunctionDef) and node.name == "gate"
+    ]
+    (query,) = [
+        node
+        for node in gate.body
+        if isinstance(node, ast.Assign)
+        and ast.unparse(node) == "rows = _query(connection, key, prefix + '_gate')"
+    ]
     (condition,) = [
         node
-        for node in ast.walk(ast.parse("".join(source)))
+        for node in ast.walk(gate)
         if isinstance(node, ast.If)
         and ast.unparse(node.test)
         == (
@@ -46,6 +57,7 @@ def refusal_sites():
     (raised,) = ast.parse("".join(source)).body[0].body
     assert ast.unparse(raised) == "raise MigrationRefused('ledger_history_unsupported')"
     return {
+        "query": first + query.lineno - 1,
         "condition": first + condition.lineno - 1,
         "call": first + call.lineno - 1,
         "raise": refuse_first + raised.lineno - 1,
@@ -117,11 +129,11 @@ def observe_financial(watch, monkeypatch, record):
     assert original_reader is ledger_reader_financial.read_financial
     original_query = ledger_reader_financial._query
     original_execute = Connection.execute
-    gate_code = next(
+    (gate_code,) = [
         code
-        for code in original_reader.__code__.co_consts
+        for code in ledger_reader_financial.read_financial_projection.__code__.co_consts
         if getattr(code, "co_name", None) == "gate"
-    )
+    ]
     refuse_code = ledger_reader_financial._refuse.__code__
     receipt = {
         "readers": [],
@@ -203,7 +215,8 @@ def observe_financial(watch, monkeypatch, record):
 
 def assert_financial_refusal(receipt, error, identity):
     assert type(error) is MigrationRefused and error.code == "ledger_history_unsupported"
-    assert receipt["sites"] == refusal_sites() == {"condition": 239, "call": 240, "raise": 206}
+    sites = refusal_sites()
+    assert typed(receipt["sites"]) == typed(sites)
     (reader,) = receipt["readers"]
     assert reader["revision"] == ADMISSION and reader["original_inspector_caller"] is True
     assert "returned" not in reader
@@ -224,12 +237,12 @@ def assert_financial_refusal(receipt, error, identity):
         [
             {
                 "kind": "gate",
-                "line": 240,
+                "line": sites["call"],
                 "domain": "job",
                 "prefix": "financial_base_job",
                 "receipt": gate,
             },
-            {"kind": "refuse", "line": 206},
+            {"kind": "refuse", "line": sites["raise"]},
         ]
     )
     (statement,) = receipt["statements"]

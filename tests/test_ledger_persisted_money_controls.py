@@ -132,9 +132,9 @@ def test_refusal_witness_rejects_independent_corruption(monkeypatch, change):
             {"revision": "ar6", "name": "financial_base_job_body", "rows": []}
         )
     elif change == "wrong-call":
-        reader["frames"][0]["line"] = 236
+        reader["frames"][0]["line"] = original["sites"]["call"] + 1
     elif change == "wrong-raise":
-        reader["frames"][1]["line"] = 207
+        reader["frames"][1]["line"] = original["sites"]["raise"] + 1
     elif change == "wrong-caller":
         reader["original_inspector_caller"] = False
     elif change == "wrong-raw":
@@ -168,7 +168,7 @@ def test_original_query_interrupt_is_preserved_without_refusal_credit(monkeypatc
     assert receipt["readers"][0]["frames"] == [
         {
             "kind": "gate",
-            "line": 231,
+            "line": receipt["sites"]["query"],
             "domain": "job",
             "prefix": "financial_base_job",
             "receipt": None,
