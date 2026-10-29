@@ -106,7 +106,7 @@ def test_tested_python_versions_and_pinned_external_inputs():
         "include": [
             {"python": "3.11", "leg": "early", "timeout": 45},
             {"python": "3.11", "leg": "late", "timeout": 45},
-            {"python": "3.12", "leg": "all", "timeout": 60},
+            {"python": "3.12", "leg": "all", "timeout": 75},
         ]
     }
     assert core["strategy"]["fail-fast"] is False
