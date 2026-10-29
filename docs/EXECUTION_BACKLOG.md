@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** [PR #122](https://github.com/spei04/agent-rewind/pull/122) contains the independently reviewed repair. All 97 focused tests passed per Python version; the 8,382-case inventory and 16 baseline controls are accepted.
-- **Next:** Backend tracks [original CI](https://github.com/spei04/agent-rewind/actions/runs/40921709077); Review checks source-bound receipts and artifacts. Quality updates future integration requirements; the lead owns delivery.
-- **Blocker:** Repaired-source PR/main checks and installed-artifact acceptance remain pending before P2 delivery. Worker, corpus and production prerequisites remain unchanged.
+- **Verified:** The CHECK repair's focused checks, inventory and baseline controls are independently reviewed. Both Python 3.11 CI shards and support checks passed.
+- **Next:** Backend proposes a bounded setup correction; Review checks the original failure and source. Quality maintains the corpus handoff; the lead owns integration.
+- **Blocker:** Original Python 3.12 CI failed before reservation. Required PR/main and installed-artifact acceptance, P2 delivery and downstream gates remain unmet.
 
 [P2 task and dependencies](#ar-010-a-p2) · [History and maintenance](#dependency-review-progress-and-maintenance)
 
@@ -3674,6 +3674,23 @@ M1 / P0 · 1 PR · 2 engineering days · Verified · [Tracking issue #26](https:
 No question above asks to reapprove accepted architecture or issue #51 choices. The nine selected engineering scopes and calibration targets are approved; optional adapters/reuse, held-out execution, actual study funding/data, independent statistics and production remain separate.
 
 ## Dependency review, progress and maintenance
+
+### Original PR122 CI failure; setup correction under review — 2026-10-29
+
+[PR #122](https://github.com/spei04/agent-rewind/pull/122), source `e3c879ce`, [original run 40921709077](https://github.com/spei04/agent-rewind/actions/runs/40921709077), attempt 1: both Python 3.11 core shards and support checks passed. The [Python 3.12 all-tests job 123616399230](https://github.com/spei04/agent-rewind/actions/runs/40921709077/job/123616399230) was observed with a failed Run core tests step at 18:25:13 UTC, with 1 failed, 7,572 passed and 30 skipped; later tests were unexecuted. The CI gate failed and the candidate was skipped.
+
+The failure was `tests/test_reservation_qe_postgres.py::test_postgres_final_period_fence_observes_injected_constraint_latency[organization]`: helper line 162's setup clock precondition failed after real P1, ACL and full-state checks, before injected delay or reservation. Actual clock values are absent, so expired-window versus clock-regression cause is unproven; no runtime regression is inferred.
+
+Backend proposes bounded setup and four-second period alignment, retaining the real clock, rollback assertions, 4.1-second upper bound and ten-second Work limit. Review checks the original failure and source; Quality maintains documentation and corpus handoff; the lead integrates reviewed changes. The independently reviewed 97 focused passes per interpreter remain local evidence, not full Python 3.12 success. Originals and failures remain retained. Required PR/main, matching installed artifacts, P2 delivery and worker/corpus/production gates remain pending.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** [PR #122](https://github.com/spei04/agent-rewind/pull/122) contains the independently reviewed repair. All 97 focused tests passed per Python version; the 8,382-case inventory and 16 baseline controls are accepted.
+- **Next:** Backend tracks [original CI](https://github.com/spei04/agent-rewind/actions/runs/40921709077); Review checks source-bound receipts and artifacts. Quality updates future integration requirements; the lead owns delivery.
+- **Blocker:** Repaired-source PR/main checks and installed-artifact acceptance remain pending before P2 delivery. Worker, corpus and production prerequisites remain unchanged.
+
+</details>
 
 ### CHECK correspondence repair published; fresh CI pending — 2026-10-29
 
