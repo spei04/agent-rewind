@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger foundations are delivered. P2's PR CI and original receipts were accepted, and the PR merged. The worker failure design and corpus candidate source are reviewed.
-- **Next:** Backend monitors main CI; Review verifies results and installed artifacts. Quality prepares corpus delivery, and the lead integrates reviewed changes.
-- **Blocker:** Passing main CI and matching installed artifacts are required before P2 delivery. Earlier delays and unwitnessed HTTP failures remain unexplained; downstream gates remain unmet.
+- **Verified:** Ledger foundations are delivered. Review of merged P2 found a SQLite clause-policy defect; its minimal correction and complete persisted-inspector regression passed independent review on both supported Python versions.
+- **Next:** Quality reconciles the full test inventory. Backend prepares fresh CI validation; Review checks the evidence, and the lead integrates the repair and maintains this log.
+- **Blocker:** Corrected PR/main CI and matching installed artifacts are required before P2 delivery. Earlier-source CI cannot validate the repair; downstream gates remain unmet.
 
 [Active backlog](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Retained history](#143-dated-progress-ledger)
 
@@ -895,6 +895,23 @@ The original brief is filled in this single roadmap. The later request explicitl
 - [ ] G1–G7 implementation and release gates accepted with actual evidence.
 
 ### 14.3 Dated progress ledger
+
+### SQLite clause-policy correction — 2026-10-29
+
+The original complete persisted inspector accepted an unsupported comment-separated CHECK on a controlled SQLite fixture. A shared mutable restriction set let jobs-table exceptions affect later tables. The correction copies the policy per table. Six order/token controls and a persisted-inspector regression cover refusal, acknowledged rollback and unchanged stored state. The original reproduction and its earlier instrumentation failure remain separate evidence; this is not a production-incident or earlier-CI-cause claim.
+
+The reviewed correction is committed as `286e1f1d`: exactly two files changed. Forty-eight focused checks and the separate persisted-inspector case passed on Python 3.11 and 3.12. Review verified the committed source against those results. Full test collection, the inventory baseline, repair publication and fresh hosted/artifact checks are pending. The original main run cannot clear this acceptance hold.
+
+The reviewed worker failure entry design and corpus candidate branch remain available for subsequent delivery. Worker P1/P2 remain Not started; corpus publication and later implementation keep their existing prerequisites. Budget, data, provider, runtime activation and production gates are unchanged.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** Ledger foundations are delivered. P2's PR CI and original receipts were accepted, and the PR merged. The worker failure design and corpus candidate source are reviewed.
+- **Next:** Backend monitors main CI; Review verifies results and installed artifacts. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Passing main CI and matching installed artifacts are required before P2 delivery. Earlier delays and unwitnessed HTTP failures remain unexplained; downstream gates remain unmet.
+
+</details>
 
 ### PR merge and worker failure entry design — 2026-10-29
 
