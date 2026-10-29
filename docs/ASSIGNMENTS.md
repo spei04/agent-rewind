@@ -4,7 +4,7 @@
 
 - **Verified:** [Original M121 main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970) passed all eight jobs. One synthetic Python 3.12 fixture reproduced an extra jobs CHECK accepted by the complete inspector.
 - **Next:** Backend implements scoped CHECK declaration, name and body validation; Review verifies the reproduction and repair. Quality maintains corpus handoff and documentation; the lead integrates.
-- **Blocker:** Independent reproduction review, repair acceptance and matching delivery evidence remain pending. P2, worker, corpus and production gates remain unmet.
+- **Blocker:** Independent review confirmed the reproduced gap. Repair acceptance and matching delivery evidence remain pending. P2, worker, corpus and production gates remain unmet.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -26,7 +26,7 @@ partner-data or production authorization.
 
 [Original M121 main run 40843248970](https://github.com/spei04/agent-rewind/actions/runs/40843248970), attempt 1, finished with all eight jobs successful. That original result is retained; it does not resolve the newly reproduced catalog boundary or establish installed-artifact acceptance.
 
-On repaired source [0be52817](https://github.com/spei04/agent-rewind/commit/0be5281750b494729d2aa6e8c64e13bf50f1042b), whose tree equals M121, one fresh empty synthetic ar7 fixture on Python 3.12 / SQLite 3.45.1 accepted the exact additional jobs clause CHECK/*review*/(budget<9223372036854775807) through the general catalog, bounded catalog and complete persisted inspector. Their reflected profiles and expected persisted state stayed unchanged. Ordinary FK-on DDL changed only the jobs table declaration; all typed application rows, row identities, adoption/progress and other schema facts were preserved. Original outcomes, cleanup and source/environment preservation are retained; independent review of this actual result is pending at this checkpoint. This is one controlled fixture, with no production-impact or earlier-CI-cause claim.
+On repaired source [0be52817](https://github.com/spei04/agent-rewind/commit/0be5281750b494729d2aa6e8c64e13bf50f1042b), whose tree equals M121, one fresh empty synthetic ar7 fixture on Python 3.12 / SQLite 3.45.1 accepted the exact additional jobs clause CHECK/*review*/(budget<9223372036854775807) through the general catalog, bounded catalog and complete persisted inspector. Their reflected profiles and expected persisted state stayed unchanged. Ordinary FK-on DDL changed only the jobs table declaration; all typed application rows, row identities, adoption/progress and other schema facts were preserved. Original outcomes, cleanup and source/environment preservation are retained; independent review accepted this exact original result and the scoped repair plan. This is one controlled fixture, with no production-impact or earlier-CI-cause claim.
 
 Backend owns the scoped repair comparing actual CHECK declarations, names and bodies; Review independently verifies its source and evidence. P2 delivery remains held for accepted correction and matching CI/artifact evidence. Worker implementation, corpus delivery and product/production gates retain their prerequisites; task statuses, graph, estimates and budgets are unchanged.
 
