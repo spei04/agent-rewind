@@ -14,6 +14,7 @@ from ledger_provisioning_fixture import digest
 from ledger_provisioning_postgres_fixture import invoke
 from ledger_restore_authority import typed
 from reservation_qe_fixture import assert_claim, identity, one, same
+from sqlalchemy import text
 
 from agent_rewind.reservation_service import ReservationCoordinator
 from agent_rewind.reservation_types import ClaimIntent
@@ -81,7 +82,7 @@ def micros(value):
 
 
 def build_expiring_period_case(pg, tmp_path, monkeypatch, selected, record_property):
-    """Real P1 periods; only the later SET CONSTRAINTS phase receives injected latency."""
+    """Real P1 periods with separate measured setup and SET CONSTRAINTS latency."""
     initial = shared.initial_manifest
     boundary = []
 
@@ -118,7 +119,13 @@ def build_expiring_period_case(pg, tmp_path, monkeypatch, selected, record_prope
         with shared.offline_postgres_ledger(
             case, lambda name, value: record(record_property, name, value)
         ):
-            selected_end = native_time(pg) + timedelta(seconds=4)
+            horizon_start = native_time(pg)
+            selected_end = horizon_start + timedelta(seconds=20)
+            record(
+                record_property,
+                "period_setup_horizon",
+                {"native_time": horizon_start, "selected_end": selected_end},
+            )
             accounts = []
             for number, scope in enumerate(("organization", "project"), 140010):
                 original = next(row for row in previous["accounts"] if row["scope"] == scope)
@@ -142,6 +149,11 @@ def build_expiring_period_case(pg, tmp_path, monkeypatch, selected, record_prope
                 "accounts": accounts,
             }
             receipt = invoke(fixture, pg, manifest)
+            record(
+                record_property,
+                "period_setup_provision_clock",
+                {"native_time": native_time(pg), "selected_end": selected_end},
+            )
         assert receipt.account_rows == 2 and receipt.sequence == 1
         after = state(case)
         for table in set(before["tables"]) - {"budget_accounts", "migration_progress"}:
@@ -158,7 +170,70 @@ def build_expiring_period_case(pg, tmp_path, monkeypatch, selected, record_prope
             provisioning=fixture,
             account_ids=(accounts[0]["id"], accounts[1]["id"], case.account_ids[2]),
         )
-        observed = native_time(pg)
+        record(
+            record_property,
+            "period_setup_complete_clock",
+            {"native_time": native_time(pg), "selected_end": selected_end},
+        )
+        # Deliberately exceed the former setup window before entering the
+        # unchanged four-second reservation window. This owner-only fault is
+        # separate from the later app-role SET CONSTRAINTS latency.
+        with pg["owner"].connect() as connection, connection.begin():
+            connection.exec_driver_sql("SET TRANSACTION READ ONLY")
+            connection.exec_driver_sql("SET LOCAL statement_timeout = '6000ms'")
+            setup_before = connection.exec_driver_sql("SELECT clock_timestamp()").scalar_one()
+            record(
+                record_property,
+                "period_setup_delay_before",
+                {"native_time": setup_before, "requested_seconds": 4.25},
+            )
+            connection.execute(text("SELECT pg_sleep(:delay)"), {"delay": 4.25}).scalar_one()
+            setup_after = connection.exec_driver_sql("SELECT clock_timestamp()").scalar_one()
+        record(
+            record_property,
+            "period_setup_delay",
+            {
+                "before_native_time": setup_before,
+                "after_native_time": setup_after,
+                "requested_seconds": 4.25,
+                "selected_end": selected_end,
+                "qualification": "Deliberate native setup latency; no original cause claim.",
+            },
+        )
+        for sample in (setup_before, setup_after):
+            assert isinstance(sample, datetime) and sample.utcoffset() == timedelta(0)
+        assert setup_after - setup_before > timedelta(seconds=4)
+
+        # All ACL/state observations and the setup connection have finished.
+        # Align using native time; never extend the original selected_end.
+        alignment_started = time.monotonic()
+        alignment_first = None
+        for alignment_samples in range(1, 513):
+            observed = native_time(pg)
+            if alignment_first is None:
+                alignment_first = observed
+            alignment_elapsed = time.monotonic() - alignment_started
+            remaining = (selected_end - observed).total_seconds()
+            if remaining <= 4 or not 0 <= alignment_elapsed < 20:
+                break
+            if alignment_samples < 512:
+                Event().wait(min(0.05, max(0.0, remaining - 4)))
+        record(
+            record_property,
+            "period_setup_alignment",
+            {
+                "first_native_time": alignment_first,
+                "last_native_time": observed,
+                "samples": alignment_samples,
+                "monotonic_seconds": alignment_elapsed,
+                "initial_end": boundary[0],
+                "target_time": selected_end - timedelta(seconds=4),
+                "selected_end": selected_end,
+                "remaining_seconds": remaining,
+            },
+        )
+        assert 0 <= alignment_elapsed < 20
+        assert 0 < remaining <= 4
         assert boundary[0] <= observed < selected_end
         assert one(after, "jobs", id=case.job_id)["lease_until"] * 1_000_000 > micros(observed)
         record(
