@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** The CHECK repair and bounded period-test setup correction are independently reviewed. The correction is published in PR #122.
-- **Next:** Backend monitors fresh CI; Review verifies receipts and artifacts. Quality maintains corpus handoff and documentation; the lead owns delivery.
-- **Blocker:** Full PR/main and matching installed-artifact acceptance remain pending. The earlier CI failure's cause is unknown; P2 delivery and downstream gates remain unmet.
+- **Verified:** Corrected PR #122 CI and its exact receipts are independently accepted. The PR merged under the repository's protections.
+- **Next:** Backend monitors fresh main CI; Review verifies receipts and installed artifacts. Quality maintains corpus handoff and documentation; the lead owns delivery.
+- **Blocker:** Fresh main and matching installed-artifact acceptance remain required before P2 delivery. Worker, corpus and production prerequisites remain unchanged.
 
 [Active backlog](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Retained history](#143-dated-progress-ledger)
 
@@ -895,6 +895,23 @@ The original brief is filled in this single roadmap. The later request explicitl
 - [ ] G1–G7 implementation and release gates accepted with actual evidence.
 
 ### 14.3 Dated progress ledger
+
+### PR122 accepted and merged; fresh main pending — 2026-10-29
+
+[PR #122](https://github.com/spei04/agent-rewind/pull/122) merged normally under repository protections at 20:10:23 UTC as [M122 `aed2c20d`](https://github.com/spei04/agent-rewind/commit/aed2c20d314e0e361fa4c8e438f839802e1e729b), tree `571263bc`. Independent review accepted corrected [original PR run 40935985110](https://github.com/spei04/agent-rewind/actions/runs/40935985110), attempt 1, on source `cd73a458`: exact 8,382-node arrays, order and skips; Python 3.11 shards passed 4,337 and 4,000 cases with 45 skips total; Python 3.12 passed 8,351 with 31 skips.
+
+The 17 native cases, two R3 cases, seven prior clause-policy and 48 CHECK regressions passed all three phases on both versions: 148 outcomes and 444 phase facts. The 652-file accepted source and 147 runtime members match. This closes the PR-side evidence requirement, not final P2 delivery.
+
+[Fresh push-main run 40946635371](https://github.com/spei04/agent-rewind/actions/runs/40946635371), attempt 1, is running at M122. Backend retains originals and monitors; Review verifies main receipts and matching installed artifacts; Quality maintains corpus handoff and documentation; the lead owns protected delivery. P2 accepted-merge/delivery fields remain null until final acceptance, and parent, worker, corpus and production gates remain unchanged. Earlier failures and their unknown cause stay historical qualifiers, not new gates; all prior evidence remains retained.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** The CHECK repair and bounded period-test setup correction are independently reviewed. The correction is published in PR #122.
+- **Next:** Backend monitors fresh CI; Review verifies receipts and artifacts. Quality maintains corpus handoff and documentation; the lead owns delivery.
+- **Blocker:** Full PR/main and matching installed-artifact acceptance remain pending. The earlier CI failure's cause is unknown; P2 delivery and downstream gates remain unmet.
+
+</details>
 
 ### Reviewed period-test correction published; fresh PR122 CI — 2026-10-29
 
