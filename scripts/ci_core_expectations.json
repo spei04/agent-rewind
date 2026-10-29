@@ -3,8 +3,8 @@
   "status": "accepted",
   "versions": {
     "3.11": {
-      "count": 8327,
-      "sha256": "a2cc17df9c5ddc01728896cf46734112fc9c5c9bee277c595990fa7fe29aef20",
+      "count": 8334,
+      "sha256": "48ac2fddf29ec0850fd92d2395543522303afc444874477332bb0aa4719fa290",
       "skips": [
         {
           "nodeid": "tests/test_admission_transaction.py::test_unsupported_or_dirty_physical_mode_refuses_before_body[autocommit_true]",
@@ -189,8 +189,8 @@
       ]
     },
     "3.12": {
-      "count": 8327,
-      "sha256": "a2cc17df9c5ddc01728896cf46734112fc9c5c9bee277c595990fa7fe29aef20",
+      "count": 8334,
+      "sha256": "48ac2fddf29ec0850fd92d2395543522303afc444874477332bb0aa4719fa290",
       "skips": [
         {
           "nodeid": "tests/test_docker.py::test_actual_code_execution_and_round_trip",

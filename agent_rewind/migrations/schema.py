@@ -190,7 +190,7 @@ def _sqlite_supported_clauses(
         ).scalar_one()
         if not isinstance(sql, str):
             raise MigrationRefused("schema_incompatible")
-        restricted = forbidden if table in TABLES else forbidden - {"CHECK", "AS"}
+        restricted = forbidden.copy() if table in TABLES else forbidden - {"CHECK", "AS"}
         if table in (
             OWNERSHIP_TABLES
             | ARTIFACT_TABLES
