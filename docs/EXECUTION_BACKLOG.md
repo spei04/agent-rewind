@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger foundations are delivered. P2 corrections and PCA1 source have independent review; final delivery remains pending.
-- **Next:** Backend monitors CI and handles failures; Review verifies source and results. Quality prepares corpus delivery, and the lead integrates reviewed changes.
-- **Blocker:** Complete passing PR and main CI and matching artifacts are still required. The earlier HTTP 503 remains unexplained; downstream gates remain unmet.
+- **Verified:** Ledger foundations are delivered. P2 test cleanup and failure diagnostics are independently reviewed, as is the corpus candidate source.
+- **Next:** Backend monitors fresh CI; Review verifies results and artifacts. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Passing PR and main CI and matching installed artifacts are still required. Earlier HTTP 503 causes remain unresolved, and downstream delivery gates remain unmet.
 
 [P2 task and dependencies](#ar-010-a-p2) · [History and maintenance](#dependency-review-progress-and-maintenance)
 
@@ -3576,6 +3576,12 @@ No question above asks to reapprove accepted architecture or issue #51 choices. 
 
 <details>
 <summary>Superseded status snapshots</summary>
+
+**Prior delivery current view — retained 2026-10-29 UTC:**
+
+- **Verified:** Ledger foundations are delivered. P2 corrections and PCA1 source have independent review; final delivery remains pending.
+- **Next:** Backend monitors CI and handles failures; Review verifies source and results. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Complete passing PR and main CI and matching artifacts are still required. The earlier HTTP 503 remains unexplained; downstream gates remain unmet.
 
 **Prior clock-isolation current view — retained 2026-10-29 UTC:**
 

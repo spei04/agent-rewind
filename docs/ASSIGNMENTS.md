@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger foundations are delivered. P2 corrections and PCA1 source have independent review; final delivery remains pending.
-- **Next:** Backend monitors CI and handles failures; Review verifies source and results. Quality prepares corpus delivery, and the lead integrates reviewed changes.
-- **Blocker:** Complete passing PR and main CI and matching artifacts are still required. The earlier HTTP 503 remains unexplained; downstream gates remain unmet.
+- **Verified:** Ledger foundations are delivered. P2 test cleanup and failure diagnostics are independently reviewed, as is the corpus candidate source.
+- **Next:** Backend monitors fresh CI; Review verifies results and artifacts. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Passing PR and main CI and matching installed artifacts are still required. Earlier HTTP 503 causes remain unresolved, and downstream delivery gates remain unmet.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -24,6 +24,14 @@ partner-data or production authorization.
 
 <details>
 <summary>Earlier assignments, approvals and delivery records</summary>
+
+**Prior delivery current view — retained 2026-10-29 UTC:**
+
+- **Verified:** Ledger foundations are delivered. P2 corrections and PCA1 source have independent review; final delivery remains pending.
+- **Next:** Backend monitors CI and handles failures; Review verifies source and results. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Complete passing PR and main CI and matching artifacts are still required. The earlier HTTP 503 remains unexplained; downstream gates remain unmet.
+
+**HTTP cleanup and corpus delivery checkpoint — 2026-10-29 UTC:** Original [P2 CI 40808810414](https://github.com/spei04/agent-rewind/actions/runs/40808810414) failed with distinct schema-guard and listing-continuation observations. Reviewed changes cover seven-module app-cache cleanup, explicit engine finalizers, and bounded failure-only diagnostics. Both supported interpreters collected the accepted 8,575-node corpus inventory; this is collection-only evidence. These checks do not establish the earlier failure causes, full-suite or native success, or delivery acceptance.
 
 **Prior clock-isolation current view — retained 2026-10-29 UTC:**
 
