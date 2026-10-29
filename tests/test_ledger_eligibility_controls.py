@@ -389,6 +389,7 @@ def test_refusal_oracle_rejects_earlier_or_wrong_job_and_physical_outcome(change
 def mapped_fixture():
     fixture, _, principal, _, _ = example()
     grant = {"principal_id": principal, "role": "maintainer", "legacy_default": True}
+    fixture.case.adoption["source_kind"] = "legacy"
     fixture.case.adoption["mapping"] = json.dumps({"principal_grants": [grant]})
     fixture.before["tables"]["project_memberships"] = table(
         [

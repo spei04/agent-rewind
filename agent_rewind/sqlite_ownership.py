@@ -66,6 +66,8 @@ class SQLiteCapability:
 
     lock: RLock = field(default_factory=RLock, repr=False)
     records: WeakSet[ConnectionPoolEntry] = field(default_factory=WeakSet, repr=False)
+    connect_timeout: float | None = None
+    connect_hook: Callable[..., Any] | None = field(default=None, repr=False)
 
 
 @dataclass(eq=False)
@@ -275,6 +277,20 @@ def require_owned_sqlite(engine: Engine) -> SQLiteCapability:
     return capability
 
 
+def require_bounded_sqlite(engine: Engine) -> SQLiteCapability:
+    """Read-only opt-in bound/provenance check for an existing owned factory."""
+    capability = require_owned_sqlite(engine)
+    timeout = capability.connect_timeout
+    if (
+        timeout is None
+        or not 0 < timeout <= 3
+        or capability.connect_hook is None
+        or tuple(engine.dialect.dispatch.do_connect) != (capability.connect_hook,)
+    ):
+        raise SQLiteOwnershipError()
+    return capability
+
+
 def _capability(engine: Engine) -> SQLiteCapability | None:
     with _REGISTRY_LOCK:
         capability = _CAPABILITIES.get(engine)
@@ -344,7 +360,7 @@ def create_owned_sqlite_engine(
         or not 0 <= max_overflow <= 32
     ):
         raise SQLiteOwnershipError()
-    capability = SQLiteCapability()
+    capability = SQLiteCapability(connect_timeout=float(connect_timeout))
     engine = create_engine(
         parsed,
         poolclass=_OwnedQueuePool,
@@ -360,6 +376,12 @@ def create_owned_sqlite_engine(
         dialect: Any, record: ConnectionPoolEntry, args: Any, params: Any
     ) -> _TrackedSQLite:
         receipt = _attempt(capability, record)
+        # Bind the retained factory limit to the actual final native argument.
+        if (
+            type(params.get("timeout")) not in (int, float)
+            or params["timeout"] != capability.connect_timeout
+        ):
+            raise SQLiteOwnershipError()
         raw = sqlite3.connect(*args, **params, factory=_TrackedSQLite)
         raw._ownership = _Physical(capability, receipt=receipt)
         receipt.raw = raw
@@ -429,6 +451,7 @@ def create_owned_sqlite_engine(
             with receipt.lock:
                 receipt.returned = True
 
+    capability.connect_hook = do_connect
     event.listen(engine, "do_connect", do_connect)
     event.listen(engine, "checkout", checkout)
     event.listen(engine, "reset", returning)

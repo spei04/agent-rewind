@@ -3,8 +3,8 @@
   "status": "accepted",
   "versions": {
     "3.11": {
-      "count": 8041,
-      "sha256": "629681d4936e12bd2c1cfe5f7084a9b922373af43db6c9b32bc2efe65c19d88c",
+      "count": 8327,
+      "sha256": "a2cc17df9c5ddc01728896cf46734112fc9c5c9bee277c595990fa7fe29aef20",
       "skips": [
         {
           "nodeid": "tests/test_admission_transaction.py::test_unsupported_or_dirty_physical_mode_refuses_before_body[autocommit_true]",
@@ -167,6 +167,10 @@
           "reason": "sqlite3 driver autocommit is a Python3.12 boundary"
         },
         {
+          "nodeid": "tests/test_reservation_restore_postgres.py::test_postgres_restored_reservation_retains_original_identity_and_balances",
+          "reason": "Opt-in same-cluster restore after actual P2 reservation"
+        },
+        {
           "nodeid": "tests/test_run_projection_backfill.py::test_projection_initializer_discards_unsupported_sqlite_mode_before_ddl[driver_true]",
           "reason": "sqlite3 driver autocommit is a Python3.12 boundary"
         },
@@ -185,8 +189,8 @@
       ]
     },
     "3.12": {
-      "count": 8041,
-      "sha256": "629681d4936e12bd2c1cfe5f7084a9b922373af43db6c9b32bc2efe65c19d88c",
+      "count": 8327,
+      "sha256": "a2cc17df9c5ddc01728896cf46734112fc9c5c9bee277c595990fa7fe29aef20",
       "skips": [
         {
           "nodeid": "tests/test_docker.py::test_actual_code_execution_and_round_trip",
@@ -307,6 +311,10 @@
         {
           "nodeid": "tests/test_ledger_schema.py::test_postgres_executable_policy_drift_refuses[sqlite-disabled_trigger]",
           "reason": "PostgreSQL executable inventory"
+        },
+        {
+          "nodeid": "tests/test_reservation_restore_postgres.py::test_postgres_restored_reservation_retains_original_identity_and_balances",
+          "reason": "Opt-in same-cluster restore after actual P2 reservation"
         }
       ]
     }

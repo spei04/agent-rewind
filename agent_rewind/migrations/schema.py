@@ -179,17 +179,14 @@ def _sqlite_supported_clauses(
         | ADMISSION_TABLES
         | (LEDGER_TABLES if ledger else set())
     ):
-        size: int | None = connection.execute(
+        # Gate the body in SQLite before it crosses the driver boundary; the
+        # same exact row need not be fetched once for its size and again as text.
+        sql: str | None = connection.execute(
             text(
-                "SELECT length(CAST(sql AS BLOB)) FROM sqlite_master "
-                "WHERE type='table' AND name=:name"
+                "SELECT CASE WHEN length(CAST(sql AS BLOB))<=65536 THEN sql END "
+                "FROM sqlite_master WHERE type='table' AND name=:name"
             ),
             {"name": table},
-        ).scalar_one()
-        if size is None or size > 65536:
-            raise MigrationRefused("schema_incompatible")
-        sql: str = connection.execute(
-            text("SELECT sql FROM sqlite_master WHERE type='table' AND name=:name"), {"name": table}
         ).scalar_one()
         if not isinstance(sql, str):
             raise MigrationRefused("schema_incompatible")

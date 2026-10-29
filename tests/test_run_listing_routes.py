@@ -11,6 +11,8 @@ from unittest.mock import Mock
 import pytest
 import test_run_projection_backfill as projection_tests
 from fastapi.testclient import TestClient
+from http_app_cleanup import http_application_cache_cleanup as http_application_cache_cleanup
+from http_failure_diagnostics import route_failure
 from pydantic import SecretStr
 from route_fixture import CSRF, ISSUER, PRINCIPAL, PROJECT
 from sqlalchemy import text
@@ -257,6 +259,12 @@ def test_real_scoped_key_and_live_revocation(http_listing):
 
 
 def test_paging_keeps_watermark_expiry_and_original_limit(http_listing, monkeypatch):
+    from agent_rewind import listing_session
+
+    # Cursor and watermark semantics are independent of elapsed scheduling.
+    # Native SQL and statement/VM guards remain active; separate controls cover
+    # elapsed deadlines and the real native-work budget.
+    monkeypatch.setattr(listing_session, "time", SimpleNamespace(monotonic=lambda: 0.0))
     app, client, engine = http_listing
     clock = [datetime(2026, 1, 1, tzinfo=UTC)]
 
@@ -276,8 +284,9 @@ def test_paging_keeps_watermark_expiry_and_original_limit(http_listing, monkeypa
         rolled_back = add_runs(connection, 1, first=2000)[0]
         raise RuntimeError("synthetic rollback")
     clock[0] += timedelta(seconds=899)
-    second = client.get(BASE, params={"cursor": cursor}, headers=headers(app))
-    assert second.status_code == 200 and second.json()["next_cursor"] is None
+    with route_failure(monkeypatch, app, phase="listing_continuation_expected_200") as evidence:
+        second = client.get(BASE, params={"cursor": cursor}, headers=headers(app))
+        assert second.status_code == 200 and second.json()["next_cursor"] is None, evidence()
     assert [v["id"] for v in second.json()["items"]] == [RUN1]
     assert late not in second.text and rolled_back not in second.text
     error(

@@ -19,6 +19,7 @@ from sqlalchemy import create_engine, event, text
 from test_admission_configuration import configuration
 from test_admission_request import submission
 from test_admission_submit import Policy, Ready, Storage
+from test_ownership import FRESH
 
 from agent_rewind.admission_configuration import NativeRegistry
 from agent_rewind.admission_coordinator import AdmissionCoordinator
@@ -138,7 +139,14 @@ def existing_admission_principal(fixture):
     mapping = fixture.case.adoption["mapping"]
     if isinstance(mapping, str):
         mapping = json.loads(mapping)
-    (grant,) = mapping["principal_grants"]
+    if fixture.case.adoption["source_kind"] == "fresh":
+        assert mapping == {"schema": 1, "source_kind": "fresh"}
+        assert fixture.case.adoption["installation_key"] == FRESH["installation_key"]
+        assert fixture.organization == FRESH["organization_id"]
+        assert fixture.project == FRESH["project_id"]
+        (grant,) = FRESH["principal_grants"]
+    else:
+        (grant,) = mapping["principal_grants"]
     (member,) = rows(fixture.before, "project_memberships")
     assert grant["role"] == "maintainer" and grant["legacy_default"] is True
     assert member == {
@@ -180,13 +188,47 @@ def admitted_predecessor(path, monkeypatch, record):
         raise
 
 
-def admit_existing_fixture(fixture, monkeypatch, record):
+def admit_existing_fixture(
+    fixture,
+    monkeypatch,
+    record,
+    *,
+    principal=None,
+    project_id=None,
+    client_operation_id=None,
+    key_hash=None,
+    admission_root=None,
+):
     """Publish one job; the caller retains ownership of the supplied fixture."""
     engine = None
     try:
         engine = admission_engine(fixture)
         f = SimpleNamespace(engine=engine, config=configuration())
-        f.principal, authority_binding = existing_admission_principal(fixture)
+        explicit = any(
+            value is not None
+            for value in (principal, project_id, client_operation_id, key_hash, admission_root)
+        )
+        if explicit:
+            assert all(
+                value is not None
+                for value in (principal, project_id, client_operation_id, key_hash, admission_root)
+            )
+            assert type(principal) is VerifiedPrincipal
+            principal.__post_init__()
+            for value, width in ((project_id, 32), (client_operation_id, 32), (key_hash, 64)):
+                assert type(value) is str and len(value) == width
+                assert all(char in "0123456789abcdef" for char in value)
+            f.principal = principal
+            selected_project = project_id
+            authority_binding = {
+                "route": "explicit_predecessor_project",
+                "principal_id": principal.principal_id,
+                "project_id": selected_project,
+                "authorization": "fresh actual record authority below",
+            }
+        else:
+            f.principal, authority_binding = existing_admission_principal(fixture)
+            selected_project = fixture.project
         record("predecessor_authority_binding", authority_binding)
         with f.engine.connect() as connection:
             foreign_keys = connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one()
@@ -199,13 +241,17 @@ def admit_existing_fixture(fixture, monkeypatch, record):
             )
             assert foreign_keys == 1
             f.name = connection.execute(
-                text("SELECT name FROM projects WHERE id=:p"), {"p": fixture.project}
+                text("SELECT name FROM projects WHERE id=:p"), {"p": selected_project}
             ).scalar_one()
         f.authority = RequestAuthority(f.engine)
-        f.context = f.authority.named(f.principal, fixture.project, action="record").context
-        f.intent = parse_submit(canonical(submission()))
-        f.root = fixture.case.path.parent / "admission-journal"
-        objects = fixture.case.path.parent / "admission-objects"
+        f.context = f.authority.named(f.principal, selected_project, action="record").context
+        request = submission()
+        if explicit:
+            request["client_operation_id"] = client_operation_id
+        f.intent = parse_submit(canonical(request))
+        selected_root = admission_root if explicit else fixture.case.path.parent
+        f.root = selected_root / "admission-journal"
+        objects = selected_root / "admission-objects"
         f.root.mkdir(mode=0o700)
         objects.mkdir(mode=0o700)
         f.policy, f.ready = Policy(f), Ready(f)
@@ -227,7 +273,11 @@ def admit_existing_fixture(fixture, monkeypatch, record):
                 f.service, "schema_compatibility", lambda: CompatibilityResult("ready", "ready")
             )
             accepted = f.service.submit(
-                f.principal, f.context, f.intent, "7" * 64, OriginCorrelation("6" * 32)
+                f.principal,
+                f.context,
+                f.intent,
+                key_hash if explicit else "7" * 64,
+                OriginCorrelation("6" * 32),
             )
         assert len(f.storage.calls) == 3 and f.ready.calls == 1
         for descriptor in f.storage.calls:
@@ -238,7 +288,7 @@ def admit_existing_fixture(fixture, monkeypatch, record):
         association = assert_admitted(
             result.before,
             accepted,
-            project=result.project,
+            project=selected_project,
             principal=f.principal.principal_id,
             config_digest=f.config.digest,
             budget=f.intent.budget_microusd,

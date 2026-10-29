@@ -2,7 +2,9 @@
 
 One request shares 512 SQL/control attempts, ten seconds while a connection is
 owned, and 20 million SQLite VM instructions across every phase. Connection
-acquisition and storage I/O are outside this clock. Eight attempts are reserved
+acquisition and storage I/O are outside the default clock. The opt-in invocation
+clock includes acquisition and all gaps from construction; neither clock resets.
+Eight attempts are reserved
 before ordinary work for rollback, restoration, discard and bounded reclose.
 Native timeouts bound server waits; cleanup is always attempted, not promised a
 hard real-time bound. Engines must yield exclusive native connections without
@@ -46,7 +48,10 @@ CLEANUP_RESERVE = 8
 class OperationWork:
     """A single request's counters, reused sequentially, never concurrently."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, include_acquisition: bool = False) -> None:
+        if type(include_acquisition) is not bool:
+            raise AdmissionError("invalid_request")
+        self._invocation_started = perf_counter() if include_acquisition else None
         self.statements = 0
         self.seconds = 0.0
         self.instructions = 0
@@ -62,6 +67,8 @@ class OperationWork:
         self._failed = False
 
     def _elapsed(self) -> float:
+        if self._invocation_started is not None:
+            return perf_counter() - self._invocation_started
         return self.seconds + (0.0 if self._started is None else perf_counter() - self._started)
 
     def _limits(self, *, cleanup: bool = False) -> None:
@@ -232,7 +239,9 @@ class OperationWork:
             raise AdmissionError("dependency_unavailable")
 
     def finish(self) -> None:
-        if self._started is not None:
+        if self._invocation_started is not None:
+            self.seconds = self._elapsed()
+        elif self._started is not None:
             self.seconds += perf_counter() - self._started
         self._started = None
         self._connection = None

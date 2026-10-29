@@ -14,7 +14,7 @@ from agent_rewind.migrations import ledger_reader_catalog
 from agent_rewind.migrations.ledger_inspection import inspect_ledger_state
 from agent_rewind.migrations.ledger_transaction import LedgerOutcome, ledger_transaction
 from agent_rewind.migrations.ledger_work import LedgerWork
-from agent_rewind.migrations.schema import ADMISSION, MigrationRefused
+from agent_rewind.migrations.schema import ADMISSION, MigrationRefused, installed_profile
 
 pg = migration_tests.pg
 
@@ -91,39 +91,158 @@ def test_missing_column_field_refuses():
         ledger_reader_catalog._postgres_column(row)
 
 
-@pytest.mark.parametrize("count", [0, 33])
-def test_column_transport_refuses_missing_or_overfull_rows(count):
-    rows = [column() for _ in range(count)]
+def column_rows():
+    profile = installed_profile("postgresql", ADMISSION)
+    names = sorted(name for name in profile if not name.startswith("$"))
+    rows = [
+        column(
+            table_name=name,
+            ordinal=index,
+            name=field[0],
+            default_expression=None if index % 2 else "'quoted default'::text",
+        )
+        for name in names
+        for index, field in enumerate(profile[name]["columns"], 1)
+    ]
+    assert len(rows) == 115
+    return names, rows
+
+
+@pytest.mark.parametrize("fault", ["missing", "overfull"])
+def test_column_transport_refuses_missing_or_overfull_rows(fault):
+    names, rows = column_rows()
+    if fault == "missing":
+        rows.pop()
+    else:
+        rows.append(rows[-1])
     connection = SimpleNamespace(
         execute=lambda *args: SimpleNamespace(mappings=lambda: SimpleNamespace(all=lambda: rows))
     )
     with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
-        ledger_reader_catalog._postgres_columns(connection, "jobs", LedgerWork())
+        ledger_reader_catalog._postgres_columns(connection, names, "ar6", LedgerWork())
 
 
-def test_column_query_keeps_observed_names_and_one_bound_table_parameter():
-    rows = [column(name="second"), column(name="first")]
+def test_column_query_keeps_observed_names_and_one_bound_row_limit():
+    names, rows = column_rows()
     calls = []
 
     def execute(statement, parameters):
         calls.append((statement, parameters))
         return SimpleNamespace(mappings=lambda: SimpleNamespace(all=lambda: rows))
 
-    table = "quoted'; SELECT 1; --"
     observed = ledger_reader_catalog._postgres_columns(
-        SimpleNamespace(execute=execute), table, LedgerWork()
+        SimpleNamespace(execute=execute), names, "ar6", LedgerWork()
     )
-    assert [row[0] for row in observed] == ["second", "first"]
-    assert len(calls) == 1 and calls[0][1] == {"table_name": table}
+    assert set(observed) == set(names)
+    for name in names:
+        native = [row for row in rows if row["table_name"] == name]
+        assert [row[0] for row in observed[name]] == [row["name"] for row in native]
+        assert [row[3] for row in observed[name]] == [row["default_expression"] for row in native]
+    assert len(calls) == 1 and calls[0][1] == {"row_limit": 116}
     compiled = (
         calls[0][0]
         .bindparams(**calls[0][1])
         .compile(dialect=PGDialect_psycopg())
         .construct_expanded_state()
     )
-    assert compiled.parameters == {"table_name": table}
-    assert table not in compiled.statement
-    assert compiled.statement.rstrip().endswith("LIMIT 33")
+    assert compiled.parameters == {"row_limit": 116}
+    assert "ORDER BY c.relname,a.attnum" in compiled.statement
+    assert compiled.statement.rstrip().endswith("LIMIT %(row_limit)s::INTEGER")
+
+
+def test_column_query_rejects_unowned_selected_names_before_sql():
+    names, _ = column_rows()
+    names[-1] = "quoted'; SELECT 1; --"
+
+    def unexpected(*args):
+        pytest.fail("Unowned table selection reached SQL")
+
+    with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+        ledger_reader_catalog._postgres_columns(
+            SimpleNamespace(execute=unexpected), names, "ar6", LedgerWork()
+        )
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "unknown-table",
+        "table-type",
+        "ordinal-bool",
+        "ordinal-zero",
+        "ordinal-gap",
+        "ordinal-duplicate",
+        "global-order",
+        "duplicate-name",
+        "missing-field",
+        "extra-field",
+        "identity",
+        "dropped",
+    ],
+)
+def test_column_batch_rejects_misowned_disordered_or_unsupported_rows(fault):
+    names, rows = column_rows()
+    index = next(i for i, row in enumerate(rows) if row["ordinal"] == 2)
+    if fault == "unknown-table":
+        rows[index]["table_name"] = "unowned"
+    elif fault == "table-type":
+        rows[index]["table_name"] = b"unowned"
+    elif fault == "ordinal-bool":
+        rows[index]["ordinal"] = True
+    elif fault == "ordinal-zero":
+        rows[index]["ordinal"] = 0
+    elif fault == "ordinal-gap":
+        rows[index]["ordinal"] += 1
+    elif fault == "ordinal-duplicate":
+        rows[index]["ordinal"] -= 1
+    elif fault == "global-order":
+        first, second = names[:2]
+        rows = (
+            [row for row in rows if row["table_name"] == second]
+            + [row for row in rows if row["table_name"] == first]
+            + [row for row in rows if row["table_name"] not in {first, second}]
+        )
+    elif fault == "duplicate-name":
+        rows[index]["name"] = rows[index - 1]["name"]
+    elif fault == "missing-field":
+        del rows[index]["generated"]
+    elif fault == "extra-field":
+        rows[index]["unobserved"] = None
+    elif fault == "identity":
+        rows[index]["identity_kind"] = "a"
+    else:
+        rows[index]["dropped"] = True
+    connection = SimpleNamespace(
+        execute=lambda *args: SimpleNamespace(mappings=lambda: SimpleNamespace(all=lambda: rows))
+    )
+    with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+        ledger_reader_catalog._postgres_columns(connection, names, "ar6", LedgerWork())
+
+
+@pytest.mark.parametrize("first_count", [32, 33], ids=["exact", "one-over"])
+def test_column_batch_preserves_per_table_transport_ceiling(first_count):
+    names, _ = column_rows()
+    counts = [first_count] + [1] * (len(names) - 1)
+    remaining = 115 - sum(counts)
+    for index in range(1, len(counts)):
+        amount = min(remaining, 31)
+        counts[index] += amount
+        remaining -= amount
+    assert remaining == 0
+    rows = [
+        column(table_name=name, ordinal=index, name=f"column_{index}")
+        for name, count in zip(names, counts, strict=True)
+        for index in range(1, count + 1)
+    ]
+    connection = SimpleNamespace(
+        execute=lambda *args: SimpleNamespace(mappings=lambda: SimpleNamespace(all=lambda: rows))
+    )
+    if first_count == 32:
+        observed = ledger_reader_catalog._postgres_columns(connection, names, "ar6", LedgerWork())
+        assert len(observed[names[0]]) == 32 and sum(map(len, observed.values())) == 115
+    else:
+        with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+            ledger_reader_catalog._postgres_columns(connection, names, "ar6", LedgerWork())
 
 
 def test_column_preflight_failure_prevents_body(monkeypatch):
@@ -181,9 +300,9 @@ def test_postgres_column_drift_refuses_before_body(pg, monkeypatch, changes, rec
             state = inspect_ledger_state(connection)
         assert state.model_dump(mode="json") == case.expected
         assert positive.commit_acknowledged and not positive.cleanup_failed
-        body = "SELECT a.attname::text AS name,"
+        body = "SELECT c.relname::text AS table_name, a.attnum AS ordinal,"
         positive_bodies = [row for row in calls if row[0] == "positive" and row[1].startswith(body)]
-        assert positive_bodies and all(row[2] == 1 for row in positive_bodies)
+        assert len(positive_bodies) == 1 and positive_bodies[0][2] == 1
         engine.dispose()
         phase[0] = "fixture-drift"
         with case.engine.begin() as connection:

@@ -4,6 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 from fastapi.testclient import TestClient
+from http_app_cleanup import http_application_cache_cleanup as http_application_cache_cleanup
 from route_fixture import CSRF, PRINCIPAL, PROJECT, cookie, cookie_headers, prepared_app
 from sqlalchemy import text
 
@@ -15,8 +16,9 @@ from agent_rewind.sqlite_ownership import owned_begin, owned_connect
 pytestmark = pytest.mark.usefixtures("legacy_behavior_schema")
 
 
-def test_auth_roles_key_revocation_and_no_payload_echo(settings, task):
+def test_auth_roles_key_revocation_and_no_payload_echo(settings, task, request):
     app = prepared_app(settings)
+    request.addfinalizer(app.state.db.engine.dispose)
     with TestClient(app) as client:
         assert client.get("/api/runs").status_code == 401
         admin = cookie_headers(app)
@@ -45,8 +47,9 @@ def test_auth_roles_key_revocation_and_no_payload_echo(settings, task):
         assert "frame-ancestors" in client.get("/").headers["content-security-policy"]
 
 
-def test_tampered_cookie_rejected(settings):
+def test_tampered_cookie_rejected(settings, request):
     app = create_app(settings)
+    request.addfinalizer(app.state.db.engine.dispose)
     app.state.db.migrate(installation_key="synthetic-test")
     with TestClient(app) as client:
         client.cookies.set("rewind_session", "forged")
@@ -59,8 +62,9 @@ def test_tool_paths_are_normalized(path):
         Action(tool="read_file", path=path)
 
 
-def test_scoped_key_expiry(settings):
+def test_scoped_key_expiry(settings, request):
     app = create_app(settings)
+    request.addfinalizer(app.state.db.engine.dispose)
     app.state.db.migrate(installation_key="synthetic-test")
     app.state.db.issue_key("expired-token", "administrator", "expired", time.time() - 1, "test")
     with TestClient(app) as client:
@@ -70,16 +74,18 @@ def test_scoped_key_expiry(settings):
         )
 
 
-def test_oversized_body_is_rejected_before_parsing(settings):
+def test_oversized_body_is_rejected_before_parsing(settings, request):
     app = create_app(settings)
+    request.addfinalizer(app.state.db.engine.dispose)
     app.state.db.migrate(installation_key="synthetic-test")
     with TestClient(app) as client:
         response = client.post("/api/runs", content=b"x" * (9 * 1024 * 1024 + 1))
         assert response.status_code == 413
 
 
-def test_cookie_write_requires_csrf_and_origin(settings, task):
+def test_cookie_write_requires_csrf_and_origin(settings, task, request):
     app = prepared_app(settings)
+    request.addfinalizer(app.state.db.engine.dispose)
     with TestClient(app) as client:
         client.cookies.set("rewind_session", cookie(app))
         assert client.get("/api/me").status_code == 200
@@ -102,8 +108,9 @@ def test_cookie_write_requires_csrf_and_origin(settings, task):
         )
 
 
-def test_revoked_member_recovers_csrf_and_logs_out_without_data(settings):
+def test_revoked_member_recovers_csrf_and_logs_out_without_data(settings, request):
     app = prepared_app(settings)
+    request.addfinalizer(app.state.db.engine.dispose)
     with TestClient(app) as client:
         client.cookies.set("rewind_session", cookie(app))
         assert client.get("/api/me").json()["role"] == "maintainer"
@@ -136,8 +143,11 @@ def test_revoked_member_recovers_csrf_and_logs_out_without_data(settings):
         ("correct", "correct", 200),
     ],
 )
-def test_logout_cookie_boundary_ignores_bearer_precedence(settings, bearer, csrf, origin, expected):
+def test_logout_cookie_boundary_ignores_bearer_precedence(
+    settings, bearer, csrf, origin, expected, request
+):
     app = prepared_app(settings)
+    request.addfinalizer(app.state.db.engine.dispose)
     app.state.db.issue_key("valid", "operator", "fixture", time.time() + 1000, "test")
     headers = {"Authorization": "Bearer " + bearer}
     if csrf is not None:
@@ -154,8 +164,9 @@ def test_logout_cookie_boundary_ignores_bearer_precedence(settings, bearer, csrf
             assert client.get("/api/me", headers=headers).status_code == 401
 
 
-def test_me_database_failure_is_not_null_role(settings, monkeypatch):
+def test_me_database_failure_is_not_null_role(settings, monkeypatch, request):
     app = prepared_app(settings)
+    request.addfinalizer(app.state.db.engine.dispose)
 
     def unavailable(*args):
         raise RepositoryUnavailable()
@@ -165,8 +176,9 @@ def test_me_database_failure_is_not_null_role(settings, monkeypatch):
         assert client.get("/api/me", headers=cookie_headers(app)).status_code == 503
 
 
-def test_admission_refuses_before_readiness_storage_or_writes(settings, task, monkeypatch):
+def test_admission_refuses_before_readiness_storage_or_writes(settings, task, monkeypatch, request):
     app = prepared_app(settings)
+    request.addfinalizer(app.state.db.engine.dispose)
     forbidden = Mock(side_effect=AssertionError("unavailable admission crossed boundary"))
     monkeypatch.setattr(app.state.readiness, "check", forbidden)
     monkeypatch.setattr(app.state.reader.repositories, "artifact_loader", forbidden)

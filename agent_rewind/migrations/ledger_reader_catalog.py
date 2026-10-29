@@ -6,8 +6,9 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-from sqlalchemy import inspect, text
+from sqlalchemy import Integer, String, TupleType, bindparam, inspect, text
 from sqlalchemy.engine import Connection
+from sqlalchemy.engine.reflection import Inspector, ObjectKind, ObjectScope
 
 from .ledger_catalog_sql import EXPECTED, SQL
 from .ledger_check import LedgerCheck
@@ -18,6 +19,7 @@ from .schema import (
     _canonicalize_postgresql_enum_checks,
     _sqlite_supported_clauses,
     dialect,
+    installed_profile,
     schema_table_names,
     verify_installed_profile,
 )
@@ -25,7 +27,8 @@ from .schema import (
 # The generic PG column query has 21 binds for optional identity/collation
 # reflection. The ledger's preceding exact gates exclude those shapes, so this
 # observation preserves the shared 16-bind limit without changing old readers.
-_POSTGRES_COLUMNS = """SELECT a.attname::text AS name,
+_POSTGRES_COLUMNS = """SELECT c.relname::text AS table_name, a.attnum AS ordinal,
+       a.attname::text AS name,
        pg_catalog.format_type(a.atttypid,a.atttypmod) AS format_type,
        a.attnotnull AS not_null,
        CASE WHEN a.atthasdef THEN
@@ -40,9 +43,9 @@ FROM pg_catalog.pg_class c
 JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
 JOIN pg_catalog.pg_attribute a ON a.attrelid=c.oid
 WHERE n.nspname='public' AND c.relkind='r'
-  AND c.relname=:table_name AND a.attnum>0
-ORDER BY a.attnum
-LIMIT 33
+  AND a.attnum>0
+ORDER BY c.relname,a.attnum
+LIMIT :row_limit
 """
 _POSTGRES_COLUMN_TYPES = {
     "bigint": "BIGINT",
@@ -99,15 +102,53 @@ def _postgres_column(row: Mapping[Any, Any]) -> list[Any]:
     ]
 
 
-def _postgres_columns(connection: Connection, table: str, work: LedgerCheck) -> list[list[Any]]:
-    rows = connection.execute(text(_POSTGRES_COLUMNS), {"table_name": table}).mappings().all()
-    if not 1 <= len(rows) <= 32:
+def _postgres_columns(
+    connection: Connection, selected: list[str], revision_key: str, work: LedgerCheck
+) -> dict[str, list[list[Any]]]:
+    revision = {"ar6": ADMISSION, "ar7": LEDGER}[revision_key]
+    expected = sorted(
+        table for table in installed_profile("postgresql", revision) if not table.startswith("$")
+    )
+    if selected != expected:
         raise MigrationRefused("schema_incompatible")
-    result = []
+    count = EXPECTED[(revision_key, "postgresql", "catalog_column_count")]["candidate_rows"]
+    if type(count) is not int:
+        raise MigrationRefused("schema_incompatible")
+    rows = connection.execute(text(_POSTGRES_COLUMNS), {"row_limit": count + 1}).mappings().all()
+    if len(rows) != count:
+        raise MigrationRefused("schema_incompatible")
+    ordinals = {table: 0 for table in selected}
+    names: set[tuple[str, str]] = set()
+    columns: list[tuple[str, list[Any]]] = []
+    previous = ("", 0)
     for row in rows:
         work.check()
-        result.append(_postgres_column(row))
-    return result
+        table_name, ordinal = row.get("table_name"), row.get("ordinal")
+        if (
+            type(table_name) is not str
+            or table_name not in ordinals
+            or type(ordinal) is not int
+            or ordinal != ordinals[table_name] + 1
+            or not 1 <= ordinal <= 32
+            or (table_name, ordinal) <= previous
+        ):
+            raise MigrationRefused("schema_incompatible")
+        # Keep the complete original scalar parser; no unsupported native
+        # column is filtered out or repaired by batching.
+        column = _postgres_column(
+            {key: value for key, value in row.items() if key not in {"table_name", "ordinal"}}
+        )
+        identity = (table_name, column[0])
+        if identity in names:
+            raise MigrationRefused("schema_incompatible")
+        names.add(identity)
+        ordinals[table_name] = ordinal
+        previous = table_name, ordinal
+        columns.append((table_name, column))
+    if any(value == 0 for value in ordinals.values()):
+        raise MigrationRefused("schema_incompatible")
+    # Group only after complete ownership, order, multiplicity and type checks.
+    return {table: [column for owner, column in columns if owner == table] for table in selected}
 
 
 def _gate(connection: Connection, revision: str, name: str) -> None:
@@ -222,6 +263,194 @@ def inspect_catalog(connection: Connection, revision: str, work: LedgerCheck) ->
     return shape
 
 
+def _sqlite_table_options(connection: Connection, tables: list[str], revision: str) -> list[str]:
+    # Use only the revision-owned literals, after proving the fresh table set.
+    selected = sorted(installed_profile("sqlite", revision))
+    if len(tables) != len(selected) or set(tables) != set(selected):
+        raise MigrationRefused("schema_incompatible")
+    # The typed compiler renders these proven profile names as SQL literals,
+    # keeping the existing 16-wire-bind ceiling without handwritten quoting.
+    statement = text(
+        "SELECT name,wr,strict FROM pragma_table_list WHERE schema='main' "
+        "AND name IN :table_names LIMIT :row_limit"
+    ).bindparams(
+        bindparam("table_names", type_=String(), expanding=True, literal_execute=True),
+        bindparam("row_limit", type_=Integer()),
+    )
+    rows = connection.execute(
+        statement, {"table_names": selected, "row_limit": len(selected) + 1}
+    ).all()
+    if (
+        len(rows) != len(selected)
+        or any(
+            len(row) != 3
+            or type(row[0]) is not str
+            or type(row[1]) is not int
+            or type(row[2]) is not int
+            or row[1:] != (0, 0)
+            for row in rows
+        )
+        or {row[0] for row in rows} != set(selected)
+    ):
+        raise MigrationRefused("schema_incompatible")
+    return selected
+
+
+def _sqlite_native_indexes(
+    connection: Connection, selected: list[str], revision_key: str, work: LedgerCheck
+) -> tuple[dict[str, list[tuple[Any, ...]]], dict[tuple[str, str], list[tuple[Any, ...]]]]:
+    """Observe the same native index rows once, within the preceding exact gates."""
+    index_count = EXPECTED[(revision_key, "sqlite", "sqlite_index_gate")]["candidate_rows"]
+    part_count = EXPECTED[(revision_key, "sqlite", "sqlite_index_parts_gate")]["candidate_rows"]
+    if type(index_count) is not int or type(part_count) is not int:
+        raise MigrationRefused("schema_incompatible")
+    # A one-column expanding tuple retains the VALUES CTE. SQLAlchemy's
+    # String literal compiler handles names; only integer limits are wire binds.
+    names = bindparam(
+        "table_names", type_=TupleType(String()), expanding=True, literal_execute=True
+    )
+    index_limit = bindparam("index_limit", type_=Integer())
+    parameters = {"table_names": [(name,) for name in selected], "index_limit": index_count + 1}
+    tables = "WITH tables(table_name) AS :table_names"
+    indexes_sql = (
+        'SELECT t.table_name,p.seq,p.name,p."unique",p.origin,p.partial '
+        "FROM tables t JOIN pragma_index_list(t.table_name,'main') p "
+        "ORDER BY t.table_name,p.seq LIMIT :index_limit"
+    )
+    indexes = connection.execute(
+        text(tables + " " + indexes_sql).bindparams(names, index_limit), parameters
+    ).all()
+    parts = connection.execute(
+        text(
+            tables + ", indexes AS MATERIALIZED (" + indexes_sql + ") "
+            'SELECT i.table_name,i.name,p.seqno,p.cid,p.name,p."desc",p.coll,p."key" '
+            "FROM indexes i JOIN pragma_index_xinfo(i.name,'main') p "
+            "ORDER BY i.table_name,i.name,p.seqno LIMIT :part_limit"
+        ).bindparams(names, index_limit, bindparam("part_limit", type_=Integer())),
+        {**parameters, "part_limit": part_count + 1},
+    ).all()
+    if (
+        len(indexes) != index_count
+        or len(parts) != part_count
+        or any(
+            len(row) != 6
+            or type(row[0]) is not str
+            or row[0] not in selected
+            or type(row[1]) is not int
+            or type(row[2]) is not str
+            or type(row[3]) is not int
+            or row[3] not in (0, 1)
+            or type(row[4]) is not str
+            or row[4] not in ("c", "u", "pk")
+            or type(row[5]) is not int
+            or row[5] not in (0, 1)
+            for row in indexes
+        )
+        or any(
+            len(row) != 8
+            or type(row[0]) is not str
+            or type(row[1]) is not str
+            or type(row[2]) is not int
+            or type(row[3]) is not int
+            or (row[4] is not None and type(row[4]) is not str)
+            or type(row[5]) is not int
+            or row[5] not in (0, 1)
+            or type(row[6]) is not str
+            or row[6] != "BINARY"
+            or type(row[7]) is not int
+            or row[7] not in (0, 1)
+            or (row[4] is None and (row[3], row[5], row[7]) != (-1, 0, 0))
+            for row in parts
+        )
+    ):
+        raise MigrationRefused("schema_incompatible")
+    keys = {(row[0], row[2]) for row in indexes}
+    if (
+        len(keys) != index_count
+        or len({row[2] for row in indexes}) != index_count
+        or {(row[0], row[1]) for row in parts} != keys
+    ):
+        raise MigrationRefused("schema_incompatible")
+    # Prove multiplicity and complete native ordinals before grouping any rows.
+    for table in selected:
+        work.check()
+        ordinals = [row[1] for row in indexes if row[0] == table]
+        if ordinals != list(range(len(ordinals))):
+            raise MigrationRefused("schema_incompatible")
+    for table, index in sorted(keys):
+        work.check()
+        ordinals = [row[2] for row in parts if row[0] == table and row[1] == index]
+        if not ordinals or ordinals != list(range(len(ordinals))):
+            raise MigrationRefused("schema_incompatible")
+    return (
+        {table: [tuple(row[1:]) for row in indexes if row[0] == table] for table in selected},
+        {
+            (table, index): [tuple(row[2:]) for row in parts if row[0] == table and row[1] == index]
+            for table, index in sorted(keys)
+        },
+    )
+
+
+def _postgres_constraints(
+    inspector: Inspector, selected: list[str], work: LedgerCheck
+) -> dict[str, dict[str, Any]]:
+    """Reuse the same fresh parsers without repeating each table's queries."""
+    result: dict[str, dict[str, Any]] = {"pk": {}, "uniques": {}, "foreign_keys": {}, "checks": {}}
+
+    def retain(kind: str, rows: Mapping[Any, Any], names: list[str]) -> None:
+        work.check()
+        if set(rows) != {("public", table) for table in names} or any(
+            type(value) is not (dict if kind == "pk" else list) for value in rows.values()
+        ):
+            raise MigrationRefused("schema_incompatible")
+        for (_, table), value in rows.items():
+            result[kind][table] = value
+
+    # The pinned PostgreSQL dialect expands both names and OIDs. Ten names
+    # retain the operator reader's 16-bind ceiling (15 for OIDs, 13 for keys).
+    # This Inspector belongs only to this observation; no prior approval is reused.
+    for start in range(0, len(selected), 10):
+        batch = selected[start : start + 10]
+        retain(
+            "pk",
+            inspector.get_multi_pk_constraint(
+                schema="public",
+                filter_names=batch,
+                scope=ObjectScope.DEFAULT,
+                kind=ObjectKind.TABLE,
+            ),
+            batch,
+        )
+        retain(
+            "uniques",
+            inspector.get_multi_unique_constraints(
+                schema="public",
+                filter_names=batch,
+                scope=ObjectScope.DEFAULT,
+                kind=ObjectKind.TABLE,
+            ),
+            batch,
+        )
+    # The preceding native gates and exact table set already bound all public
+    # tables. Omitting the name filter preserves eight fixed binds for these
+    # two parsers; the complete returned public keyset must still match.
+    retain(
+        "foreign_keys",
+        inspector.get_multi_foreign_keys(
+            schema="public", scope=ObjectScope.DEFAULT, kind=ObjectKind.TABLE
+        ),
+        selected,
+    )
+    retain(
+        "checks",
+        inspector.get_multi_check_constraints(
+            schema="public", scope=ObjectScope.DEFAULT, kind=ObjectKind.TABLE
+        ),
+        selected,
+    )
+    return result
+
+
 def _observe_catalog(
     connection: Connection,
     indexes_by_table: dict[str, list[dict[str, Any]]],
@@ -236,6 +465,9 @@ def _observe_catalog(
     ledger = revision == LEDGER
     executable_profile = None
     if name == "sqlite":
+        selected = _sqlite_table_options(
+            connection, tables, {"ar6": ADMISSION, "ar7": LEDGER}[revision_key]
+        )
         _sqlite_supported_clauses(
             connection, tables, admission=revision == ADMISSION, ledger=ledger
         )
@@ -244,6 +476,9 @@ def _observe_catalog(
         ).first()
         if extras or connection.exec_driver_sql("SELECT 1 FROM sqlite_temp_master LIMIT 1").first():
             raise MigrationRefused("schema_incompatible")
+        native_by_table, parts_by_index = _sqlite_native_indexes(
+            connection, selected, revision_key, work
+        )
     else:
         if connection.execute(
             text("SELECT 1 FROM pg_class WHERE relnamespace=pg_my_temp_schema() LIMIT 1")
@@ -289,11 +524,20 @@ def _observe_catalog(
         )
         if extras or executable:
             raise MigrationRefused("schema_incompatible")
+        selected = sorted(
+            table
+            for table in installed_profile(name, {"ar6": ADMISSION, "ar7": LEDGER}[revision_key])
+            if not table.startswith("$")
+        )
+        if tables != selected:
+            raise MigrationRefused("schema_incompatible")
+        constraints = _postgres_constraints(inspector, selected, work)
+        columns_by_table = _postgres_columns(connection, selected, revision_key, work)
     result: dict[str, Any] = {}
     for table in sorted(tables):
         work.check()
         if name == "postgresql":
-            column_shape = _postgres_columns(connection, table, work)
+            column_shape = columns_by_table[table]
         else:
             columns = inspector.get_columns(table, schema=schema)
             if len(columns) > 32:
@@ -309,28 +553,21 @@ def _observe_catalog(
                 ]
                 for c in columns
             ]
-        indexes = (
-            indexes_by_table.get(table, [])
+        indexes = indexes_by_table.get(table, []) if name == "postgresql" else []
+        # SQLite uniqueness is observed below from its native index catalog;
+        # generic reflection would only repeat reads whose result is discarded.
+        uniques = (
+            sorted([c["column_names"] for c in constraints["uniques"][table]])
             if name == "postgresql"
-            else inspector.get_indexes(table, schema=schema)
-        )
-        for reflected_index in indexes:
-            if "dialect_options" in reflected_index:
-                reflected_index["dialect_options"] = {
-                    key: str(value) if key.endswith("_where") else value
-                    for key, value in reflected_index["dialect_options"].items()
-                }
-        uniques = sorted(
-            [c["column_names"] for c in inspector.get_unique_constraints(table, schema=schema)]
+            else []
         )
         if name == "sqlite":
             # SQLAlchemy's SQLite SQL parser misses inline UNIQUE declarations in the
             # frozen fixture. SQLite's own index catalog is the structural authority.
-            quoted = connection.dialect.identifier_preparer.quote_identifier(table)
             uniques = []
-            for index in connection.exec_driver_sql(f"PRAGMA index_list({quoted})"):
-                index_name = connection.dialect.identifier_preparer.quote_identifier(index[1])
-                parts = list(connection.exec_driver_sql(f"PRAGMA index_xinfo({index_name})"))
+            native_indexes = native_by_table[table]
+            for index in native_indexes:
+                parts = parts_by_index[(table, index[1])]
                 allowed_partial = (
                     table == "project_memberships"
                     and index[1] == "membership_active_legacy_default"
@@ -364,18 +601,45 @@ def _observe_catalog(
                 if index[3] == "u":
                     uniques.append([part[2] for part in parts if part[5]])
             uniques.sort()
-            options = connection.execute(
-                text(SQL[(revision_key, "sqlite", "sqlite_selected_table_options")]),
-                {"table_name": table},
-            ).all()
-            if len(options) != 1 or tuple(options[0]) != (0, 0):
-                raise MigrationRefused("schema_incompatible")
+            # Generic reflection excludes autoindexes, and otherwise repeats
+            # index_list plus has_table reads to return the same empty list.
+            if any(not index[1].startswith("sqlite_autoindex") for index in native_indexes):
+                indexes = [dict(index) for index in inspector.get_indexes(table, schema=schema)]
+        for reflected_index in indexes:
+            if "dialect_options" in reflected_index:
+                reflected_index["dialect_options"] = {
+                    key: str(value) if key.endswith("_where") else value
+                    for key, value in reflected_index["dialect_options"].items()
+                }
+        # SQLite's PK reflection uses these same fresh column ordinals; its
+        # additional DDL read supplies only the unused constraint name.
+        if name == "postgresql":
+            primary_key = constraints["pk"][table]["constrained_columns"]
+        else:
+            primary_columns: list[tuple[int, str]] = []
+            for column in columns:
+                ordinal = column.get("primary_key", 0)
+                if type(ordinal) is not int:
+                    raise MigrationRefused("schema_incompatible")
+                if ordinal > 0:
+                    primary_columns.append((ordinal, column["name"]))
+            primary_key = [
+                column for _, column in sorted(primary_columns, key=lambda pair: pair[0])
+            ]
         result[table] = {
             "columns": column_shape,
-            "pk": inspector.get_pk_constraint(table, schema=schema)["constrained_columns"],
+            "pk": primary_key,
             "uniques": uniques,
-            "foreign_keys": inspector.get_foreign_keys(table, schema=schema),
-            "checks": inspector.get_check_constraints(table, schema=schema),
+            "foreign_keys": (
+                constraints["foreign_keys"][table]
+                if name == "postgresql"
+                else inspector.get_foreign_keys(table, schema=schema)
+            ),
+            "checks": (
+                constraints["checks"][table]
+                if name == "postgresql"
+                else inspector.get_check_constraints(table, schema=schema)
+            ),
             # Reflection values retain their SQLAlchemy types; the persisted
             # catalog uses JSON arrays without dropping sort/null-order modifiers.
             "indexes": [
