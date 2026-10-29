@@ -5,6 +5,7 @@ import time
 import pytest
 import test_migrations_postgres as migration_cases
 from fastapi.testclient import TestClient
+from http_app_cleanup import http_application_cache_cleanup as http_application_cache_cleanup
 from sqlalchemy import event, text
 from sqlalchemy.exc import DBAPIError
 

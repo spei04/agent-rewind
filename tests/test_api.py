@@ -4,6 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 from fastapi.testclient import TestClient
+from http_app_cleanup import http_application_cache_cleanup as http_application_cache_cleanup
 from route_fixture import CSRF, PRINCIPAL, PROJECT, cookie, cookie_headers, prepared_app
 from sqlalchemy import text
 
