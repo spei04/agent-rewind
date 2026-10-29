@@ -3,7 +3,7 @@
 ## Current status
 
 - **Verified:** Ledger foundations are delivered. P2 implementation and diagnostics passed component review; delivery remains unaccepted. Corpus work is preparation only.
-- **Next:** The lead publishes the diagnostics and starts full CI. Quality checks the test inventory; Review verifies the results.
+- **Next:** Backend monitors full CI; Review checks the results. Quality prepares corpus delivery, and the lead integrates the reviewed changes.
 - **Blocker:** The HTTP 503 seen in CI remains unexplained. P2 needs complete PR/main checks and candidate acceptance. Corpus delivery and downstream work remain gated.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
@@ -24,6 +24,14 @@ partner-data or production authorization.
 
 <details>
 <summary>Earlier assignments, approvals and delivery records</summary>
+
+**Prior delivery current view — retained 2026-10-29 UTC:**
+
+- **Verified:** Ledger foundations are delivered. P2 implementation and diagnostics passed component review; delivery remains unaccepted. Corpus work is preparation only.
+- **Next:** The lead publishes the diagnostics and starts full CI. Quality checks the test inventory; Review verifies the results.
+- **Blocker:** The HTTP 503 seen in CI remains unexplained. P2 needs complete PR/main checks and candidate acceptance. Corpus delivery and downstream work remain gated.
+
+**Corpus delivery assignment checkpoint — 2026-10-29 UTC:** Published P2 source e0b4c1d9 is tracked by [CI 40801845500](https://github.com/spei04/agent-rewind/actions/runs/40801845500). Both supported interpreters collected the same 8,571-node corpus inventory at ba61a590; this is collection-only evidence, not test or delivery acceptance. Backend monitors full CI, Review checks the results, Quality prepares corpus delivery, and the lead integrates reviewed changes.
 
 **Earlier CI diagnosis status — retained 2026-10-29 UTC:**
 

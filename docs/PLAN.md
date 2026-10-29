@@ -3,7 +3,7 @@
 ## Current status
 
 - **Verified:** Ledger foundations are delivered. P2 implementation and diagnostics passed component review; delivery remains unaccepted. Corpus work is preparation only.
-- **Next:** The lead publishes the diagnostics and starts full CI. Quality checks the test inventory; Review verifies the results.
+- **Next:** Backend monitors full CI; Review checks the results. Quality prepares corpus delivery, and the lead integrates the reviewed changes.
 - **Blocker:** The HTTP 503 seen in CI remains unexplained. P2 needs complete PR/main checks and candidate acceptance. Corpus delivery and downstream work remain gated.
 
 [Active backlog](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Retained history](#143-dated-progress-ledger)
@@ -898,6 +898,12 @@ The original brief is filled in this single roadmap. The later request explicitl
 
 <details>
 <summary>Prior status snapshots and dated records</summary>
+
+**Prior delivery current view — retained 2026-10-29 UTC:**
+
+- **Verified:** Ledger foundations are delivered. P2 implementation and diagnostics passed component review; delivery remains unaccepted. Corpus work is preparation only.
+- **Next:** The lead publishes the diagnostics and starts full CI. Quality checks the test inventory; Review verifies the results.
+- **Blocker:** The HTTP 503 seen in CI remains unexplained. P2 needs complete PR/main checks and candidate acceptance. Corpus delivery and downstream work remain gated.
 
 **Earlier CI diagnosis status — retained 2026-10-29 UTC:**
 
