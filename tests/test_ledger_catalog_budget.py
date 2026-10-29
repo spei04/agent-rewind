@@ -65,13 +65,25 @@ def test_optimized_catalog_keeps_complete_original_and_literal_profile_equality(
             @event.listens_for(connection, "before_cursor_execute")
             def observe_parameters(conn, cursor, statement, parameters, context, many):
                 if statement.startswith(
-                    ("SELECT name,wr,strict FROM pragma_table_list", "WITH tables(table_name)")
+                    ("SELECT p.name,p.wr,p.strict,", "WITH tables(table_name)")
                 ):
                     batches.append((statement, parameters))
 
             from agent_rewind.migrations.ledger_reader_catalog import _sqlite_table_options
 
-            assert _sqlite_table_options(connection, names, revision) == names
+            selected, declarations = _sqlite_table_options(
+                connection,
+                names,
+                revision,
+                LedgerWork(),
+                admission=revision == ADMISSION,
+                ledger=revision == LEDGER,
+            )
+            assert selected == names
+            assert declarations == {
+                table: tuple((check["name"], check["sqltext"]) for check in shape["checks"])
+                for table, shape in independent.items()
+            }
             grouped_indexes, grouped_parts = _sqlite_native_indexes(
                 connection, names, "ar7" if revision == LEDGER else "ar6", LedgerWork()
             )
@@ -196,22 +208,29 @@ def test_table_options_batch_rejects_incomplete_or_invalid_rows(fault):
     from agent_rewind.migrations.ledger_reader_catalog import _sqlite_table_options
 
     names = sorted(installed_profile("sqlite", LEDGER))
-    rows = [(name, 0, 0) for name in names]
+    rows = [(name, 0, 0, "CREATE TABLE x(value INTEGER)") for name in names]
     if fault == "missing":
         rows.pop()
     elif fault == "duplicate":
         rows[-1] = rows[0]
     elif fault == "unknown":
-        rows[-1] = ("not_a_selected_table", 0, 0)
+        rows[-1] = ("not_a_selected_table", 0, 0, rows[-1][3])
     elif fault == "wr":
-        rows[-1] = (names[-1], 1, 0)
+        rows[-1] = (names[-1], 1, 0, rows[-1][3])
     elif fault == "strict":
-        rows[-1] = (names[-1], 0, 1)
+        rows[-1] = (names[-1], 0, 1, rows[-1][3])
     else:
-        rows[-1] = (names[-1], False, 0)
-    connection = SimpleNamespace(execute=lambda sql, params: SimpleNamespace(all=lambda: rows))
+        rows[-1] = (names[-1], False, 0, rows[-1][3])
+    pending = iter(rows)
+    closed = []
+    connection = SimpleNamespace(
+        execute=lambda sql, params: SimpleNamespace(
+            fetchone=lambda: next(pending, None), close=lambda: closed.append(True)
+        )
+    )
     with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
-        _sqlite_table_options(connection, names, LEDGER)
+        _sqlite_table_options(connection, names, LEDGER, LedgerWork(), ledger=True)
+    assert closed == [True]
 
 
 def test_table_options_rejects_unowned_names_before_query():
@@ -221,7 +240,9 @@ def test_table_options_rejects_unowned_names_before_query():
         pytest.fail("Unowned table names must never reach SQL construction")
 
     with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
-        _sqlite_table_options(SimpleNamespace(execute=unexpected_query), ["unowned'"], LEDGER)
+        _sqlite_table_options(
+            SimpleNamespace(execute=unexpected_query), ["unowned'"], LEDGER, LedgerWork()
+        )
 
 
 @pytest.fixture(scope="module")
@@ -308,14 +329,21 @@ def test_typed_catalog_names_remain_values_and_limits_remain_native_binds(monkey
 
     def capture(statement, parameters):
         captured.append((statement, parameters))
-        rows = [(name, 0, 0) for name in names] if len(captured) == 1 else []
-        return SimpleNamespace(all=lambda: rows)
+        rows = (
+            [(name, 0, 0, "CREATE TABLE x(value INTEGER)") for name in names]
+            if len(captured) == 1
+            else []
+        )
+        pending = iter(rows)
+        return SimpleNamespace(
+            all=lambda: rows, fetchone=lambda: next(pending, None), close=lambda: None
+        )
 
     with monkeypatch.context() as patch:
         patch.setattr(reader, "installed_profile", lambda dialect, revision: dict.fromkeys(names))
-        assert (
-            reader._sqlite_table_options(SimpleNamespace(execute=capture), names, LEDGER) == names
-        )
+        assert reader._sqlite_table_options(
+            SimpleNamespace(execute=capture), names, LEDGER, LedgerWork()
+        ) == (names, dict.fromkeys(names, ()))
     with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
         reader._sqlite_native_indexes(SimpleNamespace(execute=capture), names, "ar7", LedgerWork())
     assert len(captured) == 3
@@ -408,7 +436,7 @@ def test_sqlite_clause_policy_does_not_leak_jobs_exceptions(
 
 
 def test_persisted_inspector_rejects_comment_separated_check_without_restamping(
-    tmp_path, record_property
+    tmp_path, record_property, monkeypatch
 ):
     import sqlite3
     from contextlib import closing
@@ -417,14 +445,17 @@ def test_persisted_inspector_rejects_comment_separated_check_without_restamping(
 
     case = seed_ar7(complete_ar6(tmp_path / "clause-policy.sqlite", legacy=False))
     profile = installed_profile("sqlite", LEDGER)
-    prefix = "SELECT CASE WHEN length(CAST(sql AS BLOB))<=65536 THEN sql END"
+    from agent_rewind.migrations import ledger_reader_catalog as reader
+
+    prefix = "SELECT p.name,p.wr,p.strict,"
+    original_policy = reader._sqlite_check_supported_ddl
 
     def inspect_with_trace(outcome, trace):
         engine = case.operator_engine()
 
         def passive(sql):
             if sql.startswith(prefix):
-                if len(trace["queries"]) >= 21 or len(sql) > 512:
+                if len(trace["queries"]) >= 1 or len(sql) > 2048:
                     trace["overflow"] = True
                 else:
                     trace["queries"].append(sql)
@@ -434,7 +465,14 @@ def test_persisted_inspector_rejects_comment_separated_check_without_restamping(
                 raw = connection.connection.driver_connection
                 raw.set_trace_callback(passive)
                 try:
-                    return inspect_ledger_state(connection).model_dump(mode="json")
+
+                    def observe_policy(table, sql, **flags):
+                        trace.setdefault("consumed", []).append(table)
+                        return original_policy(table, sql, **flags)
+
+                    with monkeypatch.context() as patch:
+                        patch.setattr(reader, "_sqlite_check_supported_ddl", observe_policy)
+                        return inspect_ledger_state(connection).model_dump(mode="json")
                 finally:
                     raw.set_trace_callback(None)
         finally:
@@ -442,12 +480,13 @@ def test_persisted_inspector_rejects_comment_separated_check_without_restamping(
 
     def observed_order(trace):
         assert not trace["overflow"]
-        result = []
-        for sql in trace["queries"]:
-            names = [name for name in profile if sql.endswith("name='" + name + "'")]
-            assert len(names) == 1
-            result.append(names[0])
+        assert len(trace["queries"]) == 1
+        assert "ORDER BY p.name LIMIT 21" in trace["queries"][0]
+        # A SQL trace alone cannot prove fetched-row order: observe the original
+        # policy call on each consumed row without changing its result/error.
+        result = trace["consumed"]
         assert len(result) == len(set(result))
+        assert result == sorted(result)
         return result
 
     try:
@@ -909,3 +948,276 @@ def test_native_check_correspondence_retains_duplicate_multiplicity_and_tie_orde
     ):
         with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
             _sqlite_require_reflected_checks(native, changed)
+
+
+@pytest.mark.parametrize("size", [65536, 65537], ids=["exact", "one_over"])
+@pytest.mark.parametrize("padding", ["x", "表"], ids=["ascii", "utf8"])
+def test_fused_ddl_body_is_gated_before_native_transfer(monkeypatch, size, padding):
+    from agent_rewind.migrations import ledger_reader_catalog as reader
+
+    prefix, suffix = "CREATE TABLE events (value INTEGER /*", "*/)"
+    available = size - len((prefix + suffix).encode())
+    ddl = prefix + padding * (available // len(padding.encode()))
+    ddl += "x" * (available % len(padding.encode())) + suffix
+    assert len(ddl.encode()) == size
+    engine = create_engine("sqlite://")
+    original = Connection.execute
+    transfers, closed, native_binds = [], [], []
+
+    def observe(connection, statement, parameters):
+        result = original(connection, statement, parameters)
+
+        def fetchone():
+            row = result.fetchone()
+            transfers.append(None if row is None else tuple(row))
+            return row
+
+        def close():
+            closed.append(True)
+            result.close()
+
+        return SimpleNamespace(fetchone=fetchone, close=close)
+
+    try:
+        with engine.begin() as connection:
+            connection.exec_driver_sql(ddl)
+
+            @event.listens_for(connection, "before_cursor_execute")
+            def binds(_conn, _cursor, _statement, parameters, _context, _many):
+                native_binds.append(parameters)
+
+            with monkeypatch.context() as patch:
+                # A private one-table profile isolates transport, not catalog acceptance.
+                patch.setattr(reader, "installed_profile", lambda *_: {"events": {}})
+                patch.setattr(Connection, "execute", observe)
+                if size == 65536:
+                    assert reader._sqlite_table_options(
+                        connection, ["events"], LEDGER, LedgerWork()
+                    ) == (["events"], {"events": ()})
+                else:
+                    with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+                        reader._sqlite_table_options(connection, ["events"], LEDGER, LedgerWork())
+            event.remove(connection, "before_cursor_execute", binds)
+        assert transfers == (
+            [("events", 0, 0, ddl), None] if size == 65536 else [("events", 0, 0, None)]
+        )
+        assert native_binds == [(2,)]
+        assert closed == [True]
+    finally:
+        engine.dispose()
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "empty",
+        "overflow",
+        "reordered",
+        "name_blob",
+        "short",
+        "long",
+        "strict_bool",
+        "ddl_null",
+        "ddl_blob",
+        "ddl_integer",
+        "ddl_bool",
+        "ddl_overflow",
+    ],
+)
+def test_fused_table_rows_refuse_visible_shape_and_sentinel_faults(fault):
+    from agent_rewind.migrations.ledger_reader_catalog import _sqlite_table_options
+
+    names = sorted(installed_profile("sqlite", LEDGER))
+    ddl = "CREATE TABLE x(value INTEGER)"
+    rows = [(name, 0, 0, ddl) for name in names]
+    if fault == "empty":
+        rows = []
+    elif fault == "overflow":
+        rows.append(rows[-1])
+    elif fault == "reordered":
+        rows[:2] = reversed(rows[:2])
+    elif fault == "name_blob":
+        rows[0] = (names[0].encode(), 0, 0, ddl)
+    elif fault == "short":
+        rows[0] = rows[0][:-1]
+    elif fault == "long":
+        rows[0] = (*rows[0], None)
+    elif fault == "strict_bool":
+        rows[0] = (names[0], 0, False, ddl)
+    else:
+        body = {
+            "ddl_null": None,
+            "ddl_blob": ddl.encode(),
+            "ddl_integer": 0,
+            "ddl_bool": False,
+            "ddl_overflow": ddl + " " * 65536,
+        }[fault]
+        rows[0] = (*rows[0][:3], body)
+    pending = iter(rows)
+    fetched, closed = [], []
+
+    def fetchone():
+        row = next(pending, None)
+        fetched.append(row)
+        return row
+
+    connection = SimpleNamespace(
+        execute=lambda *_: SimpleNamespace(fetchone=fetchone, close=lambda: closed.append(True))
+    )
+    with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+        _sqlite_table_options(connection, names, LEDGER, LedgerWork(), ledger=True)
+    assert closed == [True]
+    assert len(fetched) <= len(names) + 1
+    assert len(fetched) == (len(names) + 1 if fault == "overflow" else 1)
+
+
+@pytest.mark.parametrize("primary_stage", ["none", "fetch", "parser", "work"])
+def test_fused_cursor_close_preserves_primary_and_prevents_reflection(monkeypatch, primary_stage):
+    from agent_rewind.migrations import ledger_reader_catalog as reader
+
+    primary = KeyboardInterrupt("original") if primary_stage == "fetch" else RuntimeError("primary")
+    close_error = RuntimeError("close")
+    closed, called = [], []
+    pending = iter([("jobs", 0, 0, "CREATE TABLE jobs(value INTEGER)")])
+
+    def fetchone():
+        if primary_stage == "fetch":
+            raise primary
+        return next(pending, None)
+
+    def close():
+        closed.append(True)
+        raise close_error
+
+    def policy(*args, **kwargs):
+        if primary_stage == "parser":
+            raise primary
+        return ()
+
+    def check():
+        if primary_stage == "work":
+            raise primary
+
+    def later(*args):
+        pytest.fail("Reflection/native indexes must not execute after failed cursor closure")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(reader, "dialect", lambda _: "sqlite")
+        patch.setattr(reader, "inspect", lambda _: SimpleNamespace(get_columns=later))
+        patch.setattr(reader, "schema_table_names", lambda _: (["jobs"], LEDGER))
+        patch.setattr(reader, "installed_profile", lambda *_: {"jobs": {}})
+        patch.setattr(reader, "_sqlite_check_supported_ddl", policy)
+        patch.setattr(reader, "_sqlite_native_indexes", later)
+        connection = SimpleNamespace(
+            execute=lambda *_: SimpleNamespace(fetchone=fetchone, close=close),
+            exec_driver_sql=lambda sql: (called.append(sql) or SimpleNamespace(first=lambda: None)),
+        )
+        expected = close_error if primary_stage == "none" else primary
+        with pytest.raises(BaseException) as caught:
+            reader._observe_catalog(connection, {}, "ar7", SimpleNamespace(check=check))
+        assert caught.value is expected
+    assert closed == [True]
+    assert called == [
+        "SELECT 1 FROM sqlite_master WHERE type IN ('trigger','view') LIMIT 1",
+        "SELECT 1 FROM sqlite_temp_master LIMIT 1",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("expected", "observed_revision", "flags", "accepted"),
+    [
+        ("ar7", ADMISSION, {"admission": True, "ledger": False}, True),
+        ("ar6", LEDGER, {"admission": False, "ledger": True}, True),
+        ("ar7", None, {"admission": False, "ledger": False}, False),
+    ],
+    ids=["observed_ar6", "observed_ar7", "unverified"],
+)
+def test_fused_policy_uses_observed_revision_flags(
+    monkeypatch, expected, observed_revision, flags, accepted
+):
+    from agent_rewind.migrations import ledger_reader_catalog as reader
+
+    original = reader._sqlite_check_supported_ddl
+    witnessed, closed = [], []
+    stop = RuntimeError("observation reached native indexes")
+
+    def policy(table, ddl, **actual):
+        witnessed.append(actual)
+        return original(table, ddl, **actual)
+
+    def later(*_):
+        raise stop
+
+    pending = iter([("jobs", 0, 0, "CREATE TABLE jobs(value INTEGER CHECK(value>0))")])
+    with monkeypatch.context() as patch:
+        patch.setattr(reader, "dialect", lambda _: "sqlite")
+        patch.setattr(reader, "inspect", lambda _: None)
+        patch.setattr(reader, "schema_table_names", lambda _: (["jobs"], observed_revision))
+        patch.setattr(reader, "installed_profile", lambda *_: {"jobs": {}})
+        patch.setattr(reader, "_sqlite_check_supported_ddl", policy)
+        patch.setattr(reader, "_sqlite_native_indexes", later)
+        connection = SimpleNamespace(
+            execute=lambda *_: SimpleNamespace(
+                fetchone=lambda: next(pending, None), close=lambda: closed.append(True)
+            ),
+            exec_driver_sql=lambda _: SimpleNamespace(first=lambda: None),
+        )
+        with pytest.raises(RuntimeError) as caught:
+            reader._observe_catalog(connection, {}, expected, LedgerWork())
+        if accepted:
+            assert caught.value is stop
+        else:
+            assert isinstance(caught.value, MigrationRefused)
+            assert caught.value.code == "schema_incompatible"
+    assert witnessed == [flags]
+    assert closed == [True]
+
+
+@pytest.mark.parametrize(
+    ("table", "clause", "flags", "allowed"),
+    [
+        ("audit", "CHECK(value>0)", {}, False),
+        ("jobs", "DEFAULT 0 CHECK(value>=0)", {"admission": True}, True),
+        ("jobs", "DEFAULT 0 CHECK(value>=0)", {"ledger": True}, True),
+        ("jobs", "DEFAULT 0 CHECK(value>=0)", {}, False),
+        ("alembic_version", "CHECK(value>0)", {}, True),
+        ("alembic_version", "DEFAULT 0", {}, False),
+        ("project_memberships", "DEFAULT 0 REFERENCES parent(value)", {}, True),
+        ("artifact_refs", "DEFAULT 0 REFERENCES parent(value)", {}, True),
+        ("run_index", "DEFAULT 0 REFERENCES parent(value)", {}, True),
+        ("operations", "DEFAULT 0 REFERENCES parent(value)", {}, True),
+        ("budget_accounts", "DEFAULT 0 REFERENCES parent(value)", {"ledger": True}, True),
+        ("budget_accounts", "DEFAULT 0 REFERENCES parent(value)", {}, False),
+        ("budget_accounts", "COLLATE NOCASE", {"ledger": True}, False),
+    ],
+)
+def test_fused_policy_retains_table_specific_native_restrictions(
+    monkeypatch, table, clause, flags, allowed
+):
+    from agent_rewind.migrations import ledger_reader_catalog as reader
+
+    engine = create_engine("sqlite://")
+    try:
+        with engine.begin() as connection:
+            connection.exec_driver_sql(f'CREATE TABLE "{table}"(value INTEGER {clause})')
+            with monkeypatch.context() as patch:
+                patch.setattr(reader, "installed_profile", lambda *_: {table: {}})
+                if allowed:
+                    selected, checks = reader._sqlite_table_options(
+                        connection, [table], LEDGER, LedgerWork(), **flags
+                    )
+                    assert selected == [table]
+                    assert checks == {
+                        table: ((None, "value>=0"),)
+                        if table == "jobs"
+                        else ((None, "value>0"),)
+                        if table == "alembic_version"
+                        else ()
+                    }
+                else:
+                    with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+                        reader._sqlite_table_options(
+                            connection, [table], LEDGER, LedgerWork(), **flags
+                        )
+    finally:
+        engine.dispose()
