@@ -13,6 +13,7 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 from http_app_cleanup import http_application_cache_cleanup as http_application_cache_cleanup
+from http_failure_diagnostics import first_get_failure
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from test_admission_envelope import descriptor
@@ -728,8 +729,9 @@ def test_verified_result_loader_outside_sql_exact_integers_and_final_receipt(
 
     monkeypatch.setattr(f.app.state.operation_service, "artifact_loader", load)
     path = f.base + "/operations/" + accepted["operation_id"]
-    response = f.client.get(path, headers=f.headers)
-    assert response.status_code == 200, response.text
+    with first_get_failure(monkeypatch) as diagnostic:
+        response = f.client.get(path, headers=f.headers)
+        assert response.status_code == 200, (response.text, diagnostic())
     assert response.json()["result_run_id"] == run_id and calls == [descriptor]
     assert response.json()["reserved_microusd"] == 2**53 + 1
     assert response.json()["error"] is None
