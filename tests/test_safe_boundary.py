@@ -7,6 +7,7 @@ import pytest
 from fastapi import HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.testclient import TestClient
+from http_app_cleanup import http_application_cache_cleanup as http_application_cache_cleanup
 from route_fixture import cookie_headers, prepared_app, source_run, work_bodies
 from sqlalchemy.exc import OperationalError
 

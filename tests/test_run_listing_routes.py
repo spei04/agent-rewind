@@ -11,6 +11,7 @@ from unittest.mock import Mock
 import pytest
 import test_run_projection_backfill as projection_tests
 from fastapi.testclient import TestClient
+from http_app_cleanup import http_application_cache_cleanup as http_application_cache_cleanup
 from pydantic import SecretStr
 from route_fixture import CSRF, ISSUER, PRINCIPAL, PROJECT
 from sqlalchemy import text
