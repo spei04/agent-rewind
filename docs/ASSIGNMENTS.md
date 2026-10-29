@@ -22,6 +22,10 @@ partner-data or production authorization.
 
 ## Assignment history
 
+### Worker failure planning reforecast — 2026-10-29
+
+Lead adopted the independently reviewed #97 P1 allocation of 12 [9–18] low-confidence BE days across F1–F5; P2 remains 2 [2–3]. Quality reconciles the planning ledger/cards and existing expectations; Review checks the patch; the lead owns integration and later migration/revision assignment. Backend code remains unassigned until accepted whole AR-010-A/AR-005-C and complete entry design/validation plan. Actual native fit is earned at implementation acceptance. Current statuses, null acceptance, migration-only gates and all previous checkpoints remain unchanged. [Execution plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md).
+
 <details>
 <summary>Earlier assignments, approvals and delivery records</summary>
 

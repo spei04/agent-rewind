@@ -516,7 +516,7 @@ def pre_p1_packet(packet):
 def test_implementation_pr_refinement_counts_prs_without_completing_package(pre_p1_packet):
     data, markdown, plan = pre_p1_packet
     result = CHECK.validate(data, markdown, plan)
-    assert result["delivery_pr_count"] == 167
+    assert result["delivery_pr_count"] == 171
     task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
     p1, p2 = task["delivery_packages"]
     assert len(p1["implementation_prs"]) == 3
@@ -525,7 +525,7 @@ def test_implementation_pr_refinement_counts_prs_without_completing_package(pre_
     assert p2["status"] == "Not started"
     assert result["task_count"] == 155
     assert result["edge_count"] == 569
-    assert result["base_effort_days"] == 472
+    assert result["base_effort_days"] == 482
 
 
 def _sync_implementation_cards(markdown, package):
@@ -584,7 +584,7 @@ def test_implementation_pr_acceptance_does_not_complete_parent_package(pre_p1_pa
     if completed < 3:
         p1["implementation_prs"][completed]["status"] = "In progress"
     markdown = _sync_implementation_cards(markdown, p1)
-    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 167
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 171
     assert p1["status"] == task["status"] == "In progress"
     assert p1["accepted_merge_commit"] is p1["review_evidence"] is None
     assert p2["status"] == "Not started"
@@ -604,7 +604,7 @@ def test_final_implementation_evidence_allows_explicit_p1_acceptance_and_p2_star
     )
     p2["status"] = "In progress"
     markdown = _sync_package_cards(_sync_implementation_cards(markdown, p1), [p1, p2])
-    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 167
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 171
     assert task["status"] == "In progress"
 
 
@@ -643,7 +643,7 @@ def test_final_implementation_evidence_allows_explicit_p1_acceptance_and_p2_star
 )
 def test_implementation_pr_invalid_claims_reach_the_intended_gate(pre_p1_packet, variant, message):
     data, markdown, plan = deepcopy(pre_p1_packet)
-    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 167
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 171
     task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
     p1, p2 = task["delivery_packages"]
     prs = p1["implementation_prs"]
@@ -663,7 +663,7 @@ def test_implementation_pr_invalid_claims_reach_the_intended_gate(pre_p1_packet,
                 tracking_pr=None,
             )
         markdown = _sync_implementation_cards(markdown, p1)
-        assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 167
+        assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 171
     if variant in ("empty", "one", "over_bound", "null_list"):
         p1["implementation_prs"] = {
             "empty": [],
@@ -739,7 +739,7 @@ def test_implementation_pr_card_drift_is_rejected(packet, variant):
     import re
 
     data, markdown, plan = deepcopy(packet)
-    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 167
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 171
     p1 = next(t for t in data["tasks"] if t["id"] == "AR-010-A")["delivery_packages"][0]
     pr = p1["implementation_prs"][0]
     start = markdown.index(f"#### {pr['id']} —")
@@ -784,11 +784,11 @@ def test_legacy_packages_keep_one_pr_each_without_refinement(packet):
         f"{task_count} aggregate tasks and {pr_count - 2} planned delivery PRs",
         1,
     )
-    markdown = re.sub(r"(### AR-010 —[^\n]+\n\nM1 / P0 · )6 PRs", r"\g<1>4 PRs", markdown)
+    markdown = re.sub(r"(### AR-010 —[^\n]+\n\nM1 / P0 · )10 PRs", r"\g<1>8 PRs", markdown)
     plan = plan.replace(
-        "[AR-010](EXECUTION_BACKLOG.md#ar-010): 6 PRs.",
-        "[AR-010](EXECUTION_BACKLOG.md#ar-010): 4 PRs.",
+        "[AR-010](EXECUTION_BACKLOG.md#ar-010): 10 PRs.",
+        "[AR-010](EXECUTION_BACKLOG.md#ar-010): 8 PRs.",
         1,
     )
     data["validation"]["delivery_pr_count"] -= 2
-    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 165
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 169

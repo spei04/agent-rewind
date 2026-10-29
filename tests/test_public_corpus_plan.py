@@ -78,10 +78,10 @@ def test_preparation_progress_preserves_native_status_and_aggregate_accounting(p
     markdown = sync_card(markdown, lookup["PCA2"])
     assert execution.validate(data, markdown, roadmap) == baseline
     assert lookup["AR-002-C"]["status"] == lookup["PUBCAP-A"]["status"] == "Not started"
-    assert baseline["base_effort_days"] == 472
-    assert baseline["upper_range_days"] == 799.6
+    assert baseline["base_effort_days"] == 482
+    assert baseline["upper_range_days"] == 814.6
     assert baseline["preparatory_pr_count"] == 2
-    assert baseline["delivery_pr_count"] == 167
+    assert baseline["delivery_pr_count"] == 171
     assert baseline["edge_count"] == 569
     assert {"G4", "G5"} <= set(baseline["effort_only_critical_path"])
 
