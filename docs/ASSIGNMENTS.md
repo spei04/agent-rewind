@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **P2 delivery:** P1/F3 is delivered. P2 source `822aa235` is published in [PR #119](https://github.com/spei04/agent-rewind/pull/119); [CI 40794765309](https://github.com/spei04/agent-rewind/actions/runs/40794765309) and delivery acceptance are pending.
-- **PCA1:** [#120](https://github.com/spei04/agent-rewind/issues/120) is In progress. Quality implements candidate-only v2; independent review precedes delivery. Corpus v1 stays unchanged; PCA2 remains Not started.
-- **Unmet gates:** PCA1 acceptance and P2 accepted merge/review remain null. Aggregate acceptance and acquisition, rights, capture, held-out, funding, study and production gates remain unmet. The $200 cap and unreconciled $36.567974 reservations are unchanged.
+- **P2:** [PR #119](https://github.com/spei04/agent-rewind/pull/119), [CI 40794765309](https://github.com/spei04/agent-rewind/actions/runs/40794765309) attempt 1: both 3.11 partitions/support checks passed; 3.12's first positive result GET returned 503 after 6,480 passes/30 skips. One exact diagnostic passed; cause unresolved.
+- **Next owners:** Backend adds bounded failure-only test diagnostics; Review evaluates; Quality reconciles progress; lead integrates before fresh full CI.
+- **PCA1:** [#120](https://github.com/spei04/agent-rewind/issues/120) remains In progress: corrected source independently reviewed, committed `bb5cfc0d`, composed `47b5b324`. Reviewed collection preparation is stopped. P2/PCA1 delivery unaccepted; PCA2 Not started. P1/F3 delivered; external gates, $200 cap and $36.567974 unreconciled reservations unchanged.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -24,6 +24,14 @@ partner-data or production authorization.
 
 <details>
 <summary>Earlier assignments, approvals and delivery records</summary>
+
+**CI diagnosis and local PCA1 assignment — 2026-10-29 UTC:** Run `40794765309` attempt 1 passed both Python 3.11 partitions and support checks; Python 3.12 stopped on the first positive result GET with HTTP 503 after 6,480 passes and 30 skips. One exact existing Python 3.12 diagnostic passed; the original cause remains unresolved. Backend owns bounded failure-only diagnostics, Review their evaluation, Quality this progress reconciliation, and the lead integration before fresh full CI. PCA1's corrected offline source has independent component review and local commit/composition (`bb5cfc0d` → `47b5b324`); reviewed collection preparation remains stopped. No delivery, merge or PCA2 acceptance is claimed. Existing acceptance fields, estimates, prerequisites and external gates remain unchanged.
+
+**Prior CI/PCA1 current view — retained 2026-10-29 UTC:**
+
+- **P2 delivery:** P1/F3 is delivered. P2 source `822aa235` is published in [PR #119](https://github.com/spei04/agent-rewind/pull/119); [CI 40794765309](https://github.com/spei04/agent-rewind/actions/runs/40794765309) and delivery acceptance are pending.
+- **PCA1:** [#120](https://github.com/spei04/agent-rewind/issues/120) is In progress. Quality implements candidate-only v2; independent review precedes delivery. Corpus v1 stays unchanged; PCA2 remains Not started.
+- **Unmet gates:** PCA1 acceptance and P2 accepted merge/review remain null. Aggregate acceptance and acquisition, rights, capture, held-out, funding, study and production gates remain unmet. The $200 cap and unreconciled $36.567974 reservations are unchanged.
 
 **PCA1 entry and P2 delivery checkpoint — 2026-10-29 UTC:** Independent entry review `6491c371`, clarification `a4ce5405` and root grant `6ad5320c` authorize the scoped PCA1 #120 candidate-only v2 implementation. Quality owns implementation, independent review precedes delivery, and the lead owns publication. No recorded-public admission is added: a future producer-backed shape needs a distinct accepted contract/version. PCA1 source/accepted-merge/review evidence remain null, PCA2 remains Not started, and aggregate/external gates and estimates are unchanged. P2 source `822aa235` is published in PR #119 with run `40794765309` pending; the earlier failed attempts remain retained and no P2 delivery acceptance is claimed.
 

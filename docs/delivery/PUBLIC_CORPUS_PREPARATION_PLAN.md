@@ -1,5 +1,16 @@
 # Public-corpus preparation plan
 
+## Current status
+
+- **Local source:** PCA1 [#120](https://github.com/spei04/agent-rewind/issues/120) remains In progress. Corrected candidate-only v2 is independently reviewed, committed `bb5cfc0d` and composed `47b5b324`; corpus v1 is unchanged. No delivery or merge acceptance.
+- **Next owners:** Reviewed collection preparation remains stopped while Backend diagnoses P2's CI GET 503; Review evaluates diagnostics, Quality refreshes collection bindings after composition, and the lead integrates.
+- **Limits:** PCA2 and all four aggregates remain Not started; acceptance fields stay null. Scope, prerequisites, estimates, closed acquisition/data/production gates, the $200 cap and $36.567974 unreconciled reservations remain unchanged.
+
+[Current backlog](../EXECUTION_BACKLOG.md#current-status)
+
+<details>
+<summary>Prior status and technical planning record</summary>
+
 **Current progress — 2026-10-29 UTC:** PCA1 #120 is In progress under reviewed entry `6491c371`, clarification `a4ce5405` and root grant `6ad5320c`; all acceptance fields remain null. PCA2 and the four aggregate tasks remain Not started. See the [current backlog](../EXECUTION_BACKLOG.md#current-status). The dated technical plan and its original status snapshot below are retained; scope, prerequisites, estimates and external gates are unchanged.
 
 2026-10-27 · technical candidate for independent review · no implementation acceptance
@@ -50,3 +61,5 @@ The route changes only AR-026-A's added prerequisite and AR-038-A/B's research i
 The estimate projection is 155 aggregates, two preparation nodes, 167 planned PRs, 53 parents, 30 gates, 20 contracts and 569 edges. Total effort is 472 base / 799.6 upper; the alternative 25% allowance is 590, not additive. RS is 71 and BE 100.5; M0 is 11.5, M2 73, M3 81 and M5 51. The 173.5-day effort-only path still runs through enterprise G4/G5; no completed work or removed enterprise effort is credited. All four new aggregates and PCA1/PCA2 are Not started; previous task/package statuses and acceptance remain unchanged.
 
 Implementation sequence: independently accept the exact technical record and checker/schema design; compose the reviewed planning delta while preserving later delivery records; run all required planning regressions and independent review; accept PCA1 delivery; then start PCA2. New native/runtime, rights, acquisition, capture, held-out, funding and study gates require their own evidence and authorization.
+
+</details>
