@@ -1,10 +1,29 @@
 # Worker failure P1 — entry design
 
+**Complete entry accepted; F1 implementation assigned only.** Lead entry e7a70bb9 on 2026-10-29 accepts the reviewed D1v2, D2v4, D3v1/accounting amendment, D4v3 and terminal-cancellation policy against delivered M122 and its accepted artifact. Backend owns F1; P1/aggregate are In progress with no delivery acceptance. Later checkpoints, customer API, live worker, provider and paid runs are not activated.
+
+This consolidates interfaces for [AR-010-B/P1 #97](https://github.com/spei04/agent-rewind/issues/97). The [worker failure execution plan](WORKER_FAILURE_EXECUTION_PLAN.md) owns F1-F5 scope, allocation, sequence and exits. The inherited W/0cada design is rebound to immutable M122 aed2c20d314e0e361fa4c8e438f839802e1e729b through the reviewed CHECK reconciliation and F1 entry packet; the original source-bound designs remain retained. No live checkout is a design input.
+
+## Entry and operating boundary
+
+### Worker P1 entry accepted; F1 assigned — 2026-10-29
+
+At 21:14:57 UTC, lead entry e7a70bb9 accepted D1-D4 and assigned only AR-010-B/P1/F1 to Backend on delivered [M122](https://github.com/spei04/agent-rewind/commit/aed2c20d314e0e361fa4c8e438f839802e1e729b). Preparation b91b0afa and independent review 52a9800d bind the repaired F1 interface; accepted predecessor wheel SHA256 13bb8a8caa1b1c8226b8f57eda367243024a1edb7b2c265ff2453cc27e1501aa and AR-005-C remain prerequisites satisfied by their own evidence. The lead reserved later-F2 ar_0008_failure_evidence, owned by Backend; F1 adds no revision/schema.
+
+AR-010-B, P1 and F1 are In progress with null source/merge/delivery acceptance; F2-F5 and worker P2 remain Not started. Task counts are 31 Verified / 1 In progress / 123 Not started; delivery packages 11 / 1 / 3. Quality owns bookkeeping/corpus handoff and independent oracles; Review checks source/evidence; the lead integrates. GitHub #96/#97 synchronization/readback remains separate lead work. Native fit, later sequential accepted merges, corpus acceptance and production gates are unchanged.
+
+The lead's later-F2 reservation is ar_0008_failure_evidence, down_revision ar_0007_ledger, module agent_rewind/migrations/versions/0008_failure_evidence.py, profile failure_evidence_v1 with sqlite_failure_evidence.json and postgresql16_failure_evidence.json; branch_labels and depends_on are null. Backend owns migration/schema/profile implementation. The fresh M122 collision review and accepted predecessor wheel are bound by entry e7a70bb9. No successor migration is part of F1, and actual successor profile/wheel bytes remain future implementation evidence.
+
+<details>
+<summary>Superseded pre-entry status and source statements — 2026-10-29</summary>
+
 **Adopted design, not complete entry or implementation authority.** D1v2, D2v4, D3v1 with its accounting amendment, D4v3 and the terminal-cancellation policy have been independently reviewed and adopted. The successor revision and accepted whole ledger predecessor remain pending. This draft activates no customer API, worker, provider or paid run.
 
 This consolidates interfaces for [AR-010-B/P1 #97](https://github.com/spei04/agent-rewind/issues/97). The [worker failure execution plan](https://github.com/spei04/agent-rewind/blob/76f6039316ccad75e9760c48dcda140453bffb87/docs/delivery/WORKER_FAILURE_EXECUTION_PLAN.md) owns F1–F5 scope, allocation, sequence and exits. Source assumptions use immutable 76f6039316ccad75e9760c48dcda140453bffb87 and comparison 0cada5d13627b8029f8179c621938c7cf3ea8117. The interfaces and consistency choices below are source-bound design decisions; no live checkout is an input.
 
-## Entry and operating boundary
+Outstanding before code: complete independently reviewed entry, accepted whole AR-010-A and AR-005-C with the accepted predecessor artifact, the exact successor revision/owner decision, and the successor artifact identity/binding design plus implementation assignment and native validation plan. Actual successor wheel/profile bytes and their installed-source equivalence are earned during implementation/delivery, not a pre-code prerequisite. This draft adopts no additional estimate, task status or execution authority.
+
+</details>
 
 Before any checkpoint code: accepted whole AR-010-A and AR-005-C, independently reviewed complete entry, one lead-owned migration/revision decision against the accepted predecessor, adopted reforecast and source-bound native validation plan. Actual native fit, races and recovery are implementation acceptance evidence, not a requirement to measure unimplemented code.
 
@@ -172,4 +191,4 @@ One online Work:504 ordinary/512 total,8 cleanup,10s/20M SQLite VM. Offline2048/
 
 The linked F1–F5 plan owns finite acceptance: old-profile equivalence; native schema/ACL/rollback; actual issuer/exclusion/conditional effects and uncertainty; maximal inherited reads/final snapshot/paid denial; marker restart/preservation/physical restore; successful PR/main and matching installed artifacts. No historical component proof becomes new-source execution.
 
-Outstanding before code: complete independently reviewed entry, accepted whole AR-010-A and AR-005-C with the accepted predecessor artifact, the exact successor revision/owner decision, and the successor artifact identity/binding design plus implementation assignment and native validation plan. Actual successor wheel/profile bytes and their installed-source equivalence are earned during implementation/delivery, not a pre-code prerequisite. This draft adopts no additional estimate, task status or execution authority.
+The common entry requirements are satisfied for the assigned F1 scope by lead e7a70bb9: complete reviewed entry, delivered whole AR-010-A/M122 and AR-005-C, accepted predecessor artifact, migration owner/revision decision, adopted reforecast and source-bound validation plan. Actual successor wheel/profile bytes, installed-source equivalence and native fit remain implementation/delivery proof. F2-F5 each still require the preceding accepted merge and their assigned validation; no P1 delivery or live worker activation follows.

@@ -1,6 +1,6 @@
 # Worker failure execution plan
 
-Planning reforecast adopted on 2026-10-29 for [AR-010-B/P1 #97](https://github.com/spei04/agent-rewind/issues/97). P1 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**, with null accepted merge/review. This plan implements the existing DDL reforecast clause; complete entry design, concrete revision and implementation assignment remain pending. The [machine ledger](../../contracts/proposals/execution-backlog.json) and [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) are authoritative for current status and acceptance.
+Planning reforecast adopted on 2026-10-29 for [AR-010-B/P1 #97](https://github.com/spei04/agent-rewind/issues/97). Complete entry e7a70bb9 now assigns F1 to Backend; P1 and aggregate AR-010-B are **In progress**, with null accepted merge/review. F2-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. The [machine ledger](../../contracts/proposals/execution-backlog.json) and [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) remain authoritative; estimates and sequential gates are unchanged.
 
 ## Allocation and sequence
 
@@ -16,11 +16,36 @@ P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2
 
 ## Entry, ownership and acceptance
 
+### Worker P1 entry accepted; F1 assigned — 2026-10-29
+
+At 21:14:57 UTC, lead entry e7a70bb9 accepted D1-D4 and assigned only AR-010-B/P1/F1 to Backend on delivered [M122](https://github.com/spei04/agent-rewind/commit/aed2c20d314e0e361fa4c8e438f839802e1e729b). Preparation b91b0afa and independent review 52a9800d bind the repaired F1 interface; accepted predecessor wheel SHA256 13bb8a8caa1b1c8226b8f57eda367243024a1edb7b2c265ff2453cc27e1501aa and AR-005-C remain prerequisites satisfied by their own evidence. The lead reserved later-F2 ar_0008_failure_evidence, owned by Backend; F1 adds no revision/schema.
+
+AR-010-B, P1 and F1 are In progress with null source/merge/delivery acceptance; F2-F5 and worker P2 remain Not started. Task counts are 31 Verified / 1 In progress / 123 Not started; delivery packages 11 / 1 / 3. Quality owns bookkeeping/corpus handoff and independent oracles; Review checks source/evidence; the lead integrates. GitHub #96/#97 synchronization/readback remains separate lead work. Native fit, later sequential accepted merges, corpus acceptance and production gates are unchanged.
+
+The lead's later-F2 reservation is ar_0008_failure_evidence, down_revision ar_0007_ledger, module agent_rewind/migrations/versions/0008_failure_evidence.py, profile failure_evidence_v1 with sqlite_failure_evidence.json and postgresql16_failure_evidence.json; branch_labels and depends_on are null. Backend owns migration/schema/profile implementation. The fresh M122 collision review and accepted predecessor wheel are bound by entry e7a70bb9. No successor migration is part of F1, and actual successor profile/wheel bytes remain future implementation evidence.
+
+<details>
+<summary>Superseded pre-entry status and source statements — 2026-10-29</summary>
+
+Planning reforecast adopted on 2026-10-29 for [AR-010-B/P1 #97](https://github.com/spei04/agent-rewind/issues/97). P1 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**, with null accepted merge/review. This plan implements the existing DDL reforecast clause; complete entry design, concrete revision and implementation assignment remain pending. The [machine ledger](../../contracts/proposals/execution-backlog.json) and [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) are authoritative for current status and acceptance.
+
 The [concrete worker failure entry design](WORKER_FAILURE_ENTRY_DESIGN.md) specifies the adopted schema, producer, reader and operator interfaces. Complete prerequisite entry, the successor revision and implementation assignment remain pending.
 
 Before any checkpoint code, require accepted whole AR-010-A including P2 and AR-005-C, complete independently reviewed entry design, lead migration owner/revision decision against the accepted predecessor, this adopted reforecast and source-bound native validation plan. No precursor is an early-entry exception. Each F2–F5 requires the preceding accepted merge. Backend owns implementation/migration, Quality independent behavior/native evidence, Review independent source/security and the lead revision/integration. These are logical roles for later assignment.
 
 Retain accepted C04, AR-005-C guard/recovery, AR-008-B bounded Operation/HTTP and AR-011-B safe-vocabulary producer reviews. Pin the accepted whole AR-010-A source/profile, PR/main receipts and installed artifact before code. Review the exact query/frame/capability and migration/privilege/restore plans; do not assign a revision name now. Actual producer, race, preservation and native capacity proofs are earned during implementation and required for acceptance, not before unimplemented code.
+
+Proposed source boundary: `agent_rewind/migrations/schema.py`, `agent_rewind/migrations/ledger_reader_catalog.py`, `tests/test_ledger_catalog_budget.py`, `focused existing catalog fixtures/controls only if needed`. Names are planning seams, not assigned files/revisions.
+
+Owner: Backend migration owner; Review catalog/privilege review; Quality preservation and both-dialect validation; lead reserves revision.
+
+</details>
+
+The [concrete worker failure entry design](WORKER_FAILURE_ENTRY_DESIGN.md) is accepted for the assigned F1 scope at delivered M122, lead e7a70bb9 after peer 52a9800d. Backend owns implementation/migration; Quality and Review own independent checks. The lead has reserved later-F2 ar_0008_failure_evidence, not assigned F2 implementation.
+
+Before any checkpoint code, require accepted whole AR-010-A including P2 and AR-005-C, complete independently reviewed entry design, lead migration owner/revision decision against the accepted predecessor, this adopted reforecast and source-bound native validation plan. No precursor is an early-entry exception. Each F2–F5 requires the preceding accepted merge. Backend owns implementation/migration, Quality independent behavior/native evidence, Review independent source/security and the lead revision/integration. F1 is now assigned to Backend under those satisfied entry requirements; F2-F5 remain separately gated.
+
+Retain accepted C04, AR-005-C guard/recovery, AR-008-B bounded Operation/HTTP and AR-011-B safe-vocabulary producer reviews. Pin the accepted whole AR-010-A source/profile, PR/main receipts and installed artifact before code. Review the exact query/frame/capability and migration/privilege/restore plans; the lead's reserved later-F2 identity is recorded below, with no F1 migration code. Actual producer, race, preservation and native capacity proofs are earned during implementation and required for acceptance, not before unimplemented code.
 
 Native/producer/budget proof is earned during implementation and required for acceptance, not a requirement to measure unimplemented code before entry. Each checkpoint needs independent source/security review, scoped actual SQLite/restricted PostgreSQL evidence as specified, configured checks, exact successful PR/main and installed candidate/source equivalence before the next checkpoint. No previous component outcome is relabeled as new-source execution.
 
@@ -44,7 +69,7 @@ Historical markers retain an immutable operator intent and full bounded selected
 
 ### F1 — Existing-profile SQLite catalog equivalence and capacity precursor
 
-Proposed source boundary: `agent_rewind/migrations/schema.py`, `agent_rewind/migrations/ledger_reader_catalog.py`, `tests/test_ledger_catalog_budget.py`, `focused existing catalog fixtures/controls only if needed`. Names are planning seams, not assigned files/revisions.
+Assigned F1 source boundary: `agent_rewind/migrations/schema.py`, `agent_rewind/migrations/ledger_reader_catalog.py`, `tests/test_ledger_catalog_budget.py`, `focused existing catalog fixtures/controls only if needed`. Only these F1 seams and narrowly required existing controls are assigned; no successor schema/revision implementation.
 
 Owner: Backend; lead owns scope; Quality raw/whole-path oracles; Review SQL/security.
 
@@ -64,7 +89,7 @@ Allocation basis: Two profile families, literal token semantics, fresh bounded t
 
 Proposed source boundary: `new focused agent_rewind/migrations/failure_schema.py and failure_catalog.py (names provisional at entry)`, `explicit new profile capture files after revision decision`, `narrow version registry/compatibility/state branches in existing migrations/schema.py, compatibility.py, ledger_compatibility.py, ledger_history_sql.py, ledger_state.py`, `focused migration/catalog/privilege tests`. Names are planning seams, not assigned files/revisions.
 
-Owner: Backend migration owner; Review catalog/privilege review; Quality preservation and both-dialect validation; lead reserves revision.
+Owner: Backend migration owner; Review catalog/privilege review; Quality preservation and both-dialect validation; lead has reserved the later-F2 revision below. F2 still waits for accepted F1.
 
 Common prerequisites plus accepted merged F1 and actual capacity report; complete relation/constraints/grants/revision/profile/rollback design independently accepted before this code. Unknown full successor fit is an explicitly planned later implementation test, not evidence fabricated here.
 

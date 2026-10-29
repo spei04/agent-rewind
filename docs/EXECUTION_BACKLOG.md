@@ -2,13 +2,13 @@
 
 ## Current status
 
-- **Verified:** Corrected PR #122 CI and its exact receipts are independently accepted. The PR merged under the repository's protections.
-- **Next:** Backend monitors fresh main CI; Review verifies receipts and installed artifacts. Quality maintains corpus handoff and documentation; the lead owns delivery.
-- **Blocker:** Fresh main and matching installed-artifact acceptance remain required before P2 delivery. Worker, corpus and production prerequisites remain unchanged.
+- **Verified:** Ledger P2 and AR-010-A are delivered. Main CI and the matching installed package are independently accepted.
+- **Next:** Backend implements F1; Quality completes bookkeeping and corpus handoff. Review provides independent checks; the lead integrates reviewed work.
+- **Open gates:** F1 and worker delivery, corpus acceptance and production prerequisites remain. Parent AR-010 stays In progress.
 
 [P2 task and dependencies](#ar-010-a-p2) · [History and maintenance](#dependency-review-progress-and-maintenance)
 
-Current planning rollup: **155 aggregate tasks and 171 planned delivery PRs**, including the five included #97 P1 checkpoints. Statuses and 569 outer edges are unchanged; the 2026-10-29 [worker failure reforecast](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) supersedes earlier estimate/count snapshots without changing their historical text.
+Current planning rollup: **155 aggregate tasks and 171 planned delivery PRs**, including the five included #97 P1 checkpoints. Tasks are 31 Verified / 1 In progress / 123 Not started; delivery packages are 11 Verified / 1 In progress / 3 Not started. The 569 outer edges are unchanged; the 2026-10-29 [worker failure reforecast](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) supersedes earlier estimate/count snapshots without changing their historical text.
 
 ## Approval boundary and readiness
 
@@ -955,7 +955,7 @@ M1 / P0 · 10 PRs · 20 engineering days · In progress · [Tracking issue #10](
 
 #### AR-010-A — Integer ledger and hierarchical reservations
 
-Tracking: [#107](https://github.com/spei04/agent-rewind/issues/107) · In progress.
+Tracking: [#107](https://github.com/spei04/agent-rewind/issues/107) · Verified; closed as completed.
 
 - **Objective:** Deliver the scoped integer ledger, trusted fixed-period provisioning and conservative reservation/generation primitives before live worker integration.
 - **Implementation scope / PR boundary:** Two sequential accepted-merge-gated packages: exact additive ledger schema/catalog/provisioning/opening backfill, then connection-bound reservations, minimum generation fences and no-reset rollover. Preserve the three frozen ledger tables, original account triple, gross job reservations and prior outstanding exposure.
@@ -966,9 +966,9 @@ Tracking: [#107](https://github.com/spei04/agent-rewind/issues/107) · In progre
 - **Required automated tests:** CT-M1-018/020 plus relevant generation/lease controls: historical 245000 opening exposure, signed-64-bit/native-type boundaries, absent/overlapping period races, deferred commit rejection, exact executable-catalog drift, restart/restore; eight-way reservations, shared organization caps, prior-period holds, repeated/conflicting calls, wait-time generation/cancel/window changes, rollback/lost acknowledgment and actual PostgreSQL cleanup.
 - **Security and reliability:** Use trusted bounded provisioning and SQL-derived openings, never mutable worker timeouts, user amounts or invented timestamps. Stable scope exclusion precedes jobs and sorted accounts; select stronger organization mode before downstream locks. No external I/O under SQL locks, no automatic account creation, no refund on timeout, no fabricated call-owned evidence and no generic trigger/function allowance.
 - **Effort / confidence:** 6 engineering days; planning range 6–10; medium-low confidence.
-- **Responsible role:** BE; platform/security owns P1 runtime in secondary work/ledger-schema. Planning/verification owns independent tests after accepted progress handoff and stable interfaces; lead integrates, with independent delivery/security review.
+- **Responsible role:** BE component maintenance; Quality and Review retain independent evidence. The lead owns accepted delivery and separate downstream prerequisite handoffs; no new runtime assignment follows.
 - **Definition of done:** Both packages require independent exact-entry/source review, local and hosted SQLite/actual PostgreSQL evidence, installed-package/security checks and accepted merged-source/candidate evidence in order. AR-008-B must have accepted protected-main delivery before implementation; P2 additionally waits for accepted merged P1. The whole aggregate precedes AR-010-B; later worker, reconciliation and full M1/customer gates remain separate.
-- **Progress:** In progress in #107. [P1 #108](#ar-010-a-p1) is Verified: protected merge b214f21b and final lead acceptance 4d157d97 are recorded below; the issue closed as completed at 2026-10-28T18:01:43Z, confirmed by lead readback bae9970b. [P2 #109](#ar-010-a-p2) is In progress after accepted entry v7, with the reviewed CHECK correspondence repair published in [PR #122](https://github.com/spei04/agent-rewind/pull/122). P2 accepted merge and delivery review evidence remain null pending required PR/main and matching installed-artifact acceptance. Whole AR-010-A and parent #10 remain In progress; downstream gates remain unmet.
+- **Progress:** Verified; P1 #108 retains its accepted b214f21b delivery. P2 #109 and aggregate #107 are accepted at protected merge aed2c20d after exact PR/main and installed-candidate review, lead e937f66f; both issues closed as completed on 2026-10-29 with recorded readbacks. [Final delivery evidence](delivery/LEDGER_EXECUTION_PLAN.md#ledger-p2-and-ar-010-a-delivered--2026-10-29) preserves original failures and limits. Parent #10 remains In progress; worker entry, corpus acceptance and production gates remain separate.
 - **Delivery boundary:** Two sequential acceptance packages across four BE PRs: P1 has F1 dormant schema/operator/guard foundation, F2 complete bounded persisted reader, and F3 trusted provisioning/opening/replay/recovery; P2 reservation/minimum generation/rollover remains one PR after accepted full P1. P1 and P2 each retain 3 [3–5] days, total 6 [6–10], medium-low, with inherited AR-008-B and no early package acceptance.
 - **Contract readiness:** Frozen C04 remains authoritative. The owner approved proposal 882fa139 on 2026-10-21: fixed job lifetime is one finite immutable authorized execution window from trusted provisioning, not an observed completion interval or renewable worker timeout. Exact P1 manifest/schema/authority/native bounds/replay, SQL privilege and outcome/recovery policy is independently accepted at 51af77dc. Implementation must prove exact DDL/catalog, constraints, bounds and recovery against that policy. P2 reservation/fence entry requires separate review after accepted P1. No public API/native configuration or ready-profile amendment is made.
 
@@ -1056,7 +1056,7 @@ Implementation PRs: [F1 foundation](#ar-010-a-p1-f1), [F2 reader](#ar-010-a-p1-f
 
 #### AR-010-A/P2 — Integer reservations, generation fence and rollover proof
 
-Tracking: [#109](https://github.com/spei04/agent-rewind/issues/109) · In progress.
+Tracking: [#109](https://github.com/spei04/agent-rewind/issues/109) · Verified; closed as completed.
 
 - **Objective:** Provide conservative connection-bound reserve-only primitives with current generation authority, repeat-stable call identity and bounded prior-period exposure.
 - **Implementation scope:** Implement minimum claim/live-fence and existing-account reservation primitives after accepted P1. Atomically bind logical call and resource scope, three reservation entries and three account balances, while retaining the gross job counter. Check current plus prior outstanding organization/project holds under stable scope exclusion; inspect the original scoped identity after uncertain acknowledgment without granting a new dispatch opportunity.
@@ -1067,15 +1067,15 @@ Tracking: [#109](https://github.com/spei04/agent-rewind/issues/109) · In progre
 - **Required automated tests:** SQLite and actual PostgreSQL eight-way shared-cap contention and different projects sharing an organization; no-reset rollover with outstanding holds; repeated/conflicting calls, signed-64-bit and 2**53+1 controls; cancellation/generation/window expiry while blocked; every write-stage rollback, lost acknowledgment and physical connection cleanup. Preserve accepted admission, operation GET/cancel behavior and untouched historical rows.
 - **Security and reliability:** Keep project(s), organization/grants/key, original scope/job and sorted account ordering; acquire any stronger organization mode before downstream locks. No job-first legacy wrapper or late lock upgrade, no external I/O, float/bool money, invoice inference, implicit mutable settings or automatic paid retry/refund. Overflow or incomplete bounded prior-exposure proof refuses; expired windows retain all existing obligations.
 - **Effort / confidence:** 3 engineering days; planning range 3–5; medium-low confidence.
-- **Responsible role:** BE implementation, QE independent behavioral tests and independent TL/security review assigned; actual PostgreSQL proof remains required.
+- **Responsible role:** BE component maintenance, QE behavioral/native evidence and independent TL/security review; accepted delivery and future handoffs remain lead-owned.
 - **Definition of done:** Independent source/security review and matching local/hosted actual PostgreSQL concurrency, finite outcome, preservation, package and recovery evidence establish accepted P2 and the whole aggregate. Both packages and accepted AR-008-B remain mandatory before AR-010-B or integrated M1 claims; no worker/customer/spending activation follows.
-- **Progress:** In progress after accepted entry v7; accepted merge and delivery review evidence remain null. Backend, independent QE and source review are assigned.
+- **Progress:** Verified; accepted merge aed2c20d314e0e361fa4c8e438f839802e1e729b and final candidate/sufficiency review d3d1a8c2 plus lead e937f66f bind source cd73a458, original PR/main 40935985110/40946635371 and installed candidate 12931054242. [Final delivery record](delivery/LEDGER_EXECUTION_PLAN.md#ledger-p2-and-ar-010-a-delivered--2026-10-29). Issue #109 is closed as completed; full worker/customer/production integration remains outside this component.
 
 <a id="ar-010-b"></a>
 
 #### AR-010-B — Lease-fenced admission permits and cancellation accounting
 
-Tracking: [#96](https://github.com/spei04/agent-rewind/issues/96) · Not started.
+Tracking: [#96](https://github.com/spei04/agent-rewind/issues/96) · In progress; canonical assignment recorded, GitHub synchronization pending.
 
 - **Objective:** Enforce budget limits before every potentially paid action. This task delivers lease-fenced admission permits and cancellation accounting.
 - **Implementation scope / PR boundary:** Deliver two sequential accepted-merge-gated packages, with P1 implemented through five independently reviewed F1–F5 PRs and P2 through its own PR: bounded structured worker-failure persistence, authentic origin and historical-marker/consumer handoff, then live permit/configuration/cancellation and both completion/lease-expiry producer integrations. Require current owner/lease/generation/cancel authority before new paid work or normal completion; expiry uses a database-time conditional transition of the observed generation. Preserve scoped immutable common configuration and historical non-dispatchability.
@@ -1088,7 +1088,7 @@ Tracking: [#96](https://github.com/spei04/agent-rewind/issues/96) · Not started
 - **Effort / confidence:** 14 engineering days; planning range 11–21; low confidence.
 - **Responsible role:** BE; independent TL and QE review.
 - **Definition of done:** Both packages require independent source/security review, matching hosted checks and accepted merged-source evidence in order. Aggregate verification requires actual SQLite/PostgreSQL producer, parser, preservation, lock/race and recovery evidence plus the existing permit/configuration/cancellation matrix. AR-011-C and AR-012-B still consume accepted whole AR-010-B; no early completion or activation follows.
-- **Progress:** Not started; neither package is assigned runtime work.
+- **Progress:** In progress; complete entry e7a70bb9 assigns only P1/F1 to Backend on delivered M122. P1/aggregate delivery remains unaccepted; worker P2 remains Not started.
 - **Delivery boundary:** Two sequential BE acceptance packages: P1 five accepted-merge-gated implementation PRs for existing-profile catalog capacity, dormant successor foundation, trusted persistence, bounded consumers and operator preservation/recovery, 12 [9–18] days low confidence; P2 live permit/configuration/cancellation and both failure producers remains 2 [2–3] days medium-low after accepted whole P1. Aggregate 14 [11–21], low; both inherit AR-010-A and AR-005-C.
 - **Contract readiness:** Frozen C04 already requires safe stored Error, originating correlation and explicit historical migration markers. AR-010-B owns the missing producer handoff: P1 freezes and implements the chosen version/encoding/native bounds/provenance/parser and marker policy, P2 integrates normal completion and lease expiry. Before code, any required additive DDL needs explicit owner, linear revision, captured catalog, preservation and rollback/restore decisions; reforecast broader work. AR-008-B retains unsupported-evidence 503 until this producer is accepted; no reverse edge, invented envelope or early AR-011-C/AR-012-B acceptance. Before any checkpoint code, require accepted whole AR-010-A including P2 and AR-005-C, complete independently reviewed entry design, lead migration owner/revision decision against the accepted predecessor, this adopted reforecast and source-bound native validation plan. Actual producer/native/budget proof is earned during implementation and required at acceptance, not before unimplemented code. Default migration-only/customer-admission/worker-dispatch gates remain through F1–F5; no early-entry exception.
 
@@ -1096,7 +1096,7 @@ Tracking: [#96](https://github.com/spei04/agent-rewind/issues/96) · Not started
 
 #### AR-010-B/P1 — Bounded worker failure persistence and provenance
 
-Tracking: [#97](https://github.com/spei04/agent-rewind/issues/97) · Not started.
+Tracking: [#97](https://github.com/spei04/agent-rewind/issues/97) · In progress; canonical assignment recorded, GitHub synchronization pending.
 
 - **Objective:** Implement the complete chosen bounded stored-failure representation and consumer handoff before wiring either live worker failure path.
 - **Implementation scope:** Freeze version/encoding, allowlisted safe code/message and phase-specific retryability mappings, exact byte/native-type/work bounds, authentic originating correlation and immutable job/operation association. Implement persistence/parser helpers and the bounded AR-008-B consumer extension using original receipts and fresh authority. Define and implement an operator-only idempotent historical migration-marker path that preserves original job rows/bytes, audit, ciphertexts and hash history; a marker never promotes raw legacy text into a trusted Error. Before code, decide whether existing storage suffices; any additive DDL requires explicit migration owner/revision, captured catalogs and preservation/rollback/restore proof within P1, with reforecast if broader. Deliver the complete boundary through F1 existing-profile SQLite catalog capacity, F2 dormant successor migration/profile, F3 trusted persistence, F4 bounded successor consumers and F5 operator markers/preservation/restore. The additive 15-column relation is the planning recommendation; complete entry and concrete revision remain pending.
@@ -1109,7 +1109,7 @@ Tracking: [#97](https://github.com/spei04/agent-rewind/issues/97) · Not started
 - **Effort / confidence:** 12 engineering days; planning range 9–18; low confidence.
 - **Responsible role:** BE; independent TL and QE review.
 - **Definition of done:** Before any checkpoint code, require accepted whole AR-010-A including P2 and AR-005-C, complete independently reviewed entry design, lead migration owner/revision decision against the accepted predecessor, this adopted reforecast and source-bound native validation plan. Each F requires the preceding accepted merge and its scoped native/source/security/PR/main/artifact evidence. All original P1 duties remain required; only the accepted final F5 merge/review can populate P1 acceptance. Preserve default migration-only/customer-admission/worker-dispatch gates through EVERY checkpoint, including F1, dormant schema F2, persistence F3, successor consumer F4 and explicit offline marker F5. Internal tests/explicit operator code do not activate the default API or worker, install a customer-ready release profile or grant production access. Even complete P1 does not start #98 without its accepted prerequisite/entry handoff or satisfy G1/customer/funding/data gates.
-- **Progress:** Not started; accepted_merge_commit and review_evidence remain null.
+- **Progress:** In progress; F1 is assigned after complete entry e7a70bb9. F2-F5 remain Not started and sequentially gated; accepted_merge_commit and review_evidence remain null.
 
 
 See the [worker failure execution plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) for allocations, owners, entry obligations and measured-versus-static capacity qualifications.
@@ -1129,7 +1129,7 @@ See the [worker failure execution plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.m
 - **Prerequisites:** [AR-010-A](#ar-010-a), [AR-005-C](#ar-005-c).
 - **Responsible role:** BE.
 - **Effort allocation:** Included in AR-010-B/P1; no additional effort or acceptance package.
-- **Progress:** Not started.
+- **Progress:** In progress.
 - **Tracking PR:** Not assigned.
 - **Checkpoint evidence:** Pending; no accepted source/merge/review.
 
@@ -3674,6 +3674,76 @@ M1 / P0 · 1 PR · 2 engineering days · Verified · [Tracking issue #26](https:
 No question above asks to reapprove accepted architecture or issue #51 choices. The nine selected engineering scopes and calibration targets are approved; optional adapters/reuse, held-out execution, actual study funding/data, independent statistics and production remain separate.
 
 ## Dependency review, progress and maintenance
+
+<details>
+<summary>Superseded worker pre-entry current statements — 2026-10-29</summary>
+
+Tracking: [#96](https://github.com/spei04/agent-rewind/issues/96) · Not started.
+
+Tracking: [#97](https://github.com/spei04/agent-rewind/issues/97) · Not started.
+
+- **Progress:** Not started; neither package is assigned runtime work.
+
+- **Progress:** Not started; accepted_merge_commit and review_evidence remain null.
+
+- **Progress:** Not started.
+
+Current planning rollup: **155 aggregate tasks and 171 planned delivery PRs**, including the five included #97 P1 checkpoints. Tasks are 31 Verified / 0 In progress / 124 Not started; delivery packages are 11 Verified / 0 In progress / 4 Not started. The 569 outer edges are unchanged; the 2026-10-29 [worker failure reforecast](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) supersedes earlier estimate/count snapshots without changing their historical text.
+
+</details>
+
+### Worker P1 entry accepted; F1 assigned — 2026-10-29
+
+At 21:14:57 UTC, lead entry e7a70bb9 accepted D1-D4 and assigned only AR-010-B/P1/F1 to Backend on delivered [M122](https://github.com/spei04/agent-rewind/commit/aed2c20d314e0e361fa4c8e438f839802e1e729b). Preparation b91b0afa and independent review 52a9800d bind the repaired F1 interface; accepted predecessor wheel SHA256 13bb8a8caa1b1c8226b8f57eda367243024a1edb7b2c265ff2453cc27e1501aa and AR-005-C remain prerequisites satisfied by their own evidence. The lead reserved later-F2 ar_0008_failure_evidence, owned by Backend; F1 adds no revision/schema.
+
+AR-010-B, P1 and F1 are In progress with null source/merge/delivery acceptance; F2-F5 and worker P2 remain Not started. Task counts are 31 Verified / 1 In progress / 123 Not started; delivery packages 11 / 1 / 3. Quality owns bookkeeping/corpus handoff and independent oracles; Review checks source/evidence; the lead integrates. GitHub #96/#97 synchronization/readback remains separate lead work. Native fit, later sequential accepted merges, corpus acceptance and production gates are unchanged.
+
+<details>
+<summary>Delivery-only handoff before the subsequent F1 assignment</summary>
+
+- **Verified:** Ledger P2 and AR-010-A are delivered at M122. Main CI and the matching installed package are independently accepted.
+- **Next:** The lead updates delivery records; Backend takes corpus integration after handoff. Quality and Review prepare the worker entry and its independent checks.
+- **Open gates:** AR-010-B, corpus acceptance and production prerequisites remain. Parent AR-010 stays In progress.
+
+</details>
+
+### Ledger P2 and AR-010-A delivered — 2026-10-29
+
+[PR #122](https://github.com/spei04/agent-rewind/pull/122), source [`cd73a458`](https://github.com/spei04/agent-rewind/commit/cd73a45892569a0dc95f9f4f006ec7717e6f6486), is accepted at protected merge [`aed2c20d`](https://github.com/spei04/agent-rewind/commit/aed2c20d314e0e361fa4c8e438f839802e1e729b). [Original main run 40946635371](https://github.com/spei04/agent-rewind/actions/runs/40946635371), attempt 1, passed all eight jobs. The exact 8,382-node inventory has 8,337 Python 3.11 passes with 45 skips and 8,351 Python 3.12 passes with 31 skips. The 17 native, two R3, seven clause-policy and 48 CHECK cases passed all three phases on both versions.
+
+Independent main review `3dfaeb88`, final candidate/sufficiency review `d3d1a8c2` and lead acceptance `e937f66f` bind candidate `12931054242`, archive SHA256 `f914492f4a676e28567256eb82895ca6020a64aaca1f3c57f4b5d7fee8e08ca9`, all 147 runtime members, actual isolated wheel installation/smoke/CLI and the original hosted-image trust checks. The durable private release record has SHA256 `26a29f824397ae30a7f2204fb3c340f85599db509d60334a3a7a1b18dae2143d`; original failures and bounded component qualifications remain retained. The initial log-summary uniqueness failure and provisional artifact review were corrected using unchanged original evidence, with no rerun.
+
+P2 #109 and aggregate AR-010-A #107 are Verified. P1 #108 remains Verified; parent AR-010 #10 remains In progress. Worker entry, corpus integration/acceptance, customer/production, provider, funding and data gates remain separate. No new paid resource, model run or partner-data access follows from this delivery.
+
+Issue closure/readback: #109 completed at 2026-10-29T21:12:17Z (803c11cd); #107 completed at 21:12:18Z (d55f3597). Parent #10 remains open (72f119dc); P1 #108 and all earlier acceptance evidence remain unchanged. Current machine planning/assignment/queue prose is reconciled to this delivery, with superseded text retained. Totals remain 155 tasks / 171 planned PRs / 569 edges; status counts are 31 Verified / 0 In progress / 124 Not started and 11 / 0 / 4 delivery packages.
+
+<details>
+<summary>Superseded current-status panel before final P2 acceptance</summary>
+
+- **Verified:** Corrected PR #122 CI and its exact receipts are independently accepted. The PR merged under the repository's protections.
+- **Next:** Backend monitors fresh main CI; Review verifies receipts and installed artifacts. Quality maintains corpus handoff and documentation; the lead owns delivery.
+- **Blocker:** Fresh main and matching installed-artifact acceptance remain required before P2 delivery. Worker, corpus and production prerequisites remain unchanged.
+
+</details>
+
+<details>
+<summary>Superseded aggregate/P2 tracking and assignment prose — 2026-10-29</summary>
+
+Tracking: [#107](https://github.com/spei04/agent-rewind/issues/107) · In progress.
+
+Tracking: [#109](https://github.com/spei04/agent-rewind/issues/109) · In progress.
+
+- **Progress:** In progress in #107. [P1 #108](#ar-010-a-p1) is Verified: protected merge b214f21b and final lead acceptance 4d157d97 are recorded below; the issue closed as completed at 2026-10-28T18:01:43Z, confirmed by lead readback bae9970b. [P2 #109](#ar-010-a-p2) is In progress after accepted entry v7, with the reviewed CHECK correspondence repair published in [PR #122](https://github.com/spei04/agent-rewind/pull/122). P2 accepted merge and delivery review evidence remain null pending required PR/main and matching installed-artifact acceptance. Whole AR-010-A and parent #10 remain In progress; downstream gates remain unmet.
+
+- **Progress:** In progress after accepted entry v7; accepted merge and delivery review evidence remain null. Backend, independent QE and source review are assigned.
+
+- **Responsible role:** BE; platform/security owns P1 runtime in secondary work/ledger-schema. Planning/verification owns independent tests after accepted progress handoff and stable interfaces; lead integrates, with independent delivery/security review.
+
+- **Responsible role:** BE implementation, QE independent behavioral tests and independent TL/security review assigned; actual PostgreSQL proof remains required.
+
+Current planning rollup: **155 aggregate tasks and 171 planned delivery PRs**, including the five included #97 P1 checkpoints. Statuses and 569 outer edges are unchanged; the 2026-10-29 [worker failure reforecast](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) supersedes earlier estimate/count snapshots without changing their historical text.
+
+</details>
 
 ### PR122 accepted and merged; fresh main pending — 2026-10-29
 

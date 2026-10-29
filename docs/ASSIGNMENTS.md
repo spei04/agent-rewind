@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Corrected PR #122 CI and its exact receipts are independently accepted. The PR merged under the repository's protections.
-- **Next:** Backend monitors fresh main CI; Review verifies receipts and installed artifacts. Quality maintains corpus handoff and documentation; the lead owns delivery.
-- **Blocker:** Fresh main and matching installed-artifact acceptance remain required before P2 delivery. Worker, corpus and production prerequisites remain unchanged.
+- **Verified:** Ledger P2 and AR-010-A are delivered. Main CI and the matching installed package are independently accepted.
+- **Next:** Backend implements F1; Quality completes bookkeeping and corpus handoff. Review provides independent checks; the lead integrates reviewed work.
+- **Open gates:** F1 and worker delivery, corpus acceptance and production prerequisites remain. Parent AR-010 stays In progress.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -21,6 +21,42 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+### Worker P1 entry accepted; F1 assigned — 2026-10-29
+
+At 21:14:57 UTC, lead entry e7a70bb9 accepted D1-D4 and assigned only AR-010-B/P1/F1 to Backend on delivered [M122](https://github.com/spei04/agent-rewind/commit/aed2c20d314e0e361fa4c8e438f839802e1e729b). Preparation b91b0afa and independent review 52a9800d bind the repaired F1 interface; accepted predecessor wheel SHA256 13bb8a8caa1b1c8226b8f57eda367243024a1edb7b2c265ff2453cc27e1501aa and AR-005-C remain prerequisites satisfied by their own evidence. The lead reserved later-F2 ar_0008_failure_evidence, owned by Backend; F1 adds no revision/schema.
+
+AR-010-B, P1 and F1 are In progress with null source/merge/delivery acceptance; F2-F5 and worker P2 remain Not started. Task counts are 31 Verified / 1 In progress / 123 Not started; delivery packages 11 / 1 / 3. Quality owns bookkeeping/corpus handoff and independent oracles; Review checks source/evidence; the lead integrates. GitHub #96/#97 synchronization/readback remains separate lead work. Native fit, later sequential accepted merges, corpus acceptance and production gates are unchanged.
+
+<details>
+<summary>Delivery-only handoff before the subsequent F1 assignment</summary>
+
+- **Verified:** Ledger P2 and AR-010-A are delivered at M122. Main CI and the matching installed package are independently accepted.
+- **Next:** The lead updates delivery records; Backend takes corpus integration after handoff. Quality and Review prepare the worker entry and its independent checks.
+- **Open gates:** AR-010-B, corpus acceptance and production prerequisites remain. Parent AR-010 stays In progress.
+
+</details>
+
+### Ledger P2 and AR-010-A delivered — 2026-10-29
+
+[PR #122](https://github.com/spei04/agent-rewind/pull/122), source [`cd73a458`](https://github.com/spei04/agent-rewind/commit/cd73a45892569a0dc95f9f4f006ec7717e6f6486), is accepted at protected merge [`aed2c20d`](https://github.com/spei04/agent-rewind/commit/aed2c20d314e0e361fa4c8e438f839802e1e729b). [Original main run 40946635371](https://github.com/spei04/agent-rewind/actions/runs/40946635371), attempt 1, passed all eight jobs. The exact 8,382-node inventory has 8,337 Python 3.11 passes with 45 skips and 8,351 Python 3.12 passes with 31 skips. The 17 native, two R3, seven clause-policy and 48 CHECK cases passed all three phases on both versions.
+
+Independent main review `3dfaeb88`, final candidate/sufficiency review `d3d1a8c2` and lead acceptance `e937f66f` bind candidate `12931054242`, archive SHA256 `f914492f4a676e28567256eb82895ca6020a64aaca1f3c57f4b5d7fee8e08ca9`, all 147 runtime members, actual isolated wheel installation/smoke/CLI and the original hosted-image trust checks. The durable private release record has SHA256 `26a29f824397ae30a7f2204fb3c340f85599db509d60334a3a7a1b18dae2143d`; original failures and bounded component qualifications remain retained. The initial log-summary uniqueness failure and provisional artifact review were corrected using unchanged original evidence, with no rerun.
+
+P2 #109 and aggregate AR-010-A #107 are Verified. P1 #108 remains Verified; parent AR-010 #10 remains In progress. Worker entry, corpus integration/acceptance, customer/production, provider, funding and data gates remain separate. No new paid resource, model run or partner-data access follows from this delivery.
+
+Issue closure/readback: #109 completed at 2026-10-29T21:12:17Z (803c11cd); #107 completed at 21:12:18Z (d55f3597). Parent #10 remains open (72f119dc); P1 #108 and all earlier acceptance evidence remain unchanged. Current machine planning/assignment/queue prose is reconciled to this delivery, with superseded text retained. Totals remain 155 tasks / 171 planned PRs / 569 edges; status counts are 31 Verified / 0 In progress / 124 Not started and 11 / 0 / 4 delivery packages.
+
+**Handoff:** Backend takes corpus integration only after the lead's source handoff; Quality prepares worker entry and independent checks, Review verifies evidence, and the lead owns protected delivery and prerequisites. Worker/F1 assignment, revision reservation, PCA2 and production remain ungranted.
+
+<details>
+<summary>Superseded current-status panel before final P2 acceptance</summary>
+
+- **Verified:** Corrected PR #122 CI and its exact receipts are independently accepted. The PR merged under the repository's protections.
+- **Next:** Backend monitors fresh main CI; Review verifies receipts and installed artifacts. Quality maintains corpus handoff and documentation; the lead owns delivery.
+- **Blocker:** Fresh main and matching installed-artifact acceptance remain required before P2 delivery. Worker, corpus and production prerequisites remain unchanged.
+
+</details>
 
 ### PR122 accepted and merged; fresh main pending — 2026-10-29
 
