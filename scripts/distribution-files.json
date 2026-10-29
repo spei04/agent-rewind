@@ -115,6 +115,7 @@
     "agent_rewind/projection_publication.py",
     "agent_rewind/projection_rows.py",
     "agent_rewind/projection_source.py",
+    "agent_rewind/public_corpus.py",
     "agent_rewind/publication_journal.py",
     "agent_rewind/publication_source.py",
     "agent_rewind/published_reader.py",
