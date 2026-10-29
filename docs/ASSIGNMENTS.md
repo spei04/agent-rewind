@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger foundations are delivered. P2 implementation and diagnostics passed component review; delivery remains unaccepted. Corpus work is preparation only.
-- **Next:** Backend monitors full CI; Review checks the results. Quality prepares corpus delivery, and the lead integrates the reviewed changes.
-- **Blocker:** The HTTP 503 seen in CI remains unexplained. P2 needs complete PR/main checks and candidate acceptance. Corpus delivery and downstream work remain gated.
+- **Verified:** Ledger foundations are delivered. PCA1 source is independently reviewed and published; its collection and baseline are complete.
+- **Next:** Backend prepares the test-clock correction and fresh CI; Review checks source and results. Quality maintains documentation and corpus delivery; the lead integrates.
+- **Blocker:** P2's Python 3.11 late partition failed a semantic test's elapsed-time limit. The earlier HTTP 503 remains unexplained. Full CI and installed-artifact acceptance are pending.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -24,6 +24,14 @@ partner-data or production authorization.
 
 <details>
 <summary>Earlier assignments, approvals and delivery records</summary>
+
+**Prior corpus delivery current view — retained 2026-10-29 UTC:**
+
+- **Verified:** Ledger foundations are delivered. P2 implementation and diagnostics passed component review; delivery remains unaccepted. Corpus work is preparation only.
+- **Next:** Backend monitors full CI; Review checks the results. Quality prepares corpus delivery, and the lead integrates the reviewed changes.
+- **Blocker:** The HTTP 503 seen in CI remains unexplained. P2 needs complete PR/main checks and candidate acceptance. Corpus delivery and downstream work remain gated.
+
+**CI clock-isolation and corpus delivery assignment — 2026-10-29 UTC:** Original [P2 CI 40801845500](https://github.com/spei04/agent-rewind/actions/runs/40801845500), attempt 1, failed the Python 3.11 late partition on a cohort semantic-test elapsed refusal; its original Python 3.12 leg is still running. The earlier HTTP 503 cause remains unresolved. Backend's one-test clock isolation passed eight existing cases on each interpreter and awaits independent review; production deadlines and native guards are unchanged. Backend owns correction and fresh CI, Review source/results, Quality documentation and corpus delivery, and the lead integration. PCA1 branch source 6726d165 is published; both interpreters' 8,571-node collection and baseline are complete, with no test-body credit from collection. Full CI and installed-artifact acceptance remain pending; no delivery or downstream acceptance is claimed.
 
 **Prior delivery current view — retained 2026-10-29 UTC:**
 
