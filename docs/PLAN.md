@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger foundations are delivered. P2 test cleanup and failure diagnostics are independently reviewed, as is the corpus candidate source.
-- **Next:** Backend monitors fresh CI; Review verifies results and artifacts. Quality prepares corpus delivery, and the lead integrates reviewed changes.
-- **Blocker:** Passing PR and main CI and matching installed artifacts are still required. Earlier HTTP 503 causes remain unresolved, and downstream delivery gates remain unmet.
+- **Verified:** Ledger foundations and the worker planning reforecast are delivered. The paging correction passed seven targeted checks on each Python version and independent review.
+- **Next:** Backend monitors CI and designs worker authority. Quality specifies bounded consumers; Review checks source and evidence. The lead integrates reviewed work.
+- **Blocker:** [Fresh full CI](https://github.com/spei04/agent-rewind/actions/runs/40825337038) checks the correction. The previous elapsed refusal is identified, but its delay remains unexplained. Passing PR/main checks and matching artifacts are still required; downstream gates remain unmet.
 
 [Active backlog](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Retained history](#143-dated-progress-ledger)
 
@@ -896,6 +896,29 @@ The original brief is filled in this single roadmap. The later request explicitl
 
 ### 14.3 Dated progress ledger
 
+### Paging correction and next assignments — 2026-10-29
+
+Original [run 40819867773](https://github.com/spei04/agent-rewind/actions/runs/40819867773) failed on Python 3.12: 7,715 passed, 31 skipped and one pagination failure before fail-fast stopped the remaining cases. Both Python 3.11 jobs and supporting checks passed. The bounded witness identifies the two-second elapsed guard before the candidate query; schema readiness succeeded. Its retained 3.58 seconds includes cleanup and does not establish the delay's cause. Earlier unwitnessed HTTP causes remain unresolved.
+
+[Correction `0cada5d1`](https://github.com/spei04/agent-rewind/commit/0cada5d13627b8029f8179c621938c7cf3ea8117) isolates only the pagination semantics test's listing clock. Cursor expiry, all assertions, runtime limits and separate deadline/native-work controls remain unchanged. Seven existing checks passed once on each supported Python version, followed by independent review. Test IDs, 8,327-case P2 and 8,575-case corpus baselines are unchanged. This is component evidence, not a production performance fix or complete delivery acceptance. [New original CI](https://github.com/spei04/agent-rewind/actions/runs/40825337038) must pass before PR/main and artifact acceptance.
+
+Backend owns CI and the read-only worker capability/conditional-write design. Quality owns bounded successor reader/query design. Review independently checks both; the lead owns integration and the offline operator interface. The published worker reforecast passed all 190 affected planning tests. No worker implementation assignment, paid run, corpus acquisition or production activation follows; existing budget and data gates remain unchanged.
+
+### Path to the next real-agent validation
+
+The historical walkthrough reconstructs saved fixtures. The next integrated real-agent validation follows the existing dependency graph:
+
+| Next delivery | Owner | Observable exit |
+| --- | --- | --- |
+| Current ledger P2 | Backend, Review, lead | Passing PR/main checks, native evidence and matching installed artifact; whole AR-010-A accepted |
+| Worker P1 F1–F5, then P2 | Backend; Quality and Review | All five accepted checkpoints, followed by actual fenced completion/expiry integration |
+| M1 integration | Backend, Platform, Quality | Projection repair and telemetry joined by AR-012-B; all 24 M1 behavior cases and G1 accepted |
+| Runtime branches | Platform, Backend, Research, Quality | Native gVisor isolation, checkpoint/restore, storage/key recovery, fencing and evaluator evidence under each existing task's prerequisites |
+| Real-agent smoke and G2 | Quality, Research, Platform | AR-019-A integration, the PAID0-bound AR-019-B failed run and branches, then AR-019-C evidence and G2 acceptance |
+
+Every worker checkpoint is required by the current contracts. P1's 12 [9–18] days measure engineering effort, not elapsed calendar time or an assumed parallel speedup. CI, review, failures and existing ENV0/PAID0 dependencies affect elapsed delivery. This intermediate validation does not satisfy enterprise study, workbench, partner pilot, capacity/security or rollout gates G3–G7. See the [worker plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) and [task graph](EXECUTION_BACKLOG.md); no reduced-scope bypass or new spending authority is introduced.
+
+
 ### Worker failure DDL reforecast adopted — 2026-10-29
 
 2026-10-29 lead-adopted #97 DDL reforecast replaces P1 2 [2–3] with 12 [9–18] low-confidence BE days in five sequential F1–F5 implementation PRs. P2 remains 2 [2–3]; AR-010-B is 14 [11–21], low, and parent AR-010 is 20 days/10 PRs. Current totals: 171 PRs, 482 base / 814.6 upper / 602.5 alternative allowance / 183.5 effort-path days, BE 110.5 and M1 75.5. Existing 155 aggregates, 569 outer edges, statuses, null acceptance, contracts and historical evidence remain unchanged. No early entry, customer/worker activation or implementation assignment follows; whole AR-010-A/AR-005-C and complete entry/revision/validation-plan prerequisites remain. Backend owns later implementation/migration, Quality independent evidence, Review source/security and the lead integration. These are planning roles, not current code assignments. See [execution plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md).
@@ -903,6 +926,13 @@ The original brief is filled in this single roadmap. The later request explicitl
 
 <details>
 <summary>Prior status snapshots and dated records</summary>
+
+**Prior current view — retained 2026-10-29:**
+
+- **Verified:** Ledger foundations are delivered. P2 test cleanup and failure diagnostics are independently reviewed, as is the corpus candidate source.
+- **Next:** Backend monitors fresh CI; Review verifies results and artifacts. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Passing PR and main CI and matching installed artifacts are still required. Earlier HTTP 503 causes remain unresolved, and downstream delivery gates remain unmet.
+
 
 **Prior delivery current view — retained 2026-10-29 UTC:**
 

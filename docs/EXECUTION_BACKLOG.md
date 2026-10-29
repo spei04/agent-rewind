@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger foundations are delivered. P2 test cleanup and failure diagnostics are independently reviewed, as is the corpus candidate source.
-- **Next:** Backend monitors fresh CI; Review verifies results and artifacts. Quality prepares corpus delivery, and the lead integrates reviewed changes.
-- **Blocker:** Passing PR and main CI and matching installed artifacts are still required. Earlier HTTP 503 causes remain unresolved, and downstream delivery gates remain unmet.
+- **Verified:** Ledger foundations and the worker planning reforecast are delivered. The paging correction passed seven targeted checks on each Python version and independent review.
+- **Next:** Backend monitors CI and designs worker authority. Quality specifies bounded consumers; Review checks source and evidence. The lead integrates reviewed work.
+- **Blocker:** [Fresh full CI](https://github.com/spei04/agent-rewind/actions/runs/40825337038) checks the correction. The previous elapsed refusal is identified, but its delay remains unexplained. Passing PR/main checks and matching artifacts are still required; downstream gates remain unmet.
 
 [P2 task and dependencies](#ar-010-a-p2) · [History and maintenance](#dependency-review-progress-and-maintenance)
 
@@ -3675,8 +3675,26 @@ No question above asks to reapprove accepted architecture or issue #51 choices. 
 
 ## Dependency review, progress and maintenance
 
+### Paging correction and next assignments — 2026-10-29
+
+Original [run 40819867773](https://github.com/spei04/agent-rewind/actions/runs/40819867773) failed on Python 3.12: 7,715 passed, 31 skipped and one pagination failure before fail-fast stopped the remaining cases. Both Python 3.11 jobs and supporting checks passed. The bounded witness identifies the two-second elapsed guard before the candidate query; schema readiness succeeded. Its retained 3.58 seconds includes cleanup and does not establish the delay's cause. Earlier unwitnessed HTTP causes remain unresolved.
+
+[Correction `0cada5d1`](https://github.com/spei04/agent-rewind/commit/0cada5d13627b8029f8179c621938c7cf3ea8117) isolates only the pagination semantics test's listing clock. Cursor expiry, all assertions, runtime limits and separate deadline/native-work controls remain unchanged. Seven existing checks passed once on each supported Python version, followed by independent review. Test IDs, 8,327-case P2 and 8,575-case corpus baselines are unchanged. This is component evidence, not a production performance fix or complete delivery acceptance. [New original CI](https://github.com/spei04/agent-rewind/actions/runs/40825337038) must pass before PR/main and artifact acceptance.
+
+Backend owns CI and the read-only worker capability/conditional-write design. Quality owns bounded successor reader/query design. Review independently checks both; the lead owns integration and the offline operator interface. The published worker reforecast passed all 190 affected planning tests. No worker implementation assignment, paid run, corpus acquisition or production activation follows; existing budget and data gates remain unchanged.
+
+The existing complete path to real-agent validation is recorded in the [roadmap](PLAN.md#path-to-the-next-real-agent-validation); its owners, observable gates and engineering-effort qualification remain separate from historical replay evidence.
+
+
 <details>
 <summary>Superseded status snapshots</summary>
+
+**Prior current view — retained 2026-10-29:**
+
+- **Verified:** Ledger foundations are delivered. P2 test cleanup and failure diagnostics are independently reviewed, as is the corpus candidate source.
+- **Next:** Backend monitors fresh CI; Review verifies results and artifacts. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Passing PR and main CI and matching installed artifacts are still required. Earlier HTTP 503 causes remain unresolved, and downstream delivery gates remain unmet.
+
 
 **Prior delivery current view — retained 2026-10-29 UTC:**
 
