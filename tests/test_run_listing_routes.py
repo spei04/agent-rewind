@@ -259,6 +259,12 @@ def test_real_scoped_key_and_live_revocation(http_listing):
 
 
 def test_paging_keeps_watermark_expiry_and_original_limit(http_listing, monkeypatch):
+    from agent_rewind import listing_session
+
+    # Cursor and watermark semantics are independent of elapsed scheduling.
+    # Native SQL and statement/VM guards remain active; separate controls cover
+    # elapsed deadlines and the real native-work budget.
+    monkeypatch.setattr(listing_session, "time", SimpleNamespace(monotonic=lambda: 0.0))
     app, client, engine = http_listing
     clock = [datetime(2026, 1, 1, tzinfo=UTC)]
 
