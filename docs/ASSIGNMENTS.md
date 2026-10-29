@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Verified:** Ledger P2 and AR-010-A are delivered. Main CI and the matching installed package are independently accepted.
-- **Next:** Backend implements F1; Quality completes bookkeeping and corpus handoff. Review provides independent checks; the lead integrates reviewed work.
-- **Open gates:** F1 and worker delivery, corpus acceptance and production prerequisites remain. Parent AR-010 stays In progress.
+- **Verified:** Ledger P2 and AR-010-A are delivered. Corpus inventory and baseline controls are verified locally.
+- **Next:** Backend completes the F1 native campaign; Quality prepares corpus delivery. Review checks evidence, and the lead integrates and publishes reviewed work.
+- **Open gates:** Corpus PR/main CI and matching installed artifacts remain required. F1 and worker delivery, corpus acceptance and production gates remain unmet.
 
-[Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
+[Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Assignment history](#assignment-history)
 
 ## Execution location — 2026-10-23
 
@@ -21,6 +21,21 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+### Corpus integration and final inventory — 2026-10-29
+
+The accepted ledger repair was integrated locally into corpus work at 193cb3f3. Both original collect-only runs observed **8,630** IDs, retaining all 8,575 prior corpus IDs and all 8,382 P2 IDs in order. Independent review 8055096b accepts the exact reconciliation, including metadata qualifications; no test-body result follows from collection. The actual-derived baseline passed the existing **16 controls** once, plus direct original-array validation and formatting/whitespace checks. Corpus PR/main CI and matching installed-artifact acceptance remain pending; no future PR/run identity is assigned here.
+
+Backend owns the F1 native campaign; partial principal/key samples are not final F1 acceptance. Quality owns corpus integration and delivery preparation, Review checks source/evidence, and the lead owns publication. Machine statuses, estimates, worker sequencing and production/data/provider gates are unchanged.
+
+<details>
+<summary>Superseded current-status panel before final corpus inventory</summary>
+
+- **Verified:** Ledger P2 and AR-010-A are delivered. Main CI and the matching installed package are independently accepted.
+- **Next:** Backend implements F1; Quality completes bookkeeping and corpus handoff. Review provides independent checks; the lead integrates reviewed work.
+- **Open gates:** F1 and worker delivery, corpus acceptance and production prerequisites remain. Parent AR-010 stays In progress.
+
+</details>
 
 ### Worker P1 entry accepted; F1 assigned — 2026-10-29
 

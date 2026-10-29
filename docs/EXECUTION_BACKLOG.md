@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Verified:** Ledger P2 and AR-010-A are delivered. Main CI and the matching installed package are independently accepted.
-- **Next:** Backend implements F1; Quality completes bookkeeping and corpus handoff. Review provides independent checks; the lead integrates reviewed work.
-- **Open gates:** F1 and worker delivery, corpus acceptance and production prerequisites remain. Parent AR-010 stays In progress.
+- **Verified:** Ledger P2 and AR-010-A are delivered. Corpus inventory and baseline controls are verified locally.
+- **Next:** Backend completes the F1 native campaign; Quality prepares corpus delivery. Review checks evidence, and the lead integrates and publishes reviewed work.
+- **Open gates:** Corpus PR/main CI and matching installed artifacts remain required. F1 and worker delivery, corpus acceptance and production gates remain unmet.
 
-[P2 task and dependencies](#ar-010-a-p2) · [History and maintenance](#dependency-review-progress-and-maintenance)
+[Worker task and dependencies](#ar-010-b) · [History and maintenance](#dependency-review-progress-and-maintenance)
 
 Current planning rollup: **155 aggregate tasks and 171 planned delivery PRs**, including the five included #97 P1 checkpoints. Tasks are 31 Verified / 1 In progress / 123 Not started; delivery packages are 11 Verified / 1 In progress / 3 Not started. The 569 outer edges are unchanged; the 2026-10-29 [worker failure reforecast](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) supersedes earlier estimate/count snapshots without changing their historical text.
 
@@ -3674,6 +3674,19 @@ M1 / P0 · 1 PR · 2 engineering days · Verified · [Tracking issue #26](https:
 No question above asks to reapprove accepted architecture or issue #51 choices. The nine selected engineering scopes and calibration targets are approved; optional adapters/reuse, held-out execution, actual study funding/data, independent statistics and production remain separate.
 
 ## Dependency review, progress and maintenance
+
+### Corpus integration and final inventory — 2026-10-29
+
+The final corpus inventory and baseline checks are complete locally; see the [assignment checkpoint](ASSIGNMENTS.md#corpus-integration-and-final-inventory--2026-10-29) for exact evidence and remaining CI/artifact gates.
+
+<details>
+<summary>Superseded current-status panel before final corpus inventory</summary>
+
+- **Verified:** Ledger P2 and AR-010-A are delivered. Main CI and the matching installed package are independently accepted.
+- **Next:** Backend implements F1; Quality completes bookkeeping and corpus handoff. Review provides independent checks; the lead integrates reviewed work.
+- **Open gates:** F1 and worker delivery, corpus acceptance and production prerequisites remain. Parent AR-010 stays In progress.
+
+</details>
 
 <details>
 <summary>Superseded worker pre-entry current statements — 2026-10-29</summary>

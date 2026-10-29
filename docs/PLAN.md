@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Verified:** Ledger P2 and AR-010-A are delivered. Main CI and the matching installed package are independently accepted.
-- **Next:** Backend implements F1; Quality completes bookkeeping and corpus handoff. Review provides independent checks; the lead integrates reviewed work.
-- **Open gates:** F1 and worker delivery, corpus acceptance and production prerequisites remain. Parent AR-010 stays In progress.
+- **Verified:** Ledger P2 and AR-010-A are delivered. Corpus inventory and baseline controls are verified locally.
+- **Next:** Backend completes the F1 native campaign; Quality prepares corpus delivery. Review checks evidence, and the lead integrates and publishes reviewed work.
+- **Open gates:** Corpus PR/main CI and matching installed artifacts remain required. F1 and worker delivery, corpus acceptance and production gates remain unmet.
 
-[Active backlog](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Retained history](#143-dated-progress-ledger)
+[Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Retained history](#143-dated-progress-ledger)
 
 ## Contents
 
@@ -895,6 +895,19 @@ The original brief is filled in this single roadmap. The later request explicitl
 - [ ] G1–G7 implementation and release gates accepted with actual evidence.
 
 ### 14.3 Dated progress ledger
+
+### Corpus integration and final inventory — 2026-10-29
+
+The final corpus inventory and baseline checks are complete locally; see the [assignment checkpoint](ASSIGNMENTS.md#corpus-integration-and-final-inventory--2026-10-29) for exact evidence and remaining CI/artifact gates.
+
+<details>
+<summary>Superseded current-status panel before final corpus inventory</summary>
+
+- **Verified:** Ledger P2 and AR-010-A are delivered. Main CI and the matching installed package are independently accepted.
+- **Next:** Backend implements F1; Quality completes bookkeeping and corpus handoff. Review provides independent checks; the lead integrates reviewed work.
+- **Open gates:** F1 and worker delivery, corpus acceptance and production prerequisites remain. Parent AR-010 stays In progress.
+
+</details>
 
 ### Worker P1 entry accepted; F1 assigned — 2026-10-29
 
