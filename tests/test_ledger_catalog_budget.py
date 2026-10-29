@@ -520,3 +520,392 @@ def test_persisted_inspector_rejects_comment_separated_check_without_restamping(
         record_property("refusal_preserved_whole_state", True)
     finally:
         case.dispose()
+
+
+def jobs_check_native_state(case):
+    """Retain native scalar types and rowids without ORM decoding."""
+    import sqlite3
+    from contextlib import closing
+
+    from sqlalchemy import literal_column, select, table
+
+    names = sorted(installed_profile("sqlite", LEDGER))
+    rows = {}
+    engine = create_engine(case.engine.url)
+    try:
+        with engine.connect() as connection:
+            for name in names:
+                statement = (
+                    select(literal_column("rowid"), literal_column("*"))
+                    .select_from(table(name))
+                    .order_by(literal_column("rowid"))
+                    .limit(1025)
+                )
+                values = connection.execute(statement).fetchall()
+                assert len(values) <= 1024
+                rows[name] = [
+                    [
+                        (type(value).__name__, value.hex() if type(value) is float else value)
+                        for value in row
+                    ]
+                    for row in values
+                ]
+    finally:
+        engine.dispose()
+    with closing(sqlite3.connect(case.path)) as raw:
+        master = raw.execute(
+            "SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY type,name LIMIT 1025"
+        ).fetchall()
+        assert len(master) <= 1024
+        foreign_keys = {
+            name: raw.execute('PRAGMA foreign_key_list("' + name + '")').fetchall()
+            for name in names
+        }
+        assert raw.execute("PRAGMA foreign_key_check").fetchall() == []
+    return rows, master, foreign_keys
+
+
+@pytest.mark.parametrize("candidate_kind", ["extra", "compensated"])
+def test_persisted_inspector_rejects_unreflected_jobs_checks(
+    tmp_path, record_property, candidate_kind
+):
+    import hashlib
+    import sqlite3
+    from contextlib import closing
+
+    from sqlalchemy import inspect
+
+    from agent_rewind.migrations.ledger_inspection import inspect_ledger_state
+
+    case = seed_ar7(complete_ar6(tmp_path / "jobs-check.sqlite", legacy=False))
+    profile = installed_profile("sqlite", LEDGER)
+
+    def full_inspection(outcome):
+        engine = case.operator_engine()
+        work = LedgerWork()
+        try:
+            with ledger_transaction(engine, outcome, work=work) as connection:
+                return inspect_ledger_state(connection).model_dump(mode="json")
+        finally:
+            engine.dispose()
+            assert work._detached
+            record_property("inspection_ordinary_units", work.observed_ordinary)
+
+    try:
+        original_dump = sqlite_snapshot(case.path)
+        original_rows, original_master, original_fks = jobs_check_native_state(case)
+        with case.engine.connect() as connection:
+            assert catalog(connection) == profile
+        assert observed(case, LEDGER) == profile
+        positive = LedgerOutcome()
+        assert full_inspection(positive) == case.expected
+        assert positive.commit_acknowledged and not positive.cleanup_failed
+        assert not positive.rollback_attempted
+        assert jobs_check_native_state(case) == (original_rows, original_master, original_fks)
+        case.engine.dispose()
+
+        with closing(sqlite3.connect(case.path)) as raw:
+            raw.execute("PRAGMA foreign_keys=ON")
+            assert raw.execute("PRAGMA foreign_keys").fetchone() == (1,)
+            original_sql = raw.execute(
+                "SELECT sql FROM sqlite_master WHERE type='table' AND name='jobs'"
+            ).fetchone()[0]
+            assert hashlib.sha256(original_sql.encode()).hexdigest() == (
+                "22eaf8063ff8c236d7ae2e5d900c75b843faf9b2916744e82277f8d222b44a91"
+            )
+            empty_queries = [
+                "SELECT count(*) FROM jobs",
+                "SELECT count(*) FROM operations",
+                "SELECT count(*) FROM provider_calls",
+                "SELECT count(*) FROM budget_entries",
+                "SELECT count(*) FROM operation_keys",
+                "SELECT count(*) FROM resource_scopes WHERE resource_kind='job'",
+                "SELECT count(*) FROM budget_accounts WHERE job_id IS NOT NULL OR scope='job'",
+                "SELECT count(*) FROM artifact_refs WHERE owner_kind='job'",
+            ]
+            assert all(raw.execute(query).fetchone() == (0,) for query in empty_queries)
+            assert sorted(
+                name for name, keys in original_fks.items() if any(key[2] == "jobs" for key in keys)
+            ) == ["operations", "provider_calls"]
+            objects = raw.execute(
+                "SELECT type,name,sql FROM sqlite_master WHERE tbl_name='jobs' ORDER BY type,name"
+            ).fetchall()
+            assert objects == [
+                ("index", "sqlite_autoindex_jobs_1", None),
+                ("table", "jobs", original_sql),
+            ]
+            if candidate_kind == "extra":
+                assert original_sql.endswith(")")
+                candidate = (
+                    original_sql[:-1] + ",\n    CHECK/*review*/(budget<9223372036854775807)\n)"
+                )
+                assert hashlib.sha256(candidate.encode()).hexdigest() == (
+                    "6b1a844818e3d9266d56a14268508f4643798c742318454363df417297b94a45"
+                )
+            else:
+                expression = next(
+                    check["sqltext"]
+                    for check in profile["jobs"]["checks"]
+                    if check["name"] == "ar7_jobs_generation"
+                )
+                declaration = "CONSTRAINT ar7_jobs_generation CHECK(" + expression + ")"
+                assert original_sql.count(declaration) == 1
+                candidate = original_sql.replace(
+                    declaration,
+                    "CONSTRAINT ar7_jobs_generation CHECK/*review*/(1) /* " + declaration + " */",
+                )
+            raw.execute("BEGIN IMMEDIATE")
+            try:
+                raw.execute("DROP TABLE jobs")
+                raw.execute(candidate)
+                assert raw.execute("PRAGMA foreign_key_check").fetchall() == []
+                assert raw.execute("PRAGMA integrity_check").fetchall() == [("ok",)]
+                raw.commit()
+            except BaseException:
+                raw.rollback()
+                raise
+
+        changed_dump = sqlite_snapshot(case.path)
+        assert [
+            (left, right)
+            for left, right in zip(original_dump, changed_dump, strict=True)
+            if left != right
+        ] == [(original_sql + ";", candidate + ";")]
+        changed_rows, changed_master, changed_fks = jobs_check_native_state(case)
+        assert changed_rows == original_rows and changed_fks == original_fks
+        assert [
+            (left, right)
+            for left, right in zip(original_master, changed_master, strict=True)
+            if left != right
+        ] == [(("table", "jobs", "jobs", original_sql), ("table", "jobs", "jobs", candidate))]
+
+        # Both attacks preserve the vulnerable reflected shape; count equality
+        # cannot establish which real declaration supplied a reflected expression.
+        engine = create_engine(case.engine.url)
+        try:
+            with engine.connect() as connection:
+                assert (
+                    inspect(connection).get_check_constraints("jobs") == profile["jobs"]["checks"]
+                )
+        finally:
+            engine.dispose()
+        refused = LedgerOutcome()
+        with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+            full_inspection(refused)
+        assert refused.rollback_attempted and refused.rollback_acknowledged
+        assert not refused.commit_attempted and not refused.cleanup_failed
+        engine = create_engine(case.engine.url)
+        try:
+            with (
+                engine.connect() as connection,
+                pytest.raises(MigrationRefused, match="^schema_incompatible$"),
+            ):
+                catalog(connection)
+        finally:
+            engine.dispose()
+        with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+            observed(case, LEDGER)
+        assert sqlite_snapshot(case.path) == changed_dump
+        assert jobs_check_native_state(case) == (changed_rows, changed_master, changed_fks)
+        record_property("candidate_kind", candidate_kind)
+        record_property("positive_outcome", vars(positive))
+        record_property("refused_outcome", vars(refused))
+        record_property("only_jobs_ddl_changed", True)
+        record_property("typed_rows_rowids_and_provenance_preserved", True)
+    finally:
+        case.dispose()
+
+
+@pytest.mark.parametrize(
+    ("fields", "expected"),
+    [
+        ("x INTEGER CONSTRAINT nn NOT NULL CHECK(x>0)", ((None, "x>0"),)),
+        ("x INTEGER CONSTRAINT ar7_jobs_generation CHECK(x>0)", (("ar7_jobs_generation", "x>0"),)),
+        (
+            "x INTEGER, CONSTRAINT fk FOREIGN KEY(x) REFERENCES parent(x), CHECK(x>0)",
+            ((None, "x>0"),),
+        ),
+        (
+            "x INTEGER CONSTRAINT c CHECK(x>0) CHECK(x<9)",
+            (("c", "x>0"), (None, "x<9")),
+        ),
+        ("x INTEGER CONSTRAINT nn UNIQUE, CHECK(x>0)", ((None, "x>0"),)),
+        (
+            "\"CHECK()\" INTEGER, x INTEGER CHECK((x>0) AND length(')CHECK(')>0)",
+            ((None, "(x>0) AND length(')CHECK(')>0"),),
+        ),
+        ("x TEXT CHECK(x!='it''s)CHECK(')", ((None, "x!='it''s)CHECK('"),)),
+        ("x TEXT CHECK(x!='back\\slash')", ((None, "x!='back\\slash'"),)),
+        (
+            "x INTEGER, CONSTRAINT/*one*/ c /*two*/CHECK/*three*/( x>0 )",
+            (("c", "x>0"),),
+        ),
+        ("x INTEGER /* CHECK(0) */, CHECK(x>0) -- CHECK(0)\n", ((None, "x>0"),)),
+        (
+            'x INTEGER, CHECK(x!=3), CONSTRAINT "~" CHECK(x!=4), '
+            'CONSTRAINT "" CHECK(x!=5), CONSTRAINT same CHECK(x>0), '
+            "CONSTRAINT same CHECK(x<9)",
+            (("same", "x>0"), ("same", "x<9"), (None, "x!=3"), ("~", "x!=4"), ("", "x!=5")),
+        ),
+        ('x INTEGER, CONSTRAINT "a""b" CHECK(x>0)', (('a"b', "x>0"),)),
+        ("x INTEGER, CONSTRAINT `a``b` CHECK(x>0)", (("a`b", "x>0"),)),
+        ("x INTEGER, CONSTRAINT [name] CHECK(x>0)", (("name", "x>0"),)),
+    ],
+    ids=[
+        "name-not-carried-past-not-null",
+        "full-ar7-identifier",
+        "name-not-carried-past-foreign-key",
+        "name-not-carried-past-check",
+        "name-not-carried-past-comma",
+        "quoted-identifier-and-nested-string",
+        "doubled-string-quote",
+        "backslash-is-not-an-escape",
+        "interstitial-comments",
+        "comment-decoys",
+        "stable-duplicate-and-anonymous-order",
+        "doubled-identifier-quote",
+        "doubled-backtick",
+        "bracket-name",
+    ],
+)
+def test_native_check_declarations_preserve_names_bodies_and_order(fields, expected):
+    from agent_rewind.migrations.schema import _sqlite_check_declarations
+
+    assert _sqlite_check_declarations('CREATE TABLE "CHECK(table)" (' + fields + ")") == expected
+
+
+@pytest.mark.parametrize(
+    "tail",
+    [
+        "CHECK",
+        "CHECK x>0",
+        "CHECK(",
+        "CHECK()",
+        "CHECK((x>0)",
+        "CHECK(x='unterminated)",
+        "CHECK(x>0 /* unterminated)",
+        'CONSTRAINT "unterminated CHECK(x>0)',
+        "CONSTRAINT [unterminated CHECK(x>0)",
+        "CONSTRAINT `unterminated CHECK(x>0)",
+        "CONSTRAINT",
+        "CONSTRAINT named",
+        "CONSTRAINT named, CHECK(x>0)",
+        "CHECK(x>0))",
+    ],
+    ids=[
+        "missing-opening-at-end",
+        "missing-opening",
+        "missing-body",
+        "empty-body",
+        "unbalanced-body",
+        "unterminated-string",
+        "unterminated-comment",
+        "unterminated-double-name",
+        "unterminated-bracket-name",
+        "unterminated-backtick-name",
+        "missing-name",
+        "missing-named-constraint",
+        "detached-name",
+        "unbalanced-table",
+    ],
+)
+def test_native_check_declarations_refuse_malformed_tail_without_returning_prefix(tail):
+    from agent_rewind.migrations.schema import _sqlite_check_declarations
+
+    with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+        _sqlite_check_declarations("CREATE TABLE t (x INTEGER CHECK(x<9), " + tail + ")")
+
+
+@pytest.mark.parametrize(
+    ("fields", "matches"),
+    [
+        ('x INTEGER, CONSTRAINT "named" CHECK(x>0)', True),
+        ("x INTEGER, CONSTRAINT [named] CHECK(x>0)", True),
+        ("x INTEGER, CONSTRAINT `named` CHECK(x>0)", True),
+        ("x INTEGER, CONSTRAINT 'named' CHECK(x>0)", True),
+        ("x INTEGER, CHECK/*hidden*/(x>0)", False),
+        ("x INTEGER, CHECK(x>0 /* ) */)", False),
+        ('x INTEGER, CONSTRAINT "a""b" CHECK(x>0)', False),
+        ("x INTEGER, CONSTRAINT same CHECK/*hidden*/(1) /* CONSTRAINT same CHECK(x>0) */", False),
+    ],
+    ids=[
+        "double-name",
+        "bracket-name",
+        "backtick-name",
+        "single-name",
+        "hidden-check",
+        "comment-parenthesis",
+        "escaped-name-representation",
+        "equal-count-spoof",
+    ],
+)
+def test_native_check_correspondence_uses_actual_sqlite_and_pinned_reflection(fields, matches):
+    from sqlalchemy import inspect
+
+    from agent_rewind.migrations.schema import (
+        _sqlite_check_declarations,
+        _sqlite_require_reflected_checks,
+    )
+
+    ddl = "CREATE TABLE t (" + fields + ")"
+    engine = create_engine("sqlite://")
+    try:
+        with engine.begin() as connection:
+            connection.exec_driver_sql(ddl)
+            native = _sqlite_check_declarations(ddl)
+            reflected = inspect(connection).get_check_constraints("t")
+            if matches:
+                _sqlite_require_reflected_checks(native, reflected)
+            else:
+                with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+                    _sqlite_require_reflected_checks(native, reflected)
+    finally:
+        engine.dispose()
+
+
+@pytest.mark.parametrize(
+    "reflected",
+    [
+        None,
+        ({"name": None, "sqltext": "x>0"},),
+        [],
+        [{"name": None}],
+        [{"name": None, "sqltext": "x>0", "extra": None}],
+        [{"name": False, "sqltext": "x>0"}],
+        [{"name": None, "sqltext": 1}],
+        [{"name": "", "sqltext": "x>0"}],
+        [{"name": None, "sqltext": " x>0 "}],
+    ],
+    ids=[
+        "null",
+        "tuple",
+        "missing",
+        "missing-key",
+        "extra-key",
+        "nontext-name",
+        "nontext-body",
+        "empty-is-not-anonymous",
+        "no-body-normalization",
+    ],
+)
+def test_native_check_correspondence_refuses_malformed_or_changed_reflection(reflected):
+    from agent_rewind.migrations.schema import _sqlite_require_reflected_checks
+
+    with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+        _sqlite_require_reflected_checks(((None, "x>0"),), reflected)
+
+
+def test_native_check_correspondence_retains_duplicate_multiplicity_and_tie_order():
+    from agent_rewind.migrations.schema import _sqlite_require_reflected_checks
+
+    native = (("same", "x>0"), ("same", "x<9"), (None, "x!=3"), ("~", "x!=4"))
+    original = [{"name": name, "sqltext": body} for name, body in native]
+    _sqlite_require_reflected_checks(native, original)
+    for changed in (
+        [original[1], original[0], *original[2:]],
+        [*original[:2], original[3], original[2]],
+        original[:-1],
+        [*original, original[-1]],
+    ):
+        with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+            _sqlite_require_reflected_checks(native, changed)

@@ -17,6 +17,7 @@ from .schema import (
     LEDGER,
     MigrationRefused,
     _canonicalize_postgresql_enum_checks,
+    _sqlite_require_reflected_checks,
     _sqlite_supported_clauses,
     dialect,
     installed_profile,
@@ -468,7 +469,7 @@ def _observe_catalog(
         selected = _sqlite_table_options(
             connection, tables, {"ar6": ADMISSION, "ar7": LEDGER}[revision_key]
         )
-        _sqlite_supported_clauses(
+        sqlite_checks = _sqlite_supported_clauses(
             connection, tables, admission=revision == ADMISSION, ledger=ledger
         )
         extras = connection.exec_driver_sql(
@@ -659,6 +660,8 @@ def _observe_catalog(
                 if not index.get("duplicates_constraint")
             ],
         }
+        if name == "sqlite" and table in sqlite_checks:
+            _sqlite_require_reflected_checks(sqlite_checks[table], result[table]["checks"])
     if name == "postgresql":
         # Include physical index expressions, predicates, opclasses, sort options and typmods.
         # A stored installed fingerprint also detects drift in the additive metadata tables.

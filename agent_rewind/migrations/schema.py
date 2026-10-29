@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -151,9 +152,132 @@ def _sqlite_ddl_tokens(sql: str) -> list[str]:
     return tokens
 
 
+_SQLITE_IDENTIFIER = re.compile(r"[A-Za-z_][A-Za-z_0-9$]*")
+
+
+def _sqlite_ddl_items(sql: str) -> Iterator[tuple[str, str, int, int]]:
+    """Yield bounded lexical spans; quoted text and comments are never SQL words."""
+    offset = 0
+    while offset < len(sql):
+        start = offset
+        if sql[offset].isspace():
+            offset += 1
+        elif sql.startswith("--", offset):
+            end = sql.find("\n", offset + 2)
+            offset = len(sql) if end < 0 else end + 1
+        elif sql.startswith("/*", offset):
+            end = sql.find("*/", offset + 2)
+            if end < 0:
+                raise MigrationRefused("schema_incompatible")
+            offset = end + 2
+        elif sql[offset] in {"'", '"', "`", "["}:
+            closing = "]" if sql[offset] == "[" else sql[offset]
+            offset += 1
+            while offset < len(sql):
+                if sql[offset] != closing:
+                    offset += 1
+                elif closing != "]" and sql.startswith(closing * 2, offset):
+                    offset += 2
+                else:
+                    value = sql[start + 1 : offset]
+                    if closing != "]":
+                        value = value.replace(closing * 2, closing)
+                    offset += 1
+                    yield "quoted", value, start, offset
+                    break
+            else:
+                raise MigrationRefused("schema_incompatible")
+        else:
+            word = _SQLITE_IDENTIFIER.match(sql, offset)
+            if word:
+                offset += len(word.group())
+                yield "word", word.group(), start, offset
+            else:
+                offset += 1
+                yield "symbol", sql[start:offset], start, offset
+
+
+def _sqlite_check_declarations(sql: str) -> tuple[tuple[str | None, str], ...]:
+    """Read actual CHECK names/bodies without accepting reflected comment text."""
+    items = iter(_sqlite_ddl_items(sql))
+    checks: list[tuple[str | None, str]] = []
+    depth = 0
+    pending_name: str | None = None
+    named_constraint = False
+    for kind, value, _start, _end in items:
+        if named_constraint and (
+            kind != "word"
+            or value.upper() not in {"CHECK", "NOT", "PRIMARY", "UNIQUE", "FOREIGN", "REFERENCES"}
+        ):
+            raise MigrationRefused("schema_incompatible")
+        named_constraint = False
+        if kind == "symbol":
+            if value == "(":
+                depth += 1
+            elif value == ")":
+                depth -= 1
+                if depth < 0:
+                    raise MigrationRefused("schema_incompatible")
+            pending_name = None
+            continue
+        if depth != 1 or kind != "word":
+            pending_name = None
+            continue
+        if value.upper() == "CONSTRAINT":
+            named = next(items, None)
+            if named is None or named[0] not in {"word", "quoted"}:
+                raise MigrationRefused("schema_incompatible")
+            pending_name = named[1]
+            named_constraint = True
+        elif value.upper() == "CHECK":
+            opening = next(items, None)
+            if opening is None or opening[:2] != ("symbol", "("):
+                raise MigrationRefused("schema_incompatible")
+            body_start = opening[3]
+            body_depth = 1
+            for body_kind, body_value, start, _end in items:
+                if body_kind == "symbol":
+                    if body_value == "(":
+                        body_depth += 1
+                    elif body_value == ")":
+                        body_depth -= 1
+                        if body_depth == 0:
+                            body_end = start
+                            break
+            else:
+                raise MigrationRefused("schema_incompatible")
+            body = sql[body_start:body_end].strip()
+            if not body:
+                raise MigrationRefused("schema_incompatible")
+            checks.append((pending_name, body))
+            pending_name = None
+        else:
+            pending_name = None
+    if depth or named_constraint:
+        raise MigrationRefused("schema_incompatible")
+    # Preserve reflection's stable ordering, including duplicate and anonymous ties.
+    return tuple(sorted(checks, key=lambda check: check[0] or "~"))
+
+
+def _sqlite_require_reflected_checks(
+    declarations: tuple[tuple[str | None, str], ...], checks: object
+) -> None:
+    if type(checks) is not list or len(checks) != len(declarations):
+        raise MigrationRefused("schema_incompatible")
+    for declaration, reflected in zip(declarations, checks, strict=True):
+        if (
+            type(reflected) is not dict
+            or set(reflected) != {"name", "sqltext"}
+            or (reflected["name"] is not None and type(reflected["name"]) is not str)
+            or type(reflected["sqltext"]) is not str
+            or (reflected["name"], reflected["sqltext"]) != declaration
+        ):
+            raise MigrationRefused("schema_incompatible")
+
+
 def _sqlite_supported_clauses(
     connection: Connection, tables: list[str], *, admission: bool = False, ledger: bool = False
-) -> None:
+) -> dict[str, tuple[tuple[str | None, str], ...]]:
     # Unindexed COLLATE and conflict policies are invisible to SQLite reflection.
     # This is a conservative supported-DDL exclusion, not a replacement SQL parser.
     forbidden = {
@@ -170,6 +294,7 @@ def _sqlite_supported_clauses(
         "DEFERRABLE",
         "DEFERRED",
     }
+    declarations = {}
     for table in set(tables) & (
         set(TABLES)
         | METADATA_TABLES
@@ -205,6 +330,8 @@ def _sqlite_supported_clauses(
             restricted -= {"CHECK", "DEFAULT", "AS"}
         if restricted.intersection(_sqlite_ddl_tokens(sql)):
             raise MigrationRefused("schema_incompatible")
+        declarations[table] = _sqlite_check_declarations(sql)
+    return declarations
 
 
 # PostgreSQL 16 pg_dump/pg_restore round trips these frozen enum checks
@@ -385,7 +512,7 @@ def catalog(connection: Connection) -> dict[str, Any]:
     ledger = revision == LEDGER
     executable_profile = None
     if name == "sqlite":
-        _sqlite_supported_clauses(
+        sqlite_checks = _sqlite_supported_clauses(
             connection, tables, admission=revision == ADMISSION, ledger=ledger
         )
         extras = connection.exec_driver_sql(
@@ -532,6 +659,8 @@ def catalog(connection: Connection) -> dict[str, Any]:
                 if not index.get("duplicates_constraint")
             ],
         }
+        if name == "sqlite" and table in sqlite_checks:
+            _sqlite_require_reflected_checks(sqlite_checks[table], result[table]["checks"])
     if name == "postgresql":
         # Include physical index expressions, predicates, opclasses, sort options and typmods.
         # A stored installed fingerprint also detects drift in the additive metadata tables.
