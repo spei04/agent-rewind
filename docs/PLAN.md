@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** The CHECK repair's focused checks, inventory and baseline controls are independently reviewed. Both Python 3.11 CI shards and support checks passed.
-- **Next:** Backend proposes a bounded setup correction; Review checks the original failure and source. Quality maintains the corpus handoff; the lead owns integration.
-- **Blocker:** Original Python 3.12 CI failed before reservation. Required PR/main and installed-artifact acceptance, P2 delivery and downstream gates remain unmet.
+- **Verified:** The CHECK repair and bounded period-test setup correction are independently reviewed. The correction is published in PR #122.
+- **Next:** Backend monitors fresh CI; Review verifies receipts and artifacts. Quality maintains corpus handoff and documentation; the lead owns delivery.
+- **Blocker:** Full PR/main and matching installed-artifact acceptance remain pending. The earlier CI failure's cause is unknown; P2 delivery and downstream gates remain unmet.
 
 [Active backlog](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Retained history](#143-dated-progress-ledger)
 
@@ -895,6 +895,23 @@ The original brief is filled in this single roadmap. The later request explicitl
 - [ ] G1–G7 implementation and release gates accepted with actual evidence.
 
 ### 14.3 Dated progress ledger
+
+### Reviewed period-test correction published; fresh PR122 CI — 2026-10-29
+
+[PR #122](https://github.com/spei04/agent-rewind/pull/122) now publishes [source `cd73a458`](https://github.com/spei04/agent-rewind/commit/cd73a45892569a0dc95f9f4f006ec7717e6f6486), tree `571263bc`. Only `tests/reservation_postgres_qe_helpers.py` changed since `e3c879ce`. The exact 652-file source was independently accepted; all 147 runtime files, test bodies/IDs and the 8,382-node baseline are unchanged. No new full collection was run.
+
+Independent review accepted the two existing organization/project period cases once on each supported interpreter: four original passes. A deliberate 4.25-second native setup delay measured about 4.256 seconds; alignment retained 3.991–3.992 seconds, and requested target delays were 3.220–3.351 seconds. Each attempt recorded 448 cumulative post-cleanup Work units and about 4.06 seconds, acknowledged rollback and no commit attempt. Whole-state assertions, source/environment/database-baseline preservation, physical PostgreSQL stop and child release passed. The real clock, 4.1-second upper bound and ten-second Work limit remain. The original CI failure's cause is still unknown; these local results establish no broad-suite, full-CI or delivery acceptance.
+
+[Fresh original CI run 40935985110](https://github.com/spei04/agent-rewind/actions/runs/40935985110), attempt 1, is running on this source. Backend is the sole original-CI monitor; Review verifies receipts and artifacts; Quality maintains corpus handoff and documentation; the lead owns delivery. Passing PR/main and matching installed artifacts remain required, with P2 and downstream gates unmet. All previous outcomes and failures remain retained.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** The CHECK repair's focused checks, inventory and baseline controls are independently reviewed. Both Python 3.11 CI shards and support checks passed.
+- **Next:** Backend proposes a bounded setup correction; Review checks the original failure and source. Quality maintains the corpus handoff; the lead owns integration.
+- **Blocker:** Original Python 3.12 CI failed before reservation. Required PR/main and installed-artifact acceptance, P2 delivery and downstream gates remain unmet.
+
+</details>
 
 ### Original PR122 CI failure; setup correction under review — 2026-10-29
 
