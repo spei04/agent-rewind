@@ -233,8 +233,11 @@ def test_sqlite_budget_interrupts_expensive_inspection(prepared, monkeypatch):
         ("/api/schema/lookalike", "get"),
     ],
 )
-def test_all_customer_routes_refuse_before_auth_or_artifacts(settings, path, method, monkeypatch):
+def test_all_customer_routes_refuse_before_auth_or_artifacts(
+    settings, path, method, monkeypatch, request
+):
     app = create_app(settings)
+    request.addfinalizer(app.state.db.engine.dispose)
     app.state.db.migrate(installation_key="synthetic-api-guard")
 
     def forbidden(*args, **kwargs):
@@ -254,7 +257,6 @@ def test_all_customer_routes_refuse_before_auth_or_artifacts(settings, path, met
             evidence()
         )
     assert response.headers["cache-control"] == "no-store"
-    app.state.db.engine.dispose()
 
 
 def test_liveness_and_static_do_not_open_or_create_database(settings, monkeypatch):
