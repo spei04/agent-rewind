@@ -29,7 +29,7 @@ def diagnostic_output(monkeypatch):
 
 
 @pytest.fixture
-def boundary_app(settings, monkeypatch):
+def boundary_app(settings, monkeypatch, request):
     # Synthetic supported-schema behavior only. No packaged profile is replaced.
     monkeypatch.setattr(
         Database,
@@ -37,7 +37,9 @@ def boundary_app(settings, monkeypatch):
         lambda self: CompatibilityResult("ready", "test_only", "synthetic-install"),
     )
     monkeypatch.setattr(Readiness, "start", lambda self: None)
-    return prepared_app(settings)
+    app = prepared_app(settings)
+    request.addfinalizer(app.state.db.engine.dispose)
+    return app
 
 
 @pytest.mark.parametrize("kind", ["value", "key", "nested", "malformed", "validation", "http"])
