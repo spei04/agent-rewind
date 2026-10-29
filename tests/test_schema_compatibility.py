@@ -8,6 +8,7 @@ from dataclasses import FrozenInstanceError
 import pytest
 from fastapi.testclient import TestClient
 from http_app_cleanup import http_application_cache_cleanup as http_application_cache_cleanup
+from http_failure_diagnostics import route_failure
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
 
@@ -245,10 +246,13 @@ def test_all_customer_routes_refuse_before_auth_or_artifacts(settings, path, met
     monkeypatch.setattr(app.state.auth, "callback", forbidden)
     monkeypatch.setattr(app.state.admission, "admit", forbidden)
     monkeypatch.setattr(app.state.reader.repositories, "artifact_loader", forbidden)
-    with TestClient(app) as client:
-        response = getattr(client, method)(path)
-    assert response.status_code == 503
-    assert response.json()["detail"] == "Service schema is not compatible with this release."
+    with route_failure(monkeypatch, app, phase="schema_guard_expected_incompatible") as evidence:
+        with TestClient(app) as client:
+            response = getattr(client, method)(path)
+        assert response.status_code == 503, evidence()
+        assert response.json()["detail"] == "Service schema is not compatible with this release.", (
+            evidence()
+        )
     assert response.headers["cache-control"] == "no-store"
     app.state.db.engine.dispose()
 
@@ -409,7 +413,18 @@ def test_stalled_probes_are_capped_while_liveness_and_static_respond(settings, m
         futures = [pool.submit(client.get, "/api/runs") for _ in range(4)]
         try:
             assert entered.wait(timeout=2)
-            full = client.get("/api/runs")
+            with route_failure(
+                monkeypatch, app, phase="schema_guard_expected_incompatible"
+            ) as evidence:
+                full = client.get("/api/runs")
+                capacity = json.loads(evidence())
+            assert capacity["probes"] == [] and capacity["guard"] == []
+            assert capacity["security"] == [
+                {
+                    "stage": "security",
+                    "result": {"status": "unavailable", "code": "schema_probe_capacity"},
+                }
+            ]
             assert full.status_code == 503
             assert full.json()["detail"] == "A required service is temporarily unavailable."
             assert calls == 4
