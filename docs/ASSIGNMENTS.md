@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **P2:** [PR #119](https://github.com/spei04/agent-rewind/pull/119), [CI 40794765309](https://github.com/spei04/agent-rewind/actions/runs/40794765309) attempt 1: both 3.11 partitions/support checks passed; 3.12's first positive result GET returned 503 after 6,480 passes/30 skips. One exact diagnostic passed; cause unresolved.
-- **Next owners:** Backend adds bounded failure-only test diagnostics; Review evaluates; Quality reconciles progress; lead integrates before fresh full CI.
-- **PCA1:** [#120](https://github.com/spei04/agent-rewind/issues/120) remains In progress: corrected source independently reviewed, committed `bb5cfc0d`, composed `47b5b324`. Reviewed collection preparation is stopped. P2/PCA1 delivery unaccepted; PCA2 Not started. P1/F3 delivered; external gates, $200 cap and $36.567974 unreconciled reservations unchanged.
+- **Verified:** Ledger foundations are delivered. P2 implementation and diagnostics passed component review; delivery remains unaccepted. Corpus work is preparation only.
+- **Next:** The lead publishes the diagnostics and starts full CI. Quality checks the test inventory; Review verifies the results.
+- **Blocker:** The HTTP 503 seen in CI remains unexplained. P2 needs complete PR/main checks and candidate acceptance. Corpus delivery and downstream work remain gated.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -24,6 +24,12 @@ partner-data or production authorization.
 
 <details>
 <summary>Earlier assignments, approvals and delivery records</summary>
+
+**Earlier CI diagnosis status — retained 2026-10-29 UTC:**
+
+- **P2:** [PR #119](https://github.com/spei04/agent-rewind/pull/119), [CI 40794765309](https://github.com/spei04/agent-rewind/actions/runs/40794765309) attempt 1: both 3.11 partitions/support checks passed; 3.12's first positive result GET returned 503 after 6,480 passes/30 skips. One exact diagnostic passed; cause unresolved.
+- **Next owners:** Backend adds bounded failure-only test diagnostics; Review evaluates; Quality reconciles progress; lead integrates before fresh full CI.
+- **PCA1:** [#120](https://github.com/spei04/agent-rewind/issues/120) remains In progress: corrected source independently reviewed, committed `bb5cfc0d`, composed `47b5b324`. Reviewed collection preparation is stopped. P2/PCA1 delivery unaccepted; PCA2 Not started. P1/F3 delivered; external gates, $200 cap and $36.567974 unreconciled reservations unchanged.
 
 **CI diagnosis and local PCA1 assignment — 2026-10-29 UTC:** Run `40794765309` attempt 1 passed both Python 3.11 partitions and support checks; Python 3.12 stopped on the first positive result GET with HTTP 503 after 6,480 passes and 30 skips. One exact existing Python 3.12 diagnostic passed; the original cause remains unresolved. Backend owns bounded failure-only diagnostics, Review their evaluation, Quality this progress reconciliation, and the lead integration before fresh full CI. PCA1's corrected offline source has independent component review and local commit/composition (`bb5cfc0d` → `47b5b324`); reviewed collection preparation remains stopped. No delivery, merge or PCA2 acceptance is claimed. Existing acceptance fields, estimates, prerequisites and external gates remain unchanged.
 
