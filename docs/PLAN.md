@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** [Repair PR #121](https://github.com/spei04/agent-rewind/pull/121) merged; its original CI evidence is independently accepted. The PR-side blocker is cleared.
-- **Next:** Backend monitors [fresh main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970); Review checks receipts and artifacts. Quality prepares corpus delivery and documentation; the lead owns protected delivery and prerequisites.
-- **Blocker:** Fresh main checks and matching installed artifacts remain before P2 delivery. Worker, corpus and production gates retain their prerequisites.
+- **Verified:** [PR #121](https://github.com/spei04/agent-rewind/pull/121) merged with independently accepted original CI evidence.
+- **Next:** Quality qualifies an extra SQLite CHECK that may be omitted by reflection; Review verifies the complete inspector and preserved state. Backend preserves [original main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970); the lead integrates findings.
+- **Blocker:** Final P2 delivery is held pending that qualification, source-matched main evidence and installed artifacts. Worker, corpus and production prerequisites remain unmet.
 
 [Active backlog](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Retained history](#143-dated-progress-ledger)
 
@@ -895,6 +895,21 @@ The original brief is filled in this single roadmap. The later request explicitl
 - [ ] G1–G7 implementation and release gates accepted with actual evidence.
 
 ### 14.3 Dated progress ledger
+
+### Additional SQLite CHECK qualification — 2026-10-29
+
+Source review identified a separate possible gap on the ar7 `jobs` table: CHECK is permitted there, while native catalog gates do not independently count CHECK clauses and the profile/fingerprint checks use reflected constraints. An additional comment-separated CHECK may be omitted by reflection. Acceptance by the complete persisted inspector has **not yet been observed**.
+
+Quality owns a bounded native qualification on the repaired source; Review checks the exact candidate, original adoption/progress records, whole-state preservation and complete inspector result. Backend preserves the original M121 main run without retry or cancellation. The project lead holds final P2 delivery until the question is resolved and source-matched main/artifact evidence is accepted. A successful current CI run alone cannot resolve an untested candidate. Worker implementation and corpus delivery retain their existing prerequisites; no spending, data access, deployment or production gate advances.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** [Repair PR #121](https://github.com/spei04/agent-rewind/pull/121) merged; its original CI evidence is independently accepted. The PR-side blocker is cleared.
+- **Next:** Backend monitors [fresh main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970); Review checks receipts and artifacts. Quality prepares corpus delivery and documentation; the lead owns protected delivery and prerequisites.
+- **Blocker:** Fresh main checks and matching installed artifacts remain before P2 delivery. Worker, corpus and production gates retain their prerequisites.
+
+</details>
 
 ### Repair PR merged; fresh main validation — 2026-10-29
 
