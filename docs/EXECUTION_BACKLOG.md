@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** [PR #121](https://github.com/spei04/agent-rewind/pull/121) merged with independently accepted original CI evidence.
-- **Next:** Quality qualifies an extra SQLite CHECK that may be omitted by reflection; Review verifies the complete inspector and preserved state. Backend preserves [original main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970); the lead integrates findings.
-- **Blocker:** Final P2 delivery is held pending that qualification, source-matched main evidence and installed artifacts. Worker, corpus and production prerequisites remain unmet.
+- **Verified:** [Original M121 main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970) passed all eight jobs. One synthetic Python 3.12 fixture reproduced an extra jobs CHECK accepted by the complete inspector.
+- **Next:** Backend implements scoped CHECK declaration, name and body validation; Review verifies the reproduction and repair. Quality maintains corpus handoff and documentation; the lead integrates.
+- **Blocker:** Independent reproduction review, repair acceptance and matching delivery evidence remain pending. P2, worker, corpus and production gates remain unmet.
 
 [P2 task and dependencies](#ar-010-a-p2) · [History and maintenance](#dependency-review-progress-and-maintenance)
 
@@ -3674,6 +3674,23 @@ M1 / P0 · 1 PR · 2 engineering days · Verified · [Tracking issue #26](https:
 No question above asks to reapprove accepted architecture or issue #51 choices. The nine selected engineering scopes and calibration targets are approved; optional adapters/reuse, held-out execution, actual study funding/data, independent statistics and production remain separate.
 
 ## Dependency review, progress and maintenance
+
+### Jobs CHECK reproduced; delivery hold retained — 2026-10-29
+
+[Original M121 main run 40843248970](https://github.com/spei04/agent-rewind/actions/runs/40843248970), attempt 1, finished with all eight jobs successful. That original result is retained; it does not resolve the newly reproduced catalog boundary or establish installed-artifact acceptance.
+
+On repaired source [0be52817](https://github.com/spei04/agent-rewind/commit/0be5281750b494729d2aa6e8c64e13bf50f1042b), whose tree equals M121, one fresh empty synthetic ar7 fixture on Python 3.12 / SQLite 3.45.1 accepted the exact additional jobs clause CHECK/*review*/(budget<9223372036854775807) through the general catalog, bounded catalog and complete persisted inspector. Their reflected profiles and expected persisted state stayed unchanged. Ordinary FK-on DDL changed only the jobs table declaration; all typed application rows, row identities, adoption/progress and other schema facts were preserved. Original outcomes, cleanup and source/environment preservation are retained; independent review of this actual result is pending at this checkpoint. This is one controlled fixture, with no production-impact or earlier-CI-cause claim.
+
+Backend owns the scoped repair comparing actual CHECK declarations, names and bodies; Review independently verifies its source and evidence. P2 delivery remains held for accepted correction and matching CI/artifact evidence. Worker implementation, corpus delivery and product/production gates retain their prerequisites; task statuses, graph, estimates and budgets are unchanged.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** [PR #121](https://github.com/spei04/agent-rewind/pull/121) merged with independently accepted original CI evidence.
+- **Next:** Quality qualifies an extra SQLite CHECK that may be omitted by reflection; Review verifies the complete inspector and preserved state. Backend preserves [original main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970); the lead integrates findings.
+- **Blocker:** Final P2 delivery is held pending that qualification, source-matched main evidence and installed artifacts. Worker, corpus and production prerequisites remain unmet.
+
+</details>
 
 ### Additional SQLite CHECK qualification — 2026-10-29
 
