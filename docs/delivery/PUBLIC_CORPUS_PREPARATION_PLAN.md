@@ -1,5 +1,7 @@
 # Public-corpus preparation plan
 
+**Current progress — 2026-10-29 UTC:** PCA1 #120 is In progress under reviewed entry `6491c371`, clarification `a4ce5405` and root grant `6ad5320c`; all acceptance fields remain null. PCA2 and the four aggregate tasks remain Not started. See the [current backlog](../EXECUTION_BACKLOG.md#current-status). The dated technical plan and its original status snapshot below are retained; scope, prerequisites, estimates and external gates are unchanged.
+
 2026-10-27 · technical candidate for independent review · no implementation acceptance
 
 The new owner decision permits preparation of the reviewed proposal at aaa1d9749b196bdef6da69510c74fbbbfb2d2340. The original planning implementation was independently reviewed at 9aa5a204cbaca0b944f841ade84086046caffdb1 against the F3 checkpoint 8fd8bf19179f95da27bb0b223f38fb1192456e87. This successor composes the same planning scope onto corrected P2 source 0e7e3bd7592ee043e8bc5f3c938610d6e99b5a6d. P1 accepted delivery and P2 In progress/null acceptance are preserved. The reused primary checkout owns planning integration; no runtime, corpus schema or normalizer implementation is included.

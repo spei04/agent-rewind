@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified components:** P1/F3 is delivered. P2 has 115 local passes (24 pure, 91 SQLite), 91 supported Python 3.11 passes, PostgreSQL owner/key paths and two setup/restore passes.
-- **Next:** Backend finishes packaging; qualification freezes inventory; the lead owns hosted CI and publication. Ten native adversarial cases have independent component acceptance.
-- **Open gate:** P2 remains In progress with null accepted merge; full CI, review and delivery remain. The $200 cap, unreconciled $36.567974 reservations, corpus preparation-only scope and production/provider gates are unchanged. Research advantage and live readiness remain unproven.
+- **P2 delivery:** P1/F3 is delivered. P2 source `822aa235` is published in [PR #119](https://github.com/spei04/agent-rewind/pull/119); [CI 40794765309](https://github.com/spei04/agent-rewind/actions/runs/40794765309) and delivery acceptance are pending.
+- **PCA1:** [#120](https://github.com/spei04/agent-rewind/issues/120) is In progress. Quality implements candidate-only v2; independent review precedes delivery. Corpus v1 stays unchanged; PCA2 remains Not started.
+- **Unmet gates:** PCA1 acceptance and P2 accepted merge/review remain null. Aggregate acceptance and acquisition, rights, capture, held-out, funding, study and production gates remain unmet. The $200 cap and unreconciled $36.567974 reservations are unchanged.
 
 [Active P2 task](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Assignment history](#assignment-history)
 
@@ -24,6 +24,14 @@ partner-data or production authorization.
 
 <details>
 <summary>Earlier assignments, approvals and delivery records</summary>
+
+**PCA1 entry and P2 delivery checkpoint — 2026-10-29 UTC:** Independent entry review `6491c371`, clarification `a4ce5405` and root grant `6ad5320c` authorize the scoped PCA1 #120 candidate-only v2 implementation. Quality owns implementation, independent review precedes delivery, and the lead owns publication. No recorded-public admission is added: a future producer-backed shape needs a distinct accepted contract/version. PCA1 source/accepted-merge/review evidence remain null, PCA2 remains Not started, and aggregate/external gates and estimates are unchanged. P2 source `822aa235` is published in PR #119 with run `40794765309` pending; the earlier failed attempts remain retained and no P2 delivery acceptance is claimed.
+
+**Earlier P2 integration current view — retained 2026-10-29 UTC:**
+
+- **Verified components:** P1/F3 is delivered. P2 has 115 local passes (24 pure, 91 SQLite), 91 supported Python 3.11 passes, PostgreSQL owner/key paths and two setup/restore passes.
+- **Next:** Backend finishes packaging; qualification freezes inventory; the lead owns hosted CI and publication. Ten native adversarial cases have independent component acceptance.
+- **Open gate:** P2 remains In progress with null accepted merge; full CI, review and delivery remain. The $200 cap, unreconciled $36.567974 reservations, corpus preparation-only scope and production/provider gates are unchanged. Research advantage and live readiness remain unproven.
 
 **Public-corpus planning integration — 2026-10-28:** The preparation-only decision and reviewed reconciliation are being integrated with current delivery records. Planning/checker review precedes PCA1; PCA2 also requires accepted PCA1 source and schema. All new aggregates and PCA1/PCA2 remain Not started. The 3–5 day preparation allocation is included in the 8–15 day corpus increment. P1 remains Verified and product P2 remains In progress with null acceptance. Acquisition, capture, held-out access, paid calls, study and new resources remain unauthorized. The $200 cap and unreconciled historical reservations are unchanged. [Scope and dependency record](delivery/PUBLIC_CORPUS_PREPARATION_PLAN.md).
 
