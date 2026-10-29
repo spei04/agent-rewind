@@ -227,7 +227,13 @@ def test_counter_behind_existing_rows_never_returns_an_empty_page(listing):
 
 @pytest.mark.parametrize("foreign", [False, True])
 @pytest.mark.parametrize("malformed", [False, True])
-def test_incoming_cohort_bounds_and_foreign_scope_behavior(listing, foreign, malformed):
+def test_incoming_cohort_bounds_and_foreign_scope_behavior(
+    listing, foreign, malformed, monkeypatch
+):
+    # Cohort bounds and foreign-scope semantics are independent of elapsed scheduling.
+    # Native SQL and statement/VM guards remain active; separate controls cover
+    # elapsed deadlines and the real native-work budget.
+    monkeypatch.setattr(listing_session, "time", SimpleNamespace(monotonic=lambda: 0.0))
     from agent_rewind.scoped_repositories import MAX_RECORD_BYTES
 
     _, engine, reader = listing
