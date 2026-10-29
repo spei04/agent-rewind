@@ -336,3 +336,187 @@ def test_typed_catalog_names_remain_values_and_limits_remain_native_binds(monkey
             assert connection.exec_driver_sql("SELECT value FROM sentinel").all() == [(7,)]
     finally:
         engine.dispose()
+
+
+@pytest.mark.parametrize(
+    "order", [("jobs", "audit"), ("audit", "jobs")], ids=["jobs_first", "audit_first"]
+)
+@pytest.mark.parametrize(
+    ("clause", "ddl"),
+    [
+        ("CHECK", "CREATE TABLE audit (value INTEGER CHECK/*policy_probe*/(1))"),
+        ("DEFAULT", "CREATE TABLE audit (value INTEGER DEFAULT 0)"),
+        ("AS", "CREATE TABLE audit (value INTEGER, derived INTEGER AS (value+1))"),
+    ],
+    ids=["check", "default", "as"],
+)
+def test_sqlite_clause_policy_does_not_leak_jobs_exceptions(
+    monkeypatch, record_property, order, clause, ddl
+):
+    import builtins
+
+    from agent_rewind.migrations import schema
+
+    tables = ["jobs", "audit", "not_a_profile_table"]
+    selections, queries = [], []
+
+    class OrderedSelection:
+        def __and__(self, allowed):
+            members = builtins.set(tables) & allowed
+            assert members == {"jobs", "audit"}
+            selections.append(sorted(members))
+            return tuple(name for name in order if name in members)
+
+    def select_tables(values=()):
+        # Control only this exact input's traversal, retaining its native intersection.
+        if values is tables:
+            return OrderedSelection()
+        return builtins.set(values)
+
+    engine = create_engine("sqlite://")
+    try:
+        with engine.begin() as connection:
+            connection.exec_driver_sql(
+                "CREATE TABLE jobs (value INTEGER DEFAULT 0 CHECK(value>=0), "
+                "derived INTEGER AS (value+1))"
+            )
+            connection.exec_driver_sql(ddl)
+
+            @event.listens_for(connection, "before_cursor_execute")
+            def observe(_connection, _cursor, statement, parameters, _context, _many):
+                assert statement == (
+                    "SELECT CASE WHEN length(CAST(sql AS BLOB))<=65536 THEN sql END "
+                    "FROM sqlite_master WHERE type='table' AND name=?"
+                )
+                assert len(parameters) == 1
+                queries.append(parameters[0])
+
+            try:
+                with monkeypatch.context() as patch:
+                    patch.setattr(schema, "set", select_tables, raising=False)
+                    with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+                        schema._sqlite_supported_clauses(connection, tables, ledger=True)
+            finally:
+                event.remove(connection, "before_cursor_execute", observe)
+                record_property("clause", clause)
+                record_property("query_order", queries)
+                record_property("selected_membership", selections)
+                assert selections == [["audit", "jobs"]]
+                assert queries == list(order[: order.index("audit") + 1])
+    finally:
+        engine.dispose()
+
+
+def test_persisted_inspector_rejects_comment_separated_check_without_restamping(
+    tmp_path, record_property
+):
+    import sqlite3
+    from contextlib import closing
+
+    from agent_rewind.migrations.ledger_inspection import inspect_ledger_state
+
+    case = seed_ar7(complete_ar6(tmp_path / "clause-policy.sqlite", legacy=False))
+    profile = installed_profile("sqlite", LEDGER)
+    prefix = "SELECT CASE WHEN length(CAST(sql AS BLOB))<=65536 THEN sql END"
+
+    def inspect_with_trace(outcome, trace):
+        engine = case.operator_engine()
+
+        def passive(sql):
+            if sql.startswith(prefix):
+                if len(trace["queries"]) >= 21 or len(sql) > 512:
+                    trace["overflow"] = True
+                else:
+                    trace["queries"].append(sql)
+
+        try:
+            with ledger_transaction(engine, outcome, work=LedgerWork()) as connection:
+                raw = connection.connection.driver_connection
+                raw.set_trace_callback(passive)
+                try:
+                    return inspect_ledger_state(connection).model_dump(mode="json")
+                finally:
+                    raw.set_trace_callback(None)
+        finally:
+            engine.dispose()
+
+    def observed_order(trace):
+        assert not trace["overflow"]
+        result = []
+        for sql in trace["queries"]:
+            names = [name for name in profile if sql.endswith("name='" + name + "'")]
+            assert len(names) == 1
+            result.append(names[0])
+        assert len(result) == len(set(result))
+        return result
+
+    try:
+        original = sqlite_snapshot(case.path)
+        positive = LedgerOutcome()
+        positive_trace = {"queries": [], "overflow": False}
+        assert inspect_with_trace(positive, positive_trace) == case.expected
+        assert positive.commit_acknowledged and not positive.cleanup_failed
+        assert not positive.rollback_attempted
+        positive_order = observed_order(positive_trace)
+        assert set(positive_order) == set(profile)
+        assert sqlite_snapshot(case.path) == original
+        case.engine.dispose()
+        candidate = (
+            'CREATE TABLE "audit" ("id" VARCHAR(32) NOT NULL,"created" FLOAT NOT NULL,'
+            '"actor" VARCHAR(256) NOT NULL,"action" VARCHAR(80) NOT NULL,'
+            '"target" VARCHAR(64) NOT NULL,PRIMARY KEY (id),CHECK/*f1_alias_probe*/(1))'
+        )
+        # Rebuild only native DDL, retaining every row and the original ar7 provenance.
+        with closing(sqlite3.connect(case.path)) as raw:
+            raw.execute("PRAGMA foreign_keys=ON")
+            before_sql = raw.execute(
+                "SELECT sql FROM sqlite_master WHERE type='table' AND name='audit'"
+            ).fetchone()[0]
+            audit_rows = raw.execute(
+                "SELECT rowid,id,created,actor,action,target FROM audit ORDER BY rowid"
+            ).fetchall()
+            raw.execute("BEGIN IMMEDIATE")
+            try:
+                raw.execute("DROP TABLE audit")
+                raw.execute(candidate)
+                raw.executemany(
+                    "INSERT INTO audit(rowid,id,created,actor,action,target) VALUES(?,?,?,?,?,?)",
+                    audit_rows,
+                )
+                assert (
+                    raw.execute(
+                        "SELECT rowid,id,created,actor,action,target FROM audit ORDER BY rowid"
+                    ).fetchall()
+                    == audit_rows
+                )
+                assert raw.execute("PRAGMA foreign_key_check").fetchall() == []
+                assert raw.execute("PRAGMA integrity_check").fetchall() == [("ok",)]
+                raw.commit()
+            except BaseException:
+                raw.rollback()
+                raise
+        changed = sqlite_snapshot(case.path)
+        differences = [
+            (left.rstrip(";"), right.rstrip(";"))
+            for left, right in zip(original, changed, strict=True)
+            if left != right
+        ]
+        assert differences == [(before_sql, candidate)]
+        refused = LedgerOutcome()
+        refused_trace = {"queries": [], "overflow": False}
+        with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+            inspect_with_trace(refused, refused_trace)
+        assert refused.rollback_attempted and refused.rollback_acknowledged
+        assert not refused.commit_attempted and not refused.cleanup_failed
+        refused_order = observed_order(refused_trace)
+        assert refused_order == positive_order[: positive_order.index("audit") + 1]
+        assert sqlite_snapshot(case.path) == changed
+        record_property("positive_clause_query_order", positive_order)
+        record_property("refused_clause_query_order", refused_order)
+        record_property("audit_row_count", len(audit_rows))
+        record_property("positive_outcome", vars(positive))
+        record_property("refused_outcome", vars(refused))
+        record_property("only_audit_ddl_changed", True)
+        record_property("refusal_preserved_whole_state", True)
+    finally:
+        case.dispose()
