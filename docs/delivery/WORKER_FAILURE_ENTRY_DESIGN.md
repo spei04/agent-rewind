@@ -143,6 +143,17 @@ Truthful rollback/ACK facts remain mandatory. Schema downgrade always refuses, e
 
 ## Fixed limits and remaining acceptance
 
+### Observed repaired-predecessor baseline — 2026-10-29
+
+At [source `0be52817`](https://github.com/spei04/agent-rewind/commit/0be5281750b494729d2aa6e8c64e13bf50f1042b), one bounded synthetic service-key claim/reserve sample per native runtime was independently accepted:
+
+| Python | SQLite | Claim: total Work units | Reserve: total Work units |
+| --- | --- | ---: | ---: |
+| 3.11 | 3.53.1 | 488 | 504 |
+| 3.12 | 3.45.1 | 488 | 504 |
+
+These are original cumulative post-cleanup counters; an ordinary/control/cleanup decomposition was not collected. Both calls acknowledged their commits, preserved all unrelated typed state, and passed exact claim/reservation delta and release checks. The source and owned environments stayed unchanged. Each row is one sample of the current predecessor, with its own native build. F1, the successor schema and broader capacity acceptance still require their planned measurements under unchanged limits. Historical 502/470 arithmetic remains separate from these observations.
+
 One online Work:504 ordinary/512 total,8 cleanup,10s/20M SQLite VM. Offline2048/120s is never borrowed. Keep259 identities,4096 selected job/frame,4MiB complete retained book,64 compiled binds,260 sentinel,2048 response; financial2MiB/65,536 rows/4,096 accounts and original source/page bounds unchanged.
 
 492 ordinary owner units is measured on earlier exact source;502 keyed/470 fused are static. Smaller wire, fewer columns or same SQL-target count does not prove successor fit. Trigger/native catalog/plan/time/VM/memory costs remain real.

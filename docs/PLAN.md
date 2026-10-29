@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** [Repair PR #121](https://github.com/spei04/agent-rewind/pull/121) contains the reviewed schema fix, regressions and reconciled 8,334-test inventory. Targeted checks passed; the earlier main run passed for its older source.
-- **Next:** Backend monitors [fresh CI](https://github.com/spei04/agent-rewind/actions/runs/40837589029). Quality prepares bounded service-key measurements; Review verifies evidence, and the lead integrates delivery.
-- **Blocker:** Corrected PR/main checks and matching installed artifacts remain unmet. Worker implementation, corpus delivery and downstream gates retain their prerequisites.
+- **Verified:** [Repair PR #121](https://github.com/spei04/agent-rewind/pull/121) contains the reviewed schema fix and 8,334-test inventory. Independent review also accepted one existing service-key claim/reserve sample on Python 3.11 and 3.12.
+- **Next:** Backend monitors [fresh CI](https://github.com/spei04/agent-rewind/actions/runs/40837589029); Review checks delivery evidence. Quality prepares the corpus integration handoff, and the lead integrates accepted work.
+- **Blocker:** Corrected PR/main checks and matching installed artifacts remain unmet. F1 implementation, corpus delivery and downstream gates retain their prerequisites.
 
 [Active backlog](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Retained history](#143-dated-progress-ledger)
 
@@ -895,6 +895,21 @@ The original brief is filled in this single roadmap. The later request explicitl
 - [ ] G1–G7 implementation and release gates accepted with actual evidence.
 
 ### 14.3 Dated progress ledger
+
+### Current-source service-key baseline — 2026-10-29
+
+At [repair source `0be52817`](https://github.com/spei04/agent-rewind/commit/0be5281750b494729d2aa6e8c64e13bf50f1042b), independent review accepted one bounded synthetic service-key claim/reserve sample on Python 3.11 and one on Python 3.12. Both observed 488 cumulative post-cleanup Work units for claim and 504 for reservation, acknowledged both commits, and passed exact whole-state change and release checks. Source and environments were preserved; the owned fixture databases were removed. The [worker entry design](delivery/WORKER_FAILURE_ENTRY_DESIGN.md#fixed-limits-and-remaining-acceptance) records the native-runtime bindings and measurement scope.
+
+This supplies an observed current-predecessor baseline. Existing ordinary/control estimates and hypothetical fused savings remain distinct from these cumulative totals. F1 and successor capacity still require their planned native validation. PR #121 CI, fresh main checks and matching installed artifacts remain required before ledger delivery; no implementation, revision, budget, data or production gate advances here.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** [Repair PR #121](https://github.com/spei04/agent-rewind/pull/121) contains the reviewed schema fix, regressions and reconciled 8,334-test inventory. Targeted checks passed; the earlier main run passed for its older source.
+- **Next:** Backend monitors [fresh CI](https://github.com/spei04/agent-rewind/actions/runs/40837589029). Quality prepares bounded service-key measurements; Review verifies evidence, and the lead integrates delivery.
+- **Blocker:** Corrected PR/main checks and matching installed artifacts remain unmet. Worker implementation, corpus delivery and downstream gates retain their prerequisites.
+
+</details>
 
 ### Repair PR and next validation assignments — 2026-10-29
 

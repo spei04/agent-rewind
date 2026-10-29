@@ -114,6 +114,17 @@ Allocation basis: Real interruption/ACK and owner/ACL-preserving physical restor
 
 ## Capacity and reforecast boundaries
 
+### Observed repaired-predecessor baseline — 2026-10-29
+
+At [source `0be52817`](https://github.com/spei04/agent-rewind/commit/0be5281750b494729d2aa6e8c64e13bf50f1042b), one bounded synthetic service-key claim/reserve sample per native runtime was independently accepted:
+
+| Python | SQLite | Claim: total Work units | Reserve: total Work units |
+| --- | --- | ---: | ---: |
+| 3.11 | 3.53.1 | 488 | 504 |
+| 3.12 | 3.45.1 | 488 | 504 |
+
+These are original cumulative post-cleanup counters; an ordinary/control/cleanup decomposition was not collected. Both calls acknowledged their commits, preserved all unrelated typed state, and passed exact claim/reservation delta and release checks. The source and owned environments stayed unchanged. Each row is one sample of the current predecessor, with its own native build. F1, the successor schema and broader capacity acceptance still require their planned measurements under unchanged limits. Historical 502/470 arithmetic remains separate from these observations.
+
 The retained owner reservation measured 492 ordinary / 494 total Work units. Key-route 502 and hypothetical fused 470 are static arithmetic, not measured fit, savings, latency, VM or memory proof. F1 targets only existing ar6/ar7 SQLite observation, leaving the independent schema.catalog per-table observer and PostgreSQL path intact. Preserve every table-specific supported-clause restriction, exact membership/multiplicity/options, null/invalid/oversize refusal, <=65536 bytes per DDL and <=1310720 cumulative ar7 transfer. No hidden out-of-Work query, stale/global cache or budget relaxation is allowed.
 
 Reforecast at measured F1 capacity, observed F2 catalog/rollback and before F5 recovery. If exact equivalence or complete successor fit fails under existing limits, stop subsequent assignment and refine the design; do not turn a conservative refusal or static calculation into successful capacity evidence. This plan adds no paid/provider/native execution authority, acquisition/held-out work, resources, activation, new external approval gate or scope outside #97.
