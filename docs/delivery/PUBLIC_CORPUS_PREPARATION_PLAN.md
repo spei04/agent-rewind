@@ -2,9 +2,10 @@
 
 ## Current status
 
-- **Local source:** PCA1 [#120](https://github.com/spei04/agent-rewind/issues/120) remains In progress. Corrected candidate-only v2 is independently reviewed, committed `bb5cfc0d` and composed `47b5b324`; corpus v1 is unchanged. No delivery or merge acceptance.
-- **Next owners:** Reviewed collection preparation remains stopped while Backend diagnoses P2's CI GET 503; Review evaluates diagnostics, Quality refreshes collection bindings after composition, and the lead integrates.
-- **Limits:** PCA2 and all four aggregates remain Not started; acceptance fields stay null. Scope, prerequisites, estimates, closed acquisition/data/production gates, the $200 cap and $36.567974 unreconciled reservations remain unchanged.
+- **PCA1 Verified:** [#120](https://github.com/spei04/agent-rewind/issues/120) delivered source `574fb0499996b189a23c9d85488a32417bd6970e` at protected merge `48ddc894ba5351efe2bddc3873059f6c0bab1015`. Independent final review `a0748cc0f99788dd7f6d16146d03e0e8a856dfbd0599e28b98968512a21dd06d` and private lead release record SHA-256 `f46559a9974c8a3a31702eb1b491fb5c197ade050cbc9c625216b53074ff79e2` accept this software-preparation scope.
+- **Delivery evidence:** Original main [41121769232](https://github.com/spei04/agent-rewind/actions/runs/41121769232), attempt 1, passed all eight jobs. Python 3.11 recorded 8,605 passes/45 skips across both legs; Python 3.12 recorded 8,619 passes/31 skips. Candidate archive/source equality, actual installed execution and hosted final-image trust are separately accepted. Historical failures remain retained without retrospective causal claims.
+- **PCA2 In progress:** Corpus engineer owns [#125](https://github.com/spei04/agent-rewind/issues/125) in the existing SECONDARY checkout, consuming accepted PCA1 types/schema for disconnected synthetic-row normalization. Its accepted source/merge/review fields remain null. Backend owns the separate API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) correction and shared planning in PRIMARY; that fix is under review, not delivered.
+- **Unchanged boundaries:** AR-002-C and PUBCAP-A remain incomplete; other aggregates and all acquisition, actual rights, capture, paid/model/data/production gates retain their prior status. F1 remains separately retained at `a604fd25`, without integration credit. The $200 cap and $36.567974 unreconciled held reservation remain; additional exposure is **UNKNOWN** (owner unsure), with no available balance inferred.
 
 [Current backlog](../EXECUTION_BACKLOG.md#current-status)
 

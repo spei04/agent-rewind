@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import math
 from collections.abc import Callable
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 import httpx
 
@@ -34,12 +34,61 @@ class Policy(Protocol):
     ) -> dict[str, Any]: ...
 
 
+ModelCallCode = Literal[
+    "response_unavailable",
+    "invalid_response",
+    "invalid_usage",
+    "invalid_usage_cost",
+    "usage_exceeds_reservation",
+    "invalid_action",
+]
+PublicationStage = Literal["run", "study"]
+
+
+class ModelCallFailure(RuntimeError):
+    """A terminal paid-call failure; safe evidence never implies a refunded hold."""
+
+    def __init__(
+        self,
+        code: ModelCallCode,
+        reserved_micro_usd: int,
+        *,
+        usage: dict[str, int] | None = None,
+        reported_micro_usd: int | None = None,
+    ):
+        super().__init__(code)
+        self.code = code
+        self.reserved_micro_usd = reserved_micro_usd
+        self.usage = dict(usage) if usage is not None else None
+        self.reported_micro_usd = reported_micro_usd
+        self.publication_failures: list[PublicationStage] = []
+
+    def publication_failed(self, stage: PublicationStage) -> None:
+        if stage not in self.publication_failures:
+            self.publication_failures.append(stage)
+
+    def evidence(self) -> dict[str, Any]:
+        return {
+            "code": self.code,
+            "reserved_micro_usd": self.reserved_micro_usd,
+            "usage": dict(self.usage) if self.usage is not None else None,
+            "reported_micro_usd": self.reported_micro_usd,
+            "publication_failures": list(self.publication_failures),
+        }
+
+
+def _prices(settings: Settings) -> tuple[float, float]:
+    prices = settings.model_input_price, settings.model_output_price
+    if any(not math.isfinite(price) or price <= 0 for price in prices):
+        raise ValueError("Configure positive finite model prices in dollars per million tokens.")
+    return prices
+
+
 class ChatPolicy:
     def __init__(self, settings: Settings, reserve: Callable[[int], None]):
         if not settings.model_url or not settings.model_name or not settings.model_api_key:
             raise ValueError("Configure the model URL, name, and worker API key.")
-        if settings.model_input_price <= 0 or settings.model_output_price <= 0:
-            raise ValueError("Configure positive model prices in dollars per million tokens.")
+        _prices(settings)
         self.settings = settings
         self.reserve = reserve
 
@@ -74,6 +123,8 @@ class ChatPolicy:
         }
 
     def propose(self, state: dict[str, Any], step: int, seed: int) -> tuple[Action, dict[str, Any]]:
+        # Snapshot mutable configuration before either reservation or dispatch.
+        input_price, output_price = _prices(self.settings)
         body: dict[str, Any] = {
             "model": self.settings.model_name,
             "messages": state["messages"],
@@ -91,8 +142,7 @@ class ChatPolicy:
         if upper_input > self.settings.model_max_input_tokens:
             raise ValueError("Model input exceeds the configured conservative token bound.")
         reserve = math.ceil(
-            upper_input * self.settings.model_input_price
-            + self.settings.model_max_output_tokens * self.settings.model_output_price
+            upper_input * input_price + self.settings.model_max_output_tokens * output_price
         )
         self.reserve(reserve)
         key = self.settings.model_api_key
@@ -109,25 +159,43 @@ class ChatPolicy:
                 )
                 response.raise_for_status()
                 data = response.json()
-        except (httpx.HTTPError, ValueError) as exc:
-            # Provider bodies and request headers can contain sensitive payloads.
-            raise RuntimeError(
-                "Model request failed; reservation retained. Check provider service status."
-            ) from exc
+        except (httpx.HTTPError, ValueError, RecursionError):
+            # Provider exception bodies may contain private request/response data.
+            raise ModelCallFailure("response_unavailable", reserve) from None
+        if type(data) is not dict:
+            raise ModelCallFailure("invalid_response", reserve)
+        usage = data.get("usage")
+        if type(usage) is not dict or any(
+            type(usage.get(name)) is not int or usage[name] < 0
+            for name in ("prompt_tokens", "completion_tokens")
+        ):
+            raise ModelCallFailure("invalid_usage", reserve)
+        counts = {name: usage[name] for name in ("prompt_tokens", "completion_tokens")}
+        if "total_tokens" in usage and (
+            type(usage["total_tokens"]) is not int or usage["total_tokens"] != sum(counts.values())
+        ):
+            raise ModelCallFailure("invalid_usage", reserve)
+        try:
+            cost = (
+                counts["prompt_tokens"] * input_price + counts["completion_tokens"] * output_price
+            )
+            if not math.isfinite(cost):
+                raise ValueError("Nonfinite cost")
+            actual = math.ceil(cost)
+        except (OverflowError, ValueError):
+            raise ModelCallFailure("invalid_usage_cost", reserve, usage=counts) from None
+        if actual > reserve:
+            raise ModelCallFailure(
+                "usage_exceeds_reservation", reserve, usage=counts, reported_micro_usd=actual
+            )
         try:
             content = data["choices"][0]["message"]["content"]
             action = Action.model_validate_json(content)
-            usage = data.get("usage", {})
-            actual = math.ceil(
-                usage.get("prompt_tokens", 0) * self.settings.model_input_price
-                + usage.get("completion_tokens", 0) * self.settings.model_output_price
-            )
-        except (KeyError, TypeError, ValueError) as exc:
-            raise RuntimeError("Model returned an invalid action or usage record.") from exc
-        if actual > reserve:
-            raise RuntimeError(
-                "Provider usage exceeded the reserved bound; review pricing before continuing."
-            )
+        except (KeyError, IndexError, TypeError, ValueError):
+            # Valid billing does not make an unusable response safe to continue.
+            raise ModelCallFailure(
+                "invalid_action", reserve, usage=counts, reported_micro_usd=actual
+            ) from None
         return action, {
             "response": data,
             "reserved_micro_usd": reserve,

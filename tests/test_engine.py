@@ -1,10 +1,13 @@
-import pytest
-from sqlalchemy import update
+import traceback
 
-from agent_rewind.database import events
+import pytest
+from sqlalchemy import select, update
+
+from agent_rewind.database import JobStopped, events, jobs
 from agent_rewind.engine import read_events
 from agent_rewind.models import Action, Intervention
-from agent_rewind.sqlite_ownership import owned_begin
+from agent_rewind.policy import ModelCallFailure
+from agent_rewind.sqlite_ownership import owned_begin, owned_connect
 
 
 def test_result_intervention_changes_future_policy_without_mutating_parent(engine, task):
@@ -122,3 +125,69 @@ def test_incomplete_internal_intervention_fails_without_corrupting_parent(engine
     with pytest.raises(ValueError, match="requires"):
         engine.run(task, original, intervention)
     assert engine.events(original) == before
+
+
+@pytest.mark.parametrize(
+    "known,publication",
+    [
+        pytest.param(False, "success", id="unknown-saved"),
+        pytest.param(True, "success", id="known-saved"),
+        pytest.param(False, "failure", id="unknown-publication-failure"),
+        pytest.param(True, "failure", id="known-publication-failure"),
+        pytest.param(False, "lease", id="unknown-expired-owner"),
+    ],
+)
+def test_model_failure_preserves_hold_primary_and_no_effects(
+    engine, task, monkeypatch, known, publication
+):
+    failure = ModelCallFailure(
+        "invalid_action" if known else "invalid_usage",
+        100,
+        usage={"prompt_tokens": 0, "completion_tokens": 0} if known else None,
+        reported_micro_usd=0 if known else None,
+    )
+    runs = []
+    add = engine.db.add
+
+    def recorded(kind, data, record_id=None):
+        result = add(kind, data, record_id)
+        if kind == "run":
+            runs.append(result)
+        return result
+
+    def propose(*args):
+        engine.db.reserve(engine.job_id, engine.owner, 100)
+        raise failure
+
+    def forbidden(*args):
+        pytest.fail("Rejected model decision must not execute or grade")
+
+    if publication != "success":
+
+        def fail_publication(*args):
+            if publication == "lease":
+                raise JobStopped("private-publication-payload")
+            raise RuntimeError("private-publication-payload")
+
+        monkeypatch.setattr(engine.db, "finish_run", fail_publication)
+    monkeypatch.setattr(engine.db, "add", recorded)
+    monkeypatch.setattr(engine.policy, "propose", propose)
+    monkeypatch.setattr(engine.runner, "execute", forbidden)
+    monkeypatch.setattr(engine.runner, "evaluate", forbidden)
+    with pytest.raises(ModelCallFailure) as caught:
+        engine.run(task)
+    assert caught.value is failure
+    assert len(runs) == 1 and engine.db.event_refs(runs[0]) == []
+    with owned_connect(engine.db.engine) as connection:
+        hold = connection.execute(
+            select(jobs.c.reserved).where(jobs.c.id == engine.job_id)
+        ).scalar_one()
+    assert hold == 100
+    assert failure.publication_failures == ([] if publication == "success" else ["run"])
+    assert "private-publication-payload" not in "".join(traceback.format_exception(failure))
+    manifest = engine.db.get(runs[0])
+    if publication == "success":
+        assert manifest["status"] == "failed" and manifest["branchable"] is False
+        assert manifest["model_call_failure"] == failure.evidence()
+    else:
+        assert manifest["status"] == "running"  # Never claim the failed publication committed.

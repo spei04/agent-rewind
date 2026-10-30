@@ -2,13 +2,13 @@
 
 ## Current status
 
-- **Verified:** The registry retention defect is reproduced and fixed with ownership checks preserved. Python 3.11 coverage combines 65 unchanged and two corrected passes; Python 3.12 passed 67 cases in one run. Both versions collected 8,650 tests.
-- **Blocker:** Latest full CI stopped in the listing guard, leaving 2,926 tests unreported. Its inner cause and any connection to registry retention remain unproven.
-- **Next:** Fresh PR/main CI and installed-artifact acceptance are required before corpus delivery and F1 integration. Production and acquisition remain gated.
+- **Verified:** PCA1 [#120](https://github.com/spei04/agent-rewind/issues/120) is delivered at merge `48ddc894` from `574fb049`. Original main [41121769232](https://github.com/spei04/agent-rewind/actions/runs/41121769232) and candidate, installed execution and image-trust evidence are independently accepted.
+- **Active:** API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) is implemented and under review; PCA2 [#125](https://github.com/spei04/agent-rewind/issues/125) is In progress. F1 remains retained at `a604fd25`, not integrated.
+- **Limits:** AR-002-C and PUBCAP-A remain incomplete. The $200 cap, $36.567974 held reservation and additional exposure **UNKNOWN** remain unchanged; no paid/model/data/production gate is opened.
 
 [Worker task and dependencies](#ar-010-b) · [History and maintenance](#dependency-review-progress-and-maintenance)
 
-Current planning rollup: **155 aggregate tasks and 171 planned delivery PRs**, including the five included #97 P1 checkpoints. Tasks are 31 Verified / 1 In progress / 123 Not started; delivery packages are 11 Verified / 1 In progress / 3 Not started. The 569 outer edges are unchanged; the 2026-10-29 [worker failure reforecast](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) supersedes earlier estimate/count snapshots without changing their historical text.
+Current planning rollup: **155 aggregate tasks and 171 planned delivery PRs**, including the five included #97 P1 checkpoints. Tasks are 31 Verified / 1 In progress / 123 Not started; delivery packages are 11 Verified / 1 In progress / 3 Not started. The 569 outer edges are unchanged; the 2026-10-29 [worker failure reforecast](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) supersedes earlier estimate/count snapshots without changing their historical text. Preparation nodes are separately PCA1 Verified and PCA2 In progress; neither completes its aggregate.
 
 ## Approval boundary and readiness
 
@@ -435,8 +435,8 @@ M0 / P0 · 4 PRs · 5 engineering days · In progress · [Tracking issue #2](htt
 - **Effort allocation:** 1 engineering days; planning range 1–2; included in AR-002-C.
 - **Responsible role:** RS.
 - **Definition of done:** All package acceptance and meaningful offline tests pass at recorded source; independent review and accepted delivery are recorded; inputs/schema identities and scope limits are documented. No aggregate or external gate is promoted.
-- **Progress:** In progress.
-- **Delivery evidence:** Pending; no accepted source/merge/review.
+- **Progress:** Verified.
+- **Delivery evidence:** Source 574fb0499996b189a23c9d85488a32417bd6970e; accepted merge 48ddc894ba5351efe2bddc3873059f6c0bab1015; review Independent final delivery review a0748cc0f99788dd7f6d16146d03e0e8a856dfbd0599e28b98968512a21dd06d; lead release f46559a9974c8a3a31702eb1b491fb5c197ade050cbc9c625216b53074ff79e2.
 
 <a id="ar-003"></a>
 
@@ -4508,7 +4508,7 @@ M2/M5 / P0 · 4 PRs · 5 engineering days · Not started. No native implementati
 - **Effort allocation:** 2 engineering days; planning range 2–3; included in PUBCAP-A.
 - **Responsible role:** BE.
 - **Definition of done:** All package acceptance and meaningful offline tests pass at recorded source; independent review and accepted delivery are recorded; inputs/schema identities and scope limits are documented. No aggregate or external gate is promoted.
-- **Progress:** Not started.
+- **Progress:** In progress.
 - **Delivery evidence:** Pending; no accepted source/merge/review.
 
 <a id="pubcap-b"></a>

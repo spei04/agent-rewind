@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** The registry retention defect is reproduced and fixed with ownership checks preserved. Python 3.11 coverage combines 65 unchanged and two corrected passes; Python 3.12 passed 67 cases in one run. Both versions collected 8,650 tests.
-- **Blocker:** Latest full CI stopped in the listing guard, leaving 2,926 tests unreported. Its inner cause and any connection to registry retention remain unproven.
-- **Next:** Fresh PR/main CI and installed-artifact acceptance are required before corpus delivery and F1 integration. Production and acquisition remain gated.
+- **Verified:** PCA1 [#120](https://github.com/spei04/agent-rewind/issues/120) is delivered at merge `48ddc894` from `574fb049`. Original main [41121769232](https://github.com/spei04/agent-rewind/actions/runs/41121769232) and candidate, installed execution and image-trust evidence are independently accepted.
+- **Active:** API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) is implemented and under review; PCA2 [#125](https://github.com/spei04/agent-rewind/issues/125) is In progress. F1 remains retained at `a604fd25`, not integrated.
+- **Limits:** AR-002-C and PUBCAP-A remain incomplete. The $200 cap, $36.567974 held reservation and additional exposure **UNKNOWN** remain unchanged; no paid/model/data/production gate is opened.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Assignment history](#assignment-history)
 
@@ -21,6 +21,14 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**PCA1 delivery and next isolated assignments — 2026-10-30**
+
+- Lead: accepted PCA1 source `574fb049` at protected merge `48ddc894`, closed #120 and retained final review `a0748cc0` / release record `f46559a9`. Original main attempt 1 passed all eight jobs; Python 3.11 recorded 8,605 passes/45 skips and Python 3.12 8,619 passes/31 skips.
+- Backend: owns API-USAGE-001 #124 and shared planning in PRIMARY. The six-file correction is under independent review: original 74 cases passed per interpreter, followed by nine affected decode/study-stop controls per interpreter. No delivery or complete-accounting claim.
+- Corpus engineer: owns PCA2 #125 on SECONDARY `work/swe-rebench-normalizer`, using the existing owned environments. Scope is the disconnected typed normalizer, synthetic fixtures/profile and one distribution member; no acquisition or runtime integration.
+- F1 remains on `work/worker-failure-f1` at `a604fd25` for later integration. Two checkouts are reused; no new resources or provider calls.
+- Aggregate AR-002-C/PUBCAP-A acceptance stays pending. The $200 cap and $36.567974 unreconciled held reservation remain; additional exposure is **UNKNOWN** because the owner is unsure. No available balance or spending authority is inferred.
 
 **Ledger engine lifetime follow-up — 2026-10-30**
 

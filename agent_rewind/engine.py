@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import copy
 import time
-from contextlib import suppress
 from typing import Any
 
 from .artifacts import Artifacts
 from .database import Database, JobStopped, identifier
 from .models import Action, Intervention, TaskSpec, digest
-from .policy import Policy
+from .policy import ModelCallFailure, Policy
 from .runner import Runner
 from .workspace import File, summary
 
@@ -223,15 +222,22 @@ class Engine:
             )
             self.db.finish_run(self.job_id, self.owner, run_id, manifest)
             return run_id
-        except Exception:
+        except Exception as exc:
             manifest.update(
                 status="failed",
                 branchable=False,
                 error="Execution interrupted; inspect job status.",
             )
-            # Expired owners cannot write; the job retains its failure status.
-            with suppress(JobStopped):
+            if isinstance(exc, ModelCallFailure):
+                manifest["model_call_failure"] = exc.evidence()
+            # Publication failure cannot turn a paid-call stop into a retryable error.
+            try:
                 self.db.finish_run(self.job_id, self.owner, run_id, manifest)
+            except Exception as publication:
+                if isinstance(exc, ModelCallFailure):
+                    exc.publication_failed("run")
+                elif not isinstance(publication, JobStopped):
+                    raise
             raise
 
 
