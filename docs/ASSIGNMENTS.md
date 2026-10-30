@@ -2,8 +2,8 @@
 
 ## Current status
 
-- **Verified:** Ledger delivery is accepted; F1 source and evidence are retained. The SQLite correction passed 105/104 focused checks; both versions collected 8,643 tests. The measured fixture used 214 native statements versus 263.
-- **Blocker:** Original PR #123 exhausted the schema-check budget during setup, leaving 890 tests unrun. The preceding hosted cost remains unisolated; local measurements establish no full-suite timing margin.
+- **Verified:** The registry retention defect is reproduced and fixed with ownership checks preserved. Python 3.11 coverage combines 65 unchanged and two corrected passes; Python 3.12 passed 67 cases in one run. Both versions collected 8,650 tests.
+- **Blocker:** Latest full CI stopped in the listing guard, leaving 2,926 tests unreported. Its inner cause and any connection to registry retention remain unproven.
 - **Next:** Fresh PR/main CI and installed-artifact acceptance are required before corpus delivery and F1 integration. Production and acquisition remain gated.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Assignment history](#assignment-history)
@@ -21,6 +21,14 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Ledger engine lifetime follow-up — 2026-10-30**
+
+- Quality: reproduced the registry's engine-retention path without database connections, then replaced strong pool, dialect, context and callback witnesses with weak identity references. Active claims and refusal checks remain intact.
+- Inventory: both versions collected the same 8,650 IDs in order, preserving all 8,643 prior IDs and expected skips. All 16 baseline controls passed.
+- Validation: Python 3.11 coverage combines 65 unchanged passes and two corrected passes; Python 3.12 passed all 67 cases. The original new-test callback-name failure is retained. Static checks passed.
+- Review: accepted the source and evidence. The package test passed locally, but its diagnostic observer recorded no valid timings; the hosted listing failure and its connection to retention remain unexplained.
+- Lead: owns fresh PR/main and installed-artifact acceptance. Corpus delivery and F1 integration remain gated.
 
 **SQLite schema-check follow-up — 2026-10-30**
 

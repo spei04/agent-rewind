@@ -2,8 +2,8 @@
 
 ## Current status
 
-- **Verified:** Ledger delivery is accepted; F1 source and evidence are retained. The SQLite correction passed 105/104 focused checks; both versions collected 8,643 tests. The measured fixture used 214 native statements versus 263.
-- **Blocker:** Original PR #123 exhausted the schema-check budget during setup, leaving 890 tests unrun. The preceding hosted cost remains unisolated; local measurements establish no full-suite timing margin.
+- **Verified:** The registry retention defect is reproduced and fixed with ownership checks preserved. Python 3.11 coverage combines 65 unchanged and two corrected passes; Python 3.12 passed 67 cases in one run. Both versions collected 8,650 tests.
+- **Blocker:** Latest full CI stopped in the listing guard, leaving 2,926 tests unreported. Its inner cause and any connection to registry retention remain unproven.
 - **Next:** Fresh PR/main CI and installed-artifact acceptance are required before corpus delivery and F1 integration. Production and acquisition remain gated.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Retained history](#143-dated-progress-ledger)
