@@ -2,13 +2,11 @@
 
 ## Current status
 
-- **Verified:** PCA1 [#120](https://github.com/spei04/agent-rewind/issues/120) is delivered at merge `48ddc894` from `574fb049`. Original main [41121769232](https://github.com/spei04/agent-rewind/actions/runs/41121769232) and candidate, installed execution and image-trust evidence are independently accepted.
-- **Active:** API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) source `5845ada6` is independently reviewed; 85 billing-detail controls passed per version and both actual inventories contain 8,746 tests. Hosted delivery remains pending. PCA2 [#125](https://github.com/spei04/agent-rewind/issues/125) component `e0623c3b` and its 363-control focused evidence are accepted and published; full delivery remains pending. F1 remains retained at `a604fd25`, not integrated.
-- **Limits:** AR-002-C and PUBCAP-A remain incomplete. The $200 cap, $36.567974 held reservation and additional exposure **UNKNOWN** remain unchanged; no paid/model/data/production gate is opened.
+- **Verified:** PCA1 is delivered at `48ddc894`. API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) merged at `84d63879`; main/candidate acceptance is pending.
+- **Active:** Internal dispatch component `ab9736fe` is under native validation. F1 composition `9e0f24d0` passed 137 focused tests. PCA2 `51ae3a75` remains published with full delivery pending.
+- **Limits:** Live admitted execution remains incomplete. Payment is approved within **$200 total including prior charges**; $36.567974 stays held and additional exposure is unknown. No verified paid allowance or production activation follows.
 
-[Worker task and dependencies](#ar-010-b) · [History and maintenance](#dependency-review-progress-and-maintenance)
-
-Current planning rollup: **155 aggregate tasks and 171 planned delivery PRs**, including the five included #97 P1 checkpoints. Tasks are 31 Verified / 1 In progress / 123 Not started; delivery packages are 11 Verified / 1 In progress / 3 Not started. The 569 outer edges are unchanged; the 2026-10-29 [worker failure reforecast](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) supersedes earlier estimate/count snapshots without changing their historical text. Preparation nodes are separately PCA1 Verified and PCA2 In progress; neither completes its aggregate.
+[Dispatch scope](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
 ## Approval boundary and readiness
 
@@ -1212,6 +1210,8 @@ See the [worker failure execution plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.m
 <a id="ar-010-b-p2"></a>
 
 #### AR-010-B/P2 — Live permit and completion/expiry failure integration
+
+**Preparatory development — 2026-10-30:** The [internal dispatch boundary](delivery/WORKER_DISPATCH.md) is implemented for separate component validation. It owns a fresh reservation and durable dispatch transition; it does not satisfy P1 or start the full live worker integration and terminal-publication package below. Existing prerequisites and acceptance remain required.
 
 Tracking: [#98](https://github.com/spei04/agent-rewind/issues/98) · Not started.
 
