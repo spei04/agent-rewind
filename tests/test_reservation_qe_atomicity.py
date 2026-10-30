@@ -576,9 +576,9 @@ def test_known_budget_refusal_does_not_claim_rollback_when_acknowledgment_is_los
     original_rollback = Connection.rollback
     failures, attempts = [], []
 
-    def observe_refusal(*args):
+    def observe_refusal(*args, **kwargs):
         try:
-            return original_reserve(*args)
+            return original_reserve(*args, **kwargs)
         except ReservationRefusal as error:
             failures.append(error)
             raise
