@@ -1,6 +1,5 @@
 """Candidate discovery, fixed screening, and independent confirmation."""
 
-import contextlib
 import copy
 import random
 from typing import Any
@@ -8,6 +7,7 @@ from typing import Any
 from .database import BudgetExceeded, JobStopped, identifier
 from .engine import Engine
 from .models import Action, Intervention, StudyRequest, TaskSpec, digest
+from .policy import ModelCallFailure
 from .statistics import paired_evidence
 
 
@@ -170,7 +170,9 @@ class Experiments:
                 except Exception as exc:
                     pair["error"] = type(exc).__name__
                     # Preserve every planned trial. Missing outcomes cannot support a claim.
-                    if isinstance(exc, BudgetExceeded | JobStopped):
+                    if isinstance(exc, ModelCallFailure):
+                        pair["model_call_failure"] = exc.evidence()
+                    if isinstance(exc, BudgetExceeded | JobStopped | ModelCallFailure):
                         pairs.extend(
                             {
                                 "seed": request.seed + phase + j,
@@ -244,8 +246,16 @@ class Experiments:
                 report["confirmation"]["evidence"]["verdict"] = "incomplete study"
             for entry in report["candidates"]:
                 entry["evidence"] = paired_evidence(entry["pairs"])
-            with contextlib.suppress(JobStopped):
+            terminal = exc.__cause__ if isinstance(exc, StudyInterrupted) else exc
+            if isinstance(terminal, ModelCallFailure):
+                report["model_call_failure"] = terminal.evidence()
+            try:
                 save()
+            except Exception as publication:
+                if isinstance(terminal, ModelCallFailure):
+                    terminal.publication_failed("study")
+                elif not isinstance(publication, JobStopped):
+                    raise
             raise
         save()
         return study_id

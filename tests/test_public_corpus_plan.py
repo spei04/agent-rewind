@@ -65,6 +65,26 @@ def test_preparation_progress_preserves_native_status_and_aggregate_accounting(p
     data, markdown, roadmap = packet
     lookup = nodes(data)
     baseline = execution.validate(*packet)
+    # Exercise historical transitions without undoing the accepted live packet.
+    for key in ("PCA1", "PCA2"):
+        row = lookup[key]
+        if row["status"] == "Verified":
+            evidence = (
+                f"Source {row['source_commit']}; accepted merge "
+                f"{row['accepted_merge_commit']}; review {row['review_evidence']}."
+            )
+            markdown = markdown.replace(
+                "- **Delivery evidence:** " + evidence,
+                "- **Delivery evidence:** Pending; no accepted source/merge/review.",
+                1,
+            )
+        row.update(
+            status="Not started",
+            source_commit=None,
+            accepted_merge_commit=None,
+            review_evidence=None,
+        )
+        markdown = sync_card(markdown, row)
     for status in ("In progress", "Implemented; verification pending"):
         lookup["PCA1"]["status"] = status
         markdown = sync_card(markdown, lookup["PCA1"])
@@ -93,6 +113,7 @@ def test_preparation_progress_preserves_native_status_and_aggregate_accounting(p
 def test_pca2_requires_accepted_pca1_source_not_implementation_only(packet, first, second):
     data = packet[0]
     lookup = nodes(data)
+    lookup["PCA1"].update(source_commit=None, accepted_merge_commit=None, review_evidence=None)
     lookup["PCA1"]["status"] = first
     if second == "Verified":
         accept(lookup["PCA2"])

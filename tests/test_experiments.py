@@ -1,5 +1,13 @@
-from agent_rewind.experiments import Experiments, locate
+import traceback
+
+import pytest
+from sqlalchemy import select
+
+from agent_rewind.database import JobStopped, jobs, records
+from agent_rewind.experiments import Experiments, StudyInterrupted, locate
 from agent_rewind.models import Intervention, StudyRequest
+from agent_rewind.policy import ModelCallFailure
+from agent_rewind.sqlite_ownership import owned_connect
 from agent_rewind.statistics import paired_evidence
 
 
@@ -88,3 +96,158 @@ def test_missing_pair_does_not_duplicate_remaining_trials(engine, task):
     assert len(result["confirmation"]["pairs"]) == 5
     assert result["confirmation"]["evidence"]["missing"] == 1
     assert result["confirmation"]["evidence"]["verdict"] == "inconclusive"
+
+
+@pytest.mark.parametrize(
+    "phase,arm,known",
+    [
+        pytest.param("screening", 1, False, id="screen-first-unknown"),
+        pytest.param("screening", 2, False, id="screen-second-unknown"),
+        pytest.param("confirmation", 1, False, id="confirm-first-unknown"),
+        pytest.param("confirmation", 2, False, id="confirm-second-unknown"),
+        pytest.param("screening", 1, True, id="screen-first-known"),
+        pytest.param("confirmation", 2, True, id="confirm-second-known"),
+    ],
+)
+def test_terminal_model_failure_stops_the_entire_study(
+    engine, task, monkeypatch, phase, arm, known
+):
+    original = engine.run(task)
+    request = StudyRequest(
+        run_id=original,
+        candidates=[
+            Intervention(step=1, kind="tool_result", result={"exit_code": 0, "output": "repair"}),
+            Intervention(step=1, kind="tool_result", result={"exit_code": 1, "output": "other"}),
+        ],
+        screening_trials=2,
+        confirmation_trials=5,
+    )
+    failure = ModelCallFailure(
+        "invalid_action" if known else "invalid_usage",
+        101,
+        usage={"prompt_tokens": 1, "completion_tokens": 1} if known else None,
+        reported_micro_usd=10 if known else None,
+    )
+    execute = engine.run
+    calls = []
+    trigger = arm if phase == "screening" else 8 + arm
+
+    def run(*args, **kwargs):
+        calls.append((args, kwargs))
+        if len(calls) == trigger:
+            engine.db.reserve(engine.job_id, engine.owner, 101)
+            raise failure
+        return execute(*args, **kwargs)
+
+    monkeypatch.setattr(engine, "run", run)
+    with pytest.raises(StudyInterrupted) as caught:
+        Experiments(engine).study(request)
+    assert caught.value.__cause__ is failure
+    assert len(calls) == trigger
+    with owned_connect(engine.db.engine) as connection:
+        rows = (
+            connection.execute(select(records.c.data).where(records.c.kind == "study"))
+            .scalars()
+            .all()
+        )
+        hold = connection.execute(
+            select(jobs.c.reserved).where(jobs.c.id == engine.job_id)
+        ).scalar_one()
+    assert len(rows) == 1 and hold == 101
+    study = rows[0]
+    assert study["status"] == "incomplete"
+    assert study["request"] == request.model_dump()
+    assert study["model_call_failure"] == failure.evidence()
+    if phase == "screening":
+        assert len(study["candidates"]) == 1
+        assert study["winner"] is None and study["confirmation"] is None
+        pairs = study["candidates"][0]["pairs"]
+        assert len(pairs) == 2
+    else:
+        assert len(study["candidates"]) == 2 and study["winner_digest"]
+        assert all(len(c["pairs"]) == 2 for c in study["candidates"])
+        pairs = study["confirmation"]["pairs"]
+        assert len(pairs) == 5
+        assert study["confirmation"]["evidence"]["verdict"] == "incomplete study"
+    assert pairs[0]["model_call_failure"] == failure.evidence()
+    assert (
+        sum(pairs[0][key] is not None for key in ("control_success", "treatment_success"))
+        == arm - 1
+    )
+    assert all(
+        p["error"] == "not_attempted" and p["control_success"] is p["treatment_success"] is None
+        for p in pairs[1:]
+    )
+
+
+@pytest.mark.parametrize("publication", ["failure", "lease"])
+def test_incomplete_study_publication_cannot_mask_terminal_cause(
+    engine, task, monkeypatch, publication
+):
+    original = engine.run(task)
+    request = StudyRequest(
+        run_id=original,
+        candidates=[Intervention(step=1, kind="tool_result", result={"output": "repair"})],
+        screening_trials=2,
+        confirmation_trials=5,
+    )
+    failure = ModelCallFailure("invalid_usage", 100)
+    calls = []
+    finish = engine.db.finish_run
+
+    def failed_run(*args, **kwargs):
+        calls.append("run")
+        engine.db.reserve(engine.job_id, engine.owner, 100)
+        raise failure
+
+    def failed_save(job, owner, record, data):
+        if data["status"] == "incomplete":
+            if publication == "lease":
+                raise JobStopped("private-study-publication")
+            raise RuntimeError("private-study-publication")
+        return finish(job, owner, record, data)
+
+    monkeypatch.setattr(engine, "run", failed_run)
+    monkeypatch.setattr(engine.db, "finish_run", failed_save)
+    with pytest.raises(StudyInterrupted) as caught:
+        Experiments(engine).study(request)
+    assert calls == ["run"] and caught.value.__cause__ is failure
+    assert failure.publication_failures == ["study"]
+    assert len(caught.value.pairs) == 2
+    assert "private-study-publication" not in "".join(traceback.format_exception(caught.value))
+
+
+def test_discovery_stops_after_one_terminal_paid_proposal(engine, task, monkeypatch):
+    original = engine.run(task)
+    events = engine.events(original)
+    checkpoint = engine.artifacts.json
+    failure = ModelCallFailure(
+        "invalid_action",
+        100,
+        usage={"prompt_tokens": 0, "completion_tokens": 0},
+        reported_micro_usd=0,
+    )
+    calls = []
+
+    def with_messages(reference):
+        value = checkpoint(reference)
+        if "state" in value:
+            value["state"]["messages"] = []
+        return value
+
+    def propose(*args):
+        calls.append("dispatch")
+        engine.db.reserve(engine.job_id, engine.owner, 100)
+        raise failure
+
+    monkeypatch.setattr(engine.artifacts, "json", with_messages)
+    monkeypatch.setattr(engine.policy, "propose", propose)
+    with pytest.raises(ModelCallFailure) as caught:
+        Experiments(engine).discover(original, count=3)
+    assert caught.value is failure and calls == ["dispatch"]
+    assert engine.events(original) == events
+    with owned_connect(engine.db.engine) as connection:
+        hold = connection.execute(
+            select(jobs.c.reserved).where(jobs.c.id == engine.job_id)
+        ).scalar_one()
+    assert hold == 100

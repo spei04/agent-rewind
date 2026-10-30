@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** The registry retention defect is reproduced and fixed with ownership checks preserved. Python 3.11 coverage combines 65 unchanged and two corrected passes; Python 3.12 passed 67 cases in one run. Both versions collected 8,650 tests.
-- **Blocker:** Latest full CI stopped in the listing guard, leaving 2,926 tests unreported. Its inner cause and any connection to registry retention remain unproven.
-- **Next:** Fresh PR/main CI and installed-artifact acceptance are required before corpus delivery and F1 integration. Production and acquisition remain gated.
+- **Verified:** PCA1 [#120](https://github.com/spei04/agent-rewind/issues/120) is delivered at merge `48ddc894` from `574fb049`. Original main [41121769232](https://github.com/spei04/agent-rewind/actions/runs/41121769232) and candidate, installed execution and image-trust evidence are independently accepted.
+- **Active:** API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) source `5845ada6` is independently reviewed; 85 billing-detail controls passed per version and both actual inventories contain 8,746 tests. Hosted delivery remains pending. PCA2 [#125](https://github.com/spei04/agent-rewind/issues/125) component `e0623c3b` and its 363-control focused evidence are accepted and published; full delivery remains pending. F1 remains retained at `a604fd25`, not integrated.
+- **Limits:** AR-002-C and PUBCAP-A remain incomplete. The $200 cap, $36.567974 held reservation and additional exposure **UNKNOWN** remain unchanged; no paid/model/data/production gate is opened.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Retained history](#143-dated-progress-ledger)
 
