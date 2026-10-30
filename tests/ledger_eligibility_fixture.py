@@ -2,10 +2,12 @@
 
 import hashlib
 import json
+from contextlib import suppress
 from dataclasses import asdict, replace
 from pathlib import Path
 from types import SimpleNamespace
 
+from http_failure_diagnostics import compatibility_failure
 from ledger_provisioning_fixture import (
     build_case,
     ciphertexts,
@@ -172,10 +174,17 @@ def admission_engine(fixture):
 
 
 def predecessor_compatibility(service, record):
-    result = service.schema_compatibility()
-    record("predecessor_compatibility", asdict(result))
-    assert result == CompatibilityResult("incompatible", "migration_only"), result
-    return result
+    with compatibility_failure(service) as report:
+        result = service.schema_compatibility()
+        record("predecessor_compatibility", asdict(result))
+        try:
+            assert result == CompatibilityResult("incompatible", "migration_only"), result
+        except AssertionError as error:
+            # Diagnostic rendering/attachment must preserve the original verdict error.
+            with suppress(Exception):
+                error.add_note(report())
+            raise
+        return result
 
 
 def admitted_predecessor(path, monkeypatch, record):
