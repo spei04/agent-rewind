@@ -2,8 +2,8 @@
 
 ## Current status
 
-- **Verified:** Ledger delivery is accepted; F1 source and evidence are retained. Reviewed cancellation diagnostics passed 18 focused checks and the original PostgreSQL regression per Python version; both inventories contain 8,641 tests.
-- **Blocker:** Original PR #123 CI stopped after a cancellation guard returned `dependency_unavailable` instead of `schema_incompatible`. Its cause remains unresolved; 2,293 tests did not run, so no complete-suite timing margin is established.
+- **Verified:** Ledger delivery is accepted; F1 source and evidence are retained. The SQLite correction passed 105/104 focused checks; both versions collected 8,643 tests. The measured fixture used 214 native statements versus 263.
+- **Blocker:** Original PR #123 exhausted the schema-check budget during setup, leaving 890 tests unrun. The preceding hosted cost remains unisolated; local measurements establish no full-suite timing margin.
 - **Next:** Fresh PR/main CI and installed-artifact acceptance are required before corpus delivery and F1 integration. Production and acquisition remain gated.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Assignment history](#assignment-history)
@@ -21,6 +21,13 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**SQLite schema-check follow-up — 2026-10-30**
+
+- Backend: removed discarded SQLite unique reflection while preserving native constraint checks and deadlines; 105/104 focused checks and the original fixture passed on the corrected source.
+- Quality: retained and verified the failed run’s complete and partial receipts; reconciled matching inventories of 8,643 tests, retaining all 8,641 prior IDs and skip expectations.
+- Review: accepted the two-file correction and independent physical-constraint oracles. The same fixture used 214 native statements versus 263 before; local timings do not establish hosted causation or headroom.
+- Lead: owns fresh PR/main and installed-artifact acceptance. The recorded deadline exhaustion is confirmed; earlier unexplained failures remain separate. F1 integration remains gated.
 
 **Cancellation guard follow-up — 2026-10-30**
 

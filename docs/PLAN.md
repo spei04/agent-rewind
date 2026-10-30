@@ -2,8 +2,8 @@
 
 ## Current status
 
-- **Verified:** Ledger delivery is accepted; F1 source and evidence are retained. Reviewed cancellation diagnostics passed 18 focused checks and the original PostgreSQL regression per Python version; both inventories contain 8,641 tests.
-- **Blocker:** Original PR #123 CI stopped after a cancellation guard returned `dependency_unavailable` instead of `schema_incompatible`. Its cause remains unresolved; 2,293 tests did not run, so no complete-suite timing margin is established.
+- **Verified:** Ledger delivery is accepted; F1 source and evidence are retained. The SQLite correction passed 105/104 focused checks; both versions collected 8,643 tests. The measured fixture used 214 native statements versus 263.
+- **Blocker:** Original PR #123 exhausted the schema-check budget during setup, leaving 890 tests unrun. The preceding hosted cost remains unisolated; local measurements establish no full-suite timing margin.
 - **Next:** Fresh PR/main CI and installed-artifact acceptance are required before corpus delivery and F1 integration. Production and acquisition remain gated.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Retained history](#143-dated-progress-ledger)
