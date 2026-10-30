@@ -4564,3 +4564,7 @@ The new PUBCAP parent covers three aggregate tasks and four planned PRs. AR-002 
 The reconciled backlog contains **155 aggregate tasks and 167 planned delivery PRs**, including 2 nested preparation nodes, across 53 parents, 30 gates, 20 contracts and 569 dependency edges. There are 30 Verified, 1 In progress and 124 Not started aggregates; PCA1/PCA2 are both Not started. Existing delivery-package statuses and F3/P1/P2 acceptance remain unchanged. The total increment is **+8 base / +15 upper**; the 3–5 day preparation allocation is included. The 173.5-day effort-only longest path still traverses enterprise G4 and G5. Its reduction from 176.5 follows the reviewed change in research dependencies, not completed work or deleted enterprise effort. No calendar or staffing conversion follows.
 
 </details>
+
+### Superseded planning rollup — 2026-10-30
+
+Current planning rollup: **155 aggregate tasks and 171 planned delivery PRs**, including the five included #97 P1 checkpoints. Tasks are 31 Verified / 1 In progress / 123 Not started; delivery packages are 11 Verified / 1 In progress / 3 Not started. The 569 outer edges are unchanged; the 2026-10-29 [worker failure reforecast](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) supersedes earlier estimate/count snapshots without changing their historical text. Preparation nodes are separately PCA1 Verified and PCA2 In progress; neither completes its aggregate.
