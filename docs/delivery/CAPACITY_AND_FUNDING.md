@@ -1,5 +1,14 @@
 # Capacity, ownership and funding decision record
 
+## Owner payment decision — 2026-10-30
+
+The owner approved model API payment and clarified that the **$200 total includes all earlier Agent Rewind charges**. This is not a fresh $200 allowance. No additional approval is needed merely to establish permission to pay within that cap.
+
+The recorded $36.567974 reservation remains held, and additional historical exposure is still unknown. Permission to pay does not establish a remaining balance: reconcile prior exposure and reserve a bounded allocation before a new paid run. Runtime, accounting and execution prerequisites remain applicable. This decision authorizes no new production resources or partner-data access.
+
+The dated capacity estimates and historical observations below are unchanged.
+
+
 AR-003-B · C03 capacity supplement v1 · 2026-10-19 · planning estimates, not purchase authorization.
 
 Use a small dedicated installation for the first measured workload: separate API, HA metadata, encrypted object storage and two trusted worker hosts with gVisor. Keep admission bounded until CPU, memory, file-object operations, inference latency and provider quotas have been measured together. Preserve the $200 **total validation ceiling**. The current approval authorizes three contributor slots for development/testing; it does not name human production operators, select a production region/IdP, approve recurring cloud charges or increase the model budget.

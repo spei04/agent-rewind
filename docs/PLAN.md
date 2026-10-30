@@ -4,7 +4,7 @@
 
 - **Verified:** [Public-corpus declarations](https://github.com/spei04/agent-rewind/issues/120) are delivered.
 - **Next:** Lead completes [accounting/API](https://github.com/spei04/agent-rewind/pull/126) and [normalizer](https://github.com/spei04/agent-rewind/issues/125) delivery; Backend then resumes the worker sequence. Original accounting CI and delivery acceptance remain pending. The functional blocker is admitted dispatch with generation-aware recording and interruption/recovery proof.
-- **Limits:** Paid work stays paused under the $200 cap. The $36.567974 reservation remains held and additional exposure is unknown. No research or production acceptance is claimed.
+- **Funding:** Model API payment is [approved within the $200 lifetime cap](delivery/CAPACITY_AND_FUNDING.md#owner-payment-decision--2026-10-30), including earlier charges. The $36.567974 reservation remains held; additional exposure is unknown. New paid runs await spend reconciliation and runtime qualification.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Retained history](#143-dated-progress-ledger)
 
