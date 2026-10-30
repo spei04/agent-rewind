@@ -8,6 +8,7 @@ from typing import Literal
 from sqlalchemy.engine import Engine
 
 from . import reservation
+from .admission_configuration import NativeConfiguration
 from .admission_transaction import TransactionOutcome, admission_transaction
 from .migrations.schema import MigrationRefused
 from .operation_work import OperationWork
@@ -59,8 +60,12 @@ class ReservationCoordinator:
         context: ProjectContext,
         fence: JobFence,
         intent: ReservationIntent,
+        *,
+        configuration: NativeConfiguration | None = None,
     ) -> ReservationDecision:
-        result = self._run("reserve", principal, context, fence=fence, identity=intent)
+        result = self._run(
+            "reserve", principal, context, fence=fence, identity=intent, configuration=configuration
+        )
         if isinstance(result, JobFence | InspectionResult):
             raise ReservationRefusal("ledger_state_invalid")
         return result
@@ -87,6 +92,7 @@ class ReservationCoordinator:
         fence: JobFence | None = None,
         identity: ReservationIntent | None = None,
         job_id: str | None = None,
+        configuration: NativeConfiguration | None = None,
     ) -> JobFence | ReservationDecision | InspectionResult:
         work = OperationWork(include_acquisition=True)
         with self._lock:
@@ -152,7 +158,9 @@ class ReservationCoordinator:
                     if mode == "claim" and claim is not None:
                         result = reservation.claim_generation(connection, scope, claim)
                     elif mode == "reserve" and fence is not None and identity is not None:
-                        result = reservation.reserve(connection, scope, fence, identity)
+                        result = reservation.reserve(
+                            connection, scope, fence, identity, configuration=configuration
+                        )
                     else:
                         result = reservation.inspect_original(connection, scope, identity)
                     # Deferred/FK work precedes the final authority and DB-time

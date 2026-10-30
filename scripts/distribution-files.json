@@ -27,6 +27,7 @@
     "agent_rewind/corpus.py",
     "agent_rewind/cursor_config.py",
     "agent_rewind/database.py",
+    "agent_rewind/dispatch.py",
     "agent_rewind/engine.py",
     "agent_rewind/errors.py",
     "agent_rewind/experiments.py",
