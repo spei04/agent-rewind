@@ -5,13 +5,21 @@ from __future__ import annotations
 import json
 import math
 import re
+import sys
 from collections import defaultdict
 from graphlib import CycleError, TopologicalSorter
 from pathlib import Path
 from typing import Any
 
+# Direct CLI and importlib-loaded checkers share the same planning-only module.
+if __package__:
+    from scripts import public_corpus_plan
+else:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from scripts import public_corpus_plan
+
 ROOT = Path(__file__).resolve().parents[1]
-TASK_ID = r"(?:AR-\d{3}|RA-\d{2})-[A-Z]"
+TASK_ID = r"(?:AR-\d{3}|RA-\d{2}|PUBCAP)-[A-Z]"
 READY = {"Verified", "Satisfied"}
 REQUIRED = {
     "id",
@@ -131,7 +139,7 @@ def check_cards(data: dict[str, Any], markdown: str, plan: str) -> None:
     parents = {}
     for line in plan.splitlines():
         parts = [x.strip() for x in line.split("|")]
-        if len(parts) == 8 and re.fullmatch(r"AR-\d{3}|RA-\d{2}", parts[1]):
+        if len(parts) == 8 and re.fullmatch(r"AR-\d{3}|RA-\d{2}|PUBCAP", parts[1]):
             require(parts[1] not in parents, f"Duplicate roadmap parent {parts[1]}")
             parents[parts[1]] = parts[-2]
     require(set(parents) == set(data["parents"]), "Roadmap parent identities differ")
@@ -144,7 +152,7 @@ def check_cards(data: dict[str, Any], markdown: str, plan: str) -> None:
 
 def planned_delivery_prs(task: dict[str, Any]) -> int:
     """Count implementation PRs without multiplying package effort or DAG nodes."""
-    count = 0
+    count = len(task.get("preparatory_prs", []))
     for package in task.get("delivery_packages", [{}]):
         if "implementation_prs" not in package:
             count += 1
@@ -312,12 +320,12 @@ def check_implementation_prs(package: dict[str, Any], markdown: str) -> None:
 def check_delivery_packages(data: dict[str, Any], markdown: str, plan: str) -> int:
     """Check optional sequential PR boundaries without changing aggregate DAG identity."""
     tasks = indexed(data["tasks"], "task")
-    nodes = {**tasks, **indexed(data["gates"], "gate")}
+    nodes = public_corpus_plan.graph_nodes(data)
     count = 0
     for task in tasks.values():
         packages = task.get("delivery_packages")
         if packages is None:
-            count += 1
+            count += planned_delivery_prs(task)
             continue
         require(isinstance(packages, list) and 2 <= len(packages) <= 8, "Invalid PR package count")
         count += planned_delivery_prs(task)
@@ -519,7 +527,8 @@ def validate(data: dict[str, Any], markdown: str, plan: str) -> dict[str, Any]:
     tasks = indexed(data["tasks"], "task")
     gates = indexed(data["gates"], "gate")
     require(not (tasks.keys() & gates.keys()), "Task/gate identity overlap")
-    nodes = {**tasks, **gates}
+    preparation = public_corpus_plan.preparation_nodes(data)
+    nodes = public_corpus_plan.graph_nodes(data)
     contracts = indexed(data["contracts"], "contract")
     require(len(nodes) <= 1000, "Planning graph exceeds review bound")
     for task in tasks.values():
@@ -544,8 +553,9 @@ def validate(data: dict[str, Any], markdown: str, plan: str) -> dict[str, Any]:
         previous: tuple[float, list[str]] = max(
             (paths[dep] for dep in graph[key]), key=lambda item: item[0], default=(0, [])
         )
-        paths[key] = (previous[0] + nodes[key]["effort_days"], previous[1] + [key])
-        if nodes[key]["status"] in READY | {"In progress"}:
+        included = sum(row["effort_days"] for row in nodes[key].get("preparatory_prs", []))
+        paths[key] = (previous[0] + nodes[key]["effort_days"] - included, previous[1] + [key])
+        if nodes[key]["status"] in public_corpus_plan.ACTIVE:
             require(
                 all(nodes[dep]["status"] in READY for dep in graph[key]),
                 f"Active or verified node precedes prerequisites: {key}",
@@ -557,7 +567,7 @@ def validate(data: dict[str, Any], markdown: str, plan: str) -> dict[str, Any]:
             require(
                 tasks[producer]["status"] == "Verified", "Unreviewed contract claims availability"
             )
-    for key, task in tasks.items():
+    for key, task in (tasks | preparation).items():
         require("E0" in ancestors[key], f"Missing E0 ancestry: {key}")
         for contract_id in task["contracts"]:
             require(contract_id in contracts, f"Unknown contract: {key}")
@@ -566,7 +576,7 @@ def validate(data: dict[str, Any], markdown: str, plan: str) -> dict[str, Any]:
                 producer is None or producer == key or producer in ancestors[key],
                 f"Contract producer missing from ancestry: {key}/{contract_id}",
             )
-            if task["status"] in READY | {"In progress"} and producer != key:
+            if task["status"] in public_corpus_plan.ACTIVE and producer != key:
                 require(
                     contract_available(contracts[contract_id]),
                     f"Active or verified task consumes unavailable contract: {key}/{contract_id}",
@@ -615,6 +625,7 @@ def validate(data: dict[str, Any], markdown: str, plan: str) -> dict[str, Any]:
     computed = {
         "delivery_pr_count": check_delivery_packages(data, markdown, plan),
         "task_count": len(tasks),
+        "preparatory_pr_count": len(preparation),
         "parent_count": len(data["parents"]),
         "gate_count": len(gates),
         "contract_count": len(contracts),
@@ -705,6 +716,8 @@ def validate(data: dict[str, Any], markdown: str, plan: str) -> dict[str, Any]:
         "schedule_no_predecessor_violations_conditional_on_stated_approvals",
     ):
         require(data["validation"][key] is True, f"Stored audit flag differs: {key}")
+    public_corpus_plan.validate_amendment(data)
+    public_corpus_plan.check_preparation_cards(data, markdown, plan)
     check_cards(data, markdown, plan)
     return computed
 

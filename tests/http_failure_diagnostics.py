@@ -11,12 +11,14 @@ import math
 import sqlite3
 import sys
 import threading
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass, field
+from functools import partial
 from pathlib import Path
 from types import CodeType
 from typing import get_args
 
+import pytest
 from sqlalchemy.exc import DBAPIError, OperationalError, SQLAlchemyError, TimeoutError
 
 from agent_rewind import api, errors
@@ -297,44 +299,30 @@ def _route_message(report):
     return json.dumps(summary, separators=(",", ":"), allow_nan=False)
 
 
-@contextmanager
-def route_failure(monkeypatch, app, *, phase):
-    """One request's real probe/security/classifier calls, with no extra clock or SQL."""
-    if phase not in ("schema_guard_expected_incompatible", "listing_continuation_expected_200"):
-        raise ValueError("unsupported diagnostic phase")
-    report = {"phase": phase, "probes": [], "guard": [], "security": [], "classified": []}
-    budget = _EvidenceBudget()
+def _capture(report, budget, bucket, event, error=None):
+    # A shared budget bounds all exception/frame visits in this request.
+    if len(report[bucket]) >= (1 if bucket == "classified" else 4):
+        return
+    try:
+        if error is not None:
+            event = {
+                **event,
+                "error": _identity(error),
+                **exception_evidence(error, budget=budget),
+            }
+        report[bucket].append(event)
+    except Exception:
+        report[bucket].append({"diagnostic_unavailable": True})
+
+
+def _compatibility_observers(original_probe, original_constructor, capture):
+    """Share only the owned probe/constructor seam, without an HTTP application."""
     owned = threading.local()
     token = object()
-    db = app.state.db
-    original_probe = db.schema_compatibility
-    original_constructor = guard.CompatibilityResult
-    original_response = api.error_response
-    original_classifier = errors.classified
     guard_codes = {
         guard._check_schema_compatibility.__code__,
         guard.runtime_schema_compatibility.__code__,
     }
-    security_code = next(
-        code
-        for code in api.create_app.__code__.co_consts
-        if isinstance(code, CodeType) and code.co_name == "security"
-    )
-
-    def capture(bucket, event, error=None):
-        # A shared budget bounds all exception/frame visits in this request.
-        if len(report[bucket]) >= (1 if bucket == "classified" else 4):
-            return
-        try:
-            if error is not None:
-                event = {
-                    **event,
-                    "error": _identity(error),
-                    **exception_evidence(error, budget=budget),
-                }
-            report[bucket].append(event)
-        except Exception:
-            report[bucket].append({"diagnostic_unavailable": True})
 
     def probe(*args, **kwargs):
         previous = getattr(owned, "token", None)
@@ -375,6 +363,62 @@ def route_failure(monkeypatch, app, *, phase):
         finally:
             del frame
         return result
+
+    return probe, constructor
+
+
+@contextmanager
+def compatibility_failure(service, *, phase="predecessor_compatibility_expected_migration_only"):
+    """Observe one real probe; only the cancellation phase annotates its assertion."""
+    if type(phase) is not str or phase not in (
+        "predecessor_compatibility_expected_migration_only",
+        "cancel_guard_expected_schema_incompatible",
+    ):
+        raise ValueError("unsupported diagnostic phase")
+    report = {
+        "phase": phase,
+        "probes": [],
+        "guard": [],
+        "security": [],
+        "classified": [],
+    }
+    capture = partial(_capture, report, _EvidenceBudget())
+    probe, constructor = _compatibility_observers(
+        service.schema_compatibility, guard.CompatibilityResult, capture
+    )
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(service, "schema_compatibility", probe)
+        patch.setattr(guard, "CompatibilityResult", constructor)
+        try:
+            yield lambda: _route_message(report)
+        except AssertionError as error:
+            if phase == "cancel_guard_expected_schema_incompatible":
+                # A failed diagnostic must preserve the original assertion and verdict.
+                with suppress(Exception):
+                    error.add_note(_route_message(report))
+            raise
+
+
+@contextmanager
+def route_failure(monkeypatch, app, *, phase):
+    """One request's real probe/security/classifier calls, with no extra clock or SQL."""
+    if phase not in ("schema_guard_expected_incompatible", "listing_continuation_expected_200"):
+        raise ValueError("unsupported diagnostic phase")
+    report = {"phase": phase, "probes": [], "guard": [], "security": [], "classified": []}
+    budget = _EvidenceBudget()
+    db = app.state.db
+    original_response = api.error_response
+    original_classifier = errors.classified
+    security_code = next(
+        code
+        for code in api.create_app.__code__.co_consts
+        if isinstance(code, CodeType) and code.co_name == "security"
+    )
+
+    capture = partial(_capture, report, budget)
+    probe, constructor = _compatibility_observers(
+        db.schema_compatibility, guard.CompatibilityResult, capture
+    )
 
     def response(*args, **kwargs):
         result = original_response(*args, **kwargs)

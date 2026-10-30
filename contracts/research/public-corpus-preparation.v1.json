@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "decision_id": "PUBLICPREP0-2026-10-27",
+  "record_kind": "scoped_owner_continuation",
+  "status": "approved_preparation_only",
+  "authority": {
+    "owner": "Project owner",
+    "date": "2026-10-27",
+    "source": "Direct owner continuation of all three projects after the portfolio checkpoint identified this preparation-only proposal as awaiting decision. The project lead verified the private conversation record.",
+    "scope_interpretation": "The short continuation instruction is interpreted narrowly as approval of the already-reviewed preparatory amendment below; it is not explicit acquisition or study approval."
+  },
+  "accepted_proposal": {
+    "commit": "aaa1d9749b196bdef6da69510c74fbbbfb2d2340",
+    "path": "docs/research/PUBLIC_CORPUS_PROPOSAL_2026-10-27.md",
+    "sha256": "e7e79096491b839a3ac3633ca160e49ae6c69c0986b6b95aeaa115158a002e68"
+  },
+  "authorized": [
+    "Versioned decision and independently reviewed dependency/task/roadmap/backlog reconciliation.",
+    "PCA1 versioned C02 supplement and public-source contract/schema, preserving v1 and separating pre-recording candidates from recorded corpus entries.",
+    "PCA2 pure offline typed normalizer using supplied synthetic rows and independently constructed qualification fixtures; separate inference/evaluator views; disconnected from runtime; reject unknown, stale, leaking and unsupported inputs."
+  ],
+  "not_authorized": [
+    "Dataset or image acquisition",
+    "Native capture or execution",
+    "Held-out access",
+    "Paid calls",
+    "Study execution or adaptive nested evaluation",
+    "Partner/customer data",
+    "New resources",
+    "Increase of the existing $200 ceiling"
+  ],
+  "limits": {
+    "existing_cap_usd": 200,
+    "historical_reservations_usd": "36.567974",
+    "invoice_reconciled": false,
+    "available_funds_known": false,
+    "preparation_range_days": [
+      3,
+      5
+    ],
+    "corpus_increment_range_days": [
+      8,
+      15
+    ],
+    "preparation_estimate_included_in_corpus_increment": true
+  },
+  "execution_sequence": [
+    "Independent technical reconciliation acceptance",
+    "PCA1 implementation and accepted delivery",
+    "PCA2 implementation and accepted delivery",
+    "Separate native integration, rights, funding, capture and study gates"
+  ],
+  "preserved_artifact_sha256": {
+    "contracts/research/owner-decision.v1.json": "e91f9a83224edd806c934b3378436da87cf792ab4682d782da4947b4152feda0",
+    "docs/research/OWNER_DECISION_2026-10-20.md": "3a8e137d9de5427003e85ec22a931e08f95b14d3adaab8523f1e17047487802b",
+    "contracts/research/evaluation-design.json": "07c9dad5dedcee482a229e9fe5c5df61b13f39902cee76fceeb041a3bef34e37",
+    "docs/research/TOTAL_BUDGET_PROTOCOL.md": "f7f8cb2fd21baf7c99a8467ad413556e130fc647f0b9479ed6deb8c502431554",
+    "contracts/corpus-manifest.v1.schema.json": "c3ddda7d7cc5da6dea4e204b894ef53dcf71dea15d88cd22bfd5a9b4bb9950c2",
+    "agent_rewind/corpus.py": "c2f30b0e533000a955b151adca6cb15a1fbcf89b417f57abac8baf9a8756fa60",
+    "docs/delivery/CORPUS_PERMISSIONS.md": "55fe3811541944c985b29e5591fc9c71f5a06e7e1a3eeb913b24ebd298839584",
+    "docs/delivery/NATURAL_FAILURE_PROTOCOL.md": "2439d11a639a0131924b1078b07e440e2cbbab1fa76a53ec0243d8a02a24d26b",
+    "docs/research/PUBLIC_CORPUS_PROPOSAL_2026-10-27.md": "e7e79096491b839a3ac3633ca160e49ae6c69c0986b6b95aeaa115158a002e68"
+  },
+  "claim_boundary": "No F3/P1, product P2, native adapter, corpus, study or scientific-result completion credit."
+}

@@ -85,20 +85,26 @@ def _body_live(body: _LedgerBody) -> None:
     connection, claim, work = body.connection, body.claim, body.work
     with ledger_engine._LOCK:
         state = ledger_engine._REGISTRY.get(claim.engine)
+        pool = state.pool() if state is not None else None
+        dialect = state.dialect() if state is not None else None
+        handlers = state.resolved_handlers() if state is not None else None
         if (
             state is None
+            or pool is None
+            or dialect is None
+            or handlers is None
             or state.claim is not claim
             or state.poisoned
             or claim.released
             or claim.work is not work
             or not claim.checked_out
             or connection.engine is not claim.engine
-            or claim.engine.pool is not state.pool
-            or claim.engine.dialect is not state.dialect
-            or ledger_engine._handlers(claim.engine) != state.handlers
+            or claim.engine.pool is not pool
+            or claim.engine.dialect is not dialect
+            or ledger_engine._handlers(claim.engine) != handlers
         ):
             raise MigrationRefused("transactional_connection_required")
-        _body_listeners(connection, work, state.handlers)
+        _body_listeners(connection, work, handlers)
     if (
         connection.closed
         or connection.invalidated

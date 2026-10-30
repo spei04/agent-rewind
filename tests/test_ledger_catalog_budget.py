@@ -1,11 +1,15 @@
 """Catalog equivalence and fresh drift checks for bounded SQLite reflection."""
 
+import hashlib
+from copy import deepcopy
 from types import SimpleNamespace
 
 import pytest
 from ledger_reader_fixture import complete_ar6, seed_ar7, sqlite_snapshot
+from legacy_fixture import FIXTURE_ROOT, read_manifest
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Connection
+from sqlalchemy.engine.reflection import Inspector
 
 from agent_rewind.migrations.ledger_reader_catalog import (
     _sqlite_native_indexes,
@@ -19,6 +23,7 @@ from agent_rewind.migrations.schema import (
     MigrationRefused,
     catalog,
     installed_profile,
+    verify_baseline,
 )
 
 
@@ -49,7 +54,7 @@ def observed(case, revision):
 @pytest.mark.parametrize("revision", [ADMISSION, LEDGER], ids=["ar6", "ar7"])
 @pytest.mark.parametrize("legacy", [False, True], ids=["fresh", "legacy"])
 def test_optimized_catalog_keeps_complete_original_and_literal_profile_equality(
-    tmp_path, revision, legacy
+    tmp_path, monkeypatch, revision, legacy
 ):
     case = complete_ar6(tmp_path / "catalog.sqlite", legacy=legacy)
     try:
@@ -57,7 +62,13 @@ def test_optimized_catalog_keeps_complete_original_and_literal_profile_equality(
             seed_ar7(case)
         before = sqlite_snapshot(case.path)
         with case.engine.connect() as connection:
-            independent = catalog(connection)
+
+            def unexpected_unique_reflection(*args, **kwargs):
+                pytest.fail("SQLite uniqueness must come from the native index catalog")
+
+            with monkeypatch.context() as patch:
+                patch.setattr(Inspector, "get_unique_constraints", unexpected_unique_reflection)
+                independent = catalog(connection)
             names = sorted(independent)
             original_indexes, original_parts = original_native_rows(connection, names)
             batches = []
@@ -909,3 +920,65 @@ def test_native_check_correspondence_retains_duplicate_multiplicity_and_tie_orde
     ):
         with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
             _sqlite_require_reflected_checks(native, changed)
+
+
+@pytest.mark.parametrize(
+    ("original", "replacement", "expected_uniques"),
+    [
+        ("hash VARCHAR(64) UNIQUE", "hash VARCHAR(64)", []),
+        (
+            " revoked BOOLEAN\n",
+            " revoked BOOLEAN, UNIQUE(hash, role)\n",
+            [["hash"], ["hash", "role"]],
+        ),
+    ],
+    ids=["missing-inline", "extra-table"],
+)
+def test_native_unique_constraints_remain_structural_without_reflection(
+    tmp_path, monkeypatch, original, replacement, expected_uniques
+):
+    sql = (FIXTURE_ROOT / "baseline.sql").read_text()
+    assert hashlib.sha256(sql.encode()).hexdigest() == read_manifest()["baseline_sql_sha256"]
+    assert sql.count(original) == 1
+    changed = sql.replace(original, replacement, 1)
+
+    def unexpected_unique_reflection(*args, **kwargs):
+        pytest.fail("SQLite uniqueness must come from the native index catalog")
+
+    monkeypatch.setattr(Inspector, "get_unique_constraints", unexpected_unique_reflection)
+    baseline = None
+    for label, ddl in [("original", sql), ("changed", changed)]:
+        path = tmp_path / f"{label}.sqlite"
+        engine = create_engine(f"sqlite:///{path}")
+        try:
+            with engine.begin() as connection:
+                connection.connection.driver_connection.executescript(ddl)
+            before = sqlite_snapshot(path)
+            before_bytes = path.read_bytes()
+            with engine.connect() as connection:
+                shape = catalog(connection)
+                native_uniques = []
+                quote = connection.dialect.identifier_preparer.quote_identifier
+                for index in connection.exec_driver_sql('PRAGMA main.index_list("api_keys")'):
+                    if index[3] == "u":
+                        parts = connection.exec_driver_sql(
+                            f"PRAGMA main.index_xinfo({quote(index[1])})"
+                        )
+                        native_uniques.append([part[2] for part in parts if part[5]])
+                expected = [["hash"]] if label == "original" else expected_uniques
+                assert sorted(native_uniques) == expected
+                assert shape["api_keys"]["uniques"] == expected
+                if label == "original":
+                    verify_baseline(shape, "sqlite")
+                    baseline = shape
+                else:
+                    assert baseline is not None
+                    expected_shape = deepcopy(baseline)
+                    expected_shape["api_keys"]["uniques"] = expected_uniques
+                    assert shape == expected_shape
+                    with pytest.raises(MigrationRefused, match="^schema_incompatible$"):
+                        verify_baseline(shape, "sqlite")
+            assert sqlite_snapshot(path) == before
+            assert path.read_bytes() == before_bytes
+        finally:
+            engine.dispose()

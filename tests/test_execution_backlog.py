@@ -149,13 +149,11 @@ def test_research_producers_cannot_bypass_owner_decision_gate(packet, task_id):
 
 def _delivery_packet(packet):
     data, markdown, plan = deepcopy(packet)
-    import re
-
     tasks = {task["id"]: task for task in data["tasks"]}
     task = tasks["AR-007-C"]
     # Sequencing fixtures rewind the producer and its packaged consumers,
     # including a ledger assignment that may be active in the live packet.
-    rewound = ["AR-007-C", "AR-008-A", "AR-008-B", "AR-006-B", "AR-010-A"]
+    rewound = ["AR-007-C", "AR-008-A", "AR-008-B", "AR-006-B", "AR-010-A", "AR-010-B"]
     for key in rewound:
         current = tasks[key]
         current["status"] = "In progress" if key == "AR-007-C" else "Not started"
@@ -170,19 +168,7 @@ def _delivery_packet(packet):
                 )
             markdown = _sync_implementation_cards(markdown, package)
         markdown = _sync_package_cards(markdown, current["delivery_packages"])
-        heading = re.search(rf"^#{{3,4}} {re.escape(key)} — .+$", markdown, re.M)
-        assert heading is not None
-        following = re.search(r"^#{1,4} ", markdown[heading.end() :], re.M)
-        end = heading.end() + following.start() if following else len(markdown)
-        body, count = re.subn(
-            r"(?m)^(- \*\*(?:Progress|Status):\*\* ).*$",
-            lambda match, status=current["status"]: match[1]
-            + status
-            + "; synthetic sequencing fixture.",
-            markdown[heading.end() : end],
-        )
-        assert count == 1
-        markdown = markdown[: heading.end()] + body + markdown[end:]
+        markdown = _sync_task_status(markdown, current)
 
     # Keep parent rollups and their roadmap rows consistent with the copied tasks.
     lines = plan.splitlines()
@@ -201,6 +187,23 @@ def _delivery_packet(packet):
         assert matches == 1
     plan = "\n".join(lines) + "\n"
     return data, markdown, plan, task, task["delivery_packages"]
+
+
+def _sync_task_status(markdown, task):
+    """Keep the copied aggregate card aligned with its synthetic state."""
+    import re
+
+    heading = re.search(rf"^#{{3,4}} {re.escape(task['id'])} — .+$", markdown, re.M)
+    assert heading is not None
+    following = re.search(r"^#{1,4} ", markdown[heading.end() :], re.M)
+    end = heading.end() + following.start() if following else len(markdown)
+    body, count = re.subn(
+        r"(?m)^(- \*\*(?:Progress|Status):\*\* ).*$",
+        lambda match: match[1] + task["status"] + "; synthetic sequencing fixture.",
+        markdown[heading.end() : end],
+    )
+    assert count == 1
+    return markdown[: heading.end()] + body + markdown[end:]
 
 
 def _sync_package_cards(markdown, packages):
@@ -498,7 +501,24 @@ def test_observability_successor_requires_accepted_merge_and_all_aggregate_input
 def pre_p1_packet(packet):
     """Freeze the historical F1/F2-complete, P1/F3-pending test state."""
     data, markdown, plan = deepcopy(packet)
-    task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
+    tasks = {task["id"]: task for task in data["tasks"]}
+    task = tasks["AR-010-A"]
+    task["status"] = "In progress"
+    worker = tasks["AR-010-B"]
+    worker["status"] = "Not started"
+    for package in worker["delivery_packages"]:
+        package.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
+        for pr in package.get("implementation_prs", []):
+            pr.update(
+                status="Not started",
+                source_commit=None,
+                accepted_merge_commit=None,
+                review_evidence=None,
+                tracking_pr=None,
+            )
+        markdown = _sync_implementation_cards(markdown, package)
+    markdown = _sync_package_cards(markdown, worker["delivery_packages"])
+    markdown = _sync_task_status(_sync_task_status(markdown, task), worker)
     p1, p2 = task["delivery_packages"]
     p1.update(status="In progress", accepted_merge_commit=None, review_evidence=None)
     p2.update(status="Not started", accepted_merge_commit=None, review_evidence=None)
@@ -516,16 +536,16 @@ def pre_p1_packet(packet):
 def test_implementation_pr_refinement_counts_prs_without_completing_package(pre_p1_packet):
     data, markdown, plan = pre_p1_packet
     result = CHECK.validate(data, markdown, plan)
-    assert result["delivery_pr_count"] == 161
+    assert result["delivery_pr_count"] == 171
     task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
     p1, p2 = task["delivery_packages"]
     assert len(p1["implementation_prs"]) == 3
     assert p1["status"] == "In progress"
     assert p1["accepted_merge_commit"] is p1["review_evidence"] is None
     assert p2["status"] == "Not started"
-    assert result["task_count"] == 151
-    assert result["edge_count"] == 544
-    assert result["base_effort_days"] == 464
+    assert result["task_count"] == 155
+    assert result["edge_count"] == 569
+    assert result["base_effort_days"] == 482
 
 
 def _sync_implementation_cards(markdown, package):
@@ -584,14 +604,14 @@ def test_implementation_pr_acceptance_does_not_complete_parent_package(pre_p1_pa
     if completed < 3:
         p1["implementation_prs"][completed]["status"] = "In progress"
     markdown = _sync_implementation_cards(markdown, p1)
-    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 171
     assert p1["status"] == task["status"] == "In progress"
     assert p1["accepted_merge_commit"] is p1["review_evidence"] is None
     assert p2["status"] == "Not started"
 
 
-def test_final_implementation_evidence_allows_explicit_p1_acceptance_and_p2_start(packet):
-    data, markdown, plan = deepcopy(packet)
+def test_final_implementation_evidence_allows_explicit_p1_acceptance_and_p2_start(pre_p1_packet):
+    data, markdown, plan = deepcopy(pre_p1_packet)
     task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
     p1, p2 = task["delivery_packages"]
     for number, pr in enumerate(p1["implementation_prs"], 1):
@@ -604,7 +624,7 @@ def test_final_implementation_evidence_allows_explicit_p1_acceptance_and_p2_star
     )
     p2["status"] = "In progress"
     markdown = _sync_package_cards(_sync_implementation_cards(markdown, p1), [p1, p2])
-    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 171
     assert task["status"] == "In progress"
 
 
@@ -643,7 +663,7 @@ def test_final_implementation_evidence_allows_explicit_p1_acceptance_and_p2_star
 )
 def test_implementation_pr_invalid_claims_reach_the_intended_gate(pre_p1_packet, variant, message):
     data, markdown, plan = deepcopy(pre_p1_packet)
-    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 171
     task = next(t for t in data["tasks"] if t["id"] == "AR-010-A")
     p1, p2 = task["delivery_packages"]
     prs = p1["implementation_prs"]
@@ -663,7 +683,7 @@ def test_implementation_pr_invalid_claims_reach_the_intended_gate(pre_p1_packet,
                 tracking_pr=None,
             )
         markdown = _sync_implementation_cards(markdown, p1)
-        assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
+        assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 171
     if variant in ("empty", "one", "over_bound", "null_list"):
         p1["implementation_prs"] = {
             "empty": [],
@@ -739,7 +759,7 @@ def test_implementation_pr_card_drift_is_rejected(packet, variant):
     import re
 
     data, markdown, plan = deepcopy(packet)
-    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 161
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 171
     p1 = next(t for t in data["tasks"] if t["id"] == "AR-010-A")["delivery_packages"][0]
     pr = p1["implementation_prs"][0]
     start = markdown.index(f"#### {pr['id']} —")
@@ -777,16 +797,18 @@ def test_legacy_packages_keep_one_pr_each_without_refinement(packet):
     start = markdown.index("#### AR-010-A/P1/F1")
     end = markdown.index("#### AR-010-A/P2")
     markdown = markdown[:start] + markdown[end:]
+    task_count = len(data["tasks"])
+    pr_count = data["validation"]["delivery_pr_count"]
     markdown = markdown.replace(
-        "151 aggregate tasks and 161 planned delivery PRs",
-        "151 aggregate tasks and 159 planned delivery PRs",
+        f"{task_count} aggregate tasks and {pr_count} planned delivery PRs",
+        f"{task_count} aggregate tasks and {pr_count - 2} planned delivery PRs",
         1,
     )
-    markdown = re.sub(r"(### AR-010 —[^\n]+\n\nM1 / P0 · )6 PRs", r"\g<1>4 PRs", markdown)
+    markdown = re.sub(r"(### AR-010 —[^\n]+\n\nM1 / P0 · )10 PRs", r"\g<1>8 PRs", markdown)
     plan = plan.replace(
-        "[AR-010](EXECUTION_BACKLOG.md#ar-010): 6 PRs.",
-        "[AR-010](EXECUTION_BACKLOG.md#ar-010): 4 PRs.",
+        "[AR-010](EXECUTION_BACKLOG.md#ar-010): 10 PRs.",
+        "[AR-010](EXECUTION_BACKLOG.md#ar-010): 8 PRs.",
         1,
     )
-    data["validation"]["delivery_pr_count"] = 159
-    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 159
+    data["validation"]["delivery_pr_count"] -= 2
+    assert CHECK.validate(data, markdown, plan)["delivery_pr_count"] == 169

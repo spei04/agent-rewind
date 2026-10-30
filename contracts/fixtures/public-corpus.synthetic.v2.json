@@ -1,0 +1,142 @@
+{
+  "schema_version": 2,
+  "corpus_id": "synthetic-public-corpus-v2",
+  "created_at": "2026-10-19T00:00:00Z",
+  "evidence_class": "synthetic",
+  "storage_profile_id": "synthetic-private-storage",
+  "storage_owner_id": "synthetic-storage-owner",
+  "purpose": "independent-confirmation",
+  "retention": {
+    "owner_id": "synthetic-retention-owner",
+    "review_at": "2026-11-19T00:00:00Z",
+    "delete_after": "2027-01-19T00:00:00Z"
+  },
+  "publication": {
+    "raw_content": "forbidden",
+    "aggregates": "separate-review-required",
+    "redaction_policy": {
+      "path": "policies/synthetic-redaction-v1.json",
+      "sha256": "6a49b98e6f37da9d0c65fd305782b4d2ad774d4e131027bb28fe7636425acf01"
+    }
+  },
+  "record_kind": "pre-recording-candidates",
+  "phase": "offline-preparation",
+  "candidates": [
+    {
+      "candidate_id": "synthetic-candidate-1",
+      "workflow_id": "manual-action-recovery",
+      "dataset": {
+        "source_id": "synthetic-dataset",
+        "revision": "0000000000000000000000000000000000000000",
+        "artifact": {
+          "path": "synthetic/public-card.json",
+          "sha256": "9540d7b42e2fca8a95723ec90bd670440a7bd333f173509bb6bec791212db20f"
+        }
+      },
+      "row": {
+        "path": "synthetic/row-1.json",
+        "sha256": "0c31224f64faaa3fef59d9b6df34f398e7a8d0c028bd5dd7b03699c69cde09d7"
+      },
+      "source": {
+        "source_id": "synthetic-source-1",
+        "revision": "0000000000000000000000000000000000000000",
+        "artifact": {
+          "path": "tasks/synthetic-1/source.json",
+          "sha256": "efd4bacf6a6e52990b2a8b4feea8db19424c0937807fb19dfd18a21dd98b9796"
+        }
+      },
+      "evaluator": {
+        "evaluator_id": "synthetic-grader-1",
+        "revision": "0000000000000000000000000000000000000000",
+        "artifact": {
+          "path": "tasks/synthetic-1/evaluator.json",
+          "sha256": "ddb3bb001aa4c5c60d7279911e5fdba8d715ebfbcc4daeaa5c6291982d17c161"
+        },
+        "command_sha256": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+        "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+      },
+      "source_policy": {
+        "path": "synthetic/public-field-policy.json",
+        "sha256": "722694dd271125479ceedf570f78a12739ff8858d67a9eea27900865aa4ba010"
+      },
+      "permission": {
+        "status": "approved",
+        "rights_owner_id": "synthetic-rights-owner",
+        "approved_by": "synthetic-approver",
+        "approved_at": "2026-10-18T00:00:00Z",
+        "valid_from": "2026-10-19T00:00:00Z",
+        "valid_until": "2027-04-19T00:00:00Z",
+        "evidence": {
+          "path": "permissions/synthetic-1.json",
+          "sha256": "610f6a31474937d0ddf8969fc70681954e93f58e6c6a91135c0c65017401b0fd"
+        },
+        "allowed_processors": [
+          "synthetic-model-region-a-no-retention"
+        ],
+        "allowed_purposes": [
+          "debugging",
+          "intervention-screening",
+          "independent-confirmation"
+        ]
+      }
+    },
+    {
+      "candidate_id": "synthetic-candidate-2",
+      "workflow_id": "automatic-intervention-evaluation",
+      "dataset": {
+        "source_id": "synthetic-dataset",
+        "revision": "0000000000000000000000000000000000000000",
+        "artifact": {
+          "path": "synthetic/public-card.json",
+          "sha256": "9540d7b42e2fca8a95723ec90bd670440a7bd333f173509bb6bec791212db20f"
+        }
+      },
+      "row": {
+        "path": "synthetic/row-2.json",
+        "sha256": "d30381d00084df55ff8324da9bfbda67e74931d751a2d01520b07186041fc097"
+      },
+      "source": {
+        "source_id": "synthetic-source-2",
+        "revision": "0000000000000000000000000000000000000000",
+        "artifact": {
+          "path": "tasks/synthetic-2/source.json",
+          "sha256": "5c3e292fd2b728f6564898ec55c6a100174cc63f17281f9a211f7b376b4faa88"
+        }
+      },
+      "evaluator": {
+        "evaluator_id": "synthetic-grader-2",
+        "revision": "0000000000000000000000000000000000000000",
+        "artifact": {
+          "path": "tasks/synthetic-2/evaluator.json",
+          "sha256": "a072a00f1e0ecaf49c2d2027d023fafa1e4ea830f16e14e28dd2258be42c3623"
+        },
+        "command_sha256": "c3ce7487d0cf52409fd8fd02a22349b2c649867f835d0cb06594ffff60e5c56c",
+        "image_digest": "02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d"
+      },
+      "source_policy": {
+        "path": "synthetic/public-field-policy.json",
+        "sha256": "722694dd271125479ceedf570f78a12739ff8858d67a9eea27900865aa4ba010"
+      },
+      "permission": {
+        "status": "approved",
+        "rights_owner_id": "synthetic-rights-owner",
+        "approved_by": "synthetic-approver",
+        "approved_at": "2026-10-18T00:00:00Z",
+        "valid_from": "2026-10-19T00:00:00Z",
+        "valid_until": "2027-04-19T00:00:00Z",
+        "evidence": {
+          "path": "permissions/synthetic-2.json",
+          "sha256": "1b28211b8520fb682bf22b2016fae4e718f98e321b730892998daaa84b885eb7"
+        },
+        "allowed_processors": [
+          "synthetic-model-region-a-no-retention"
+        ],
+        "allowed_purposes": [
+          "debugging",
+          "intervention-screening",
+          "independent-confirmation"
+        ]
+      }
+    }
+  ]
+}

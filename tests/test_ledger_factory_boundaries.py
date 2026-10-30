@@ -1,6 +1,8 @@
 """Factory policy checks without opening any PostgreSQL connection."""
 
+import gc
 import sqlite3
+import weakref
 
 import psycopg
 import pytest
@@ -200,3 +202,104 @@ def test_unreviewed_constructor_parameters_fail_before_sqlalchemy_dispatch(
     with pytest.raises(MigrationRefused, match="^unsupported_runtime_endpoint$"):
         create_ledger_engine("postgresql+psycopg://127.0.0.1/example?" + query)
     assert calls == []
+
+
+@pytest.mark.parametrize("kind", ["sqlite", "postgresql"])
+def test_disposed_factory_engine_and_witnesses_are_collectable(
+    tmp_path, no_native_connect, explicit_pg_environment, kind
+):
+    url = (
+        f"sqlite:///{tmp_path / 'unused.sqlite'}"
+        if kind == "sqlite"
+        else "postgresql+psycopg://127.0.0.1/example"
+    )
+
+    def disposed_references():
+        engine = create_ledger_engine(url)
+        try:
+            return weakref.ref(engine), weakref.ref(engine.pool), weakref.ref(engine.dialect)
+        finally:
+            engine.dispose()
+
+    references = disposed_references()
+    gc.collect()
+    assert all(reference() is None for reference in references)
+    assert not (tmp_path / "unused.sqlite").exists()
+
+
+@pytest.mark.parametrize("kind", ["sqlite", "postgresql"])
+def test_active_claim_keeps_engine_alive_until_explicit_release(
+    tmp_path, no_native_connect, explicit_pg_environment, kind
+):
+    url = (
+        f"sqlite:///{tmp_path / 'unused.sqlite'}"
+        if kind == "sqlite"
+        else "postgresql+psycopg://127.0.0.1/example"
+    )
+
+    def claimed_reference():
+        engine = create_ledger_engine(url)
+        work = LedgerWork()
+        work._consume()
+        return weakref.ref(engine), ledger_engine.claim_ledger_engine(engine, work)
+
+    reference, claim = claimed_reference()
+    try:
+        gc.collect()
+        assert reference() is claim.engine
+        assert ledger_engine._REGISTRY[claim.engine].claim is claim
+    finally:
+        ledger_engine.release_ledger_engine(claim, clean=True)
+        claim.engine.dispose()
+    del claim
+    gc.collect()
+    assert reference() is None
+    assert not (tmp_path / "unused.sqlite").exists()
+
+
+def test_disposed_factory_pool_cannot_be_readmitted(tmp_path, no_native_connect):
+    engine = create_ledger_engine(f"sqlite:///{tmp_path / 'unused.sqlite'}")
+    try:
+        engine.dispose()
+        gc.collect()
+        with (
+            pytest.raises(MigrationRefused, match="^schema_incompatible$"),
+            ledger_transaction(engine, LedgerOutcome(), work=LedgerWork()),
+        ):
+            pytest.fail("replacement pool was admitted")
+        assert not (tmp_path / "unused.sqlite").exists()
+    finally:
+        engine.dispose()
+
+
+@pytest.mark.parametrize("mutation", ["removed", "replaced"])
+def test_removed_or_replaced_factory_callback_refuses_before_connect(
+    tmp_path, no_native_connect, mutation
+):
+    engine = create_ledger_engine(f"sqlite:///{tmp_path / 'unused.sqlite'}")
+    calls = []
+
+    def foreign(*args):
+        calls.append(True)
+
+    def mutate():
+        original = tuple(engine.dialect.dispatch.do_connect)[0]
+        assert original.__name__ == "do_connect"
+        event.remove(engine, "do_connect", original)
+        if mutation == "replaced":
+            event.listen(engine, "do_connect", foreign, insert=True)
+
+    try:
+        mutate()
+        gc.collect()
+        with (
+            pytest.raises(MigrationRefused, match="^schema_incompatible$"),
+            ledger_transaction(engine, LedgerOutcome(), work=LedgerWork()),
+        ):
+            pytest.fail("changed callback witness was admitted")
+        assert calls == []
+        assert not (tmp_path / "unused.sqlite").exists()
+    finally:
+        if event.contains(engine, "do_connect", foreign):
+            event.remove(engine, "do_connect", foreign)
+        engine.dispose()

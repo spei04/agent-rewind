@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Verified components:** P1/F3 is delivered. P2 has 115 local passes (24 pure, 91 SQLite), 91 supported Python 3.11 passes, PostgreSQL owner/key paths and two setup/restore passes.
-- **Next:** Backend finishes packaging; qualification freezes inventory; the lead owns hosted CI and publication. Ten native adversarial cases have independent component acceptance.
-- **Open gate:** P2 remains In progress with null accepted merge; full CI, review and delivery remain. The $200 cap, unreconciled $36.567974 reservations, corpus preparation-only scope and production/provider gates are unchanged. Research advantage and live readiness remain unproven.
+- **Verified:** The registry retention defect is reproduced and fixed with ownership checks preserved. Python 3.11 coverage combines 65 unchanged and two corrected passes; Python 3.12 passed 67 cases in one run. Both versions collected 8,650 tests.
+- **Blocker:** Latest full CI stopped in the listing guard, leaving 2,926 tests unreported. Its inner cause and any connection to registry retention remain unproven.
+- **Next:** Fresh PR/main CI and installed-artifact acceptance are required before corpus delivery and F1 integration. Production and acquisition remain gated.
 
-[Active backlog](EXECUTION_BACKLOG.md#ar-010-a-p2) · [Retained history](#143-dated-progress-ledger)
+[Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Retained history](#143-dated-progress-ledger)
 
 ## Contents
 
@@ -68,7 +68,7 @@ Source inspected on 2026-10-19 at the baseline above. Historical test results be
 
 Use **Not started**, **In progress**, **Blocked**, **Implemented / verification pending**, and **Verified**. A checked box means its stated acceptance evidence exists. Historical implementation is not retroactively marked enterprise-ready. Milestone completion requires all exit gates, not just merged code. Each implementation change updates its task row, requirement row, and dated evidence log in this file. No fabricated overall percentage.
 
-Current planning work: blueprint and M0/M1 packet published; execution review now covers all 52 packages as 151 bounded tasks with dependencies, contracts, tests and conditional daily scheduling. Section 10 links the execution ledger. E0 and development-scope G0 are satisfied; explicit migration, offline reference configuration and secure CI are verified. Runtime guards and actual synthetic recovery are verified; ownership and safe readiness are verified; RA-01 audit/protocol design is verified for its bounded internal scope; issue #51 core engineering choices are approved and mapped; see [ASSIGNMENTS.md](ASSIGNMENTS.md). Later runtime, production and partner-data gates remain evidence-dependent.
+Current planning work: blueprint and M0/M1 packet published; execution review now covers all 53 packages as 155 bounded aggregate tasks with dependencies, contracts, tests and conditional daily scheduling. Section 10 links the execution ledger. E0 and development-scope G0 are satisfied; explicit migration, offline reference configuration and secure CI are verified. Runtime guards and actual synthetic recovery are verified; ownership and safe readiness are verified; RA-01 audit/protocol design is verified for its bounded internal scope; issue #51 core engineering choices are approved and mapped; see [ASSIGNMENTS.md](ASSIGNMENTS.md). Later runtime, production and partner-data gates remain evidence-dependent.
 
 ### 1.4 Decisions still requiring confirmation
 
@@ -81,7 +81,7 @@ The product is delivered through four stages. The broad blueprint remains the ro
 | Stage | Required output and review | Current state / transition |
 | --- | --- | --- |
 | 1 — Plan and challenge | Inspect source, identify unknowns, compare architecture options, record assumptions/risks and challenge the roadmap. | Planning artifact and execution backlog approved for staged development on 2026-10-19. M0 decision issues retain the unresolved external assumptions. |
-| 2 — Engineer the next milestone | Detailed GitHub issues, native dependency links, versioned API/data contracts, failure-oriented acceptance cases and milestone exit gates. | Execution packet prepared: 151 aggregate tasks and 161 planned delivery PRs across M0–M7, 27 gates, 20 contract entries and conditional M1 continuation scheduling; M0/M1 parent issues remain tracked and issues #47/#48 track approved research design. Ownership/readiness child issues #40/#41 are closed. Future contracts and implementation still require their producer/approval gates. |
+| 2 — Engineer the next milestone | Detailed GitHub issues, native dependency links, versioned API/data contracts, failure-oriented acceptance cases and milestone exit gates. | Execution packet prepared: 155 aggregate tasks and 171 planned delivery PRs across M0–M7, 30 gates, 20 contract entries and conditional M1 continuation scheduling; M0/M1 parent issues remain tracked and issues #47/#48 track approved research design. Ownership/readiness child issues #40/#41 are closed. Future contracts and implementation still require their producer/approval gates. |
 | 3 — Implement approved slices | One coherent vertical slice at a time with tests, independent review, safe diagnostics, recovery notes and updated progress. | G0 development scope, migration/guard/recovery, ownership/readiness, scoped artifacts/publication, run projection and AR-007-C existing-route authority are Verified for bounded preparatory scope. Remaining M1 work shares three contributor slots; exact producer gates still govern starts and activation. |
 | 4 — Verify production readiness | Audit actual requirements against commit-specific test, load, security, deployment and recovery evidence; record pass, fail, not tested, or accepted scoped risk. | Not started. Begin evidence collection with each slice; perform independent readiness review before pilot/GA. A roadmap, contract file, or closed issue is not production proof. |
 
@@ -488,13 +488,15 @@ The deeper review must inspect released code, licenses, algorithms and evaluatio
 
 ### 7.3 Corpus and release gates
 
-1. **M0–M2:** select permitted repositories and deterministic test environments with no hidden evaluator leakage. Obtain at least 10 naturally failing runs across at least three repositories to validate restoration and grading, alongside existing injected-fault cases. Retain the full attempted capture denominator and reasons for incompatibility.
-2. **M3–M4:** construct a versioned corpus of at least 100 eligible natural failures across at least 10 repositories and two agent configurations, subject to rights and available budget. Split by repository/task family before ranker tuning: 60 discovery/development and 40 untouched holdout is a provisional allocation. Do not repeatedly inspect holdout to tune proposals.
-3. **Before funded confirmation:** estimate discordance/variance from development data; specify minimum useful effect, power target and exact/simulated required trials. Thirty pairs is a default protocol setting, not a power guarantee. If available budget cannot support the design, narrow the claim and mark research gate incomplete.
-4. **M5–M6:** evaluate on pilot workloads and holdout under a frozen protocol; report task-level effects with clustering at task/repository where appropriate, uncertainty, heterogeneity, nulls, failures and spend. Compare the predeclared budget-matched workflows and selection ablations in Section 7.2. Evaluate reusable repairs on unseen repositories/task families and initially successful tasks before any transfer claim. A positive effect is not guaranteed and cannot be a prerequisite for honest publication.
-5. **GA product gate:** publish a reproducible methodology and scoped results with a useful-location result that exceeds the predeclared practical threshold on the chosen customer workload, or revise the product claim/scope before launch. The precise threshold is set in M0 with design partners; a provisional target is a ≥20% relative increase in confirmed-useful investigations per equal total budget. Freeze the comparator after the prior-method review rather than limiting it to convenient simple baselines. Reapprove this provisional threshold with the estimand, power and baseline set before evaluation. Report uncertainty; a small point estimate alone does not pass. Product usefulness and research superiority are separate decisions: absent advantage requires a narrower claim and owner scope review, not invented success or automatic enterprise certification.
+The public research route is separate from enterprise partner acceptance. Its preparation follows the [versioned decision](research/PUBLIC_CORPUS_PREPARATION_DECISION_2026-10-27.md) and [implementation boundaries](delivery/PUBLIC_CORPUS_PREPARATION_PLAN.md). Initially Python-only SWE-rebench V2 is a proposed pinned source; no actual row has been admitted and no acquisition is approved. C02 v1, natural-failure definitions, answer-blind matched controls and the earlier owner/C21 choices remain intact.
 
-Paid research remains constrained by approved funds. Corpus collection, model drift, grader quality and sample size can move the schedule. The earlier 8-pair injected-stop result is integration evidence only. [AgentReplay's repository](https://github.com/gadda00/agentreplay) is an engineering comparison alongside the research sources above. No result yet establishes superiority or unique novelty for Agent Rewind.
+1. Accept PCA1's public declaration/candidate contract as the versioned C02 admission extension, then PCA2's pure offline translation and refusal properties. AR-002-C separately retains the complete source-neutral operating supplement and reconciliation. These preparation results supply no native recording, independently valid rights, image qualification or runtime acceptance.
+2. Require PUBLICDATA0, G2 and the remaining native PUBCAP-A integration before separately funded development capture. CAPTUREFUNDS0 must approve bounded allocations from reconciled existing funds. PUBCAP-B retains all baseline and qualification outcomes and measures feasibility.
+3. Add PUBCAP-B to every original AR-026-A prerequisite. The independent protocol/sample/threshold/affordability decision precedes explicitly authorized sealed PUBCAP-C capture and AR-038-A corpus freeze. Illustrative 10–20 development tasks, 100 failures, 10 repositories and 30 pairs are not approved samples, minimum sufficient populations or power guarantees.
+4. AR-038-B requires AR-038-A, STUDYFUNDS0, AR-026-C and G3. Candidate selection remains frozen before any new held-out continuation grade. The original C02 prohibition on adaptive held-out screening remains. Retain all assigned results, missingness, harmful interventions and total/online costs; separate shared physical invoices from method attribution.
+5. Public-source custody, rights and operating duties replace C17 only for AR-038-A/B on this public route. DATA0/PARTNER0, C17, partner operations, AR-035/036/037, G4 and G5 remain unchanged. The shorter research branch does not complete enterprise pilots or establish product usefulness, research superiority, reusable repairs or production readiness.
+
+The existing $200 ceiling is unchanged; historical $36.567974 reservations remain unreconciled. No balance, price or affordable study is inferred. The accepted calibration targets remain targets subject to independent statistics and measured feasibility; infeasibility narrows or blocks the claim.
 
 ### 7.4 Research amendment RA-01 and delivery impact
 
@@ -506,7 +508,7 @@ C20/C21 are internally available; RESEARCHSCOPE0 alone is now satisfied by the e
 
 Ownership/readiness, scoped repositories, artifact metadata/storage, preparatory publication/projection, existing routes, admission, run-list/detail and operation HTTP are Verified for their recorded internal scope. AR-008-B/P2 #95 and aggregate #93 are Verified after reviewed source 065df8c89da384d6e502cf0c15bf174e380c53c7, protected merge cefd222230c800eb2e90c49a3b3c411b394d0393, matching PR/main runs 39683408934/39686498691 (attempt 1) and verified candidate 12387716715. P1 #94 retains accepted merge 03a8e074b51dca7c03d69295e0c18ca0f22dc1da and candidate 12355648523. Parent #8 is Verified/closed. See [accepted HTTP evidence](delivery/OPERATION_HTTP_EXECUTION_PLAN.md#accepted-p2-delivery--2026-10-21) and the dated delivery records for earlier source, package and failure evidence. AR-010-A/P1 #108, aggregate #107 and parent #10 remain In progress with null P1 acceptance. P1 entry policy 51af77dc and the HTTP prerequisite are accepted. F1 dormant foundation is Merged; checkpoint accepted after reviewed source c6f32cdd, protected merge 2e0eeeab, matching PR/main attempts 39729061054/39733331352 and verified candidate 12407151544. F2 is Merged; checkpoint accepted at e8cba52 with matching PR/main evidence and candidate 12431486551. F3 has been In progress since its 2026-10-22 handoff. The current matrix binds accepted components and remaining behavior. Accepted C2/R2, six eligibility outcomes and three complete-cohort outcomes retain their separate evidence. The PostgreSQL present-job/project-binding outcome at 180f95b7 remains accepted. The equivalent-evidence review at 84d55333 identified two missing complete-reader representatives; both are now accepted at 1a524580 after one actual Python 3.12 attempt per dialect. Their scoped evidence, distinct lifecycle semantics and retained control diagnostic remain in the persisted-money checkpoint. PostgreSQL accounted-only carry is now accepted at 592f5842 after a retained failed first actual attempt and one successful successor. Executed carry source and the published ffe521c9 checkpoint retain their original evidence. Dependency repairs are normally merged at d46e9122/1908dbd6 and final main run 40379185725 passed all seven jobs. Candidate 12679323736 passed its exact-source verifier; final acceptance: accepted by independent review 6487674a and lead receipt 063abccd for dependency delivery only. Integrated ec19eabe adds first finite job-account creation and disjoint second-account refusal only. SQLite acceptance uses its preserved actual run and corrected saved-record validation without a database retry; the original controller failure remains retained. The PostgreSQL case passed on its first actual attempt (17.11s); final component acceptance: accepted by independent review 65cb7d72 and lead receipt 7abd0e8b for this bounded component only. Final source controls pass 33 per interpreter and corrected private controllers pass 66 per dialect/interpreter. Prior carry controls and correction history retain their own checkpoint. The F1 early-interruption cases are accepted at their recorded sources (after-DDL 0be77406 and first-backfill 833220b5). B1 writer-capacity component evidence is accepted at 0fcb0d43 for two PostgreSQL cohorts, each exactly 64 accounts. The first testcase passed but its controller failed on a standalone import; separate guarded saved-record validation accepted that case without a database rerun. The second cohort passed under the corrected controller with a clean release. Initialization used 1,711 and 1,708 ordinary work units under the original 2,028-unit ceiling. The failed controller and all earlier diagnostics remain retained; this is bounded component evidence, not full F3/P1 delivery. PostgreSQL windows retain their source-specific acceptance; all three SQLite counterparts passed at baa05fd9, accepted by peer 9422335c and lead ace6ce9d. PostgreSQL replay and missing-opening restore are accepted components. SQLite replay is accepted from the original service cases on Python 3.11 and 3.12 with matching offline controls. Full matching-source delivery remains open ([current checkpoint](delivery/LEDGER_EXECUTION_PLAN.md#r1-source-and-controller-checkpoint--2026-10-27)). Final matching-source delivery remains gated. P2 #109 remains Not started/null acceptance behind accepted full P1 and its own reservation/fence entry review. F1/F2/F3 retain the unchanged P1 effort and acceptance scope. Full F3 provisioning/recovery and P1 delivery remain unaccepted; accepted reader/component results retain their scope. Default adapters, customer admission, worker integration, full M1/G1 acceptance and external funding/data/production gates remain unavailable or open. Earlier dated failures and component evidence remain historical, not current status.
 
-M3 is 81 base days after approved scope reconciliation. M5 stays 50 pending measured calibration, permitted corpus, independent statistics and funded execution. The 176.5-day effort-only path is a lower bound without staffing or external waits. Deferred adaptations and study execution require their own decisions; approved core engineering choices need no repeat approval.
+M3 remains 81 base days after approved scope reconciliation. M5 is 51 including the separately gated sealed-capture increment. M0 is 11.5 and M2 is 73. The 183.5-day effort-only path is a lower bound without staffing or external waits. Deferred adaptations and study execution require their own decisions; approved core engineering choices need no repeat approval.
 
 ## 8. Milestones and delivery schedule
 
@@ -516,18 +518,18 @@ M1 delivery is in progress: F1/F2 ledger checkpoints are accepted; F3/P1 retains
 
 | Milestone | Objective and deliverable | Base effort | Dependency-ready scheduling | Exit gate |
 | --- | --- | ---: | --- | --- |
-| M0 | Approved workflow, architecture, contracts and development decisions | 8.5 days | Internal development freeze verified; external production funding remains separately gated | [G0](EXECUTION_BACKLOG.md#g0) |
-| M1 | Versioned migrations, identity, API, artifacts and budgets | 65.5 days | Continue dependency-ready tasks after accepted G0; allocate against research review demand | [G1](EXECUTION_BACKLOG.md#g1) |
-| M2 | Verified isolated execution, restore, real cloud storage and keys | 69 days | After exact M1 inputs and early staging; closes after G1 | [G2](EXECUTION_BACKLOG.md#g2) |
+| M0 | Approved workflow, architecture, contracts and development decisions | 11.5 days | Internal development freeze verified; external production funding remains separately gated | [G0](EXECUTION_BACKLOG.md#g0) |
+| M1 | Versioned migrations, identity, API, artifacts and budgets | 75.5 days | Continue dependency-ready tasks after accepted G0; allocate against research review demand | [G1](EXECUTION_BACKLOG.md#g1) |
+| M2 | Verified isolated execution, restore, real cloud storage and keys | 73 days | After exact M1 inputs and early staging; closes after G1 | [G2](EXECUTION_BACKLOG.md#g2) |
 | M3 | Durable distributed studies, reviewed research design and evidence accounting | 81 days | RA-01 before C08/C09 producers; runtime follows existing prerequisites and G2 | [G3](EXECUTION_BACKLOG.md#g3) |
 | M4 | Integrated workbench, SDK, adapter, retention, identity and installation | 82 days | Early staging after G0/ENV0; consumer tasks after their APIs; closes after G3 | [G4](EXECUTION_BACKLOG.md#g4) |
-| M5 | Two-partner private pilot and natural-failure evaluation | 50 days | After G4, agreements and recovery gate; at least 28 calendar days of measurement | [G5](EXECUTION_BACKLOG.md#g5) |
+| M5 | Two-partner private pilot and natural-failure evaluation | 51 days | After G4, agreements and recovery gate; at least 28 calendar days of measurement | [G5](EXECUTION_BACKLOG.md#g5) |
 | M6 | Enterprise capacity, recovery, security, release and support evidence | 78 days | Hardening overlaps stable M3–M5; closes only after G5 and all readiness evidence | [G6](EXECUTION_BACKLOG.md#g6) |
 | M7 | Controlled rollout and 30-day review | 30 days | After G6 and actual launch authorization; at least 30 calendar days after rollout | [G7](EXECUTION_BACKLOG.md#g7) |
 
-The current base estimate is **464 engineering days**; an alternate 25% integration/rework allowance yields **580 days**. Summed task upper planning ranges total **784.6 days**; do not add these uncertainty views together. Task confidence includes medium-low where integration uncertainty warrants it, with explicit ranges. Unknown security remediation, customer-required controls, staffing, assessor lead time/fees, ongoing operations and paid research are excluded and must be estimated when known. No launch date is committed.
+The current base estimate is **482 engineering days**; an alternate 25% integration/rework allowance yields **602.5 days**. Summed task upper planning ranges total **814.6 days**; do not add these uncertainty views together. Task confidence includes medium-low where integration uncertainty warrants it, with explicit ranges. Unknown security remediation, customer-required controls, staffing, assessor lead time/fees, ongoing operations and paid research are excluded and must be estimated when known. No launch date is committed.
 
-The effort-only task path is **176.5 days**, approximately **50.4 workweeks** at 70% delivery availability before role contention and external waits; it is a lower bound, not a forecast. Primary-role effort is TL 75, BE 97.5, PL 90, FE 23, RS 66 and QE 112.5 days. Six logical role totals are demand estimates, not six staffed people; the three contributor slots have no measured conversion to that calendar scenario. Reforecast at Day 10 and every milestone gate using actual throughput and staffing; preserve acceptance criteria when moving dates. The original 430-day/133-day-path and 42–50-week figures are superseded.
+The effort-only task path is **183.5 days**, approximately **52.4 workweeks** at 70% delivery availability before role contention and external waits; it is a lower bound, not a forecast. Primary-role effort is TL 75, BE 110.5, PL 90, FE 23, RS 71 and QE 112.5 days. Six logical role totals are demand estimates, not six staffed people; the three contributor slots have no measured conversion to that calendar scenario. Reforecast at Day 10 and every milestone gate using actual throughput and staffing; preserve acceptance criteria when moving dates. The original 430-day/133-day-path and 42–50-week figures are superseded.
 
 ### 8.2 Milestone execution cards
 
@@ -603,7 +605,7 @@ Use short-lived branches and pull requests in the personal repository. Independe
 
 ## 10. Prioritized engineering backlog
 
-The 52 stable work-package IDs contain **151 aggregate tasks and 161 planned delivery PRs** in [EXECUTION_BACKLOG.md](EXECUTION_BACKLOG.md). Each task and explicit package records objective, scope, exclusions, prerequisites, interfaces, acceptance, tests, security/reliability, effort/confidence, owner/review and definition of done. Nested packages inherit all aggregate prerequisites and require accepted merged predecessor evidence; they add neither aggregate tasks nor duplicate effort. AR-008-A retains three packages; AR-007-C, AR-006-B and AR-008-B retain two each, all Verified for their accepted scopes. Operation adapters/HTTP total 6 [6–10] BE days; [accepted P1/P2 records](delivery/OPERATION_HTTP_EXECUTION_PLAN.md) preserve exact evidence. AR-010-A retains two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low: schema/provisioning/opening backfill, then reservations/minimum generation/rollover. AR-010-A/P1 #108: Verified; F3: Merged; checkpoint accepted at protected merge b214f21b from reviewed source 1c6e30e0. Aggregate AR-010-A/#107 and parent AR-010/#10 remain In progress; product P2/#109 is In progress after independently accepted entry v7 and implementation assignment; its accepted merge and delivery review evidence remain null. The approved scope, task graph, effort estimates and funding/data/production gates are unchanged. Totals remain 151 tasks, 161 planned PRs, 544 outer edges and 15 delivery packages; aggregate tasks remain 30 Verified / 1 In progress / 120 Not started. Current package status totals: 10 Verified / 1 In progress / 4 Not started. Accepted F1/F2 checkpoints and dated component/failure records retain their original scope; the current source-bound delivery record is linked above. AR-010-B retains two sequential 2 [2–3] BE packages, total 4 [4–6], for failure/provenance followed by live permits and both completion/expiry producers. Both inherit AR-010-A and AR-005-C; P2 requires accepted P1. AR-011-C retains two sequential PL packages totaling 4 [4–6] days gated on AR-010-B; AR-011-C/AR-012-B require the whole worker aggregate. AR-006-C repair also remains gated. Other tasks retain one delivery PR each; no reverse worker edge or ready-profile claim is added.
+The 53 stable work-package IDs contain **155 aggregate tasks and 171 planned delivery PRs** in [EXECUTION_BACKLOG.md](EXECUTION_BACKLOG.md). Each task and explicit package records objective, scope, exclusions, prerequisites, interfaces, acceptance, tests, security/reliability, effort/confidence, owner/review and definition of done. Nested packages inherit all aggregate prerequisites and require accepted merged predecessor evidence; they add neither aggregate tasks nor duplicate effort. AR-008-A retains three packages; AR-007-C, AR-006-B and AR-008-B retain two each, all Verified for their accepted scopes. Operation adapters/HTTP total 6 [6–10] BE days; [accepted P1/P2 records](delivery/OPERATION_HTTP_EXECUTION_PLAN.md) preserve exact evidence. AR-010-A retains two sequential 3 [3–5] BE packages, total 6 [6–10], medium-low: schema/provisioning/opening backfill, then reservations/minimum generation/rollover. AR-010-A/P1 #108: Verified; F3: Merged; checkpoint accepted at protected merge b214f21b from reviewed source 1c6e30e0. Aggregate AR-010-A/#107 and parent AR-010/#10 remain In progress; product P2/#109 is In progress after independently accepted entry v7 and implementation assignment; its accepted merge and delivery review evidence remain null. Existing scope, task graph, statuses and funding/data/production gates remain unchanged; the separate #97 reforecast below changes only its planning allocation and PR decomposition. Totals are 155 tasks, 171 planned PRs, 569 dependency edges and 15 delivery packages; aggregate tasks are 30 Verified / 1 In progress / 124 Not started. Current package status totals: 10 Verified / 1 In progress / 4 Not started. Accepted F1/F2 checkpoints and dated component/failure records retain their original scope; the current source-bound delivery record is linked above. AR-010-B retains two acceptance packages: P1 failure/provenance in five F1–F5 implementation PRs, 12 [9–18] BE days low confidence; P2 live permits and both completion/expiry producers remains 2 [2–3] medium-low. Aggregate 14 [11–21], low; see the [worker failure execution plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md). Both inherit AR-010-A and AR-005-C; P2 requires accepted P1. AR-011-C retains two sequential PL packages totaling 4 [4–6] days gated on AR-010-B; AR-011-C/AR-012-B require the whole worker aggregate. AR-006-C repair also remains gated. Other tasks retain one delivery PR each; no reverse worker edge or ready-profile claim is added.
 
 Initial E0-ready tasks are **Verified**; AR-004-B/C contract reconciliation and development decision are **Verified**. Other tasks retain their ledger status. Parent rows below are rollups, not assignable implementation PRs. Their entry dependencies point to exact child/gate prerequisites; they do not imply waiting for an entire parent package. This matters for early staging in AR-033 and independently testable contract producers. Full milestone gates still join all required tasks. No issue or specification is completion evidence. Unknown assessment findings or customer gaps receive new IDs with reviewable scope before their blocking gate can close.
 
@@ -612,7 +614,7 @@ Role abbreviations: TL technical lead/backend, BE execution/backend, PL platform
 | Package | Milestone / priority | Assignable task cards / objective | Entry prerequisites from outside package | Primary roles / base effort | Status |
 | --- | --- | --- | --- | --- | --- |
 | AR-001 | M0 / P0 | [AR-001](EXECUTION_BACKLOG.md#ar-001): 2 PRs. Make supported investigations and their business value explicit. | [E0](EXECUTION_BACKLOG.md#e0) | FE/TL / 2 days | Verified |
-| AR-002 | M0 / P0 | [AR-002](EXECUTION_BACKLOG.md#ar-002): 2 PRs. Protect corpus rights and establish a credible natural-failure evaluation protocol. | [AR-001-A](EXECUTION_BACKLOG.md#ar-001-a), [AR-001-B](EXECUTION_BACKLOG.md#ar-001-b) | RS / 2 days | Verified |
+| AR-002 | M0 / P0 | [AR-002](EXECUTION_BACKLOG.md#ar-002): 4 PRs. Protect corpus rights and establish a credible natural-failure evaluation protocol. | [AR-001-A](EXECUTION_BACKLOG.md#ar-001-a), [AR-001-B](EXECUTION_BACKLOG.md#ar-001-b), [PCA1](EXECUTION_BACKLOG.md#pca1), [PUBLICPREP0](EXECUTION_BACKLOG.md#publicprep0) | RS / 5 days | In progress |
 | AR-003 | M0 / P0 | [AR-003](EXECUTION_BACKLOG.md#ar-003): 2 PRs. Bound deployment trust, operating responsibility and financial exposure. | [AR-001-A](EXECUTION_BACKLOG.md#ar-001-a) | PL / 2 days | Verified |
 | AR-004 | M0 / P0 | [AR-004](EXECUTION_BACKLOG.md#ar-004): 3 PRs. Resolve architecture and interface decisions before runtime changes. | [AR-002-B](EXECUTION_BACKLOG.md#ar-002-b), [AR-003-B](EXECUTION_BACKLOG.md#ar-003-b), [AR-005-A](EXECUTION_BACKLOG.md#ar-005-a), [AR-011-A](EXECUTION_BACKLOG.md#ar-011-a), [AR-012-A](EXECUTION_BACKLOG.md#ar-012-a), [ARCH0](EXECUTION_BACKLOG.md#arch0), [E0](EXECUTION_BACKLOG.md#e0) | BE/TL / 2.5 days | Verified |
 | AR-005 | M1 / P0 | [AR-005](EXECUTION_BACKLOG.md#ar-005): 3 PRs. Upgrade stored history safely without changing evidence identity. | [E0](EXECUTION_BACKLOG.md#e0), [G0](EXECUTION_BACKLOG.md#g0) | BE/QE / 6 days | Verified |
@@ -620,7 +622,7 @@ Role abbreviations: TL technical lead/backend, BE execution/backend, PL platform
 | AR-007 | M1 / P0 | [AR-007](EXECUTION_BACKLOG.md#ar-007): 4 PRs. Prevent cross-project access through both legacy and new paths. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-011-B](EXECUTION_BACKLOG.md#ar-011-b) | TL/BE / 9.5 days | Verified |
 | AR-008 | M1 / P0 | [AR-008](EXECUTION_BACKLOG.md#ar-008): 5 PRs. Make retries safe and admission/cancellation behavior predictable. | [AR-007-C](EXECUTION_BACKLOG.md#ar-007-c), [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-011-B](EXECUTION_BACKLOG.md#ar-011-b) | BE / 13 days | Verified |
 | AR-009 | M1 / P0 | [AR-009](EXECUTION_BACKLOG.md#ar-009): 2 PRs. Keep published evidence immutable, scoped and complete. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-007-A](EXECUTION_BACKLOG.md#ar-007-a), [AR-007-B](EXECUTION_BACKLOG.md#ar-007-b), [AR-011-B](EXECUTION_BACKLOG.md#ar-011-b) | PL / 4 days | Verified |
-| AR-010 | M1 / P0 | [AR-010](EXECUTION_BACKLOG.md#ar-010): 6 PRs. Enforce budget limits before every potentially paid action. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-008-B](EXECUTION_BACKLOG.md#ar-008-b) | BE / 10 days | In progress |
+| AR-010 | M1 / P0 | [AR-010](EXECUTION_BACKLOG.md#ar-010): 10 PRs. Enforce budget limits before every potentially paid action. | [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-008-B](EXECUTION_BACKLOG.md#ar-008-b) | BE / 20 days | In progress |
 | AR-011 | M1 / P0 | [AR-011](EXECUTION_BACKLOG.md#ar-011): 4 PRs. Diagnose failures without exposing secrets or losing request context. | [AR-004-A](EXECUTION_BACKLOG.md#ar-004-a), [AR-005-C](EXECUTION_BACKLOG.md#ar-005-c), [AR-010-B](EXECUTION_BACKLOG.md#ar-010-b), [G0](EXECUTION_BACKLOG.md#g0) | PL / 7 days | In progress |
 | AR-012 | M1 / P0 | [AR-012](EXECUTION_BACKLOG.md#ar-012): 2 PRs. Detect incompatible or unsafe foundation changes before integration. | [AR-004-A](EXECUTION_BACKLOG.md#ar-004-a), [AR-005-A](EXECUTION_BACKLOG.md#ar-005-a), [AR-006-B](EXECUTION_BACKLOG.md#ar-006-b), [AR-006-C](EXECUTION_BACKLOG.md#ar-006-c), [AR-008-B](EXECUTION_BACKLOG.md#ar-008-b), [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-010-B](EXECUTION_BACKLOG.md#ar-010-b), [AR-011-C](EXECUTION_BACKLOG.md#ar-011-c) | QE / 5 days | In progress |
 | AR-013 | M2 / P0 | [AR-013](EXECUTION_BACKLOG.md#ar-013): 3 PRs. Execute untrusted code within an accountable Linux sandbox boundary. | [AR-009-B](EXECUTION_BACKLOG.md#ar-009-b), [AR-011-C](EXECUTION_BACKLOG.md#ar-011-c), [AR-033-A](EXECUTION_BACKLOG.md#ar-033-a), [AR-033-B](EXECUTION_BACKLOG.md#ar-033-b) | PL/QE / 10 days | NS |
@@ -636,7 +638,7 @@ Role abbreviations: TL technical lead/backend, BE execution/backend, PL platform
 | AR-023 | M3 / P0 | [AR-023](EXECUTION_BACKLOG.md#ar-023): 3 PRs. Account for every provider call and preserve uncertainty until reconciled. | [AR-010-B](EXECUTION_BACKLOG.md#ar-010-b), [AR-017-A](EXECUTION_BACKLOG.md#ar-017-a), [AR-020-A](EXECUTION_BACKLOG.md#ar-020-a), [AR-020-B](EXECUTION_BACKLOG.md#ar-020-b), [AR-020-C](EXECUTION_BACKLOG.md#ar-020-c) | BE / 10 days | NS |
 | AR-024 | M3 / P0 | [AR-024](EXECUTION_BACKLOG.md#ar-024): 4 PRs. Report intervention effects with correct denominators and uncertainty. | [AR-002-B](EXECUTION_BACKLOG.md#ar-002-b), [AR-020-A](EXECUTION_BACKLOG.md#ar-020-a), [AR-025-D](EXECUTION_BACKLOG.md#ar-025-d), [RA-01-B](EXECUTION_BACKLOG.md#ra-01-b), [RESEARCHSCOPE0](EXECUTION_BACKLOG.md#researchscope0) | RS / 12 days | NS |
 | AR-025 | M3 / P0 | [AR-025](EXECUTION_BACKLOG.md#ar-025): 4 PRs. Compare useful intervention locations against fair inexpensive baselines. | [AR-018-C](EXECUTION_BACKLOG.md#ar-018-c), [AR-021-A](EXECUTION_BACKLOG.md#ar-021-a), [AR-023-C](EXECUTION_BACKLOG.md#ar-023-c), [AR-024-A](EXECUTION_BACKLOG.md#ar-024-a), [AR-024-C](EXECUTION_BACKLOG.md#ar-024-c), [RESEARCHSCOPE0](EXECUTION_BACKLOG.md#researchscope0) | RS/QE / 14 days | NS |
-| AR-026 | M3 / P0 | [AR-026](EXECUTION_BACKLOG.md#ar-026): 3 PRs. Establish experiment correctness before relying on research conclusions. | [AR-002-B](EXECUTION_BACKLOG.md#ar-002-b), [AR-022-C](EXECUTION_BACKLOG.md#ar-022-c), [AR-023-C](EXECUTION_BACKLOG.md#ar-023-c), [AR-024-C](EXECUTION_BACKLOG.md#ar-024-c), [AR-024-D](EXECUTION_BACKLOG.md#ar-024-d), [AR-025-B](EXECUTION_BACKLOG.md#ar-025-b), [AR-025-C](EXECUTION_BACKLOG.md#ar-025-c), [G2](EXECUTION_BACKLOG.md#g2) | RS/QE / 10 days | NS |
+| AR-026 | M3 / P0 | [AR-026](EXECUTION_BACKLOG.md#ar-026): 3 PRs. Establish experiment correctness before relying on research conclusions. | [AR-002-B](EXECUTION_BACKLOG.md#ar-002-b), [AR-022-C](EXECUTION_BACKLOG.md#ar-022-c), [AR-023-C](EXECUTION_BACKLOG.md#ar-023-c), [AR-024-C](EXECUTION_BACKLOG.md#ar-024-c), [AR-024-D](EXECUTION_BACKLOG.md#ar-024-d), [AR-025-B](EXECUTION_BACKLOG.md#ar-025-b), [AR-025-C](EXECUTION_BACKLOG.md#ar-025-c), [G2](EXECUTION_BACKLOG.md#g2), [PUBCAP-B](EXECUTION_BACKLOG.md#pubcap-b) | QE/RS / 10 days | Not started |
 | AR-027 | M4 / P0 | [AR-027](EXECUTION_BACKLOG.md#ar-027): 3 PRs. Let engineers inspect and branch large recorded runs through stable contracts. | [AR-006-B](EXECUTION_BACKLOG.md#ar-006-b), [AR-008-B](EXECUTION_BACKLOG.md#ar-008-b), [AR-012-B](EXECUTION_BACKLOG.md#ar-012-b), [AR-014-A](EXECUTION_BACKLOG.md#ar-014-a), [AR-014-C](EXECUTION_BACKLOG.md#ar-014-c) | BE/FE/TL / 10 days | NS |
 | AR-028 | M4 / P0 | [AR-028](EXECUTION_BACKLOG.md#ar-028): 3 PRs. Make intervention differences and unsuccessful outcomes understandable. | [AR-014-C](EXECUTION_BACKLOG.md#ar-014-c), [AR-027-B](EXECUTION_BACKLOG.md#ar-027-b), [AR-027-C](EXECUTION_BACKLOG.md#ar-027-c) | FE/QE / 10 days | NS |
 | AR-029 | M4 / P0 | [AR-029](EXECUTION_BACKLOG.md#ar-029): 3 PRs. Expose study progress, uncertainty and costs without overstating evidence. | [AR-008-B](EXECUTION_BACKLOG.md#ar-008-b), [AR-020-C](EXECUTION_BACKLOG.md#ar-020-c), [AR-022-C](EXECUTION_BACKLOG.md#ar-022-c), [AR-023-C](EXECUTION_BACKLOG.md#ar-023-c), [AR-024-B](EXECUTION_BACKLOG.md#ar-024-b), [AR-026-C](EXECUTION_BACKLOG.md#ar-026-c), [AR-027-C](EXECUTION_BACKLOG.md#ar-027-c) | BE/FE/TL / 10 days | NS |
@@ -648,7 +650,8 @@ Role abbreviations: TL technical lead/backend, BE execution/backend, PL platform
 | AR-035 | M5 / P0 | [AR-035](EXECUTION_BACKLOG.md#ar-035): 3 PRs. Admit pilot data only after deployment, permission and recovery prerequisites. | [AR-003-B](EXECUTION_BACKLOG.md#ar-003-b), [AR-026-A](EXECUTION_BACKLOG.md#ar-026-a), [AR-032-A](EXECUTION_BACKLOG.md#ar-032-a), [G4](EXECUTION_BACKLOG.md#g4), [PARTNER0](EXECUTION_BACKLOG.md#partner0), [PILOT0](EXECUTION_BACKLOG.md#pilot0) | PL/QE/TL / 10 days | NS |
 | AR-036 | M5 / P0 | [AR-036](EXECUTION_BACKLOG.md#ar-036): 3 PRs. Validate onboarding and daily operation for the first design partner. | [AR-030-C](EXECUTION_BACKLOG.md#ar-030-c), [AR-031-C](EXECUTION_BACKLOG.md#ar-031-c), [AR-035-C](EXECUTION_BACKLOG.md#ar-035-c) | QE/RS/TL / 10 days | NS |
 | AR-037 | M5 / P0 | [AR-037](EXECUTION_BACKLOG.md#ar-037): 3 PRs. Validate repeatable onboarding for a second distinct design-partner workflow. | [AR-030-C](EXECUTION_BACKLOG.md#ar-030-c), [AR-031-C](EXECUTION_BACKLOG.md#ar-031-c), [AR-035-C](EXECUTION_BACKLOG.md#ar-035-c) | QE/RS/TL / 10 days | NS |
-| AR-038 | M5 / P0 | [AR-038](EXECUTION_BACKLOG.md#ar-038): 3 PRs. Measure natural-failure intervention usefulness under a frozen affordable protocol. | [AR-026-A](EXECUTION_BACKLOG.md#ar-026-a), [AR-026-C](EXECUTION_BACKLOG.md#ar-026-c), [AR-036-C](EXECUTION_BACKLOG.md#ar-036-c), [AR-037-C](EXECUTION_BACKLOG.md#ar-037-c), [DATA0](EXECUTION_BACKLOG.md#data0), [STUDYFUNDS0](EXECUTION_BACKLOG.md#studyfunds0) | RS / 10 days | NS |
+| AR-038 | M5 / P0 | [AR-038](EXECUTION_BACKLOG.md#ar-038): 3 PRs. Measure natural-failure intervention usefulness under a frozen affordable protocol. | [AR-026-A](EXECUTION_BACKLOG.md#ar-026-a), [AR-026-C](EXECUTION_BACKLOG.md#ar-026-c), [G3](EXECUTION_BACKLOG.md#g3), [PUBCAP-C](EXECUTION_BACKLOG.md#pubcap-c), [PUBLICDATA0](EXECUTION_BACKLOG.md#publicdata0), [STUDYFUNDS0](EXECUTION_BACKLOG.md#studyfunds0) | RS / 10 days | Not started |
+| PUBCAP | M2/M5 / P0 | [PUBCAP](EXECUTION_BACKLOG.md#pubcap): 4 PRs. Qualify a supported public-corpus acquisition route without bypassing rights, runtime, funding or study gates. | [AR-026-A](EXECUTION_BACKLOG.md#ar-026-a), [CAPTUREFUNDS0](EXECUTION_BACKLOG.md#capturefunds0), [G2](EXECUTION_BACKLOG.md#g2), [PCA2](EXECUTION_BACKLOG.md#pca2), [PUBLICDATA0](EXECUTION_BACKLOG.md#publicdata0) | BE/RS / 5 days | Not started |
 | AR-039 | M5 / P0 | [AR-039](EXECUTION_BACKLOG.md#ar-039): 3 PRs. Decide pilot readiness from complete customer and operating evidence. | [AR-036-C](EXECUTION_BACKLOG.md#ar-036-c), [AR-037-C](EXECUTION_BACKLOG.md#ar-037-c), [AR-038-C](EXECUTION_BACKLOG.md#ar-038-c), [P28](EXECUTION_BACKLOG.md#p28), [PILOTFIX0](EXECUTION_BACKLOG.md#pilotfix0) | QE/TL / 10 days | NS |
 | AR-040 | M6 / P1 | [AR-040](EXECUTION_BACKLOG.md#ar-040): 3 PRs. Establish measured forecast capacity and honest installation limits. | [AR-022-C](EXECUTION_BACKLOG.md#ar-022-c), [AR-033-C](EXECUTION_BACKLOG.md#ar-033-c), [AR-033-D](EXECUTION_BACKLOG.md#ar-033-d), [SCALEFUNDS0](EXECUTION_BACKLOG.md#scalefunds0) | PL/QE / 10 days | NS |
 | AR-041 | M6 / P1 | [AR-041](EXECUTION_BACKLOG.md#ar-041): 3 PRs. Recover from zonal and dependency failures without duplicating logical work. | [AR-019-C](EXECUTION_BACKLOG.md#ar-019-c), [AR-021-C](EXECUTION_BACKLOG.md#ar-021-c), [AR-033-C](EXECUTION_BACKLOG.md#ar-033-c), [AR-033-D](EXECUTION_BACKLOG.md#ar-033-d), [SCALEFUNDS0](EXECUTION_BACKLOG.md#scalefunds0) | PL/QE / 10 days | NS |
@@ -893,8 +896,326 @@ The original brief is filled in this single roadmap. The later request explicitl
 
 ### 14.3 Dated progress ledger
 
+### Corpus integration and final inventory — 2026-10-29
+
+The final corpus inventory and baseline checks are complete locally; see the [assignment checkpoint](ASSIGNMENTS.md#corpus-integration-and-final-inventory--2026-10-29) for exact evidence and remaining CI/artifact gates.
+
+<details>
+<summary>Superseded current-status panel before final corpus inventory</summary>
+
+- **Verified:** Ledger P2 and AR-010-A are delivered. Main CI and the matching installed package are independently accepted.
+- **Next:** Backend implements F1; Quality completes bookkeeping and corpus handoff. Review provides independent checks; the lead integrates reviewed work.
+- **Open gates:** F1 and worker delivery, corpus acceptance and production prerequisites remain. Parent AR-010 stays In progress.
+
+</details>
+
+### Worker P1 entry accepted; F1 assigned — 2026-10-29
+
+At 21:14:57 UTC, lead entry e7a70bb9 accepted D1-D4 and assigned only AR-010-B/P1/F1 to Backend on delivered [M122](https://github.com/spei04/agent-rewind/commit/aed2c20d314e0e361fa4c8e438f839802e1e729b). Preparation b91b0afa and independent review 52a9800d bind the repaired F1 interface; accepted predecessor wheel SHA256 13bb8a8caa1b1c8226b8f57eda367243024a1edb7b2c265ff2453cc27e1501aa and AR-005-C remain prerequisites satisfied by their own evidence. The lead reserved later-F2 ar_0008_failure_evidence, owned by Backend; F1 adds no revision/schema.
+
+AR-010-B, P1 and F1 are In progress with null source/merge/delivery acceptance; F2-F5 and worker P2 remain Not started. Task counts are 31 Verified / 1 In progress / 123 Not started; delivery packages 11 / 1 / 3. Quality owns bookkeeping/corpus handoff and independent oracles; Review checks source/evidence; the lead integrates. GitHub #96/#97 synchronization/readback remains separate lead work. Native fit, later sequential accepted merges, corpus acceptance and production gates are unchanged.
+
+<details>
+<summary>Delivery-only handoff before the subsequent F1 assignment</summary>
+
+- **Verified:** Ledger P2 and AR-010-A are delivered at M122. Main CI and the matching installed package are independently accepted.
+- **Next:** The lead updates delivery records; Backend takes corpus integration after handoff. Quality and Review prepare the worker entry and its independent checks.
+- **Open gates:** AR-010-B, corpus acceptance and production prerequisites remain. Parent AR-010 stays In progress.
+
+</details>
+
+### Ledger P2 and AR-010-A delivered — 2026-10-29
+
+[PR #122](https://github.com/spei04/agent-rewind/pull/122), source [`cd73a458`](https://github.com/spei04/agent-rewind/commit/cd73a45892569a0dc95f9f4f006ec7717e6f6486), is accepted at protected merge [`aed2c20d`](https://github.com/spei04/agent-rewind/commit/aed2c20d314e0e361fa4c8e438f839802e1e729b). [Original main run 40946635371](https://github.com/spei04/agent-rewind/actions/runs/40946635371), attempt 1, passed all eight jobs. The exact 8,382-node inventory has 8,337 Python 3.11 passes with 45 skips and 8,351 Python 3.12 passes with 31 skips. The 17 native, two R3, seven clause-policy and 48 CHECK cases passed all three phases on both versions.
+
+Independent main review `3dfaeb88`, final candidate/sufficiency review `d3d1a8c2` and lead acceptance `e937f66f` bind candidate `12931054242`, archive SHA256 `f914492f4a676e28567256eb82895ca6020a64aaca1f3c57f4b5d7fee8e08ca9`, all 147 runtime members, actual isolated wheel installation/smoke/CLI and the original hosted-image trust checks. The durable private release record has SHA256 `26a29f824397ae30a7f2204fb3c340f85599db509d60334a3a7a1b18dae2143d`; original failures and bounded component qualifications remain retained. The initial log-summary uniqueness failure and provisional artifact review were corrected using unchanged original evidence, with no rerun.
+
+P2 #109 and aggregate AR-010-A #107 are Verified. P1 #108 remains Verified; parent AR-010 #10 remains In progress. Worker entry, corpus integration/acceptance, customer/production, provider, funding and data gates remain separate. No new paid resource, model run or partner-data access follows from this delivery.
+
+Issue closure/readback: #109 completed at 2026-10-29T21:12:17Z (803c11cd); #107 completed at 21:12:18Z (d55f3597). Parent #10 remains open (72f119dc); P1 #108 and all earlier acceptance evidence remain unchanged. Current machine planning/assignment/queue prose is reconciled to this delivery, with superseded text retained. Totals remain 155 tasks / 171 planned PRs / 569 edges; status counts are 31 Verified / 0 In progress / 124 Not started and 11 / 0 / 4 delivery packages.
+
+<details>
+<summary>Superseded current-status panel before final P2 acceptance</summary>
+
+- **Verified:** Corrected PR #122 CI and its exact receipts are independently accepted. The PR merged under the repository's protections.
+- **Next:** Backend monitors fresh main CI; Review verifies receipts and installed artifacts. Quality maintains corpus handoff and documentation; the lead owns delivery.
+- **Blocker:** Fresh main and matching installed-artifact acceptance remain required before P2 delivery. Worker, corpus and production prerequisites remain unchanged.
+
+</details>
+
+### PR122 accepted and merged; fresh main pending — 2026-10-29
+
+[PR #122](https://github.com/spei04/agent-rewind/pull/122) merged normally under repository protections at 20:10:23 UTC as [M122 `aed2c20d`](https://github.com/spei04/agent-rewind/commit/aed2c20d314e0e361fa4c8e438f839802e1e729b), tree `571263bc`. Independent review accepted corrected [original PR run 40935985110](https://github.com/spei04/agent-rewind/actions/runs/40935985110), attempt 1, on source `cd73a458`: exact 8,382-node arrays, order and skips; Python 3.11 shards passed 4,337 and 4,000 cases with 45 skips total; Python 3.12 passed 8,351 with 31 skips.
+
+The 17 native cases, two R3 cases, seven prior clause-policy and 48 CHECK regressions passed all three phases on both versions: 148 outcomes and 444 phase facts. The 652-file accepted source and 147 runtime members match. This closes the PR-side evidence requirement, not final P2 delivery.
+
+[Fresh push-main run 40946635371](https://github.com/spei04/agent-rewind/actions/runs/40946635371), attempt 1, is running at M122. Backend retains originals and monitors; Review verifies main receipts and matching installed artifacts; Quality maintains corpus handoff and documentation; the lead owns protected delivery. P2 accepted-merge/delivery fields remain null until final acceptance, and parent, worker, corpus and production gates remain unchanged. Earlier failures and their unknown cause stay historical qualifiers, not new gates; all prior evidence remains retained.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** The CHECK repair and bounded period-test setup correction are independently reviewed. The correction is published in PR #122.
+- **Next:** Backend monitors fresh CI; Review verifies receipts and artifacts. Quality maintains corpus handoff and documentation; the lead owns delivery.
+- **Blocker:** Full PR/main and matching installed-artifact acceptance remain pending. The earlier CI failure's cause is unknown; P2 delivery and downstream gates remain unmet.
+
+</details>
+
+### Reviewed period-test correction published; fresh PR122 CI — 2026-10-29
+
+[PR #122](https://github.com/spei04/agent-rewind/pull/122) now publishes [source `cd73a458`](https://github.com/spei04/agent-rewind/commit/cd73a45892569a0dc95f9f4f006ec7717e6f6486), tree `571263bc`. Only `tests/reservation_postgres_qe_helpers.py` changed since `e3c879ce`. The exact 652-file source was independently accepted; all 147 runtime files, test bodies/IDs and the 8,382-node baseline are unchanged. No new full collection was run.
+
+Independent review accepted the two existing organization/project period cases once on each supported interpreter: four original passes. A deliberate 4.25-second native setup delay measured about 4.256 seconds; alignment retained 3.991–3.992 seconds, and requested target delays were 3.220–3.351 seconds. Each attempt recorded 448 cumulative post-cleanup Work units and about 4.06 seconds, acknowledged rollback and no commit attempt. Whole-state assertions, source/environment/database-baseline preservation, physical PostgreSQL stop and child release passed. The real clock, 4.1-second upper bound and ten-second Work limit remain. The original CI failure's cause is still unknown; these local results establish no broad-suite, full-CI or delivery acceptance.
+
+[Fresh original CI run 40935985110](https://github.com/spei04/agent-rewind/actions/runs/40935985110), attempt 1, is running on this source. Backend is the sole original-CI monitor; Review verifies receipts and artifacts; Quality maintains corpus handoff and documentation; the lead owns delivery. Passing PR/main and matching installed artifacts remain required, with P2 and downstream gates unmet. All previous outcomes and failures remain retained.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** The CHECK repair's focused checks, inventory and baseline controls are independently reviewed. Both Python 3.11 CI shards and support checks passed.
+- **Next:** Backend proposes a bounded setup correction; Review checks the original failure and source. Quality maintains the corpus handoff; the lead owns integration.
+- **Blocker:** Original Python 3.12 CI failed before reservation. Required PR/main and installed-artifact acceptance, P2 delivery and downstream gates remain unmet.
+
+</details>
+
+### Original PR122 CI failure; setup correction under review — 2026-10-29
+
+[PR #122](https://github.com/spei04/agent-rewind/pull/122), source `e3c879ce`, [original run 40921709077](https://github.com/spei04/agent-rewind/actions/runs/40921709077), attempt 1: both Python 3.11 core shards and support checks passed. The [Python 3.12 all-tests job 123616399230](https://github.com/spei04/agent-rewind/actions/runs/40921709077/job/123616399230) was observed with a failed Run core tests step at 18:25:13 UTC, with 1 failed, 7,572 passed and 30 skipped; later tests were unexecuted. The CI gate failed and the candidate was skipped.
+
+The failure was `tests/test_reservation_qe_postgres.py::test_postgres_final_period_fence_observes_injected_constraint_latency[organization]`: helper line 162's setup clock precondition failed after real P1, ACL and full-state checks, before injected delay or reservation. Actual clock values are absent, so expired-window versus clock-regression cause is unproven; no runtime regression is inferred.
+
+Backend proposes bounded setup and four-second period alignment, retaining the real clock, rollback assertions, 4.1-second upper bound and ten-second Work limit. Review checks the original failure and source; Quality maintains documentation and corpus handoff; the lead integrates reviewed changes. The independently reviewed 97 focused passes per interpreter remain local evidence, not full Python 3.12 success. Originals and failures remain retained. Required PR/main, matching installed artifacts, P2 delivery and worker/corpus/production gates remain pending.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** [PR #122](https://github.com/spei04/agent-rewind/pull/122) contains the independently reviewed repair. All 97 focused tests passed per Python version; the 8,382-case inventory and 16 baseline controls are accepted.
+- **Next:** Backend tracks [original CI](https://github.com/spei04/agent-rewind/actions/runs/40921709077); Review checks source-bound receipts and artifacts. Quality updates future integration requirements; the lead owns delivery.
+- **Blocker:** Repaired-source PR/main checks and installed-artifact acceptance remain pending before P2 delivery. Worker, corpus and production prerequisites remain unchanged.
+
+</details>
+
+### CHECK correspondence repair published; fresh CI pending — 2026-10-29
+
+[PR #122](https://github.com/spei04/agent-rewind/pull/122) publishes [source `e3c879ce`](https://github.com/spei04/agent-rewind/commit/e3c879cef68415b5cfa777f50c8b789811518448). Independent review accepted 97 selected controls on each supported Python version, actual collect-only inventories of 8,382 nodes each (all 8,334 prior IDs retained in order plus 48 additions), and 16 baseline controls. Original failures, corrected outcomes and their qualifications remain retained; these are not full-suite or delivery acceptance.
+
+[Original CI run 40921709077](https://github.com/spei04/agent-rewind/actions/runs/40921709077) is running at this checkpoint. Earlier PR121/main success remains historical evidence for its own source. Fresh PR/main and matching installed artifacts are still required before P2 delivery; worker, corpus and production prerequisites remain unmet. Backend monitors CI and handles failures; Review checks receipts and artifacts; Quality prepares corpus delivery and this documentation; the lead owns integration and prerequisite decisions.
+
+The immutable corpus/repair merge preview found only the inventory-baseline conflict. Actual integration and combined-source collection remain pending after corrected P2 delivery; no combined count is inferred.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** Cloud access and the preserved regression file are verified. [PR #121 and main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970) passed; independent review confirmed the separate synthetic CHECK gap.
+- **Next:** Backend resumes native CHECK declaration validation and both regressions. Quality checks parser boundaries; Review verifies the implementation and original results.
+- **Blocker:** P2 requires the accepted repair and matching CI/artifact evidence. Worker, corpus and production prerequisites remain unchanged.
+
+</details>
+
+### Access restored; preserved repair resumed — 2026-10-29
+
+Cloud SSH access is restored. The lead independently verified PRIMARY at M121 on `work/sqlite-check-correspondence`, with the exact preserved regression file and no runtime changes at resumption; the planning checkout remains clean at `b541deb9`. Backend resumes the already authorized repair and scoped original/final tests. Quality checks parser boundaries, and Review verifies implementation and source-bound evidence. The authentication interruption remains in history. No new checkout, resources, budget or downstream gate was authorized.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** [Original M121 main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970) passed all eight jobs. One synthetic Python 3.12 fixture reproduced an extra jobs CHECK accepted by the complete inspector.
+- **Next:** Backend implements scoped CHECK declaration, name and body validation; Review verifies the reproduction and repair. Quality maintains corpus handoff and documentation; the lead integrates.
+- **Blocker:** Independent review confirmed the reproduced gap. Repair acceptance and matching delivery evidence remain pending. P2, worker, corpus and production gates remain unmet.
+
+</details>
+
+### Jobs CHECK reproduced; delivery hold retained — 2026-10-29
+
+[Original M121 main run 40843248970](https://github.com/spei04/agent-rewind/actions/runs/40843248970), attempt 1, finished with all eight jobs successful. That original result is retained; it does not resolve the newly reproduced catalog boundary or establish installed-artifact acceptance.
+
+On repaired source [0be52817](https://github.com/spei04/agent-rewind/commit/0be5281750b494729d2aa6e8c64e13bf50f1042b), whose tree equals M121, one fresh empty synthetic ar7 fixture on Python 3.12 / SQLite 3.45.1 accepted the exact additional jobs clause CHECK/*review*/(budget<9223372036854775807) through the general catalog, bounded catalog and complete persisted inspector. Their reflected profiles and expected persisted state stayed unchanged. Ordinary FK-on DDL changed only the jobs table declaration; all typed application rows, row identities, adoption/progress and other schema facts were preserved. Original outcomes, cleanup and source/environment preservation are retained; independent review accepted this exact original result and the scoped repair plan. This is one controlled fixture, with no production-impact or earlier-CI-cause claim.
+
+Backend owns the scoped repair comparing actual CHECK declarations, names and bodies; Review independently verifies its source and evidence. P2 delivery remains held for accepted correction and matching CI/artifact evidence. Worker implementation, corpus delivery and product/production gates retain their prerequisites; task statuses, graph, estimates and budgets are unchanged.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** [PR #121](https://github.com/spei04/agent-rewind/pull/121) merged with independently accepted original CI evidence.
+- **Next:** Quality qualifies an extra SQLite CHECK that may be omitted by reflection; Review verifies the complete inspector and preserved state. Backend preserves [original main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970); the lead integrates findings.
+- **Blocker:** Final P2 delivery is held pending that qualification, source-matched main evidence and installed artifacts. Worker, corpus and production prerequisites remain unmet.
+
+</details>
+
+### Additional SQLite CHECK qualification — 2026-10-29
+
+Source review identified a separate possible gap on the ar7 `jobs` table: CHECK is permitted there, while native catalog gates do not independently count CHECK clauses and the profile/fingerprint checks use reflected constraints. An additional comment-separated CHECK may be omitted by reflection. Acceptance by the complete persisted inspector has **not yet been observed**.
+
+Quality owns a bounded native qualification on the repaired source; Review checks the exact candidate, original adoption/progress records, whole-state preservation and complete inspector result. Backend preserves the original M121 main run without retry or cancellation. The project lead holds final P2 delivery until the question is resolved and source-matched main/artifact evidence is accepted. A successful current CI run alone cannot resolve an untested candidate. Worker implementation and corpus delivery retain their existing prerequisites; no spending, data access, deployment or production gate advances.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** [Repair PR #121](https://github.com/spei04/agent-rewind/pull/121) merged; its original CI evidence is independently accepted. The PR-side blocker is cleared.
+- **Next:** Backend monitors [fresh main CI](https://github.com/spei04/agent-rewind/actions/runs/40843248970); Review checks receipts and artifacts. Quality prepares corpus delivery and documentation; the lead owns protected delivery and prerequisites.
+- **Blocker:** Fresh main checks and matching installed artifacts remain before P2 delivery. Worker, corpus and production gates retain their prerequisites.
+
+</details>
+
+### Repair PR merged; fresh main validation — 2026-10-29
+
+[PR #121](https://github.com/spei04/agent-rewind/pull/121) merged as [M121 ae6a3987](https://github.com/spei04/agent-rewind/commit/ae6a3987ba20a9f1203564c2e8a24a6134d71bb0) at 08:35:33 UTC. Independent review accepted [original PR run 40837589029](https://github.com/spei04/agent-rewind/actions/runs/40837589029), attempt 1: the exact 8,334-case inventory, all 102 setup/call/teardown phase records for 17 native cases across both supported Python versions, the corrected persisted-money R3 controls, and all seven clause-policy repair cases.
+
+The PR-side blocker is cleared. At this checkpoint, [fresh main run 40843248970](https://github.com/spei04/agent-rewind/actions/runs/40843248970), attempt 1, is running. Only this new main validation and matching installed artifacts remain before P2 delivery. The earlier green PR119 main run covers its older source; it does not validate M121. Worker implementation, corpus delivery and production gates retain their prerequisites; task statuses, estimates, budgets and acceptance fields are unchanged.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** [Repair PR #121](https://github.com/spei04/agent-rewind/pull/121) contains the reviewed schema fix and 8,334-test inventory. Independent review also accepted one existing service-key claim/reserve sample on Python 3.11 and 3.12.
+- **Next:** Backend monitors [fresh CI](https://github.com/spei04/agent-rewind/actions/runs/40837589029); Review checks delivery evidence. Quality prepares the corpus integration handoff, and the lead integrates accepted work.
+- **Blocker:** Corrected PR/main checks and matching installed artifacts remain unmet. F1 implementation, corpus delivery and downstream gates retain their prerequisites.
+
+</details>
+
+### Current-source service-key baseline — 2026-10-29
+
+At [repair source `0be52817`](https://github.com/spei04/agent-rewind/commit/0be5281750b494729d2aa6e8c64e13bf50f1042b), independent review accepted one bounded synthetic service-key claim/reserve sample on Python 3.11 and one on Python 3.12. Both observed 488 cumulative post-cleanup Work units for claim and 504 for reservation, acknowledged both commits, and passed exact whole-state change and release checks. Source and environments were preserved; the owned fixture databases were removed. The [worker entry design](delivery/WORKER_FAILURE_ENTRY_DESIGN.md#fixed-limits-and-remaining-acceptance) records the native-runtime bindings and measurement scope.
+
+This supplies an observed current-predecessor baseline. Existing ordinary/control estimates and hypothetical fused savings remain distinct from these cumulative totals. F1 and successor capacity still require their planned native validation. PR #121 CI, fresh main checks and matching installed artifacts remain required before ledger delivery; no implementation, revision, budget, data or production gate advances here.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** [Repair PR #121](https://github.com/spei04/agent-rewind/pull/121) contains the reviewed schema fix, regressions and reconciled 8,334-test inventory. Targeted checks passed; the earlier main run passed for its older source.
+- **Next:** Backend monitors [fresh CI](https://github.com/spei04/agent-rewind/actions/runs/40837589029). Quality prepares bounded service-key measurements; Review verifies evidence, and the lead integrates delivery.
+- **Blocker:** Corrected PR/main checks and matching installed artifacts remain unmet. Worker implementation, corpus delivery and downstream gates retain their prerequisites.
+
+</details>
+
+### Repair PR and next validation assignments — 2026-10-29
+
+[PR #121](https://github.com/spei04/agent-rewind/pull/121), head `0be5281750b494729d2aa6e8c64e13bf50f1042b`, publishes the schema correction. Independent review accepted 48 focused checks plus the separate persisted-inspector regression on both Python versions. Both original collections contain 8,334 cases, retaining all 8,327 prior IDs in order plus seven additions. The four-field inventory update passed 16 existing controls on Python 3.12, with skip rules preserved. All 652 committed files match the reviewed source. [Fresh CI](https://github.com/spei04/agent-rewind/actions/runs/40837589029) is running; successful earlier-source main jobs do not validate the repair.
+
+Parallel preparation now targets the existing repaired predecessor's actual service-key claim/reserve path on a bounded synthetic SQLite fixture. It must report observed counters and outcomes, including refusal if the path does not fit. This is qualification preparation, not worker F1 implementation or successor-revision selection. Runtime, data, budget and production gates stay unchanged. The corpus integration preview found only the shared test-inventory conflict; no checkout merge or new inventory adoption has occurred.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** Ledger foundations are delivered. Review of merged P2 found a SQLite clause-policy defect; its minimal correction and complete persisted-inspector regression passed independent review on both supported Python versions.
+- **Next:** Quality reconciles the full test inventory. Backend prepares fresh CI validation; Review checks the evidence, and the lead integrates the repair and maintains this log.
+- **Blocker:** Corrected PR/main CI and matching installed artifacts are required before P2 delivery. Earlier-source CI cannot validate the repair; downstream gates remain unmet.
+
+</details>
+
+### SQLite clause-policy correction — 2026-10-29
+
+The original complete persisted inspector accepted an unsupported comment-separated CHECK on a controlled SQLite fixture. A shared mutable restriction set let jobs-table exceptions affect later tables. The correction copies the policy per table. Six order/token controls and a persisted-inspector regression cover refusal, acknowledged rollback and unchanged stored state. The original reproduction and its earlier instrumentation failure remain separate evidence; this is not a production-incident or earlier-CI-cause claim.
+
+The reviewed correction is committed as `286e1f1d`: exactly two files changed. Forty-eight focused checks and the separate persisted-inspector case passed on Python 3.11 and 3.12. Review verified the committed source against those results. Full test collection, the inventory baseline, repair publication and fresh hosted/artifact checks are pending. The original main run cannot clear this acceptance hold.
+
+The reviewed worker failure entry design and corpus candidate branch remain available for subsequent delivery. Worker P1/P2 remain Not started; corpus publication and later implementation keep their existing prerequisites. Budget, data, provider, runtime activation and production gates are unchanged.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** Ledger foundations are delivered. P2's PR CI and original receipts were accepted, and the PR merged. The worker failure design and corpus candidate source are reviewed.
+- **Next:** Backend monitors main CI; Review verifies results and installed artifacts. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Passing main CI and matching installed artifacts are required before P2 delivery. Earlier delays and unwitnessed HTTP failures remain unexplained; downstream gates remain unmet.
+
+</details>
+
+### PR merge and worker failure entry design — 2026-10-29
+
+Original [PR119 run 40825337038](https://github.com/spei04/agent-rewind/actions/runs/40825337038), attempt 1, passed the full 8,327-case P2 CI profile. Its original receipts were independently accepted, including exact phases for all 17 native cases on both Python versions. [PR119](https://github.com/spei04/agent-rewind/pull/119) merged at [286980ac](https://github.com/spei04/agent-rewind/commit/286980ac5b591af243a68715035c2bc1b6753aa4) at 06:37 UTC. Main CI and matching installed-candidate acceptance remain pending; ledger P2 delivery is not yet accepted. This does not establish the cause of earlier delays or unwitnessed HTTP failures.
+
+The [worker failure entry design](delivery/WORKER_FAILURE_ENTRY_DESIGN.md) consolidates the independently reviewed and adopted D1–D4 interfaces. P1 and P2 remain Not started with null acceptance; whole ledger prerequisites, the exact successor revision and implementation assignment remain pending. Actual successor wheel/profile and native-fit evidence belong to implementation/delivery. Backend handles CI and later implementation; Quality prepares corpus delivery and independent evidence; Review verifies results; the lead owns prerequisite/revision decisions and integration. No runtime, estimate, budget, data or activation gate changes follow.
+
+<details>
+<summary>Previous current-status panel</summary>
+
+- **Verified:** Ledger foundations and the worker planning reforecast are delivered. The paging correction passed seven targeted checks on each Python version and independent review.
+- **Next:** Backend monitors CI and designs worker authority. Quality specifies bounded consumers; Review checks source and evidence. The lead integrates reviewed work.
+- **Blocker:** [Fresh full CI](https://github.com/spei04/agent-rewind/actions/runs/40825337038) checks the correction. The previous elapsed refusal is identified, but its delay remains unexplained. Passing PR/main checks and matching artifacts are still required; downstream gates remain unmet.
+
+</details>
+
+### Paging correction and next assignments — 2026-10-29
+
+Original [run 40819867773](https://github.com/spei04/agent-rewind/actions/runs/40819867773) failed on Python 3.12: 7,715 passed, 31 skipped and one pagination failure before fail-fast stopped the remaining cases. Both Python 3.11 jobs and supporting checks passed. The bounded witness identifies the two-second elapsed guard before the candidate query; schema readiness succeeded. Its retained 3.58 seconds includes cleanup and does not establish the delay's cause. Earlier unwitnessed HTTP causes remain unresolved.
+
+[Correction `0cada5d1`](https://github.com/spei04/agent-rewind/commit/0cada5d13627b8029f8179c621938c7cf3ea8117) isolates only the pagination semantics test's listing clock. Cursor expiry, all assertions, runtime limits and separate deadline/native-work controls remain unchanged. Seven existing checks passed once on each supported Python version, followed by independent review. Test IDs, 8,327-case P2 and 8,575-case corpus baselines are unchanged. This is component evidence, not a production performance fix or complete delivery acceptance. [New original CI](https://github.com/spei04/agent-rewind/actions/runs/40825337038) must pass before PR/main and artifact acceptance.
+
+Backend owns CI and the read-only worker capability/conditional-write design. Quality owns bounded successor reader/query design. Review independently checks both; the lead owns integration and the offline operator interface. The published worker reforecast passed all 190 affected planning tests. No worker implementation assignment, paid run, corpus acquisition or production activation follows; existing budget and data gates remain unchanged.
+
+### Path to the next real-agent validation
+
+The historical walkthrough reconstructs saved fixtures. The next integrated real-agent validation follows the existing dependency graph:
+
+| Next delivery | Owner | Observable exit |
+| --- | --- | --- |
+| Current ledger P2 | Backend, Review, lead | Passing PR/main checks, native evidence and matching installed artifact; whole AR-010-A accepted |
+| Worker P1 F1–F5, then P2 | Backend; Quality and Review | All five accepted checkpoints, followed by actual fenced completion/expiry integration |
+| M1 integration | Backend, Platform, Quality | Projection repair and telemetry joined by AR-012-B; all 24 M1 behavior cases and G1 accepted |
+| Runtime branches | Platform, Backend, Research, Quality | Native gVisor isolation, checkpoint/restore, storage/key recovery, fencing and evaluator evidence under each existing task's prerequisites |
+| Real-agent smoke and G2 | Quality, Research, Platform | AR-019-A integration, the PAID0-bound AR-019-B failed run and branches, then AR-019-C evidence and G2 acceptance |
+
+Every worker checkpoint is required by the current contracts. P1's 12 [9–18] days measure engineering effort, not elapsed calendar time or an assumed parallel speedup. CI, review, failures and existing ENV0/PAID0 dependencies affect elapsed delivery. This intermediate validation does not satisfy enterprise study, workbench, partner pilot, capacity/security or rollout gates G3–G7. See the [worker plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) and [task graph](EXECUTION_BACKLOG.md); no reduced-scope bypass or new spending authority is introduced.
+
+
+### Worker failure DDL reforecast adopted — 2026-10-29
+
+2026-10-29 lead-adopted #97 DDL reforecast replaces P1 2 [2–3] with 12 [9–18] low-confidence BE days in five sequential F1–F5 implementation PRs. P2 remains 2 [2–3]; AR-010-B is 14 [11–21], low, and parent AR-010 is 20 days/10 PRs. Current totals: 171 PRs, 482 base / 814.6 upper / 602.5 alternative allowance / 183.5 effort-path days, BE 110.5 and M1 75.5. Existing 155 aggregates, 569 outer edges, statuses, null acceptance, contracts and historical evidence remain unchanged. No early entry, customer/worker activation or implementation assignment follows; whole AR-010-A/AR-005-C and complete entry/revision/validation-plan prerequisites remain. Backend owns later implementation/migration, Quality independent evidence, Review source/security and the lead integration. These are planning roles, not current code assignments. See [execution plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md).
+
+
 <details>
 <summary>Prior status snapshots and dated records</summary>
+
+**Prior current view — retained 2026-10-29:**
+
+- **Verified:** Ledger foundations are delivered. P2 test cleanup and failure diagnostics are independently reviewed, as is the corpus candidate source.
+- **Next:** Backend monitors fresh CI; Review verifies results and artifacts. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Passing PR and main CI and matching installed artifacts are still required. Earlier HTTP 503 causes remain unresolved, and downstream delivery gates remain unmet.
+
+
+**Prior delivery current view — retained 2026-10-29 UTC:**
+
+- **Verified:** Ledger foundations are delivered. P2 corrections and PCA1 source have independent review; final delivery remains pending.
+- **Next:** Backend monitors CI and handles failures; Review verifies source and results. Quality prepares corpus delivery, and the lead integrates reviewed changes.
+- **Blocker:** Complete passing PR and main CI and matching artifacts are still required. The earlier HTTP 503 remains unexplained; downstream gates remain unmet.
+
+**Prior clock-isolation current view — retained 2026-10-29 UTC:**
+
+- **Verified:** Ledger foundations are delivered. PCA1 source is independently reviewed and published; its collection and baseline are complete.
+- **Next:** Backend prepares the test-clock correction and fresh CI; Review checks source and results. Quality maintains documentation and corpus delivery; the lead integrates.
+- **Blocker:** P2's Python 3.11 late partition failed a semantic test's elapsed-time limit. The earlier HTTP 503 remains unexplained. Full CI and installed-artifact acceptance are pending.
+
+**Prior corpus delivery current view — retained 2026-10-29 UTC:**
+
+- **Verified:** Ledger foundations are delivered. P2 implementation and diagnostics passed component review; delivery remains unaccepted. Corpus work is preparation only.
+- **Next:** Backend monitors full CI; Review checks the results. Quality prepares corpus delivery, and the lead integrates the reviewed changes.
+- **Blocker:** The HTTP 503 seen in CI remains unexplained. P2 needs complete PR/main checks and candidate acceptance. Corpus delivery and downstream work remain gated.
+
+**Prior delivery current view — retained 2026-10-29 UTC:**
+
+- **Verified:** Ledger foundations are delivered. P2 implementation and diagnostics passed component review; delivery remains unaccepted. Corpus work is preparation only.
+- **Next:** The lead publishes the diagnostics and starts full CI. Quality checks the test inventory; Review verifies the results.
+- **Blocker:** The HTTP 503 seen in CI remains unexplained. P2 needs complete PR/main checks and candidate acceptance. Corpus delivery and downstream work remain gated.
+
+**Earlier CI diagnosis status — retained 2026-10-29 UTC:**
+
+- **P2:** [PR #119](https://github.com/spei04/agent-rewind/pull/119), [CI 40794765309](https://github.com/spei04/agent-rewind/actions/runs/40794765309) attempt 1: both 3.11 partitions/support checks passed; 3.12's first positive result GET returned 503 after 6,480 passes/30 skips. One exact diagnostic passed; cause unresolved.
+- **Next owners:** Backend adds bounded failure-only test diagnostics; Review evaluates; Quality reconciles progress; lead integrates before fresh full CI.
+- **PCA1:** [#120](https://github.com/spei04/agent-rewind/issues/120) remains In progress: corrected source independently reviewed, committed `bb5cfc0d`, composed `47b5b324`. Reviewed collection preparation is stopped. P2/PCA1 delivery unaccepted; PCA2 Not started. P1/F3 delivered; external gates, $200 cap and $36.567974 unreconciled reservations unchanged.
+
+**Prior CI/PCA1 current view — retained 2026-10-29 UTC:**
+
+- **P2 delivery:** P1/F3 is delivered. P2 source `822aa235` is published in [PR #119](https://github.com/spei04/agent-rewind/pull/119); [CI 40794765309](https://github.com/spei04/agent-rewind/actions/runs/40794765309) and delivery acceptance are pending.
+- **PCA1:** [#120](https://github.com/spei04/agent-rewind/issues/120) is In progress. Quality implements candidate-only v2; independent review precedes delivery. Corpus v1 stays unchanged; PCA2 remains Not started.
+- **Unmet gates:** PCA1 acceptance and P2 accepted merge/review remain null. Aggregate acceptance and acquisition, rights, capture, held-out, funding, study and production gates remain unmet. The $200 cap and unreconciled $36.567974 reservations are unchanged.
+
+**PCA1 entry and P2 delivery checkpoint — 2026-10-29 UTC:** Independent entry review `6491c371`, clarification `a4ce5405` and root grant `6ad5320c` authorize the scoped PCA1 #120 candidate-only v2 implementation. Quality owns implementation, independent review precedes delivery, and the lead owns publication. No recorded-public admission is added: a future producer-backed shape needs a distinct accepted contract/version. PCA1 source/accepted-merge/review evidence remain null, PCA2 remains Not started, and aggregate/external gates and estimates are unchanged. P2 source `822aa235` is published in PR #119 with run `40794765309` pending; the earlier failed attempts remain retained and no P2 delivery acceptance is claimed.
+
+**Earlier P2 integration current view — retained 2026-10-29 UTC:**
+
+- **Verified components:** P1/F3 is delivered. P2 has 115 local passes (24 pure, 91 SQLite), 91 supported Python 3.11 passes, PostgreSQL owner/key paths and two setup/restore passes.
+- **Next:** Backend finishes packaging; qualification freezes inventory; the lead owns hosted CI and publication. Ten native adversarial cases have independent component acceptance.
+- **Open gate:** P2 remains In progress with null accepted merge; full CI, review and delivery remain. The $200 cap, unreconciled $36.567974 reservations, corpus preparation-only scope and production/provider gates are unchanged. Research advantage and live readiness remain unproven.
+
+**Public-corpus planning integration — 2026-10-28:** The preparation-only decision and reviewed reconciliation are being integrated with current delivery records. Planning/checker review precedes PCA1; PCA2 also requires accepted PCA1 source and schema. All new aggregates and PCA1/PCA2 remain Not started. The 3–5 day preparation allocation is included in the 8–15 day corpus increment. P1 remains Verified and product P2 remains In progress with null acceptance. Acquisition, capture, held-out access, paid calls, study and new resources remain unauthorized. The $200 cap and unreconciled historical reservations are unchanged. [Scope and dependency record](delivery/PUBLIC_CORPUS_PREPARATION_PLAN.md).
 
 **Current P1 status:** AR-010-A/P1 #108: Verified; F3: Merged; checkpoint accepted at protected merge b214f21b from reviewed source 1c6e30e0. Aggregate AR-010-A/#107 and parent AR-010/#10 remain In progress; product P2/#109 is In progress after independently accepted entry v7 and implementation assignment; its accepted merge and delivery review evidence remain null. The approved scope, task graph, effort estimates and funding/data/production gates are unchanged. [Delivery record](delivery/LEDGER_EXECUTION_PLAN.md#p1-delivery-record--2026-10-28).
 
@@ -1305,5 +1626,11 @@ PR #115 was normally merged at d46e9122; PR #116 incorporated that exact main th
 Integrated source ec19eabe adds first finite job-account creation and refusal of a second disjoint account. SQLite ran once: its testcase passed, while the original controller rejected an overbroad financial-scope projection and returned 1. A reviewed private correction separately validated the retained original record; no database retry or rewrite of the failed controller result occurred. The PostgreSQL case passed on its first actual attempt (17.11s); final component acceptance: accepted by independent review 65cb7d72 and lead receipt 7abd0e8b for this bounded component only. Final source controls pass 33 per interpreter; corrected private controllers pass 66 per dialect/interpreter. [Detailed evidence](delivery/LEDGER_EXECUTION_PLAN.md#dependency-integration-and-account-identity-checkpoint--2026-10-26) keeps original and corrected accounting distinct.
 
 Only these first/second-account obligations receive component credit. Overlap/renewal and other matrix obligations remain open; the reviewed two-case F1 PostgreSQL early-interruption scope has not started. Full F3/P1 matching-source delivery remains unaccepted and product P2 remains Not started. Task cards, counts, estimates, budget and external gates are unchanged.
+
+## Public-corpus preparation accounting — 2026-10-27
+
+The new PUBCAP parent covers three aggregate tasks and four planned PRs. AR-002 now has three aggregate tasks and four PRs; its earlier two Verified children remain accepted. Adding AR-002-C makes the parent In progress for its expanded scope; it does not revoke the original acceptance. PCA1/PCA2 are explicit preparation nodes whose successful delivery does not start or complete native PUBCAP-A. Each has its own prerequisites and accepted delivery evidence. Their included effort is subtracted from the aggregate's path weight, and remains counted once in total effort and role/milestone demand.
+
+Current totals are **155 aggregates, 2 nested preparation nodes, 167 planned PRs, 53 parents, 30 gates, 20 contracts and 569 dependency edges**. There are 30 Verified, 1 In progress and 124 Not started aggregates; PCA1/PCA2 are both Not started. Existing delivery-package statuses and F3/P1/P2 acceptance remain unchanged. The total increment is **+8 base / +15 upper**; the 3–5 day preparation allocation is included. The 173.5-day effort-only longest path still traverses enterprise G4 and G5. Its reduction from 176.5 follows the reviewed change in research dependencies, not completed work or deleted enterprise effort. No calendar or staffing conversion follows.
 
 </details>

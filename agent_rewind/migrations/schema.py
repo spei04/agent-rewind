@@ -577,9 +577,6 @@ def catalog(connection: Connection) -> dict[str, Any]:
                     key: str(value) if key.endswith("_where") else value
                     for key, value in reflected_index["dialect_options"].items()
                 }
-        uniques = sorted(
-            [c["column_names"] for c in inspector.get_unique_constraints(table, schema=schema)]
-        )
         if name == "sqlite":
             # SQLAlchemy's SQLite SQL parser misses inline UNIQUE declarations in the
             # frozen fixture. SQLite's own index catalog is the structural authority.
@@ -624,6 +621,10 @@ def catalog(connection: Connection) -> dict[str, Any]:
             options = connection.exec_driver_sql("PRAGMA table_list").all()
             if any(r[1] == table and (r[4] or r[5]) for r in options):
                 raise MigrationRefused("schema_incompatible")
+        else:
+            uniques = sorted(
+                [c["column_names"] for c in inspector.get_unique_constraints(table, schema=schema)]
+            )
         result[table] = {
             "columns": [
                 [

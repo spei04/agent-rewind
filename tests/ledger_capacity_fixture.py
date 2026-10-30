@@ -12,8 +12,14 @@ from collections import defaultdict
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
 
-from ledger_fixture import OBSERVED, canonical_bytes, digest, identifier
-from ledger_reader_fixture import append_provision, seed_ar7
+from ledger_fixture import OBSERVED, canonical_bytes, cursor_for, digest, identifier
+from ledger_reader_fixture import (
+    _insert_provision,
+    _provision_expected,
+    _provision_manifest,
+    append_provision,
+    seed_ar7,
+)
 from sqlalchemy import text
 
 from agent_rewind.migrations.inputs import source_digest
@@ -125,23 +131,7 @@ def extend_opening(case):
     return original
 
 
-def capacity_history(case, *, accounts, object_directory=None, database_role=None):
-    """256 manifests; initial 64 rows and 255 nonempty adjacent provision batches."""
-    assert accounts in {319, 4096}
-    if case.engine.dialect.name == "postgresql":
-        assert object_directory is not None and type(database_role) is str
-        assert database_role and len(database_role.encode()) <= 63
-    else:
-        assert case.engine.dialect.name == "sqlite" and database_role is None
-    ciphertext = object_hashes(case, directory=object_directory)
-    legacy_jobs = extend_opening(case)
-    seed_ar7(case)
-    assert len(case.manifest["accounts"]) == 64
-    assert len(case.opening["jobs"]) == 48
-    assert len(case.opening["project_totals"]) == 15
-    assert case.opening["organization_opening_microusd"] == 245000
-    initial = deepcopy(case.manifest)
-    organization_template = deepcopy(initial["accounts"][0])
+def _capacity_batches(organization_template, accounts):
     remaining = accounts - 64
     offset = 0
     origin = datetime(2030, 1, 1, tzinfo=UTC)
@@ -161,9 +151,67 @@ def capacity_history(case, *, accounts, object_directory=None, database_role=Non
                 }
             )
             offset += 1
-        append_provision(case, rows)
+        yield rows
         remaining -= count
     assert remaining == 0
+
+
+def _append_sqlite_capacity(case, batches):
+    """Seed synthetic history atomically; no service-commit proof is replaced."""
+    assert case.engine.dialect.name == "sqlite"
+    assert case.manifest is not None and case.opening is not None
+    manifest, cursor, expected = case.manifest, case.cursor, case.expected
+    with case.engine.begin() as connection:
+        # SQLite otherwise defers BEGIN until the first write. Both source reads
+        # must share the same native transaction as all fixture inserts.
+        connection.exec_driver_sql("BEGIN")
+        assert (
+            connection.exec_driver_sql(
+                "SELECT 1 FROM sqlite_master WHERE type IN ('trigger','view') LIMIT 1"
+            ).first()
+            is None
+        )
+        source = source_digest(connection)
+        count = 0
+        for rows in batches:
+            count += 1
+            assert count <= 255 and 1 <= len(rows) <= 16
+            sequence = expected["manifest_count"]
+            raw = _provision_manifest(manifest, sequence, rows)
+            raw["source_digest"] = source
+            cursor = cursor_for(raw, sequence=sequence, role=None)
+            _insert_provision(connection, raw, cursor)
+            manifest = raw
+            expected = _provision_expected(expected, raw, sequence)
+        assert count > 0
+        assert source_digest(connection) == source
+    # A failed insert, source check or commit must leave Python state unchanged.
+    case.manifest, case.cursor, case.expected = manifest, cursor, expected
+
+
+def capacity_history(case, *, accounts, object_directory=None, database_role=None):
+    """256 manifests; initial 64 rows and 255 nonempty adjacent provision batches."""
+    assert accounts in {319, 4096}
+    if case.engine.dialect.name == "postgresql":
+        assert object_directory is not None and type(database_role) is str
+        assert database_role and len(database_role.encode()) <= 63
+    else:
+        assert case.engine.dialect.name == "sqlite" and database_role is None
+    ciphertext = object_hashes(case, directory=object_directory)
+    legacy_jobs = extend_opening(case)
+    seed_ar7(case)
+    assert len(case.manifest["accounts"]) == 64
+    assert len(case.opening["jobs"]) == 48
+    assert len(case.opening["project_totals"]) == 15
+    assert case.opening["organization_opening_microusd"] == 245000
+    initial = deepcopy(case.manifest)
+    organization_template = deepcopy(initial["accounts"][0])
+    batches = _capacity_batches(organization_template, accounts)
+    if case.engine.dialect.name == "sqlite":
+        _append_sqlite_capacity(case, batches)
+    else:
+        for rows in batches:
+            append_provision(case, rows)
     return {
         "accounts": accounts,
         "manifests": 256,

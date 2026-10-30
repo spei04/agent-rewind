@@ -1,0 +1,365 @@
+{
+  "$defs": {
+    "EvaluatorIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "evaluator_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+          "title": "Evaluator Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "artifact": {
+          "$ref": "#/$defs/PrivateObject"
+        },
+        "command_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Command Sha256",
+          "type": "string"
+        },
+        "image_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Image Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evaluator_id",
+        "revision",
+        "artifact",
+        "command_sha256",
+        "image_digest"
+      ],
+      "title": "EvaluatorIdentity",
+      "type": "object"
+    },
+    "Permission": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "approved",
+          "title": "Status",
+          "type": "string"
+        },
+        "rights_owner_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+          "title": "Rights Owner Id",
+          "type": "string"
+        },
+        "approved_by": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+          "title": "Approved By",
+          "type": "string"
+        },
+        "approved_at": {
+          "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+          "title": "Approved At",
+          "type": "string"
+        },
+        "valid_from": {
+          "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+          "title": "Valid From",
+          "type": "string"
+        },
+        "valid_until": {
+          "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+          "title": "Valid Until",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/PrivateObject"
+        },
+        "allowed_processors": {
+          "items": {
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+            "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Allowed Processors",
+          "type": "array"
+        },
+        "allowed_purposes": {
+          "items": {
+            "enum": [
+              "debugging",
+              "intervention-screening",
+              "independent-confirmation"
+            ],
+            "type": "string"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "title": "Allowed Purposes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "rights_owner_id",
+        "approved_by",
+        "approved_at",
+        "valid_from",
+        "valid_until",
+        "evidence",
+        "allowed_processors",
+        "allowed_purposes"
+      ],
+      "title": "Permission",
+      "type": "object"
+    },
+    "PrivateObject": {
+      "additionalProperties": false,
+      "description": "A relative key within the separately approved storage profile; never a URL.",
+      "properties": {
+        "path": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "title": "PrivateObject",
+      "type": "object"
+    },
+    "PublicCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "workflow_id": {
+          "enum": [
+            "manual-action-recovery",
+            "automatic-intervention-evaluation"
+          ],
+          "title": "Workflow Id",
+          "type": "string"
+        },
+        "dataset": {
+          "$ref": "#/$defs/SourceIdentity"
+        },
+        "row": {
+          "$ref": "#/$defs/PrivateObject"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceIdentity"
+        },
+        "evaluator": {
+          "$ref": "#/$defs/EvaluatorIdentity"
+        },
+        "source_policy": {
+          "$ref": "#/$defs/PrivateObject"
+        },
+        "permission": {
+          "$ref": "#/$defs/Permission"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "workflow_id",
+        "dataset",
+        "row",
+        "source",
+        "evaluator",
+        "source_policy",
+        "permission"
+      ],
+      "title": "PublicCandidate",
+      "type": "object"
+    },
+    "PublicationRules": {
+      "additionalProperties": false,
+      "properties": {
+        "raw_content": {
+          "const": "forbidden",
+          "title": "Raw Content",
+          "type": "string"
+        },
+        "aggregates": {
+          "const": "separate-review-required",
+          "title": "Aggregates",
+          "type": "string"
+        },
+        "redaction_policy": {
+          "$ref": "#/$defs/PrivateObject"
+        }
+      },
+      "required": [
+        "raw_content",
+        "aggregates",
+        "redaction_policy"
+      ],
+      "title": "PublicationRules",
+      "type": "object"
+    },
+    "Retention": {
+      "additionalProperties": false,
+      "properties": {
+        "owner_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+          "title": "Owner Id",
+          "type": "string"
+        },
+        "review_at": {
+          "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+          "title": "Review At",
+          "type": "string"
+        },
+        "delete_after": {
+          "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+          "title": "Delete After",
+          "type": "string"
+        }
+      },
+      "required": [
+        "owner_id",
+        "review_at",
+        "delete_after"
+      ],
+      "title": "Retention",
+      "type": "object"
+    },
+    "SourceIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "artifact": {
+          "$ref": "#/$defs/PrivateObject"
+        }
+      },
+      "required": [
+        "source_id",
+        "revision",
+        "artifact"
+      ],
+      "title": "SourceIdentity",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 2,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "record_kind": {
+      "const": "pre-recording-candidates",
+      "title": "Record Kind",
+      "type": "string"
+    },
+    "phase": {
+      "const": "offline-preparation",
+      "title": "Phase",
+      "type": "string"
+    },
+    "corpus_id": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+      "title": "Corpus Id",
+      "type": "string"
+    },
+    "created_at": {
+      "description": "RFC3339 date-time with seconds, a Z/z or numeric offset, and optional 1-6 fractional digits. Calendar years 0001-9999; no leap seconds.",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+      "title": "Created At",
+      "type": "string"
+    },
+    "evidence_class": {
+      "enum": [
+        "synthetic",
+        "public-derived-declaration"
+      ],
+      "title": "Evidence Class",
+      "type": "string"
+    },
+    "storage_profile_id": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+      "title": "Storage Profile Id",
+      "type": "string"
+    },
+    "storage_owner_id": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,79}$",
+      "title": "Storage Owner Id",
+      "type": "string"
+    },
+    "purpose": {
+      "enum": [
+        "debugging",
+        "intervention-screening",
+        "independent-confirmation"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    },
+    "retention": {
+      "$ref": "#/$defs/Retention"
+    },
+    "publication": {
+      "$ref": "#/$defs/PublicationRules"
+    },
+    "candidates": {
+      "items": {
+        "$ref": "#/$defs/PublicCandidate"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "title": "Candidates",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_kind",
+    "phase",
+    "corpus_id",
+    "created_at",
+    "evidence_class",
+    "storage_profile_id",
+    "storage_owner_id",
+    "purpose",
+    "retention",
+    "publication",
+    "candidates"
+  ],
+  "title": "PublicCandidateManifest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/spei04/agent-rewind/blob/main/contracts/public-corpus.v2.schema.json",
+  "description": "Closed offline public candidate declarations; no native recording or rights authority."
+}

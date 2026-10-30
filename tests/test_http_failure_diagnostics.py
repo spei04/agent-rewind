@@ -2,13 +2,20 @@
 
 import json
 import sqlite3
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from types import FunctionType, SimpleNamespace
 
 import http_failure_diagnostics
 import pytest
 from http_app_cleanup import http_application_cache_cleanup as http_application_cache_cleanup
-from http_failure_diagnostics import MAX_BYTES, MAX_EXCEPTIONS, first_get_failure, route_failure
+from http_failure_diagnostics import (
+    MAX_BYTES,
+    MAX_EXCEPTIONS,
+    compatibility_failure,
+    first_get_failure,
+    route_failure,
+)
 from sqlalchemy.exc import OperationalError
 from test_admission_transaction import engine
 from test_operation_http import admission_engine, http_operation, publication
@@ -433,3 +440,295 @@ def test_route_witness_distinguishes_cleanup_generated_listing_refusal(owned_eng
     assert "private-cleanup-canary" not in encoded and owned_engine.pool.checkedout() == 0
     with listing_session.listing_connection(owned_engine, listing_session.SQLWork()) as connection:
         assert connection.exec_driver_sql("SELECT 1").scalar_one() == 1
+
+
+@pytest.mark.parametrize("kind", ["timeout", "sqlalchemy"])
+def test_standalone_compatibility_witness_preserves_guard_errors(owned_engine, monkeypatch, kind):
+    from ledger_eligibility_fixture import predecessor_compatibility
+
+    canary = "private-standalone-sql-and-parameters"
+    original_error = (
+        TimeoutError(canary)
+        if kind == "timeout"
+        else OperationalError(canary, {"canary": canary}, RuntimeError(canary))
+    )
+    original_constructor = guard.CompatibilityResult
+    original_evidence = http_failure_diagnostics.exception_evidence
+    calls, returned, serialized = [], [], []
+
+    def evidence_spy(error, **kwargs):
+        serialized.append(error)
+        return original_evidence(error, **kwargs)
+
+    def failing_step(*args, **kwargs):
+        calls.append(1)
+        raise original_error
+
+    def original_probe():
+        return guard.runtime_schema_compatibility(owned_engine)
+
+    def counted_probe():
+        result = original_probe()
+        returned.append(result)
+        return result
+
+    service = SimpleNamespace(schema_compatibility=counted_probe)
+    if kind == "sqlalchemy":
+        from agent_rewind.sqlite_ownership import owned_connect
+
+        # Reach the inner guard through a real file, without bypassing its missing-file gate.
+        with owned_connect(owned_engine):
+            pass
+    monkeypatch.setattr(http_failure_diagnostics, "exception_evidence", evidence_spy)
+    target = "load_release_profile" if kind == "timeout" else "schema_table_names"
+    monkeypatch.setattr(guard, target, failing_step)
+    with compatibility_failure(service) as report:
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            result = pool.submit(service.schema_compatibility).result(timeout=5)
+            before = report()
+            # The same worker's unwrapped original call has no owned probe token.
+            unowned = pool.submit(original_probe).result(timeout=5)
+        assert result is returned[0] and type(result) is original_constructor
+        assert unowned == result and report() == before
+        encoded = report()
+    assert service.schema_compatibility is counted_probe
+    assert guard.CompatibilityResult is original_constructor
+    evidence = json.loads(encoded)
+    assert calls == [1, 1] and returned == [result]
+    assert len(serialized) == 1 and serialized[0] is original_error
+    assert evidence["probes"] == [
+        {"stage": "returned", "result": {"status": "unavailable", "code": "schema_unavailable"}}
+    ]
+    assert len(evidence["guard"]) == 1
+    observed = evidence["guard"][0]
+    assert observed["stage"] == (
+        "runtime_schema_compatibility" if kind == "timeout" else "_check_schema_compatibility"
+    )
+    assert observed["error"]["type"] == (
+        "TimeoutError" if kind == "timeout" else "OperationalError"
+    )
+    assert evidence["security"] == evidence["classified"] == []
+    assert canary not in encoded and len(encoded.encode()) <= MAX_BYTES
+
+    failed_observations = []
+
+    def observer_failed(error, **kwargs):
+        failed_observations.append(error)
+        raise ValueError("private-observer-canary")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(http_failure_diagnostics, "exception_evidence", observer_failed)
+        with compatibility_failure(service) as report:
+            preserved = service.schema_compatibility()
+        assert preserved is returned[-1] and type(preserved) is original_constructor
+        assert (preserved.status, preserved.code) == ("unavailable", "schema_unavailable")
+        assert json.loads(report())["guard"] == [{"diagnostic_unavailable": True}]
+        assert "private-observer-canary" not in report()
+    assert failed_observations == [original_error] and calls == [1, 1, 1]
+    assert service.schema_compatibility is counted_probe
+    assert guard.CompatibilityResult is original_constructor
+
+    success = original_constructor("incompatible", "migration_only")
+    successful = SimpleNamespace(schema_compatibility=lambda: success)
+    saved_success = successful.schema_compatibility
+    records = []
+    assert predecessor_compatibility(successful, lambda *row: records.append(row)) is success
+    assert successful.schema_compatibility is saved_success and len(records) == 1
+
+    interruption = KeyboardInterrupt(canary)
+
+    def interrupted():
+        raise interruption
+
+    service.schema_compatibility = interrupted
+    with pytest.raises(KeyboardInterrupt) as caught, compatibility_failure(service) as report:
+        service.schema_compatibility()
+    assert caught.value is interruption and service.schema_compatibility is interrupted
+    assert guard.CompatibilityResult is original_constructor
+    assert json.loads(report())["probes"][0]["stage"] == "raised"
+    assert canary not in report()
+
+    # Rendering and note-attachment failures cannot replace the strict assertion.
+    failed_result = original_constructor("unavailable", "schema_unavailable")
+    service.schema_compatibility = lambda: failed_result
+    saved_probe = service.schema_compatibility
+    for mode in ("render", "attach"):
+        assertions = []
+
+        def broken_report(_report, mode=mode, assertions=assertions):
+            assertions.append(sys.exception())
+            if mode == "render":
+                raise ValueError("private-render-canary")
+            return object()
+
+        with monkeypatch.context() as patch:
+            patch.setattr(http_failure_diagnostics, "_route_message", broken_report)
+            with pytest.raises(AssertionError) as caught:
+                predecessor_compatibility(service, lambda *_: None)
+        assert assertions == [caught.value] and caught.value.args == (failed_result,)
+        assert getattr(caught.value, "__notes__", []) == []
+        assert service.schema_compatibility is saved_probe
+        assert guard.CompatibilityResult is original_constructor
+
+
+@pytest.mark.parametrize("stage", ["inner", "outer", "raised"])
+def test_cancellation_compatibility_witness_preserves_guard_mapping(
+    owned_engine, monkeypatch, stage
+):
+    from test_admission_schema import OPERATION, PRINCIPAL, PROJECT
+    from test_operation_cancel_service_postgres import fault
+
+    from agent_rewind.operation_service import OperationService
+    from agent_rewind.request_authority import RequestAuthority
+    from agent_rewind.request_identity import VerifiedPrincipal
+    from agent_rewind.scoped_repositories import ProjectContext
+    from agent_rewind.sqlite_ownership import owned_begin, owned_connect
+
+    canary = "private-cancellation-error-sql-and-parameters"
+    original_error = (
+        TimeoutError(canary)
+        if stage == "outer"
+        else OperationalError(canary, {"private": canary}, RuntimeError(canary))
+    )
+    # A real file/owned connection reaches the inner guard without bypassing its gate.
+    with owned_begin(owned_engine) as connection:
+        connection.exec_driver_sql("CREATE TABLE cancellation_witness (value INTEGER)")
+        connection.exec_driver_sql("INSERT INTO cancellation_witness VALUES (1)")
+
+    def state():
+        with owned_connect(owned_engine) as connection:
+            return connection.exec_driver_sql(
+                "SELECT value FROM cancellation_witness ORDER BY value"
+            ).all()
+
+    before = state()
+    service = OperationService(owned_engine, RequestAuthority(owned_engine))
+    principal = VerifiedPrincipal(PRINCIPAL)
+    context = ProjectContext("8" * 32, PROJECT, PRINCIPAL)
+    original_probe = service.schema_compatibility
+    original_constructor = guard.CompatibilityResult
+    original_evidence = http_failure_diagnostics.exception_evidence
+    original_render = http_failure_diagnostics._route_message
+    calls, failed_steps, returned, constructed, serialized, targets, faults = (
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    )
+
+    def failing_step(*args, **kwargs):
+        failed_steps.append(1)
+        raise original_error
+
+    def counted_probe():
+        calls.append(1)
+        if stage == "raised":
+            raise original_error
+        result = original_probe()
+        returned.append(result)
+        return result
+
+    def constructor(*args, **kwargs):
+        result = original_constructor(*args, **kwargs)
+        constructed.append(result)
+        return result
+
+    def evidence(error, **kwargs):
+        serialized.append(error)
+        return original_evidence(error, **kwargs)
+
+    def forbidden_target(*args, **kwargs):
+        targets.append(1)
+        pytest.fail("guard entered cancellation target")
+
+    def cancel():
+        try:
+            return service.cancel_operation(principal, context, OPERATION)
+        except errors.Fault as error:
+            faults.append(error)
+            raise
+
+    monkeypatch.setattr(service, "schema_compatibility", counted_probe)
+    monkeypatch.setattr(service, "_cancel", forbidden_target)
+    monkeypatch.setattr(guard, "CompatibilityResult", constructor)
+    monkeypatch.setattr(http_failure_diagnostics, "exception_evidence", evidence)
+    if stage != "raised":
+        target = "load_release_profile" if stage == "outer" else "schema_table_names"
+        monkeypatch.setattr(guard, target, failing_step)
+
+    if stage == "inner":
+        with (
+            pytest.raises(ValueError, match="^unsupported diagnostic phase$"),
+            compatibility_failure(service, phase=canary),
+        ):
+            pytest.fail("unsupported phase entered observer")
+        assert calls == [] and service.schema_compatibility is counted_probe
+        assert guard.CompatibilityResult is constructor
+
+    for count, mode in enumerate(("normal", "render", "attach"), start=1):
+        observed_assertions = []
+
+        def render(report, mode=mode, observed_assertions=observed_assertions):
+            observed_assertions.append((sys.exception(), sys.exception().args))
+            if mode == "render":
+                raise ValueError("private-render-canary")
+            if mode == "attach":
+                return object()
+            return original_render(report)
+
+        with monkeypatch.context() as patch:
+            patch.setattr(http_failure_diagnostics, "_route_message", render)
+            with (
+                pytest.raises(AssertionError) as caught,
+                compatibility_failure(
+                    service, phase="cancel_guard_expected_schema_incompatible"
+                ) as report,
+            ):
+                fault(cancel, "schema_incompatible")
+        assert len(observed_assertions) == 1
+        assert observed_assertions[0][0] is caught.value
+        assert observed_assertions[0][1] == caught.value.args
+        assert caught.value.__context__ is faults[-1]
+        assert str(faults[-1]) == "dependency_unavailable"
+        assert faults[-1].__suppress_context__ is True and faults[-1].__cause__ is None
+        assert len(calls) == count and serialized == [original_error] * count
+        assert len(failed_steps) == (0 if stage == "raised" else count)
+        assert targets == [] and state() == before
+        assert service.schema_compatibility is counted_probe
+        assert guard.CompatibilityResult is constructor
+        if stage == "raised":
+            assert returned == constructed == []
+            assert faults[-1].__context__ is original_error
+        else:
+            assert len(returned) == len(constructed) == count
+            assert returned[-1] is constructed[-1]
+            assert type(returned[-1]) is original_constructor
+
+        encoded = report()
+        observed = json.loads(encoded)
+        assert observed["phase"] == "cancel_guard_expected_schema_incompatible"
+        assert observed["security"] == observed["classified"] == []
+        if stage == "raised":
+            assert observed["probes"][0]["stage"] == "raised"
+            assert observed["guard"] == []
+        else:
+            assert observed["probes"] == [
+                {
+                    "stage": "returned",
+                    "result": {"status": "unavailable", "code": "schema_unavailable"},
+                }
+            ]
+            assert len(observed["guard"]) == 1
+            assert observed["guard"][0]["stage"] == (
+                "_check_schema_compatibility"
+                if stage == "inner"
+                else "runtime_schema_compatibility"
+            )
+        assert canary not in encoded and len(encoded.encode()) <= MAX_BYTES
+        if mode == "normal":
+            assert caught.value.__notes__ == [encoded]
+        else:
+            assert getattr(caught.value, "__notes__", []) == []
