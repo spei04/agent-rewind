@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger delivery is accepted; F1’s published source and evidence are retained. The SQLite capacity fixture correction has independent review, 12 focused passes per Python version, and matching 8,638-test inventories.
-- **Blocker:** Original PR #123 exceeded its 3,600-second limit by 14.797441 seconds. Its receipts remain unaccepted; the earlier setup failure is separately unresolved.
-- **Next:** Fresh PR/main CI and installed-artifact verification are required before corpus delivery and F1 integration. Production and acquisition remain gated.
+- **Verified:** Ledger delivery is accepted; F1 source and evidence are retained. Reviewed cancellation diagnostics passed 18 focused checks and the original PostgreSQL regression per Python version; both inventories contain 8,641 tests.
+- **Blocker:** Original PR #123 CI stopped after a cancellation guard returned `dependency_unavailable` instead of `schema_incompatible`. Its cause remains unresolved; 2,293 tests did not run, so no complete-suite timing margin is established.
+- **Next:** Fresh PR/main CI and installed-artifact acceptance are required before corpus delivery and F1 integration. Production and acquisition remain gated.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Retained history](#143-dated-progress-ledger)
 

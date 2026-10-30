@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger delivery is accepted; F1’s published source and evidence are retained. The SQLite capacity fixture correction has independent review, 12 focused passes per Python version, and matching 8,638-test inventories.
-- **Blocker:** Original PR #123 exceeded its 3,600-second limit by 14.797441 seconds. Its receipts remain unaccepted; the earlier setup failure is separately unresolved.
-- **Next:** Fresh PR/main CI and installed-artifact verification are required before corpus delivery and F1 integration. Production and acquisition remain gated.
+- **Verified:** Ledger delivery is accepted; F1 source and evidence are retained. Reviewed cancellation diagnostics passed 18 focused checks and the original PostgreSQL regression per Python version; both inventories contain 8,641 tests.
+- **Blocker:** Original PR #123 CI stopped after a cancellation guard returned `dependency_unavailable` instead of `schema_incompatible`. Its cause remains unresolved; 2,293 tests did not run, so no complete-suite timing margin is established.
+- **Next:** Fresh PR/main CI and installed-artifact acceptance are required before corpus delivery and F1 integration. Production and acquisition remain gated.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Assignment history](#assignment-history)
 
@@ -21,6 +21,13 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Cancellation guard follow-up — 2026-10-30**
+
+- Backend: added bounded failure diagnostics while preserving the original guard, assertion, deadline and state checks; 18 focused cases and the original PostgreSQL case passed per Python version.
+- Quality: retained and verified the failed run’s complete and partial receipts; reconciled matching 8,641-test inventories, retaining all prior 8,638 IDs and skip expectations.
+- Review: accepted source, focused and native evidence; the hosted cause remains unresolved.
+- Lead: owns fresh PR/main and installed-artifact acceptance. Local passes do not establish hosted recovery or full-suite timing margin.
 
 **CI runtime follow-up**
 
