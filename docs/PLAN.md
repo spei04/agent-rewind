@@ -2,11 +2,7 @@
 
 ## Current status
 
-- **Verified:** PCA1 is delivered at `48ddc894`. API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) merged at `84d63879`; main/candidate acceptance is pending.
-- **Active:** Internal dispatch component `ab9736fe` is under native validation. F1 composition `9e0f24d0` passed 137 focused tests. PCA2 `51ae3a75` remains published with full delivery pending.
-- **Limits:** Live admitted execution remains incomplete. Payment is approved within **$200 total including prior charges**; $36.567974 stays held and additional exposure is unknown. No verified paid allowance or production activation follows.
-
-[Dispatch scope](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
+See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status).
 
 ## Contents
 
