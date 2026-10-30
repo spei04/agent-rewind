@@ -175,6 +175,41 @@ class ChatPolicy:
             type(usage["total_tokens"]) is not int or usage["total_tokens"] != sum(counts.values())
         ):
             raise ModelCallFailure("invalid_usage", reserve)
+        # These documented counters are overlapping views, not extra billable tokens:
+        # https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create
+        for detail_name, aggregate, counters in (
+            (
+                "prompt_tokens_details",
+                "prompt_tokens",
+                (
+                    "audio_tokens",
+                    "cache_write_tokens",
+                    "cached_tokens",
+                    "image_tokens",
+                    "text_tokens",
+                ),
+            ),
+            (
+                "completion_tokens_details",
+                "completion_tokens",
+                (
+                    "accepted_prediction_tokens",
+                    "audio_tokens",
+                    "reasoning_tokens",
+                    "rejected_prediction_tokens",
+                    "text_tokens",
+                ),
+            ),
+        ):
+            if detail_name not in usage:
+                continue
+            details = usage[detail_name]
+            if type(details) is not dict or any(
+                name in details
+                and (type(details[name]) is not int or not 0 <= details[name] <= counts[aggregate])
+                for name in counters
+            ):
+                raise ModelCallFailure("invalid_usage", reserve)
         try:
             cost = (
                 counts["prompt_tokens"] * input_price + counts["completion_tokens"] * output_price
