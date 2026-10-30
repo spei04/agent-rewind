@@ -352,45 +352,40 @@ def complete_postgres_ar6(pg, *, legacy: bool) -> ReaderFixture:
     return case
 
 
-def append_provision(case: ReaderFixture, accounts: list[dict[str, Any]]) -> None:
-    """Seed a later immutable receipt, without pretending a provisioner exists."""
-    assert case.manifest is not None and case.opening is not None
-    raw = deepcopy(case.manifest)
-    sequence = case.expected["manifest_count"]
+def _provision_manifest(manifest, sequence, accounts):
+    raw = deepcopy(manifest)
     raw.update(
         manifest_id=identifier(1_000_000 + sequence),
         operation="provision",
-        parent_manifest_digest=digest(case.manifest),
+        parent_manifest_digest=digest(manifest),
         accounts=sorted(accounts, key=lambda row: row["id"]),
         opening_accounts=None,
     )
-    with case.engine.begin() as connection:
-        raw["source_digest"] = source_digest(connection)
-        role = (
-            connection.exec_driver_sql("SELECT current_user").scalar_one()
-            if connection.dialect.name == "postgresql"
-            else None
-        )
-        cursor = cursor_for(raw, sequence=sequence, role=role)
-        for row in raw["accounts"]:
-            _insert(
-                connection,
-                "budget_accounts",
-                {
-                    **row,
-                    "held_microusd": 0,
-                    "accounted_microusd": 0,
-                    "opening_held_microusd": 0,
-                },
-            )
+    return raw
+
+
+def _insert_provision(connection, raw, cursor):
+    for row in raw["accounts"]:
         _insert(
             connection,
-            "migration_progress",
-            progress_row(cursor, postgres=connection.dialect.name == "postgresql"),
+            "budget_accounts",
+            {
+                **row,
+                "held_microusd": 0,
+                "accounted_microusd": 0,
+                "opening_held_microusd": 0,
+            },
         )
-    case.manifest, case.cursor = raw, cursor
-    case.expected = {
-        **case.expected,
+    _insert(
+        connection,
+        "migration_progress",
+        progress_row(cursor, postgres=connection.dialect.name == "postgresql"),
+    )
+
+
+def _provision_expected(expected, raw, sequence):
+    return {
+        **expected,
         "head": {
             "installation_key": raw["installation_key"],
             "revision": LEDGER,
@@ -399,14 +394,32 @@ def append_provision(case: ReaderFixture, accounts: list[dict[str, Any]]) -> Non
             "sequence": sequence,
             "operation": "provision",
             "source_digest": raw["source_digest"],
-            "account_rows": len(accounts),
+            "account_rows": len(raw["accounts"]),
             "imported_jobs": 0,
             "imported_opening_microusd": 0,
             "initialized_at": OBSERVED,
         },
         "manifest_count": sequence + 1,
-        "account_count": case.expected["account_count"] + len(accounts),
+        "account_count": expected["account_count"] + len(raw["accounts"]),
     }
+
+
+def append_provision(case: ReaderFixture, accounts: list[dict[str, Any]]) -> None:
+    """Seed a later immutable receipt, without pretending a provisioner exists."""
+    assert case.manifest is not None and case.opening is not None
+    sequence = case.expected["manifest_count"]
+    raw = _provision_manifest(case.manifest, sequence, accounts)
+    with case.engine.begin() as connection:
+        raw["source_digest"] = source_digest(connection)
+        role = (
+            connection.exec_driver_sql("SELECT current_user").scalar_one()
+            if connection.dialect.name == "postgresql"
+            else None
+        )
+        cursor = cursor_for(raw, sequence=sequence, role=role)
+        _insert_provision(connection, raw, cursor)
+    case.manifest, case.cursor = raw, cursor
+    case.expected = _provision_expected(case.expected, raw, sequence)
 
 
 def later_admitted_call(
