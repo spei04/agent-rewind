@@ -275,11 +275,10 @@ def _sqlite_require_reflected_checks(
             raise MigrationRefused("schema_incompatible")
 
 
-def _sqlite_supported_clauses(
-    connection: Connection, tables: list[str], *, admission: bool = False, ledger: bool = False
-) -> dict[str, tuple[tuple[str | None, str], ...]]:
-    # Unindexed COLLATE and conflict policies are invisible to SQLite reflection.
-    # This is a conservative supported-DDL exclusion, not a replacement SQL parser.
+def _sqlite_check_supported_ddl(
+    table: str, sql: str, *, admission: bool = False, ledger: bool = False
+) -> tuple[tuple[str | None, str], ...]:
+    # This table-local policy is shared; the general observer keeps its own SQL.
     forbidden = {
         "COLLATE",
         "CONFLICT",
@@ -294,6 +293,29 @@ def _sqlite_supported_clauses(
         "DEFERRABLE",
         "DEFERRED",
     }
+    restricted = forbidden.copy() if table in TABLES else forbidden - {"CHECK", "AS"}
+    if table in (
+        OWNERSHIP_TABLES
+        | ARTIFACT_TABLES
+        | PROJECTION_TABLES
+        | ADMISSION_TABLES
+        | (LEDGER_TABLES if ledger else set())
+    ):
+        restricted -= {"REFERENCES", "DEFAULT"}
+    if (admission or ledger) and table == "jobs":
+        # Only verified ar6/ar7 successors may extend this historical table.
+        # Full literal-profile equality still checks every clause and column.
+        restricted -= {"CHECK", "DEFAULT", "AS"}
+    if restricted.intersection(_sqlite_ddl_tokens(sql)):
+        raise MigrationRefused("schema_incompatible")
+    return _sqlite_check_declarations(sql)
+
+
+def _sqlite_supported_clauses(
+    connection: Connection, tables: list[str], *, admission: bool = False, ledger: bool = False
+) -> dict[str, tuple[tuple[str | None, str], ...]]:
+    # Unindexed COLLATE and conflict policies are invisible to SQLite reflection.
+    # This is a conservative supported-DDL exclusion, not a replacement SQL parser.
     declarations = {}
     for table in set(tables) & (
         set(TABLES)
@@ -315,22 +337,9 @@ def _sqlite_supported_clauses(
         ).scalar_one()
         if not isinstance(sql, str):
             raise MigrationRefused("schema_incompatible")
-        restricted = forbidden.copy() if table in TABLES else forbidden - {"CHECK", "AS"}
-        if table in (
-            OWNERSHIP_TABLES
-            | ARTIFACT_TABLES
-            | PROJECTION_TABLES
-            | ADMISSION_TABLES
-            | (LEDGER_TABLES if ledger else set())
-        ):
-            restricted -= {"REFERENCES", "DEFAULT"}
-        if (admission or ledger) and table == "jobs":
-            # Only verified ar6/ar7 successors may extend this historical table.
-            # Full literal-profile equality still checks every clause and column.
-            restricted -= {"CHECK", "DEFAULT", "AS"}
-        if restricted.intersection(_sqlite_ddl_tokens(sql)):
-            raise MigrationRefused("schema_incompatible")
-        declarations[table] = _sqlite_check_declarations(sql)
+        declarations[table] = _sqlite_check_supported_ddl(
+            table, sql, admission=admission, ledger=ledger
+        )
     return declarations
 
 

@@ -1,6 +1,7 @@
 """Native dispatch-component tests; setup adapters do not establish live readiness."""
 
 import hashlib
+import json
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from threading import Barrier
@@ -81,7 +82,9 @@ def state_only(before, after, identity):
             assert after["tables"][name] == before["tables"][name], name
 
 
-def test_transition_commits_before_one_call_and_restart_cannot_dispatch(reservation_case):
+def test_transition_commits_before_one_call_and_restart_cannot_dispatch(
+    reservation_case, record_property
+):
     case = reservation_case
     fence, identity = reserved(case)
     adapter = Adapter(case)
@@ -89,6 +92,26 @@ def test_transition_commits_before_one_call_and_restart_cannot_dispatch(reservat
     assert invoke(case, adapter, fence, identity, owner=owner) == b"response"
     assert owner.outcome.commit_acknowledged and not owner.outcome.cleanup_failed
     assert owner._work.statements <= 512 and owner._work.seconds < 10
+    # Read only the invocation's retained Work counters after both cleanups.
+    record_property(
+        "dispatch_work",
+        json.dumps(
+            {
+                phase: {
+                    "statements": work.statements,
+                    "seconds": work.seconds,
+                    "vm_instructions": work.instructions,
+                    "commit_acknowledged": outcome.commit_acknowledged,
+                    "cleanup_failed": outcome.cleanup_failed,
+                }
+                for phase, work, outcome in (
+                    ("reservation", owner._reservation._work, owner.reservation_outcome),
+                    ("transition", owner._work, owner.outcome),
+                )
+            },
+            sort_keys=True,
+        ),
+    )
     assert adapter.calls == [REQUEST]
     after = case.snapshot()
     state_only(case.reserved_snapshot, after, identity)
