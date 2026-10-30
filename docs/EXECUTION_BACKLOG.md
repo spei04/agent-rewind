@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger P2 and AR-010-A are delivered. Corpus inventory and baseline controls are verified locally.
-- **Next:** Backend completes the F1 native campaign; Quality prepares corpus delivery. Review checks evidence, and the lead integrates and publishes reviewed work.
-- **Open gates:** Corpus PR/main CI and matching installed artifacts remain required. F1 and worker delivery, corpus acceptance and production gates remain unmet.
+- **Verified:** Ledger delivery is accepted. F1’s published source and capacity measurements are retained. The corpus diagnostic patch has reviewed focused checks and matching 8,632-node inventories.
+- **Blocker:** Original corpus PR #123 failed during Python 3.12 fixture setup; its cause remains unresolved. Original receipts are retained, with no campaign acceptance.
+- **Next:** Fresh PR/main CI and installed-artifact verification are required before corpus delivery and queued F1 integration. Production and acquisition remain gated.
 
 [Worker task and dependencies](#ar-010-b) · [History and maintenance](#dependency-review-progress-and-maintenance)
 

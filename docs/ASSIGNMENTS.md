@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger P2 and AR-010-A are delivered. Corpus inventory and baseline controls are verified locally.
-- **Next:** Backend completes the F1 native campaign; Quality prepares corpus delivery. Review checks evidence, and the lead integrates and publishes reviewed work.
-- **Open gates:** Corpus PR/main CI and matching installed artifacts remain required. F1 and worker delivery, corpus acceptance and production gates remain unmet.
+- **Verified:** Ledger delivery is accepted. F1’s published source and capacity measurements are retained. The corpus diagnostic patch has reviewed focused checks and matching 8,632-node inventories.
+- **Blocker:** Original corpus PR #123 failed during Python 3.12 fixture setup; its cause remains unresolved. Original receipts are retained, with no campaign acceptance.
+- **Next:** Fresh PR/main CI and installed-artifact verification are required before corpus delivery and queued F1 integration. Production and acquisition remain gated.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Assignment history](#assignment-history)
 
@@ -21,6 +21,15 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Readiness diagnostic follow-up — 2026-10-30**
+
+- Backend: committed bounded failure diagnostics while preserving the original readiness call, result, assertion and limits.
+- Quality: retained all original failed-run receipts and reconciled the matching 8,632-node inventories.
+- Review: accepted the source and focused evidence: nine retained plus 16 corrected or previously unrun Python 3.11 passes, and 25 Python 3.12 passes. The earlier local control failure remains retained.
+- Lead: owns the baseline, publication, fresh CI and installed-artifact checks. Published F1 capacity evidence remains retained pending corpus delivery.
+
+The original hosted cause remains unresolved. No corpus or F1 delivery acceptance follows from these component checks.
 
 ### Corpus integration and final inventory — 2026-10-29
 
