@@ -2,11 +2,15 @@
 
 ## Current status
 
-- **Verified:** PCA1 [#120](https://github.com/spei04/agent-rewind/issues/120) is delivered at merge `48ddc894` from `574fb049`. Original main [41121769232](https://github.com/spei04/agent-rewind/actions/runs/41121769232) and candidate, installed execution and image-trust evidence are independently accepted.
-- **Active:** API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) source `5845ada6` is independently reviewed; 85 billing-detail controls passed per version and both actual inventories contain 8,746 tests. Hosted delivery remains pending. PCA2 [#125](https://github.com/spei04/agent-rewind/issues/125) component `e0623c3b` and its 363-control focused evidence are accepted and published; full delivery remains pending. F1 remains retained at `a604fd25`, not integrated.
-- **Limits:** AR-002-C and PUBCAP-A remain incomplete. The $200 cap, $36.567974 held reservation and additional exposure **UNKNOWN** remain unchanged; no paid/model/data/production gate is opened.
+- **Verified:** [Public-corpus declarations](https://github.com/spei04/agent-rewind/issues/120) are delivered.
+- **Next:** Lead completes [accounting/API](https://github.com/spei04/agent-rewind/pull/126) and [normalizer](https://github.com/spei04/agent-rewind/issues/125) delivery; Backend then resumes the worker sequence. Original accounting CI and delivery acceptance remain pending. The functional blocker is admitted dispatch with generation-aware recording and interruption/recovery proof.
+- **Limits:** Paid work stays paused under the $200 cap. The $36.567974 reservation remains held and additional exposure is unknown. No research or production acceptance is claimed.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Retained history](#143-dated-progress-ledger)
+
+## Next functional proof
+
+Follow the existing [F1–F5 then worker P2 sequence](delivery/WORKER_FAILURE_EXECUTION_PLAN.md). The migration-only profile still refuses real startup/dispatch; terminal job status alone does not establish generation-aware recorded-result publication. Positive offline acceptance must use admitted configuration, ownership and publication interfaces with interruption/recovery evidence, without patching readiness. Existing [AR-006-C and AR-011-C → AR-012-B](EXECUTION_BACKLOG.md) cover integrated worker proof; branchable restore additionally needs AR-014/AR-017. This maps existing tasks without activating a profile or changing research/production gates.
 
 ## Contents
 

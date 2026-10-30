@@ -2,13 +2,9 @@
 
 ## Current status
 
-- **Verified:** PCA1 [#120](https://github.com/spei04/agent-rewind/issues/120) is delivered at merge `48ddc894` from `574fb049`. Original main [41121769232](https://github.com/spei04/agent-rewind/actions/runs/41121769232) and candidate, installed execution and image-trust evidence are independently accepted.
-- **Active:** API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) source `5845ada6` is independently reviewed; 85 billing-detail controls passed per version and both actual inventories contain 8,746 tests. Hosted delivery remains pending. PCA2 [#125](https://github.com/spei04/agent-rewind/issues/125) component `e0623c3b` and its 363-control focused evidence are accepted and published; full delivery remains pending. F1 remains retained at `a604fd25`, not integrated.
-- **Limits:** AR-002-C and PUBCAP-A remain incomplete. The $200 cap, $36.567974 held reservation and additional exposure **UNKNOWN** remain unchanged; no paid/model/data/production gate is opened.
+See the [canonical current summary](PLAN.md#current-status) and [current assignments](ASSIGNMENTS.md#current-status). Lead owns delivery acceptance; Backend follows with the existing worker sequence.
 
 [Worker task and dependencies](#ar-010-b) · [History and maintenance](#dependency-review-progress-and-maintenance)
-
-Current planning rollup: **155 aggregate tasks and 171 planned delivery PRs**, including the five included #97 P1 checkpoints. Tasks are 31 Verified / 1 In progress / 123 Not started; delivery packages are 11 Verified / 1 In progress / 3 Not started. The 569 outer edges are unchanged; the 2026-10-29 [worker failure reforecast](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) supersedes earlier estimate/count snapshots without changing their historical text. Preparation nodes are separately PCA1 Verified and PCA2 In progress; neither completes its aggregate.
 
 ## Approval boundary and readiness
 
@@ -47,6 +43,8 @@ Reviewed PLAN, README and the current-release architecture, deployment, security
 | REV-23 | The two-day #97 estimate omitted additive successor profiles, trusted persistence, bounded consumer integration and restart-safe operator preservation/restore. | Adopt five sequential P1 implementation checkpoints at 12 [9–18] BE days, low confidence; P2 remains 2 [2–3], aggregate 14 [11–21]. Preserve all original duties, inherited accepted-merge prerequisites, migration-only activation and native limits; complete entry/revision and measured implementation fit remain pending. |
 
 ## Estimates, staffing and uncertainty
+
+Current planning rollup: **155 aggregate tasks and 171 planned delivery PRs**, including the five included #97 P1 checkpoints. Tasks are 31 Verified / 1 In progress / 123 Not started; delivery packages are 11 Verified / 1 In progress / 3 Not started. The 569 outer edges are unchanged; the 2026-10-29 [worker failure reforecast](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) supersedes earlier estimate/count snapshots without changing their historical text. Preparation nodes are separately PCA1 Verified and PCA2 In progress; neither completes its aggregate.
 
 Engineering effort includes implementation or design, task tests, ordinary review/rework and documentation. Six logical role totals are demand estimates, not six funded human FTEs. Three contributor slots are active; no measured conversion from those slots to engineering days or a launch calendar is assumed. A hypothetical human role at 3.5 delivery days/week is shown only as a capacity lower bound. Ranges are planning bounds, not probabilities; RA-01 uses approved 2–3 and 2–4 day design ranges. The 25% integration reserve is alternative to summed upper ranges, not additive. External review/operations/funding waits and unestimated follow-up implementation remain excluded.
 
@@ -106,6 +104,12 @@ After the first two weeks, use dependency-ready milestone scheduling. The former
 Completed RA checkpoints: accepted audit before protocol, followed by reviewed design and scope/capacity reconciliation. Historical initial checkpoints were Day 5 fixture/workflow review, Day 8 producer handoff and Day 10 freeze packet; ARCH0/G0 are now satisfied for development. Subsequent integration checkpoints: AR-005-C historical upgrade and runtime guard; AR-012-B all M1 cases; AR-019-C real runtime/store/key/fault evidence; AR-026-C distributed study integrity; AR-034-D independent browser/SDK flow; AR-035-C pre-ingestion recovery; AR-039-C two-partner pilot review; AR-047-C readiness audit; AR-048-C release decision; AR-049-C accepted rollout; AR-050-C 30-day closure. During active M1–M4 work, merge small reviewed PRs, run daily shared synthetic integration and twice-weekly cross-role reviews. A review meeting is not a passing gate.
 
 ## First two weeks — day-by-day
+
+For current priorities, use the [canonical summary](PLAN.md#current-status) and [current assignments](ASSIGNMENTS.md#current-status).
+
+### Superseded ledger and allocation snapshot — archived 2026-10-30
+
+The block and table below are preserved verbatim as superseded history. Their repeated active F2 and main-failure statements are not current status. The archive date records this editorial move, not an inferred date for the original events.
 
 The owner-approved ledger amendment adds no calendar allocation. AR-010-A/P1 #108, aggregate #107 and parent #10 remain In progress with null P1 acceptance. P1 entry policy 51af77dc and the HTTP prerequisite are accepted. F1 dormant foundation is Merged; checkpoint accepted after reviewed source c6f32cdd, protected merge 2e0eeeab, matching PR/main attempts 39729061054/39733331352 and verified candidate 12407151544. F2 complete persisted reader remains In progress/null acceptance: source 432bcbc passed PR #113 checks and merged at 08234c, but protected-main attempt 39773689705/1 failed one Python 3.11 timed listing-continuation test; Python 3.12 passed and candidate delivery was skipped. Independent QE owns the isolated test-clock correction; planning/verification updates progress and reviews the correction and delivery evidence; the lead owns integration and fresh protected delivery. Platform/security completed the separate writer feasibility component and prepares reviewed F3 components only. F3 provisioning/opening/replay/recovery remains Not started. P2 #109 remains Not started/null acceptance behind accepted full P1 and its own reservation/fence entry review. F1/F2/F3 retain the unchanged P1 effort and acceptance scope. Full reader, provisioning, recovery and P1 delivery remain unaccepted. The historical rows and opening conditions below remain unchanged; two packages total 6 [6–10] BE effort days, not six staffed days.
 

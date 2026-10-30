@@ -2,9 +2,7 @@
 
 ## Current status
 
-- **Verified:** PCA1 [#120](https://github.com/spei04/agent-rewind/issues/120) is delivered at merge `48ddc894` from `574fb049`. Original main [41121769232](https://github.com/spei04/agent-rewind/actions/runs/41121769232) and candidate, installed execution and image-trust evidence are independently accepted.
-- **Active:** API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) source `5845ada6` is independently reviewed; 85 billing-detail controls passed per version and both actual inventories contain 8,746 tests. Hosted delivery remains pending. PCA2 [#125](https://github.com/spei04/agent-rewind/issues/125) component `e0623c3b` and its 363-control focused evidence are accepted and published; full delivery remains pending. F1 remains retained at `a604fd25`, not integrated.
-- **Limits:** AR-002-C and PUBCAP-A remain incomplete. The $200 cap, $36.567974 held reservation and additional exposure **UNKNOWN** remain unchanged; no paid/model/data/production gate is opened.
+See the [canonical current summary](PLAN.md#current-status). Lead completes API/normalizer delivery; Backend then resumes the worker sequence. The corpus engineer hands off the frozen integration, and Quality independently reviews its source and evidence. Detailed outcomes remain in the [dated assignment history](#assignment-history).
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Assignment history](#assignment-history)
 
@@ -21,6 +19,13 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**PCA2 composition and observed inventory — 2026-10-30**
+
+- Corpus engineer: composed reviewed component `e0623c3b` onto API source `df314055` as `217479fc` on the separate integration branch. The four component paths and other 665 API paths are exact; the unchanged 363-control component evidence remains applicable. The published component branch is preserved.
+- Quality: both original collect-only runs observed 8,866 ordered IDs, retaining all 8,746 API IDs plus 120 normalizer IDs. Python 3.11 partitions are 4,381/4,485 with 10/35 expected skips; Python 3.12 retains 31. All 16 baseline controls and direct inventory checks passed. The missing private output-parent launch failure is retained; it occurred before a collection child started.
+- Review/lead: own independent review and publication. API [PR #126](https://github.com/spei04/agent-rewind/pull/126) delivery sequencing and PCA2 PR/main/installed acceptance remain pending; PCA2's technical prerequisites remain PCA1 and PUBLICPREP0. No acquisition, research or production authority follows.
+- Next functional work follows the existing worker sequence and current PLAN mapping. Migration-only readiness patches cannot substitute for admitted execution, ownership and publication proof; F1 remains retained separately at `a604fd25`.
 
 
 **API usage inventory and component handoff — 2026-10-30**
