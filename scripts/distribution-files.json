@@ -143,6 +143,7 @@
     "agent_rewind/sentinel_cli.py",
     "agent_rewind/sqlite_ownership.py",
     "agent_rewind/statistics.py",
+    "agent_rewind/swe_rebench.py",
     "agent_rewind/web/app.js",
     "agent_rewind/web/index.html",
     "agent_rewind/web/style.css",
