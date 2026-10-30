@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from importlib.metadata import PackageNotFoundError, version
 from threading import RLock
 from typing import Any, cast
-from weakref import WeakKeyDictionary
+from weakref import ReferenceType, WeakKeyDictionary, ref
 
 import psycopg
 import sqlalchemy
@@ -127,13 +127,23 @@ class LedgerEngineClaim:
 
 @dataclass
 class _EngineState:
-    pool: Any
-    dialect: Any
+    # Identity witnesses must not root the Engine through pool/event closures.
+    pool: ReferenceType[Pool]
+    dialect: ReferenceType[Dialect]
     url: Any
-    context: Any = None
-    handlers: dict[str, tuple[Any, ...]] = field(default_factory=dict)
+    context: ReferenceType[Any] | None = None
+    handlers: dict[str, tuple[ReferenceType[Any], ...]] = field(default_factory=dict)
     claim: LedgerEngineClaim | None = None
     poisoned: bool = False
+
+    def resolved_handlers(self) -> dict[str, tuple[Any, ...]] | None:
+        result: dict[str, tuple[Any, ...]] = {}
+        for name, references in self.handlers.items():
+            callbacks = tuple(reference() for reference in references)
+            if any(callback is None for callback in callbacks):
+                return None
+            result[name] = callbacks
+        return result
 
 
 def create_ledger_engine(url: str) -> Engine:
@@ -175,7 +185,15 @@ def create_ledger_engine(url: str) -> Engine:
         context = getattr(engine.dialect, "_psycopg_adapters_map", None)
         if kind == "postgresql":
             _pg_parameters(arguments, parameters, context=context)
-        state = _EngineState(engine.pool, engine.dialect, engine.url, context=context)
+        try:
+            state = _EngineState(
+                ref(engine.pool),
+                ref(engine.dialect),
+                engine.url,
+                context=ref(context) if context is not None else None,
+            )
+        except TypeError:
+            raise MigrationRefused("schema_incompatible") from None
 
         def connect(dialect: Dialect, record: Any, args: Any, params: Any) -> Any:
             with _LOCK:
@@ -192,7 +210,9 @@ def create_ledger_engine(url: str) -> Engine:
                 raise MigrationRefused("schema_incompatible")
             if supplied.pop("prepare_threshold", object()) is not None:
                 raise MigrationRefused("schema_incompatible")
-            _pg_parameters(args, supplied, context=state.context)
+            _pg_parameters(
+                args, supplied, context=state.context() if state.context is not None else None
+            )
             supplied["target_session_attrs"] = "any"
             _trusted_startup_path(dialect, record, [], supplied)
             statement_ms, lock_ms = claim.work.remaining_timeouts_ms()
@@ -220,7 +240,13 @@ def create_ledger_engine(url: str) -> Engine:
             )
         if {key: len(value) for key, value in handlers.items()} != expected:
             raise MigrationRefused("schema_incompatible")
-        state.handlers = handlers
+        try:
+            state.handlers = {
+                name: tuple(ref(callback) for callback in callbacks)
+                for name, callbacks in handlers.items()
+            }
+        except TypeError:
+            raise MigrationRefused("schema_incompatible") from None
         with _LOCK:
             _REGISTRY[engine] = state
         return engine
@@ -236,14 +262,20 @@ def claim_ledger_engine(engine: Engine, work: LedgerWork) -> LedgerEngineClaim:
     _no_class_handlers(Engine, Connection, Pool, type(engine.dialect))
     with _LOCK:
         state = _REGISTRY.get(engine)
+        pool = state.pool() if state is not None else None
+        dialect = state.dialect() if state is not None else None
+        handlers = state.resolved_handlers() if state is not None else None
         if (
             state is None
+            or pool is None
+            or dialect is None
+            or handlers is None
             or state.poisoned
             or state.claim is not None
-            or engine.pool is not state.pool
-            or engine.dialect is not state.dialect
+            or engine.pool is not pool
+            or engine.dialect is not dialect
             or engine.url != state.url
-            or _handlers(engine) != state.handlers
+            or _handlers(engine) != handlers
             or engine.pool._pre_ping
             or engine.pool._reset_on_return is not reset_none
             or bool(engine._execution_options)
@@ -252,16 +284,18 @@ def claim_ledger_engine(engine: Engine, work: LedgerWork) -> LedgerEngineClaim:
         if engine.dialect.name == "sqlite":
             require_owned_sqlite(engine)
         else:
+            context = state.context() if state.context is not None else None
             if (
-                not isinstance(engine.dialect, PGDialect_psycopg)
+                context is None
+                or not isinstance(engine.dialect, PGDialect_psycopg)
                 or engine.dialect.use_native_hstore
                 or engine.dialect.client_encoding is not None
                 or engine.dialect.isolation_level is not None
-                or engine.dialect._psycopg_adapters_map is not state.context
+                or engine.dialect._psycopg_adapters_map is not context
             ):
                 raise MigrationRefused("schema_incompatible")
             args, params = cast(Dialect, engine.dialect).create_connect_args(engine.url)
-            _pg_parameters(args, params, context=state.context)
+            _pg_parameters(args, params, context=context)
         work._prepay()
         claim = LedgerEngineClaim(engine, work)
         state.claim = claim
