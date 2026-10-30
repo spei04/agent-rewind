@@ -2,11 +2,12 @@
 
 ## Current status
 
-- **Verified:** PCA1 is delivered at `48ddc894`. API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) merged at `84d63879`; main/candidate acceptance is pending.
-- **Active:** Internal dispatch component `ab9736fe` is under native validation. F1 composition `9e0f24d0` passed 137 focused tests. PCA2 `51ae3a75` remains published with full delivery pending.
-- **Limits:** Live admitted execution remains incomplete. Payment is approved within **$200 total including prior charges**; $36.567974 stays held and additional exposure is unknown. No verified paid allowance or production activation follows.
+- **Delivery:** PCA1 is delivered at `48ddc894`. API usage merged at `84d63879`; main/candidate acceptance is pending.
+- **Active:** Dispatch [PR #127](https://github.com/spei04/agent-rewind/pull/127) passed native component checks. F1 composition `629f8b2b` passed 155 focused cases per Python version; delivery is pending. PCA2 `51ae3a75` remains published.
+- **Next:** After F1 delivery, implement F2’s dormant failure schema and exact native catalogs; live startup remains behind F3–F5/P2.
+- **Limits:** Live admitted startup is incomplete. Payment is approved within **$200 total including prior charges**; $36.567974 remains held and other exposure is unknown. No verified paid allowance or production activation follows.
 
-[Dispatch scope](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
+[Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
 ## Execution location — 2026-10-23
 
@@ -21,6 +22,14 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F1 dispatch composition and startup audit — 2026-10-30**
+
+- Engineer 1: integrated F1 on the dispatch branch at `629f8b2b`; 137 catalog/claim/reservation and 18 dispatch cases passed per Python version. Both actual full collections contain 8,815 ordered cases, retaining all 8,779 prior cases plus 36 F1 additions.
+- Engineer 2: independently accepted the four-file composition. The earlier combined SIGKILL attempt remains retained without partial credit; separate Work counters are not an end-to-end capacity claim.
+- Release engineer: checked original main/PR #127 CI, then took the admission/account-provenance design audit. No workflow rerun or live activation.
+- Lead: owns publication and the exact F2 allocation; F2 implementation waits for accepted F1 delivery. Recorded the missing startup integrations and required P2 reforecast without reopening accepted components.
+
 
 
 **Admitted dispatch development — 2026-10-30**
