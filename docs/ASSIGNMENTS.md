@@ -3,7 +3,7 @@
 ## Current status
 
 - **Verified:** PCA1 [#120](https://github.com/spei04/agent-rewind/issues/120) is delivered at merge `48ddc894` from `574fb049`. Original main [41121769232](https://github.com/spei04/agent-rewind/actions/runs/41121769232) and candidate, installed execution and image-trust evidence are independently accepted.
-- **Active:** API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) is implemented and under review; PCA2 [#125](https://github.com/spei04/agent-rewind/issues/125) is In progress. F1 remains retained at `a604fd25`, not integrated.
+- **Active:** API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) source `5845ada6` is independently reviewed; 85 billing-detail controls passed per version and both actual inventories contain 8,746 tests. Hosted delivery remains pending. PCA2 [#125](https://github.com/spei04/agent-rewind/issues/125) component `e0623c3b` and its 363-control focused evidence are accepted and published; full delivery remains pending. F1 remains retained at `a604fd25`, not integrated.
 - **Limits:** AR-002-C and PUBCAP-A remain incomplete. The $200 cap, $36.567974 held reservation and additional exposure **UNKNOWN** remain unchanged; no paid/model/data/production gate is opened.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Assignment history](#assignment-history)
@@ -21,6 +21,14 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+
+**API usage inventory and component handoff — 2026-10-30**
+
+- Backend: source `5845ada6` closes the reviewed supplied-detail contract gap; 85 offline policy controls passed on each interpreter, including retained reservation and terminal study dispatch. Earlier 74/9 and planning 366 originals remain separately retained.
+- Inventory: both original collect-only runs produced the same 8,746 ordered IDs, retaining all 8,650 prior IDs and 96 reviewed additions. Python 3.11 partitions are 4,381/4,365 with 10/35 expected skips; Python 3.12 retains 31 expected skips. The earlier `ed7e5b44` inventory of 8,707 remains source-bound and was not adopted.
+- Corpus engineer: PCA2 component `e0623c3b` and 363-control focused evidence are independently accepted and published. Its full delivery and aggregate PUBCAP-A acceptance remain pending.
+- Lead/quality: review the actual-derived API baseline before publication; no hosted, installed, research-budget or complete-accounting acceptance follows from these offline controls.
 
 **PCA1 delivery and next isolated assignments — 2026-10-30**
 
