@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger delivery is accepted. F1’s published source and capacity measurements are retained. The corpus diagnostic patch has reviewed focused checks and matching 8,632-node inventories.
-- **Blocker:** Original corpus PR #123 failed during Python 3.12 fixture setup; its cause remains unresolved. Original receipts are retained, with no campaign acceptance.
-- **Next:** Fresh PR/main CI and installed-artifact verification are required before corpus delivery and queued F1 integration. Production and acquisition remain gated.
+- **Verified:** Ledger delivery is accepted; F1’s published source and evidence are retained. The SQLite capacity fixture correction has independent review, 12 focused passes per Python version, and matching 8,638-test inventories.
+- **Blocker:** Original PR #123 exceeded its 3,600-second limit by 14.797441 seconds. Its receipts remain unaccepted; the earlier setup failure is separately unresolved.
+- **Next:** Fresh PR/main CI and installed-artifact verification are required before corpus delivery and F1 integration. Production and acquisition remain gated.
 
 [Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Assignment history](#assignment-history)
 
@@ -21,6 +21,13 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**CI runtime follow-up**
+
+- Backend: batched SQLite fixture seeding; retained every receipt and independent capacity check. Twelve focused checks passed per Python version; the same four profile cases passed.
+- Quality: reconciled 8,638 collected IDs, preserving the prior inventory and skips; all 16 baseline controls passed.
+- Review: verified source preservation, transaction rollback, clone connection configuration and original evidence. The first clone-control failure remains retained.
+- Lead: owns fresh PR/main and installed-artifact acceptance. The original time-limit failure remains unaccepted; local profiling does not establish hosted margin.
 
 **Readiness diagnostic follow-up — 2026-10-30**
 

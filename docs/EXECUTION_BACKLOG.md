@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Ledger delivery is accepted. F1’s published source and capacity measurements are retained. The corpus diagnostic patch has reviewed focused checks and matching 8,632-node inventories.
-- **Blocker:** Original corpus PR #123 failed during Python 3.12 fixture setup; its cause remains unresolved. Original receipts are retained, with no campaign acceptance.
-- **Next:** Fresh PR/main CI and installed-artifact verification are required before corpus delivery and queued F1 integration. Production and acquisition remain gated.
+- **Verified:** Ledger delivery is accepted; F1’s published source and evidence are retained. The SQLite capacity fixture correction has independent review, 12 focused passes per Python version, and matching 8,638-test inventories.
+- **Blocker:** Original PR #123 exceeded its 3,600-second limit by 14.797441 seconds. Its receipts remain unaccepted; the earlier setup failure is separately unresolved.
+- **Next:** Fresh PR/main CI and installed-artifact verification are required before corpus delivery and F1 integration. Production and acquisition remain gated.
 
 [Worker task and dependencies](#ar-010-b) · [History and maintenance](#dependency-review-progress-and-maintenance)
 
