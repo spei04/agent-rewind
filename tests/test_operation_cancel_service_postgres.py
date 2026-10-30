@@ -12,6 +12,7 @@ from threading import Event
 
 import pytest
 import test_migrations_postgres as migrations
+from http_failure_diagnostics import compatibility_failure
 from sqlalchemy import event, text
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import DBAPIError
@@ -716,7 +717,10 @@ def test_postgres_real_fresh_ar6_guard_has_zero_target_effects(pg, monkeypatch):
         before = connection.exec_driver_sql(
             "SELECT (SELECT count(*) FROM jobs),(SELECT count(*) FROM audit)"
         ).one()
-    fault(lambda: service.cancel_operation(principal, context, OPERATION), "schema_incompatible")
+    with compatibility_failure(service, phase="cancel_guard_expected_schema_incompatible"):
+        fault(
+            lambda: service.cancel_operation(principal, context, OPERATION), "schema_incompatible"
+        )
     with pg["owner"].connect() as connection:
         assert (
             connection.exec_driver_sql(

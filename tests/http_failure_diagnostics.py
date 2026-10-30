@@ -11,7 +11,7 @@ import math
 import sqlite3
 import sys
 import threading
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass, field
 from functools import partial
 from pathlib import Path
@@ -368,10 +368,15 @@ def _compatibility_observers(original_probe, original_constructor, capture):
 
 
 @contextmanager
-def compatibility_failure(service):
-    """Observe the existing predecessor call; report only when its assertion fails."""
+def compatibility_failure(service, *, phase="predecessor_compatibility_expected_migration_only"):
+    """Observe one real probe; only the cancellation phase annotates its assertion."""
+    if type(phase) is not str or phase not in (
+        "predecessor_compatibility_expected_migration_only",
+        "cancel_guard_expected_schema_incompatible",
+    ):
+        raise ValueError("unsupported diagnostic phase")
     report = {
-        "phase": "predecessor_compatibility_expected_migration_only",
+        "phase": phase,
         "probes": [],
         "guard": [],
         "security": [],
@@ -384,7 +389,14 @@ def compatibility_failure(service):
     with pytest.MonkeyPatch.context() as patch:
         patch.setattr(service, "schema_compatibility", probe)
         patch.setattr(guard, "CompatibilityResult", constructor)
-        yield lambda: _route_message(report)
+        try:
+            yield lambda: _route_message(report)
+        except AssertionError as error:
+            if phase == "cancel_guard_expected_schema_incompatible":
+                # A failed diagnostic must preserve the original assertion and verdict.
+                with suppress(Exception):
+                    error.add_note(_route_message(report))
+            raise
 
 
 @contextmanager
