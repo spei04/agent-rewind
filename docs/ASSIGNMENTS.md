@@ -3,7 +3,7 @@
 ## Current status
 
 - **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129) is accepted at [main 47da5b44](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2), including original main checks, source-matched candidate and installed-package evidence.
-- **Assigned:** The private historical walkthrough passed source, data and browser review. Quality resumes independent terminal tests; Backend owns F3 producer/event interfaces and persistence; Review checks source, authority and evidence.
+- **Assigned:** The requested plain dashboard passed private source, data and browser review. Quality resumes independent terminal oracle preparation; Backend owns F3 persistence; Review checks source, authority and evidence.
 - **Next:** F3 acceptance, F4/F5, then P2 worker integration. Admitted startup and production remain gated; [funding](delivery/CAPACITY_AND_FUNDING.md) and [retained failures](#assignment-history) are unchanged. Optional fixture optimization is deferred.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -21,6 +21,19 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Plain recorded dashboard accepted — 2026-10-31 (Pacific)**
+
+- The user requested a simple black-and-white dashboard. Lead verified compact
+  runs/IDs, files before action, repaired D4, study pairs/interval and Recording
+  details at private viewer `ef7a0bd8` after the 17:27:44 UTC restart.
+- Compare preserves decisions, modes and diffs with neutral unchanged-control
+  wording. Scoped checks cover 66 cases per interpreter; the two corrections each
+  reran only six affected renderer cases. Prior findings remain retained.
+  All 183 recorded responses are unchanged; [validation and opening instructions](VALIDATION.md#private-recorded-walkthrough)
+  retain historical scope, costs, privacy and zero new provider calls.
+- Quality resumes F3 oracle preparation separately; preview assets stay frozen.
+  Full F3, startup, funding and production gates do not advance.
 
 **Private recorded walkthrough accepted — 2026-10-31 (Pacific)**
 

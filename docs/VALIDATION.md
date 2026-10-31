@@ -76,7 +76,7 @@ After independent review of the private response manifest, run in the existing c
 checkout (keep this foreground session owned and time-bounded):
 
 ~~~sh
-.venv/bin/python scripts/recorded_walkthrough.py --recording /absolute/private/path/response-map.json --port 8081 --browser-port 18081
+.venv/bin/python scripts/recorded_walkthrough.py --recording /absolute/private/path/response-map-dashboard-v3.json --port 8081 --browser-port 18081
 ~~~
 
 Use an owned SSH tunnel with local forwarding
@@ -86,24 +86,42 @@ preloads an owner-readable response map, checks exact viewer-asset hashes and re
 all mutations and routes outside that finite recording. It does not start the
 production API or change its migration-only readiness/authentication policy.
 
-Acceptance requires a persistent historical/read-only/source label; recorded failed
-and repaired trajectories, checkpoint contents, all eight control/treatment pairs
-and uncertainty; visibly disabled branch/investigate actions; and server-side write
-refusals. The $36.567974 historical reservation across five jobs is distinct from an
+Acceptance requires a persistent recorded/read-only notice with source and scope
+available in Recording details; recorded failed and repaired trajectories, checkpoint
+contents, all eight control/treatment pairs and uncertainty; unavailable editing
+actions; and server-side write refusals. The $36.567974 historical reservation across five jobs is distinct from an
 unknown bill or available balance. The $1.668527 usage-derived ceiling covers only
 67 recorded calls and excludes three proposal calls. New provider calls are zero.
 Original exports stay private and unchanged; derived responses need redaction review
 before viewing. Any external sharing remains a separate decision.
 
-Private browser acceptance passed on 2026-10-31 (Pacific), following the preview
-restart at 16:57:33 UTC. Lead verified the failed D3 finish and pre-action
+The first private browser acceptance passed on 2026-10-31 (Pacific), following
+the preview restart at 16:57:33 UTC. Lead verified the failed D3 finish and pre-action
 invoice.py, parent comparison, the treatment's D3 write and repaired D4 file,
 and an unsuccessful control's evaluator assertion. All eight control/treatment
 pairs, the interval and scope were readable. The full-width historical/source/cost
 notice and RECORDED badge were visible, with mutation controls disabled.
 The earlier layout finding was corrected in the private served overlay; on-disk
-workbench assets remain unchanged. This acceptance covers the temporary private
+workbench assets were unchanged at that checkpoint. That acceptance covered the private
 recorded view, not a fresh execution, deployed service or public release.
+
+At the user's request, the later dashboard uses a plain black-and-white layout,
+compact run rows with short IDs, simple headings and expandable Recording details.
+The final private browser check passed at viewer source `ef7a0bd8` after the
+17:27:44 UTC restart on 2026-10-31 (Pacific). It verified D3 files before action,
+the treatment's repaired D4 file, eight confirmation pairs and interval, and the
+failed control's actual 2292 versus expected 2334 evaluator result. Compare retains
+decisions, action fields, file modes and text diffs. The unchanged control shows
+equal 420 modes and “No text differences.” without inferring a change.
+
+The scoped UI, authority and recording checks cover 66 cases per interpreter
+(Python 3.11 and 3.12). Each Compare correction ran only its six affected renderer
+cases; the other 60 retain unchanged-source applicability. The original test-host
+failure, layout finding, omitted comparison details and misleading change labels
+remain retained. Bundle `9c9260d2` changes only viewer/asset metadata; all 183
+recorded responses remain identical. The active preview stays read-only and
+private, with zero new provider calls. This is historical controlled evidence,
+not fresh confirmation, live readiness or a public release.
 
 ## Historical live procedure
 
