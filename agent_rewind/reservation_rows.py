@@ -16,7 +16,9 @@ from sqlalchemy.engine import Connection
 
 from .admission_records import OPERATION_LIMITS, AdmissionStorageError, operation_value
 from .artifact_metadata import ArtifactError, _object
-from .migrations.ledger_compatibility import validated_ar7_history
+from .migrations.failure_catalog import inspect_failure_catalog
+from .migrations.failure_service import _actual_revision
+from .migrations.ledger_compatibility import _validate_native_projection, validated_ar7_history
 from .migrations.ledger_reader_financial import (
     CAP,
     FinancialProjection,
@@ -25,8 +27,8 @@ from .migrations.ledger_reader_financial import (
     read_financial_projection,
 )
 from .migrations.ledger_reader_graph import read_source_bounds
-from .migrations.ledger_reader_history import History
-from .migrations.schema import LEDGER, MigrationRefused, canonical
+from .migrations.ledger_reader_history import History, read_history
+from .migrations.schema import FAILURE, LEDGER, MigrationRefused, canonical
 from .operation_reads import (
     DESCRIPTOR_FIELDS,
     JOB_LIMITS,
@@ -79,6 +81,25 @@ class ReservationRows:
         observed = read_financial_projection(connection, LEDGER, work)
         source = source_headroom(connection, work, prospective=False)
         value = cls(scope, work, history, observed, source)
+        value.require_job()
+        return value
+
+    @classmethod
+    def _capture_failure(
+        cls, connection: Connection, scope: ReservationScope, work: OperationWork
+    ) -> ReservationRows:
+        # This fixed private producer entry never broadens the public ar7 guard.
+        # The complete successor must pass before its retained ar7 view is used.
+        observed = inspect_failure_catalog(connection, work)
+        if _actual_revision(connection) != FAILURE:
+            raise MigrationRefused("schema_incompatible")
+        history = read_history(connection, LEDGER, observed.retained_ar7, work)
+        _validate_native_projection(connection, history, work)
+        if history.ownership.organization_id != scope.context.organization_id:
+            raise ReservationRefusal("schema_or_provenance_invalid")
+        projection = read_financial_projection(connection, LEDGER, work)
+        source = source_headroom(connection, work, prospective=False)
+        value = cls(scope, work, history, projection, source)
         value.require_job()
         return value
 

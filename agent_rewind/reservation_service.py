@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from threading import Lock
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from sqlalchemy.engine import Engine
 
@@ -29,6 +29,10 @@ from .reservation_types import (
 from .scoped_locks import lock_authority
 from .scoped_repositories import ProjectContext
 
+if TYPE_CHECKING:
+    from .failure_evidence import _AcknowledgedClaim
+    from .failure_persistence import _FailureExecutionOwner
+
 
 class ReservationCoordinator:
     """Every result is historical; transaction facts remain available on failure."""
@@ -53,6 +57,21 @@ class ReservationCoordinator:
         if not isinstance(result, JobFence):
             raise ReservationRefusal("ledger_state_invalid")
         return result
+
+    def _claim_for_failure_execution(
+        self,
+        principal: VerifiedPrincipal,
+        context: ProjectContext,
+        intent: ClaimIntent,
+        *,
+        owner: _FailureExecutionOwner,
+        configuration: NativeConfiguration,
+    ) -> _AcknowledgedClaim:
+        from .failure_persistence import _claim_for_failure_execution
+
+        return _claim_for_failure_execution(
+            self, principal, context, intent, owner=owner, configuration=configuration
+        )
 
     def reserve(
         self,
