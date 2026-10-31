@@ -1617,6 +1617,408 @@ def failure_evidence_smoke(root: Path) -> None:
     print("Installed dormant failure evidence service and profiles verified outside checkout.")
 
 
+def failure_terminal_smoke(root: Path) -> None:
+    """Synthetic installed component execution, not a provider or live-worker proof."""
+    import hashlib
+    import sqlite3
+    from contextlib import ExitStack, closing
+    from dataclasses import asdict
+    from datetime import UTC, datetime
+
+    from cryptography.fernet import Fernet
+
+    from agent_rewind.admission_configuration import (
+        MAX_CONFIG_BYTES,
+        NativeConfiguration,
+        NativeRegistry,
+    )
+    from agent_rewind.admission_envelope import (
+        ArtifactBinding,
+        OriginCorrelation,
+        prepare_admission,
+    )
+    from agent_rewind.admission_publication import publish_rows
+    from agent_rewind.admission_repository import AdmissionRepository
+    from agent_rewind.admission_request import parse_submit
+    from agent_rewind.admission_transaction import TransactionOutcome, admission_transaction
+    from agent_rewind.artifact_metadata import ArtifactObject, object_locator
+    from agent_rewind.artifact_storage import LocalArtifactStorage
+    from agent_rewind.failure_evidence import CreatedFailure, FailureRefusal, MatchingOriginal
+    from agent_rewind.failure_persistence import _FailureExecutionOwner
+    from agent_rewind.failure_terminal import TerminalCoordinator
+    from agent_rewind.migrations.admission_service import initialize_admission
+    from agent_rewind.migrations.artifact_service import initialize_artifacts
+    from agent_rewind.migrations.failure_service import initialize_failure_evidence
+    from agent_rewind.migrations.ledger_engine import create_ledger_engine
+    from agent_rewind.migrations.ledger_inputs import validate_ledger_manifest
+    from agent_rewind.migrations.ledger_service import initialize_ledger
+    from agent_rewind.migrations.ledger_source import source_digest
+    from agent_rewind.migrations.ledger_transaction import LedgerOutcome, ledger_transaction
+    from agent_rewind.migrations.ledger_work import LedgerWork
+    from agent_rewind.migrations.projection_service import initialize_projection
+    from agent_rewind.models import canonical
+    from agent_rewind.request_authority import RequestAuthority
+    from agent_rewind.request_identity import VerifiedPrincipal
+    from agent_rewind.reservation_types import ClaimIntent
+    from agent_rewind.scoped_locks import lock_authority
+    from agent_rewind.sqlite_ownership import create_owned_sqlite_engine
+
+    fixture = root / "failure-terminal"
+    fixture.mkdir(mode=0o700)
+    path = fixture / "metadata.sqlite"
+    url = f"sqlite:///{path}"
+    key = "synthetic-installed-terminal"
+    organization, project, job = "1" * 32, "2" * 32, "3" * 32
+    # A local fixture identity receives actual native membership below. This is
+    # not an authentication test or a public admission/readiness override.
+    principal = VerifiedPrincipal("oidc:" + "4" * 64)
+    context = ProjectContext(organization, project, principal.principal_id)
+    configuration_bytes = canonical(
+        {
+            "schema": 1,
+            "kind": "native-v1",
+            "image_identity": "sha256:" + "1" * 64,
+            "endpoint_profile": "installed-fixture",
+            "endpoint_revision": "revision-1",
+            "model_revision": "model-1",
+            "adapter_digest": "2" * 64,
+            "prompt_digest": "3" * 64,
+            "tool_policy_digest": "4" * 64,
+            "configuration_digest": "5" * 64,
+            "processor_profile": "fixture",
+            "max_input_tokens": 1000,
+            "max_output_tokens": 1,
+            "reasoning_effort": "",
+            "seed_supported": False,
+            "seed_strategy": "trial-plus-step-mod-2147483647",
+            "price_version": "prices-1",
+            "input_microusd_per_million_tokens": 1,
+            "output_microusd_per_million_tokens": 1,
+        }
+    )
+    configuration = NativeConfiguration(
+        configuration_bytes, expected_digest=hashlib.sha256(configuration_bytes).hexdigest()
+    )
+    dependency = fixture / "installed-configuration.json"
+    with dependency.open("xb") as stream:
+        dependency.chmod(0o600)
+        stream.write(configuration_bytes)
+
+    class OfflineConfigurationProbe:
+        """Reads a real private dependency; never implements provider execution."""
+
+        @property
+        def configuration(self) -> NativeConfiguration:
+            with dependency.open("rb") as stream:
+                data = stream.read(MAX_CONFIG_BYTES + 1)
+            return NativeConfiguration(data, expected_digest=configuration.digest)
+
+        def validate_request(self, request: bytes, reserved_microusd: int) -> None:
+            raise RuntimeError("The installed component fixture cannot dispatch")
+
+        def send(self, request: bytes) -> object:
+            raise RuntimeError("The installed component fixture cannot call a provider")
+
+    def snapshot():
+        with closing(sqlite3.connect(path)) as connection:
+            connection.execute("PRAGMA query_only=ON")
+            schema = tuple(
+                connection.execute(
+                    "SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY type,name"
+                )
+            )
+            retained = tuple(
+                line
+                for line in connection.iterdump()
+                if line.startswith("INSERT INTO ")
+                and not line.startswith('INSERT INTO "jobs"')
+                and not line.startswith('INSERT INTO "job_failure_evidence"')
+            )
+            result = connection.execute("SELECT * FROM jobs ORDER BY id")
+            jobs = [
+                dict(zip([column[0] for column in result.description], row, strict=True))
+                for row in result.fetchall()
+            ]
+            result = connection.execute("SELECT * FROM job_failure_evidence ORDER BY job_id")
+            evidence = [
+                dict(zip([column[0] for column in result.description], row, strict=True))
+                for row in result.fetchall()
+            ]
+            return schema, retained, jobs, evidence
+
+    with ExitStack() as resources:
+        seed = create_engine(url)
+        resources.callback(seed.dispose)
+        install(seed, key)
+        initialize_ownership(
+            seed,
+            {
+                "schema_version": 1,
+                "installation_key": key,
+                "organization_id": organization,
+                "project_id": project,
+                "project_name": "Synthetic installed terminal component",
+                "principal_grants": [
+                    {
+                        "principal_id": principal.principal_id,
+                        "role": "maintainer",
+                        "legacy_default": False,
+                    }
+                ],
+            },
+        )
+        initialize_artifacts(seed)
+        initialize_projection(seed)
+        initialize_admission(seed)
+        seed.dispose()
+
+        # Invoke the existing internal publisher with actual upload receipts.
+        # No customer-facing coordinator is made ready for this controlled setup.
+        admission = create_owned_sqlite_engine(url)
+        configure_artifact_engine(admission)
+        resources.callback(admission.dispose)
+        authority = RequestAuthority(admission)
+        repository = AdmissionRepository(authority)
+        intent = parse_submit(
+            canonical(
+                {
+                    "client_operation_id": "5" * 32,
+                    "adapter_config_id": "native-v1",
+                    "seed": 0,
+                    "budget_microusd": 1,
+                    "task": {
+                        "name": "installed-component",
+                        "instruction": "No execution requested.",
+                        "image": "installed-fixture",
+                        "files": {},
+                        "evaluator_files": {},
+                        "evaluator_command": "true",
+                    },
+                }
+            )
+        )
+        at = datetime.now(UTC)
+
+        def metadata(data: bytes, identifier: str) -> ArtifactObject:
+            digest = hashlib.sha256(data).hexdigest()
+            return ArtifactObject(
+                identifier, project, digest, object_locator(project, digest), 1, len(data), at
+            )
+
+        task = ArtifactBinding(
+            project_id=project,
+            job_id=job,
+            role="task",
+            descriptor=metadata(intent.task_bytes, "6" * 32),
+            plaintext=intent.task_bytes,
+        )
+        config = ArtifactBinding(
+            project_id=project,
+            job_id=job,
+            role="admission_config",
+            descriptor=metadata(configuration_bytes, "7" * 32),
+            plaintext=configuration_bytes,
+        )
+        prepared = prepare_admission(
+            intent,
+            NativeRegistry(configuration, ["installed-fixture"]),
+            project_id=project,
+            job_id=job,
+            origin=OriginCorrelation("8" * 32),
+            task_binding=task,
+            configuration_binding=config,
+            permitted_processor_profile="fixture",
+        )
+        payload = prepared.bind_payload(metadata(prepared.envelope_bytes, "9" * 32))
+        artifact_root = fixture / "artifacts"
+        artifact_root.mkdir(mode=0o700)
+        storage = LocalArtifactStorage(
+            artifact_root, Fernet(Fernet.generate_key()), plaintext_limit=65536
+        )
+        receipts = tuple(
+            storage.put_verified(binding.descriptor, binding.plaintext)
+            for binding in (task, config, payload)
+        )
+        outcome = TransactionOutcome()
+        with admission_transaction(admission, outcome) as connection:
+            lock_authority(authority, connection, principal, context, None, None)
+            arguments = dict(
+                client_operation_id=intent.client_operation_id,
+                key_hash="a" * 64,
+                request_digest=intent.request_digest,
+            )
+            if (
+                repository.resolve_identities(connection, principal, context, **arguments).operation
+                is not None
+            ):
+                raise RuntimeError("Installed fixture admission identity already exists")
+            operation = publish_rows(
+                connection,
+                authority,
+                repository,
+                principal,
+                context,
+                operation_id="b" * 32,
+                key_hash="a" * 64,
+                prepared=prepared,
+                payload=payload,
+                receipts=receipts,
+                created_at=at,
+            )
+            resolved = repository.resolve_identities(connection, principal, context, **arguments)
+            if resolved.operation != operation or resolved.needs_alias:
+                raise RuntimeError("Installed fixture admission identity did not reconcile")
+        if not outcome.commit_acknowledged or outcome.cleanup_failed:
+            raise RuntimeError("Installed fixture admission did not exit cleanly")
+        admission.dispose()
+
+        operator = create_ledger_engine(url)
+        resources.callback(operator.dispose)
+        work = LedgerWork()
+        with ledger_transaction(operator, LedgerOutcome(), work=work) as connection:
+            original_source = source_digest(connection, work)
+
+        def account(identifier, scope, target, project_id=None, job_id=None):
+            return {
+                "id": identifier,
+                "organization_id": organization,
+                "scope": scope,
+                "scope_id": target,
+                "project_id": project_id,
+                "job_id": job_id,
+                "period_start": "2000-01-01T00:00:00.000000Z",
+                "period_end": "2100-01-01T00:00:00.000000Z",
+                "limit_microusd": 1,
+            }
+
+        manifest = validate_ledger_manifest(
+            {
+                "schema_version": 1,
+                "installation_key": key,
+                "manifest_id": "c" * 32,
+                "operation": "initialize",
+                "source_digest": original_source,
+                "parent_manifest_digest": None,
+                "backup_evidence_digest": "d" * 64,
+                "drain_evidence_digest": "e" * 64,
+                "accounts": [
+                    account("d" * 32, "organization", organization),
+                    account("e" * 32, "project", project, project),
+                    account("f" * 32, "job", job, project, job),
+                ],
+                "opening_accounts": {
+                    "organization_account_id": "d" * 32,
+                    "projects": [{"project_id": project, "account_id": "e" * 32}],
+                },
+            }
+        )
+        initialize_ledger(operator, manifest)
+        initialize_failure_evidence(operator, installation_key=key)
+        operator.dispose()
+
+        engine = create_owned_sqlite_engine(url)
+        configure_artifact_engine(engine)
+        resources.callback(engine.dispose)
+        authority = RequestAuthority(engine)
+        before = snapshot()
+        if len(before[2]) != 1 or before[2][0]["status"] != "queued" or before[3]:
+            raise RuntimeError("Installed fixture did not create one eligible queued admission")
+        ciphertexts = {
+            file.relative_to(artifact_root).as_posix(): hashlib.sha256(
+                file.read_bytes()
+            ).hexdigest()
+            for file in artifact_root.rglob("*")
+            if file.is_file()
+        }
+        probe = OfflineConfigurationProbe()
+        if probe.configuration != configuration:
+            raise RuntimeError("Installed dependency differs from admitted configuration")
+        owner = _FailureExecutionOwner(engine, authority, probe)
+        resources.callback(owner.close)
+        fence = owner.claim(principal, context, ClaimIntent(job, "0" * 32, 0, 60))
+        if not owner.outcome.commit_acknowledged or owner.outcome.cleanup_failed:
+            raise RuntimeError("Installed private claim did not exit cleanly")
+        claimed = snapshot()
+        if (
+            claimed[:2] != before[:2]
+            or claimed[3]
+            or len(claimed[2]) != 1
+            or claimed[2][0]
+            != {
+                **before[2][0],
+                "status": "running",
+                "owner": fence.owner_uuid,
+                "lease_generation": fence.generation,
+                "lease_until": claimed[2][0]["lease_until"],
+            }
+            or fence.job_id != job
+            or fence.generation != 1
+            or claimed[2][0]["lease_until"] is None
+        ):
+            raise RuntimeError("Installed claim changed an unexpected native value")
+
+        # Real dependency loss is observed by the registered installed owner.
+        # No event, cause, capability or registration is manufactured by the smoke.
+        dependency.unlink()
+        event = owner._check_installed_binding()
+        if event is None or dependency.exists():
+            raise RuntimeError("Installed dependency loss did not issue its fixed event")
+        terminal = TerminalCoordinator(engine, authority)
+        result = terminal.complete_failure(principal, context, event)
+        if (
+            type(result) is not CreatedFailure
+            or terminal.original != result.original
+            or not terminal.outcome.commit_acknowledged
+            or terminal.outcome.cleanup_failed
+            or result.original.fence != fence
+            or result.original.record.cause != "dependency_failed"
+            or result.original.record.phase != "outcome_unknown"
+            or result.original.record.job_status != "failed"
+        ):
+            raise RuntimeError(
+                "Installed completion did not retain its original acknowledged result"
+            )
+        completed = snapshot()
+        if (
+            completed[:2] != claimed[:2]
+            or completed[2] != [{**claimed[2][0], "status": "failed"}]
+            or completed[3] != [asdict(result.original.record)]
+        ):
+            raise RuntimeError("Installed completion changed more than status and one evidence row")
+        inspector = TerminalCoordinator(engine, authority)
+        inspected = inspector.inspect_original(principal, context, result.original)
+        if (
+            type(inspected) is not MatchingOriginal
+            or inspected.original != result.original
+            or not inspector.outcome.commit_acknowledged
+            or inspector.outcome.cleanup_failed
+            or snapshot() != completed
+        ):
+            raise RuntimeError("Installed original inspection changed or regenerated the result")
+        try:
+            TerminalCoordinator(engine, authority).complete_failure(principal, context, event)
+        except FailureRefusal as error:
+            if error.reason != "capability_not_issued":
+                raise RuntimeError("Installed consumed-event refusal changed") from None
+        else:
+            raise RuntimeError("Installed component reused a consumed completion event")
+        compatibility = runtime_schema_compatibility(engine)
+        if (
+            compatibility.status != "incompatible"
+            or compatibility.code != "migration_only"
+            or snapshot() != completed
+            or ciphertexts
+            != {
+                file.relative_to(artifact_root).as_posix(): hashlib.sha256(
+                    file.read_bytes()
+                ).hexdigest()
+                for file in artifact_root.rglob("*")
+                if file.is_file()
+            }
+        ):
+            raise RuntimeError("Installed component altered preserved data or customer readiness")
+
+
 package = Path(agent_rewind.__file__).resolve()
 if not package.is_relative_to(Path(sys.prefix).resolve()):
     raise RuntimeError("Smoke imported a source checkout instead of the installed wheel")
@@ -1665,6 +2067,7 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
     operation_service_smoke(Path(temporary))
     operation_http_smoke(Path(temporary))
     failure_evidence_smoke(Path(temporary))
+    failure_terminal_smoke(Path(temporary))
     database = Path(temporary) / "metadata.sqlite"
     engine = create_engine(f"sqlite:///{database}")
     configure_artifact_engine(engine)
