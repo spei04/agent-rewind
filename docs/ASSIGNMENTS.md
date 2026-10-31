@@ -2,7 +2,7 @@
 
 ## Current status
 
-- **Delivery:** PCA1 is delivered at `48ddc894`. API usage merged at `84d63879`; main/candidate acceptance is pending.
+- **Delivery:** PCA1 is delivered at `48ddc894`. [API-USAGE-001 #124](https://github.com/spei04/agent-rewind/issues/124) is verified at `84d63879` ([original main](https://github.com/spei04/agent-rewind/actions/runs/41141950680)).
 - **Active:** Dispatch [PR #127](https://github.com/spei04/agent-rewind/pull/127) has a reviewed rollback-test correction at `1788de74`; hosted acceptance is pending. F1 composition `b8c1f2d` and PCA2 `51ae3a75` await delivery.
 - **Next:** After F1 delivery, implement F2’s dormant failure schema and exact native catalogs; live startup remains behind F3–F5/P2.
 - **Limits:** Live admitted startup is incomplete. Payment is approved within **$200 total including prior charges**; $36.567974 remains held and other exposure is unknown. No verified paid allowance or production activation follows.
@@ -22,6 +22,11 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**API-USAGE-001 delivery accepted — 2026-10-31**
+
+- Lead: accepted [API-USAGE-001 #124](https://github.com/spei04/agent-rewind/issues/124) at `84d63879`. [Original main run 41141950680](https://github.com/spei04/agent-rewind/actions/runs/41141950680), attempt 1, passed all eight jobs: Python 3.11 recorded 8,701 passes/45 skips and Python 3.12 recorded 8,715 passes/31 skips.
+- Independent final review `7ca6db7e` binds candidate `13021143895` (archive SHA256 prefix `b38c1d19`), all 148 runtime members, actual isolated installed-wheel and container proof. Worker, production, research and payment gates remain unchanged; no new paid allowance or activation follows.
 
 **Rollback-test correction — 2026-10-30**
 
