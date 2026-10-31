@@ -123,6 +123,30 @@ recorded responses remain identical. The active preview stays read-only and
 private, with zero new provider calls. This is historical controlled evidence,
 not fresh confirmation, live readiness or a public release.
 
+## Private F3 component checks — 2026-10-31
+
+These engineering checks are separate from the recorded dashboard and research
+results. Private source `137bb2bc` adds original inspection and expiry alongside
+completion. Fifteen focused SQLite cases per interpreter passed before the
+row-count correction (30 originals); two affected positives per interpreter
+passed on corrected source (four further passes). The other originals retain
+their reviewed source applicability, not new-source execution credit.
+
+At aligned source `4df33d67`, one fresh restricted PostgreSQL completion passed
+on each interpreter. Stable producer grants preceded genuine claim and dependency
+observation; the public F2 observer still refused those writer grants. Independent
+checks verified the exact native state/evidence delta, timestamp, digests,
+ciphertexts, event consumption and clean commit acknowledgment. Both completions
+used 483 of 512 Work units, with elapsed samples below one second. Source,
+environment and database/role baselines were preserved; PostgreSQL and test
+processes were stopped and reaped.
+
+The original row-count refusal and the separate pre-native launcher refusal remain
+retained. These PostgreSQL cases do not cover original inspection, expiry,
+cancel=true or the remaining [five terminal control groups](ASSIGNMENTS.md#assignment-history).
+Earlier independent SQLite ACK/cleanup outcomes remain scoped to `131e6bc0`.
+No full F3, live startup or production acceptance follows from these finite cases.
+
 ## Historical live procedure
 
 The following describes the historical live procedure; current migration-only

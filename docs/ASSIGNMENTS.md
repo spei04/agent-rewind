@@ -3,8 +3,8 @@
 ## Current status
 
 - **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129) is accepted at [main 47da5b44](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2), including original main checks, source-matched candidate and installed-package evidence.
-- **Assigned:** The requested plain dashboard passed private source, data and browser review. Quality resumes independent terminal oracle preparation; Backend owns F3 persistence; Review checks source, authority and evidence.
-- **Next:** F3 acceptance, F4/F5, then P2 worker integration. Admitted startup and production remain gated; [funding](delivery/CAPACITY_AND_FUNDING.md) and [retained failures](#assignment-history) are unchanged. Optional fixture optimization is deferred.
+- **Assigned:** The plain dashboard is complete. Private F3 has scoped SQLite inspection/expiry and fresh restricted PostgreSQL completion evidence. Backend owns persistence; Quality prepares remaining native controls; Review checks source and evidence.
+- **Next:** Five terminal control groups, then F3 acceptance, F4/F5 and P2 integration. Admitted startup and production remain gated; [funding](delivery/CAPACITY_AND_FUNDING.md) and [retained failures](#assignment-history) are unchanged.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,29 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Private F3 terminal checkpoint — 2026-10-31 (Pacific)**
+
+- Private source `137bb2bc` contains completion, original inspection and expiry.
+  The 15 focused SQLite cases per interpreter supply 30 original passes; after the
+  statement-scoped row-count correction, two affected positives per interpreter
+  supply four new passes. Remaining originals retain only their reviewed source
+  applicability; this was not a new combined run.
+- Independent fresh restricted PostgreSQL completion passed once on Python 3.12
+  and 3.11 at aligned source `4df33d67`: stable SELECT+INSERT grants before claim,
+  public F2 writer refusal, exact status/evidence delta, native time, independent
+  digests and clean commit acknowledgment. Each completion used 483 Work units.
+  The original PostgreSQL row-count failure and outer-launch pre-entry refusal
+  remain retained. Earlier independent SQLite ACK/cleanup outcomes stay scoped
+  to `131e6bc0`; these PostgreSQL positives do not execute inspection, expiry or
+  cancel=true.
+- Quality next prepares five groups: actual expiry contention with original
+  inspection/cancel-bit checks; native owner/generation/origin drift; role-policy
+  faults; transaction-body replacement; and genuine deferred-constraint rollback.
+  Backend owns runtime; Review checks source and evidence before bounded execution.
+  Claim-only receipts do not establish terminal coverage. The accepted monochrome
+  [private dashboard](VALIDATION.md#private-recorded-walkthrough) stays unchanged;
+  full F3, live startup, funding and production gates do not advance.
 
 **Plain recorded dashboard accepted — 2026-10-31 (Pacific)**
 
