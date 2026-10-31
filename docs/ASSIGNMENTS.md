@@ -3,8 +3,8 @@
 ## Current status
 
 - **Delivery:** PCA1, [API-USAGE-001](https://github.com/spei04/agent-rewind/issues/124), F1 and internal dispatch are delivered at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb).
-- **Active:** F2 schema/catalog/profile components are accepted at `76437340`. Backend builds the owned transaction; Quality checks native behavior; Review audits each stage.
-- **Next:** Complete F2 transaction/service/migration and native acceptance. Full F2/P1, F3–F5/P2 and admitted startup remain gated; PCA2 delivery is separate.
+- **Active:** F2 schema/catalog/profile/transaction components are accepted at `d24ee7ab`. Backend builds service/revision/compatibility; Quality checks service/native preservation; Review audits source/security.
+- **Next:** Complete F2 service/migration and delivery acceptance. Full F2/P1, F3–F5/P2 and admitted startup remain gated; PCA2 delivery is separate.
 - **Limits:** The **$200 lifetime budget includes prior charges**; $36.567974 remains held. Other exposure and available allowance remain unknown.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F2 owned transaction accepted; service assigned — 2026-10-30 (Pacific)**
+
+- Lead: accepted transaction source and independent oracle at `d24ee7ab`, peer `bdb3521e`, final native packet `28ea6850` and integration `9ebc5de9`. Separate originals record 61 focused/retained SQLite cases and 15 independent PostgreSQL cases per interpreter; this is not a new combined run. PostgreSQL includes a real version-row write plus DDL, complete independent rollback readback, and truthful acknowledgment/cleanup uncertainty. The original native receipts are dated 2026-10-31 UTC.
+- Backend: owns service/revision/compatibility implementation in SECONDARY; Quality owns independent service/native/preservation tests in PRIMARY; Review checks source/security. [Current F2 component entry](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f2-owned-transaction-accepted-service-assigned--2026-10-30-pacific) retains exact source and evidence identities. Physical transaction fixtures do not establish installed successor/readiness; full F2/P1 acceptance remains null, and F3–F5/P2 remain gated.
+- Planning: preserves previous histories, fixed limits, estimates, funding preparation and unknown available allowance. No new task, paid scope or production activation follows.
 
 **F2 catalog accepted; owned transaction assigned — 2026-10-30 (Pacific)**
 

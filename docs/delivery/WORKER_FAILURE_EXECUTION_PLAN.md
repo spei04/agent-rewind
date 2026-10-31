@@ -1,6 +1,6 @@
 # Worker failure execution plan
 
-F1 is **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb) after PR128/main/candidate delivery. F2 schema/catalog/profile components are accepted at `76437340`; Backend now implements the owned transaction, Quality supplies independent native oracles and Review checks each stage under source handoff 22608a0f. P1 and aggregate AR-010-B remain **In progress** with null final acceptance; F2 is **In progress** with null acceptance; F3-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. The [machine ledger](../../contracts/proposals/execution-backlog.json) and [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) are authoritative; five planned F1-F5 PRs, estimates and sequential gates are unchanged.
+F1 is **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb) after PR128/main/candidate delivery. F2 schema/catalog/profile and owned transaction components are accepted at `d24ee7ab`; Backend implements service/revision/compatibility, Quality supplies independent service/native/preservation tests and Review checks source/security under source handoff 22608a0f. P1 and aggregate AR-010-B remain **In progress** with null final acceptance; F2 is **In progress** with null acceptance; F3-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. The [machine ledger](../../contracts/proposals/execution-backlog.json) and [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) are authoritative; five planned F1-F5 PRs, estimates and sequential gates are unchanged.
 
 ## Allocation and sequence
 
@@ -15,6 +15,41 @@ P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2
 | F5 | Restart-safe operator markers, preservation, restore and P1 delivery | 3 [2.5–4.5] | low |
 
 ## Entry, ownership and acceptance
+
+### F2 owned transaction accepted; service assigned — 2026-10-30 (Pacific)
+
+Accepted source `d24ee7ab4435b1e5c61b61f170066cd68193aa69` preserves
+the earlier schema/catalog/profile components and adds the owned transaction
+plus independent native oracle. Independent peer
+`bdb3521ec429d00c429d4580f539201dfdda9219e50e7482e41d3667b6460723`,
+final native index
+`28ea6850e47bc95aab355f61582169a6c8062f2050daaea1a2475a5c018f8fe0`
+and lead integration
+`9ebc5de93eccaffa137d840c413c483cf7420a741f07e2649ba86b7be609ec5a`
+bind the source and separate originals: 61 focused/retained SQLite cases plus
+15 independent PostgreSQL cases per interpreter, not a new combined run.
+The 2026-10-31 UTC PostgreSQL originals include actual DDL and version-row
+rollback, old20/new21 exclusion, body/xid identity and acknowledgment/cleanup
+ambiguity with independent native state observations. Scoped native Work records
+retain 12 bootstrap, 8 cleanup and 10–61 ordinary units; they do not establish
+complete service fit. Prior source, transport and preparation incidents remain
+retained separately.
+
+Backend owns `initialize_failure_evidence(engine, *, installation_key,
+timeout_seconds=5)`, `inspect_failure_evidence(...)`, the thin reserved revision
+and compatibility registration in SECONDARY. Quality owns independent
+service/native/preservation tests in PRIMARY; Review checks source/security;
+the lead owns revision/integration. Services must distinguish strict absent/ar7
+with `ledger_v1` from complete/ar8 with `failure_evidence_v1`, retaining complete
+ar7 inspection with the same installation key. Full catalog checksum stays
+separate from adoption/file hashes; results follow acknowledged commit and clean
+exit only. The thin revision uses the exact owned Connection-to-Work guard,
+revoked in finally; the raw creator stays unchanged. These are the existing F2
+requirements, not new gates.
+
+Full F2/P1/aggregate acceptance remains null. Service/migration compatibility,
+complete-path native fit and matching delivery remain required; F3–F5/P2,
+readiness/startup, fixed limits, five planned PRs, estimates and funding are unchanged.
 
 ### F2 component progress; owned transaction next — 2026-10-30 (Pacific)
 
@@ -119,7 +154,7 @@ Allocation basis: Two profile families, literal token semantics, fresh bounded t
 
 Frozen module boundaries and native acceptance vectors are in the [F2 implementation allocation](WORKER_FAILURE_ENTRY_DESIGN.md#f2-implementation-allocation--2026-10-30): failure_schema, failure_catalog, failure_transaction, failure_service, the reserved thin migration and two literal dialect profiles. This allocates the existing F2 scope; accepted F1 delivery and handoff 22608a0f now permit its implementation, without F2 acceptance.
 
-Owner: Backend implements the owned transaction, then service/migration and focused native checks in SECONDARY; Quality owns independent transaction oracles in PRIMARY; Review independently checks source/privilege/preservation evidence; the lead retains revision/integration ownership. F2 is In progress after accepted F1, with null acceptance.
+Owner: Backend implements service/revision/compatibility and focused native checks in SECONDARY; Quality owns independent service/native/preservation oracles in PRIMARY; Review independently checks source/security evidence; the lead retains revision/integration ownership. F2 is In progress after accepted F1, with null acceptance.
 
 Common prerequisites plus accepted merged F1 and actual capacity report; complete relation/constraints/grants/revision/profile/rollback design independently accepted before this code. Unknown full successor fit is an explicitly planned later implementation test, not evidence fabricated here.
 
