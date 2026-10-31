@@ -26,6 +26,7 @@ from ..sqlite_ownership import optional_progress, owned_connect, owned_receipt, 
 from .schema import (
     ADMISSION,
     ARTIFACTS,
+    FAILURE,
     HEAD,
     LEDGER,
     OWNERSHIP,
@@ -67,9 +68,16 @@ class RevisionProfile(BaseModel):
         "ar_0005_run_index",
         "ar_0006_admission",
         "ar_0007_ledger",
+        "ar_0008_failure_evidence",
     ]
     catalog_profile: Literal[
-        "adoption_v1", "ownership_v1", "artifacts_v1", "projection_v1", "admission_v1", "ledger_v1"
+        "adoption_v1",
+        "ownership_v1",
+        "artifacts_v1",
+        "projection_v1",
+        "admission_v1",
+        "ledger_v1",
+        "failure_evidence_v1",
     ]
     mode: Literal["migration_only"]
     required_completed_backfills: tuple[BackfillRequirement, ...] = Field(max_length=16)
@@ -83,6 +91,7 @@ class RevisionProfile(BaseModel):
             PROJECTION: "projection_v1",
             ADMISSION: "admission_v1",
             LEDGER: "ledger_v1",
+            FAILURE: "failure_evidence_v1",
         }[self.revision]
         if self.catalog_profile != expected:
             raise ValueError("Revision catalog profile mismatch")
@@ -91,9 +100,9 @@ class RevisionProfile(BaseModel):
             if self.revision != HEAD
             else ()
         )
-        if self.revision in {PROJECTION, ADMISSION, LEDGER}:
+        if self.revision in {PROJECTION, ADMISSION, LEDGER, FAILURE}:
             requirements += (BackfillRequirement(revision=PROJECTION, phase="run_index"),)
-        if self.revision == LEDGER:
+        if self.revision in {LEDGER, FAILURE}:
             requirements += (BackfillRequirement(revision=LEDGER, phase="ledger_opening"),)
         if self.revision != HEAD and self.required_completed_backfills != requirements:
             raise ValueError("Required backfill differs")
@@ -106,7 +115,7 @@ class ReleaseProfile(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
     manifest_version: Literal[1]
     release: Literal["0.1.0"]
-    revisions: tuple[RevisionProfile, ...] = Field(min_length=1, max_length=6)
+    revisions: tuple[RevisionProfile, ...] = Field(min_length=1, max_length=7)
 
     @model_validator(mode="after")
     def unique_revisions(self) -> ReleaseProfile:
@@ -449,6 +458,15 @@ def _check_schema_compatibility(
         # can turn the adoption revision into a customer-ready revision.
         profile = ReleaseProfile.model_validate_json(release_profile.model_dump_json())
         with _inspection(connection, coherent_snapshot=True, checks=checks):
+            # A successor is never passed through the frozen old20 observer.
+            from .failure_service import _is_failure_candidate, _validate_failure_compatibility
+
+            if _is_failure_candidate(connection, checks):
+                if sum(item.revision == FAILURE for item in profile.revisions) != 1:
+                    return CompatibilityResult("incompatible", "schema_incompatible")
+                _validate_failure_compatibility(connection, checks)
+                checks.check()
+                return CompatibilityResult("incompatible", "migration_only")
             _, revision = schema_table_names(connection)
             checks.check()
             selected = [p for p in profile.revisions if revision == p.revision]
