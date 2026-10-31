@@ -1,6 +1,6 @@
 # Worker failure execution plan
 
-F1 is **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb) after PR128/main/candidate delivery. F2 schema/catalog/profile and owned transaction components are accepted at `d24ee7ab`; Backend implements service/revision/compatibility, Quality supplies independent service/native/preservation tests and Review checks source/security under source handoff 22608a0f. P1 and aggregate AR-010-B remain **In progress** with null final acceptance; F2 is **In progress** with null acceptance; F3-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. The [machine ledger](../../contracts/proposals/execution-backlog.json) and [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) are authoritative; five planned F1-F5 PRs, estimates and sequential gates are unchanged.
+F1 is **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb) after PR128/main/candidate delivery. F2 schema/catalog/profile/transaction and service/native components are accepted at `33649347`; installed smoke is statically reviewed but unexecuted. Backend collects final inventory/skips, the lead assembles delivery and Quality/Review reconcile source/evidence under the existing handoff 22608a0f. P1 and aggregate AR-010-B remain **In progress** with null final acceptance; F2 is **In progress** with null acceptance; F3-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. The [machine ledger](../../contracts/proposals/execution-backlog.json) and [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) are authoritative; five planned F1-F5 PRs, estimates and sequential gates are unchanged.
 
 ## Allocation and sequence
 
@@ -15,6 +15,35 @@ P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2
 | F5 | Restart-safe operator markers, preservation, restore and P1 delivery | 3 [2.5–4.5] | low |
 
 ## Entry, ownership and acceptance
+
+### F2 service and native checks accepted; delivery next — 2026-10-30 (Pacific)
+
+Composition `3364934728d67514e4f7f86e46f8d2f3a1098375` preserves accepted
+service/native source `72ac4525385aed2d6feb847f4ac2c46d9b3b6f5b` and adds the
+statically reviewed installed smoke. Lead integration `0ddd5653`,
+independent peer `80fe0f99` and native final packet `e9d32fe1` retain exact
+source and original outcomes. Backend's 60 SQLite/offline cases and independent
+15 applicable cases (5 SQLite, 10 PostgreSQL) per interpreter are separate
+campaigns. Python 3.12 retains its qualified composites and both original
+Backend failures; the oracle retains direct-API originals separately from
+the two changed public-entry positives plus three unchanged SQLite bodies.
+The PostgreSQL originals and full Python 3.11 oracle ran the final source.
+
+The 2026-10-31 UTC native evidence verifies real upgrade/version publication,
+raw adoption/progress/row/ciphertext preservation, landed source-drift rollback,
+scoped guard revocation, public migration-only compatibility and truthful
+acknowledgment/cleanup uncertainty. Whole fixture paths stayed within unchanged
+caps and satisfy F2 foundation capacity. Finite ordinary Work observations of
+12–826 do not establish universal maximum-data fit or admitted startup; the
+specified maximum online-consumer cohorts remain F4 work.
+
+Backend now collects actual full inventories/skips; the lead assembles their
+phase/CI baseline and matching hosted PR/main/candidate/installed evidence.
+Quality synchronizes progress and independently reconciles evidence; Review
+checks source/evidence. The installed smoke is written and reviewed but has
+not run. Full F2/P1/aggregate acceptance remains null; F3–F5/P2 remain
+Not started. Fixed limits, five planned PRs, estimates, funding and paid or
+production gates are unchanged.
 
 ### F2 owned transaction accepted; service assigned — 2026-10-30 (Pacific)
 
@@ -154,9 +183,9 @@ Allocation basis: Two profile families, literal token semantics, fresh bounded t
 
 Frozen module boundaries and native acceptance vectors are in the [F2 implementation allocation](WORKER_FAILURE_ENTRY_DESIGN.md#f2-implementation-allocation--2026-10-30): failure_schema, failure_catalog, failure_transaction, failure_service, the reserved thin migration and two literal dialect profiles. This allocates the existing F2 scope; accepted F1 delivery and handoff 22608a0f now permit its implementation, without F2 acceptance.
 
-Owner: Backend implements service/revision/compatibility and focused native checks in SECONDARY; Quality owns independent service/native/preservation oracles in PRIMARY; Review independently checks source/security evidence; the lead retains revision/integration ownership. F2 is In progress after accepted F1, with null acceptance.
+Owner: Backend collects final inventory/skips in SECONDARY; Quality synchronizes progress and independently reconciles delivery evidence in PRIMARY; Review checks source/evidence; the lead owns phase/CI baseline, publication and delivery integration. Accepted service/native components do not populate F2 acceptance: F2 remains In progress with null acceptance.
 
-Common prerequisites plus accepted merged F1 and actual capacity report; complete relation/constraints/grants/revision/profile/rollback design independently accepted before this code. Unknown full successor fit is an explicitly planned later implementation test, not evidence fabricated here.
+Common prerequisites plus accepted merged F1 and actual capacity report; complete relation/constraints/grants/revision/profile/rollback design independently accepted before this code. Fresh/legacy dormant-foundation fit is now evidenced by the accepted complete service and public runtime paths under unchanged limits; final composed checks and delivery remain pending.
 
 Actual SQLite/restricted PostgreSQL upgrade, exact observed columns/types/constraints/triggers/indexes/privileges, duplicate/invalid variant/native byte/range rejection, forbidden mutation and partial/unknown/future schema refusal; interrupted upgrade/rollback and original-row/audit/ciphertext comparison. Old-version serving guard must refuse successor unless the later complete adapter is selected.
 

@@ -3,8 +3,8 @@
 ## Current status
 
 - **Delivery:** PCA1, [API-USAGE-001](https://github.com/spei04/agent-rewind/issues/124), F1 and internal dispatch are delivered at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb).
-- **Active:** F2 schema/catalog/profile/transaction components are accepted at `d24ee7ab`. Backend builds service/revision/compatibility; Quality checks service/native preservation; Review audits source/security.
-- **Next:** Complete F2 service/migration and delivery acceptance. Full F2/P1, F3–F5/P2 and admitted startup remain gated; PCA2 delivery is separate.
+- **Active:** F2 service/native components are accepted at `33649347`; foundation checks are complete. Backend collects inventories; lead assembles delivery; Quality and Review check evidence.
+- **Next:** Installed smoke is unexecuted; hosted delivery and full F2/P1 acceptance remain pending. F3–F5/P2 and admitted startup stay gated; PCA2 delivery is separate.
 - **Limits:** The **$200 lifetime budget includes prior charges**; $36.567974 remains held. Other exposure and available allowance remain unknown.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F2 service and native checks accepted; delivery next — 2026-10-30 (Pacific)**
+
+- Lead: composed accepted service/native source `72ac4525` and the statically reviewed, unexecuted installed smoke at `33649347`. Peer `80fe0f99` and native packet `e9d32fe1` bind actual upgrade/version, raw history/ciphertext preservation, public migration-only compatibility and acknowledgment/cleanup behavior; receipts are dated 2026-10-31 UTC.
+- Evidence: Backend's 60 cases and Quality's 15 applicable cases per interpreter are separate campaigns. Python 3.12 composites, both original Backend failures and the earlier direct-API oracle successes remain qualified; changed public-entry positives have their own originals. Whole fixture paths satisfy F2 foundation capacity within existing caps; no universal maximum-capacity claim follows.
+- Next: Backend collects final inventory/skips; lead assembles phase/CI baseline and hosted PR/main/candidate/installed delivery. Quality synchronizes progress and independently reconciles evidence; Review checks source/evidence. [Current F2 entry](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f2-service-and-native-checks-accepted-delivery-next--2026-10-30-pacific) keeps full F2/P1 acceptance null, F3–F5/P2 Not started and funding unchanged.
 
 **F2 owned transaction accepted; service assigned — 2026-10-30 (Pacific)**
 
