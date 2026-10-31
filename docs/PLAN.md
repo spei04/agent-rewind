@@ -1182,10 +1182,12 @@ ceiling for those 67 calls, excluding the proposals, and $36.567974 held.
 Local authenticated artifact integrity is not provider-authenticated billing,
 current trusted receipt issuance or exhaustive charge attribution.
 
-The examined records contain no authoritative billing export. PL/RS still needs
-authoritative account/project usage and charge evidence for the Oct6 UTC window,
-matched to retained records where supported; missing proposal usage; applicable
-historical rates and adjustments; and attribution of any other exposure.
+The examined records contain no authoritative billing export. Unresolved evidence
+includes authoritative account/project usage and charges for the Oct6 UTC window,
+matching to retained records where supported, missing proposal usage, applicable
+historical rates and adjustments, and attribution of other exposure. Scoped
+funding reconciliation may instead establish an explicitly conservative exposure
+bound under the existing contract; neither route is established here.
 Additional exposure and available allowance remain **unknown**. Holds remain
 unchanged pending supported reconciliation; subtracting them from $200 does not
 establish an allowance. AR-023 owns supported settlement/release behavior, not an
