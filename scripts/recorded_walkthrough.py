@@ -127,29 +127,35 @@ def load_recording(path):
 
 
 def historical_banner(viewer_commit):
-    # This is an overlay on unchanged checked-in assets, not a product readiness flag.
+    # A private recording label; product assets and readiness remain separate.
     return (
-        "<style>body{padding-top:220px!important}body>aside{top:220px!important}"
-        "#recording-notice{position:fixed;display:block;top:0;left:0;right:0;"
-        "width:100%;height:220px;overflow:auto;z-index:10000;padding:14px 24px;"
-        "box-sizing:border-box;background:#17213a;color:#fff;font:14px/1.4 sans-serif}"
-        "#recording-notice p{margin:3px 0}"
-        "@media(max-width:800px){body>aside{top:auto!important}}</style>"
+        "<style>#recording-notice{position:sticky;top:0;z-index:10;"
+        "display:grid;grid-template-columns:1fr auto;gap:6px 16px;"
+        "padding:10px 24px;background:#fff;color:#171717;border-bottom:1px solid #bbb;"
+        "font:13px/1.5 system-ui,sans-serif}"
+        "#recording-notice details{margin:0}#recording-notice summary{padding:0;"
+        "font-weight:400;cursor:pointer}#recording-notice details[open]{grid-column:1/-1}"
+        "#recording-notice p{margin:8px 0;max-width:1100px}"
+        "#recording-notice .recording-label{font-weight:500}"
+        "#logout{display:none!important}"
+        "@media(max-width:600px){#recording-notice{padding:10px 16px}}</style>"
         '<div id="recording-notice" role="note">'
-        "<strong>Historical controlled fault injection · 2026-10-06 · READ ONLY</strong>"
-        "<p>No live execution or new provider calls. "
-        "Branch, investigate and all writes are disabled."
-        " “Fresh trial effect” below describes the eight confirmation pairs "
-        "executed in October.</p>"
-        "<p>8 confirmation pairs: controls 0/8, treatment 8/8; 95% interval 15.65–100 percentage "
-        "points. This is not a natural-failure benchmark or a current-source execution.</p>"
+        '<span class="recording-label">Recorded 6 Oct 2026 · Read-only</span>'
+        "<details><summary>Recording details</summary>"
+        "<p>Historical controlled fault injection, not a natural-failure benchmark "
+        "or current-source execution. No live model, repair, evaluator or confirmation "
+        "is running. Branch, investigate and all writes are disabled.</p>"
+        "<p>The eight confirmation pairs were executed on 6 October: controls 0/8, "
+        "treatment 8/8; 95% interval 15.65–100 percentage points. "
+        "Confirmation results below describe that historical run.</p>"
         "<p>$36.567974 historically held/reserved across five jobs; "
-        "bill, invoice, other exposure and available allowance unknown."
-        " Usage-derived ceiling: $1.668527 for 67 recorded calls, "
-        "excluding three proposal calls. This is not an invoice."
-        " New provider calls: 0.</p>"
-        f"<p>Recorded execution source: {SOURCE[:8]}; current viewer assets: {viewer_commit[:8]}."
-        " Private review only; no public sharing.</p></div>"
+        "bill, invoice, other exposure and available allowance unknown. "
+        "Usage-derived ceiling: $1.668527 for 67 recorded calls, "
+        "excluding three proposal calls. This is not an invoice. "
+        "New provider calls: 0.</p>"
+        f"<p>Recorded execution source: {SOURCE[:8]}; viewer source: {viewer_commit[:8]}. "
+        "Private review only; no public sharing.</p>"
+        "</details></div>"
     ).encode()
 
 
@@ -162,10 +168,8 @@ def make_server(recording, *, port=8081, browser_port=None):
         raise ValueError("invalid_browser_port")
     viewer_commit, assets, responses = load_recording(recording)
     html = assets["index.html"][1]
-    live_badge = b'<span class="mono">LIVE</span>'
-    if html.count(b"<body>") != 1 or html.count(live_badge) != 1:
+    if html.count(b"<body>") != 1:
         raise ValueError("unsupported_viewer_document")
-    html = html.replace(live_badge, b'<span class="mono">RECORDED</span>', 1)
     html = html.replace(b"<body>", b"<body>" + historical_banner(viewer_commit), 1)
     static = {
         "/": ("text/html; charset=utf-8", html),

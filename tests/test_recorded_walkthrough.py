@@ -69,18 +69,13 @@ def test_recorded_view_preserves_assets_and_disables_live_authority(recording):
         status, headers, body = request(port, "GET", "/")
         assert status == 200
         banner = recorded.historical_banner("b" * 40)
-        original = (recorded.WEB / "index.html").read_bytes()
-        live_badge = b'<span class="mono">LIVE</span>'
-        recorded_badge = b'<span class="mono">RECORDED</span>'
-        assert original.count(live_badge) == body.count(recorded_badge) == 1
-        assert live_badge not in body
-        assert body.replace(banner, b"", 1).replace(recorded_badge, live_badge, 1) == original
-        assert b'<div id="recording-notice" role="note">' in body
-        assert b"position:fixed;display:block" in banner and b"width:100%" in banner
-        assert b"body{padding-top:220px!important}" in banner
-        assert b"body>aside{top:220px!important}" in banner
-        assert b"@media(max-width:800px){body>aside{top:auto!important}}" in banner
+        assert body.replace(banner, b"", 1) == (recorded.WEB / "index.html").read_bytes()
+        assert b"Recorded 6 Oct 2026" in body and b"Read-only" in body
+        assert b"<details><summary>Recording details</summary>" in body
         assert b"Historical controlled fault injection" in body
+        assert b"position:sticky" in banner and b"grid-template-columns:1fr auto" in banner
+        assert b"height:" not in banner and b"padding-top:" not in banner
+        assert b">LIVE<" not in body and b"available allowance unknown" in body
         assert b"$36.567974" in body and b"five jobs" in body and b"bill" in body
         assert b"New provider calls: 0" in body
         assert headers["Cache-Control"] == "no-store"

@@ -77,7 +77,7 @@ async function api(path, body, method) {
 function badge(run) {
   return element(
     "span",
-    run.status !== "complete" ? run.status : run.success ? "PASS" : "FAIL",
+    run.status !== "complete" ? run.status : run.success ? "Passed" : "Failed",
     `badge ${run.status === "complete" ? (run.success ? "pass" : "fail") : ""}`,
   );
 }
@@ -93,8 +93,8 @@ function showView(view) {
     .forEach((e) => e.classList.toggle("active", e.dataset.view === view));
   $("page-label").textContent = {
     runs: "Runs",
-    studies: "Intervention studies",
-    jobs: "Execution jobs",
+    studies: "Study results",
+    jobs: "Jobs",
   }[view];
 }
 function canOperate() {
@@ -138,6 +138,9 @@ function clearProtectedState() {
     "study-submit",
   ])
     $(id).disabled = true;
+  document.querySelectorAll("[data-operator-only]").forEach((section) => {
+    section.classList.add("hidden");
+  });
   for (const id of ["task-dialog", "study-dialog", "compare-dialog"])
     $(id).close();
   document.querySelectorAll("[data-project-action]").forEach((button) => {
@@ -169,6 +172,9 @@ async function refresh() {
     $("identity").textContent = `${user.subject} · ${user.role || "no project access"}`;
     for (const id of ["new-run", "empty-record", "task-submit", "study-submit"])
       $(id).disabled = !canOperate();
+    document.querySelectorAll("[data-operator-only]").forEach((section) => {
+      section.classList.toggle("hidden", !canOperate());
+    });
     $("connection").textContent = "Connected";
     $("logout").classList.remove("hidden");
     $("login-panel").classList.add("hidden");
@@ -215,14 +221,14 @@ function renderRuns() {
       undefined,
       `run-item ${state.run?.id === run.id ? "selected" : ""}`,
     );
-    item.append(element("strong", run.name));
-    const meta = element("div", undefined, "meta");
-    meta.append(
+    const title = element("span", undefined, "run-name");
+    title.append(element("strong", run.name), element("small", run.id.slice(0, 8), "mono"));
+    item.append(
+      title,
       badge(run),
-      element("span", `${run.steps} decisions`),
-      element("span", run.parent_id ? "↳ branch" : "source"),
+      element("span", String(run.steps), "step-count"),
+      element("span", run.parent_id ? "Branch" : "Source", "run-origin"),
     );
-    item.append(meta);
     item.onclick = guard(() => selectRun(run.id));
     $("run-list").append(item);
   });
@@ -238,7 +244,7 @@ async function selectRun(id, reset = true) {
   state.step = Math.min(state.step, state.run.events.length || 1);
   $("run-empty").classList.add("hidden");
   $("run-detail").classList.remove("hidden");
-  $("run-id").textContent = `RUN / ${id.slice(0, 12)}`;
+  $("run-id").textContent = `Run ${id.slice(0, 12)}`;
   $("run-title").textContent = state.run.name;
   $("run-status").replaceWith(
     Object.assign(badge(state.run), { id: "run-status" }),
@@ -377,8 +383,8 @@ function effectPlot(evidence) {
     );
     svg.append(el);
   };
-  line(10, 24, 390, 24, "#e4e9e3", 1);
-  line(200, 8, 200, 40, "#a4b3a8", 1);
+  line(10, 24, 390, 24, "#dedede", 1);
+  line(200, 8, 200, 40, "#999", 1);
   if (evidence.effect !== null) {
     const x = (v) => 200 + 190 * v;
     line(
@@ -386,14 +392,14 @@ function effectPlot(evidence) {
       24,
       x(evidence.interval[1]),
       24,
-      "#669783",
+      "#555",
       5,
     );
     const point = document.createElementNS(ns, "circle");
     point.setAttribute("cx", x(evidence.effect));
     point.setAttribute("cy", 24);
     point.setAttribute("r", 5);
-    point.setAttribute("fill", "#22644e");
+    point.setAttribute("fill", "#111");
     svg.append(point);
   }
   return svg;
@@ -417,7 +423,7 @@ function renderStudies(studies) {
   if (!studies.length) {
     const empty = element("div", undefined, "panel empty");
     empty.append(
-      element("h2", "No intervention studies yet."),
+      element("h2", "No studies yet."),
       element(
         "p",
         "Open a failed run and choose “Investigate failure” to start.",
@@ -459,7 +465,7 @@ function renderStudies(studies) {
       const e = study.confirmation.evidence;
       card.append(
         element("h3", `Confirmation: ${e.verdict}`),
-        evidenceRow("Fresh trial effect", e),
+        evidenceRow("Confirmation effect", e),
         element(
           "p",
           `${e.n} complete pairs · ${e.missing} missing · 95% conservative interval. ${study.seed_support ? "Provider seed requested; exact determinism is not guaranteed." : "Provider seeds unavailable; pairs use randomized execution order."}`,
@@ -471,7 +477,7 @@ function renderStudies(studies) {
           if (p[`${arm}_run`]) {
             const b = element(
               "button",
-              `${i + 1} ${arm} ${p[`${arm}_success`] ? "PASS" : "FAIL"}`,
+              `${i + 1} ${arm} ${p[`${arm}_success`] ? "Passed" : "Failed"}`,
             );
             b.onclick = guard(() => selectRun(p[`${arm}_run`]));
             links.append(b);
@@ -498,11 +504,26 @@ function renderStudies(studies) {
     $("studies-list").append(card);
   });
 }
+function comparisonText(result) {
+  const outcome = (value) =>
+    value === true ? "Passed" : value === false ? "Failed" : "Not complete";
+  const lines = [
+    "Source " + result.left.slice(0, 8) + ": " + outcome(result.left_success),
+    "Branch " + result.right.slice(0, 8) + ": " + outcome(result.right_success),
+    "",
+  ];
+  if (!result.files.length) lines.push("No file changes.");
+  result.files.forEach((file) => {
+    lines.push(file.path, file.diff || "File changed without a text diff.", "");
+  });
+  return lines.join("\n");
+}
+
 function renderJobs(jobs) {
   $("jobs-list").replaceChildren();
   if (!jobs.length)
     $("jobs-list").append(
-      element("div", "No execution jobs yet.", "empty-small"),
+      element("div", "No jobs yet.", "empty-small"),
     );
   jobs.forEach((job) => {
     const row = element("div", undefined, "job-row"),
@@ -517,7 +538,7 @@ function renderJobs(jobs) {
     if (job.error) left.append(element("small", job.error));
     row.append(left);
     if (job.result?.run_id) {
-      const b = element("button", "Open run →", "quiet");
+      const b = element("button", "Open run", "quiet");
       b.onclick = guard(() => selectRun(job.result.run_id));
       row.append(b);
     } else if (["queued", "running"].includes(job.status)) {
@@ -663,6 +684,6 @@ $("compare").onclick = guard(async () => {
   );
   checkIdentity(generation);
   checkView(viewGeneration);
-  $("compare-output").textContent = JSON.stringify(result, null, 2);
+  $("compare-output").textContent = comparisonText(result);
   $("compare-dialog").showModal();
 });

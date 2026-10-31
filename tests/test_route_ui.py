@@ -34,11 +34,13 @@ class Element {
 const nodes=new Map();
 const get=(id)=>{if(!nodes.has(id)) nodes.set(id,new Element(id)); return nodes.get(id);};
 const stale=new Element('stale-cancel'); stale.dataset.projectAction='cancel';
+const operatorOnly=[get('new-run'),get('empty-record'),get('intervention'),get('research')];
 const calls=[], timers=[];
 let currentRole='operator', denied=false, reloads=0;
 const context=vm.createContext({
  document:{getElementById:get,createElement:(tag)=>new Element(tag),
-  querySelectorAll:(selector)=>selector==='[data-project-action]'?[stale]:[],
+  querySelectorAll:(selector)=>selector==='[data-project-action]'?[stale]:
+    selector==='[data-operator-only]'?operatorOnly:[],
   querySelector:()=>null,addEventListener:()=>{},hidden:false,
   activeElement:{tagName:'BODY'}},
  fetch:async(url,options)=>{calls.push([url,options]);
@@ -54,6 +56,21 @@ vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),context);
  await new Promise(setImmediate);
  assert.equal(vm.runInContext('state.user.role',context),'operator');
  assert.equal(get('new-run').disabled,false);
+ for(const section of operatorOnly) assert.equal(section.classList.contains('hidden'),false);
+ context.compareInput={left:"aaaaaaaa00000000",right:"bbbbbbbb00000000",
+   left_success:false,right_success:true,files:[{path:"invoice.py",diff:"- old\n+ fixed"}]};
+ const comparison=vm.runInContext('comparisonText(compareInput)',context);
+ assert.match(comparison,/Source aaaaaaaa: Failed/);
+ assert.match(comparison,/Branch bbbbbbbb: Passed/);
+ assert.ok(comparison.includes('invoice.py\n- old\n+ fixed'));
+ vm.runInContext('state.runs=[{id:"12345678aaaaaaaa",name:"Same task",status:"complete",' +
+   'success:false,steps:3,parent_id:null}];renderRuns()',context);
+ const row=get('run-list').children[0];
+ assert.equal(row.children[0].children[1].textContent,'12345678');
+ assert.equal(row.children[1].textContent,'Failed');
+ assert.equal(row.children[2].textContent,'3');
+
+
  vm.runInContext('state.run={id:"old"};state.runs=[state.run]',context);
  stale.disabled=false;
  get('task-dialog').showModal(); get('study-dialog').showModal();
@@ -74,6 +91,7 @@ vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),context);
    'branch','investigate','new-run','empty-record','task-submit','study-submit'])
    assert.equal(get(id).disabled,true);
  assert.equal(stale.disabled,true);
+ for(const section of operatorOnly) assert.equal(section.classList.contains('hidden'),true);
  assert.equal(get('logout').classList.contains('hidden'),false);
  assert.equal(get('task-dialog').opened,false);
  assert.equal(get('study-dialog').opened,false);
@@ -93,8 +111,12 @@ vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),context);
  assert.equal(reloads,1);
  // A later successful current-role check restores actions, including when the
  // failed refresh itself had still reported operator.
- currentRole='operator'; denied=false;
+ currentRole='viewer'; denied=false;
  await get('refresh').onclick();
+ for(const section of operatorOnly) assert.equal(section.classList.contains('hidden'),true);
+ currentRole='operator';
+ await get('refresh').onclick();
+ for(const section of operatorOnly) assert.equal(section.classList.contains('hidden'),false);
  assert.equal(vm.runInContext('state.user.role',context),'operator');
  for(const id of ['new-run','empty-record','task-submit','study-submit'])
    assert.equal(get(id).disabled,false);
