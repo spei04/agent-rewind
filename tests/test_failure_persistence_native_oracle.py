@@ -1,9 +1,10 @@
-"""Independent F3 claim fixtures; synthetic admission is not live startup proof.
+"""Independent F3 native claim/completion oracles; synthetic setup is not startup proof.
 
 The real private owner supplies claim authority; returned fences are historical.
-No terminal event, provider call, live startup or maximum-cohort claim is exercised.
+Completion uses a genuine registered dependency event; no provider is called.
 """
 
+import hashlib
 import json
 import math
 import time
@@ -35,10 +36,13 @@ from test_failure_catalog_native_oracle import full_shape, native_snapshot, proj
 from test_failure_service_native_oracle import assert_retained_native, observe_work
 from test_run_projection_postgres import drain as drain_postgres
 
-from agent_rewind import failure_persistence, operation_work
+from agent_rewind import failure_persistence, failure_terminal, operation_work
 from agent_rewind.admission_transaction import AdmissionError
+from agent_rewind.failure_evidence import CompletionEvent, CreatedFailure
+from agent_rewind.migrations.compatibility import _InspectionChecks
+from agent_rewind.migrations.failure_catalog import inspect_failure_catalog
 from agent_rewind.migrations.failure_service import initialize_failure_evidence
-from agent_rewind.migrations.schema import FAILURE, LEDGER, catalog, checksum
+from agent_rewind.migrations.schema import FAILURE, LEDGER, MigrationRefused, catalog, checksum
 from agent_rewind.operation_work import OperationWork
 from agent_rewind.reservation_types import ClaimIntent, JobFence
 
@@ -180,30 +184,32 @@ def initialize_ar8(case, monkeypatch, record_property):
     return result
 
 
-def evidence_reader_grant(case, before):
-    """Add only SELECT for the new table; this first slice cannot persist evidence."""
+def evidence_producer_grant(case, before):
+    """Install final SELECT+INSERT before claim; later stages never widen these rights."""
     drain_case(case)
     with case.pg["owner"].begin() as connection:
         assert _application_acl(connection, case.pg["app_role"]) == before
         assert not any(row[1] == EVIDENCE for row in before)
         role = connection.dialect.identifier_preparer.quote_identifier(case.pg["app_role"])
-        connection.exec_driver_sql(f"GRANT SELECT ON job_failure_evidence TO {role}")
+        connection.exec_driver_sql(f"GRANT SELECT, INSERT ON job_failure_evidence TO {role}")
         after = _application_acl(connection, case.pg["app_role"])
         expected = before | {
             ("table", EVIDENCE, "", "SELECT", False, case.pg["owner_role"]),
+            ("table", EVIDENCE, "", "INSERT", False, case.pg["owner_role"]),
         }
         assert after == expected
     drain_case(case)
 
 
-def assert_restricted_reader(case):
+def assert_restricted_producer(case):
     """Observe actual role and effective rights, not just the GRANT statement."""
     try:
         with case.engine.connect() as connection:
             role = connection.execute(
                 text(
                     "SELECT current_user,session_user,rolsuper,rolcreaterole,rolcreatedb,"
-                    "rolinherit,rolbypassrls,pg_has_role(current_user,:owner,'MEMBER') "
+                    "rolinherit,rolreplication,rolbypassrls,"
+                    "pg_has_role(current_user,:owner,'MEMBER') "
                     "FROM pg_roles WHERE rolname=current_user"
                 ),
                 {"owner": case.pg["owner_role"]},
@@ -218,18 +224,36 @@ def assert_restricted_reader(case):
                 "has_table_privilege(current_user,'job_failure_evidence','TRIGGER'),"
                 "has_schema_privilege(current_user,'public','CREATE')"
             ).one()
-        assert tuple(role) == (case.pg["app_role"], case.pg["app_role"]) + (False,) * 6
-        assert tuple(rights) == (True,) + (False,) * 7
-        return {"role": tuple(role), "evidence_rights": tuple(rights)}
+            functions = connection.execute(
+                text(
+                    "SELECT p.proname,pg_get_userbyid(p.proowner),"
+                    "has_function_privilege(current_user,p.oid,'EXECUTE'),"
+                    "has_function_privilege(:owner,p.oid,'EXECUTE') "
+                    "FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace "
+                    "WHERE n.nspname='public' ORDER BY p.proname LIMIT 3"
+                ),
+                {"owner": case.pg["owner_role"]},
+            ).all()
+        assert tuple(role) == (case.pg["app_role"], case.pg["app_role"]) + (False,) * 7
+        assert tuple(rights) == (True, True) + (False,) * 6
+        assert [tuple(row) for row in functions] == [
+            (name, case.pg["owner_role"], False, True)
+            for name in ("ar7_ledger_constraint", "job_failure_evidence_guard")
+        ]
+        return {
+            "role": tuple(role),
+            "evidence_rights": tuple(rights),
+            "function_execution": [tuple(row) for row in functions],
+        }
     finally:
         drain_case(case)
 
 
-def restore_reader_grant(case, before):
+def restore_producer_grant(case, before):
     drain_case(case)
     with case.pg["owner"].begin() as connection:
         role = connection.dialect.identifier_preparer.quote_identifier(case.pg["app_role"])
-        connection.exec_driver_sql(f"REVOKE SELECT ON job_failure_evidence FROM {role}")
+        connection.exec_driver_sql(f"REVOKE SELECT, INSERT ON job_failure_evidence FROM {role}")
         assert _application_acl(connection, case.pg["app_role"]) == before
     drain_case(case)
 
@@ -255,8 +279,8 @@ def genuine_failure_case(tmp_path, monkeypatch, record_property, *, pg=None, leg
             with pg["owner"].connect() as connection:
                 old_acl = _application_acl(connection, pg["app_role"])
             # Save the original rights before attempting GRANT, including its ACK.
-            evidence_reader_grant(case, old_acl)
-            role = assert_restricted_reader(case)
+            evidence_producer_grant(case, old_acl)
+            role = assert_restricted_producer(case)
             record_property("f3_fixture_restricted_role", json.dumps(role, sort_keys=True))
         before = whole_state(case)
         assert before["admission_ciphertexts"] == case.admission.ciphertexts
@@ -270,7 +294,7 @@ def genuine_failure_case(tmp_path, monkeypatch, record_property, *, pg=None, leg
         cleanup_errors = []
         if old_acl is not None:
             try:
-                restore_reader_grant(case, old_acl)
+                restore_producer_grant(case, old_acl)
             except BaseException as error:
                 cleanup_errors.append(error)
         try:
@@ -824,3 +848,789 @@ def test_installed_observation_deadline_withholds_authority_with_truthful_state(
                 sort_keys=True,
             ),
         )
+
+
+# Exact ordered fields from the adopted D3 tag2 contract, not production constants.
+D3_SCOPE = ("organization_id", "project_id", "resource_kind", "resource_id")
+D3_OPERATION = (
+    "id",
+    "project_id",
+    "principal_id",
+    "kind",
+    "client_operation_id",
+    "request_digest",
+    "job_id",
+    "accepted_response",
+    "created_at",
+    "retain_until",
+    "job_resource_kind",
+    "execution_config_digest",
+    "payload_version",
+    "failure_correlation_id",
+)
+D3_JOB_IMMUTABLE = (
+    "id",
+    "kind",
+    "created",
+    "payload",
+    "actor",
+    "payload_version",
+    "execution_config_ref",
+    "execution_config_digest",
+    "budget",
+)
+D3_CONFIGURATION = (
+    "id",
+    "project_id",
+    "digest",
+    "locator",
+    "format_version",
+    "byte_count",
+    "created_at",
+    "reference_id",
+)
+D3_EVIDENCE = (
+    "schema_version",
+    "kind",
+    "project_id",
+    "job_resource_kind",
+    "job_id",
+    "operation_id",
+    "lease_generation",
+    "job_status",
+    "cause",
+    "phase",
+    "origin_kind",
+    "correlation_id",
+    "created_at_micros",
+)
+D3_JOB_TERMINAL = (
+    "id",
+    "kind",
+    "created",
+    "payload",
+    "status",
+    "owner",
+    "lease_until",
+    "budget",
+    "reserved",
+    "result",
+    "error",
+    "actor",
+    "payload_version",
+    "execution_config_ref",
+    "execution_config_digest",
+)
+
+
+class DependencyAdapter(InstalledAdapter):
+    """An installed property genuinely becomes unavailable after acknowledged claim."""
+
+    def __init__(self):
+        super().__init__()
+        self.unavailable = False
+
+    @property
+    def configuration(self):
+        if not self.unavailable:
+            return super().configuration
+        assert self.record.source is not None
+        assert self.record.coordinator.outcome.commit_acknowledged
+        self.reads += 1
+        self.phases.append("dependency")
+        raise RuntimeError(SECRET_CANARY)
+
+
+def native_digest_inputs(case):
+    """Independent native SELECTs; preserve database timestamp Text exactly."""
+    drain_case(case)
+    try:
+        with case.case.engine.connect() as connection:
+            op_columns = ",".join(
+                f"CAST({name} AS TEXT) AS {name}"
+                if name in {"created_at", "retain_until"}
+                else name
+                for name in D3_OPERATION
+            )
+            operation_rows = (
+                connection.execute(
+                    text(f"SELECT {op_columns} FROM operations WHERE job_id=:job LIMIT 2"),
+                    {"job": case.job_id},
+                )
+                .mappings()
+                .all()
+            )
+            assert len(operation_rows) == 1
+            operation = dict(operation_rows[0])
+            config_columns = ",".join(
+                "r.artifact_id AS reference_id"
+                if name == "reference_id"
+                else "CAST(o.created_at AS TEXT) AS created_at"
+                if name == "created_at"
+                else f"o.{name}"
+                for name in D3_CONFIGURATION
+            )
+            config_rows = (
+                connection.execute(
+                    text(
+                        f"SELECT {config_columns} FROM artifact_refs r "
+                        "LEFT JOIN artifact_objects o ON o.id=r.artifact_id "
+                        "AND o.project_id=r.project_id WHERE r.owner_kind='job' "
+                        "AND r.owner_id=:job AND r.role='admission_config' LIMIT 2"
+                    ),
+                    {"job": case.job_id},
+                )
+                .mappings()
+                .all()
+            )
+            assert len(config_rows) == 1
+            configuration_row = dict(config_rows[0])
+        return operation, configuration_row
+    finally:
+        drain_case(case)
+
+
+def expected_failure_hashes(case, state, record, native_inputs):
+    """Encode adopted typed arrays directly, without the runtime encoder/readers."""
+
+    def tag(value):
+        if value is None:
+            return ["n"]
+        if type(value) is bool:
+            return ["b", int(value)]
+        if type(value) is int:
+            assert -(2**63) <= value < 2**63
+            return ["i", str(value)]
+        if type(value) is float:
+            assert math.isfinite(value)
+            return ["f", (0.0 if value == 0 else value).hex()]
+        assert type(value) is str
+        assert len(value.encode("utf-8")) <= 4096
+        return ["s", value]
+
+    def row(label, fields, values):
+        return [label, [[name, tag(values[name])] for name in fields]]
+
+    def digest(frame):
+        encoded = json.dumps(
+            frame, ensure_ascii=True, sort_keys=True, separators=(",", ":"), allow_nan=False
+        ).encode("utf-8")
+        assert len(encoded) <= 4096
+        return hashlib.sha256(encoded).hexdigest()
+
+    operation, descriptor = native_inputs
+    (job,) = [r for r in state["tables"]["jobs"]["rows"] if r["id"] == case.job_id]
+    assert operation["project_id"] == descriptor["project_id"] == case.context.project_id
+    assert operation["job_id"] == job["id"]
+    assert descriptor["id"] == descriptor["reference_id"]
+    assert descriptor["digest"] == operation["execution_config_digest"]
+    scope = {
+        "organization_id": case.organization_id,
+        "project_id": case.context.project_id,
+        "resource_kind": "job",
+        "resource_id": case.job_id,
+    }
+    dialect = "postgresql" if hasattr(case, "pg") else "sqlite"
+    association = digest(
+        [
+            "ar-failure-association",
+            1,
+            dialect,
+            row("scope", D3_SCOPE, scope),
+            row("operation", D3_OPERATION, operation),
+            row("job_immutable", D3_JOB_IMMUTABLE, job),
+            row("admission_config", D3_CONFIGURATION, descriptor),
+        ]
+    )
+    any_call = any(r["job_id"] == case.job_id for r in state["tables"]["provider_calls"]["rows"])
+    source = digest(
+        [
+            "ar-failure-source",
+            2,
+            dialect,
+            association,
+            row("job_terminal", D3_JOB_TERMINAL, job),
+            ["generation", tag(record.lease_generation)],
+            ["any_provider_call_for_job", tag(any_call)],
+            row("evidence_core", D3_EVIDENCE, asdict(record)),
+        ]
+    )
+    return association, source
+
+
+def assert_only_completion_changed(case, before, after, original, native_inputs, clock_bounds):
+    expected = deepcopy(before)
+    (job,) = [r for r in expected["tables"]["jobs"]["rows"] if r["id"] == case.job_id]
+    assert job["status"] == "running"
+    status = "cancelled" if job["cancel"] else "failed"
+    job["status"] = status
+    record = original.record
+    assert original.organization_id == case.organization_id
+    assert original.fence == JobFence(case.job_id, job["owner"], job["lease_generation"])
+    assert (record.job_status, record.cause, record.phase) == (
+        status,
+        "dependency_failed",
+        "outcome_unknown",
+    )
+    assert (
+        record.schema_version,
+        record.kind,
+        record.job_resource_kind,
+        record.origin_kind,
+        record.job_id,
+        record.lease_generation,
+    ) == (1, "verified_failure", "job", "admission", case.job_id, original.fence.generation)
+    assert record.project_id == case.context.project_id
+    assert record.operation_id == native_inputs[0]["id"]
+    assert record.correlation_id == native_inputs[0]["failure_correlation_id"]
+    assert clock_bounds[0] <= record.created_at_micros <= clock_bounds[1]
+    assert expected["tables"][EVIDENCE]["rows"] == []
+    expected["tables"][EVIDENCE]["rows"] = [asdict(record)]
+    assert_same_state(expected, after)
+    assert (record.association_sha256, record.source_sha256) == expected_failure_hashes(
+        case, after, record, native_inputs
+    )
+
+
+def assert_public_dormant_policy_refuses_producer(case):
+    """Public F2 stays SELECT-only even when the private producer is installed."""
+    if not hasattr(case, "pg"):
+        return
+    before = whole_state(case)
+    try:
+        with case.engine.connect() as connection:
+            with pytest.raises(MigrationRefused) as caught:
+                inspect_failure_catalog(connection, _InspectionChecks(time.monotonic() + 2))
+            assert caught.value.code == "schema_incompatible"
+    finally:
+        drain_case(case)
+    assert_same_state(before, whole_state(case))
+
+
+@pytest.mark.parametrize("legacy", [False, True], ids=["fresh", "legacy"])
+def test_genuine_completion_keeps_final_grants_and_exact_native_delta(
+    failure_case, monkeypatch, record_property
+):
+    case = failure_case.case
+    assert_public_dormant_policy_refuses_producer(case)
+    before = whole_state(case)
+    adapter = DependencyAdapter()
+    controls = observe_controls(monkeypatch)
+    with execution_owner(case, adapter) as (owner, record):
+        start = native_clock(case)
+        fence = bounded_claim(owner, record, case, controls, record_property)
+        end = native_clock(case)
+        claimed = whole_state(case)
+        assert_only_claim_changed(before, claimed, claim_intent(case), (start, end))
+        if hasattr(case, "pg"):
+            assert_restricted_producer(case)
+        adapter.unavailable = True
+        event = owner._check_installed_binding()
+        assert type(event) is CompletionEvent and record.event is event
+        assert event in failure_persistence._EVENTS
+        assert adapter.phases == ["initial", "pre_mutation", "post_clean", "dependency"]
+        assert adapter.validate_calls == adapter.send_calls == 0
+        assert_same_state(claimed, whole_state(case))
+        native_inputs = native_digest_inputs(case)
+        coordinator = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+        assert coordinator.original is None
+        first = native_clock(case)
+        started = time.monotonic()
+        created = coordinator.complete_failure(case.principal, case.context, event)
+        elapsed = time.monotonic() - started
+        last = native_clock(case)
+        assert type(created) is CreatedFailure and created.kind == "created"
+        assert created.original is coordinator.original and created.original.fence == fence
+        facts = coordinator.outcome
+        assert facts.commit_acknowledged and not facts.cleanup_failed
+        assert not facts.rollback_attempted
+        assert event not in failure_persistence._EVENTS and record.event is None
+        assert not failure_terminal._TERMINALS
+        work = coordinator._work
+        assert work._detached and not work._listeners and work._connection is None
+        cleanup = [
+            item for item in controls if item[0] is work and item[1] not in {"begin", "commit"}
+        ]
+        assert 0 < len(cleanup) <= 8
+        assert work.statements <= 512 and work.statements - len(cleanup) <= 504
+        assert elapsed < 10 and work.instructions < 20_000_000
+        after = whole_state(case)
+        assert SECRET_CANARY not in repr(created) and SECRET_CANARY not in repr(after)
+        assert_only_completion_changed(
+            case, claimed, after, created.original, native_inputs, (first, last)
+        )
+        if hasattr(case, "pg"):
+            assert_restricted_producer(case)
+        with pytest.raises(AdmissionError) as reused:
+            failure_terminal.TerminalCoordinator(case.engine, case.authority).complete_failure(
+                case.principal, case.context, event
+            )
+        assert reused.value.reason == "capability_not_issued"
+        assert reused.value.code == "invalid_request"
+        assert_same_state(after, whole_state(case))
+        record_property(
+            "f3_native_completion",
+            json.dumps(
+                {
+                    "total_units": work.statements,
+                    "cleanup_units": len(cleanup),
+                    "ordinary_units": work.statements - len(cleanup),
+                    "vm_instructions": work.instructions,
+                    "elapsed_seconds": elapsed,
+                    "outcome": asdict(facts),
+                    "native_clock_bounds": [first, last],
+                    "created_at_micros": created.original.record.created_at_micros,
+                    "independent_hashes_equal": True,
+                    "stable_producer_grants": True,
+                    "full_state_and_ciphertexts_exact": True,
+                    "provider_calls": 0,
+                },
+                sort_keys=True,
+            ),
+        )
+
+
+@pytest.mark.parametrize("boundary", ["commit_before", "commit_after", "cleanup"])
+def test_completion_uncertainty_retains_original_and_never_reissues_event(
+    failure_case, monkeypatch, record_property, boundary
+):
+    case = failure_case.case
+    before = whole_state(case)
+    adapter = DependencyAdapter()
+    controls = observe_controls(monkeypatch)
+    original_commit, original_close = Connection.commit, Connection.close
+    attempts = []
+
+    def commit(connection):
+        if connection.engine is case.engine and boundary != "cleanup":
+            attempts.append("commit")
+            if boundary == "commit_after":
+                original_commit(connection)
+            raise RuntimeError(SECRET_CANARY)
+        return original_commit(connection)
+
+    def close(connection):
+        if connection.engine is case.engine and boundary == "cleanup" and not attempts:
+            attempts.append("close")
+            raise RuntimeError(SECRET_CANARY)
+        return original_close(connection)
+
+    with execution_owner(case, adapter) as (owner, record):
+        claim_start = native_clock(case)
+        fence = bounded_claim(owner, record, case, controls, record_property)
+        claim_end = native_clock(case)
+        claimed = whole_state(case)
+        assert_only_claim_changed(before, claimed, claim_intent(case), (claim_start, claim_end))
+        adapter.unavailable = True
+        event = owner._check_installed_binding()
+        assert type(event) is CompletionEvent and record.event is event
+        assert adapter.phases == ["initial", "pre_mutation", "post_clean", "dependency"]
+        assert_same_state(claimed, whole_state(case))
+        native_inputs = native_digest_inputs(case)
+        coordinator = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+        first = native_clock(case)
+        started = time.monotonic()
+        with monkeypatch.context() as scoped:
+            scoped.setattr(Connection, "commit", commit)
+            scoped.setattr(Connection, "close", close)
+            with pytest.raises(AdmissionError) as caught:
+                coordinator.complete_failure(case.principal, case.context, event)
+        elapsed = time.monotonic() - started
+        last = native_clock(case)
+        assert attempts == (["close"] if boundary == "cleanup" else ["commit"])
+        assert caught.value.code == "outcome_uncertain"
+        facts = coordinator.outcome
+        assert facts.commit_attempted and not facts.confirmed_precommit_rollback
+        assert facts.commit_acknowledged is (boundary == "cleanup")
+        assert facts.cleanup_failed is (boundary == "cleanup")
+        retained = coordinator.original
+        assert retained is not None and retained.fence == fence
+        assert retained.record.cause == "dependency_failed"
+        assert retained.record.job_status == "failed"
+        assert first <= retained.record.created_at_micros <= last
+        assert event not in failure_persistence._EVENTS and record.event is None
+        assert not failure_terminal._TERMINALS
+        assert adapter.validate_calls == adapter.send_calls == 0
+        after = whole_state(case)
+        visible = boundary != "commit_before"
+        if visible:
+            assert_only_completion_changed(
+                case, claimed, after, retained, native_inputs, (first, last)
+            )
+        else:
+            assert_same_state(claimed, after)
+            proposed = deepcopy(claimed)
+            (job,) = [row for row in proposed["tables"]["jobs"]["rows"] if row["id"] == case.job_id]
+            job["status"] = "failed"
+            assert (
+                retained.record.association_sha256,
+                retained.record.source_sha256,
+            ) == expected_failure_hashes(case, proposed, retained.record, native_inputs)
+        assert_no_canary(caught.value, after)
+        assert SECRET_CANARY not in repr(retained)
+        with pytest.raises(AdmissionError) as reused:
+            coordinator.complete_failure(case.principal, case.context, event)
+        assert reused.value.reason == "invocation_reused"
+        assert reused.value.code == "invalid_request"
+        assert coordinator.outcome == facts and coordinator.original is retained
+        other = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+        with pytest.raises(AdmissionError) as consumed:
+            other.complete_failure(case.principal, case.context, event)
+        assert consumed.value.reason == "capability_not_issued"
+        assert consumed.value.code == "invalid_request"
+        assert other.original is None and not any(asdict(other.outcome).values())
+        assert_same_state(after, whole_state(case))
+        work = coordinator._work
+        cleanup = [
+            item for item in controls if item[0] is work and item[1] not in {"begin", "commit"}
+        ]
+        assert work._detached and not work._listeners and work._connection is None
+        assert work.statements <= 512 and work.statements - len(cleanup) <= 504
+        assert len(cleanup) <= 8 and elapsed < 10 and work.instructions < 20_000_000
+        record_property(
+            "f3_terminal_uncertainty",
+            json.dumps(
+                {
+                    "boundary": boundary,
+                    "visible_native_completion": visible,
+                    "outcome": asdict(facts),
+                    "original_identity_retained": True,
+                    "created_at_micros": retained.record.created_at_micros,
+                    "event_consumed_without_reissue": True,
+                    "readback": "independent native observation; no product inspect or retry",
+                    "total_units": work.statements,
+                    "ordinary_units": work.statements - len(cleanup),
+                    "cleanup_units": len(cleanup),
+                    "elapsed_seconds": elapsed,
+                    "vm_instructions": work.instructions,
+                },
+                sort_keys=True,
+            ),
+        )
+
+
+@contextmanager
+def genuine_terminal_event(case, controls, record_property):
+    """Issue through the actual claim owner and fixed dependency observation."""
+    before = whole_state(case)
+    adapter = DependencyAdapter()
+    with execution_owner(case, adapter) as (owner, record):
+        first = native_clock(case)
+        fence = bounded_claim(owner, record, case, controls, record_property)
+        last = native_clock(case)
+        claimed = whole_state(case)
+        assert_only_claim_changed(before, claimed, claim_intent(case), (first, last))
+        adapter.unavailable = True
+        event = owner._check_installed_binding()
+        assert type(event) is CompletionEvent and record.event is event
+        assert event in failure_persistence._EVENTS
+        assert adapter.phases == ["initial", "pre_mutation", "post_clean", "dependency"]
+        assert adapter.validate_calls == adapter.send_calls == 0
+        assert_same_state(claimed, whole_state(case))
+        yield SimpleNamespace(owner=owner, record=record, fence=fence, event=event, claimed=claimed)
+
+
+def observe_terminal_writes(monkeypatch, case):
+    """Forward real terminal DML without substituting its result."""
+    execute = Connection.execute
+    observed = []
+
+    def forward(connection, statement, *args, **kwargs):
+        table = getattr(getattr(statement, "table", None), "name", None)
+        selected = connection.engine is case.engine and (
+            getattr(statement, "is_update", False)
+            and table == "jobs"
+            or getattr(statement, "is_insert", False)
+            and table == EVIDENCE
+        )
+        attempt = {"table": table, "returned": False, "rowcount": None}
+        if selected:
+            observed.append(attempt)
+        result = execute(connection, statement, *args, **kwargs)
+        if selected:
+            attempt.update(returned=True, rowcount=result.rowcount)
+        return result
+
+    monkeypatch.setattr(Connection, "execute", forward)
+    return observed
+
+
+def assert_terminal_refusal_state(case, issued, coordinator, error, before, writes):
+    """A refused completion consumes its event and preserves the observed state."""
+    facts = coordinator.outcome
+    assert facts.begun and not facts.commit_attempted and not facts.commit_acknowledged
+    assert facts.rollback_attempted and facts.rollback_acknowledged
+    assert coordinator.original is None and writes == []
+    assert issued.event not in failure_persistence._EVENTS and issued.record.event is None
+    assert not failure_terminal._TERMINALS
+    after = whole_state(case)
+    assert_same_state(before, after)
+    assert_no_canary(error, after)
+    observer = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+    with pytest.raises(AdmissionError) as consumed:
+        observer.complete_failure(case.principal, case.context, issued.event)
+    assert consumed.value.reason == "capability_not_issued"
+    assert consumed.value.code == "invalid_request"
+    assert observer.original is None and not any(asdict(observer.outcome).values())
+    assert_same_state(after, whole_state(case))
+    assert case.engine.pool.checkedout() == 0
+
+
+def record_terminal_refusal_work(coordinator, controls, elapsed, record_property, **observed):
+    work = coordinator._work
+    cleanup = [item for item in controls if item[0] is work and item[1] not in {"begin", "commit"}]
+    assert work._detached and not work._listeners and work._connection is None
+    assert work.statements <= 512 and work.statements - len(cleanup) <= 504
+    assert len(cleanup) <= 8 and elapsed < 10 and work.instructions < 20_000_000
+    record_property(
+        "f3_terminal_refusal",
+        json.dumps(
+            {
+                "outcome": asdict(coordinator.outcome),
+                "total_units": work.statements,
+                "ordinary_units": work.statements - len(cleanup),
+                "cleanup_units": len(cleanup),
+                "elapsed_seconds": elapsed,
+                "vm_instructions": work.instructions,
+                **observed,
+            },
+            sort_keys=True,
+        ),
+    )
+
+
+@pytest.mark.parametrize("changed", ["owner", "generation", "origin"])
+def test_terminal_refuses_changed_native_identity_before_protected_writes(
+    failure_case, monkeypatch, record_property, changed
+):
+    case = failure_case.case
+    controls = observe_controls(monkeypatch)
+    with genuine_terminal_event(case, controls, record_property) as issued:
+        expected = deepcopy(issued.claimed)
+        if changed == "origin":
+            (row,) = [
+                row
+                for row in expected["tables"]["operations"]["rows"]
+                if row["job_id"] == case.job_id
+            ]
+            field, table, key = "failure_correlation_id", "operations", "job_id"
+            value = "d" * 32 if row[field] != "d" * 32 else "e" * 32
+            sql = "UPDATE operations SET failure_correlation_id=:value WHERE job_id=:job"
+            reason = "stale_source"
+        else:
+            (row,) = [row for row in expected["tables"]["jobs"]["rows"] if row["id"] == case.job_id]
+            field, table, key = (
+                "lease_generation" if changed == "generation" else "owner",
+                "jobs",
+                "id",
+            )
+            value = issued.fence.generation + 1 if changed == "generation" else "e" * 32
+            assert value != row[field]
+            sql = (
+                "UPDATE jobs SET lease_generation=:value WHERE id=:job"
+                if changed == "generation"
+                else "UPDATE jobs SET owner=:value WHERE id=:job"
+            )
+            reason = "not_eligible"
+        row[field] = value
+        # These setup-owner writes retain every trigger and grant. An early schema
+        # refusal fails this case; it cannot impersonate a terminal-path refusal.
+        drain_case(case)
+        with case.case.engine.begin() as connection:
+            result = connection.execute(text(sql), {"value": value, "job": case.job_id})
+            assert result.rowcount == 1
+            observed = connection.execute(
+                text(f"SELECT {field} FROM {table} WHERE {key}=:job"), {"job": case.job_id}
+            ).scalar_one()
+            assert typed(observed) == typed(value)
+        fault_before = whole_state(case)
+        assert_same_state(expected, fault_before)
+        coordinator = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+        with monkeypatch.context() as patch:
+            writes = observe_terminal_writes(patch, case)
+            started = time.monotonic()
+            with pytest.raises(AdmissionError) as caught:
+                coordinator.complete_failure(case.principal, case.context, issued.event)
+            elapsed = time.monotonic() - started
+        assert caught.value.reason == reason and caught.value.code == "dependency_unavailable"
+        record_terminal_refusal_work(
+            coordinator,
+            controls,
+            elapsed,
+            record_property,
+            fault=changed,
+            native_mutation_committed=True,
+            protected_writes=writes,
+        )
+        assert_terminal_refusal_state(case, issued, coordinator, caught.value, fault_before, writes)
+
+
+def terminal_body_refusal(case, monkeypatch, record_property, mode):
+    controls = observe_controls(monkeypatch)
+    persist = failure_terminal.persist_verified_failure
+    injected = []
+
+    def replace_body(connection, token):
+        assert connection.engine is case.engine and injected == []
+        logical = connection.get_transaction()
+        assert logical is not None and logical.is_active
+        raw = connection.connection.driver_connection
+        postgres = connection.dialect.name == "postgresql"
+        before_xid = (
+            raw.execute("SELECT pg_current_xact_id()::text").fetchone()[0] if postgres else None
+        )
+        if mode == "logical_restarted":
+            if postgres:
+                connection.rollback()
+                injected_control = "ROLLBACK"
+                assert raw.info.transaction_status.name == "IDLE"
+            else:
+                # The supported SQLite lease permits this read-only COMMIT.
+                # It is injected physical control, not coordinator commit ACK.
+                connection.commit()
+                injected_control = "COMMIT"
+                assert not raw.in_transaction
+            assert not logical.is_active and connection.get_transaction() is None
+            connection.exec_driver_sql(
+                "BEGIN ISOLATION LEVEL READ COMMITTED" if postgres else "BEGIN IMMEDIATE"
+            )
+            assert connection.get_transaction() is not logical
+        else:
+            raw.execute("ROLLBACK")
+            injected_control = "ROLLBACK"
+            assert connection.get_transaction() is logical and logical.is_active
+            if mode == "raw_restarted":
+                assert postgres
+                raw.execute("BEGIN ISOLATION LEVEL READ COMMITTED")
+        after_xid = (
+            raw.execute("SELECT pg_current_xact_id()::text").fetchone()[0]
+            if postgres and mode != "raw_idle"
+            else None
+        )
+        if postgres:
+            assert type(before_xid) is str
+            if mode == "raw_idle":
+                assert raw.info.transaction_status.name == "IDLE"
+            else:
+                assert raw.info.transaction_status.name == "INTRANS"
+                assert type(after_xid) is str and before_xid != after_xid
+        else:
+            assert raw.in_transaction is (mode == "logical_restarted")
+        injected.append(
+            {
+                "mode": mode,
+                "before_xid": before_xid,
+                "after_xid": after_xid,
+                "same_logical_root": connection.get_transaction() is logical,
+                "injected_physical_control": injected_control,
+                "qualification": (
+                    "Read-only test injection before protected writes; "
+                    "its physical COMMIT is separate from coordinator outcome facts."
+                ),
+            }
+        )
+        return persist(connection, token)
+
+    with genuine_terminal_event(case, controls, record_property) as issued:
+        coordinator = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+        with monkeypatch.context() as patch:
+            writes = observe_terminal_writes(patch, case)
+            patch.setattr(failure_terminal, "persist_verified_failure", replace_body)
+            started = time.monotonic()
+            with pytest.raises(AdmissionError) as caught:
+                coordinator.complete_failure(case.principal, case.context, issued.event)
+            elapsed = time.monotonic() - started
+        assert len(injected) == 1
+        assert caught.value.reason == "invalid_native_state"
+        assert caught.value.code == "dependency_unavailable"
+        record_terminal_refusal_work(
+            coordinator,
+            controls,
+            elapsed,
+            record_property,
+            fault="native_body",
+            injected=injected,
+            protected_writes=writes,
+        )
+        assert_terminal_refusal_state(
+            case, issued, coordinator, caught.value, issued.claimed, writes
+        )
+
+
+@pytest.mark.parametrize("mode", ["logical_restarted", "raw_idle"])
+def test_terminal_refuses_replaced_native_body(failure_case, monkeypatch, record_property, mode):
+    terminal_body_refusal(failure_case.case, monkeypatch, record_property, mode)
+
+
+@POSTGRES
+def test_postgres_terminal_refuses_restarted_raw_xid(pg, tmp_path, monkeypatch, record_property):
+    with genuine_failure_case(tmp_path, monkeypatch, record_property, pg=pg) as fixture:
+        terminal_body_refusal(fixture.case, monkeypatch, record_property, "raw_restarted")
+
+
+@POSTGRES
+def test_postgres_terminal_refuses_revoked_insert_without_reissuing_event(
+    pg, tmp_path, monkeypatch, record_property
+):
+    with genuine_failure_case(tmp_path, monkeypatch, record_property, pg=pg) as fixture:
+        case = fixture.case
+        controls = observe_controls(monkeypatch)
+        with genuine_terminal_event(case, controls, record_property) as issued:
+            drain_case(case)
+            with pg["owner"].connect() as connection:
+                old_acl = _application_acl(connection, pg["app_role"])
+                role = connection.dialect.identifier_preparer.quote_identifier(pg["app_role"])
+            removed = ("table", EVIDENCE, "", "INSERT", False, pg["owner_role"])
+            assert removed in old_acl
+            try:
+                with pg["owner"].begin() as connection:
+                    connection.exec_driver_sql(f"REVOKE INSERT ON job_failure_evidence FROM {role}")
+                    assert _application_acl(connection, pg["app_role"]) == old_acl - {removed}
+                with case.engine.connect() as connection:
+                    rights = connection.exec_driver_sql(
+                        "SELECT current_user,session_user,"
+                        "has_table_privilege(current_user,'job_failure_evidence','SELECT'),"
+                        "has_table_privilege(current_user,'job_failure_evidence','INSERT')"
+                    ).one()
+                assert tuple(rights) == (pg["app_role"], pg["app_role"], True, False)
+                fault_before = whole_state(case)
+                expected = deepcopy(issued.claimed)
+                original_acls = expected["native"]["table_owners_acl"]
+                changed_acls = fault_before["native"]["table_owners_acl"]
+                assert [r for r in original_acls if r[0] != EVIDENCE] == [
+                    r for r in changed_acls if r[0] != EVIDENCE
+                ]
+                (old,) = [r for r in original_acls if r[0] == EVIDENCE]
+                (new,) = [r for r in changed_acls if r[0] == EVIDENCE]
+                assert old[:2] == new[:2] and old[2] != new[2]
+                expected["native"]["table_owners_acl"] = changed_acls
+                assert_same_state(expected, fault_before)
+                coordinator = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+                with monkeypatch.context() as patch:
+                    writes = observe_terminal_writes(patch, case)
+                    started = time.monotonic()
+                    with pytest.raises(AdmissionError) as caught:
+                        coordinator.complete_failure(case.principal, case.context, issued.event)
+                    elapsed = time.monotonic() - started
+                assert caught.value.reason == "unsupported_profile"
+                assert caught.value.code == "schema_incompatible"
+                record_terminal_refusal_work(
+                    coordinator,
+                    controls,
+                    elapsed,
+                    record_property,
+                    fault="revoked_insert",
+                    intentional_grant_fault=True,
+                    native_rights=list(rights),
+                    protected_writes=writes,
+                )
+                assert_terminal_refusal_state(
+                    case, issued, coordinator, caught.value, fault_before, writes
+                )
+            finally:
+                drain_case(case)
+                with pg["owner"].begin() as connection:
+                    connection.exec_driver_sql(f"GRANT INSERT ON job_failure_evidence TO {role}")
+                    assert _application_acl(connection, pg["app_role"]) == old_acl
+            assert_restricted_producer(case)
+            assert_same_state(issued.claimed, whole_state(case))
