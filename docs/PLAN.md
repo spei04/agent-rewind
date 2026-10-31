@@ -2,7 +2,7 @@
 
 ## Current status
 
-See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status).
+See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status). Worker F1 is **Merged; checkpoint accepted** through PR128/main `89a43e43`; Backend is implementing F2 under source handoff `22608a0f`. P1/AR-010-B remain In progress with null final acceptance, F2 acceptance is null, and F3-F5/P2 remain Not started. [Current F1 delivery and F2 entry](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f1-delivery-accepted-f2-assigned--2026-10-30-pacific) preserve the original D1-D4 provenance, five planned PRs, estimates and fixed gates; dated snapshots below remain historical.
 
 ## Contents
 
