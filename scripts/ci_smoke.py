@@ -1438,6 +1438,185 @@ def readiness_smoke(root: Path, database_url: str) -> None:
     asyncio.run(check())
 
 
+def failure_evidence_smoke(root: Path) -> None:
+    """Exercise the installed dormant successor through real services on synthetic data."""
+    import sqlite3
+    from contextlib import ExitStack, closing
+
+    from agent_rewind.migrations.admission_service import initialize_admission
+    from agent_rewind.migrations.artifact_service import initialize_artifacts
+    from agent_rewind.migrations.failure_catalog import inspect_failure_catalog
+    from agent_rewind.migrations.failure_service import (
+        initialize_failure_evidence,
+        inspect_failure_evidence,
+    )
+    from agent_rewind.migrations.failure_transaction import failure_transaction
+    from agent_rewind.migrations.ledger_engine import create_ledger_engine
+    from agent_rewind.migrations.ledger_inputs import validate_ledger_manifest
+    from agent_rewind.migrations.ledger_inspection import inspect_ledger_state
+    from agent_rewind.migrations.ledger_service import initialize_ledger
+    from agent_rewind.migrations.ledger_source import source_digest
+    from agent_rewind.migrations.ledger_transaction import LedgerOutcome, ledger_transaction
+    from agent_rewind.migrations.ledger_work import LedgerWork
+    from agent_rewind.migrations.projection_service import initialize_projection
+    from agent_rewind.migrations.schema import FAILURE, LEDGER, MigrationRefused, catalog, checksum
+    from agent_rewind.sqlite_ownership import create_owned_sqlite_engine, owned_connect
+
+    path = root / "failure-evidence.sqlite"
+    url = f"sqlite:///{path}"
+    key = "synthetic-installed-failure"
+
+    def snapshot():
+        # Native lexical rows and original schema are separate from typed history.
+        with closing(sqlite3.connect(path)) as raw:
+            raw.execute("PRAGMA query_only=ON")
+            objects = {
+                (kind, name): (table, sql)
+                for kind, name, table, sql in raw.execute(
+                    "SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY type,name"
+                )
+            }
+            dump = tuple(raw.iterdump())
+            retained_rows = tuple(
+                line
+                for line in dump
+                if line.startswith("INSERT INTO ")
+                and not line.startswith('INSERT INTO "alembic_version"')
+            )
+            return objects, retained_rows, dump
+
+    with ExitStack() as engines:
+        seed = create_engine(url)
+        engines.callback(seed.dispose)
+        install(seed, key)
+        initialize_ownership(
+            seed,
+            {
+                "schema_version": 1,
+                "installation_key": key,
+                "organization_id": "6" * 32,
+                "project_id": "7" * 32,
+                "project_name": "Synthetic installed failure evidence",
+                "principal_grants": [
+                    {
+                        "principal_id": "oidc:" + "8" * 64,
+                        "role": "maintainer",
+                        "legacy_default": False,
+                    }
+                ],
+            },
+        )
+        initialize_artifacts(seed)
+        initialize_projection(seed)
+        initialize_admission(seed)
+        seed.dispose()
+
+        operator = create_ledger_engine(url)
+        engines.callback(operator.dispose)
+        work = LedgerWork()
+        with ledger_transaction(operator, LedgerOutcome(), work=work) as connection:
+            if inspect_ledger_state(connection).status != "absent":
+                raise RuntimeError("Installed synthetic predecessor already has a ledger")
+            original_source = source_digest(connection, work)
+        manifest = validate_ledger_manifest(
+            {
+                "schema_version": 1,
+                "installation_key": key,
+                "manifest_id": "9" * 32,
+                "operation": "initialize",
+                "source_digest": original_source,
+                "parent_manifest_digest": None,
+                "backup_evidence_digest": "a" * 64,
+                "drain_evidence_digest": "b" * 64,
+                "accounts": [],
+                "opening_accounts": {"organization_account_id": None, "projects": []},
+            }
+        )
+        initialize_ledger(operator, manifest)
+        before = inspect_failure_evidence(operator, installation_key=key)
+        if (before.status, before.revision, before.catalog_profile) != (
+            "absent",
+            LEDGER,
+            "ledger_v1",
+        ):
+            raise RuntimeError("Installed failure inspection mislabeled its predecessor")
+        predecessor_objects, predecessor_rows, _ = snapshot()
+        installed = initialize_failure_evidence(operator, installation_key=key)
+        observed = inspect_failure_evidence(operator, installation_key=key)
+        if (
+            installed.outcome != "complete"
+            or (observed.status, observed.revision, observed.catalog_profile)
+            != ("complete", FAILURE, "failure_evidence_v1")
+            or installed.model_dump(mode="json", exclude={"outcome"})
+            != observed.model_dump(mode="json")
+            or observed.retained_ar7 != before.retained_ar7
+        ):
+            raise RuntimeError("Installed failure transition changed retained ledger identity")
+        work = LedgerWork()
+        with failure_transaction(operator, LedgerOutcome(), work=work) as connection:
+            full = inspect_failure_catalog(connection, work)
+            packaged = json.loads(
+                importlib.resources.files("agent_rewind.migrations")
+                .joinpath("profiles", "sqlite_failure_evidence.json")
+                .read_text()
+            )
+            if full.catalog != packaged or observed.installed_profile_sha256 != checksum(
+                full.catalog
+            ):
+                raise RuntimeError("Installed failure catalog/profile identity differs")
+            if connection.exec_driver_sql("SELECT 1 FROM job_failure_evidence LIMIT 1").first():
+                raise RuntimeError("Installed dormant transition created failure evidence")
+            if connection.exec_driver_sql(
+                "SELECT version_num FROM alembic_version LIMIT 2"
+            ).all() != [(FAILURE,)]:
+                raise RuntimeError(
+                    "Installed failure transition did not advance the actual revision"
+                )
+        successor_objects, successor_rows, successor_dump = snapshot()
+        if {
+            name: successor_objects.get(name) for name in predecessor_objects
+        } != predecessor_objects or successor_rows != predecessor_rows:
+            raise RuntimeError("Installed failure transition changed original schema or row bytes")
+        if initialize_failure_evidence(operator, installation_key=key) != installed:
+            raise RuntimeError("Installed failure reentry changed its original result")
+        try:
+            inspect_failure_evidence(operator, installation_key=key + "-wrong")
+        except MigrationRefused as error:
+            if str(error) != "installation_key_mismatch":
+                raise RuntimeError("Installed failure key refusal changed") from None
+        else:
+            raise RuntimeError("Installed failure inspection accepted the wrong installation")
+        try:
+            with ledger_transaction(operator, LedgerOutcome(), work=LedgerWork()) as connection:
+                inspect_ledger_state(connection)
+        except MigrationRefused as error:
+            if str(error) != "schema_incompatible":
+                raise RuntimeError("Installed predecessor ledger refusal changed") from None
+        else:
+            raise RuntimeError("Installed predecessor ledger accepted the successor")
+
+        runtime = create_owned_sqlite_engine(url, connect_timeout=3, pool_timeout=1)
+        engines.callback(runtime.dispose)
+        with owned_connect(runtime) as connection:
+            try:
+                catalog(connection)
+            except MigrationRefused as error:
+                if str(error) != "schema_incompatible":
+                    raise RuntimeError("Installed old catalog refusal changed") from None
+            else:
+                raise RuntimeError("Installed old catalog accepted the successor")
+        result = runtime_schema_compatibility(runtime)
+        if (result.status, result.code) != ("incompatible", "migration_only"):
+            raise RuntimeError("Installed successor incorrectly permits runtime admission")
+        if runtime.pool.checkedout() or snapshot() != (
+            successor_objects,
+            successor_rows,
+            successor_dump,
+        ):
+            raise RuntimeError("Installed inspection, refusal or reentry changed native state")
+    print("Installed dormant failure evidence service and profiles verified outside checkout.")
+
+
 package = Path(agent_rewind.__file__).resolve()
 if not package.is_relative_to(Path(sys.prefix).resolve()):
     raise RuntimeError("Smoke imported a source checkout instead of the installed wheel")
@@ -1463,6 +1642,8 @@ for profile in (
     "sqlite_projection",
     "sqlite_admission",
     "postgresql16_admission",
+    "sqlite_failure_evidence",
+    "postgresql16_failure_evidence",
 ):
     shape = json.loads(
         importlib.resources.files("agent_rewind.migrations")
@@ -1471,6 +1652,11 @@ for profile in (
     )
     if not isinstance(shape, dict) or "installation_adoptions" not in shape:
         raise RuntimeError("Packaged frozen migration profile is missing or invalid")
+    if profile.endswith("_failure_evidence") and (
+        "job_failure_evidence" not in shape
+        or len([name for name in shape if not name.startswith("$")]) != 21
+    ):
+        raise RuntimeError("Packaged failure evidence profile is missing its successor shape")
 if importlib.metadata.version("agent-rewind") != "0.1.0":
     raise RuntimeError("Unexpected installed package identity")
 admission_foundation_smoke()
@@ -1478,6 +1664,7 @@ with tempfile.TemporaryDirectory(prefix="rewind-package-migration-") as temporar
     operation_components_smoke(Path(temporary))
     operation_service_smoke(Path(temporary))
     operation_http_smoke(Path(temporary))
+    failure_evidence_smoke(Path(temporary))
     database = Path(temporary) / "metadata.sqlite"
     engine = create_engine(f"sqlite:///{database}")
     configure_artifact_engine(engine)

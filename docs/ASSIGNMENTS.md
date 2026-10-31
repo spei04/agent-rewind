@@ -2,10 +2,9 @@
 
 ## Current status
 
-- **Delivery:** PCA1 is delivered at `48ddc894`. [API-USAGE-001 #124](https://github.com/spei04/agent-rewind/issues/124) is verified at `84d63879` ([original main](https://github.com/spei04/agent-rewind/actions/runs/41141950680)).
-- **Active:** Dispatch [PR #127](https://github.com/spei04/agent-rewind/pull/127) has a reviewed rollback-test correction at `1788de74`; hosted acceptance is pending. F1 composition `b8c1f2d` and PCA2 `51ae3a75` await delivery.
-- **Next:** After F1 delivery, implement F2’s dormant failure schema and exact native catalogs; live startup remains behind F3–F5/P2.
-- **Limits:** Live admitted startup is incomplete. Payment is approved within **$200 total including prior charges**; $36.567974 remains held and other exposure is unknown. No verified paid allowance or production activation follows.
+- **Current:** F2 components and the 8,988-node inventory at 19b8c45c are accepted. [PR129](https://github.com/spei04/agent-rewind/pull/129)'s six core/support jobs passed; its gate rejected Python 3.12 elapsed time. Originals are retained.
+- **Next:** Lead prepares one diagnostic CI campaign reporting the 50 slowest phases under unchanged bounds. Backend/Quality/Review assess hosted costs; no performance fix is claimed.
+- **Gates:** Full F2/P1, admitted startup and main/candidate delivery remain pending. F3 is audit only. [Funding limits](delivery/CAPACITY_AND_FUNDING.md) and [dated history](#assignment-history) remain unchanged.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -22,6 +21,50 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F2 duration evidence retained; diagnostic CI assigned — 2026-10-31 (Pacific)**
+
+- [Original run41177621013/1](https://github.com/spei04/agent-rewind/actions/runs/41177621013) at source 19b8c45c passed all three core legs, package, security and isolation. Its CI gate rejected the complete Python 3.12 receipt's **3,839.488659-second** elapsed time against the unchanged 3,600-second limit; candidate delivery was skipped. The decoded pytest log separately reports **8,957 passed, 31 skipped, 3,839.53 seconds**. Original logs and all three receipts are retained and independently reviewed; both 3.11 receipts pass their existing limits. Neither this run nor either earlier failed run supplies whole-campaign acceptance.
+- The accepted source bridge preserves the 8,988-node inventory and 964 selected receipt-phase cases. Lead assigned one prospective original diagnostic campaign with pytest's built-in reporting of the **50 slowest setup/call/teardown phases**, using existing timings and the default display filter. This adds hosted hotspot evidence, with no performance fix or acceptance inferred. Matrix, collection order, job-local PostgreSQL isolation, receipt schema, session limits and case coverage remain unchanged. Quality validates the reporting change; Review checks source and evidence before lead publication. Backend analyzes the resulting hosted durations before proposing a measured repair.
+- Full F2/P1/admitted startup and protected-main/candidate delivery remain pending. F3 remains source/interface audit only. Earlier dated snapshots and failed runs stay historical; [funding limits](delivery/CAPACITY_AND_FUNDING.md), holds, later gates and estimates are unchanged.
+
+**F2 inventories accepted; two original CI failures retained — 2026-10-30 (Pacific)**
+
+- The 8,988-node inventory, declared skips, 879 phase selections and 16 baseline controls are accepted for source `c05eed2f` through peers `7358f647`, `92acf656` and its reviewed comment-only source bridge. A later fixture correction needs its own collection-impact confirmation before those records apply.
+- [Original run41173030450/1](https://github.com/spei04/agent-rewind/actions/runs/41173030450) retained its security failure and cancelled/incomplete core receipts without campaign credit. [Corrected run41174177134/1](https://github.com/spei04/agent-rewind/actions/runs/41174177134) passed security, package (including installed smoke) and isolation, but Python 3.11 early and Python 3.12 all failed the fixture source-hash guard at `tests/ledger_acquisition_postgres_fixture.py:71`, before lock-expiry. Their complete decoded logs are retained; full CI/main/candidate acceptance remains pending. These are recorded outcomes, without a broader product-cause claim.
+- Lead retains original evidence and coordinates the reviewed fixture correction, inventory applicability, receipt review and protected-main/candidate delivery. Backend completed 83 pure and 2 native correction checks per interpreter; Review verifies their source and outcomes; F3 remains source/interface design audit only, without implementation or acceptance. Earlier dated pending-inventory/unexecuted-smoke statements remain historical; PR package success supplies no candidate installed credit. Full F2/P1/startup and [funding limits](delivery/CAPACITY_AND_FUNDING.md) remain unchanged.
+
+**F2 service and native checks accepted; delivery next — 2026-10-30 (Pacific)**
+
+- Lead: composed accepted service/native source `72ac4525` and the statically reviewed, unexecuted installed smoke at `33649347`. Peer `80fe0f99` and native packet `e9d32fe1` bind actual upgrade/version, raw history/ciphertext preservation, public migration-only compatibility and acknowledgment/cleanup behavior; receipts are dated 2026-10-31 UTC.
+- Evidence: Backend's 60 cases and Quality's 15 applicable cases per interpreter are separate campaigns. Python 3.12 composites, both original Backend failures and the earlier direct-API oracle successes remain qualified; changed public-entry positives have their own originals. Whole fixture paths satisfy F2 foundation capacity within existing caps; no universal maximum-capacity claim follows.
+- Next: Backend collects final inventory/skips; lead assembles phase/CI baseline and hosted PR/main/candidate/installed delivery. Quality synchronizes progress and independently reconciles evidence; Review checks source/evidence. [Current F2 entry](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f2-service-and-native-checks-accepted-delivery-next--2026-10-30-pacific) keeps full F2/P1 acceptance null, F3–F5/P2 Not started and funding unchanged.
+
+**F2 owned transaction accepted; service assigned — 2026-10-30 (Pacific)**
+
+- Lead: accepted transaction source and independent oracle at `d24ee7ab`, peer `bdb3521e`, final native packet `28ea6850` and integration `9ebc5de9`. Separate originals record 61 focused/retained SQLite cases and 15 independent PostgreSQL cases per interpreter; this is not a new combined run. PostgreSQL includes a real version-row write plus DDL, complete independent rollback readback, and truthful acknowledgment/cleanup uncertainty. The original native receipts are dated 2026-10-31 UTC.
+- Backend: owns service/revision/compatibility implementation in SECONDARY; Quality owns independent service/native/preservation tests in PRIMARY; Review checks source/security. [Current F2 component entry](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f2-owned-transaction-accepted-service-assigned--2026-10-30-pacific) retains exact source and evidence identities. Physical transaction fixtures do not establish installed successor/readiness; full F2/P1 acceptance remains null, and F3–F5/P2 remain gated.
+- Planning: preserves previous histories, fixed limits, estimates, funding preparation and unknown available allowance. No new task, paid scope or production activation follows.
+
+**F2 catalog accepted; owned transaction assigned — 2026-10-30 (Pacific)**
+
+- Lead: integrated the accepted schema, independently captured profiles/oracle and catalog components at `76437340`. Schema peer `264890a4`, profile peer `8cb86979` and catalog peer `4385eb88` retain their distinct scope. Catalog coverage is 54 applicable cases per interpreter: 36 retained SQLite/offline controls and 18 current PostgreSQL cases; the original failed positive and assembly incident remain retained without success credit.
+- Backend: owns the F2 transaction component in SECONDARY. Quality owns independent native transaction oracles in PRIMARY; Review checks source and original evidence. The next boundary preserves exclusion, transaction identity, rollback and acknowledgment/cleanup ambiguity. Physical 21-table fixtures do not establish installed revision or readiness; full F2/P1 acceptance remains null.
+- PL/RS: private preparation `8707e8e1`, accepted by peer `2c4a2ff5`, reconciles 67 locally retained response usages and three source-bound proposal quotes. It supplies no authoritative billing export, missing proposal usage, complete account/project charge attribution or available allowance. The $36.567974 hold, unknown other exposure and PAID0's sole AR-003-B dependency remain unchanged.
+
+**F2 independent profiles and path to real evidence — 2026-10-30 (Pacific)**
+
+- Quality: committed independent SQLite/PostgreSQL literal profiles and the native oracle at `1a4ccfc9`; peer `8cb86979` accepts the bounded capture component. Original SQLite 2+2 and PostgreSQL 2 passes remain source-bound; the pre-import PG launch failure has no body credit. The added literal assertion was checked against all six retained captures, not claimed as part of the old XML.
+- Backend: continues the F2 catalog observer; schema/profile capture does not establish full successor/service/online fit. Review checks the composed source and native evidence within the same F2 PR.
+- Planning: refreshed the [existing path to real-agent validation](PLAN.md#path-to-the-next-real-agent-validation), separating current migration-only commands, checkpoint/replay producers and natural-failure budget-matched confirmation. PL/RS owns PAID0 reconciliation; private reservation/partial-usage records exist, but invoice attribution, additional exposure and any spendable allowance remain unknown. No gate, estimate or paid scope advances.
+
+**F1 delivery accepted; F2 assigned — 2026-10-30 (Pacific)**
+
+- Lead: accepted [PR #128](https://github.com/spei04/agent-rewind/pull/128), reviewed head `e036d3e7`, at protected main `89a43e4355413ba5cca96e09c410c63c634138fb`. The UTC acceptance is 2026-10-31T02:36:02.319699Z. [Original main run 41155393767](https://github.com/spei04/agent-rewind/actions/runs/41155393767), attempt 1, passed all eight jobs: Python 3.11 recorded 8,770 passes/45 skips; Python 3.12 recorded 8,784 passes/31 skips.
+- Independent final review `39566b17` and release `b1bef87e` bind candidate `13026742056` (archive SHA256 `e2014f918d08c8a66082a5a9113da2f4e28df35806ca8291c21592a561354b8b`), wheel `d552cd7d`, all 149 runtime members, its own installed smoke/CLI and separate current image trust proof. [F1 acceptance and F2 entry](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f1-delivery-accepted-f2-assigned--2026-10-30-pacific) retain the exact evidence identities.
+- Backend: owns F2 implementation/schema/native tests in the reused SECONDARY checkout under source handoff `22608a0f`; Planning owns this PRIMARY metadata update; Review independently checks source and evidence. The first F2 schema commit is an internal review stage of the same F2 PR; five planned F1–F5 PRs and their estimates are unchanged.
+- [Original rollback failure and correction](#rollback-test-correction--2026-10-30) and the superseded incomplete [PR128 run 41147939612](https://github.com/spei04/agent-rewind/actions/runs/41147939612) remain retained separately. PR127’s closed/merged readback reflects GitHub containment after PR128; no separate PR127 check acceptance or manual closure is claimed.
+- F1 is **Merged; checkpoint accepted**. F2 is **In progress** with null acceptance; P1/AR-010-B remain In progress without final acceptance, and F3–F5/P2 remain Not started. No live startup, successor-fit, research or production acceptance or new paid allowance follows.
 
 **API-USAGE-001 delivery accepted — 2026-10-31**
 

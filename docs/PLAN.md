@@ -2,7 +2,7 @@
 
 ## Current status
 
-See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status).
+See the [canonical summary and dated assignment log](ASSIGNMENTS.md#current-status). F1/main 89a43e43 remains accepted. F2 components and the 8,988-node inventory apply to reviewed source 19b8c45c through the accepted source bridge, without a new full collection. Original PR129 run41177621013/1 passed all six core/support jobs; its complete Python 3.12 receipt exceeded the unchanged session limit. All originals are retained and independently reviewed. Lead prepares one original diagnostic campaign reporting the 50 slowest pytest phases to identify hosted hotspots; no performance fix is claimed. Full F2/P1/startup and protected-main/candidate delivery remain pending; F3 is source/interface audit only. [Component history](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f2-service-and-native-checks-accepted-delivery-next--2026-10-30-pacific), [funding limits](delivery/CAPACITY_AND_FUNDING.md), later gates and estimates are unchanged.
 
 ## Contents
 
@@ -38,7 +38,7 @@ The product offers auditable intervention experiments: reliable execution bounda
 | Accepted initial deployment | Self-hosted, one organization per deployment, dedicated metadata database and artifact store, dedicated Linux gVisor workers. No connection to an adopter's production application database. |
 | Initial execution scope | Controlled sequential Python coding agent; workspace files and serialized policy state; offline tools and independent evaluator. |
 | Model integration | Existing model provider adapter and private worker credential. Provider versions and rates are configuration, not hardcoded product assumptions. |
-| Spending authorization | Initial model validation cap: $200. Historical reservations of $36.567974 remain unreconciled; they are not invoice spend or a verified available balance. Reconcile and approve a bounded allocation before further paid experiments. |
+| Spending authorization | Payment approved within the $200 lifetime total, including prior charges. Historical reservations of $36.567974 remain held and other exposure is unknown; they are not invoices or a verified balance. Reconcile exposure and reserve a bounded allocation before further paid experiments. |
 | Team | Unknown. Planning scenario: six core engineers plus shared product/security support; see Section 9. No hires or availability are assumed confirmed. |
 | Launch date | Not committed. Earlier week-number windows are superseded by the task-level review; first ten working days are conditional, later scheduling is milestone-based until staffing, throughput and external dependencies are known. |
 | Capacity and customers | No verified customer demand or production load. Baseline, forecast, and stress assumptions are defined separately in Section 5. |
@@ -1139,17 +1139,74 @@ Backend owns CI and the read-only worker capability/conditional-write design. Qu
 
 ### Path to the next real-agent validation
 
-The historical walkthrough reconstructs saved fixtures. The next integrated real-agent validation follows the existing dependency graph:
+**Current source boundary — 2026-10-30 (Pacific).** At delivered main
+`89a43e43`, `uv run rewind migrate status` reports configured metadata state;
+`uv run rewind serve` exposes the static workbench described in the
+[README](../README.md#start-locally). Recording, branch and study routes remain
+disabled by migration-only readiness. There is no admitted checkpoint/replay
+command to recommend yet. The installed candidate proves software delivery,
+while [the historical `05fd44b` validation](VALIDATION.md) used an injected stop;
+neither is a current natural-failure comparison.
 
-| Next delivery | Owner | Observable exit |
+The existing task graph reaches two distinct evidence targets:
+
+| Boundary and existing producers | Owner | Required observable artifact |
 | --- | --- | --- |
-| Current ledger P2 | Backend, Review, lead | Passing PR/main checks, native evidence and matching installed artifact; whole AR-010-A accepted |
-| Worker P1 F1–F5, then P2 | Backend; Quality and Review | All five accepted checkpoints, followed by actual fenced completion/expiry integration |
-| M1 integration | Backend, Platform, Quality | Projection repair and telemetry joined by AR-012-B; all 24 M1 behavior cases and G1 accepted |
-| Runtime branches | Platform, Backend, Research, Quality | Native gVisor isolation, checkpoint/restore, storage/key recovery, fencing and evaluator evidence under each existing task's prerequisites |
-| Real-agent smoke and G2 | Quality, Research, Platform | AR-019-A integration, the PAID0-bound AR-019-B failed run and branches, then AR-019-C evidence and G2 acceptance |
+| Admitted execution: worker F2–F5/P1, then [P2 integration](delivery/WORKER_DISPATCH.md#remaining-admitted-startup-integration--2026-10-30) | Backend; Platform/Quality/Review | Atomic operation/job/account/authentic-provenance publication, an installed configuration-bound adapter, acknowledged claim, fenced Engine/event/result publication and fresh whole-tuple recovery after unknown acknowledgment. Packaged startup must work without patched readiness. The accepted dispatch and dormant-schema/profile components do not supply this composition. |
+| M1 integration: AR-006-C/AR-011-C, AR-012-B and G1 | Backend, Platform, Quality | Projection repair, telemetry and the integrated M1 behavior evidence. AR-012-B verifies these producers; it does not implement missing worker behavior. |
+| Checkpoint → branch/replay: AR-014 and AR-017, with AR-013/015/016/018 prerequisites | Backend, Platform, Research, Quality | A supported manifest binds policy state, files, image and evaluator. Native restore rejects unsupported state, preserves the parent and records actual versus observed effects; isolated tools and fenced checkpoint publication survive interruption. Existing method/unit tests are not this integrated qualification. |
+| First usable replay workflow: AR-019-A/B/C, PAID0 and all G2 prerequisites | Research/Quality; Platform/Security review | One captured real coding failure, its checkpoint, unchanged and intervention continuations, independent evaluator results, retained failed/missing outcomes and attributable cost/uncertainty. AR-019-B needs a reconciled bounded allocation; no current task/model/rates/replay artifact is selected by this map. |
+| First real-failure comparison under a matched budget: AR-020/021/022/023, AR-024/025/026 and G3; the existing public-corpus route feeds AR-038 | Backend owns identity/receipts/reconciliation; Research owns methods/protocol; independent Quality/statistics review | Frozen task/candidate/evaluator identities, matched physical and comparison budgets covering proposals, continuations and evaluation, all attempted/missing outcomes, reserved independent confirmation and recomputable reports. Rights/capture, PUBLICDATA0/CAPTUREFUNDS0, affordable sample/power and STUDYFUNDS0 remain separate gates; a successful branch gives no comparative advantage claim. |
 
-Every worker checkpoint is required by the current contracts. P1's 12 [9–18] days measure engineering effort, not elapsed calendar time or an assumed parallel speedup. CI, review, failures and existing ENV0/PAID0 dependencies affect elapsed delivery. This intermediate validation does not satisfy enterprise study, workbench, partner pilot, capacity/security or rollout gates G3–G7. See the [worker plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) and [task graph](EXECUTION_BACKLOG.md); no reduced-scope bypass or new spending authority is introduced.
+[The worker plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) and
+[assignable task cards](EXECUTION_BACKLOG.md) retain the exact dependencies and
+estimates. F2 service/native components are accepted at `33649347`, with
+separate Backend 60-case and independent 15-case evidence per interpreter.
+The 8,988-node inventory, declared skips and CI baseline apply to reviewed
+source 19b8c45c through the accepted source bridge, without new full collection.
+Original PR129 run41177621013/1 passed all six core/support jobs, but its
+complete Python 3.12 receipt took 3,839.488659 seconds and failed the unchanged
+3,600-second bound. The decoded pytest summary separately reports 8,957 passed,
+31 skipped and 3,839.53 seconds. Original receipts/logs are retained and
+independently reviewed; all three failed runs remain without campaign acceptance.
+One prospective original diagnostic campaign adds the 50 slowest pytest phases
+under the unchanged matrix, order, isolation, receipt schema and limits. It
+collects hosted hotspot evidence, with no performance fix claimed. Measured
+diagnosis/repair, successful original receipt review, protected-main checks and
+the candidate's own installed/provenance proof remain before full F2 acceptance. F3 is source/interface audit only, without
+implementation or acceptance; later producers remain gated. Measured whole
+fixture paths satisfy F2 foundation capacity under unchanged caps, without a
+universal maximum-data claim. Specified maximum online-consumer cohorts remain
+F4 work. P2 still needs its explicit storage/issuer/history decisions and reforecast before implementation. These are
+concrete ownership, accounting and publication requirements; later regional
+rollout and enterprise operations do not replace them. A standalone runner or
+deterministic adapter does not bypass them. No new task, estimate, allocation or
+scope amendment is created here.
+
+**PAID0 preparation and missing authoritative evidence.** PL/RS owns PAID0;
+its sole dependency remains AR-003-B and its machine status remains
+**Not satisfied**. The owner has approved payment within the **$200 lifetime
+total, including prior charges**. Accepted private reconciliation
+`8707e8e1c7b2ffc26a01993d38f5c679c493ef6d5c6bd148234cbebb9cff4a92`
+and independent peer
+`2c4a2ff532765dfc9cb2ec29dc81bd4fa7652c5a13b44e337c0616d5ac3b73b5`
+establish local consistency of 67 retained response usages and three
+source-configured proposal quotes. The source-bound records retain a $1.668527
+ceiling for those 67 calls, excluding the proposals, and $36.567974 held.
+Local authenticated artifact integrity is not provider-authenticated billing,
+current trusted receipt issuance or exhaustive charge attribution.
+
+The examined records contain no authoritative billing export. Unresolved evidence
+includes authoritative account/project usage and charges for the Oct6 UTC window,
+matching to retained records where supported, missing proposal usage, applicable
+historical rates and adjustments, and attribution of other exposure. Scoped
+funding reconciliation may instead establish an explicitly conservative exposure
+bound under the existing contract; neither route is established here.
+Additional exposure and available allowance remain **unknown**. Holds remain
+unchanged pending supported reconciliation; subtracting them from $200 does not
+establish an allowance. AR-023 owns supported settlement/release behavior, not an
+added PAID0 funding prerequisite. [The funding decision](delivery/CAPACITY_AND_FUNDING.md#owner-payment-decision--2026-10-30)
+and [historical validation](VALIDATION.md) retain their scope.
 
 
 ### Worker failure DDL reforecast adopted — 2026-10-29

@@ -203,8 +203,8 @@ def run(channel):
                         "mapped_id": id(mapped_object),
                         "mapped_type": type(mapped_object).__name__,
                         "mapped_code": mapped_object.code,
-                        "original_mapping": 280 in mapping_lines,
-                        "original_mapping_line": 280,
+                        "original_mapping": 286 in mapping_lines,
+                        "original_mapping_line": 286,
                     }
                 )
                 return mapped_object

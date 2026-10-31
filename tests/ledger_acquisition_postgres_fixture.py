@@ -39,7 +39,9 @@ EXCLUSION_QUERIES = [
 ]
 ORIGIN_HASHES = {
     "_postgres_exclusion": "703b86006864491ed1ce29f71a6c1672707c26a1b3b0fe94ab8d2b2b34a2cbcf",
-    "_begin": "a75cd93ef4c1d09b8f5bfe50762e70df0dd8613b14059b340d3209e4e1733fcb",
+    # The reviewed extraction keeps both the native prelude and old inventory pinned.
+    "_begin": "23c4897897816f6bbf0f11937ffe4914efbd838bec8ccf1c9b607cb1ed012ad5",
+    "_begin_native": "60339068e15847528faf3992262155805f4f1ac341392fb4d40fdbce3202e79e",
     "_ordinary_error": "a60af50376eaaa24f6dfe36fc94ef3e1a00029649110286b2980c27714cac9ba",
 }
 BOOTSTRAP = [
@@ -205,7 +207,7 @@ def assert_result(message, held, mode):
     ]
     assert len({native["error_id"], mapped["wrapper_id"], mapped["mapped_id"]}) == 3
     assert mapped["caught_id"] == mapped["mapped_id"] == witness["refusal"]["error_id"]
-    assert mapped["original_mapping"] and mapped["original_mapping_line"] == 280
+    assert mapped["original_mapping"] and mapped["original_mapping_line"] == 286
     assert mapped["mapped_type"] == "MigrationRefused" and mapped["mapped_code"] == "migration_busy"
     assert mapped["wrapper_type"] == "OperationalError" and mapped["wrapper_id"] > 0
     assert observed["outcomes"] == [

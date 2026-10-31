@@ -19,6 +19,7 @@ ARTIFACTS = "ar_0004_artifacts"
 PROJECTION = "ar_0005_run_index"
 ADMISSION = "ar_0006_admission"
 LEDGER = "ar_0007_ledger"
+FAILURE = "ar_0008_failure_evidence"
 LEDGER_TABLES = {"budget_accounts", "provider_calls", "budget_entries"}
 ADMISSION_TABLES = {"operations", "operation_keys"}
 PROJECTION_TABLES = {"run_index"}
@@ -835,7 +836,7 @@ def verify_baseline(
 
 def installed_profile(name: str, revision: str = HEAD) -> dict[str, Any]:
     """The checked-in literal profile is authority, never a value stored in the target DB."""
-    if revision not in {HEAD, OWNERSHIP, ARTIFACTS, PROJECTION, ADMISSION, LEDGER}:
+    if revision not in {HEAD, OWNERSHIP, ARTIFACTS, PROJECTION, ADMISSION, LEDGER, FAILURE}:
         raise MigrationRefused("unsupported_target_revision")
     profile_name = "postgresql16" if name == "postgresql" else "sqlite"
     if revision == OWNERSHIP:
@@ -848,6 +849,8 @@ def installed_profile(name: str, revision: str = HEAD) -> dict[str, Any]:
         profile_name += "_admission"
     elif revision == LEDGER:
         profile_name += "_ledger"
+    elif revision == FAILURE:
+        profile_name += "_failure_evidence"
     profile_path = Path(__file__).parent / "profiles" / (profile_name + ".json")
     if not profile_path.is_file():
         raise MigrationRefused("schema_profile_unavailable")
