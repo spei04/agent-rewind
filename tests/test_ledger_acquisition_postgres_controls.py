@@ -50,7 +50,10 @@ def source_text_calls(function):
 def test_contracts_are_bound_to_original_queries_and_pinned_bootstrap_sources():
     assert_origins()
     assert source_text_calls(service._postgres_exclusion) == EXCLUSION_QUERIES
-    beginning = source_text_calls(ledger_transaction._begin)
+    beginning = [
+        *source_text_calls(ledger_transaction._begin_native),
+        *source_text_calls(ledger_transaction._begin),
+    ]
     assert beginning == [
         "SELECT pg_try_advisory_xact_lock(:key)",
         "SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename LIMIT 21",
@@ -238,7 +241,7 @@ def synthetic_message(*, final=False, mode="lock-expiry"):
                 "mapped_id": 23,
                 "caught_id": 23,
                 "original_mapping": True,
-                "original_mapping_line": 280,
+                "original_mapping_line": 286,
                 "mapped_type": "MigrationRefused",
                 "mapped_code": "migration_busy",
                 "wrapper_type": "OperationalError",
@@ -652,12 +655,20 @@ def test_parent_fixture_wrapper_does_not_replace_operator_source_binding(monkeyp
 
 
 def test_changed_original_operator_alias_fails_source_binding(monkeypatch):
-    def replacement(*args, **kwargs):
-        raise AssertionError("replacement must not be invoked")
+    for name in ("_postgres_exclusion", "_begin", "_begin_native", "_ordinary_error"):
+        with monkeypatch.context() as patch:
 
-    monkeypatch.setattr(ledger_transaction, "_postgres_exclusion", replacement)
-    with pytest.raises(AssertionError):
-        assert_origins()
+            def replacement(*args, **kwargs):
+                raise AssertionError("replacement must not be invoked")
+
+            # Preserve identity metadata so rejection proves the source hash guard.
+            replacement.__name__ = replacement.__qualname__ = name
+            replacement.__module__ = (
+                service.__name__ if name == "_postgres_exclusion" else ledger_transaction.__name__
+            )
+            patch.setattr(ledger_transaction, name, replacement)
+            with pytest.raises(AssertionError):
+                assert_origins()
 
 
 def test_final_native_prefix_must_be_the_exact_held_observation():
