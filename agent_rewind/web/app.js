@@ -512,9 +512,36 @@ function comparisonText(result) {
     "Branch " + result.right.slice(0, 8) + ": " + outcome(result.right_success),
     "",
   ];
+  if (result.decisions?.length) {
+    lines.push("Changed decisions");
+    result.decisions.forEach((decision) => {
+      lines.push("Decision " + decision.step);
+      for (const [label, key] of [
+        ["Action", "action"],
+        ["Source action", "left_action"],
+        ["Branch action", "right_action"],
+      ]) {
+        if (Object.hasOwn(decision, key)) {
+          const action = decision[key];
+          lines.push(
+            label + (typeof action?.tool === "string" ? ": " + action.tool : ":"),
+            JSON.stringify(action, null, 2),
+          );
+        }
+      }
+      if (typeof decision.observation_changed === "boolean")
+        lines.push("Tool result changed: " + (decision.observation_changed ? "Yes" : "No"));
+      lines.push("");
+    });
+  }
   if (!result.files.length) lines.push("No file changes.");
   result.files.forEach((file) => {
-    lines.push(file.path, file.diff || "File changed without a text diff.", "");
+    lines.push(file.path);
+    if (Object.hasOwn(file, "mode_before"))
+      lines.push("Source file mode: " + file.mode_before);
+    if (Object.hasOwn(file, "mode_after"))
+      lines.push("Branch file mode: " + file.mode_after);
+    lines.push(file.diff || "File changed without a text diff.", "");
   });
   return lines.join("\n");
 }

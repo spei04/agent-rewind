@@ -63,6 +63,31 @@ vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),context);
  assert.match(comparison,/Source aaaaaaaa: Failed/);
  assert.match(comparison,/Branch bbbbbbbb: Passed/);
  assert.ok(comparison.includes('invoice.py\n- old\n+ fixed'));
+ context.compareInput.decisions=[{step:3,action:{tool:"finish"}}];
+ context.compareInput.files=[];
+ const decisionOnly=vm.runInContext('comparisonText(compareInput)',context);
+ assert.match(decisionOnly,/Changed decisions\nDecision 3\nAction: finish/);
+ assert.ok(decisionOnly.includes('"tool": "finish"'));
+ assert.ok(decisionOnly.includes('No file changes.'));
+ assert.ok(!decisionOnly.includes('Tool result changed:'));
+ context.compareInput.decisions=[{step:3,left_action:{tool:"write",path:"invoice.py"},
+   right_action:{tool:"finish"},observation_changed:true}];
+ const production=vm.runInContext('comparisonText(compareInput)',context);
+ assert.ok(production.includes('Source action: write'));
+ assert.ok(production.includes('"path": "invoice.py"'));
+ assert.ok(production.includes('Branch action: finish'));
+ assert.ok(production.includes('Tool result changed: Yes'));
+ context.compareInput.decisions[0].observation_changed=false;
+ assert.ok(vm.runInContext('comparisonText(compareInput)',context)
+   .includes('Tool result changed: No'));
+ context.compareInput.files=[{path:"mode_only.py",diff:"",mode_before:420,mode_after:493}];
+ const modeOnly=vm.runInContext('comparisonText(compareInput)',context);
+ assert.ok(modeOnly.includes('mode_only.py'));
+ assert.ok(modeOnly.includes('Source file mode: 420'));
+ assert.ok(modeOnly.includes('Branch file mode: 493'));
+ assert.ok(modeOnly.includes('File changed without a text diff.'));
+
+
  vm.runInContext('state.runs=[{id:"12345678aaaaaaaa",name:"Same task",status:"complete",' +
    'success:false,steps:3,parent_id:null}];renderRuns()',context);
  const row=get('run-list').children[0];
