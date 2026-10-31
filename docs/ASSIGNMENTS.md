@@ -3,10 +3,10 @@
 ## Current status
 
 - **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129), including installed-package evidence.
-- **Validated:** F3 targeted checks have 35 applicable cases per interpreter: 10 pure, 9 SQLite and 16 PostgreSQL. [Source and retained-failure qualifications](VALIDATION.md#remaining-f3-controls) preserve the separate original runs.
-- **Assigned:** Backend owns the four CI metadata fields and 16 controls; Lead/Quality own installed-package delivery, with independent Review.
-- **Next:** Full CI, installed delivery and full F3 acceptance remain pending before F4/F5/P2. Funding, live startup and production remain gated.
-- **Dashboard:** The plain black-and-white version is saved; its private preview has expired.
+- **Validated:** 35 source-qualified F3 cases per interpreter, reviewed 9,198-node inventories, unchanged skip allowances and 16 baseline controls. [Qualifications](VALIDATION.md#remaining-f3-controls).
+- **Assigned:** Backend handles concrete fixes; Quality runs configured checks; Lead owns planned source-only publication, required CI and installed delivery, with Review.
+- **Next:** Full F3 acceptance remains pending before F4/F5/P2; funding, live startup and production remain gated.
+- **Dashboard:** The saved monochrome dashboard is unchanged; its private preview has expired.
 
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -24,6 +24,23 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F3 CI inventory and baseline controls completed — 2026-10-31 (Pacific)**
+
+- Both original collect-only runs at `1a703ecc` observed the same 9,198 ordered
+  IDs, retaining all 8,988 previous IDs and adding 210. No test or fixture bodies
+  ran. Expected skips remain 45 on Python 3.11 (10 early, 35 late) and 31 on
+  Python 3.12.
+- Review accepted the four count/digest metadata leaves and one original run of
+  16 retained CI controls, with direct validation against both collected arrays.
+  Commit `b9ed477f` changes only that metadata. The separately source-qualified
+  35 targeted cases per interpreter and their retained failures and cleanup
+  qualifications remain unchanged in [validation](VALIDATION.md#remaining-f3-controls).
+- Backend remains available for concrete fixes. Quality owns configured final
+  checks; Lead owns planned source-only publication, a draft PR, required CI
+  and installed-package delivery, with independent Review. Those results and
+  full F3 acceptance remain pending. The saved dashboard is unchanged and its
+  private preview remains expired.
 
 **Targeted terminal controls closed — 2026-10-31 (Pacific)**
 

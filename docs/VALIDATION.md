@@ -199,12 +199,22 @@ Bare and borrowed scopes were refused on distinct idle and active connections.
 Source, environments, database/role baselines and private data were preserved;
 the database stopped and all owned processes were reaped.
 
-Backend's four CI metadata fields and 16 controls, then actual installed-package
-and delivery checks, remain pending. Full CI and full F3 acceptance are not
-established by these targeted cases; F4/F5/P2 follow those delivery gates. The
-development environments do not substitute for the established candidate-build
-workflow. No new model calls, public preview, live startup or production
-acceptance follows from these checks.
+Both original collect-only runs at `1a703ecc` observed the same 9,198 ordered
+IDs: all 8,988 previous IDs remain in order, with 210 additions. No test or
+fixture bodies ran. Expected skip allowances remain 45 on Python 3.11 (10 early,
+35 late) and 31 on Python 3.12; actual CI skip outcomes remain to be verified.
+
+Only the four version count/digest leaves changed in `b9ed477f`. The retained
+16 CI controls passed in one original run, and the direct-array validator
+matched both inventories and their partitions. Runtime and test definitions
+were unchanged by that metadata update. These results do not relabel the
+separate targeted native groups or their retained failures.
+
+Configured final-check results, required CI and installed-package qualification
+remain pending. Source-only publication and a draft PR are planned; full F3
+acceptance still precedes F4/F5/P2. Development environments do not substitute
+for the established candidate-build workflow. No new model calls, public
+preview, live startup or production acceptance follows from these checks.
 
 ## Historical live procedure
 
