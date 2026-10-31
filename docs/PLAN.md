@@ -2,7 +2,7 @@
 
 ## Current status
 
-See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status). Worker F1 is **Merged; checkpoint accepted** through PR128/main `89a43e43`. F2 schema/catalog/profile and owned transaction components are accepted at `d24ee7ab`; Backend implements service/revision/compatibility, Quality supplies independent service/native/preservation tests, and Review checks source/security under source handoff `22608a0f`. P1/AR-010-B remain In progress with null final acceptance, F2 acceptance is null, and F3-F5/P2 remain Not started. [Current F1 delivery and F2 entry](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f1-delivery-accepted-f2-assigned--2026-10-30-pacific) preserve the original D1-D4 provenance, five planned PRs, estimates and fixed gates; dated snapshots below remain historical.
+See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status). Worker F1 is **Merged; checkpoint accepted** through PR128/main `89a43e43`. F2 schema/catalog/profile/transaction and service/native components are accepted at `33649347`; the installed smoke is statically reviewed but unexecuted. Backend collects final inventory/skips, the lead assembles delivery, and Quality/Review reconcile source and evidence under the existing handoff `22608a0f`. P1/AR-010-B remain In progress with null final acceptance, F2 acceptance is null, and F3-F5/P2 remain Not started. [Current F2 component evidence and remaining delivery](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f2-service-and-native-checks-accepted-delivery-next--2026-10-30-pacific) preserve the original D1-D4 provenance, five planned PRs, estimates and fixed gates; dated snapshots below remain historical.
 
 ## Contents
 
@@ -1160,10 +1160,14 @@ The existing task graph reaches two distinct evidence targets:
 
 [The worker plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) and
 [assignable task cards](EXECUTION_BACKLOG.md) retain the exact dependencies and
-estimates. The F2 schema/catalog/profile and owned transaction components are
-accepted at `d24ee7ab`; the next runtime work is service/revision/compatibility,
-then the remaining approved worker producers. P2 still needs its explicit
-storage/issuer/history decisions and reforecast before implementation. These are
+estimates. F2 service/native components are accepted at `33649347`, with
+separate Backend 60-case and independent 15-case evidence per interpreter.
+The installed smoke remains unexecuted. Actual full inventory/skips, phase/CI
+baseline and matching hosted PR/main/candidate/installed proof remain required
+before full F2 acceptance; later worker producers remain gated. Measured whole
+fixture paths satisfy F2 foundation capacity under unchanged caps, without a
+universal maximum-data claim. Specified maximum online-consumer cohorts remain
+F4 work. P2 still needs its explicit storage/issuer/history decisions and reforecast before implementation. These are
 concrete ownership, accounting and publication requirements; later regional
 rollout and enterprise operations do not replace them. A standalone runner or
 deterministic adapter does not bypass them. No new task, estimate, allocation or
