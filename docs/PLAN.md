@@ -2,7 +2,7 @@
 
 ## Current status
 
-See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status). Worker F1 is **Merged; checkpoint accepted** through PR128/main `89a43e43`. F2 schema/catalog/profile components are accepted at `76437340`; Backend implements the owned transaction, Quality supplies independent native oracles, and Review checks each stage under source handoff `22608a0f`. P1/AR-010-B remain In progress with null final acceptance, F2 acceptance is null, and F3-F5/P2 remain Not started. [Current F1 delivery and F2 entry](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f1-delivery-accepted-f2-assigned--2026-10-30-pacific) preserve the original D1-D4 provenance, five planned PRs, estimates and fixed gates; dated snapshots below remain historical.
+See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status). Worker F1 is **Merged; checkpoint accepted** through PR128/main `89a43e43`. F2 schema/catalog/profile and owned transaction components are accepted at `d24ee7ab`; Backend implements service/revision/compatibility, Quality supplies independent service/native/preservation tests, and Review checks source/security under source handoff `22608a0f`. P1/AR-010-B remain In progress with null final acceptance, F2 acceptance is null, and F3-F5/P2 remain Not started. [Current F1 delivery and F2 entry](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f1-delivery-accepted-f2-assigned--2026-10-30-pacific) preserve the original D1-D4 provenance, five planned PRs, estimates and fixed gates; dated snapshots below remain historical.
 
 ## Contents
 
@@ -1160,9 +1160,9 @@ The existing task graph reaches two distinct evidence targets:
 
 [The worker plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) and
 [assignable task cards](EXECUTION_BACKLOG.md) retain the exact dependencies and
-estimates. The F2 schema/catalog/profile components are accepted at `76437340`; the next
-runtime work is the owned transaction, then service/migration and the remaining
-approved worker producers. P2 still needs its explicit
+estimates. The F2 schema/catalog/profile and owned transaction components are
+accepted at `d24ee7ab`; the next runtime work is service/revision/compatibility,
+then the remaining approved worker producers. P2 still needs its explicit
 storage/issuer/history decisions and reforecast before implementation. These are
 concrete ownership, accounting and publication requirements; later regional
 rollout and enterprise operations do not replace them. A standalone runner or
