@@ -246,3 +246,25 @@ def test_detached_values_cannot_construct_terminal_authority(token_type):
     with pytest.raises(FailureRefusal, match="^invalid_request$") as caught:
         token_type()
     assert caught.value.reason == "capability_not_issued"
+
+
+@pytest.mark.parametrize(
+    ("reason", "code"),
+    [
+        ("invalid_intent", "invalid_request"),
+        ("capability_not_issued", "invalid_request"),
+        ("invocation_reused", "invalid_request"),
+        ("original_identity_conflict", "idempotency_conflict"),
+        ("unsupported_profile", "schema_incompatible"),
+        ("stale_source", "dependency_unavailable"),
+        ("not_eligible", "dependency_unavailable"),
+        ("origin_unproved", "dependency_unavailable"),
+        ("capacity_exceeded", "dependency_unavailable"),
+        ("invalid_native_state", "dependency_unavailable"),
+    ],
+)
+def test_failure_refusal_has_the_adopted_literal_public_code(reason, code):
+    error = FailureRefusal(reason)
+    assert error.reason == reason
+    assert error.code == code
+    assert error.args == (code,) and str(error) == code
