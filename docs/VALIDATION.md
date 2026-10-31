@@ -165,10 +165,12 @@ acceptance remain incomplete.
 
 ### Remaining F3 controls
 
-The next composed phase has 10 pure mapping checks and 9 SQLite cases per
-interpreter. Python 3.12 retains 17 source-applicable passes from `9e01a773`
-plus two corrected receiver cases at `3bd0fc99`; Python 3.11 has 19 original
-passes at `3bd0fc99`. These are separate runs, not one combined rerun.
+The targeted composed phase has 35 applicable cases per interpreter: 10 pure
+mapping checks, 9 SQLite cases and 16 PostgreSQL cases. Python 3.12 retains
+17 source-applicable pure/SQLite passes from `9e01a773` plus two corrected
+receiver cases at `3bd0fc99`; Python 3.11 has 19 pure/SQLite originals at
+`3bd0fc99`. The 16 PostgreSQL cases ran on `3bd0fc99` for each interpreter.
+These are separate original groups, not one combined rerun.
 
 The stopped Python 3.12 group first passed conditional-update and competing-writer
 checks, then failed while opening an extra SQLite connection without the required
@@ -187,10 +189,19 @@ loser returned native SQLITE_BUSY without beginning its transaction and retained
 commit acknowledgment. Native key rows and authority were tested, not HTTP
 authentication.
 
-At this checkpoint, 16 PostgreSQL cases per interpreter remain in execution
-under the same bounds, with Quality as the sole database-test owner and Review
-checking the original records. Full F3 requires that complete reviewed native
-matrix and actual installed-package/delivery checks before F4/F5/P2. The
+The PostgreSQL originals passed and were independently reviewed under the
+unchanged limits. They cover native expiry/cancel and exact original readback,
+legacy and service-key paths, scope refusals, uncertain commits, actual deferred
+SQLSTATE `23514`, conditional UPDATE rowcount zero, and competing terminal
+writers. A separate native observer proved the blocked-writer relation; one
+writer committed one exact evidence row and the loser made no protected write.
+Bare and borrowed scopes were refused on distinct idle and active connections.
+Source, environments, database/role baselines and private data were preserved;
+the database stopped and all owned processes were reaped.
+
+Backend's four CI metadata fields and 16 controls, then actual installed-package
+and delivery checks, remain pending. Full CI and full F3 acceptance are not
+established by these targeted cases; F4/F5/P2 follow those delivery gates. The
 development environments do not substitute for the established candidate-build
 workflow. No new model calls, public preview, live startup or production
 acceptance follows from these checks.

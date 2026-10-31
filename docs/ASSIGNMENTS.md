@@ -3,9 +3,9 @@
 ## Current status
 
 - **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129), including installed-package evidence.
-- **Validated:** F3 has 10 pure and 9 SQLite cases per interpreter. [Source and retained-failure qualifications](VALIDATION.md#remaining-f3-controls) distinguish prior passes from corrected runs.
-- **Assigned:** Quality runs 16 PostgreSQL cases per interpreter; Backend owns fixes and Review verifies originals.
-- **Next:** Complete F3 native and installed-package/delivery gates before F4/F5/P2. Funding, live startup and production remain gated.
+- **Validated:** F3 targeted checks have 35 applicable cases per interpreter: 10 pure, 9 SQLite and 16 PostgreSQL. [Source and retained-failure qualifications](VALIDATION.md#remaining-f3-controls) preserve the separate original runs.
+- **Assigned:** Backend owns the four CI metadata fields and 16 controls; Lead/Quality own installed-package delivery, with independent Review.
+- **Next:** Full CI, installed delivery and full F3 acceptance remain pending before F4/F5/P2. Funding, live startup and production remain gated.
 - **Dashboard:** The plain black-and-white version is saved; its private preview has expired.
 
 
@@ -24,6 +24,21 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Targeted terminal controls closed — 2026-10-31 (Pacific)**
+
+- The phase has 35 applicable cases per interpreter: 10 pure, 9 SQLite and
+  16 PostgreSQL. PostgreSQL originals ran at `3bd0fc99`; pure/SQLite coverage
+  retains 17 earlier Python 3.12 passes plus two corrected receiver cases. This is
+  source-qualified coverage, not a combined rerun.
+- Review verified all originals and database/process release. The original
+  checkout failure remains retained, and the SQLite competing writer's
+  `cleanup_failed=true` remains explicit in
+  [validation](VALIDATION.md#remaining-f3-controls).
+- Backend owns the four CI metadata fields and 16 controls; Lead/Quality own
+  installed-package/delivery preparation, with independent Review. Full F3,
+  full CI and installed delivery remain pending before F4/F5/P2. The saved
+  monochrome dashboard is unchanged and its private preview remains expired.
 
 **Pure and SQLite controls closed — 2026-10-31 (Pacific)**
 
