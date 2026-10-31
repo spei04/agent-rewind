@@ -119,9 +119,11 @@ The scoped UI, authority and recording checks cover 66 cases per interpreter
 cases; the other 60 retain unchanged-source applicability. The original test-host
 failure, layout finding, omitted comparison details and misleading change labels
 remain retained. Bundle `9c9260d2` changes only viewer/asset metadata; all 183
-recorded responses remain identical. The active preview stays read-only and
-private, with zero new provider calls. This is historical controlled evidence,
-not fresh confirmation, live readiness or a public release.
+recorded responses remain identical. The private preview expired at its scheduled
+18:27:44 UTC deadline on October 31; both listeners and owned processes were
+verified absent. The code and recording remain saved, with zero new provider calls.
+This is historical controlled evidence, not fresh confirmation, live readiness
+or a public release.
 
 ## Private F3 component checks — 2026-10-31
 
@@ -142,10 +144,24 @@ environment and database/role baselines were preserved; PostgreSQL and test
 processes were stopped and reaped.
 
 The original row-count refusal and the separate pre-native launcher refusal remain
-retained. These PostgreSQL cases do not cover original inspection, expiry,
-cancel=true or the remaining [five terminal control groups](ASSIGNMENTS.md#assignment-history).
-Earlier independent SQLite ACK/cleanup outcomes remain scoped to `131e6bc0`.
-No full F3, live startup or production acceptance follows from these finite cases.
+retained. These PostgreSQL positives do not cover original inspection, expiry or
+cancel=true. Earlier independent SQLite ACK/cleanup outcomes remain scoped to
+`131e6bc0`.
+
+A later native phase at `78855715` passed eight SQLite and ten PostgreSQL cases on
+each interpreter. It covers uncertain commit/cleanup outcomes, changed native
+owner/generation/origin, replaced transaction bodies, and PostgreSQL transaction
+identity and INSERT-permission refusal. Independent review verified full native
+state, consumed events, source/environment preservation and complete process
+cleanup. All 36 cases passed without skips.
+
+Composition `48fb0e91` preserves that runtime and oracle. It also includes the
+reviewed strict-value tests (36 new cases per interpreter on their own source)
+and installed-smoke preparation; the latter has only source/static validation.
+The [remaining assignments](ASSIGNMENTS.md#assignment-history) cover reconciliation,
+service-key/legacy paths, deferred constraints and actual competing writers.
+Full F3 delivery, installed-package execution, live startup and production
+acceptance remain incomplete.
 
 ## Historical live procedure
 

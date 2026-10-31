@@ -3,8 +3,8 @@
 ## Current status
 
 - **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129) is accepted at [main 47da5b44](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2), including original main checks, source-matched candidate and installed-package evidence.
-- **Assigned:** The plain dashboard is complete. Private F3 has scoped SQLite inspection/expiry and fresh restricted PostgreSQL completion evidence. Backend owns persistence; Quality prepares remaining native controls; Review checks source and evidence.
-- **Next:** Five terminal control groups, then F3 acceptance, F4/F5 and P2 integration. Admitted startup and production remain gated; [funding](delivery/CAPACITY_AND_FUNDING.md) and [retained failures](#assignment-history) are unchanged.
+- **Assigned:** The plain dashboard is complete. F3's latest native failure/refusal phase passed 18 cases per interpreter. Backend owns reconciliation tests; Quality owns deferred failures and competing terminal writers; Review checks their source and evidence.
+- **Next:** Finish the remaining F3 cases and delivery checks before F4/F5 and P2. The temporary preview has expired. Admitted startup, production and [funding](delivery/CAPACITY_AND_FUNDING.md) gates remain unchanged.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,25 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Native failure controls composed — 2026-10-31 (Pacific)**
+
+- At source `78855715`, eight SQLite and ten PostgreSQL cases passed on each
+  interpreter: uncertain acknowledgment and cleanup, native identity drift,
+  transaction replacement, and PostgreSQL transaction/permission refusal.
+  Full-state preservation and process cleanup were independently reviewed.
+- Private composition `48fb0e91` retains that exact runtime and oracle while
+  adding the reviewed strict-value tests and installed-smoke source. The smoke
+  has not executed; these results do not establish full F3 or installed delivery.
+- Backend uses the existing second checkout for expiry, original inspection,
+  cancellation, service-key and legacy cases in a separate test module.
+  Quality appends deferred-failure and actual competing-writer tests to the
+  native oracle. Review checks each finite source-bound execution.
+- The black-and-white dashboard is unchanged. Its private preview ended at the
+  scheduled 18:27:44 UTC deadline; both listeners and owned processes were
+  verified absent. The code and recording remain saved, with no public sharing
+  or new provider calls.
+
 
 **Private F3 terminal checkpoint — 2026-10-31 (Pacific)**
 
