@@ -1091,12 +1091,9 @@ def _observe(
     return result
 
 
-def inspect_failure_catalog(connection: Connection, work: LedgerCheck) -> FailureCatalog:
-    """Return complete successor and retained ar7 only after exact validation.
-
-    This is observation only: it never rewrites history, revisions, grants,
-    readiness or data, and it never commits or rolls back the caller's work.
-    """
+def _catalog_inputs(
+    connection: Connection, work: LedgerCheck
+) -> tuple[str, list[str], dict[str, Any], dict[str, Any]]:
     name = dialect(connection)
     expected = _profile(name)
     selected = sorted(key for key in expected if not key.startswith("$"))
@@ -1111,7 +1108,17 @@ def inspect_failure_catalog(connection: Connection, work: LedgerCheck) -> Failur
         _sqlite_gates(connection, work)
     else:
         _postgres_gates(connection, work)
-        _postgres_authority(connection)
+    return name, selected, expected, predecessor
+
+
+def _catalog_result(
+    connection: Connection,
+    work: LedgerCheck,
+    name: str,
+    selected: list[str],
+    expected: dict[str, Any],
+    predecessor: dict[str, Any],
+) -> FailureCatalog:
     tables = _tables(connection, name, selected)
     observed = _observe(connection, tables, name, work)
     _require_equal(observed, expected)
@@ -1119,3 +1126,15 @@ def inspect_failure_catalog(connection: Connection, work: LedgerCheck) -> Failur
     _require_equal(retained, predecessor)
     work.check()
     return FailureCatalog(copy.deepcopy(observed), retained)
+
+
+def inspect_failure_catalog(connection: Connection, work: LedgerCheck) -> FailureCatalog:
+    """Return complete successor and retained ar7 only after exact validation.
+
+    This is observation only: it never rewrites history, revisions, grants,
+    readiness or data, and it never commits or rolls back the caller's work.
+    """
+    name, selected, expected, predecessor = _catalog_inputs(connection, work)
+    if name == "postgresql":
+        _postgres_authority(connection)
+    return _catalog_result(connection, work, name, selected, expected, predecessor)

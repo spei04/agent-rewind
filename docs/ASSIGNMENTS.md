@@ -2,9 +2,12 @@
 
 ## Current status
 
-- **Current:** F2 components and the 8,988-node inventory at 19b8c45c are accepted. [PR129](https://github.com/spei04/agent-rewind/pull/129)'s six core/support jobs passed; its gate rejected Python 3.12 elapsed time. Originals are retained.
-- **Next:** Lead prepares one diagnostic CI campaign reporting the 50 slowest phases under unchanged bounds. Backend/Quality/Review assess hosted costs; no performance fix is claimed.
-- **Gates:** Full F2/P1, admitted startup and main/candidate delivery remain pending. F3 is audit only. [Funding limits](delivery/CAPACITY_AND_FUNDING.md) and [dated history](#assignment-history) remain unchanged.
+- **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129), including installed-package evidence.
+- **Validated:** 35 source-qualified F3 cases per interpreter, reviewed 9,198-node inventories, unchanged skip allowances and 16 baseline controls. [Qualifications](VALIDATION.md#remaining-f3-controls).
+- **Assigned:** Backend handles concrete fixes; Quality runs configured checks; Lead owns planned source-only publication, required CI and installed delivery, with Review.
+- **Next:** Full F3 acceptance remains pending before F4/F5/P2; funding, live startup and production remain gated.
+- **Dashboard:** The saved monochrome dashboard is unchanged; its private preview has expired.
+
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +24,157 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F3 CI inventory and baseline controls completed — 2026-10-31 (Pacific)**
+
+- Both original collect-only runs at `1a703ecc` observed the same 9,198 ordered
+  IDs, retaining all 8,988 previous IDs and adding 210. No test or fixture bodies
+  ran. Expected skips remain 45 on Python 3.11 (10 early, 35 late) and 31 on
+  Python 3.12.
+- Review accepted the four count/digest metadata leaves and one original run of
+  16 retained CI controls, with direct validation against both collected arrays.
+  Commit `b9ed477f` changes only that metadata. The separately source-qualified
+  35 targeted cases per interpreter and their retained failures and cleanup
+  qualifications remain unchanged in [validation](VALIDATION.md#remaining-f3-controls).
+- Backend remains available for concrete fixes. Quality owns configured final
+  checks; Lead owns planned source-only publication, a draft PR, required CI
+  and installed-package delivery, with independent Review. Those results and
+  full F3 acceptance remain pending. The saved dashboard is unchanged and its
+  private preview remains expired.
+
+**Targeted terminal controls closed — 2026-10-31 (Pacific)**
+
+- The phase has 35 applicable cases per interpreter: 10 pure, 9 SQLite and
+  16 PostgreSQL. PostgreSQL originals ran at `3bd0fc99`; pure/SQLite coverage
+  retains 17 earlier Python 3.12 passes plus two corrected receiver cases. This is
+  source-qualified coverage, not a combined rerun.
+- Review verified all originals and database/process release. The original
+  checkout failure remains retained, and the SQLite competing writer's
+  `cleanup_failed=true` remains explicit in
+  [validation](VALIDATION.md#remaining-f3-controls).
+- Backend owns the four CI metadata fields and 16 controls; Lead/Quality own
+  installed-package/delivery preparation, with independent Review. Full F3,
+  full CI and installed delivery remain pending before F4/F5/P2. The saved
+  monochrome dashboard is unchanged and its private preview remains expired.
+
+**Pure and SQLite controls closed — 2026-10-31 (Pacific)**
+
+- The latest phase has 19 applicable cases per interpreter: 10 pure mappings and
+  9 native SQLite controls. Python 3.12 retains 17 passes at `9e01a773` plus two
+  corrected receiver cases at `3bd0fc99`; Python 3.11 has 19 current-source passes.
+- The original receiver checkout failure remains retained. The fixture now uses
+  the existing owned connection helper; production code and assertions are
+  unchanged. [Validation](VALIDATION.md#remaining-f3-controls) records state,
+  cleanup and source applicability without claiming a combined rerun.
+- Quality owns the remaining 16 PostgreSQL cases per interpreter. Backend handles
+  concrete fixes; Review checks original results and lifecycle evidence. Actual
+  installed-package/delivery acceptance follows the complete F3 matrix before
+  F4/F5/P2. The saved dashboard is unchanged and its preview remains expired.
+
+
+**Native failure controls composed — 2026-10-31 (Pacific)**
+
+- At source `78855715`, eight SQLite and ten PostgreSQL cases passed on each
+  interpreter: uncertain acknowledgment and cleanup, native identity drift,
+  transaction replacement, and PostgreSQL transaction/permission refusal.
+  Full-state preservation and process cleanup were independently reviewed.
+- Private composition `48fb0e91` retains that exact runtime and oracle while
+  adding the reviewed strict-value tests and installed-smoke source. The smoke
+  has not executed; these results do not establish full F3 or installed delivery.
+- Backend uses the existing second checkout for expiry, original inspection,
+  cancellation, service-key and legacy cases in a separate test module.
+  Quality appends deferred-failure and actual competing-writer tests to the
+  native oracle. Review checks each finite source-bound execution.
+- The black-and-white dashboard is unchanged. Its private preview ended at the
+  scheduled 18:27:44 UTC deadline; both listeners and owned processes were
+  verified absent. The code and recording remain saved, with no public sharing
+  or new provider calls.
+
+
+**Private F3 terminal checkpoint — 2026-10-31 (Pacific)**
+
+- Private source `137bb2bc` contains completion, original inspection and expiry.
+  The 15 focused SQLite cases per interpreter supply 30 original passes; after the
+  statement-scoped row-count correction, two affected positives per interpreter
+  supply four new passes. Remaining originals retain only their reviewed source
+  applicability; this was not a new combined run.
+- Independent fresh restricted PostgreSQL completion passed once on Python 3.12
+  and 3.11 at aligned source `4df33d67`: stable SELECT+INSERT grants before claim,
+  public F2 writer refusal, exact status/evidence delta, native time, independent
+  digests and clean commit acknowledgment. Each completion used 483 Work units.
+  The original PostgreSQL row-count failure and outer-launch pre-entry refusal
+  remain retained. Earlier independent SQLite ACK/cleanup outcomes stay scoped
+  to `131e6bc0`; these PostgreSQL positives do not execute inspection, expiry or
+  cancel=true.
+- Quality next prepares five groups: actual expiry contention with original
+  inspection/cancel-bit checks; native owner/generation/origin drift; role-policy
+  faults; transaction-body replacement; and genuine deferred-constraint rollback.
+  Backend owns runtime; Review checks source and evidence before bounded execution.
+  Claim-only receipts do not establish terminal coverage. The accepted monochrome
+  [private dashboard](VALIDATION.md#private-recorded-walkthrough) stays unchanged;
+  full F3, live startup, funding and production gates do not advance.
+
+**Plain recorded dashboard accepted — 2026-10-31 (Pacific)**
+
+- The user requested a simple black-and-white dashboard. Lead verified compact
+  runs/IDs, files before action, repaired D4, study pairs/interval and Recording
+  details at private viewer `ef7a0bd8` after the 17:27:44 UTC restart.
+- Compare preserves decisions, modes and diffs with neutral unchanged-control
+  wording. Scoped checks cover 66 cases per interpreter; the two corrections each
+  reran only six affected renderer cases. Prior findings remain retained.
+  All 183 recorded responses are unchanged; [validation and opening instructions](VALIDATION.md#private-recorded-walkthrough)
+  retain historical scope, costs, privacy and zero new provider calls.
+- Quality resumes F3 oracle preparation separately; preview assets stay frozen.
+  Full F3, startup, funding and production gates do not advance.
+
+**Private recorded walkthrough accepted — 2026-10-31 (Pacific)**
+
+- Lead verified the failed D3 checkpoint, parent comparison, attempted repair and D4
+  after-image, unsuccessful controls and all eight recorded confirmation pairs.
+  The corrected full-width notice and RECORDED badge keep historical source,
+  uncertainty and cost limits visible; mutation controls remain disabled.
+- The private loopback view uses unchanged workbench assets and reviewed finite
+  responses, with zero new provider calls. Focused route/privacy checks pass on
+  Python 3.11 and 3.12; the original test-host failure and first browser layout
+  finding remain retained. [Acceptance and opening instructions](VALIDATION.md#private-recorded-walkthrough)
+  do not establish live readiness, natural-failure validation or public sharing.
+- F3 terminal work resumes separately. Funding, production and later delivery
+  gates are unchanged.
+
+
+**Private recorded walkthrough assigned — 2026-10-31 (Pacific)**
+
+- Quality reuses the existing workbench with finite reviewed historical responses,
+  no provider calls or product readiness bypass. Original October 6 exports remain
+  untouched; checkpoint and confirmation details are derived privately and redacted.
+- Review checks source, route refusal, asset identity and response provenance before
+  Lead's owned loopback/tunnel browser walkthrough. This is controlled historical
+  evidence, not fresh execution or natural-failure validation; [cost and acceptance
+  limits](VALIDATION.md#private-recorded-walkthrough) remain explicit.
+- F3 producer/event work continues as a separate component; independent terminal
+  tests follow. No delivery, paid allowance or production gate advances.
+
+
+**F3 claim component validated; terminal persistence next — 2026-10-31 (Pacific)**
+
+- The private claim at [801b4cb5](https://github.com/spei04/agent-rewind/commit/801b4cb5462c188359047586332d72e0cb7b1a9a) binds the actual job, admission origin, installed configuration and owned native transaction. It issues an execution capability only after an acknowledged commit and clean exit. Public ar7 behavior and default migration-only readiness remain unchanged.
+- Separate original campaigns pass 31 focused/retained SQLite cases, 11 additional ownership/evidence/writer cases, and 26 independent cases per Python version. The independent group contains 13 SQLite and 13 restricted PostgreSQL cases; [oracle7516714a](https://github.com/spei04/agent-rewind/commit/7516714a3e14940ed5e921bd3920b59e789bf254) preserves their exact source. Review reconciles complete native state, commit uncertainty, installed-binding drift, native lease, deadline, ownership and release evidence. These are component checks, not full F3 delivery.
+- The original Work-limit failure, the test rollback-injection failure and the Python 3.11 runner's pre-test version-pin failure remain retained separately. Corrected originals supply only their own coverage. Focused-run elapsed values include preservation checks; they are separate from pytest and explicitly measured claim durations.
+- Backend owns the next fixed producer-authority observer and atomic terminal/expiry path. Quality tests genuine post-registration dependency failures, native expiry and uncertain commits; Review checks capabilities and privileges. Lead composes both existing checkouts and updates delivery records. Full F3, F4/F5, P1/P2 and admitted startup remain incomplete; funding and production gates are unchanged.
+
+
+**F2 delivery accepted; F3 assigned — 2026-10-31 (Pacific)**
+
+- [Original main run41187912770/1](https://github.com/spei04/agent-rewind/actions/runs/41187912770) passed all eight jobs. Independent review verifies 8,988 collected cases per interpreter, expected skips, 5,790 selected setup/call/teardown facts and unchanged session limits. The source-matched candidate contains 156 runtime files in both wheel and source distribution, with its own installed SQLite service/profile checks and separate current main image proof. Installed PostgreSQL profile loading is distinct from native PostgreSQL execution evidence.
+- Backend owns F3 runtime and focused tests in the existing secondary checkout. Quality owns independent native state/ACK/identity oracles in the primary checkout; Review owns producer/security review; Lead owns integration and progress. Start with a genuine private ar8 claim and post-commit capability, then atomic terminal persistence and trusted expiry. Public ar7 behavior and default migration-only readiness remain unchanged.
+- The three original failed campaigns remain retained. Full P1/P2, admitted startup, production and research are incomplete. The existing $200 lifetime cap includes earlier charges; no further paid allowance is established. No new resources or paid calls are part of this assignment.
+
+
+**F2 PR accepted and merged; main delivery pending — 2026-10-31 (Pacific)**
+
+- [Original PR run41183762416/1](https://github.com/spei04/agent-rewind/actions/runs/41183762416) at 64217afe passed all seven required jobs. Independent review verifies the complete 8,988-case inventories, expected skips, 5,790 selected phase facts and unchanged time limits. Python 3.12 elapsed 3,272.612176 seconds. The earlier 3,839.488659-second failed campaign remains retained; diagnostic reporting establishes no causal speedup.
+- [Protected merge47da5b44](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2) preserves the tested source tree. Its [original main run41187912770/1](https://github.com/spei04/agent-rewind/actions/runs/41187912770) is active. Main package, security and isolation jobs passed; full main receipts and the candidate's own installed evidence remain pending. The current main image proof is separate from candidate validation.
+- Lead owns delivery; Quality prepares and monitors it; Review verifies original evidence. Backend prepares P2's existing entry contract and estimate review. F3 implementation waits for accepted F2 delivery. Full P1, admitted startup, paid allowance and production are not advanced.
 
 **F2 duration evidence retained; diagnostic CI assigned — 2026-10-31 (Pacific)**
 

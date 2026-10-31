@@ -2,7 +2,7 @@
 
 ## Current status
 
-See the [canonical summary and dated assignment log](ASSIGNMENTS.md#current-status). F1/main 89a43e43 remains accepted. F2 components and the 8,988-node inventory apply to reviewed source 19b8c45c through the accepted source bridge, without a new full collection. Original PR129 run41177621013/1 passed all six core/support jobs; its complete Python 3.12 receipt exceeded the unchanged session limit. All originals are retained and independently reviewed. Lead prepares one original diagnostic campaign reporting the 50 slowest pytest phases to identify hosted hotspots; no performance fix is claimed. Full F2/P1/startup and protected-main/candidate delivery remain pending; F3 is source/interface audit only. [Component history](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f2-service-and-native-checks-accepted-delivery-next--2026-10-30-pacific), [funding limits](delivery/CAPACITY_AND_FUNDING.md), later gates and estimates are unchanged.
+See the [canonical current summary and dated assignment log](ASSIGNMENTS.md#current-status) for accepted checkpoints, active work and the next delivery gate.
 
 ## Contents
 
@@ -1139,49 +1139,39 @@ Backend owns CI and the read-only worker capability/conditional-write design. Qu
 
 ### Path to the next real-agent validation
 
-**Current source boundary — 2026-10-30 (Pacific).** At delivered main
-`89a43e43`, `uv run rewind migrate status` reports configured metadata state;
-`uv run rewind serve` exposes the static workbench described in the
-[README](../README.md#start-locally). Recording, branch and study routes remain
-disabled by migration-only readiness. There is no admitted checkpoint/replay
-command to recommend yet. The installed candidate proves software delivery,
-while [the historical `05fd44b` validation](VALIDATION.md) used an injected stop;
-neither is a current natural-failure comparison.
+**Current boundary.** Follow [the current summary](#current-status) and
+[current assignments](ASSIGNMENTS.md) for delivery status and dated failure
+evidence. Recording, branch and study entrypoints remain migration-only.
+`rewind submit` and `rewind worker` use that same admission/worker path; there
+is no admitted checkpoint/replay CLI shortcut. Installed software and the
+historical injected-stop validation are not a natural-failure comparison.
+Successful diagnostic CI supplies no performance-improvement claim; optional
+fixture optimization is deferred.
 
-The existing task graph reaches two distinct evidence targets:
+The existing task graph separates these evidence boundaries:
 
-| Boundary and existing producers | Owner | Required observable artifact |
+| Existing producers | Owner | Required observable artifact |
 | --- | --- | --- |
-| Admitted execution: worker F2–F5/P1, then [P2 integration](delivery/WORKER_DISPATCH.md#remaining-admitted-startup-integration--2026-10-30) | Backend; Platform/Quality/Review | Atomic operation/job/account/authentic-provenance publication, an installed configuration-bound adapter, acknowledged claim, fenced Engine/event/result publication and fresh whole-tuple recovery after unknown acknowledgment. Packaged startup must work without patched readiness. The accepted dispatch and dormant-schema/profile components do not supply this composition. |
-| M1 integration: AR-006-C/AR-011-C, AR-012-B and G1 | Backend, Platform, Quality | Projection repair, telemetry and the integrated M1 behavior evidence. AR-012-B verifies these producers; it does not implement missing worker behavior. |
-| Checkpoint → branch/replay: AR-014 and AR-017, with AR-013/015/016/018 prerequisites | Backend, Platform, Research, Quality | A supported manifest binds policy state, files, image and evaluator. Native restore rejects unsupported state, preserves the parent and records actual versus observed effects; isolated tools and fenced checkpoint publication survive interruption. Existing method/unit tests are not this integrated qualification. |
-| First usable replay workflow: AR-019-A/B/C, PAID0 and all G2 prerequisites | Research/Quality; Platform/Security review | One captured real coding failure, its checkpoint, unchanged and intervention continuations, independent evaluator results, retained failed/missing outcomes and attributable cost/uncertainty. AR-019-B needs a reconciled bounded allocation; no current task/model/rates/replay artifact is selected by this map. |
-| First real-failure comparison under a matched budget: AR-020/021/022/023, AR-024/025/026 and G3; the existing public-corpus route feeds AR-038 | Backend owns identity/receipts/reconciliation; Research owns methods/protocol; independent Quality/statistics review | Frozen task/candidate/evaluator identities, matched physical and comparison budgets covering proposals, continuations and evaluation, all attempted/missing outcomes, reserved independent confirmation and recomputable reports. Rights/capture, PUBLICDATA0/CAPTUREFUNDS0, affordable sample/power and STUDYFUNDS0 remain separate gates; a successful branch gives no comparative advantage claim. |
+| Accepted F2 foundation; remaining worker F3–F5/P1, then [P2](delivery/WORKER_DISPATCH.md#remaining-admitted-startup-integration--2026-10-30); AR-006-C/011-C/012-B and G1 | Backend, Platform, Quality | Accepted ownership, atomic admission/account/provenance and generation-fenced publication, followed by actual packaged startup without patched readiness. A disconnected adapter closes plumbing only. |
+| AR-013–018, especially checkpoint AR-014 and fenced replay AR-017; AR-019-A | Backend, Platform, Research, Quality | Supported task/policy/image/evaluator manifest, faithful restore, preserved parent/effect provenance, independent grading and integrated fault/recovery evidence. |
+| AR-019-B after AR-019-A and PAID0; AR-019-C contributes to G2 | Research/Quality, Platform/Security review | One predeclared live-provider failed-run/branch smoke with complete runtime, outcome and cost receipts. This card excludes natural-failure and statistically reliable effect claims; G2 follows AR-019-C review and the other existing G2 prerequisites. |
+| AR-020–025, selected AR-024-D/025-D; AR-026 and G3 | Backend, Research, independent Quality/statistics review | Durable trial/attempt identities, complete cost/uncertainty accounting, cost-matched controls, a frozen winner before fresh confirmation, calibrated reports and an affordable frozen claim or explicit narrowing. |
+| Existing public route: AR-002-C/PUBLICDATA0, PCA2 and PUBCAP-A; CAPTUREFUNDS0/PUBCAP-B and AR-026-A; authorized PUBCAP-C, AR-038-A/STUDYFUNDS0 and AR-038-B | Rights owner, Research, Platform, Quality | Permitted source/evaluator/processor bindings, all baseline attempts and development feasibility, then sealed disjoint tasks and a preregistered bounded comparison with complete denominators and costs. The machine graph retains all runtime dependencies. |
 
-[The worker plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) and
-[assignable task cards](EXECUTION_BACKLOG.md) retain the exact dependencies and
-estimates. F2 service/native components are accepted at `33649347`, with
-separate Backend 60-case and independent 15-case evidence per interpreter.
-The 8,988-node inventory, declared skips and CI baseline apply to reviewed
-source 19b8c45c through the accepted source bridge, without new full collection.
-Original PR129 run41177621013/1 passed all six core/support jobs, but its
-complete Python 3.12 receipt took 3,839.488659 seconds and failed the unchanged
-3,600-second bound. The decoded pytest summary separately reports 8,957 passed,
-31 skipped and 3,839.53 seconds. Original receipts/logs are retained and
-independently reviewed; all three failed runs remain without campaign acceptance.
-One prospective original diagnostic campaign adds the 50 slowest pytest phases
-under the unchanged matrix, order, isolation, receipt schema and limits. It
-collects hosted hotspot evidence, with no performance fix claimed. Measured
-diagnosis/repair, successful original receipt review, protected-main checks and
-the candidate's own installed/provenance proof remain before full F2 acceptance. F3 is source/interface audit only, without
-implementation or acceptance; later producers remain gated. Measured whole
-fixture paths satisfy F2 foundation capacity under unchanged caps, without a
-universal maximum-data claim. Specified maximum online-consumer cohorts remain
-F4 work. P2 still needs its explicit storage/issuer/history decisions and reforecast before implementation. These are
-concrete ownership, accounting and publication requirements; later regional
-rollout and enterprise operations do not replace them. A standalone runner or
-deterministic adapter does not bypass them. No new task, estimate, allocation or
-scope amendment is created here.
+[Current C02](delivery/NATURAL_FAILURE_PROTOCOL.md#two-distinct-levels-of-holdout)
+separates fresh confirmation of one frozen edit on the same task from task-held-out
+evaluation of a frozen procedure. A successful branch or smoke proves neither
+method superiority nor generalization. Development capture and the AR-026-A
+feasibility decision do not themselves authorize paid comparative trials.
+
+[The owner decision](research/OWNER_DECISION_2026-10-20.md) selects the existing
+core engineering methods; the linked total-budget proposal does not approve its
+deferred optional or nested held-out arms. [Task cards](EXECUTION_BACKLOG.md) and
+[the worker plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) retain owners and
+dependencies. P2's entry decisions/reforecast, faithful runtime qualification,
+study/accounting delivery and source/funding evidence remain unfinished.
+Historical total estimates are not remaining effort. No new task, method,
+allocation or execution authority is created by this map.
 
 **PAID0 preparation and missing authoritative evidence.** PL/RS owns PAID0;
 its sole dependency remains AR-003-B and its machine status remains

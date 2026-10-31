@@ -1,6 +1,6 @@
 # Worker failure execution plan
 
-F1 is **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb) after PR128/main/candidate delivery. F2 schema/catalog/profile/transaction and service/native components are accepted at `33649347`; installed smoke is statically reviewed but unexecuted. Backend collects final inventory/skips, the lead assembles delivery and Quality/Review reconcile source/evidence under the existing handoff 22608a0f. P1 and aggregate AR-010-B remain **In progress** with null final acceptance; F2 is **In progress** with null acceptance; F3-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. The [machine ledger](../../contracts/proposals/execution-backlog.json) and [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) are authoritative; five planned F1-F5 PRs, estimates and sequential gates are unchanged.
+F1 and F2 are **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb) and [main47](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2). F2's original PR/main/candidate, native migration/service, installed package and current image evidence are independently accepted. F3 is **In progress**: Backend implements trusted bounded claims/persistence, Quality supplies independent native oracles, Review checks source/security and the lead integrates. F4-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. P1 and aggregate AR-010-B remain **In progress** with null final acceptance. The [machine ledger](../../contracts/proposals/execution-backlog.json), [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) and [assignment log](../ASSIGNMENTS.md#current-status) record current evidence; five planned F1-F5 PRs, estimates and sequential gates are unchanged.
 
 ## Allocation and sequence
 
@@ -15,6 +15,20 @@ P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2
 | F5 | Restart-safe operator markers, preservation, restore and P1 delivery | 3 [2.5–4.5] | low |
 
 ## Entry, ownership and acceptance
+
+### F3 claim component validated; terminal persistence next — 2026-10-31 (Pacific)
+
+The private claim at 801b4cb5 and independent oracle7516714a have source-bound focused and native evidence. Each Python version has 31 focused/retained SQLite cases, 11 additional ownership/evidence/writer cases, and 26 independent cases (13 SQLite, 13 restricted PostgreSQL), run as separate originals. Exact final evidence indexes are 69e61f3f, 06939d4d and 3b889ec5. Review preserves the original Work-limit, rollback-injection and pre-test version-pin failures with their coverage qualifications. Complete state, native lease, configuration/owner binding, one-use registration, commit/cleanup uncertainty and release are checked; this is first-component validation, not full F3 acceptance.
+
+Backend next implements the fixed private producer-authority observer and adopted terminal/expiry interfaces. Final PostgreSQL producer grants must be present before the genuine claim and remain valid through terminal persistence; public F2 inspection policy stays unchanged. Completion must come from an actual registered dependency observation, expiry from locked native time, and both must atomically preserve the original failure identity. Quality owns independent tests and Review capability/privilege review. Full F3 PR/main/candidate delivery precedes F4; P1/P2, default readiness, fixed limits, estimates and funding are unchanged.
+
+
+### F2 delivery accepted; F3 assigned — 2026-10-31 (Pacific)
+
+F2 at main47da5b44 is accepted through original PR41183762416/1 and main41187912770/1, the candidate's source integrity and own installed checks, plus the current main image proof. Main collects 8,988 cases per interpreter; Python 3.11 has 8,943 passes/45 skips and Python 3.12 has 8,957 passes/31 skips. All 5,790 selected phase facts pass; elapsed seconds are 1848.935336/1720.600730/2566.634901 within unchanged 2700/2700/3600 limits. Exact release and independent review identities are in the F2 checkpoint card. Earlier failures remain retained.
+
+The reviewed F3 design6735ffcf/peerbd0e5c42 assigns Backend the private genuine ar8 claim with installed-configuration binding and post-clean-ACK capability issuance, followed by atomic immutable failure persistence and trusted expiry. Quality owns independent native state, origin, generation, concurrency and acknowledgment oracles in a separate existing checkout. Public ar7 behavior and default migration-only readiness remain unchanged. F4 retains complete successor consumers and maximum-cohort fit; F5 retains operator recovery/restore and whole P1 delivery; P2 retains live worker integration. No estimate, paid authority or production gate advances.
+
 
 ### F2 service and native checks accepted; delivery next — 2026-10-30 (Pacific)
 

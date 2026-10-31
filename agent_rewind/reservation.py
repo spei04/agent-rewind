@@ -99,16 +99,9 @@ def _job_account(rows: ReservationRows) -> dict[str, Any]:
     return accounts[0]
 
 
-def claim_generation(
-    connection: Connection, scope: ReservationScope, intent: ClaimIntent
-) -> JobFence:
-    body = require_body(connection, scope)
-    if type(intent) is not ClaimIntent:
-        raise ReservationRefusal("invalid_intent")
-    intent.__post_init__()
-    if intent.job_id != scope.job_id:
-        raise ReservationRefusal("invalid_intent")
-    rows = ReservationRows.capture(connection, scope, body.work)
+def _prepare_claim(
+    connection: Connection, scope: ReservationScope, intent: ClaimIntent, rows: ReservationRows
+) -> tuple[JobFence, dict[str, list[dict[str, Any]]], float]:
     rows.lock_accounts(connection)
     now = _clock(connection)
     rows.reconcile(now)
@@ -135,6 +128,20 @@ def claim_generation(
         lease_generation=fence.generation,
     )
     rows.require_headroom(after)
+    return fence, after, lease
+
+
+def claim_generation(
+    connection: Connection, scope: ReservationScope, intent: ClaimIntent
+) -> JobFence:
+    body = require_body(connection, scope)
+    if type(intent) is not ClaimIntent:
+        raise ReservationRefusal("invalid_intent")
+    intent.__post_init__()
+    if intent.job_id != scope.job_id:
+        raise ReservationRefusal("invalid_intent")
+    rows = ReservationRows.capture(connection, scope, body.work)
+    fence, after, lease = _prepare_claim(connection, scope, intent, rows)
     require_body(connection, scope)
     changed = connection.execute(
         text(
