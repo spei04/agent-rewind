@@ -2,10 +2,9 @@
 
 ## Current status
 
-- **Delivery:** PCA1, [API-USAGE-001](https://github.com/spei04/agent-rewind/issues/124), F1 and internal dispatch are delivered at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb).
-- **Active:** F2 service/native components are accepted at `33649347`; foundation checks are complete. Backend collects inventories; lead assembles delivery; Quality and Review check evidence.
-- **Next:** Installed smoke is unexecuted; hosted delivery and full F2/P1 acceptance remain pending. F3–F5/P2 and admitted startup stay gated; PCA2 delivery is separate.
-- **Limits:** The **$200 lifetime budget includes prior charges**; $36.567974 remains held. Other exposure and available allowance remain unknown.
+- **Current:** F2 service/native components are accepted; the 8,988-node inventory applies to `c05eed2f`. [PR129](https://github.com/spei04/agent-rewind/pull/129) retains an original security failure and subsequent fixture-origin failures. The corrected run passed security, package (including installed smoke) and isolation.
+- **Next:** Lead retains both failed runs and integrates the reviewed fixture correction, collection-impact confirmation and original CI receipt/main/candidate delivery. Full F2/P1 and admitted startup remain pending.
+- **Scope:** F3 is design audit only, without implementation or acceptance. [Funding limits](delivery/CAPACITY_AND_FUNDING.md) and [dated history](#assignment-history) remain unchanged.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -22,6 +21,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F2 inventories accepted; two original CI failures retained — 2026-10-30 (Pacific)**
+
+- The 8,988-node inventory, declared skips, 879 phase selections and 16 baseline controls are accepted for source `c05eed2f` through peers `7358f647`, `92acf656` and its reviewed comment-only source bridge. A later fixture correction needs its own collection-impact confirmation before those records apply.
+- [Original run41173030450/1](https://github.com/spei04/agent-rewind/actions/runs/41173030450) retained its security failure and cancelled/incomplete core receipts without campaign credit. [Corrected run41174177134/1](https://github.com/spei04/agent-rewind/actions/runs/41174177134) passed security, package (including installed smoke) and isolation, but Python 3.11 early and Python 3.12 all failed the fixture source-hash guard at `tests/ledger_acquisition_postgres_fixture.py:71`, before lock-expiry. Their complete decoded logs are retained; full CI/main/candidate acceptance remains pending. These are recorded outcomes, without a broader product-cause claim.
+- Lead retains original evidence and coordinates the reviewed fixture correction, inventory applicability, receipt review and protected-main/candidate delivery. Backend completed 83 pure and 2 native correction checks per interpreter; Review verifies their source and outcomes; F3 remains source/interface design audit only, without implementation or acceptance. Earlier dated pending-inventory/unexecuted-smoke statements remain historical; PR package success supplies no candidate installed credit. Full F2/P1/startup and [funding limits](delivery/CAPACITY_AND_FUNDING.md) remain unchanged.
 
 **F2 service and native checks accepted; delivery next — 2026-10-30 (Pacific)**
 

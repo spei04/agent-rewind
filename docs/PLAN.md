@@ -2,7 +2,7 @@
 
 ## Current status
 
-See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status). Worker F1 is **Merged; checkpoint accepted** through PR128/main `89a43e43`. F2 schema/catalog/profile/transaction and service/native components are accepted at `33649347`; the installed smoke is statically reviewed but unexecuted. Backend collects final inventory/skips, the lead assembles delivery, and Quality/Review reconcile source and evidence under the existing handoff `22608a0f`. P1/AR-010-B remain In progress with null final acceptance, F2 acceptance is null, and F3-F5/P2 remain Not started. [Current F2 component evidence and remaining delivery](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f2-service-and-native-checks-accepted-delivery-next--2026-10-30-pacific) preserve the original D1-D4 provenance, five planned PRs, estimates and fixed gates; dated snapshots below remain historical.
+See the [canonical summary and dated assignment log](ASSIGNMENTS.md#current-status). F1/main `89a43e43` remains accepted. F2's 8,988-node inventory and CI baseline apply to accepted source `c05eed2f`; applicability after the fixture correction awaits confirmation. PR129 retains both original failed runs. The corrected run passed security, package (including installed smoke) and isolation, but its Python 3.11 early and Python 3.12 all legs failed the fixture origin guard. Lead coordinates retained evidence, correction integration and original receipt/protected-main/candidate delivery. Full F2/P1/startup remain pending; F3 is source/interface design audit only. [Component history](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f2-service-and-native-checks-accepted-delivery-next--2026-10-30-pacific), [funding limits](delivery/CAPACITY_AND_FUNDING.md), later gates and estimates are unchanged.
 
 ## Contents
 
@@ -1162,9 +1162,16 @@ The existing task graph reaches two distinct evidence targets:
 [assignable task cards](EXECUTION_BACKLOG.md) retain the exact dependencies and
 estimates. F2 service/native components are accepted at `33649347`, with
 separate Backend 60-case and independent 15-case evidence per interpreter.
-The installed smoke remains unexecuted. Actual full inventory/skips, phase/CI
-baseline and matching hosted PR/main/candidate/installed proof remain required
-before full F2 acceptance; later worker producers remain gated. Measured whole
+The 8,988-node inventory, declared skips and CI baseline apply to accepted
+source `c05eed2f`; a later fixture correction needs explicit collection-impact
+confirmation. Corrected PR129 run `41174177134/1` passed security, package
+(including installed smoke) and isolation, but its Python 3.11 early and
+Python 3.12 all legs failed the fixture origin guard. Both original failed
+runs remain retained without campaign acceptance. Integration of the reviewed correction,
+original receipt review, protected-main checks and the candidate's own
+installed/provenance proof remain required before full F2 acceptance.
+F3 is source/interface design audit only, without implementation or acceptance;
+later worker producers remain gated. Measured whole
 fixture paths satisfy F2 foundation capacity under unchanged caps, without a
 universal maximum-data claim. Specified maximum online-consumer cohorts remain
 F4 work. P2 still needs its explicit storage/issuer/history decisions and reforecast before implementation. These are
