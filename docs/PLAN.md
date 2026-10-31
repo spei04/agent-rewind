@@ -38,7 +38,7 @@ The product offers auditable intervention experiments: reliable execution bounda
 | Accepted initial deployment | Self-hosted, one organization per deployment, dedicated metadata database and artifact store, dedicated Linux gVisor workers. No connection to an adopter's production application database. |
 | Initial execution scope | Controlled sequential Python coding agent; workspace files and serialized policy state; offline tools and independent evaluator. |
 | Model integration | Existing model provider adapter and private worker credential. Provider versions and rates are configuration, not hardcoded product assumptions. |
-| Spending authorization | Initial model validation cap: $200. Historical reservations of $36.567974 remain unreconciled; they are not invoice spend or a verified available balance. Reconcile and approve a bounded allocation before further paid experiments. |
+| Spending authorization | Payment approved within the $200 lifetime total, including prior charges. Historical reservations of $36.567974 remain held and other exposure is unknown; they are not invoices or a verified balance. Reconcile exposure and reserve a bounded allocation before further paid experiments. |
 | Team | Unknown. Planning scenario: six core engineers plus shared product/security support; see Section 9. No hires or availability are assumed confirmed. |
 | Launch date | Not committed. Earlier week-number windows are superseded by the task-level review; first ten working days are conditional, later scheduling is milestone-based until staffing, throughput and external dependencies are known. |
 | Capacity and customers | No verified customer demand or production load. Baseline, forecast, and stress assumptions are defined separately in Section 5. |
@@ -1139,17 +1139,52 @@ Backend owns CI and the read-only worker capability/conditional-write design. Qu
 
 ### Path to the next real-agent validation
 
-The historical walkthrough reconstructs saved fixtures. The next integrated real-agent validation follows the existing dependency graph:
+**Current source boundary — 2026-10-30 (Pacific).** At delivered main
+`89a43e43`, `uv run rewind migrate status` reports configured metadata state;
+`uv run rewind serve` exposes the static workbench described in the
+[README](../README.md#start-locally). Recording, branch and study routes remain
+disabled by migration-only readiness. There is no admitted checkpoint/replay
+command to recommend yet. The installed candidate proves software delivery,
+while [the historical `05fd44b` validation](VALIDATION.md) used an injected stop;
+neither is a current natural-failure comparison.
 
-| Next delivery | Owner | Observable exit |
+The existing task graph reaches two distinct evidence targets:
+
+| Boundary and existing producers | Owner | Required observable artifact |
 | --- | --- | --- |
-| Current ledger P2 | Backend, Review, lead | Passing PR/main checks, native evidence and matching installed artifact; whole AR-010-A accepted |
-| Worker P1 F1–F5, then P2 | Backend; Quality and Review | All five accepted checkpoints, followed by actual fenced completion/expiry integration |
-| M1 integration | Backend, Platform, Quality | Projection repair and telemetry joined by AR-012-B; all 24 M1 behavior cases and G1 accepted |
-| Runtime branches | Platform, Backend, Research, Quality | Native gVisor isolation, checkpoint/restore, storage/key recovery, fencing and evaluator evidence under each existing task's prerequisites |
-| Real-agent smoke and G2 | Quality, Research, Platform | AR-019-A integration, the PAID0-bound AR-019-B failed run and branches, then AR-019-C evidence and G2 acceptance |
+| Admitted execution: worker F2–F5/P1, then [P2 integration](delivery/WORKER_DISPATCH.md#remaining-admitted-startup-integration--2026-10-30) | Backend; Platform/Quality/Review | Atomic operation/job/account/authentic-provenance publication, an installed configuration-bound adapter, acknowledged claim, fenced Engine/event/result publication and fresh whole-tuple recovery after unknown acknowledgment. Packaged startup must work without patched readiness. The accepted dispatch and dormant-schema/profile components do not supply this composition. |
+| M1 integration: AR-006-C/AR-011-C, AR-012-B and G1 | Backend, Platform, Quality | Projection repair, telemetry and the integrated M1 behavior evidence. AR-012-B verifies these producers; it does not implement missing worker behavior. |
+| Checkpoint → branch/replay: AR-014 and AR-017, with AR-013/015/016/018 prerequisites | Backend, Platform, Research, Quality | A supported manifest binds policy state, files, image and evaluator. Native restore rejects unsupported state, preserves the parent and records actual versus observed effects; isolated tools and fenced checkpoint publication survive interruption. Existing method/unit tests are not this integrated qualification. |
+| First usable replay workflow: AR-019-A/B/C, PAID0 and all G2 prerequisites | Research/Quality; Platform/Security review | One captured real coding failure, its checkpoint, unchanged and intervention continuations, independent evaluator results, retained failed/missing outcomes and attributable cost/uncertainty. AR-019-B needs a reconciled bounded allocation; no current task/model/rates/replay artifact is selected by this map. |
+| First real-failure comparison under a matched budget: AR-020/021/022/023, AR-024/025/026 and G3; the existing public-corpus route feeds AR-038 | Backend owns identity/receipts/reconciliation; Research owns methods/protocol; independent Quality/statistics review | Frozen task/candidate/evaluator identities, matched physical and comparison budgets covering proposals, continuations and evaluation, all attempted/missing outcomes, reserved independent confirmation and recomputable reports. Rights/capture, PUBLICDATA0/CAPTUREFUNDS0, affordable sample/power and STUDYFUNDS0 remain separate gates; a successful branch gives no comparative advantage claim. |
 
-Every worker checkpoint is required by the current contracts. P1's 12 [9–18] days measure engineering effort, not elapsed calendar time or an assumed parallel speedup. CI, review, failures and existing ENV0/PAID0 dependencies affect elapsed delivery. This intermediate validation does not satisfy enterprise study, workbench, partner pilot, capacity/security or rollout gates G3–G7. See the [worker plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) and [task graph](EXECUTION_BACKLOG.md); no reduced-scope bypass or new spending authority is introduced.
+[The worker plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) and
+[assignable task cards](EXECUTION_BACKLOG.md) retain the exact dependencies and
+estimates. The next runtime work is the current F2 catalog/verification slice,
+followed by the remaining approved worker producers. P2 still needs its explicit
+storage/issuer/history decisions and reforecast before implementation. These are
+concrete ownership, accounting and publication requirements; later regional
+rollout and enterprise operations do not replace them. A standalone runner or
+deterministic adapter does not bypass them. No new task, estimate, allocation or
+scope amendment is created here.
+
+**PAID0 source and unresolved exposure.** PL/RS owns PAID0 after AR-003-B; its
+machine status remains **Not satisfied**. The owner has approved payment within
+the **$200 lifetime total, including prior charges**. The existing private
+historical evidence index (SHA256
+`fb6803a3ab4bc7cb50c601228bf107d85152120787da06d9ca4244438dbbb7e5`)
+and summary (SHA256
+`a1bb0a93d2e8d6a4be97f476b2c85482009d65016ee4298aeb60b5a62dd7e609`)
+are reservation/partial-usage sources: $36.567974 reserved and a $1.668527
+ceiling for the 67 recorded model calls, excluding proposal calls. Three proposal
+calls lack separate usage records. These are not invoices or exhaustive charge
+attribution. No billing
+account/invoice source has been identified; additional exposure and the
+spendable balance remain **unknown**. PL/RS can reconcile these retained records
+and obtain authentic missing charge evidence alongside offline engineering;
+holds stay intact until supported reconciliation. Subtracting reservations
+from $200 does not establish a new allowance. [The funding decision](delivery/CAPACITY_AND_FUNDING.md#owner-payment-decision--2026-10-30)
+and [historical validation](VALIDATION.md) remain the governing distinctions.
 
 
 ### Worker failure DDL reforecast adopted — 2026-10-29
