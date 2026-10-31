@@ -17,11 +17,14 @@ from .admission_transaction import TransactionOutcome, admission_transaction
 from .failure_catalog import _refresh_producer_authority
 from .failure_encoding import association_digest, source_digest
 from .failure_evidence import (
+    Absent,
     CompletionEvent,
+    Conflict,
     CreatedFailure,
     FailureRecord,
     FailureRefusal,
     IssuedTerminalScope,
+    MatchingOriginal,
     OriginalFailureIntent,
     TentativeCreated,
 )
@@ -40,7 +43,12 @@ from .operation_reads import (
     Domain,
     RawReceipt,
     ReceiptBook,
+    observe_result,
+    read_descriptor,
+    read_job,
+    read_operation,
     receipt_bytes,
+    validate_association,
 )
 from .operation_work import OperationWork
 from .request_authority import RequestAuthority
@@ -70,7 +78,10 @@ _LOCK = RLock()
 class _TerminalState:
     coordinator: TerminalCoordinator
     body: ReservationBody
-    event: _DependencyRecord
+    event: _DependencyRecord | None = None
+    expected: JobFence | None = None
+    retained: OriginalFailureIntent | None = None
+    operation_id: str | None = None
     used: bool = False
     original: OriginalFailureIntent | None = None
     initial_job: RawReceipt | None = None
@@ -108,11 +119,7 @@ class _TerminalState:
             ):
                 raise FailureRefusal("invalid_native_state")
         if domain is not None:
-            expected = (
-                self.event.source.operation.identity
-                if domain == "operation"
-                else self.body.scope.job_id
-            )
+            expected = self.operation_id if domain == "operation" else self.body.scope.job_id
             if (
                 domain not in ("operation", "job", "admission_config", "result")
                 or identity != expected
@@ -242,7 +249,9 @@ def _receipt_payload(values: tuple[RawReceipt, ...]) -> list[Any]:
     return [[r.domain, r.identity, list(r.fields), list(r.values)] for r in values]
 
 
-def _eligible(job: dict[str, Any], fence: JobFence, generation: int, now: int) -> None:
+def _eligible(
+    job: dict[str, Any], fence: JobFence, generation: int, now: int, *, expired: bool = False
+) -> None:
     if (
         job["status"] != "running"
         or job["owner"] != fence.owner_uuid
@@ -250,7 +259,8 @@ def _eligible(job: dict[str, Any], fence: JobFence, generation: int, now: int) -
         or generation != fence.generation
         or type(job["cancel"]) not in (bool, int)
         or job["cancel"] not in (False, True, 0, 1)
-        or not lease_live(job["lease_until"], now)
+        or job["lease_until"] is None
+        or lease_live(job["lease_until"], now) == expired
         or job["error"] is not None
         or job["result"] is not None
     ):
@@ -334,7 +344,9 @@ def _association_predicate(
     )
 
 
-def _read_created(connection: Connection, job_id: str, book: ReceiptBook) -> FailureRecord:
+def _read_evidence(
+    connection: Connection, job_id: str, book: ReceiptBook
+) -> tuple[Any, ...] | None:
     # Candidate selection is job-only. Bound every cell before transfer; no
     # malformed/project/tag predicate can turn an existing row into absence.
     book._check_connection(connection)
@@ -361,14 +373,58 @@ def _read_created(connection: Connection, job_id: str, book: ReceiptBook) -> Fai
         .mappings()
         .all()
     )
-    if len(values) != 1:
+    if len(values) > 1:
         raise FailureRefusal("invalid_native_state")
     book.observe("failure_count", job_id, (len(values),))
-    book.observe("failure_cells", job_id, tuple(values[0][name] for name in _FIELDS))
+    if not values:
+        return None
+    cells = tuple(values[0][name] for name in _FIELDS)
+    # Guard failures yield NULLs, never absence. The required schema_version
+    # distinguishes this refusal from a native-valid row with nullable fields.
+    if cells[0] is None:
+        raise FailureRefusal("invalid_native_state")
+    book.observe("failure_cells", job_id, cells)
+    return cells
+
+
+def _read_created(connection: Connection, job_id: str, book: ReceiptBook) -> FailureRecord:
+    values = _read_evidence(connection, job_id, book)
+    if values is None:
+        raise FailureRefusal("invalid_native_state")
     try:
-        return FailureRecord(**dict(values[0]))
+        return FailureRecord(**dict(zip(_FIELDS, values, strict=True)))
     except (TypeError, FailureRefusal):
         raise FailureRefusal("invalid_native_state") from None
+
+
+def _native_association(
+    connection: Connection, state: _TerminalState, book: ReceiptBook
+) -> tuple[RawReceipt, RawReceipt, RawReceipt]:
+    # Expiry/inspection derive original admission association from the complete
+    # native snapshot. Neither accepts a caller configuration or installed owner.
+    if state.rows is None or state.operation_id is None:
+        raise FailureRefusal("invalid_native_state")
+    scope = state.body.scope
+    operation, op = read_operation(connection, scope.context, state.operation_id, book)
+    job = read_job(connection, scope.context, scope.job_id, book)
+    _, config = read_descriptor(connection, scope.context, scope.job_id, "admission_config", book)
+    validate_association(op, job, config)
+    if (
+        operation.failure_correlation_id is None
+        or job.row()["error"] is not None
+        or job.row()["result"] is not None
+        or observe_result(connection, scope.context, scope.job_id, book) is not None
+    ):
+        raise FailureRefusal("origin_unproved")
+    state.body.work.check()
+    return op, job, config
+
+
+def _select_operation(state: _TerminalState, rows: ReservationRows) -> None:
+    operations = [row for row in rows.data["operation"] if row["job_id"] == state.body.scope.job_id]
+    if len(operations) != 1 or type(operations[0]["id"]) is not str:
+        raise FailureRefusal("origin_unproved")
+    state.operation_id = operations[0]["id"]
 
 
 def persist_verified_failure(
@@ -382,51 +438,67 @@ def persist_verified_failure(
         state.used = True
     body, event = state.body, state.event
     reservation_scope = body.scope
-    source, configuration = event.source, event.configuration
-    source.__post_init__()
-    state.retain(_receipt_payload((source.operation, source.job, source.configuration)))
-    state.retain_configuration(configuration.canonical_bytes)
-    state.retain(
-        [
-            source.organization_id,
-            source.project_id,
-            source.fence.job_id,
-            source.fence.owner_uuid,
-            source.fence.generation,
-        ]
-    )
-    state.identities.update(
-        (r.domain, r.identity) for r in (source.operation, source.job, source.configuration)
-    )
+    expired = event is None
+    if state.retained is not None or expired and type(state.expected) is not JobFence:
+        raise FailureRefusal("capability_not_issued")
+    if event is not None:
+        source, configuration = event.source, event.configuration
+        source.__post_init__()
+        fence = source.fence
+        state.operation_id = source.operation.identity
+        state.retain(_receipt_payload((source.operation, source.job, source.configuration)))
+        state.retain_configuration(configuration.canonical_bytes)
+        state.identities.update(
+            (r.domain, r.identity) for r in (source.operation, source.job, source.configuration)
+        )
+    else:
+        if state.expected is None:
+            raise FailureRefusal("capability_not_issued")
+        fence = state.expected
+    organization_id = reservation_scope.context.organization_id
+    project_id = reservation_scope.context.project_id
+    state.retain([organization_id, project_id, fence.job_id, fence.owner_uuid, fence.generation])
     initial_book = state.new_book()
     rows = ReservationRows._capture_failure(connection, reservation_scope, body.work)
     state.rows = rows
     _absence(connection, reservation_scope)
     initial_book.charge_sources(1)
-    initial_book.observe("failure_count", source.fence.job_id, (0,))
-    current = _association(
-        connection, reservation_scope, source.operation.identity, configuration, _book=initial_book
-    )
-    _same_association((source.operation, source.job, source.configuration), current)
+    initial_book.observe("failure_count", fence.job_id, (0,))
+    if event is not None:
+        current = _association(
+            connection,
+            reservation_scope,
+            event.source.operation.identity,
+            event.configuration,
+            _book=initial_book,
+        )
+        _same_association(
+            (event.source.operation, event.source.job, event.source.configuration), current
+        )
+        if current[1].row()["lease_until"] != event.source.job.row()["lease_until"] or (
+            type(current[1].row()["lease_until"]) is not type(event.source.job.row()["lease_until"])
+        ):
+            raise FailureRefusal("stale_source")
+    else:
+        _select_operation(state, rows)
+        current = _native_association(connection, state, initial_book)
     job = current[1].row()
-    if job["lease_until"] != source.job.row()["lease_until"] or (
-        type(job["lease_until"]) is not type(source.job.row()["lease_until"])
-    ):
-        raise FailureRefusal("stale_source")
     now = reservation._clock(connection)
-    _eligible(job, source.fence, rows.job["lease_generation"], now)
+    _eligible(job, fence, rows.job["lease_generation"], now, expired=expired)
     rows.reconcile(now)
-    any_call = _any_call(connection, source.fence.job_id)
-    initial_book.observe("any_provider_call", source.fence.job_id, (any_call,))
+    any_call = _any_call(connection, fence.job_id)
+    initial_book.observe("any_provider_call", fence.job_id, (any_call,))
     with state.frame_allowance() as remaining:
         association, state.association_frame_bytes = association_digest(
             connection.dialect.name,
-            source.organization_id,
-            source.project_id,
+            organization_id,
+            project_id,
             *current,
             remaining=remaining,
         )
-    status: Literal["failed", "cancelled"] = "cancelled" if job["cancel"] else "failed"
+    status: Literal["failed", "cancelled"] = (
+        "cancelled" if not expired and job["cancel"] else "failed"
+    )
     correlation = current[0].row()["failure_correlation_id"]
     if type(correlation) is not str:
         raise FailureRefusal("origin_unproved")
@@ -436,13 +508,13 @@ def persist_verified_failure(
     record = FailureRecord(
         1,
         "verified_failure",
-        source.project_id,
+        project_id,
         "job",
-        source.fence.job_id,
-        source.operation.identity,
-        source.fence.generation,
+        fence.job_id,
+        current[0].identity,
+        fence.generation,
         status,
-        "dependency_failed",
+        "lease_expired" if expired else "dependency_failed",
         "outcome_unknown",
         "admission",
         correlation,
@@ -457,19 +529,19 @@ def persist_verified_failure(
             connection.dialect.name,
             association,
             after_job,
-            source.fence.generation,
+            fence.generation,
             any_call,
             record,
             remaining=remaining,
         )
     record = replace(record, source_sha256=digest)
-    original = OriginalFailureIntent(source.organization_id, source.fence, record)
+    original = OriginalFailureIntent(organization_id, fence, record)
     state.retain(asdict(original))
     state.original = original
     state.coordinator._original = original
     state.initial_job = current[1]
     after = rows.after_image()
-    next(row for row in after["job"] if row["id"] == source.fence.job_id)["status"] = status
+    next(row for row in after["job"] if row["id"] == fence.job_id)["status"] = status
     rows.require_headroom(after)
     state.after = after
     _issued(connection, scope)
@@ -480,13 +552,13 @@ def persist_verified_failure(
         .values(status=status)
         .where(
             *(_same_scalar(connection, jobs.c[name], value) for name, value in job.items()),
-            jobs.c.lease_generation == source.fence.generation,
+            jobs.c.lease_generation == fence.generation,
             _association_predicate(connection, current[0], current[2]),
-            ~select(1).where(_EVIDENCE.c.job_id == source.fence.job_id).exists(),
+            ~select(1).where(_EVIDENCE.c.job_id == fence.job_id).exists(),
             ~select(1)
             .where(
                 result_refs.c.owner_kind == "job",
-                result_refs.c.owner_id == source.fence.job_id,
+                result_refs.c.owner_id == fence.job_id,
                 result_refs.c.role == "result",
             )
             .exists(),
@@ -494,7 +566,11 @@ def persist_verified_failure(
     )
     if type(changed.rowcount) is not int or changed.rowcount != 1:
         raise FailureRefusal("stale_source")
-    inserted = connection.execute(_EVIDENCE.insert().values(**asdict(record)))
+    # Psycopg clears its cursor rowcount on close; capture this INSERT's count
+    # before SQLAlchemy soft-closes it. The exact-one-row requirement is unchanged.
+    inserted = connection.execute(
+        _EVIDENCE.insert().values(**asdict(record)).execution_options(preserve_rowcount=True)
+    )
     if type(inserted.rowcount) is not int or inserted.rowcount != 1:
         raise FailureRefusal("invalid_native_state")
     reservation.flush_constraints(connection, reservation_scope)
@@ -504,21 +580,29 @@ def persist_verified_failure(
         reservation_scope.context,
         "record",
         resource_kind="job",
-        resource_id=source.fence.job_id,
+        resource_id=fence.job_id,
     )
     rows.confirm(connection, after)
     final_book = state.new_book()
-    final = _association(
-        connection, reservation_scope, source.operation.identity, configuration, _book=final_book
+    final = (
+        _association(
+            connection,
+            reservation_scope,
+            event.source.operation.identity,
+            event.configuration,
+            _book=final_book,
+        )
+        if event is not None
+        else _native_association(connection, state, final_book)
     )
     _same_association(current, final)
     if final[1] != after_job or tuple(map(type, final[1].values)) != tuple(
         map(type, after_job.values)
     ):
         raise FailureRefusal("stale_source")
-    actual = _read_created(connection, source.fence.job_id, final_book)
-    final_call = _any_call(connection, source.fence.job_id)
-    final_book.observe("any_provider_call", source.fence.job_id, (final_call,))
+    actual = _read_created(connection, fence.job_id, final_book)
+    final_call = _any_call(connection, fence.job_id)
+    final_book.observe("any_provider_call", fence.job_id, (final_call,))
     if actual != record or final_call != any_call:
         raise FailureRefusal("stale_source")
     state.retain(asdict(actual))
@@ -527,7 +611,7 @@ def persist_verified_failure(
             connection.dialect.name,
             association,
             final[1],
-            source.fence.generation,
+            fence.generation,
             any_call,
             actual,
             remaining=remaining,
@@ -540,10 +624,117 @@ def persist_verified_failure(
     _issued(connection, scope)
     final_now = reservation._clock(connection)
     # Only pure checks and inherited COMMIT controls follow the final native tick.
-    _eligible(job, source.fence, rows.job["lease_generation"], final_now)
+    _eligible(job, fence, rows.job["lease_generation"], final_now, expired=expired)
     state.audit()
     body.work.check()
     return TentativeCreated(original)
+
+
+def _same_receipts(before: tuple[RawReceipt, ...], after: tuple[RawReceipt, ...]) -> bool:
+    return before == after and all(
+        tuple(map(type, first.values)) == tuple(map(type, last.values))
+        for first, last in zip(before, after, strict=True)
+    )
+
+
+def _inspect_verified_original(
+    connection: Connection, token: IssuedTerminalScope
+) -> Absent | MatchingOriginal | Conflict:
+    state = _issued(connection, token)
+    with _LOCK:
+        if state.used:
+            raise FailureRefusal("invocation_reused")
+        state.used = True
+    retained = state.retained
+    if type(retained) is not OriginalFailureIntent or state.event is not None or state.expected:
+        raise FailureRefusal("capability_not_issued")
+    retained.__post_init__()
+    state.retain(asdict(retained))
+    body = state.body
+    rows = ReservationRows._capture_failure(connection, body.scope, body.work)
+    state.rows = rows
+    _select_operation(state, rows)
+    initial_book = state.new_book()
+    current = _native_association(connection, state, initial_book)
+    cells = _read_evidence(connection, body.scope.job_id, initial_book)
+    any_call = _any_call(connection, body.scope.job_id)
+    initial_book.observe("any_provider_call", body.scope.job_id, (any_call,))
+    now = reservation._clock(connection)
+    rows.reconcile(now)
+    with state.frame_allowance() as remaining:
+        association, state.association_frame_bytes = association_digest(
+            connection.dialect.name,
+            body.scope.context.organization_id,
+            body.scope.context.project_id,
+            *current,
+            remaining=remaining,
+        )
+    record = retained.record
+    identity_matches = (
+        association == record.association_sha256
+        and rows.job["lease_generation"] == retained.fence.generation
+        and current[1].row()["owner"] == retained.fence.owner_uuid
+    )
+    result: Absent | MatchingOriginal | Conflict
+    if cells is None:
+        result = Absent() if identity_matches else Conflict()
+    elif (
+        not identity_matches
+        or cells != tuple(getattr(record, name) for name in _FIELDS)
+        or tuple(map(type, cells)) != tuple(type(getattr(record, name)) for name in _FIELDS)
+        or current[1].row()["status"] != record.job_status
+        or record.job_status == "cancelled"
+        and current[1].row()["cancel"] not in (True, 1)
+    ):
+        result = Conflict()
+    else:
+        # Use the original row/timestamp unchanged. Current cancel is checked by
+        # the raw final snapshot but intentionally excluded from this digest.
+        with state.frame_allowance() as remaining:
+            digest, state.source_frame_bytes = source_digest(
+                connection.dialect.name,
+                association,
+                current[1],
+                retained.fence.generation,
+                any_call,
+                record,
+                remaining=remaining,
+            )
+        result = MatchingOriginal(retained) if digest == record.source_sha256 else Conflict()
+    state.coordinator.authority.check(
+        connection,
+        body.scope.principal,
+        body.scope.context,
+        "record",
+        resource_kind="job",
+        resource_id=body.scope.job_id,
+    )
+    rows.confirm(connection, rows.data)
+    final_book = state.new_book()
+    final = _native_association(connection, state, final_book)
+    final_cells = _read_evidence(connection, body.scope.job_id, final_book)
+    final_call = _any_call(connection, body.scope.job_id)
+    final_book.observe("any_provider_call", body.scope.job_id, (final_call,))
+    if (
+        not _same_receipts(current, final)
+        or cells != final_cells
+        or (cells is None) != (final_cells is None)
+        or cells is not None
+        and final_cells is not None
+        and tuple(map(type, cells)) != tuple(map(type, final_cells))
+        or any_call != final_call
+    ):
+        raise FailureRefusal("stale_source")
+    if rows.failure_authority is None:
+        raise FailureRefusal("invalid_native_state")
+    _refresh_producer_authority(connection, body.scope, rows.failure_authority)
+    _issued(connection, token)
+    reservation._clock(connection)
+    # Read-only reconciliation has no live-lease eligibility. The final clock
+    # and pure body/accounting checks precede only inherited commit controls.
+    state.audit()
+    body.work.check()
+    return result
 
 
 class TerminalCoordinator:
@@ -570,6 +761,40 @@ class TerminalCoordinator:
     def complete_failure(
         self, principal: VerifiedPrincipal, context: ProjectContext, event: CompletionEvent
     ) -> CreatedFailure:
+        result = self._run(principal, context, "complete", event)
+        if type(result) is not CreatedFailure:
+            raise FailureRefusal("invalid_native_state")
+        return result
+
+    def expire_generation(
+        self, principal: VerifiedPrincipal, context: ProjectContext, expected: JobFence
+    ) -> CreatedFailure:
+        result = self._run(principal, context, "expire", expected)
+        if type(result) is not CreatedFailure:
+            raise FailureRefusal("invalid_native_state")
+        return result
+
+    def inspect_original(
+        self, principal: VerifiedPrincipal, context: ProjectContext, retained: OriginalFailureIntent
+    ) -> Absent | MatchingOriginal | Conflict:
+        result = self._run(principal, context, "inspect", retained)
+        if isinstance(result, CreatedFailure) or type(result) not in (
+            Absent,
+            MatchingOriginal,
+            Conflict,
+        ):
+            raise FailureRefusal("invalid_native_state")
+        return result
+
+    def _run(
+        self,
+        principal: VerifiedPrincipal,
+        context: ProjectContext,
+        operation: Literal["complete", "expire", "inspect"],
+        value: CompletionEvent | JobFence | OriginalFailureIntent,
+    ) -> CreatedFailure | Absent | MatchingOriginal | Conflict:
+        # Fixed internal dispatch only: no caller cause, observer callback or
+        # replaceable transaction implementation is accepted.
         work = OperationWork(include_acquisition=True)
         with self._lock:
             if self._consumed:
@@ -577,10 +802,38 @@ class TerminalCoordinator:
             self._consumed = True
             self._work = work
         try:
-            # Pop once before any terminal storage work; refusal never restores it.
-            record = _consume_dependency_event(
-                event, self.engine, self.authority, principal, context
-            )
+            event_record = None
+            expected = None
+            retained = None
+            if operation == "complete":
+                if type(value) is not CompletionEvent:
+                    raise FailureRefusal("capability_not_issued")
+                event_record = _consume_dependency_event(
+                    value, self.engine, self.authority, principal, context
+                )
+                job_id = event_record.source.fence.job_id
+            elif operation == "expire":
+                if type(value) is not JobFence:
+                    raise FailureRefusal("invalid_intent")
+                try:
+                    value.__post_init__()
+                except ReservationRefusal:
+                    raise FailureRefusal("invalid_intent") from None
+                expected = value
+                job_id = expected.job_id
+            elif operation == "inspect":
+                if type(value) is not OriginalFailureIntent or type(context) is not ProjectContext:
+                    raise FailureRefusal("invalid_intent")
+                value.__post_init__()
+                retained = value
+                if (
+                    retained.organization_id != context.organization_id
+                    or retained.record.project_id != context.project_id
+                ):
+                    raise FailureRefusal("original_identity_conflict")
+                job_id = retained.fence.job_id
+            else:
+                raise FailureRefusal("invalid_intent")
             if (
                 type(self) is not TerminalCoordinator
                 or type(self.authority) is not RequestAuthority
@@ -590,7 +843,7 @@ class TerminalCoordinator:
                 raise FailureRefusal("invalid_intent")
             self.authority._principal(principal)
             require_engine(self.engine)
-            scope = ReservationScope(principal, context, record.source.fence.job_id)
+            scope = ReservationScope(principal, context, job_id)
             with (
                 admission_transaction(self.engine, self._transaction, work=work) as connection,
                 issued_connection(connection, scope, work) as body,
@@ -613,13 +866,19 @@ class TerminalCoordinator:
                     resource_id=scope.job_id,
                 )
                 token = object.__new__(IssuedTerminalScope)
-                state = _TerminalState(self, body, record)
+                state = _TerminalState(
+                    self, body, event_record, expected=expected, retained=retained
+                )
                 with _LOCK:
                     if connection in _TERMINALS:
                         raise FailureRefusal("invalid_native_state")
                     _TERMINALS[connection] = token, state
                 try:
-                    tentative = persist_verified_failure(connection, token)
+                    result: TentativeCreated | Absent | MatchingOriginal | Conflict
+                    if operation == "inspect":
+                        result = _inspect_verified_original(connection, token)
+                    else:
+                        result = persist_verified_failure(connection, token)
                 finally:
                     with _LOCK:
                         _TERMINALS.pop(connection, None)
@@ -628,7 +887,11 @@ class TerminalCoordinator:
                 raise FailureRefusal("invalid_native_state")
             work._limits(cleanup=True)
             work.remaining_timeouts_ms()
-            return CreatedFailure(tentative.original)
+            if isinstance(result, TentativeCreated):
+                if type(result) is not TentativeCreated:
+                    raise FailureRefusal("invalid_native_state")
+                return CreatedFailure(result.original)
+            return result
         except MigrationRefused as error:
             raise FailureRefusal(
                 "capacity_exceeded"
