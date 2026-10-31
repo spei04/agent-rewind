@@ -3,7 +3,7 @@
 ## Current status
 
 - **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129) is accepted at [main 47da5b44](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2), including original main checks, source-matched candidate and installed-package evidence.
-- **Assigned:** Backend implements F3 trusted claims and atomic failure persistence. Quality writes independent native/ACK/identity tests; Review checks source/security; Lead integrates and records delivery.
+- **Assigned:** F3's private claim component has passed focused and independent native checks. Backend now implements terminal failure persistence and expiry; Quality owns independent native tests, Review checks source/security, and Lead integrates and records delivery.
 - **Next:** F3 acceptance, F4/F5, then P2 worker integration. Admitted startup and production remain gated; [funding](delivery/CAPACITY_AND_FUNDING.md) and [retained failures](#assignment-history) are unchanged. Optional fixture optimization is deferred.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -21,6 +21,14 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F3 claim component validated; terminal persistence next — 2026-10-31 (Pacific)**
+
+- The private claim at [801b4cb5](https://github.com/spei04/agent-rewind/commit/801b4cb5462c188359047586332d72e0cb7b1a9a) binds the actual job, admission origin, installed configuration and owned native transaction. It issues an execution capability only after an acknowledged commit and clean exit. Public ar7 behavior and default migration-only readiness remain unchanged.
+- Separate original campaigns pass 31 focused/retained SQLite cases, 11 additional ownership/evidence/writer cases, and 26 independent cases per Python version. The independent group contains 13 SQLite and 13 restricted PostgreSQL cases; [oracle7516714a](https://github.com/spei04/agent-rewind/commit/7516714a3e14940ed5e921bd3920b59e789bf254) preserves their exact source. Review reconciles complete native state, commit uncertainty, installed-binding drift, native lease, deadline, ownership and release evidence. These are component checks, not full F3 delivery.
+- The original Work-limit failure, the test rollback-injection failure and the Python 3.11 runner's pre-test version-pin failure remain retained separately. Corrected originals supply only their own coverage. Focused-run elapsed values include preservation checks; they are separate from pytest and explicitly measured claim durations.
+- Backend owns the next fixed producer-authority observer and atomic terminal/expiry path. Quality tests genuine post-registration dependency failures, native expiry and uncertain commits; Review checks capabilities and privileges. Lead composes both existing checkouts and updates delivery records. Full F3, F4/F5, P1/P2 and admitted startup remain incomplete; funding and production gates are unchanged.
+
 
 **F2 delivery accepted; F3 assigned — 2026-10-31 (Pacific)**
 
