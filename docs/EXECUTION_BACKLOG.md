@@ -1093,7 +1093,7 @@ Tracking: [#96](https://github.com/spei04/agent-rewind/issues/96) · In progress
 Tracking: [#97](https://github.com/spei04/agent-rewind/issues/97) · In progress; canonical assignment recorded, GitHub synchronization pending.
 
 - **Objective:** Implement the complete chosen bounded stored-failure representation and consumer handoff before wiring either live worker failure path.
-- **Implementation scope:** Freeze version/encoding, allowlisted safe code/message and phase-specific retryability mappings, exact byte/native-type/work bounds, authentic originating correlation and immutable job/operation association. Implement persistence/parser helpers and the bounded AR-008-B consumer extension using original receipts and fresh authority. Define and implement an operator-only idempotent historical migration-marker path that preserves original job rows/bytes, audit, ciphertexts and hash history; a marker never promotes raw legacy text into a trusted Error. Before code, decide whether existing storage suffices; any additive DDL requires explicit migration owner/revision, captured catalogs and preservation/rollback/restore proof within P1, with reforecast if broader. Deliver the complete boundary through F1 existing-profile SQLite catalog capacity, F2 dormant successor migration/profile, F3 trusted persistence, F4 bounded successor consumers and F5 operator markers/preservation/restore. The adopted 15-column relation retains complete D1-D4 entry e7a70bb9 at M122. F1 delivery is accepted at 89a43e4355413ba5cca96e09c410c63c634138fb; source handoff 22608a0f assigns Backend the reserved F2 schema/profile/migration scope. Its first schema commit is an internal review stage of the same F2 PR; F2 acceptance and F3-F5/P2 entry remain gated.
+- **Implementation scope:** Freeze version/encoding, allowlisted safe code/message and phase-specific retryability mappings, exact byte/native-type/work bounds, authentic originating correlation and immutable job/operation association. Implement persistence/parser helpers and the bounded AR-008-B consumer extension using original receipts and fresh authority. Define and implement an operator-only idempotent historical migration-marker path that preserves original job rows/bytes, audit, ciphertexts and hash history; a marker never promotes raw legacy text into a trusted Error. Before code, decide whether existing storage suffices; any additive DDL requires explicit migration owner/revision, captured catalogs and preservation/rollback/restore proof within P1, with reforecast if broader. Deliver the complete boundary through F1 existing-profile SQLite catalog capacity, F2 dormant successor migration/profile, F3 trusted persistence, F4 bounded successor consumers and F5 operator markers/preservation/restore. The adopted 15-column relation retains complete D1-D4 entry e7a70bb9 at M122. F1 delivery is accepted at main89a43e43 and F2 at main47da5b44. Backend implements F3 under the reviewed private genuine-claim and terminal/expiry design; Quality supplies independent native oracles. F3 acceptance, F4-F5 and P2 entry remain gated.
 - **Out of scope:** No live completion/expiry wiring, paid dispatch, guessed schema/version, automatic legacy-text conversion, GET-triggered markers, new Error fields/metrics, history rewrite or production activation.
 - **Prerequisites:** [AR-010-A](#ar-010-a), [AR-005-C](#ar-005-c). All aggregate prerequisites remain required; a package is not an early entry exception.
 - **Required contracts:** C04. Frozen C04 four-field Error and Operation.error data, original failure versus fresh poll correlation and historical marker; AR-010-A generation/ledger identities, AR-005-C history, accepted AR-008-B bounded Operation adapter and AR-011-B safe vocabulary. ENTRY review must inspect worker.work_once, Database.complete_job, Database.claim, jobs.error String(300) and operations.failure_correlation_id.
@@ -1142,9 +1142,9 @@ See the [worker failure execution plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.m
 - **Prerequisites:** [AR-010-A](#ar-010-a), [AR-005-C](#ar-005-c), [AR-010-B/P1/F1](#ar-010-b-p1-f1).
 - **Responsible role:** BE.
 - **Effort allocation:** Included in AR-010-B/P1; no additional effort or acceptance package.
-- **Progress:** In progress.
-- **Tracking PR:** Not assigned.
-- **Checkpoint evidence:** Pending; no accepted source/merge/review.
+- **Progress:** Merged; checkpoint accepted.
+- **Tracking PR:** https://github.com/spei04/agent-rewind/pull/129.
+- **Checkpoint evidence:** 64217afe32da41a023674ad9d7cb96b6fd7d7f4b / 47da5b44e3bf53b2c0352f42366e4632abfed4c2. Final independent delivery peer f02384c3161335eaffee9f81190fcfd14da9ed8de7b834d68b3b752dadf7b692; lead acceptance 7e33725e4eddd463f2b1d59e0a28d594ea674dc00b6596496718d0db0bab06fc; release reviewed-delivery-20261031-pr129-47da5b44.json SHA256 22ca186e127f3e8719f70d33c6c631b02ef9a2179218272f6162e2cd712ae20f; original main 41187912770 attempt 1, all eight jobs successful; candidate 13038647950 SHA256 fdedba837fc345a56a6025a5e9f431030617251393c65f22cca59498f6a08471, wheel SHA256 f6e7293634b5fea84a374f266c1ede5dab04f7a37c6520bd6fa25e37b9bb497c, 156 runtime members in wheel and sdist with own installed evidence and separate current main image proof.
 
 <a id="ar-010-b-p1-f3"></a>
 
@@ -1161,7 +1161,7 @@ See the [worker failure execution plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.m
 - **Prerequisites:** [AR-010-A](#ar-010-a), [AR-005-C](#ar-005-c), [AR-010-B/P1/F2](#ar-010-b-p1-f2).
 - **Responsible role:** BE.
 - **Effort allocation:** Included in AR-010-B/P1; no additional effort or acceptance package.
-- **Progress:** Not started.
+- **Progress:** In progress.
 - **Tracking PR:** Not assigned.
 - **Checkpoint evidence:** Pending; no accepted source/merge/review.
 

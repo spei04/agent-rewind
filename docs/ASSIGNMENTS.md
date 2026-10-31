@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Current:** [PR129](https://github.com/spei04/agent-rewind/pull/129) passed validation and merged at [main 47da5b44](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2). [Original main validation](https://github.com/spei04/agent-rewind/actions/runs/41187912770) is running; full F2 delivery remains pending.
-- **Next:** Lead/Quality/Review verify main and candidate delivery. After F2 acceptance: F3 failure issuer, F4/F5, then P2 worker integration. Backend prepares P2's existing contract and reforecast.
-- **Gates:** F3 remains design only. Admitted startup and production remain gated. [Funding limits](delivery/CAPACITY_AND_FUNDING.md) and [prior failures](#assignment-history) remain unchanged. Optional fixture optimization is deferred.
+- **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129) is accepted at [main 47da5b44](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2), including original main checks, source-matched candidate and installed-package evidence.
+- **Assigned:** Backend implements F3 trusted claims and atomic failure persistence. Quality writes independent native/ACK/identity tests; Review checks source/security; Lead integrates and records delivery.
+- **Next:** F3 acceptance, F4/F5, then P2 worker integration. Admitted startup and production remain gated; [funding](delivery/CAPACITY_AND_FUNDING.md) and [retained failures](#assignment-history) are unchanged. Optional fixture optimization is deferred.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,13 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F2 delivery accepted; F3 assigned — 2026-10-31 (Pacific)**
+
+- [Original main run41187912770/1](https://github.com/spei04/agent-rewind/actions/runs/41187912770) passed all eight jobs. Independent review verifies 8,988 collected cases per interpreter, expected skips, 5,790 selected setup/call/teardown facts and unchanged session limits. The source-matched candidate contains 156 runtime files in both wheel and source distribution, with its own installed SQLite service/profile checks and separate current main image proof. Installed PostgreSQL profile loading is distinct from native PostgreSQL execution evidence.
+- Backend owns F3 runtime and focused tests in the existing secondary checkout. Quality owns independent native state/ACK/identity oracles in the primary checkout; Review owns producer/security review; Lead owns integration and progress. Start with a genuine private ar8 claim and post-commit capability, then atomic terminal persistence and trusted expiry. Public ar7 behavior and default migration-only readiness remain unchanged.
+- The three original failed campaigns remain retained. Full P1/P2, admitted startup, production and research are incomplete. The existing $200 lifetime cap includes earlier charges; no further paid allowance is established. No new resources or paid calls are part of this assignment.
+
 
 **F2 PR accepted and merged; main delivery pending — 2026-10-31 (Pacific)**
 

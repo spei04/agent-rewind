@@ -2055,7 +2055,7 @@
             "AR-005-C"
           ],
           "objective": "Implement the complete chosen bounded stored-failure representation and consumer handoff before wiring either live worker failure path",
-          "scope": "Freeze version/encoding, allowlisted safe code/message and phase-specific retryability mappings, exact byte/native-type/work bounds, authentic originating correlation and immutable job/operation association. Implement persistence/parser helpers and the bounded AR-008-B consumer extension using original receipts and fresh authority. Define and implement an operator-only idempotent historical migration-marker path that preserves original job rows/bytes, audit, ciphertexts and hash history; a marker never promotes raw legacy text into a trusted Error. Before code, decide whether existing storage suffices; any additive DDL requires explicit migration owner/revision, captured catalogs and preservation/rollback/restore proof within P1, with reforecast if broader. Deliver the complete boundary through F1 existing-profile SQLite catalog capacity, F2 dormant successor migration/profile, F3 trusted persistence, F4 bounded successor consumers and F5 operator markers/preservation/restore. The adopted 15-column relation retains complete D1-D4 entry e7a70bb9 at M122. F1 delivery is accepted at 89a43e4355413ba5cca96e09c410c63c634138fb; source handoff 22608a0f assigns Backend the reserved F2 schema/profile/migration scope. Its first schema commit is an internal review stage of the same F2 PR; F2 acceptance and F3-F5/P2 entry remain gated",
+          "scope": "Freeze version/encoding, allowlisted safe code/message and phase-specific retryability mappings, exact byte/native-type/work bounds, authentic originating correlation and immutable job/operation association. Implement persistence/parser helpers and the bounded AR-008-B consumer extension using original receipts and fresh authority. Define and implement an operator-only idempotent historical migration-marker path that preserves original job rows/bytes, audit, ciphertexts and hash history; a marker never promotes raw legacy text into a trusted Error. Before code, decide whether existing storage suffices; any additive DDL requires explicit migration owner/revision, captured catalogs and preservation/rollback/restore proof within P1, with reforecast if broader. Deliver the complete boundary through F1 existing-profile SQLite catalog capacity, F2 dormant successor migration/profile, F3 trusted persistence, F4 bounded successor consumers and F5 operator markers/preservation/restore. The adopted 15-column relation retains complete D1-D4 entry e7a70bb9 at M122. F1 delivery is accepted at main89a43e43 and F2 at main47da5b44. Backend implements F3 under the reviewed private genuine-claim and terminal/expiry design; Quality supplies independent native oracles. F3 acceptance, F4-F5 and P2 entry remain gated.",
           "out_of_scope": "No live completion/expiry wiring, paid dispatch, guessed schema/version, automatic legacy-text conversion, GET-triggered markers, new Error fields/metrics, history rewrite or production activation",
           "interface_contracts": "Frozen C04 four-field Error and Operation.error data, original failure versus fresh poll correlation and historical marker; AR-010-A generation/ledger identities, AR-005-C history, accepted AR-008-B bounded Operation adapter and AR-011-B safe vocabulary. ENTRY review must inspect worker.work_once, Database.complete_job, Database.claim, jobs.error String(300) and operations.failure_correlation_id",
           "acceptance": "Only supported bounded versioned/provenance-checked failure evidence is returned as nested Error, including outcome_uncertain as HTTP 200 data with stable original correlation and a fresh poll header. Unknown provider outcome retains its hold and retryable=false; evaluator false is not a worker failure. Missing/malformed/unsupported evidence remains safe 503. Historical markers are explicit, operator-only, repeat-stable and additive to preserved evidence; neither a poll ID nor an exception string proves origin",
@@ -2109,11 +2109,11 @@
                 "C04"
               ],
               "role": "BE",
-              "status": "In progress",
-              "source_commit": null,
-              "accepted_merge_commit": null,
-              "review_evidence": null,
-              "tracking_pr": null
+              "status": "Merged; checkpoint accepted",
+              "source_commit": "64217afe32da41a023674ad9d7cb96b6fd7d7f4b",
+              "accepted_merge_commit": "47da5b44e3bf53b2c0352f42366e4632abfed4c2",
+              "review_evidence": "Final independent delivery peer f02384c3161335eaffee9f81190fcfd14da9ed8de7b834d68b3b752dadf7b692; lead acceptance 7e33725e4eddd463f2b1d59e0a28d594ea674dc00b6596496718d0db0bab06fc; release reviewed-delivery-20261031-pr129-47da5b44.json SHA256 22ca186e127f3e8719f70d33c6c631b02ef9a2179218272f6162e2cd712ae20f; original main 41187912770 attempt 1, all eight jobs successful; candidate 13038647950 SHA256 fdedba837fc345a56a6025a5e9f431030617251393c65f22cca59498f6a08471, wheel SHA256 f6e7293634b5fea84a374f266c1ede5dab04f7a37c6520bd6fa25e37b9bb497c, 156 runtime members in wheel and sdist with own installed evidence and separate current main image proof",
+              "tracking_pr": "https://github.com/spei04/agent-rewind/pull/129"
             },
             {
               "id": "AR-010-B/P1/F3",
@@ -2135,7 +2135,7 @@
                 "C04"
               ],
               "role": "BE",
-              "status": "Not started",
+              "status": "In progress",
               "source_commit": null,
               "accepted_merge_commit": null,
               "review_evidence": null,
@@ -2228,8 +2228,8 @@
         }
       ],
       "tracking_issue": "https://github.com/spei04/agent-rewind/issues/96",
-      "assigned_to": "Backend owns AR-010-B/P1/F2 dormant schema/profile/migration implementation and native tests in SECONDARY after accepted F1 main89 delivery; Planning synchronizes PRIMARY metadata, Review independently checks source/evidence, and the lead owns revision/integration. F3-F5 and live worker P2 are not assigned.",
-      "entry_evidence": "Complete D1-D4 entry accepted by lead e7a70bb97a49773ad0b948d94c838d508a49c3390440f7834c62f17a1dec5801 at 2026-10-29T21:14:57Z, after F1 preparation b91b0afa and independent peer 52a9800d. Accepted whole AR-010-A M122 aed2c20d314e0e361fa4c8e438f839802e1e729b/release26a29f82 and predecessor wheel13bb8a8caa1b1c8226b8f57eda367243024a1edb7b2c265ff2453cc27e1501aa; AR-005-C remains accepted at0737c7bd236422577457e3dff52da02266d957cf. Backend owns later F2 revision ar_0008_failure_evidence, down_revision ar_0007_ledger, profile failure_evidence_v1, reserved by lead after fresh collision review; no F1 schema/revision code. That dated F1-only assignment is retained as history. F1 is now Merged; checkpoint accepted at main89, with exact review/release evidence in its implementation row. Current source handoff 22608a0f028e60946afa0ad659655ac06f5241fb99a58e3a86d9438e12a6c4f5 binds F2 to accepted main89; Backend is implementing F2 under the unchanged reserved revision/profile and fixed limits. F2/P1/P2 final acceptance remains null; F3-F5/P2 are Not started. No successor native-fit, startup, production or research acceptance follows."
+      "assigned_to": "Backend owns AR-010-B/P1/F3 trusted claim and failure persistence in SECONDARY after accepted F2 main47 delivery; Quality owns independent native state/ACK/identity tests in PRIMARY; Review checks source/security and the lead integrates. F4-F5 and live worker P2 remain unassigned.",
+      "entry_evidence": "Complete D1-D4 entry accepted by lead e7a70bb97a49773ad0b948d94c838d508a49c3390440f7834c62f17a1dec5801 at 2026-10-29T21:14:57Z, after F1 preparation b91b0afa and independent peer 52a9800d. Accepted whole AR-010-A M122 aed2c20d314e0e361fa4c8e438f839802e1e729b/release26a29f82 and predecessor wheel13bb8a8caa1b1c8226b8f57eda367243024a1edb7b2c265ff2453cc27e1501aa; AR-005-C remains accepted at0737c7bd236422577457e3dff52da02266d957cf. Backend owns later F2 revision ar_0008_failure_evidence, down_revision ar_0007_ledger, profile failure_evidence_v1, reserved by lead after fresh collision review; no F1 schema/revision code. That dated F1-only assignment is retained as history. F1 is accepted at main89. F2 is now Merged; checkpoint accepted at main47da5b44 through original PR/main/candidate delivery, with exact evidence in its implementation row. F3 is In progress under reviewed design6735ffcf/peerbd0e5c42 and unchanged fixed limits. Whole P1/P2 acceptance remains null; F4-F5/P2 remain Not started. No complete successor fit, admitted startup, production or research acceptance follows."
     },
     {
       "id": "AR-011-A",
