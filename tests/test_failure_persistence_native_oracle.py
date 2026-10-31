@@ -1634,3 +1634,554 @@ def test_postgres_terminal_refuses_revoked_insert_without_reissuing_event(
                     assert _application_acl(connection, pg["app_role"]) == old_acl
             assert_restricted_producer(case)
             assert_same_state(issued.claimed, whole_state(case))
+
+
+@POSTGRES
+def test_postgres_terminal_real_deferred_generation_failure_rolls_back(
+    pg, tmp_path, monkeypatch, record_property
+):
+    from sqlalchemy.exc import DBAPIError
+
+    with genuine_failure_case(tmp_path, monkeypatch, record_property, pg=pg) as fixture:
+        case = fixture.case
+        controls = observe_controls(monkeypatch)
+        with genuine_terminal_event(case, controls, record_property) as issued:
+            coordinator = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+            flush = failure_terminal.reservation.flush_constraints
+            execute_sql = Connection.exec_driver_sql
+            transient, flush_errors, flush_statements = [], [], []
+
+            def observe_flush(connection, statement, *args, **kwargs):
+                selected = connection.engine is case.engine and statement.startswith(
+                    "SET CONSTRAINTS "
+                )
+                if selected:
+                    flush_statements.append(statement)
+                try:
+                    return execute_sql(connection, statement, *args, **kwargs)
+                except DBAPIError as error:
+                    if selected:
+                        flush_errors.append(error.orig.sqlstate)
+                    raise
+
+            def change_and_restore(connection, scope):
+                assert connection.engine is case.engine and transient == []
+                original = coordinator.original
+                assert original is not None and original.fence == issued.fence
+                assert issued.fence.generation == 1
+                assert (
+                    connection.execute(
+                        text("SELECT status FROM jobs WHERE id=:id"), {"id": case.job_id}
+                    ).scalar_one()
+                    == "failed"
+                )
+                assert (
+                    connection.execute(
+                        text("SELECT count(*) FROM job_failure_evidence WHERE job_id=:id"),
+                        {"id": case.job_id},
+                    ).scalar_one()
+                    == 1
+                )
+                # Both writes must really succeed under the unchanged app grants.
+                # The queued OLD/NEW generation violation survives the restoration.
+                for generation in (0, issued.fence.generation):
+                    observed = connection.execute(
+                        text(
+                            "UPDATE jobs SET lease_generation=:generation WHERE id=:id "
+                            "RETURNING lease_generation"
+                        ),
+                        {"generation": generation, "id": case.job_id},
+                    ).scalar_one()
+                    assert type(observed) is int and observed == generation
+                    transient.append(observed)
+                return flush(connection, scope)
+
+            with monkeypatch.context() as patch:
+                writes = observe_terminal_writes(patch, case)
+                patch.setattr(Connection, "exec_driver_sql", observe_flush)
+                patch.setattr(failure_terminal.reservation, "flush_constraints", change_and_restore)
+                started = time.monotonic()
+                with pytest.raises(AdmissionError) as caught:
+                    coordinator.complete_failure(case.principal, case.context, issued.event)
+                elapsed = time.monotonic() - started
+            assert transient == [0, 1]
+            assert len(flush_statements) == 1 and flush_errors == ["23514"]
+            assert caught.value.code == "dependency_unavailable"
+            assert writes == [
+                {"table": "jobs", "returned": True, "rowcount": 1},
+                {"table": EVIDENCE, "returned": True, "rowcount": 1},
+            ]
+            facts = coordinator.outcome
+            assert facts.begun and not facts.commit_attempted and not facts.commit_acknowledged
+            assert facts.rollback_attempted and facts.rollback_acknowledged
+            assert not facts.cleanup_failed
+            retained = coordinator.original
+            assert retained is not None and retained.fence == issued.fence
+            assert retained.record.lease_generation == 1
+            assert issued.event not in failure_persistence._EVENTS and issued.record.event is None
+            assert not failure_terminal._TERMINALS
+            after = whole_state(case)
+            assert_same_state(issued.claimed, after)
+            assert_no_canary(caught.value, after)
+            observer = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+            with pytest.raises(AdmissionError) as consumed:
+                observer.complete_failure(case.principal, case.context, issued.event)
+            assert (consumed.value.reason, consumed.value.code) == (
+                "capability_not_issued",
+                "invalid_request",
+            )
+            assert not any(asdict(observer.outcome).values()) and observer.original is None
+            assert coordinator.original is retained
+            assert_same_state(after, whole_state(case))
+            record_terminal_refusal_work(
+                coordinator,
+                controls,
+                elapsed,
+                record_property,
+                fault="actual_deferred_generation",
+                transient_native_generations=transient,
+                actual_flush_statements=flush_statements,
+                actual_sqlstates=flush_errors,
+                protected_writes=writes,
+                original_retained=True,
+                exact_rollback=True,
+            )
+
+
+def test_terminal_conditional_update_refuses_same_body_generation_drift(
+    failure_case, monkeypatch, record_property
+):
+    case = failure_case.case
+    controls = observe_controls(monkeypatch)
+    with genuine_terminal_event(case, controls, record_property) as issued:
+        coordinator = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+        execute = Connection.execute
+        injected, conditional, inserts = [], [], []
+
+        def drift_before_update(connection, statement, *args, **kwargs):
+            table_name = getattr(getattr(statement, "table", None), "name", None)
+            selected = connection.engine is case.engine
+            if selected and getattr(statement, "is_insert", False) and table_name == EVIDENCE:
+                inserts.append("evidence")
+            if selected and getattr(statement, "is_update", False) and table_name == "jobs":
+                assert injected == [] and coordinator.original is not None
+                generation = issued.fence.generation + 1
+                result = execute(
+                    connection,
+                    text(
+                        "UPDATE jobs SET lease_generation=:generation WHERE id=:id "
+                        "RETURNING lease_generation"
+                    ),
+                    {"generation": generation, "id": case.job_id},
+                )
+                observed = result.scalar_one()
+                assert type(observed) is int and observed == generation
+                injected.append(observed)
+                # Forward the actual conditional statement and its actual result.
+                changed = execute(connection, statement, *args, **kwargs)
+                conditional.append(changed.rowcount)
+                native = execute(
+                    connection,
+                    text("SELECT status,lease_generation FROM jobs WHERE id=:id"),
+                    {"id": case.job_id},
+                ).one()
+                assert tuple(native) == ("running", generation)
+                assert (
+                    execute(
+                        connection,
+                        text("SELECT count(*) FROM job_failure_evidence WHERE job_id=:id"),
+                        {"id": case.job_id},
+                    ).scalar_one()
+                    == 0
+                )
+                return changed
+            return execute(connection, statement, *args, **kwargs)
+
+        with monkeypatch.context() as patch:
+            patch.setattr(Connection, "execute", drift_before_update)
+            started = time.monotonic()
+            with pytest.raises(AdmissionError) as caught:
+                coordinator.complete_failure(case.principal, case.context, issued.event)
+            elapsed = time.monotonic() - started
+        assert injected == [issued.fence.generation + 1]
+        assert conditional == [0] and inserts == []
+        assert (caught.value.reason, caught.value.code) == (
+            "stale_source",
+            "dependency_unavailable",
+        )
+        facts = coordinator.outcome
+        assert facts.begun and not facts.commit_attempted and not facts.commit_acknowledged
+        assert facts.rollback_attempted and facts.rollback_acknowledged and not facts.cleanup_failed
+        retained = coordinator.original
+        assert retained is not None and retained.fence == issued.fence
+        assert retained.record.lease_generation == issued.fence.generation
+        assert issued.event not in failure_persistence._EVENTS and issued.record.event is None
+        assert not failure_terminal._TERMINALS
+        after = whole_state(case)
+        assert_same_state(issued.claimed, after)
+        assert_no_canary(caught.value, after)
+        observer = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+        with pytest.raises(AdmissionError) as consumed:
+            observer.complete_failure(case.principal, case.context, issued.event)
+        assert (consumed.value.reason, consumed.value.code) == (
+            "capability_not_issued",
+            "invalid_request",
+        )
+        assert not any(asdict(observer.outcome).values()) and observer.original is None
+        assert coordinator.original is retained
+        assert_same_state(after, whole_state(case))
+        record_terminal_refusal_work(
+            coordinator,
+            controls,
+            elapsed,
+            record_property,
+            fault="same_body_conditional_generation",
+            actual_injected_generation=injected,
+            actual_conditional_rowcounts=conditional,
+            evidence_insert_attempts=inserts,
+            original_retained=True,
+            exact_rollback=True,
+        )
+
+
+def test_terminal_expiry_writers_exclude_one_native_outcome(
+    failure_case, monkeypatch, record_property
+):
+    import sqlite3
+    from concurrent.futures import ThreadPoolExecutor
+    from dataclasses import replace
+    from threading import Event, get_ident
+
+    case = failure_case.case
+    postgres = case.engine.dialect.name == "postgresql"
+    controls = observe_controls(monkeypatch)
+    before_claim = whole_state(case)
+    short_intent = replace(claim_intent(case), lease_seconds=1)
+    adapter = InstalledAdapter()
+    with execution_owner(case, adapter) as (owner, record):
+        before_tick = native_clock(case)
+        started = time.monotonic()
+        fence = owner.claim(case.principal, case.context, short_intent)
+        claim_elapsed = time.monotonic() - started
+        after_tick = native_clock(case)
+        claimed = whole_state(case)
+        assert_only_claim_changed(before_claim, claimed, short_intent, (before_tick, after_tick))
+        assert owner.outcome.commit_acknowledged and not owner.outcome.cleanup_failed
+        claim_work = record.work
+        assert claim_work is record.coordinator._work and claim_work._detached
+        claim_cleanup = [
+            item
+            for item in controls
+            if item[0] is claim_work and item[1] not in {"begin", "commit"}
+        ]
+        assert claim_work.statements <= 512 and claim_work.statements - len(claim_cleanup) <= 504
+        assert len(claim_cleanup) <= 8 and claim_elapsed < 10
+    job = next(row for row in claimed["tables"]["jobs"]["rows"] if row["id"] == case.job_id)
+    numerator, denominator = job["lease_until"].as_integer_ratio()
+    cadence = Event()
+    poll_started = time.monotonic()
+    while True:
+        expired_tick = native_clock(case)
+        if expired_tick * denominator >= numerator * 1_000_000:
+            break
+        assert time.monotonic() - poll_started < 4
+        cadence.wait(0.01)
+    assert_same_state(claimed, whole_state(case))
+    native_inputs = native_digest_inputs(case)
+    first = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+    second = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+    coordinators = {"winner": first, "loser": second}
+    actors, pids, results, elapsed = {}, {}, {}, {}
+    writes = {"winner": [], "loser": []}
+    first_locked, second_started, release = Event(), Event(), Event()
+    busy_codes, blockers_observed = [], []
+    persist = failure_terminal.persist_verified_failure
+    lock_authority = failure_terminal.lock_authority
+    execute, execute_sql = Connection.execute, Connection.exec_driver_sql
+
+    def actor_lock(connection_authority, connection, *args, **kwargs):
+        actor = actors[get_ident()]
+        if postgres:
+            pids[actor] = connection.exec_driver_sql("SELECT pg_backend_pid()").scalar_one()
+            if actor == "loser":
+                second_started.set()
+        return lock_authority(connection_authority, connection, *args, **kwargs)
+
+    def held_persist(connection, token):
+        actor = actors[get_ident()]
+        if actor == "winner":
+            first_locked.set()
+            assert release.wait(5), "bounded terminal winner rendezvous expired"
+        return persist(connection, token)
+
+    def observed_execute(connection, statement, *args, **kwargs):
+        actor = actors.get(get_ident())
+        table_name = getattr(getattr(statement, "table", None), "name", None)
+        selected = (
+            connection.engine is case.engine
+            and actor is not None
+            and (
+                getattr(statement, "is_update", False)
+                and table_name == "jobs"
+                or getattr(statement, "is_insert", False)
+                and table_name == EVIDENCE
+            )
+        )
+        result = execute(connection, statement, *args, **kwargs)
+        if selected:
+            writes[actor].append({"table": table_name, "rowcount": result.rowcount})
+        return result
+
+    def observed_sql(connection, statement, *args, **kwargs):
+        actor = actors.get(get_ident())
+        if not postgres and actor == "loser" and statement == "BEGIN IMMEDIATE":
+            second_started.set()
+        try:
+            return execute_sql(connection, statement, *args, **kwargs)
+        except Exception as error:
+            if not postgres and actor == "loser" and statement == "BEGIN IMMEDIATE":
+                busy_codes.append(getattr(getattr(error, "orig", None), "sqlite_errorcode", None))
+            raise
+
+    def attempt(actor):
+        actors[get_ident()] = actor
+        started = time.monotonic()
+        try:
+            try:
+                result = coordinators[actor].expire_generation(case.principal, case.context, fence)
+                results[actor] = {"value": result, "error": None}
+            except AdmissionError as error:
+                results[actor] = {"value": None, "error": error}
+        finally:
+            elapsed[actor] = time.monotonic() - started
+            actors.pop(get_ident())
+
+    with monkeypatch.context() as patch:
+        patch.setattr(failure_terminal, "lock_authority", actor_lock)
+        patch.setattr(failure_terminal, "persist_verified_failure", held_persist)
+        patch.setattr(Connection, "execute", observed_execute)
+        patch.setattr(Connection, "exec_driver_sql", observed_sql)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            winner_future = executor.submit(attempt, "winner")
+            try:
+                assert first_locked.wait(3)
+                loser_future = executor.submit(attempt, "loser")
+                assert second_started.wait(2)
+                if postgres:
+                    assert pids["winner"] != pids["loser"]
+                    deadline = time.monotonic() + 2
+                    with case.pg["owner"].connect() as observer:
+                        while time.monotonic() < deadline and not loser_future.done():
+                            blocked = observer.execute(
+                                text("SELECT pg_blocking_pids(:pid)"), {"pid": pids["loser"]}
+                            ).scalar_one()
+                            if pids["winner"] in blocked:
+                                blockers_observed.append(list(blocked))
+                                break
+                            cadence.wait(0.01)
+                    assert blockers_observed, "second terminal writer was never natively blocked"
+                    assert not loser_future.done()
+                else:
+                    loser_future.result(timeout=5)
+                    assert busy_codes == [sqlite3.SQLITE_BUSY]
+                release.set()
+                winner_future.result(timeout=6)
+                loser_future.result(timeout=6)
+            finally:
+                release.set()
+        assert winner_future.done() and loser_future.done()
+    assert set(results) == {"winner", "loser"}
+    assert results["winner"]["error"] is None and type(results["winner"]["value"]) is CreatedFailure
+    created = results["winner"]["value"]
+    failure = results["loser"]["error"]
+    assert results["loser"]["value"] is None and isinstance(failure, AdmissionError)
+    assert failure.code == "dependency_unavailable"
+    if postgres:
+        assert failure.reason == "not_eligible"
+        assert second.outcome.begun and second.outcome.rollback_acknowledged
+    else:
+        assert not second.outcome.begun
+    assert not second.outcome.commit_attempted and not second.outcome.commit_acknowledged
+    assert second.original is None
+    assert first.outcome.commit_acknowledged and not first.outcome.cleanup_failed
+    assert writes == {
+        "winner": [{"table": "jobs", "rowcount": 1}, {"table": EVIDENCE, "rowcount": 1}],
+        "loser": [],
+    }
+    original = created.original
+    assert original is first.original and original.fence == fence
+    assert (original.record.cause, original.record.job_status, original.record.phase) == (
+        "lease_expired",
+        "failed",
+        "outcome_unknown",
+    )
+    after_tick = native_clock(case)
+    assert expired_tick <= original.record.created_at_micros <= after_tick
+    expected = deepcopy(claimed)
+    next(row for row in expected["tables"]["jobs"]["rows"] if row["id"] == case.job_id)[
+        "status"
+    ] = "failed"
+    assert expected["tables"][EVIDENCE]["rows"] == []
+    expected["tables"][EVIDENCE]["rows"] = [asdict(original.record)]
+    after = whole_state(case)
+    assert_same_state(expected, after)
+    assert (original.record.association_sha256, original.record.source_sha256) == (
+        expected_failure_hashes(case, after, original.record, native_inputs)
+    )
+    assert_no_canary(failure, after)
+    assert not failure_terminal._TERMINALS and case.engine.pool.checkedout() == 0
+    observations = {}
+    for actor, coordinator in coordinators.items():
+        work = coordinator._work
+        cleanup = [
+            item for item in controls if item[0] is work and item[1] not in {"begin", "commit"}
+        ]
+        assert work._detached and not work._listeners and work._connection is None
+        assert work.statements <= 512 and work.statements - len(cleanup) <= 504
+        assert len(cleanup) <= 8 and elapsed[actor] < 10 and work.instructions < 20_000_000
+        observations[actor] = {
+            "outcome": asdict(coordinator.outcome),
+            "total_units": work.statements,
+            "ordinary_units": work.statements - len(cleanup),
+            "cleanup_units": len(cleanup),
+            "elapsed_seconds": elapsed[actor],
+            "vm_instructions": work.instructions,
+        }
+    record_property(
+        "f3_terminal_writer_race",
+        json.dumps(
+            {
+                "native_sqlite_busy": busy_codes,
+                "native_postgres_pids": pids,
+                "native_postgres_blockers": blockers_observed,
+                "first_observed_expired_tick": expired_tick,
+                "unchanged_native_lease": repr(job["lease_until"]),
+                "winner_created_at_micros": original.record.created_at_micros,
+                "protected_writes": writes,
+                "observations": observations,
+                "single_exact_evidence_row": True,
+                "no_second_terminal_write": True,
+                "scope": "Internal participating terminal coordinators; not live caller wiring.",
+            },
+            sort_keys=True,
+        ),
+    )
+
+
+@pytest.mark.parametrize("receiver_mode", ["idle", "active"])
+def test_terminal_scope_refuses_bare_and_foreign_connection(
+    failure_case, monkeypatch, record_property, receiver_mode
+):
+    case = failure_case.case
+    controls = observe_controls(monkeypatch)
+    persist = failure_terminal.persist_verified_failure
+    with genuine_terminal_event(case, controls, record_property) as issued:
+        coordinator = failure_terminal.TerminalCoordinator(case.engine, case.authority)
+        borrowed, source_connections, receiver_controls = [], [], []
+        with monkeypatch.context() as patch:
+            writes = observe_terminal_writes(patch, case)
+            with case.engine.connect() as receiver:
+                raw = receiver.connection.driver_connection
+                postgres = receiver.dialect.name == "postgresql"
+                assert receiver.get_transaction() is None
+                assert (
+                    raw.info.transaction_status.name == "IDLE"
+                    if postgres
+                    else not raw.in_transaction
+                )
+                if receiver_mode == "active":
+                    receiver.exec_driver_sql(
+                        "BEGIN ISOLATION LEVEL READ COMMITTED READ ONLY" if postgres else "BEGIN"
+                    )
+                    assert receiver.exec_driver_sql("SELECT 1").scalar_one() == 1
+                    receiver_controls.append("BEGIN")
+                receiver_root = receiver.get_transaction()
+                active = receiver_mode == "active"
+                assert (receiver_root is not None) is active
+                assert (
+                    raw.info.transaction_status.name == ("INTRANS" if active else "IDLE")
+                    if postgres
+                    else raw.in_transaction is active
+                )
+                # The idle witness uses native properties only, never diagnostic SQL.
+                with pytest.raises(AdmissionError) as bare:
+                    persist(receiver, object())
+                assert (bare.value.reason, bare.value.code) == (
+                    "capability_not_issued",
+                    "invalid_request",
+                )
+                assert receiver.get_transaction() is receiver_root
+                assert receiver not in failure_terminal._TERMINALS and writes == []
+
+                def forward_to_foreign(connection, token):
+                    assert borrowed == [] and connection.engine is receiver.engine
+                    assert connection is not receiver
+                    assert connection.connection.driver_connection is not raw
+                    source_root = connection.get_transaction()
+                    assert source_root is not None and source_root.is_active
+                    assert source_root is not receiver_root
+                    assert failure_terminal._TERMINALS[connection][0] is token
+                    assert receiver not in failure_terminal._TERMINALS
+                    assert receiver.get_transaction() is receiver_root
+                    assert (
+                        raw.info.transaction_status.name == ("INTRANS" if active else "IDLE")
+                        if postgres
+                        else raw.in_transaction is active
+                    )
+                    borrowed.append(
+                        {
+                            "actual_issued_token": True,
+                            "distinct_connection_and_native_driver": True,
+                            "receiver_native_active": active,
+                            "receiver_logical_active": receiver_root is not None,
+                        }
+                    )
+                    source_connections.append(connection)
+                    return persist(receiver, token)
+
+                patch.setattr(failure_terminal, "persist_verified_failure", forward_to_foreign)
+                started = time.monotonic()
+                with pytest.raises(AdmissionError) as caught:
+                    coordinator.complete_failure(case.principal, case.context, issued.event)
+                elapsed = time.monotonic() - started
+                assert (caught.value.reason, caught.value.code) == (
+                    "capability_not_issued",
+                    "invalid_request",
+                )
+                assert len(borrowed) == len(source_connections) == 1
+                assert source_connections[0].closed
+                assert receiver.get_transaction() is receiver_root
+                assert (
+                    raw.info.transaction_status.name == ("INTRANS" if active else "IDLE")
+                    if postgres
+                    else raw.in_transaction is active
+                )
+                if active:
+                    receiver.rollback()
+                    receiver_controls.append("ROLLBACK")
+                assert receiver.get_transaction() is None
+                assert (
+                    raw.info.transaction_status.name == "IDLE"
+                    if postgres
+                    else not raw.in_transaction
+                )
+            assert receiver.closed
+        assert receiver_controls == (["BEGIN", "ROLLBACK"] if active else [])
+        assert not coordinator.outcome.cleanup_failed
+        assert_terminal_refusal_state(
+            case, issued, coordinator, caught.value, issued.claimed, writes
+        )
+        record_terminal_refusal_work(
+            coordinator,
+            controls,
+            elapsed,
+            record_property,
+            fault="unissued_and_foreign_terminal_scope",
+            receiver_mode=receiver_mode,
+            bare_entry_refused=True,
+            genuine_token_forwarding=borrowed,
+            receiver_injected_controls=receiver_controls,
+            receiver_closed=True,
+            source_closed=True,
+            protected_writes=writes,
+        )
