@@ -3,7 +3,7 @@
 ## Current status
 
 - **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129) is accepted at [main 47da5b44](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2), including original main checks, source-matched candidate and installed-package evidence.
-- **Assigned:** F3's private claim component has passed focused and independent native checks. Backend now implements terminal failure persistence and expiry; Quality owns independent native tests, Review checks source/security, and Lead integrates and records delivery.
+- **Assigned:** The private historical walkthrough passed source, data and browser review. Quality resumes independent terminal tests; Backend owns F3 producer/event interfaces and persistence; Review checks source, authority and evidence.
 - **Next:** F3 acceptance, F4/F5, then P2 worker integration. Admitted startup and production remain gated; [funding](delivery/CAPACITY_AND_FUNDING.md) and [retained failures](#assignment-history) are unchanged. Optional fixture optimization is deferred.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -21,6 +21,34 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Private recorded walkthrough accepted — 2026-10-31 (Pacific)**
+
+- Lead verified the failed D3 checkpoint, parent comparison, attempted repair and D4
+  after-image, unsuccessful controls and all eight recorded confirmation pairs.
+  The corrected full-width notice and RECORDED badge keep historical source,
+  uncertainty and cost limits visible; mutation controls remain disabled.
+- The private loopback view uses unchanged workbench assets and reviewed finite
+  responses, with zero new provider calls. Focused route/privacy checks pass on
+  Python 3.11 and 3.12; the original test-host failure and first browser layout
+  finding remain retained. [Acceptance and opening instructions](VALIDATION.md#private-recorded-walkthrough)
+  do not establish live readiness, natural-failure validation or public sharing.
+- F3 terminal work resumes separately. Funding, production and later delivery
+  gates are unchanged.
+
+
+**Private recorded walkthrough assigned — 2026-10-31 (Pacific)**
+
+- Quality reuses the existing workbench with finite reviewed historical responses,
+  no provider calls or product readiness bypass. Original October 6 exports remain
+  untouched; checkpoint and confirmation details are derived privately and redacted.
+- Review checks source, route refusal, asset identity and response provenance before
+  Lead's owned loopback/tunnel browser walkthrough. This is controlled historical
+  evidence, not fresh execution or natural-failure validation; [cost and acceptance
+  limits](VALIDATION.md#private-recorded-walkthrough) remain explicit.
+- F3 producer/event work continues as a separate component; independent terminal
+  tests follow. No delivery, paid allowance or production gate advances.
+
 
 **F3 claim component validated; terminal persistence next — 2026-10-31 (Pacific)**
 
