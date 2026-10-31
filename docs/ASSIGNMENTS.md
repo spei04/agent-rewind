@@ -23,6 +23,12 @@ partner-data or production authorization.
 
 ## Assignment history
 
+**F2 independent profiles and path to real evidence — 2026-10-30 (Pacific)**
+
+- Quality: committed independent SQLite/PostgreSQL literal profiles and the native oracle at `1a4ccfc9`; peer `8cb86979` accepts the bounded capture component. Original SQLite 2+2 and PostgreSQL 2 passes remain source-bound; the pre-import PG launch failure has no body credit. The added literal assertion was checked against all six retained captures, not claimed as part of the old XML.
+- Backend: continues the F2 catalog observer; schema/profile capture does not establish full successor/service/online fit. Review checks the composed source and native evidence within the same F2 PR.
+- Planning: refreshed the [existing path to real-agent validation](PLAN.md#path-to-the-next-real-agent-validation), separating current migration-only commands, checkpoint/replay producers and natural-failure budget-matched confirmation. PL/RS owns PAID0 reconciliation; private reservation/partial-usage records exist, but invoice attribution, additional exposure and any spendable allowance remain unknown. No gate, estimate or paid scope advances.
+
 **F1 delivery accepted; F2 assigned — 2026-10-30 (Pacific)**
 
 - Lead: accepted [PR #128](https://github.com/spei04/agent-rewind/pull/128), reviewed head `e036d3e7`, at protected main `89a43e4355413ba5cca96e09c410c63c634138fb`. The UTC acceptance is 2026-10-31T02:36:02.319699Z. [Original main run 41155393767](https://github.com/spei04/agent-rewind/actions/runs/41155393767), attempt 1, passed all eight jobs: Python 3.11 recorded 8,770 passes/45 skips; Python 3.12 recorded 8,784 passes/31 skips.
