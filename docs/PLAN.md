@@ -2,7 +2,7 @@
 
 ## Current status
 
-See the [canonical summary and dated assignment log](ASSIGNMENTS.md#current-status). F1/main 89a43e43 remains accepted. F2 components and the 8,988-node inventory apply to reviewed source 19b8c45c through the accepted source bridge, without a new full collection. Original PR129 run41177621013/1 passed all six core/support jobs; its complete Python 3.12 receipt exceeded the unchanged session limit. All originals are retained and independently reviewed. Lead prepares one original diagnostic campaign reporting the 50 slowest pytest phases to identify hosted hotspots; no performance fix is claimed. Full F2/P1/startup and protected-main/candidate delivery remain pending; F3 is source/interface audit only. [Component history](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f2-service-and-native-checks-accepted-delivery-next--2026-10-30-pacific), [funding limits](delivery/CAPACITY_AND_FUNDING.md), later gates and estimates are unchanged.
+See the [canonical current summary and dated assignment log](ASSIGNMENTS.md#current-status) for accepted checkpoints, active work and the next delivery gate.
 
 ## Contents
 

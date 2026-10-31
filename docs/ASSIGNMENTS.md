@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Current:** F2 components and the 8,988-node inventory at 19b8c45c are accepted. [PR129](https://github.com/spei04/agent-rewind/pull/129)'s six core/support jobs passed; its gate rejected Python 3.12 elapsed time. Originals are retained.
-- **Next:** Lead prepares one diagnostic CI campaign reporting the 50 slowest phases under unchanged bounds. Backend/Quality/Review assess hosted costs; no performance fix is claimed.
-- **Gates:** Full F2/P1, admitted startup and main/candidate delivery remain pending. F3 is audit only. [Funding limits](delivery/CAPACITY_AND_FUNDING.md) and [dated history](#assignment-history) remain unchanged.
+- **Current:** [PR129](https://github.com/spei04/agent-rewind/pull/129) passed validation and merged at [main 47da5b44](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2). [Original main validation](https://github.com/spei04/agent-rewind/actions/runs/41187912770) is running; full F2 delivery remains pending.
+- **Next:** Lead/Quality/Review verify main and candidate delivery. After F2 acceptance: F3 failure issuer, F4/F5, then P2 worker integration. Backend prepares P2's existing contract and reforecast.
+- **Gates:** F3 remains design only. Admitted startup and production remain gated. [Funding limits](delivery/CAPACITY_AND_FUNDING.md) and [prior failures](#assignment-history) remain unchanged. Optional fixture optimization is deferred.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F2 PR accepted and merged; main delivery pending — 2026-10-31 (Pacific)**
+
+- [Original PR run41183762416/1](https://github.com/spei04/agent-rewind/actions/runs/41183762416) at 64217afe passed all seven required jobs. Independent review verifies the complete 8,988-case inventories, expected skips, 5,790 selected phase facts and unchanged time limits. Python 3.12 elapsed 3,272.612176 seconds. The earlier 3,839.488659-second failed campaign remains retained; diagnostic reporting establishes no causal speedup.
+- [Protected merge47da5b44](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2) preserves the tested source tree. Its [original main run41187912770/1](https://github.com/spei04/agent-rewind/actions/runs/41187912770) is active. Main package, security and isolation jobs passed; full main receipts and the candidate's own installed evidence remain pending. The current main image proof is separate from candidate validation.
+- Lead owns delivery; Quality prepares and monitors it; Review verifies original evidence. Backend prepares P2's existing entry contract and estimate review. F3 implementation waits for accepted F2 delivery. Full P1, admitted startup, paid allowance and production are not advanced.
 
 **F2 duration evidence retained; diagnostic CI assigned — 2026-10-31 (Pacific)**
 
