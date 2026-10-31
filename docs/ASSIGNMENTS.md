@@ -2,9 +2,12 @@
 
 ## Current status
 
-- **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129) is accepted at [main 47da5b44](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2), including original main checks, source-matched candidate and installed-package evidence.
-- **Assigned:** The plain dashboard is complete. F3's latest native failure/refusal phase passed 18 cases per interpreter. Backend owns reconciliation tests; Quality owns deferred failures and competing terminal writers; Review checks their source and evidence.
-- **Next:** Finish the remaining F3 cases and delivery checks before F4/F5 and P2. The temporary preview has expired. Admitted startup, production and [funding](delivery/CAPACITY_AND_FUNDING.md) gates remain unchanged.
+- **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129), including installed-package evidence.
+- **Validated:** F3 has 10 pure and 9 SQLite cases per interpreter. [Source and retained-failure qualifications](VALIDATION.md#remaining-f3-controls) distinguish prior passes from corrected runs.
+- **Assigned:** Quality runs 16 PostgreSQL cases per interpreter; Backend owns fixes and Review verifies originals.
+- **Next:** Complete F3 native and installed-package/delivery gates before F4/F5/P2. Funding, live startup and production remain gated.
+- **Dashboard:** The plain black-and-white version is saved; its private preview has expired.
+
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +24,21 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Pure and SQLite controls closed — 2026-10-31 (Pacific)**
+
+- The latest phase has 19 applicable cases per interpreter: 10 pure mappings and
+  9 native SQLite controls. Python 3.12 retains 17 passes at `9e01a773` plus two
+  corrected receiver cases at `3bd0fc99`; Python 3.11 has 19 current-source passes.
+- The original receiver checkout failure remains retained. The fixture now uses
+  the existing owned connection helper; production code and assertions are
+  unchanged. [Validation](VALIDATION.md#remaining-f3-controls) records state,
+  cleanup and source applicability without claiming a combined rerun.
+- Quality owns the remaining 16 PostgreSQL cases per interpreter. Backend handles
+  concrete fixes; Review checks original results and lifecycle evidence. Actual
+  installed-package/delivery acceptance follows the complete F3 matrix before
+  F4/F5/P2. The saved dashboard is unchanged and its preview remains expired.
+
 
 **Native failure controls composed — 2026-10-31 (Pacific)**
 

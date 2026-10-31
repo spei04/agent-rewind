@@ -163,6 +163,38 @@ service-key/legacy paths, deferred constraints and actual competing writers.
 Full F3 delivery, installed-package execution, live startup and production
 acceptance remain incomplete.
 
+### Remaining F3 controls
+
+The next composed phase has 10 pure mapping checks and 9 SQLite cases per
+interpreter. Python 3.12 retains 17 source-applicable passes from `9e01a773`
+plus two corrected receiver cases at `3bd0fc99`; Python 3.11 has 19 original
+passes at `3bd0fc99`. These are separate runs, not one combined rerun.
+
+The stopped Python 3.12 group first passed conditional-update and competing-writer
+checks, then failed while opening an extra SQLite connection without the required
+checkout receipt. That failure occurred before the bare or foreign persistence
+entry was tested. The original remains retained; the correction only uses the
+existing `owned_connect` fixture helper. Runtime, guards and assertions are
+unchanged. Both corrected receiver modes now verify refusal, consumed events,
+complete state preservation and closed connections.
+
+The SQLite cases cover legacy completion and original inspection, genuine
+service-key authority and revocation before terminal writes, wrong organization
+or project scope, actual conditional UPDATE refusal, and competing expiry writers.
+The winning writer committed one exact evidence identity and timestamp. The
+loser returned native SQLITE_BUSY without beginning its transaction and retained
+`cleanup_failed=true`; it made no protected write. Only the winner has a clean
+commit acknowledgment. Native key rows and authority were tested, not HTTP
+authentication.
+
+At this checkpoint, 16 PostgreSQL cases per interpreter remain in execution
+under the same bounds, with Quality as the sole database-test owner and Review
+checking the original records. Full F3 requires that complete reviewed native
+matrix and actual installed-package/delivery checks before F4/F5/P2. The
+development environments do not substitute for the established candidate-build
+workflow. No new model calls, public preview, live startup or production
+acceptance follows from these checks.
+
 ## Historical live procedure
 
 The following describes the historical live procedure; current migration-only
