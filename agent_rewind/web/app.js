@@ -513,7 +513,7 @@ function comparisonText(result) {
     "",
   ];
   if (result.decisions?.length) {
-    lines.push("Changed decisions");
+    lines.push("Decisions");
     result.decisions.forEach((decision) => {
       lines.push("Decision " + decision.step);
       for (const [label, key] of [
@@ -541,7 +541,7 @@ function comparisonText(result) {
       lines.push("Source file mode: " + file.mode_before);
     if (Object.hasOwn(file, "mode_after"))
       lines.push("Branch file mode: " + file.mode_after);
-    lines.push(file.diff || "File changed without a text diff.", "");
+    lines.push(file.diff || "No text differences.", "");
   });
   return lines.join("\n");
 }

@@ -66,7 +66,7 @@ vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),context);
  context.compareInput.decisions=[{step:3,action:{tool:"finish"}}];
  context.compareInput.files=[];
  const decisionOnly=vm.runInContext('comparisonText(compareInput)',context);
- assert.match(decisionOnly,/Changed decisions\nDecision 3\nAction: finish/);
+ assert.match(decisionOnly,/Decisions\nDecision 3\nAction: finish/);
  assert.ok(decisionOnly.includes('"tool": "finish"'));
  assert.ok(decisionOnly.includes('No file changes.'));
  assert.ok(!decisionOnly.includes('Tool result changed:'));
@@ -85,7 +85,7 @@ vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),context);
  assert.ok(modeOnly.includes('mode_only.py'));
  assert.ok(modeOnly.includes('Source file mode: 420'));
  assert.ok(modeOnly.includes('Branch file mode: 493'));
- assert.ok(modeOnly.includes('File changed without a text diff.'));
+ assert.ok(modeOnly.includes('No text differences.'));
 
 
  vm.runInContext('state.runs=[{id:"12345678aaaaaaaa",name:"Same task",status:"complete",' +
