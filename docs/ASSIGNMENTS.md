@@ -2,10 +2,10 @@
 
 ## Current status
 
-- **Delivery:** PCA1 is delivered at `48ddc894`. [API-USAGE-001 #124](https://github.com/spei04/agent-rewind/issues/124) is verified at `84d63879` ([original main](https://github.com/spei04/agent-rewind/actions/runs/41141950680)).
-- **Active:** F1 and the internal dispatch foundation are delivered through [PR #128](https://github.com/spei04/agent-rewind/pull/128) at `89a43e43`. Backend implements F2’s dormant failure schema/native checks in SECONDARY; Planning synchronizes entry records in PRIMARY; Review independently checks both. PCA2’s separate delivery remains pending.
-- **Next:** Review F2’s schema stage within the existing F2 PR, then complete its profile/migration/native acceptance. F3–F5 and P2 are Not started; full P1/aggregate acceptance and live startup remain pending.
-- **Limits:** Live admitted startup is incomplete. Payment is approved within **$200 total including prior charges**; $36.567974 remains held and other exposure is unknown. No verified paid allowance or production activation follows.
+- **Delivery:** PCA1 and [API-USAGE-001 #124](https://github.com/spei04/agent-rewind/issues/124) are delivered. F1 and the internal dispatch foundation are delivered at [main `89a43e43`](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb).
+- **Active:** Backend implements F2’s dormant schema/native checks; Planning synchronizes records; Review checks each stage within the same F2 PR.
+- **Next:** Complete F2 observer, migration, profile and native acceptance. F3–F5/P2, full P1 acceptance and live admitted startup remain gated; PCA2 delivery is separate.
+- **Limits:** The **$200 lifetime budget includes prior charges**; $36.567974 remains held and other exposure is unknown. No verified paid allowance or production activation follows.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
