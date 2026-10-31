@@ -1,6 +1,6 @@
 # Worker failure execution plan
 
-Planning reforecast adopted on 2026-10-29 for [AR-010-B/P1 #97](https://github.com/spei04/agent-rewind/issues/97). Complete entry e7a70bb9 now assigns F1 to Backend; P1 and aggregate AR-010-B are **In progress**, with null accepted merge/review. F2-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. The [machine ledger](../../contracts/proposals/execution-backlog.json) and [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) remain authoritative; estimates and sequential gates are unchanged.
+F1 is **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb) after PR128/main/candidate delivery. Backend now implements F2’s dormant successor foundation under source handoff 22608a0f; Planning synchronizes entry metadata and Review independently checks source/evidence. P1 and aggregate AR-010-B remain **In progress** with null final acceptance; F2 is **In progress** with null acceptance; F3-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. The [machine ledger](../../contracts/proposals/execution-backlog.json) and [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) are authoritative; five planned F1-F5 PRs, estimates and sequential gates are unchanged.
 
 ## Allocation and sequence
 
@@ -15,6 +15,16 @@ P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2
 | F5 | Restart-safe operator markers, preservation, restore and P1 delivery | 3 [2.5–4.5] | low |
 
 ## Entry, ownership and acceptance
+
+### F1 delivery accepted; F2 assigned — 2026-10-30 (Pacific)
+
+Lead acceptance at 2026-10-31T02:36:02.319699Z binds reviewed head `e036d3e7adff0399cc3888266dfbcc3d6b854ea8`, protected merge `89a43e4355413ba5cca96e09c410c63c634138fb` and tree `616ad9817b4526d579de256244d2608f42084fa9`. [Original main 41155393767](https://github.com/spei04/agent-rewind/actions/runs/41155393767), attempt 1, passed all eight jobs and 8,815 exact selected cases per version: Python 3.11 8,770 passes/45 skips, Python 3.12 8,784 passes/31 skips. All 3,936 phase facts for the 656 selected cases per version passed. Original session limits remain 2700/2700/3600 seconds.
+
+Final independent peer `39566b17e1e6db581d0d0c90d56656421b26a0482a9113657d404d42a8567e29` and lead index `70bf4b00f6b01622b241d53b2c0735eac26f7b01e356450b54fbef0278857b8c` accept only F1/internal dispatch foundation delivery. Private durable record `reviewed-delivery-20261031-pr128-89a43e43.json` has SHA256 `b1bef87e46de421f2cd8a5994749e2578681fee861fa1f1ffca368bfcc45787c`. Candidate `13026742056` is 959,189 bytes, SHA256 `e2014f918d08c8a66082a5a9113da2f4e28df35806ca8291c21592a561354b8b`; its wheel SHA256 is `d552cd7d8daf43aedb77477bdc285843353540d949f6c4c6ec7601e3de771fc5`, with all 149 runtime members verified, its own hosted installed smoke/CLI and separate current final-image trust proof.
+
+Source handoff `22608a0f028e60946afa0ad659655ac06f5241fb99a58e3a86d9438e12a6c4f5` preserves e7a70bb9/D1-D4 and accepted predecessor provenance, and assigns Backend F2 schema/native work in SECONDARY. Planning owns PRIMARY metadata; Review independently checks source/evidence; the lead owns integration. F2 keeps `ar_0008_failure_evidence`, down_revision `ar_0007_ledger`, `failure_evidence_v1` and the reserved dialect profile names below. Its first schema commit is an internal review stage of the same F2 PR, not a sixth planned PR. F2/P1/aggregate final acceptance remains null; F3-F5/P2 remain Not started. Full successor fit, startup, research, production and paid allowance are not established.
+
+The original [PR127 failure](https://github.com/spei04/agent-rewind/actions/runs/41144872313) and [superseded incomplete PR128 run](https://github.com/spei04/agent-rewind/actions/runs/41147939612) remain separate retained incidents (indexes `41b0197b` and `546c9223`), alongside the [dated correction history](../ASSIGNMENTS.md#rollback-test-correction--2026-10-30). No retrospective cause or old-run acceptance is inferred.
 
 ### Worker P1 entry accepted; F1 assigned — 2026-10-29
 
@@ -41,9 +51,9 @@ Owner: Backend migration owner; Review catalog/privilege review; Quality preserv
 
 </details>
 
-The [concrete worker failure entry design](WORKER_FAILURE_ENTRY_DESIGN.md) is accepted for the assigned F1 scope at delivered M122, lead e7a70bb9 after peer 52a9800d. Backend owns implementation/migration; Quality and Review own independent checks. The lead has reserved later-F2 ar_0008_failure_evidence, not assigned F2 implementation.
+The [concrete worker failure entry design](WORKER_FAILURE_ENTRY_DESIGN.md) retains its accepted M122/e7a70bb9/52a9800d provenance. Accepted F1 main89 delivery and source handoff 22608a0f now assign Backend the reserved F2 implementation; Planning synchronizes records and Review independently checks source/evidence.
 
-Before any checkpoint code, require accepted whole AR-010-A including P2 and AR-005-C, complete independently reviewed entry design, lead migration owner/revision decision against the accepted predecessor, this adopted reforecast and source-bound native validation plan. No precursor is an early-entry exception. Each F2–F5 requires the preceding accepted merge. Backend owns implementation/migration, Quality independent behavior/native evidence, Review independent source/security and the lead revision/integration. F1 is now assigned to Backend under those satisfied entry requirements; F2-F5 remain separately gated.
+Before any checkpoint code, require accepted whole AR-010-A including P2 and AR-005-C, complete independently reviewed entry design, lead migration owner/revision decision against the accepted predecessor, this adopted reforecast and source-bound native validation plan. No precursor is an early-entry exception. Each F2–F5 requires the preceding accepted merge. Backend owns implementation/migration, Quality independent behavior/native evidence, Review independent source/security and the lead revision/integration. F1 delivery is accepted; F2 is assigned under its source-bound handoff, while F3-F5 remain separately gated.
 
 Retain accepted C04, AR-005-C guard/recovery, AR-008-B bounded Operation/HTTP and AR-011-B safe-vocabulary producer reviews. Pin the accepted whole AR-010-A source/profile, PR/main receipts and installed artifact before code. Review the exact query/frame/capability and migration/privilege/restore plans; the lead's reserved later-F2 identity is recorded below, with no F1 migration code. Actual producer, race, preservation and native capacity proofs are earned during implementation and required for acceptance, not before unimplemented code.
 
@@ -87,9 +97,9 @@ Allocation basis: Two profile families, literal token semantics, fresh bounded t
 
 ### F2 — Dormant successor schema, profile and migration foundation
 
-Frozen module boundaries and native acceptance vectors are in the [F2 implementation allocation](WORKER_FAILURE_ENTRY_DESIGN.md#f2-implementation-allocation--2026-10-30): failure_schema, failure_catalog, failure_transaction, failure_service, the reserved thin migration and two literal dialect profiles. This allocates the existing F2 scope; implementation still requires accepted F1 delivery.
+Frozen module boundaries and native acceptance vectors are in the [F2 implementation allocation](WORKER_FAILURE_ENTRY_DESIGN.md#f2-implementation-allocation--2026-10-30): failure_schema, failure_catalog, failure_transaction, failure_service, the reserved thin migration and two literal dialect profiles. This allocates the existing F2 scope; accepted F1 delivery and handoff 22608a0f now permit its implementation, without F2 acceptance.
 
-Owner: Backend migration owner; Review catalog/privilege review; Quality preservation and both-dialect validation; lead has reserved the later-F2 revision below. F2 still waits for accepted F1.
+Owner: Backend implements schema/profile/migration and native checks in SECONDARY; Review independently checks catalog/privilege/preservation evidence; Planning synchronizes PRIMARY records; the lead retains revision/integration ownership. F2 is In progress after accepted F1, with null acceptance.
 
 Common prerequisites plus accepted merged F1 and actual capacity report; complete relation/constraints/grants/revision/profile/rollback design independently accepted before this code. Unknown full successor fit is an explicitly planned later implementation test, not evidence fabricated here.
 

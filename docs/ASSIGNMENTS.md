@@ -3,8 +3,8 @@
 ## Current status
 
 - **Delivery:** PCA1 is delivered at `48ddc894`. [API-USAGE-001 #124](https://github.com/spei04/agent-rewind/issues/124) is verified at `84d63879` ([original main](https://github.com/spei04/agent-rewind/actions/runs/41141950680)).
-- **Active:** Dispatch [PR #127](https://github.com/spei04/agent-rewind/pull/127) has a reviewed rollback-test correction at `1788de74`; hosted acceptance is pending. F1 composition `b8c1f2d` and PCA2 `51ae3a75` await delivery.
-- **Next:** After F1 delivery, implement F2’s dormant failure schema and exact native catalogs; live startup remains behind F3–F5/P2.
+- **Active:** F1 and the internal dispatch foundation are delivered through [PR #128](https://github.com/spei04/agent-rewind/pull/128) at `89a43e43`. Backend implements F2’s dormant failure schema/native checks in SECONDARY; Planning synchronizes entry records in PRIMARY; Review independently checks both. PCA2’s separate delivery remains pending.
+- **Next:** Review F2’s schema stage within the existing F2 PR, then complete its profile/migration/native acceptance. F3–F5 and P2 are Not started; full P1/aggregate acceptance and live startup remain pending.
 - **Limits:** Live admitted startup is incomplete. Payment is approved within **$200 total including prior charges**; $36.567974 remains held and other exposure is unknown. No verified paid allowance or production activation follows.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,14 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F1 delivery accepted; F2 assigned — 2026-10-30 (Pacific)**
+
+- Lead: accepted [PR #128](https://github.com/spei04/agent-rewind/pull/128), reviewed head `e036d3e7`, at protected main `89a43e4355413ba5cca96e09c410c63c634138fb`. The UTC acceptance is 2026-10-31T02:36:02.319699Z. [Original main run 41155393767](https://github.com/spei04/agent-rewind/actions/runs/41155393767), attempt 1, passed all eight jobs: Python 3.11 recorded 8,770 passes/45 skips; Python 3.12 recorded 8,784 passes/31 skips.
+- Independent final review `39566b17` and release `b1bef87e` bind candidate `13026742056` (archive SHA256 `e2014f918d08c8a66082a5a9113da2f4e28df35806ca8291c21592a561354b8b`), wheel `d552cd7d`, all 149 runtime members, its own installed smoke/CLI and separate current image trust proof. [F1 acceptance and F2 entry](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f1-delivery-accepted-f2-assigned--2026-10-30-pacific) retain the exact evidence identities.
+- Backend: owns F2 implementation/schema/native tests in the reused SECONDARY checkout under source handoff `22608a0f`; Planning owns this PRIMARY metadata update; Review independently checks source and evidence. The first F2 schema commit is an internal review stage of the same F2 PR; five planned F1–F5 PRs and their estimates are unchanged.
+- [Original rollback failure and correction](#rollback-test-correction--2026-10-30) and the superseded incomplete [PR128 run 41147939612](https://github.com/spei04/agent-rewind/actions/runs/41147939612) remain retained separately. PR127’s closed/merged readback reflects GitHub containment after PR128; no separate PR127 check acceptance or manual closure is claimed.
+- F1 is **Merged; checkpoint accepted**. F2 is **In progress** with null acceptance; P1/AR-010-B remain In progress without final acceptance, and F3–F5/P2 remain Not started. No live startup, successor-fit, research or production acceptance or new paid allowance follows.
 
 **API-USAGE-001 delivery accepted — 2026-10-31**
 
