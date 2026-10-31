@@ -1,0 +1,2792 @@
+{
+  "$executables": {
+    "triggers": [
+      {
+        "name": "job_failure_evidence_delete_guard",
+        "sql": "CREATE TRIGGER job_failure_evidence_delete_guard\nBEFORE DELETE ON job_failure_evidence\nBEGIN SELECT RAISE(ABORT,'immutable failure evidence'); END",
+        "table": "job_failure_evidence"
+      },
+      {
+        "name": "job_failure_evidence_insert_guard",
+        "sql": "CREATE TRIGGER job_failure_evidence_insert_guard BEFORE INSERT ON job_failure_evidence\nBEGIN\n  SELECT CASE WHEN EXISTS(SELECT 1 FROM job_failure_evidence WHERE job_id=NEW.job_id)\n    THEN RAISE(ABORT,'existing failure evidence') END;\n  SELECT CASE WHEN NOT EXISTS(\n    SELECT 1 FROM jobs AS j\n    JOIN resource_scopes AS s\n      ON s.resource_kind='job' AND s.resource_id=j.id\n    WHERE j.id=NEW.job_id AND s.project_id=NEW.project_id\n      AND j.lease_generation=NEW.lease_generation AND j.status=NEW.job_status\n      AND (\n        (NEW.kind='verified_failure'\n          AND j.payload_version=2 AND j.kind='run'\n          AND j.error IS NULL AND j.result IS NULL\n          AND (NEW.job_status='failed' OR\n               (NEW.job_status='cancelled' AND j.cancel=true))\n          AND NOT EXISTS(\n            SELECT 1 FROM artifact_refs AS a\n            WHERE a.owner_kind='job' AND a.owner_id=j.id AND a.role='result')\n          AND (NEW.phase<>'pre_dispatch' OR NOT EXISTS(\n            SELECT 1 FROM provider_calls AS c WHERE c.job_id=j.id))\n          AND (SELECT count(*) FROM operations AS o WHERE o.job_id=j.id)=1\n          AND EXISTS(\n            SELECT 1 FROM operations AS o\n            WHERE o.job_id=j.id AND o.id=NEW.operation_id\n              AND o.project_id=NEW.project_id AND o.kind='run'\n              AND o.payload_version=2 AND o.job_resource_kind='job'\n              AND o.failure_correlation_id IS NOT NULL\n              AND o.failure_correlation_id=NEW.correlation_id))\n        OR\n        (NEW.kind='historical_marker' AND (\n          (j.payload_version=1 AND NEW.operation_id IS NULL AND NOT EXISTS(\n            SELECT 1 FROM operations AS o WHERE o.job_id=j.id))\n          OR\n          (j.payload_version=2 AND j.kind='run'\n            AND (SELECT count(*) FROM operations AS o WHERE o.job_id=j.id)=1\n            AND EXISTS(\n              SELECT 1 FROM operations AS o\n              WHERE o.job_id=j.id AND o.id=NEW.operation_id\n                AND o.project_id=NEW.project_id AND o.kind='run'\n                AND o.payload_version=2 AND o.job_resource_kind='job'\n                AND o.failure_correlation_id IS NULL))))\n      )\n    )\n    THEN RAISE(ABORT,'invalid failure association') END;\nEND",
+        "table": "job_failure_evidence"
+      },
+      {
+        "name": "job_failure_evidence_update_guard",
+        "sql": "CREATE TRIGGER job_failure_evidence_update_guard\nBEFORE UPDATE ON job_failure_evidence\nBEGIN SELECT RAISE(ABORT,'immutable failure evidence'); END",
+        "table": "job_failure_evidence"
+      }
+    ]
+  },
+  "alembic_version": {
+    "checks": [],
+    "columns": [
+      [
+        "version_num",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "version_num"
+    ],
+    "uniques": []
+  },
+  "api_keys": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "hash",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "role",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "name",
+        "VARCHAR(120)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "expires",
+        "FLOAT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "revoked",
+        "BOOLEAN",
+        true,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "hash"
+      ]
+    ]
+  },
+  "artifact_objects": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "length(id)=32 AND id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(digest)=64 AND digest NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(locator) BETWEEN 1 AND 1024"
+      },
+      {
+        "name": null,
+        "sqltext": "format_version=1"
+      },
+      {
+        "name": null,
+        "sqltext": "byte_count>=0"
+      },
+      {
+        "name": null,
+        "sqltext": "locator='objects/' || digest\n          OR locator='objects/' || project_id || '/v1/' || digest"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "locator",
+        "VARCHAR(1024)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "format_version",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "byte_count",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "project_id",
+        "digest",
+        "format_version"
+      ],
+      [
+        "project_id",
+        "id"
+      ]
+    ]
+  },
+  "artifact_refs": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "owner_kind='run' OR owner_kind='study' OR owner_kind='job' OR owner_kind='provider_call'"
+      },
+      {
+        "name": null,
+        "sqltext": "role='payload' OR role='admission_config' OR role='task' OR role='event' OR role='checkpoint' OR role='workspace' OR role='file_blob' OR role='evaluation' OR role='result' OR role='study_attachment' OR role='budget_evidence'"
+      },
+      {
+        "name": null,
+        "sqltext": "role<>'budget_evidence' OR owner_kind='provider_call'"
+      }
+    ],
+    "columns": [
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "owner_kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "owner_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "artifact_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "role",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "project_id",
+          "artifact_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "artifact_objects"
+      },
+      {
+        "constrained_columns": [
+          "project_id",
+          "owner_kind",
+          "owner_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "resource_kind",
+          "resource_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "resource_scopes"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "project_id",
+      "owner_kind",
+      "owner_id",
+      "artifact_id",
+      "role"
+    ],
+    "uniques": []
+  },
+  "audit": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created",
+        "FLOAT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "actor",
+        "VARCHAR(256)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "action",
+        "VARCHAR(80)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "target",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": []
+  },
+  "budget_accounts": {
+    "checks": [
+      {
+        "name": "ar7_accounts_accounted",
+        "sqltext": "typeof(accounted_microusd)='integer' AND accounted_microusd BETWEEN 0 AND 9223372036854775807"
+      },
+      {
+        "name": "ar7_accounts_balance",
+        "sqltext": "accounted_microusd<=limit_microusd AND held_microusd<=limit_microusd-accounted_microusd"
+      },
+      {
+        "name": "ar7_accounts_end",
+        "sqltext": "typeof(period_end)='text' AND length(CAST(period_end AS BLOB))=27 AND period_end GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9][0-9][0-9][0-9]Z' AND substr(period_end,1,4) BETWEEN '0001' AND '9999' AND date(substr(period_end,1,10),'+0 days') IS substr(period_end,1,10) AND substr(period_end,12,2) BETWEEN '00' AND '23' AND substr(period_end,15,2) BETWEEN '00' AND '59' AND substr(period_end,18,2) BETWEEN '00' AND '59'"
+      },
+      {
+        "name": "ar7_accounts_held",
+        "sqltext": "typeof(held_microusd)='integer' AND held_microusd BETWEEN 0 AND 9223372036854775807"
+      },
+      {
+        "name": "ar7_accounts_id",
+        "sqltext": "typeof(id)='text' AND length(id)=32 AND length(CAST(id AS BLOB))=32 AND id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_accounts_job",
+        "sqltext": "job_id IS NULL OR (typeof(job_id)='text' AND length(job_id)=32 AND length(CAST(job_id AS BLOB))=32 AND job_id NOT GLOB '*[^0-9a-f]*')"
+      },
+      {
+        "name": "ar7_accounts_limit",
+        "sqltext": "typeof(limit_microusd)='integer' AND limit_microusd BETWEEN 0 AND 9223372036854775807"
+      },
+      {
+        "name": "ar7_accounts_opening",
+        "sqltext": "typeof(opening_held_microusd)='integer' AND opening_held_microusd BETWEEN 0 AND 9223372036854775807"
+      },
+      {
+        "name": "ar7_accounts_organization",
+        "sqltext": "typeof(organization_id)='text' AND length(organization_id)=32 AND length(CAST(organization_id AS BLOB))=32 AND organization_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_accounts_period",
+        "sqltext": "period_start<period_end"
+      },
+      {
+        "name": "ar7_accounts_project",
+        "sqltext": "project_id IS NULL OR (typeof(project_id)='text' AND length(project_id)=32 AND length(CAST(project_id AS BLOB))=32 AND project_id NOT GLOB '*[^0-9a-f]*')"
+      },
+      {
+        "name": "ar7_accounts_scope",
+        "sqltext": "scope='organization' OR scope='project' OR scope='job'"
+      },
+      {
+        "name": "ar7_accounts_scope_id",
+        "sqltext": "typeof(scope_id)='text' AND length(scope_id)=32 AND length(CAST(scope_id AS BLOB))=32 AND scope_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_accounts_shape",
+        "sqltext": "(scope='organization' AND scope_id=organization_id\n            AND project_id IS NULL AND job_id IS NULL)\n          OR (scope='project' AND project_id IS NOT NULL AND scope_id=project_id AND job_id IS NULL)\n          OR (scope='job' AND project_id IS NOT NULL AND job_id IS NOT NULL AND scope_id=job_id)"
+      },
+      {
+        "name": "ar7_accounts_start",
+        "sqltext": "typeof(period_start)='text' AND length(CAST(period_start AS BLOB))=27 AND period_start GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9][0-9][0-9][0-9]Z' AND substr(period_start,1,4) BETWEEN '0001' AND '9999' AND date(substr(period_start,1,10),'+0 days') IS substr(period_start,1,10) AND substr(period_start,12,2) BETWEEN '00' AND '23' AND substr(period_start,15,2) BETWEEN '00' AND '59' AND substr(period_start,18,2) BETWEEN '00' AND '59'"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "scope",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "scope_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "period_start",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "period_end",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "limit_microusd",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "held_microusd",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "accounted_microusd",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "opening_held_microusd",
+        "BIGINT",
+        false,
+        "0",
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "organization_id"
+        ],
+        "name": "ar7_accounts_organization_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "organizations"
+      },
+      {
+        "constrained_columns": [
+          "organization_id",
+          "project_id"
+        ],
+        "name": "ar7_accounts_project_fk",
+        "options": {},
+        "referred_columns": [
+          "organization_id",
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "job_id"
+      ],
+      [
+        "organization_id",
+        "scope",
+        "scope_id",
+        "period_start"
+      ]
+    ]
+  },
+  "budget_entries": {
+    "checks": [
+      {
+        "name": "ar7_entries_account",
+        "sqltext": "typeof(account_id)='text' AND length(account_id)=32 AND length(CAST(account_id AS BLOB))=32 AND account_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_entries_amount",
+        "sqltext": "typeof(amount_microusd)='integer' AND amount_microusd BETWEEN 0 AND 9223372036854775807"
+      },
+      {
+        "name": "ar7_entries_call",
+        "sqltext": "typeof(call_id)='text' AND length(call_id)=32 AND length(CAST(call_id AS BLOB))=32 AND call_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_entries_created",
+        "sqltext": "typeof(created_at)='text' AND length(CAST(created_at AS BLOB))=27 AND created_at GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9][0-9][0-9][0-9]Z' AND substr(created_at,1,4) BETWEEN '0001' AND '9999' AND date(substr(created_at,1,10),'+0 days') IS substr(created_at,1,10) AND substr(created_at,12,2) BETWEEN '00' AND '23' AND substr(created_at,15,2) BETWEEN '00' AND '59' AND substr(created_at,18,2) BETWEEN '00' AND '59'"
+      },
+      {
+        "name": "ar7_entries_evidence",
+        "sqltext": "evidence_ref IS NULL OR (typeof(evidence_ref)='text' AND length(evidence_ref)=32 AND length(CAST(evidence_ref AS BLOB))=32 AND evidence_ref NOT GLOB '*[^0-9a-f]*')"
+      },
+      {
+        "name": "ar7_entries_evidence_shape",
+        "sqltext": "(entry_kind='reserve' AND evidence_ref IS NULL)\n          OR ((entry_kind='settle' OR entry_kind='release') AND evidence_ref IS NOT NULL)"
+      },
+      {
+        "name": "ar7_entries_kind",
+        "sqltext": "entry_kind='reserve' OR entry_kind='settle' OR entry_kind='release'"
+      },
+      {
+        "name": "ar7_entries_owner",
+        "sqltext": "evidence_owner_kind='provider_call'"
+      },
+      {
+        "name": "ar7_entries_project",
+        "sqltext": "typeof(project_id)='text' AND length(project_id)=32 AND length(CAST(project_id AS BLOB))=32 AND project_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_entries_role",
+        "sqltext": "evidence_role='budget_evidence'"
+      }
+    ],
+    "columns": [
+      [
+        "call_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "account_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "entry_kind",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "amount_microusd",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "evidence_ref",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "evidence_owner_kind",
+        "VARCHAR(20)",
+        false,
+        "'provider_call'",
+        null,
+        null
+      ],
+      [
+        "evidence_role",
+        "VARCHAR(32)",
+        false,
+        "'budget_evidence'",
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "call_id"
+        ],
+        "name": "ar7_entries_call_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "provider_calls"
+      },
+      {
+        "constrained_columns": [
+          "account_id"
+        ],
+        "name": "ar7_entries_account_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "budget_accounts"
+      },
+      {
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": "ar7_entries_project_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      },
+      {
+        "constrained_columns": [
+          "project_id",
+          "call_id"
+        ],
+        "name": "ar7_entries_project_call_fk",
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "provider_calls"
+      },
+      {
+        "constrained_columns": [
+          "project_id",
+          "evidence_owner_kind",
+          "call_id",
+          "evidence_ref",
+          "evidence_role"
+        ],
+        "name": "ar7_entries_evidence_fk",
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "owner_kind",
+          "owner_id",
+          "artifact_id",
+          "role"
+        ],
+        "referred_schema": null,
+        "referred_table": "artifact_refs"
+      }
+    ],
+    "indexes": [
+      {
+        "column_names": [
+          "account_id"
+        ],
+        "dialect_options": {},
+        "name": "ar7_entries_account_id",
+        "unique": 0
+      }
+    ],
+    "pk": [
+      "call_id",
+      "account_id",
+      "entry_kind"
+    ],
+    "uniques": []
+  },
+  "events": {
+    "checks": [],
+    "columns": [
+      [
+        "run_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "step",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "artifact",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "hash",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "run_id",
+      "step"
+    ],
+    "uniques": []
+  },
+  "installation_adoptions": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "singleton = 1"
+      },
+      {
+        "name": null,
+        "sqltext": "length(installation_key) BETWEEN 1 AND 64"
+      },
+      {
+        "name": null,
+        "sqltext": "source_kind IN ('fresh','legacy')"
+      },
+      {
+        "name": null,
+        "sqltext": "state IN ('prepared','ownership_complete')"
+      },
+      {
+        "name": null,
+        "sqltext": "length(CAST(mapping AS BLOB)) <= 1048576"
+      },
+      {
+        "name": null,
+        "sqltext": "(source_kind='fresh' AND state='prepared' AND organization_id IS NULL AND project_id IS NULL) OR (organization_id IS NOT NULL AND project_id IS NOT NULL)"
+      },
+      {
+        "name": null,
+        "sqltext": "(source_kind='fresh' AND backup_evidence_digest IS NULL AND drain_evidence_digest IS NULL) OR (source_kind='legacy' AND backup_evidence_digest IS NOT NULL AND drain_evidence_digest IS NOT NULL)"
+      },
+      {
+        "name": null,
+        "sqltext": "length(source_baseline) = 40 AND source_baseline NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(schema_fingerprint) = 64 AND schema_fingerprint NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(installed_schema_fingerprint) = 64 AND installed_schema_fingerprint NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(mapping_digest) = 64 AND mapping_digest NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(organization_id) = 32 AND organization_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(project_id) = 32 AND project_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(backup_evidence_digest) = 64 AND backup_evidence_digest NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(drain_evidence_digest) = 64 AND drain_evidence_digest NOT GLOB '*[^0-9a-f]*'"
+      }
+    ],
+    "columns": [
+      [
+        "installation_key",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "singleton",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_kind",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_baseline",
+        "VARCHAR(40)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "schema_fingerprint",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "installed_schema_fingerprint",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "mapping_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "mapping",
+        "JSON",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "backup_evidence_digest",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "drain_evidence_digest",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "state",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "installation_key"
+    ],
+    "uniques": [
+      [
+        "singleton"
+      ]
+    ]
+  },
+  "job_failure_evidence": {
+    "checks": [
+      {
+        "name": "failure_association",
+        "sqltext": "typeof(association_sha256)='text' AND length(association_sha256)=64 AND length(CAST(association_sha256 AS BLOB))=64 AND association_sha256 NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "failure_cause",
+        "sqltext": "cause IS NULL OR (\n          typeof(cause)='text' AND cause IN ('budget_refused','dependency_failed','internal_fault','dispatch_uncertain','lease_expired') AND length(CAST(cause AS BLOB)) IN (13,14,17,18))"
+      },
+      {
+        "name": "failure_correlation",
+        "sqltext": "typeof(correlation_id)='text' AND length(correlation_id)=32 AND length(CAST(correlation_id AS BLOB))=32 AND correlation_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "failure_created",
+        "sqltext": "typeof(created_at_micros)='integer' AND created_at_micros BETWEEN 0 AND 253402300799999999"
+      },
+      {
+        "name": "failure_generation",
+        "sqltext": "typeof(lease_generation)='integer' AND lease_generation BETWEEN 0 AND 9223372036854775807"
+      },
+      {
+        "name": "failure_job",
+        "sqltext": "typeof(job_id)='text' AND length(job_id)=32 AND length(CAST(job_id AS BLOB))=32 AND job_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "failure_job_kind",
+        "sqltext": "typeof(job_resource_kind)='text' AND job_resource_kind IN ('job') AND length(CAST(job_resource_kind AS BLOB)) IN (3)"
+      },
+      {
+        "name": "failure_kind",
+        "sqltext": "typeof(kind)='text' AND kind IN ('verified_failure','historical_marker') AND length(CAST(kind AS BLOB)) IN (16,17)"
+      },
+      {
+        "name": "failure_operation",
+        "sqltext": "operation_id IS NULL OR (typeof(operation_id)='text' AND length(operation_id)=32 AND length(CAST(operation_id AS BLOB))=32 AND operation_id NOT GLOB '*[^0-9a-f]*')"
+      },
+      {
+        "name": "failure_origin",
+        "sqltext": "typeof(origin_kind)='text' AND origin_kind IN ('admission','migration_marker') AND length(CAST(origin_kind AS BLOB)) IN (9,16)"
+      },
+      {
+        "name": "failure_phase",
+        "sqltext": "phase IS NULL OR (\n          typeof(phase)='text' AND phase IN ('pre_dispatch','outcome_unknown') AND length(CAST(phase AS BLOB)) IN (12,15))"
+      },
+      {
+        "name": "failure_project",
+        "sqltext": "typeof(project_id)='text' AND length(project_id)=32 AND length(CAST(project_id AS BLOB))=32 AND project_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "failure_schema_version",
+        "sqltext": "typeof(schema_version)='integer' AND schema_version BETWEEN 1 AND 1"
+      },
+      {
+        "name": "failure_source",
+        "sqltext": "typeof(source_sha256)='text' AND length(source_sha256)=64 AND length(CAST(source_sha256 AS BLOB))=64 AND source_sha256 NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "failure_status",
+        "sqltext": "typeof(job_status)='text' AND job_status IN ('queued','running','succeeded','failed','cancelled') AND length(CAST(job_status AS BLOB)) IN (6,7,9)"
+      },
+      {
+        "name": "failure_variant",
+        "sqltext": "(kind='verified_failure' AND origin_kind='admission'\n          AND operation_id IS NOT NULL AND lease_generation>=1\n          AND job_status IN ('failed','cancelled') AND cause IS NOT NULL AND phase IS NOT NULL\n          AND (phase='outcome_unknown' OR\n               (phase='pre_dispatch' AND cause IN\n                 ('budget_refused','dependency_failed','internal_fault','lease_expired'))))\n        OR (kind='historical_marker' AND origin_kind='migration_marker'\n          AND cause IS NULL AND phase IS NULL)"
+      }
+    ],
+    "columns": [
+      [
+        "schema_version",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(17)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_resource_kind",
+        "VARCHAR(3)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "operation_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "lease_generation",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_status",
+        "VARCHAR(9)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "cause",
+        "VARCHAR(18)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "phase",
+        "VARCHAR(15)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "origin_kind",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "correlation_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "association_sha256",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_sha256",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at_micros",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "job_id"
+        ],
+        "name": "failure_job_fk",
+        "options": {
+          "deferrable": false
+        },
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "jobs"
+      },
+      {
+        "constrained_columns": [
+          "project_id",
+          "job_resource_kind",
+          "job_id"
+        ],
+        "name": "failure_scope_fk",
+        "options": {
+          "deferrable": false
+        },
+        "referred_columns": [
+          "project_id",
+          "resource_kind",
+          "resource_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "resource_scopes"
+      },
+      {
+        "constrained_columns": [
+          "operation_id",
+          "job_id",
+          "project_id"
+        ],
+        "name": "failure_operation_fk",
+        "options": {
+          "deferrable": false
+        },
+        "referred_columns": [
+          "id",
+          "job_id",
+          "project_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "operations"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "job_id"
+    ],
+    "uniques": []
+  },
+  "jobs": {
+    "checks": [
+      {
+        "name": "ar7_jobs_generation",
+        "sqltext": "typeof(lease_generation)='integer' AND lease_generation BETWEEN 0 AND 9223372036854775807"
+      },
+      {
+        "name": "ar7_jobs_legacy_reserved",
+        "sqltext": "typeof(legacy_reserved_microusd)='integer' AND legacy_reserved_microusd BETWEEN 0 AND 9223372036854775807"
+      },
+      {
+        "name": null,
+        "sqltext": "payload_version IN (1,2) AND typeof(payload_version)='integer'"
+      },
+      {
+        "name": null,
+        "sqltext": "(payload_version=1 AND execution_config_ref IS NULL\n            AND execution_config_digest IS NULL)\n          OR (execution_config_ref IS NOT NULL AND execution_config_digest IS NOT NULL\n            AND typeof(execution_config_ref)='text' AND length(execution_config_ref)=64 AND length(CAST(execution_config_ref AS BLOB))=64 AND execution_config_ref NOT GLOB '*[^0-9a-f]*'\n            AND typeof(execution_config_digest)='text' AND length(execution_config_digest)=64 AND length(CAST(execution_config_digest AS BLOB))=64 AND execution_config_digest NOT GLOB '*[^0-9a-f]*'\n            AND execution_config_ref=execution_config_digest)"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created",
+        "FLOAT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "payload",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "status",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "owner",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "lease_until",
+        "FLOAT",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "cancel",
+        "BOOLEAN",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "budget",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "reserved",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "result",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "error",
+        "VARCHAR(300)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "actor",
+        "VARCHAR(256)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "payload_version",
+        "INTEGER",
+        false,
+        "1",
+        null,
+        null
+      ],
+      [
+        "execution_config_ref",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "execution_config_digest",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "lease_generation",
+        "BIGINT",
+        false,
+        "0",
+        null,
+        null
+      ],
+      [
+        "legacy_reserved_microusd",
+        "BIGINT",
+        false,
+        "0",
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": []
+  },
+  "migration_progress": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "rows_verified >= 0"
+      },
+      {
+        "name": null,
+        "sqltext": "status IN ('pending','running','complete','blocked')"
+      },
+      {
+        "name": null,
+        "sqltext": "length(source_digest) = 64 AND source_digest NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(CAST(cursor AS BLOB)) <= 65536"
+      }
+    ],
+    "columns": [
+      [
+        "revision",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "phase",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "source_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "cursor",
+        "JSON",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "rows_verified",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "status",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "updated_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "revision",
+      "phase"
+    ],
+    "uniques": []
+  },
+  "operation_keys": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "typeof(project_id)='text' AND length(project_id)=32 AND length(CAST(project_id AS BLOB))=32 AND project_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "typeof(principal_id)='text' AND ((substr(principal_id,1,5)='oidc:' AND length(principal_id)=69 AND length(CAST(principal_id AS BLOB))=69 AND substr(principal_id,6) NOT GLOB '*[^0-9a-f]*') OR (substr(principal_id,1,8)='api-key:' AND length(principal_id)=40 AND length(CAST(principal_id AS BLOB))=40 AND substr(principal_id,9) NOT GLOB '*[^0-9a-f]*'))"
+      },
+      {
+        "name": null,
+        "sqltext": "kind='run'"
+      },
+      {
+        "name": null,
+        "sqltext": "typeof(key_hash)='text' AND length(key_hash)=64 AND length(CAST(key_hash AS BLOB))=64 AND key_hash NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "typeof(operation_id)='text' AND length(operation_id)=32 AND length(CAST(operation_id AS BLOB))=32 AND operation_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "typeof(request_digest)='text' AND length(request_digest)=64 AND length(CAST(request_digest AS BLOB))=64 AND request_digest NOT GLOB '*[^0-9a-f]*'"
+      }
+    ],
+    "columns": [
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "principal_id",
+        "VARCHAR(256)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "key_hash",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "operation_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "request_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      },
+      {
+        "constrained_columns": [
+          "project_id",
+          "principal_id",
+          "kind",
+          "operation_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "principal_id",
+          "kind",
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "operations"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "project_id",
+      "principal_id",
+      "kind",
+      "key_hash"
+    ],
+    "uniques": []
+  },
+  "operations": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "typeof(id)='text' AND length(id)=32 AND length(CAST(id AS BLOB))=32 AND id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "typeof(project_id)='text' AND length(project_id)=32 AND length(CAST(project_id AS BLOB))=32 AND project_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "typeof(principal_id)='text' AND ((substr(principal_id,1,5)='oidc:' AND length(principal_id)=69 AND length(CAST(principal_id AS BLOB))=69 AND substr(principal_id,6) NOT GLOB '*[^0-9a-f]*') OR (substr(principal_id,1,8)='api-key:' AND length(principal_id)=40 AND length(CAST(principal_id AS BLOB))=40 AND substr(principal_id,9) NOT GLOB '*[^0-9a-f]*'))"
+      },
+      {
+        "name": null,
+        "sqltext": "kind='run'"
+      },
+      {
+        "name": null,
+        "sqltext": "typeof(client_operation_id)='text' AND length(client_operation_id)=32 AND length(CAST(client_operation_id AS BLOB))=32 AND client_operation_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "typeof(request_digest)='text' AND length(request_digest)=64 AND length(CAST(request_digest AS BLOB))=64 AND request_digest NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "typeof(job_id)='text' AND length(job_id)=32 AND length(CAST(job_id AS BLOB))=32 AND job_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "accepted_response='{\"job_id\":\"' || job_id || '\",\"operation_id\":\"' || id || '\"}'"
+      },
+      {
+        "name": null,
+        "sqltext": "retain_until>=created_at"
+      },
+      {
+        "name": null,
+        "sqltext": "job_resource_kind='job'"
+      },
+      {
+        "name": null,
+        "sqltext": "typeof(execution_config_digest)='text' AND length(execution_config_digest)=64 AND length(CAST(execution_config_digest AS BLOB))=64 AND execution_config_digest NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "payload_version=2 AND typeof(payload_version)='integer'"
+      },
+      {
+        "name": null,
+        "sqltext": "failure_correlation_id IS NULL OR (typeof(failure_correlation_id)='text' AND length(failure_correlation_id)=32 AND length(CAST(failure_correlation_id AS BLOB))=32 AND failure_correlation_id NOT GLOB '*[^0-9a-f]*')"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "principal_id",
+        "VARCHAR(256)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "client_operation_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "request_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "accepted_response",
+        "TEXT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "retain_until",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_resource_kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "execution_config_digest",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "payload_version",
+        "INTEGER",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "failure_correlation_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      },
+      {
+        "constrained_columns": [
+          "job_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "jobs"
+      },
+      {
+        "constrained_columns": [
+          "project_id",
+          "job_resource_kind",
+          "job_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "resource_kind",
+          "resource_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "resource_scopes"
+      }
+    ],
+    "indexes": [
+      {
+        "column_names": [
+          "id",
+          "job_id",
+          "project_id"
+        ],
+        "dialect_options": {},
+        "name": "job_failure_operation_binding_uq",
+        "unique": 1
+      }
+    ],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "job_id"
+      ],
+      [
+        "project_id",
+        "principal_id",
+        "kind",
+        "client_operation_id"
+      ],
+      [
+        "project_id",
+        "principal_id",
+        "kind",
+        "id"
+      ]
+    ]
+  },
+  "organizations": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "length(id) = 32 AND id NOT GLOB '*[^0-9a-f]*'"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "installation_key",
+        "VARCHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "installation_key"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "installation_key"
+        ],
+        "referred_schema": null,
+        "referred_table": "installation_adoptions"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "installation_key"
+      ]
+    ]
+  },
+  "project_memberships": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "(substr(principal_id,1,5)='oidc:' AND length(principal_id)=69 AND substr(principal_id,6) NOT GLOB '*[^0-9a-f]*') OR (substr(principal_id,1,8)='api-key:' AND length(principal_id)=40 AND substr(principal_id,9) NOT GLOB '*[^0-9a-f]*')"
+      },
+      {
+        "name": null,
+        "sqltext": "role IN ('viewer','operator','maintainer')"
+      },
+      {
+        "name": null,
+        "sqltext": "legacy_default IN (false,true)"
+      }
+    ],
+    "columns": [
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "principal_id",
+        "VARCHAR(256)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "role",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "revoked_at",
+        "DATETIME",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "legacy_default",
+        "BOOLEAN",
+        false,
+        "false",
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [
+      {
+        "column_names": [
+          "principal_id"
+        ],
+        "dialect_options": {
+          "sqlite_where": "legacy_default = true AND revoked_at IS NULL"
+        },
+        "name": "membership_active_legacy_default",
+        "unique": 1
+      }
+    ],
+    "pk": [
+      "project_id",
+      "principal_id"
+    ],
+    "uniques": []
+  },
+  "projects": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "length(id) = 32 AND id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "length(name) BETWEEN 1 AND 120"
+      },
+      {
+        "name": null,
+        "sqltext": "run_sequence>=0 AND typeof(run_sequence)='integer'"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "name",
+        "VARCHAR(120)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "run_sequence",
+        "BIGINT",
+        false,
+        "0",
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "organization_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "organizations"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "organization_id",
+        "id"
+      ]
+    ]
+  },
+  "provider_calls": {
+    "checks": [
+      {
+        "name": "ar7_calls_created",
+        "sqltext": "typeof(created_at)='text' AND length(CAST(created_at AS BLOB))=27 AND created_at GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9][0-9][0-9][0-9]Z' AND substr(created_at,1,4) BETWEEN '0001' AND '9999' AND date(substr(created_at,1,10),'+0 days') IS substr(created_at,1,10) AND substr(created_at,12,2) BETWEEN '00' AND '23' AND substr(created_at,15,2) BETWEEN '00' AND '59' AND substr(created_at,18,2) BETWEEN '00' AND '59'"
+      },
+      {
+        "name": "ar7_calls_digest",
+        "sqltext": "typeof(request_digest)='text' AND length(request_digest)=64 AND length(CAST(request_digest AS BLOB))=64 AND request_digest NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_calls_estimate",
+        "sqltext": "usage_estimate_microusd IS NULL OR (typeof(usage_estimate_microusd)='integer' AND usage_estimate_microusd BETWEEN 0 AND 9223372036854775807)"
+      },
+      {
+        "name": "ar7_calls_generation",
+        "sqltext": "typeof(lease_generation)='integer' AND lease_generation BETWEEN 1 AND 9223372036854775807"
+      },
+      {
+        "name": "ar7_calls_id",
+        "sqltext": "typeof(id)='text' AND length(id)=32 AND length(CAST(id AS BLOB))=32 AND id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_calls_job",
+        "sqltext": "typeof(job_id)='text' AND length(job_id)=32 AND length(CAST(job_id AS BLOB))=32 AND job_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_calls_job_account",
+        "sqltext": "typeof(job_account_id)='text' AND length(job_account_id)=32 AND length(CAST(job_account_id AS BLOB))=32 AND job_account_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_calls_job_kind",
+        "sqltext": "job_resource_kind='job'"
+      },
+      {
+        "name": "ar7_calls_logical",
+        "sqltext": "typeof(logical_call_id)='text' AND length(logical_call_id)=32 AND length(CAST(logical_call_id AS BLOB))=32 AND logical_call_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_calls_org_account",
+        "sqltext": "typeof(organization_account_id)='text' AND length(organization_account_id)=32 AND length(CAST(organization_account_id AS BLOB))=32 AND organization_account_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_calls_organization",
+        "sqltext": "typeof(organization_id)='text' AND length(organization_id)=32 AND length(CAST(organization_id AS BLOB))=32 AND organization_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_calls_price",
+        "sqltext": "typeof(price_version)='text' AND length(price_version)<=128 AND length(CAST(price_version AS BLOB))<=512 AND instr(price_version,char(0))=0"
+      },
+      {
+        "name": "ar7_calls_project",
+        "sqltext": "typeof(project_id)='text' AND length(project_id)=32 AND length(CAST(project_id AS BLOB))=32 AND project_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_calls_project_account",
+        "sqltext": "typeof(project_account_id)='text' AND length(project_account_id)=32 AND length(CAST(project_account_id AS BLOB))=32 AND project_account_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": "ar7_calls_provider_request",
+        "sqltext": "provider_request_id IS NULL OR (typeof(provider_request_id)='text' AND length(provider_request_id)<=256 AND length(CAST(provider_request_id AS BLOB))<=1024 AND instr(provider_request_id,char(0))=0)"
+      },
+      {
+        "name": "ar7_calls_purpose",
+        "sqltext": "purpose='continuation' OR purpose='discovery'"
+      },
+      {
+        "name": "ar7_calls_reserved",
+        "sqltext": "typeof(reserved_microusd)='integer' AND reserved_microusd BETWEEN 0 AND 9223372036854775807"
+      },
+      {
+        "name": "ar7_calls_state",
+        "sqltext": "state='reserved' OR state='dispatching' OR state='observed'\n            OR state='uncertain' OR state='reconciled'"
+      }
+    ],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "logical_call_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "purpose",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "request_digest",
+        "CHAR(64)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "price_version",
+        "VARCHAR(128)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "state",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "reserved_microusd",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "usage_estimate_microusd",
+        "BIGINT",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "provider_request_id",
+        "VARCHAR(256)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_resource_kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "lease_generation",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "organization_account_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_account_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "job_account_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": "ar7_calls_project_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      },
+      {
+        "constrained_columns": [
+          "job_id"
+        ],
+        "name": "ar7_calls_job_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "jobs"
+      },
+      {
+        "constrained_columns": [
+          "project_id",
+          "job_resource_kind",
+          "job_id"
+        ],
+        "name": "ar7_calls_job_scope_fk",
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "resource_kind",
+          "resource_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "resource_scopes"
+      },
+      {
+        "constrained_columns": [
+          "organization_id"
+        ],
+        "name": "ar7_calls_organization_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "organizations"
+      },
+      {
+        "constrained_columns": [
+          "organization_id",
+          "project_id"
+        ],
+        "name": "ar7_calls_organization_project_fk",
+        "options": {},
+        "referred_columns": [
+          "organization_id",
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      },
+      {
+        "constrained_columns": [
+          "organization_account_id"
+        ],
+        "name": "ar7_calls_org_account_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "budget_accounts"
+      },
+      {
+        "constrained_columns": [
+          "project_account_id"
+        ],
+        "name": "ar7_calls_project_account_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "budget_accounts"
+      },
+      {
+        "constrained_columns": [
+          "job_account_id"
+        ],
+        "name": "ar7_calls_job_account_fk",
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "budget_accounts"
+      }
+    ],
+    "indexes": [
+      {
+        "column_names": [
+          "job_account_id"
+        ],
+        "dialect_options": {},
+        "name": "ar7_calls_job_account_id",
+        "unique": 0
+      },
+      {
+        "column_names": [
+          "job_id"
+        ],
+        "dialect_options": {},
+        "name": "ar7_calls_job_id",
+        "unique": 0
+      },
+      {
+        "column_names": [
+          "organization_account_id"
+        ],
+        "dialect_options": {},
+        "name": "ar7_calls_organization_account_id",
+        "unique": 0
+      },
+      {
+        "column_names": [
+          "project_account_id"
+        ],
+        "dialect_options": {},
+        "name": "ar7_calls_project_account_id",
+        "unique": 0
+      }
+    ],
+    "pk": [
+      "id"
+    ],
+    "uniques": [
+      [
+        "project_id",
+        "id"
+      ],
+      [
+        "project_id",
+        "logical_call_id"
+      ]
+    ]
+  },
+  "records": {
+    "checks": [],
+    "columns": [
+      [
+        "id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "created",
+        "FLOAT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "data",
+        "JSON",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [],
+    "indexes": [],
+    "pk": [
+      "id"
+    ],
+    "uniques": []
+  },
+  "resource_scopes": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "resource_kind IN ('run','study','job','key','provider_call')"
+      },
+      {
+        "name": null,
+        "sqltext": "length(resource_id) = 32 AND resource_id NOT GLOB '*[^0-9a-f]*'"
+      }
+    ],
+    "columns": [
+      [
+        "resource_kind",
+        "VARCHAR(20)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "resource_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      }
+    ],
+    "indexes": [],
+    "pk": [
+      "resource_kind",
+      "resource_id"
+    ],
+    "uniques": [
+      [
+        "project_id",
+        "resource_kind",
+        "resource_id"
+      ]
+    ]
+  },
+  "run_index": {
+    "checks": [
+      {
+        "name": null,
+        "sqltext": "typeof(run_id)='text' AND length(run_id)=32 AND length(CAST(run_id AS BLOB))=32 AND run_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "typeof(project_id)='text' AND length(project_id)=32 AND length(CAST(project_id AS BLOB))=32 AND project_id NOT GLOB '*[^0-9a-f]*'"
+      },
+      {
+        "name": null,
+        "sqltext": "resource_kind='run'"
+      },
+      {
+        "name": null,
+        "sqltext": "status='running' OR status='complete' OR status='failed' OR status='incomplete'"
+      },
+      {
+        "name": null,
+        "sqltext": "branchable IN (false,true) AND typeof(branchable)='integer'"
+      },
+      {
+        "name": null,
+        "sqltext": "parent_id IS NULL OR (typeof(parent_id)='text' AND length(parent_id)=32 AND length(CAST(parent_id AS BLOB))=32 AND parent_id NOT GLOB '*[^0-9a-f]*')"
+      },
+      {
+        "name": null,
+        "sqltext": "event_head IS NULL OR (typeof(event_head)='text' AND length(event_head)=64 AND length(CAST(event_head AS BLOB))=64 AND event_head NOT GLOB '*[^0-9a-f]*')"
+      },
+      {
+        "name": null,
+        "sqltext": "published_seq>0 AND typeof(published_seq)='integer'"
+      },
+      {
+        "name": null,
+        "sqltext": "branchable=false OR status='complete'"
+      },
+      {
+        "name": null,
+        "sqltext": "projection_reason IS NULL OR projection_reason='unfenced_execution'"
+      }
+    ],
+    "columns": [
+      [
+        "run_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "project_id",
+        "VARCHAR(32)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "resource_kind",
+        "VARCHAR(20)",
+        false,
+        "'run'",
+        null,
+        null
+      ],
+      [
+        "created_at",
+        "DATETIME",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "status",
+        "VARCHAR(16)",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "branchable",
+        "BOOLEAN",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "parent_id",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "event_head",
+        "VARCHAR(64)",
+        true,
+        null,
+        null,
+        null
+      ],
+      [
+        "published_seq",
+        "BIGINT",
+        false,
+        null,
+        null,
+        null
+      ],
+      [
+        "projection_reason",
+        "VARCHAR(32)",
+        true,
+        null,
+        null,
+        null
+      ]
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "run_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "records"
+      },
+      {
+        "constrained_columns": [
+          "project_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "id"
+        ],
+        "referred_schema": null,
+        "referred_table": "projects"
+      },
+      {
+        "constrained_columns": [
+          "project_id",
+          "resource_kind",
+          "run_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "resource_kind",
+          "resource_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "resource_scopes"
+      },
+      {
+        "constrained_columns": [
+          "project_id",
+          "parent_id"
+        ],
+        "name": null,
+        "options": {},
+        "referred_columns": [
+          "project_id",
+          "run_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "run_index"
+      }
+    ],
+    "indexes": [
+      {
+        "column_names": [
+          "project_id",
+          "created_at",
+          "run_id"
+        ],
+        "dialect_options": {},
+        "name": "run_index_project_created_run",
+        "unique": 0
+      }
+    ],
+    "pk": [
+      "run_id"
+    ],
+    "uniques": [
+      [
+        "project_id",
+        "published_seq"
+      ],
+      [
+        "project_id",
+        "run_id"
+      ]
+    ]
+  }
+}
