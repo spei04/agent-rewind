@@ -2,7 +2,7 @@
 
 ## Current status
 
-See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status). Worker F1 is **Merged; checkpoint accepted** through PR128/main `89a43e43`; Backend is implementing F2 under source handoff `22608a0f`. P1/AR-010-B remain In progress with null final acceptance, F2 acceptance is null, and F3-F5/P2 remain Not started. [Current F1 delivery and F2 entry](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f1-delivery-accepted-f2-assigned--2026-10-30-pacific) preserve the original D1-D4 provenance, five planned PRs, estimates and fixed gates; dated snapshots below remain historical.
+See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status). Worker F1 is **Merged; checkpoint accepted** through PR128/main `89a43e43`. F2 schema/catalog/profile components are accepted at `76437340`; Backend implements the owned transaction, Quality supplies independent native oracles, and Review checks each stage under source handoff `22608a0f`. P1/AR-010-B remain In progress with null final acceptance, F2 acceptance is null, and F3-F5/P2 remain Not started. [Current F1 delivery and F2 entry](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f1-delivery-accepted-f2-assigned--2026-10-30-pacific) preserve the original D1-D4 provenance, five planned PRs, estimates and fixed gates; dated snapshots below remain historical.
 
 ## Contents
 
@@ -1160,31 +1160,37 @@ The existing task graph reaches two distinct evidence targets:
 
 [The worker plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md) and
 [assignable task cards](EXECUTION_BACKLOG.md) retain the exact dependencies and
-estimates. The next runtime work is the current F2 catalog/verification slice,
-followed by the remaining approved worker producers. P2 still needs its explicit
+estimates. The F2 schema/catalog/profile components are accepted at `76437340`; the next
+runtime work is the owned transaction, then service/migration and the remaining
+approved worker producers. P2 still needs its explicit
 storage/issuer/history decisions and reforecast before implementation. These are
 concrete ownership, accounting and publication requirements; later regional
 rollout and enterprise operations do not replace them. A standalone runner or
 deterministic adapter does not bypass them. No new task, estimate, allocation or
 scope amendment is created here.
 
-**PAID0 source and unresolved exposure.** PL/RS owns PAID0 after AR-003-B; its
-machine status remains **Not satisfied**. The owner has approved payment within
-the **$200 lifetime total, including prior charges**. The existing private
-historical evidence index (SHA256
-`fb6803a3ab4bc7cb50c601228bf107d85152120787da06d9ca4244438dbbb7e5`)
-and summary (SHA256
-`a1bb0a93d2e8d6a4be97f476b2c85482009d65016ee4298aeb60b5a62dd7e609`)
-are reservation/partial-usage sources: $36.567974 reserved and a $1.668527
-ceiling for the 67 recorded model calls, excluding proposal calls. Three proposal
-calls lack separate usage records. These are not invoices or exhaustive charge
-attribution. No billing
-account/invoice source has been identified; additional exposure and the
-spendable balance remain **unknown**. PL/RS can reconcile these retained records
-and obtain authentic missing charge evidence alongside offline engineering;
-holds stay intact until supported reconciliation. Subtracting reservations
-from $200 does not establish a new allowance. [The funding decision](delivery/CAPACITY_AND_FUNDING.md#owner-payment-decision--2026-10-30)
-and [historical validation](VALIDATION.md) remain the governing distinctions.
+**PAID0 preparation and missing authoritative evidence.** PL/RS owns PAID0;
+its sole dependency remains AR-003-B and its machine status remains
+**Not satisfied**. The owner has approved payment within the **$200 lifetime
+total, including prior charges**. Accepted private reconciliation
+`8707e8e1c7b2ffc26a01993d38f5c679c493ef6d5c6bd148234cbebb9cff4a92`
+and independent peer
+`2c4a2ff532765dfc9cb2ec29dc81bd4fa7652c5a13b44e337c0616d5ac3b73b5`
+establish local consistency of 67 retained response usages and three
+source-configured proposal quotes. The source-bound records retain a $1.668527
+ceiling for those 67 calls, excluding the proposals, and $36.567974 held.
+Local authenticated artifact integrity is not provider-authenticated billing,
+current trusted receipt issuance or exhaustive charge attribution.
+
+The examined records contain no authoritative billing export. PL/RS still needs
+authoritative account/project usage and charge evidence for the Oct6 UTC window,
+matched to retained records where supported; missing proposal usage; applicable
+historical rates and adjustments; and attribution of any other exposure.
+Additional exposure and available allowance remain **unknown**. Holds remain
+unchanged pending supported reconciliation; subtracting them from $200 does not
+establish an allowance. AR-023 owns supported settlement/release behavior, not an
+added PAID0 funding prerequisite. [The funding decision](delivery/CAPACITY_AND_FUNDING.md#owner-payment-decision--2026-10-30)
+and [historical validation](VALIDATION.md) retain their scope.
 
 
 ### Worker failure DDL reforecast adopted — 2026-10-29

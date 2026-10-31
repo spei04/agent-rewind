@@ -2,10 +2,10 @@
 
 ## Current status
 
-- **Delivery:** PCA1 and [API-USAGE-001 #124](https://github.com/spei04/agent-rewind/issues/124) are delivered. F1 and the internal dispatch foundation are delivered at [main `89a43e43`](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb).
-- **Active:** Backend implements F2’s dormant schema/native checks; Planning synchronizes records; Review checks each stage within the same F2 PR.
-- **Next:** Complete F2 observer, migration, profile and native acceptance. F3–F5/P2, full P1 acceptance and live admitted startup remain gated; PCA2 delivery is separate.
-- **Limits:** The **$200 lifetime budget includes prior charges**; $36.567974 remains held and other exposure is unknown. No verified paid allowance or production activation follows.
+- **Delivery:** PCA1, [API-USAGE-001](https://github.com/spei04/agent-rewind/issues/124), F1 and internal dispatch are delivered at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb).
+- **Active:** F2 schema/catalog/profile components are accepted at `76437340`. Backend builds the owned transaction; Quality checks native behavior; Review audits each stage.
+- **Next:** Complete F2 transaction/service/migration and native acceptance. Full F2/P1, F3–F5/P2 and admitted startup remain gated; PCA2 delivery is separate.
+- **Limits:** The **$200 lifetime budget includes prior charges**; $36.567974 remains held. Other exposure and available allowance remain unknown.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -22,6 +22,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F2 catalog accepted; owned transaction assigned — 2026-10-30 (Pacific)**
+
+- Lead: integrated the accepted schema, independently captured profiles/oracle and catalog components at `76437340`. Schema peer `264890a4`, profile peer `8cb86979` and catalog peer `4385eb88` retain their distinct scope. Catalog coverage is 54 applicable cases per interpreter: 36 retained SQLite/offline controls and 18 current PostgreSQL cases; the original failed positive and assembly incident remain retained without success credit.
+- Backend: owns the F2 transaction component in SECONDARY. Quality owns independent native transaction oracles in PRIMARY; Review checks source and original evidence. The next boundary preserves exclusion, transaction identity, rollback and acknowledgment/cleanup ambiguity. Physical 21-table fixtures do not establish installed revision or readiness; full F2/P1 acceptance remains null.
+- PL/RS: private preparation `8707e8e1`, accepted by peer `2c4a2ff5`, reconciles 67 locally retained response usages and three source-bound proposal quotes. It supplies no authoritative billing export, missing proposal usage, complete account/project charge attribution or available allowance. The $36.567974 hold, unknown other exposure and PAID0's sole AR-003-B dependency remain unchanged.
 
 **F2 independent profiles and path to real evidence — 2026-10-30 (Pacific)**
 
