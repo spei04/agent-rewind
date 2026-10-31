@@ -231,7 +231,7 @@ def _require_ledger_body(connection: Connection) -> LedgerWork:
     return body.work
 
 
-def _begin(connection: Connection, outcome: LedgerOutcome, work: LedgerWork) -> None:
+def _begin_native(connection: Connection, outcome: LedgerOutcome, work: LedgerWork) -> None:
     raw = connection.connection.driver_connection
     if raw is None:
         raise MigrationRefused("migration_database_failure")
@@ -261,6 +261,12 @@ def _begin(connection: Connection, outcome: LedgerOutcome, work: LedgerWork) -> 
     ).scalar_one()
     if acquired is not True:
         raise MigrationRefused("migration_busy")
+
+
+def _begin(connection: Connection, outcome: LedgerOutcome, work: LedgerWork) -> None:
+    _begin_native(connection, outcome, work)
+    if connection.dialect.name == "sqlite":
+        return
     tables: list[str] = list(
         connection.execute(
             text(
@@ -290,10 +296,14 @@ def _ordinary_error(error: BaseException) -> MigrationRefused:
 
 
 @contextmanager
-def ledger_transaction(
-    engine: Engine, outcome: LedgerOutcome, *, work: LedgerWork
+def _owned_transaction(
+    engine: Engine,
+    outcome: LedgerOutcome,
+    *,
+    work: LedgerWork,
+    begin: Callable[[Connection, LedgerOutcome, LedgerWork], None],
 ) -> Iterator[Connection]:
-    """Commit once; return only after acknowledgment and bounded owned cleanup."""
+    """Private lifecycle shared by fixed, source-owned migration entry points."""
     if (
         type(outcome) is not LedgerOutcome
         or type(work) is not LedgerWork
@@ -347,7 +357,7 @@ def ledger_transaction(
             raise MigrationRefused("schema_incompatible")
         attached = True
         work._attach(connection)
-        _begin(connection, outcome, work)
+        begin(connection, outcome, work)
         try:
             _register_ledger_body(connection, claim, work, receipt)
             yield connection
@@ -438,3 +448,12 @@ def ledger_transaction(
         raise MigrationRefused("ledger_outcome_uncertain") from None
     if primary is not None:
         raise _ordinary_error(primary) from None
+
+
+@contextmanager
+def ledger_transaction(
+    engine: Engine, outcome: LedgerOutcome, *, work: LedgerWork
+) -> Iterator[Connection]:
+    """Commit once; keep the original ledger inventory and owned cleanup."""
+    with _owned_transaction(engine, outcome, work=work, begin=_begin) as connection:
+        yield connection
