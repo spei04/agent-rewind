@@ -1,11 +1,11 @@
-"""Private acknowledged-claim ownership for F3; no worker or terminal writer yet."""
+"""Private F3 claim and dependency observation; no worker or terminal writer yet."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from threading import RLock
 from typing import Any
-from weakref import WeakKeyDictionary
+from weakref import WeakKeyDictionary, ref
 
 from sqlalchemy import text
 from sqlalchemy.engine import Connection, Engine
@@ -14,7 +14,13 @@ from . import reservation
 from .admission_configuration import NativeConfiguration
 from .admission_transaction import admission_transaction
 from .dispatch import DispatchAdapter
-from .failure_evidence import ClaimedFailureSource, FailureRefusal, _AcknowledgedClaim
+from .failure_catalog import _refresh_producer_authority
+from .failure_evidence import (
+    ClaimedFailureSource,
+    CompletionEvent,
+    FailureRefusal,
+    _AcknowledgedClaim,
+)
 from .migrations.schema import MigrationRefused
 from .operation_reads import (
     IMMUTABLE_JOB_FIELDS,
@@ -61,12 +67,94 @@ class _OwnerState:
     invoked: bool = False
     work: OperationWork | None = None
     source: ClaimedFailureSource | None = None
+    configuration: NativeConfiguration | None = None
+    principal: VerifiedPrincipal | None = None
+    context: ProjectContext | None = None
+    binding_checked: bool = False
+    event: CompletionEvent | None = None
 
 
 # Values never retain their weak key. In particular, a claim record holds no
 # coordinator/owner/connection, and an owner state holds no adapter or owner.
 _CLAIMS: WeakKeyDictionary[ReservationCoordinator, _ClaimRecord] = WeakKeyDictionary()
 _OWNERS: WeakKeyDictionary[_FailureExecutionOwner, _OwnerState] = WeakKeyDictionary()
+
+
+@dataclass(frozen=True)
+class _DependencyRecord:
+    owner: ref[_FailureExecutionOwner]
+    principal: VerifiedPrincipal
+    context: ProjectContext
+    configuration: NativeConfiguration
+    source: ClaimedFailureSource
+
+
+_EVENTS: WeakKeyDictionary[CompletionEvent, _DependencyRecord] = WeakKeyDictionary()
+
+
+def _registered_owner(owner: _FailureExecutionOwner) -> _OwnerState:
+    if type(owner) is not _FailureExecutionOwner:
+        raise FailureRefusal("capability_not_issued")
+    with _LOCK:
+        state = _OWNERS.get(owner)
+        if state is None or _owned_state(owner, state.coordinator) is not state:
+            raise FailureRefusal("capability_not_issued")
+        if (
+            type(state.source) is not ClaimedFailureSource
+            or type(state.configuration) is not NativeConfiguration
+            or type(state.principal) is not VerifiedPrincipal
+            or type(state.context) is not ProjectContext
+            or not state.coordinator.outcome.commit_acknowledged
+            or state.coordinator.outcome.cleanup_failed
+        ):
+            raise FailureRefusal("capability_not_issued")
+        state.source.__post_init__()
+        _configuration(state.configuration)
+        if (
+            state.source.configuration_digest != state.configuration.digest
+            or state.source.configuration_size != len(state.configuration.canonical_bytes)
+        ):
+            raise FailureRefusal("capability_not_issued")
+        return state
+
+
+def _consume_dependency_event(
+    event: CompletionEvent,
+    engine: Engine,
+    authority: RequestAuthority,
+    principal: VerifiedPrincipal,
+    context: ProjectContext,
+) -> _DependencyRecord:
+    if type(event) is not CompletionEvent:
+        raise FailureRefusal("capability_not_issued")
+    with _LOCK:
+        # Never restore a consumed event, including after any later refusal.
+        record = _EVENTS.pop(event, None)
+        if record is None:
+            raise FailureRefusal("capability_not_issued")
+        owner = record.owner()
+        if owner is None:
+            raise FailureRefusal("capability_not_issued")
+        state = _OWNERS.get(owner)
+        matched_event = state is not None and state.event is event
+        if matched_event and state is not None:
+            state.event = None
+        if (
+            state is None
+            or not matched_event
+            or _registered_owner(owner) is not state
+            or state.coordinator.engine is not engine
+            or state.coordinator.authority is not authority
+            or state.principal is not principal
+            or record.principal is not principal
+            or state.context is not context
+            or record.context is not context
+            or state.source is not record.source
+            or state.configuration is not record.configuration
+            or not state.binding_checked
+        ):
+            raise FailureRefusal("capability_not_issued")
+        return record
 
 
 def _configuration(value: NativeConfiguration) -> NativeConfiguration:
@@ -302,6 +390,9 @@ def _claim_for_failure_execution(
                     configuration.digest,
                     len(configuration.canonical_bytes),
                 )
+                if rows.failure_authority is None:
+                    raise FailureRefusal("invalid_native_state")
+                _refresh_producer_authority(connection, scope, rows.failure_authority)
                 # Final native body/clock fence; only inherited commit controls follow.
                 reservation.require_live_job(connection, scope, fence)
             except MigrationRefused as error:
@@ -412,6 +503,9 @@ class _FailureExecutionOwner:
                 # total allowance through registration without new native work.
                 work._limits(cleanup=True)
                 work.remaining_timeouts_ms()
+                state.configuration = record.configuration
+                state.principal = record.principal
+                state.context = record.context
                 state.source = record.source
                 return record.source.fence
         finally:
@@ -419,9 +513,70 @@ class _FailureExecutionOwner:
             with _LOCK:
                 _CLAIMS.pop(state.coordinator, None)
 
+    def _check_installed_binding(self) -> CompletionEvent | None:
+        """Observe one real post-registration dependency stage, without a provider."""
+        with _LOCK:
+            state = _registered_owner(self)
+            if state.binding_checked:
+                raise FailureRefusal("invocation_reused")
+            state.binding_checked = True
+            work = OperationWork(include_acquisition=True)
+        work.check()
+        adapter = self._adapter
+        failed = False
+        try:
+            configuration = _installed_configuration(adapter)
+        except FailureRefusal:
+            failed = True
+        else:
+            failed = configuration != state.configuration
+        # An invalid owner/source does not become a dependency observation. A
+        # getter may close or replace its binding even while returning good data.
+        if _registered_owner(self) is not state or self._adapter is not adapter:
+            raise FailureRefusal("stale_source")
+        work.check()
+        with _LOCK:
+            if _registered_owner(self) is not state:
+                raise FailureRefusal("capability_not_issued")
+            if not failed:
+                work.remaining_timeouts_ms()
+                return None
+            principal, context, retained_configuration, source = (
+                state.principal,
+                state.context,
+                state.configuration,
+                state.source,
+            )
+            if (
+                principal is None
+                or context is None
+                or retained_configuration is None
+                or source is None
+            ):
+                raise FailureRefusal("capability_not_issued")
+            event = object.__new__(CompletionEvent)
+            _EVENTS[event] = _DependencyRecord(
+                ref(self), principal, context, retained_configuration, source
+            )
+            state.event = event
+            try:
+                work.check()
+                work.remaining_timeouts_ms()
+            except BaseException:
+                _EVENTS.pop(event, None)
+                state.event = None
+                raise
+            return event
+
     def close(self) -> None:
         with _LOCK:
             state = _OWNERS.pop(self, None)
             if state is not None:
                 _CLAIMS.pop(state.coordinator, None)
                 state.source = None
+                state.configuration = None
+                state.principal = None
+                state.context = None
+                if state.event is not None:
+                    _EVENTS.pop(state.event, None)
+                    state.event = None
