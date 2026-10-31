@@ -2072,6 +2072,8 @@ def test_terminal_expiry_writers_exclude_one_native_outcome(
 def test_terminal_scope_refuses_bare_and_foreign_connection(
     failure_case, monkeypatch, record_property, receiver_mode
 ):
+    from agent_rewind.sqlite_ownership import owned_connect
+
     case = failure_case.case
     controls = observe_controls(monkeypatch)
     persist = failure_terminal.persist_verified_failure
@@ -2080,7 +2082,7 @@ def test_terminal_scope_refuses_bare_and_foreign_connection(
         borrowed, source_connections, receiver_controls = [], [], []
         with monkeypatch.context() as patch:
             writes = observe_terminal_writes(patch, case)
-            with case.engine.connect() as receiver:
+            with owned_connect(case.engine) as receiver:
                 raw = receiver.connection.driver_connection
                 postgres = receiver.dialect.name == "postgresql"
                 assert receiver.get_transaction() is None
