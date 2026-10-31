@@ -3,7 +3,7 @@
 ## Current status
 
 - **Delivery:** PCA1 is delivered at `48ddc894`. API usage merged at `84d63879`; main/candidate acceptance is pending.
-- **Active:** Dispatch [PR #127](https://github.com/spei04/agent-rewind/pull/127) passed native component checks. F1 composition `629f8b2b` passed 155 focused cases per Python version; delivery is pending. PCA2 `51ae3a75` remains published.
+- **Active:** Dispatch [PR #127](https://github.com/spei04/agent-rewind/pull/127) has a reviewed rollback-test correction at `1788de74`; hosted acceptance is pending. F1 composition `b8c1f2d` and PCA2 `51ae3a75` await delivery.
 - **Next:** After F1 delivery, implement F2’s dormant failure schema and exact native catalogs; live startup remains behind F3–F5/P2.
 - **Limits:** Live admitted startup is incomplete. Payment is approved within **$200 total including prior charges**; $36.567974 remains held and other exposure is unknown. No verified paid allowance or production activation follows.
 
@@ -22,6 +22,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Rollback-test correction — 2026-10-30**
+
+- Engineer 1: reproduced the original PR #127 failure, corrected only the test wrapper's keyword forwarding, and checked both known-refusal and unexpected-write rollback cases on Python 3.11/3.12 at the fix and combined F1 sources. Runtime uncertainty behavior and all assertions are unchanged.
+- Engineer 2: independently reviewed source and original evidence. Lead publishes the correction and F1 composition without advancing PR #127 while its original jobs are running; that would automatically cancel them. Full hosted acceptance remains pending.
+
 
 **F1 dispatch composition and startup audit — 2026-10-30**
 
