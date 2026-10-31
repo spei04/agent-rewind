@@ -69,6 +69,15 @@ def test_packaged_profile_is_explicitly_inspection_only(prepared):
                 guard.BackfillRequirement(revision="ar_0007_ledger", phase="ledger_opening"),
             ),
         ),
+        (
+            "ar_0008_failure_evidence",
+            "migration_only",
+            (
+                guard.BackfillRequirement(revision="ar_0003_ownership", phase="ownership"),
+                guard.BackfillRequirement(revision="ar_0005_run_index", phase="run_index"),
+                guard.BackfillRequirement(revision="ar_0007_ledger", phase="ledger_opening"),
+            ),
+        ),
     ]
     result = prepared.schema_compatibility()
     assert (result.status, result.code) == ("incompatible", "migration_only")
