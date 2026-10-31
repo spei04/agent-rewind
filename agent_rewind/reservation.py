@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import fields
 from datetime import UTC, datetime
 from typing import Any
@@ -9,6 +10,7 @@ from typing import Any
 from sqlalchemy import and_, case, column, select, table, text
 from sqlalchemy.engine import Connection
 
+from .admission_configuration import NativeConfiguration
 from .migrations.ledger_schema import TRIGGERS
 from .reservation_checks import (
     Dialect,
@@ -220,7 +222,12 @@ def inspect_original(
 
 
 def reserve(
-    connection: Connection, scope: ReservationScope, fence: JobFence, intent: ReservationIntent
+    connection: Connection,
+    scope: ReservationScope,
+    fence: JobFence,
+    intent: ReservationIntent,
+    *,
+    configuration: NativeConfiguration | None = None,
 ) -> ReservationDecision:
     body = require_body(connection, scope)
     _fence(scope, fence)
@@ -229,6 +236,18 @@ def reserve(
     rows.lock_accounts(connection)
     now = _clock(connection)
     rows.reconcile(now)
+    if configuration is not None:
+        if type(configuration) is not NativeConfiguration:
+            raise ReservationRefusal("invalid_intent")
+        configuration = NativeConfiguration(
+            configuration.canonical_bytes, expected_digest=configuration.digest
+        )
+        if (
+            rows.job["execution_config_digest"] != configuration.digest
+            or rows.job["execution_config_ref"] != configuration.digest
+            or intent.price_version != json.loads(configuration.canonical_bytes)["price_version"]
+        ):
+            raise ReservationRefusal("unsupported_job")
     original = _original(rows, intent)
     if isinstance(original, CallMatching):
         return OriginalReservation(original.record)

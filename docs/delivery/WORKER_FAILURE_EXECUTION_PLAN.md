@@ -4,7 +4,7 @@ Planning reforecast adopted on 2026-10-29 for [AR-010-B/P1 #97](https://github.c
 
 ## Allocation and sequence
 
-P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2–3]. P2 remains 2 [2–3], medium-low; aggregate #96 is 14 [11–21], low. Checkpoint allocations are included in P1, not extra tasks or effort. Ordinary review, tests and documentation are included; calendar waits, paid work and additional staffing are not implied.
+P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2–3]. The retained P2 estimate is 2 [2–3], medium-low; aggregate #96 is 14 [11–21], low. Those figures predate the admitted-startup audit and require a coordinated reforecast before P2 assignment. Checkpoint allocations are included in P1, not extra tasks or effort. Ordinary review, tests and documentation are included; calendar waits, paid work and additional staffing are not implied.
 
 | Checkpoint | Scope | Included days [range] | Confidence |
 | --- | --- | ---: | --- |
@@ -87,7 +87,7 @@ Allocation basis: Two profile families, literal token semantics, fresh bounded t
 
 ### F2 — Dormant successor schema, profile and migration foundation
 
-Proposed source boundary: `new focused agent_rewind/migrations/failure_schema.py and failure_catalog.py (names provisional at entry)`, `explicit new profile capture files after revision decision`, `narrow version registry/compatibility/state branches in existing migrations/schema.py, compatibility.py, ledger_compatibility.py, ledger_history_sql.py, ledger_state.py`, `focused migration/catalog/privilege tests`. Names are planning seams, not assigned files/revisions.
+Frozen module boundaries and native acceptance vectors are in the [F2 implementation allocation](WORKER_FAILURE_ENTRY_DESIGN.md#f2-implementation-allocation--2026-10-30): failure_schema, failure_catalog, failure_transaction, failure_service, the reserved thin migration and two literal dialect profiles. This allocates the existing F2 scope; implementation still requires accepted F1 delivery.
 
 Owner: Backend migration owner; Review catalog/privilege review; Quality preservation and both-dialect validation; lead has reserved the later-F2 revision below. F2 still waits for accepted F1.
 
@@ -140,6 +140,10 @@ Actual SQLite/restricted PostgreSQL fresh/exact repeat/conflict, unauthorized/no
 Exit: Old source/audit/ciphertext preservation exact, same intent/row/timestamp after accepted replay/restore, wrong-source and unsupported cases refuse without writes; actual native original bounds and all final source/CI/candidate identities agree. No partial checkpoint closes #97.
 
 Allocation basis: Real interruption/ACK and owner/ACL-preserving physical restore plus integrated delivery are separate from dormant DDL or parser work. Reuses existing harnesses, no resource purchase.
+
+## P2 admitted-startup audit — 2026-10-30
+
+The [dispatch integration audit](WORKER_DISPATCH.md#remaining-admitted-startup-integration--2026-10-30) assigns admission/account provenance, installed execution composition, generation-fenced recording/publication and unpatched startup to explicit downstream work. Direct account insertion does not satisfy existing manifest reconciliation. Freeze that representation and PR boundaries, then reforecast P2 and aggregate scheduling before implementation assignment. The retained two-day P2 estimate and derived aggregate totals are not a complete startup forecast. F2 keeps its one-relation scope and 3 [2–4.5] allocation; F2–F5 entry gates and accepted component statuses are unchanged.
 
 ## Capacity and reforecast boundaries
 

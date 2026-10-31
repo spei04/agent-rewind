@@ -2,11 +2,12 @@
 
 ## Current status
 
-- **Verified:** PCA1 [#120](https://github.com/spei04/agent-rewind/issues/120) is delivered at merge `48ddc894` from `574fb049`. Original main [41121769232](https://github.com/spei04/agent-rewind/actions/runs/41121769232) and candidate, installed execution and image-trust evidence are independently accepted.
-- **Active:** API-USAGE-001 [#124](https://github.com/spei04/agent-rewind/issues/124) source `5845ada6` is independently reviewed; 85 billing-detail controls passed per version and both actual inventories contain 8,746 tests. Hosted delivery remains pending. PCA2 [#125](https://github.com/spei04/agent-rewind/issues/125) component `e0623c3b` and its 363-control focused evidence are accepted and published; full delivery remains pending. F1 remains retained at `a604fd25`, not integrated.
-- **Limits:** AR-002-C and PUBCAP-A remain incomplete. The $200 cap, $36.567974 held reservation and additional exposure **UNKNOWN** remain unchanged; no paid/model/data/production gate is opened.
+- **Delivery:** PCA1 is delivered at `48ddc894`. [API-USAGE-001 #124](https://github.com/spei04/agent-rewind/issues/124) is verified at `84d63879` ([original main](https://github.com/spei04/agent-rewind/actions/runs/41141950680)).
+- **Active:** Dispatch [PR #127](https://github.com/spei04/agent-rewind/pull/127) has a reviewed rollback-test correction at `1788de74`; hosted acceptance is pending. F1 composition `b8c1f2d` and PCA2 `51ae3a75` await delivery.
+- **Next:** After F1 delivery, implement F2’s dormant failure schema and exact native catalogs; live startup remains behind F3–F5/P2.
+- **Limits:** Live admitted startup is incomplete. Payment is approved within **$200 total including prior charges**; $36.567974 remains held and other exposure is unknown. No verified paid allowance or production activation follows.
 
-[Active worker task](EXECUTION_BACKLOG.md#ar-010-b) · [Assignment history](#assignment-history)
+[Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
 ## Execution location — 2026-10-23
 
@@ -21,6 +22,33 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**API-USAGE-001 delivery accepted — 2026-10-31**
+
+- Lead: accepted [API-USAGE-001 #124](https://github.com/spei04/agent-rewind/issues/124) at `84d63879`. [Original main run 41141950680](https://github.com/spei04/agent-rewind/actions/runs/41141950680), attempt 1, passed all eight jobs: Python 3.11 recorded 8,701 passes/45 skips and Python 3.12 recorded 8,715 passes/31 skips.
+- Independent final review `7ca6db7e` binds candidate `13021143895` (archive SHA256 prefix `b38c1d19`), all 148 runtime members, actual isolated installed-wheel and container proof. Worker, production, research and payment gates remain unchanged; no new paid allowance or activation follows.
+
+**Rollback-test correction — 2026-10-30**
+
+- Engineer 1: reproduced the original PR #127 failure, corrected only the test wrapper's keyword forwarding, and checked both known-refusal and unexpected-write rollback cases on Python 3.11/3.12 at the fix and combined F1 sources. Runtime uncertainty behavior and all assertions are unchanged.
+- Engineer 2: independently reviewed source and original evidence. Lead publishes the correction and F1 composition without advancing PR #127 while its original jobs are running; that would automatically cancel them. Full hosted acceptance remains pending.
+
+
+**F1 dispatch composition and startup audit — 2026-10-30**
+
+- Engineer 1: integrated F1 on the dispatch branch at `629f8b2b`; 137 catalog/claim/reservation and 18 dispatch cases passed per Python version. Both actual full collections contain 8,815 ordered cases, retaining all 8,779 prior cases plus 36 F1 additions.
+- Engineer 2: independently accepted the four-file composition. The earlier combined SIGKILL attempt remains retained without partial credit; separate Work counters are not an end-to-end capacity claim.
+- Release engineer: checked original main/PR #127 CI, then took the admission/account-provenance design audit. No workflow rerun or live activation.
+- Lead: owns publication and the exact F2 allocation; F2 implementation waits for accepted F1 delivery. Recorded the missing startup integrations and required P2 reforecast without reopening accepted components.
+
+
+
+**Admitted dispatch development — 2026-10-30**
+
+- Lead: implemented the internal durable dispatch boundary; default worker activation remains pending.
+- Engineer 1: integrated F1 at `9e0f24d0` (137 focused tests passed), then reassigned to restricted PostgreSQL dispatch validation.
+- Engineer 2: reviewed dispatch code; reservation-acknowledgment provenance and exception-safety findings corrected and re-reviewed.
+- Release engineer: checking original PR126 main/candidate evidence; no workflow rerun.
 
 
 **API usage inventory and component handoff — 2026-10-30**

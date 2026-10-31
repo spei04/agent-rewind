@@ -17,8 +17,8 @@ from .schema import (
     LEDGER,
     MigrationRefused,
     _canonicalize_postgresql_enum_checks,
+    _sqlite_check_supported_ddl,
     _sqlite_require_reflected_checks,
-    _sqlite_supported_clauses,
     dialect,
     installed_profile,
     schema_table_names,
@@ -264,37 +264,71 @@ def inspect_catalog(connection: Connection, revision: str, work: LedgerCheck) ->
     return shape
 
 
-def _sqlite_table_options(connection: Connection, tables: list[str], revision: str) -> list[str]:
+def _sqlite_table_options(
+    connection: Connection,
+    tables: list[str],
+    revision: str,
+    work: LedgerCheck,
+    *,
+    admission: bool = False,
+    ledger: bool = False,
+) -> tuple[list[str], dict[str, tuple[tuple[str | None, str], ...]]]:
     # Use only the revision-owned literals, after proving the fresh table set.
     selected = sorted(installed_profile("sqlite", revision))
     if len(tables) != len(selected) or set(tables) != set(selected):
         raise MigrationRefused("schema_incompatible")
-    # The typed compiler renders these proven profile names as SQL literals,
-    # keeping the existing 16-wire-bind ceiling without handwritten quoting.
+    # Names are typed compiler literals; only the N+1 limit is a native bind.
+    # The LEFT JOIN and CASE expose missing or oversized DDL as refusal values.
     statement = text(
-        "SELECT name,wr,strict FROM pragma_table_list WHERE schema='main' "
-        "AND name IN :table_names LIMIT :row_limit"
+        "SELECT p.name,p.wr,p.strict,"
+        "CASE WHEN typeof(m.sql)='text' AND length(CAST(m.sql AS BLOB))<=65536 "
+        "THEN m.sql END AS ddl "
+        "FROM pragma_table_list AS p LEFT JOIN main.sqlite_master AS m "
+        "ON m.type='table' AND m.name=p.name "
+        "WHERE p.schema='main' AND p.name IN :table_names "
+        "ORDER BY p.name LIMIT :row_limit"
     ).bindparams(
         bindparam("table_names", type_=String(), expanding=True, literal_execute=True),
         bindparam("row_limit", type_=Integer()),
     )
-    rows = connection.execute(
+    result = connection.execute(
         statement, {"table_names": selected, "row_limit": len(selected) + 1}
-    ).all()
-    if (
-        len(rows) != len(selected)
-        or any(
-            len(row) != 3
-            or type(row[0]) is not str
-            or type(row[1]) is not int
-            or type(row[2]) is not int
-            or row[1:] != (0, 0)
-            for row in rows
-        )
-        or {row[0] for row in rows} != set(selected)
-    ):
-        raise MigrationRefused("schema_incompatible")
-    return selected
+    )
+    declarations = {}
+    primary: BaseException | None = None
+    try:
+        for table in selected:
+            row = result.fetchone()
+            work.check()
+            if (
+                row is None
+                or len(row) != 4
+                or type(row[0]) is not str
+                or row[0] != table
+                or type(row[1]) is not int
+                or type(row[2]) is not int
+                or row[1:3] != (0, 0)
+                or type(row[3]) is not str
+                or len(row[3].encode("utf-8")) > 65536
+            ):
+                raise MigrationRefused("schema_incompatible")
+            declarations[table] = _sqlite_check_supported_ddl(
+                table, row[3], admission=admission, ledger=ledger
+            )
+            # Retain only the native declaration slices, not complete DDL rows.
+            del row
+        if result.fetchone() is not None:
+            raise MigrationRefused("schema_incompatible")
+    except BaseException as exc:
+        primary = exc
+        raise
+    finally:
+        try:
+            result.close()
+        except BaseException:
+            if primary is None:
+                raise
+    return selected, declarations
 
 
 def _sqlite_native_indexes(
@@ -466,17 +500,19 @@ def _observe_catalog(
     ledger = revision == LEDGER
     executable_profile = None
     if name == "sqlite":
-        selected = _sqlite_table_options(
-            connection, tables, {"ar6": ADMISSION, "ar7": LEDGER}[revision_key]
-        )
-        sqlite_checks = _sqlite_supported_clauses(
-            connection, tables, admission=revision == ADMISSION, ledger=ledger
-        )
         extras = connection.exec_driver_sql(
             "SELECT 1 FROM sqlite_master WHERE type IN ('trigger','view') LIMIT 1"
         ).first()
         if extras or connection.exec_driver_sql("SELECT 1 FROM sqlite_temp_master LIMIT 1").first():
             raise MigrationRefused("schema_incompatible")
+        selected, sqlite_checks = _sqlite_table_options(
+            connection,
+            tables,
+            {"ar6": ADMISSION, "ar7": LEDGER}[revision_key],
+            work,
+            admission=revision == ADMISSION,
+            ledger=ledger,
+        )
         native_by_table, parts_by_index = _sqlite_native_indexes(
             connection, selected, revision_key, work
         )

@@ -69,7 +69,9 @@ Insertion checks the actual scope/current generation/status and unfiltered 0/1/2
 
 ### Successor installation and identity
 
-The successor has exactly21 tables/22nd-row overflow sentinel. Old ar7 retains20/21, earlier profiles17. A distinct observer verifies the complete table/index/constraint/executable/ACL inventory before deriving retained ar7 substate, including exact PostgreSQL native column/index/executable metadata projection as well as ordinary table shape; no fake revision, broadened old allowlist or ignored unknown objects. Table-specific SQLite token restrictions and all old profile bytes remain exact.
+The successor has exactly21 tables/22nd-row overflow sentinel. Old ar7 retains20/21; predecessor table counts are ar2=8, ar3=12, ar4=14, ar5=15 and ar6=17. A distinct observer verifies the complete table/index/constraint/executable/ACL inventory before deriving retained ar7 substate, including exact PostgreSQL native column/index/executable metadata projection as well as ordinary table shape; no fake revision, broadened old allowlist or ignored unknown objects. Table-specific SQLite token restrictions and all old profile bytes remain exact.
+
+The successor retains a hard cumulative table-DDL transfer limit of 1,310,720 bytes and a 65,536-byte limit per table, enforced by a native aggregate gate before DDL transfer; its 21-table inventory does not expand these limits, and predecessor ar6/ar7 gates and profiles remain unchanged.
 
 Current offline transaction code cannot accept a twenty-first table. An explicit successor-owned dispatcher reuses body/xid/cleanup mechanics: SQLite FK-on BEGIN EXCLUSIVE; PostgreSQL existing migrator lock, dedicated actual installation owner, session/writer/role exclusion and ACCESS EXCLUSIVE locks on the exact set. Installation proves/locks old20, then atomically creates/verifies21 and advances the actual version.
 
@@ -78,6 +80,42 @@ D1 retains original adoption/progress bytes, including the ar7 installed fingerp
 D4 source_artifact_sha256 means the exact installed wheel archive digest selected by a trusted accepted release record, with candidate member and installed runtime/profile/source equality. Candidate status alone is not acceptance. installed_profile_sha256 is schema.checksum(observed_shape), which canonicalizes once internally, after equality to the accepted packaged dialect profile; it is not a checksum of already-canonical bytes or pretty-file bytes. Actual installation key/organization and selected scope must match captured intent.
 
 No new physical roles or broad grants: dedicated common installation/table owner for install/marking; explicit SELECT for dormant bounded readers; narrow INSERT plus reviewed jobs effect rights for the later controlled producer. No app UPDATE/DELETE/TRUNCATE/DDL/owner rights on evidence. No PUBLIC EXECUTE or SECURITY DEFINER escalation. SQLite uses controlled owned connections/process authority. Exact native role/trigger behavior remains implementation proof.
+
+### F2 implementation allocation — 2026-10-30
+
+The migration owner is Backend; Quality owns independent native preservation
+and failure tests, and Review owns catalog, privilege and transaction review.
+The existing allocation remains **3 [2–4.5] engineering days**, included in P1.
+Implementation entry requires accepted F1 delivery and its source-bound capacity
+handoff. The accepted AR-010-A/AR-005-C and D1–D4 decisions are retained;
+dispatch-component delivery is not an additional F2 prerequisite.
+
+The reserved successor is `ar_0008_failure_evidence`, with
+`ar_0007_ledger` as its predecessor, `failure_evidence_v1` as its profile,
+and null `branch_labels` and `depends_on`.
+
+| Module | Owned boundary |
+| --- | --- |
+| `migrations/failure_schema.py` | SQL-only creation of the adopted 15-column relation, 16 CHECKs, three FKs, job PK, operations support UNIQUE and exact immutable guards. No transaction ownership or publication. |
+| `migrations/failure_catalog.py` | Complete 21-table inventory with a 22nd-row overflow sentinel, native metadata and ACL verification, and the unchanged table-DDL limits. Only a fully verified successor may yield the explicitly retained ar7 catalog view. |
+| `migrations/failure_transaction.py` | Explicit old-20/new-21 installation exclusion while reusing existing owned-engine, transaction-body, xid and cleanup mechanics. Do not widen the old dispatcher or manufacture an ar7 revision. |
+| `migrations/failure_service.py` | One explicit dormant initialization/inspection path with acknowledged outcomes; no implicit migration, automatic retry, worker dispatch or public marker command. |
+| `migrations/versions/0008_failure_evidence.py` and the two dialect profiles | Thin guarded migration and independently reviewed literal successor catalogs; narrow registry and migration-only compatibility branches. |
+
+The retained-ar7 view removes only the already verified new relation, support
+index and executable metadata. Unknown objects never disappear through filtering.
+The original adoption/progress bytes and ar7 installed fingerprint remain exact.
+
+Acceptance requires actual SQLite and restricted PostgreSQL fresh/legacy
+upgrades; full catalog/ACL equality; scalar, variant, FK, cross-scope,
+null-operation, duplicate/REPLACE and immutable-update/delete/truncate negatives;
+wrong-owner and extra-writer/session refusal; DDL/version/commit/cleanup faults;
+and exact predecessor row, audit, ciphertext and history preservation.
+Oversized per-table/aggregate DDL and an extra table must refuse before transfer.
+Old clients and default readiness, claim/reserve and dispatch remain refused.
+Actual successor capacity and install equivalence are earned during
+implementation and required at acceptance; they are not pre-code measurements.
+
 
 ## Terminal authority and atomic persistence — adopted D2v4
 
