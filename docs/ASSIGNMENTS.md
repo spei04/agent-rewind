@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Current:** F2 service/native components are accepted; the 8,988-node inventory applies to `c05eed2f`. [PR129](https://github.com/spei04/agent-rewind/pull/129) retains an original security failure and subsequent fixture-origin failures. The corrected run passed security, package (including installed smoke) and isolation.
-- **Next:** Lead retains both failed runs and integrates the reviewed fixture correction, collection-impact confirmation and original CI receipt/main/candidate delivery. Full F2/P1 and admitted startup remain pending.
-- **Scope:** F3 is design audit only, without implementation or acceptance. [Funding limits](delivery/CAPACITY_AND_FUNDING.md) and [dated history](#assignment-history) remain unchanged.
+- **Current:** F2 components and the 8,988-node inventory at 19b8c45c are accepted. [PR129](https://github.com/spei04/agent-rewind/pull/129)'s six core/support jobs passed; its gate rejected Python 3.12 elapsed time. Originals are retained.
+- **Next:** Lead prepares one diagnostic CI campaign reporting the 50 slowest phases under unchanged bounds. Backend/Quality/Review assess hosted costs; no performance fix is claimed.
+- **Gates:** Full F2/P1, admitted startup and main/candidate delivery remain pending. F3 is audit only. [Funding limits](delivery/CAPACITY_AND_FUNDING.md) and [dated history](#assignment-history) remain unchanged.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**F2 duration evidence retained; diagnostic CI assigned — 2026-10-31 (Pacific)**
+
+- [Original run41177621013/1](https://github.com/spei04/agent-rewind/actions/runs/41177621013) at source 19b8c45c passed all three core legs, package, security and isolation. Its CI gate rejected the complete Python 3.12 receipt's **3,839.488659-second** elapsed time against the unchanged 3,600-second limit; candidate delivery was skipped. The decoded pytest log separately reports **8,957 passed, 31 skipped, 3,839.53 seconds**. Original logs and all three receipts are retained and independently reviewed; both 3.11 receipts pass their existing limits. Neither this run nor either earlier failed run supplies whole-campaign acceptance.
+- The accepted source bridge preserves the 8,988-node inventory and 964 selected receipt-phase cases. Lead assigned one prospective original diagnostic campaign with pytest's built-in reporting of the **50 slowest setup/call/teardown phases**, using existing timings and the default display filter. This adds hosted hotspot evidence, with no performance fix or acceptance inferred. Matrix, collection order, job-local PostgreSQL isolation, receipt schema, session limits and case coverage remain unchanged. Quality validates the reporting change; Review checks source and evidence before lead publication. Backend analyzes the resulting hosted durations before proposing a measured repair.
+- Full F2/P1/admitted startup and protected-main/candidate delivery remain pending. F3 remains source/interface audit only. Earlier dated snapshots and failed runs stay historical; [funding limits](delivery/CAPACITY_AND_FUNDING.md), holds, later gates and estimates are unchanged.
 
 **F2 inventories accepted; two original CI failures retained — 2026-10-30 (Pacific)**
 

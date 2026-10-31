@@ -2,7 +2,7 @@
 
 ## Current status
 
-See the [canonical summary and dated assignment log](ASSIGNMENTS.md#current-status). F1/main `89a43e43` remains accepted. F2's 8,988-node inventory and CI baseline apply to accepted source `c05eed2f`; applicability after the fixture correction awaits confirmation. PR129 retains both original failed runs. The corrected run passed security, package (including installed smoke) and isolation, but its Python 3.11 early and Python 3.12 all legs failed the fixture origin guard. Lead coordinates retained evidence, correction integration and original receipt/protected-main/candidate delivery. Full F2/P1/startup remain pending; F3 is source/interface design audit only. [Component history](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f2-service-and-native-checks-accepted-delivery-next--2026-10-30-pacific), [funding limits](delivery/CAPACITY_AND_FUNDING.md), later gates and estimates are unchanged.
+See the [canonical summary and dated assignment log](ASSIGNMENTS.md#current-status). F1/main 89a43e43 remains accepted. F2 components and the 8,988-node inventory apply to reviewed source 19b8c45c through the accepted source bridge, without a new full collection. Original PR129 run41177621013/1 passed all six core/support jobs; its complete Python 3.12 receipt exceeded the unchanged session limit. All originals are retained and independently reviewed. Lead prepares one original diagnostic campaign reporting the 50 slowest pytest phases to identify hosted hotspots; no performance fix is claimed. Full F2/P1/startup and protected-main/candidate delivery remain pending; F3 is source/interface audit only. [Component history](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f2-service-and-native-checks-accepted-delivery-next--2026-10-30-pacific), [funding limits](delivery/CAPACITY_AND_FUNDING.md), later gates and estimates are unchanged.
 
 ## Contents
 
@@ -1162,16 +1162,19 @@ The existing task graph reaches two distinct evidence targets:
 [assignable task cards](EXECUTION_BACKLOG.md) retain the exact dependencies and
 estimates. F2 service/native components are accepted at `33649347`, with
 separate Backend 60-case and independent 15-case evidence per interpreter.
-The 8,988-node inventory, declared skips and CI baseline apply to accepted
-source `c05eed2f`; a later fixture correction needs explicit collection-impact
-confirmation. Corrected PR129 run `41174177134/1` passed security, package
-(including installed smoke) and isolation, but its Python 3.11 early and
-Python 3.12 all legs failed the fixture origin guard. Both original failed
-runs remain retained without campaign acceptance. Integration of the reviewed correction,
-original receipt review, protected-main checks and the candidate's own
-installed/provenance proof remain required before full F2 acceptance.
-F3 is source/interface design audit only, without implementation or acceptance;
-later worker producers remain gated. Measured whole
+The 8,988-node inventory, declared skips and CI baseline apply to reviewed
+source 19b8c45c through the accepted source bridge, without new full collection.
+Original PR129 run41177621013/1 passed all six core/support jobs, but its
+complete Python 3.12 receipt took 3,839.488659 seconds and failed the unchanged
+3,600-second bound. The decoded pytest summary separately reports 8,957 passed,
+31 skipped and 3,839.53 seconds. Original receipts/logs are retained and
+independently reviewed; all three failed runs remain without campaign acceptance.
+One prospective original diagnostic campaign adds the 50 slowest pytest phases
+under the unchanged matrix, order, isolation, receipt schema and limits. It
+collects hosted hotspot evidence, with no performance fix claimed. Measured
+diagnosis/repair, successful original receipt review, protected-main checks and
+the candidate's own installed/provenance proof remain before full F2 acceptance. F3 is source/interface audit only, without
+implementation or acceptance; later producers remain gated. Measured whole
 fixture paths satisfy F2 foundation capacity under unchanged caps, without a
 universal maximum-data claim. Specified maximum online-consumer cohorts remain
 F4 work. P2 still needs its explicit storage/issuer/history decisions and reforecast before implementation. These are
