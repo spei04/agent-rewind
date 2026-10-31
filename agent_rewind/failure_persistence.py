@@ -220,9 +220,11 @@ def _association(
     scope: ReservationScope,
     operation_id: str,
     configuration: NativeConfiguration,
+    *,
+    _book: ReceiptBook | None = None,
 ) -> tuple[RawReceipt, RawReceipt, RawReceipt]:
     body = require_body(connection, scope)
-    book = ReceiptBook()
+    book = ReceiptBook() if _book is None else _book
     operation, op = read_operation(connection, scope.context, operation_id, book)
     job = read_job(connection, scope.context, scope.job_id, book)
     descriptor, config = read_descriptor(
