@@ -361,7 +361,7 @@ def _postgres_gates(connection: Connection, work: LedgerCheck) -> None:
             (171, 0, True),
         ),
         (
-            _PG_INDEXES
+            _PG_INDEXES  # noqa: S608 -- Both fragments are fixed source SQL literals.
             + """SELECT count(*),coalesce(sum(invalid),0)::bigint,
              coalesce(max(octet_length(definition)),0)<=65536,
              coalesce(sum(octet_length(definition)+coalesce(octet_length(predicate),0)),0)
@@ -689,7 +689,7 @@ def _postgres_indexes(connection: Connection, work: LedgerCheck) -> dict[str, li
     rows = (
         connection.execute(
             text(
-                _PG_INDEXES
+                _PG_INDEXES  # noqa: S608 -- Both fragments are fixed source SQL literals.
                 + """
         SELECT table_name,index_name,indisunique,indisprimary,indisvalid,indisready,
           definition,predicate,column_names,sort_options,constraint_kind,invalid

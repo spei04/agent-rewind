@@ -51,7 +51,7 @@ def _association(prefix: str) -> str:
                 AND o.payload_version=2 AND o.job_resource_kind='job'
                 AND o.failure_correlation_id IS NULL))))
       )
-    """
+    """  # noqa: S608 -- Sole caller supplies only "" or "public." as the prefix.
 
 
 def create_failure_schema(connection: Connection) -> None:
@@ -183,7 +183,7 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$failure$""")
+$failure$""")  # noqa: S608 -- Association expands only the fixed dialect template.
         connection.exec_driver_sql(
             "REVOKE ALL ON FUNCTION public.job_failure_evidence_guard() FROM PUBLIC"
         )
@@ -203,7 +203,7 @@ BEGIN
     THEN RAISE(ABORT,'existing failure evidence') END;
   SELECT CASE WHEN NOT EXISTS({association})
     THEN RAISE(ABORT,'invalid failure association') END;
-END""")
+END""")  # noqa: S608 -- Association expands only the fixed dialect template.
         for action in ("UPDATE", "DELETE"):
             connection.exec_driver_sql(f"""
 CREATE TRIGGER job_failure_evidence_{action.lower()}_guard
