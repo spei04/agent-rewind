@@ -2,6 +2,7 @@
 
 import hashlib
 import os
+import sqlite3
 from copy import deepcopy
 from dataclasses import fields
 from pathlib import Path
@@ -13,7 +14,7 @@ import sqlite_ar6_fixture as template_module
 from ledger_reader_fixture import ReaderFixture, sqlite_snapshot
 from ledger_restore_authority import typed
 from sqlalchemy import event
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlite_ar6_fixture import FreshSqliteAr6Template
 
 from agent_rewind.migrations.schema import ADMISSION
@@ -561,5 +562,110 @@ def test_close_error_after_native_capture_disposes_unreturned_copy(tmp_path, mon
         assert len(captured) == 1 and not (tmp_path / "retry.sqlite").exists()
     finally:
         for case in captured:
+            case.dispose()
+        template.close()
+
+
+def test_copied_engine_preserves_connection_policy_and_enforces_foreign_keys(tmp_path):
+    root, template = _template(tmp_path)
+    cases = []
+
+    def policy(connection):
+        raw = connection.connection.driver_connection
+        assert isinstance(raw, sqlite3.Connection)
+        assert not raw.in_transaction
+        result = {
+            "foreign_keys": connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one(),
+            "busy_timeout": connection.exec_driver_sql("PRAGMA busy_timeout").scalar_one(),
+            "isolation_level": raw.isolation_level,
+            "autocommit": getattr(raw, "autocommit", None),
+        }
+        assert not raw.in_transaction
+        connection.rollback()
+        return result
+
+    def refuse_missing_parent(connection):
+        raw = connection.connection.driver_connection
+        assert not raw.in_transaction
+        project = connection.exec_driver_sql(
+            "SELECT id,organization_id FROM projects ORDER BY id LIMIT 1"
+        ).one()
+        missing = "f" * 32
+        assert (
+            connection.exec_driver_sql(
+                "SELECT count(*) FROM organizations WHERE id=?", (missing,)
+            ).scalar_one()
+            == 0
+        )
+        connection.rollback()
+        with pytest.raises(IntegrityError) as refused:
+            connection.exec_driver_sql(
+                "UPDATE projects SET organization_id=? WHERE id=?", (missing, project[0])
+            )
+        assert refused.value.orig.sqlite_errorcode == sqlite3.SQLITE_CONSTRAINT_FOREIGNKEY
+        assert raw.in_transaction
+        assert (
+            connection.exec_driver_sql(
+                "SELECT organization_id FROM projects WHERE id=?", (project[0],)
+            ).scalar_one()
+            == project[1]
+        )
+        connection.rollback()
+        assert not raw.in_transaction and not connection.in_transaction()
+
+    try:
+        original = reader.complete_ar6(tmp_path / "original.sqlite", legacy=False)
+        cases.append(original)
+        original_rows = sqlite_snapshot(original.path)
+        with original.engine.connect() as connection:
+            assert any(
+                tuple(row[2:5]) == ("organizations", "organization_id", "id")
+                for row in connection.exec_driver_sql("PRAGMA foreign_key_list(projects)")
+            )
+            assert (
+                connection.exec_driver_sql(
+                    "SELECT count(*) FROM sqlite_master "
+                    "WHERE type='trigger' AND tbl_name='projects'"
+                ).scalar_one()
+                == 0
+            )
+            expected = policy(connection)
+            assert expected["foreign_keys"] == 1 and expected["isolation_level"] == ""
+            assert expected["autocommit"] == getattr(sqlite3, "LEGACY_TRANSACTION_CONTROL", None)
+            refuse_missing_parent(connection)
+        assert sqlite_snapshot(original.path) == original_rows
+
+        copied = template.copy_to(tmp_path / "copied.sqlite")
+        cases.append(copied)
+        sibling = template.copy_to(tmp_path / "sibling.sqlite")
+        cases.append(sibling)
+        source_before = _witness(root / "fresh.sqlite")
+        sibling_before = _witness(sibling.path)
+        sibling_rows = sqlite_snapshot(sibling.path)
+        copied_rows = sqlite_snapshot(copied.path)
+        with copied.engine.connect() as first, copied.engine.connect() as simultaneous:
+            # Keep the objects alive across disposal to rule out Python id reuse.
+            previous_raw = [
+                first.connection.driver_connection,
+                simultaneous.connection.driver_connection,
+            ]
+            assert previous_raw[0] is not previous_raw[1]
+            for connection in (first, simultaneous):
+                assert policy(connection) == expected
+                refuse_missing_parent(connection)
+                assert sqlite_snapshot(copied.path) == copied_rows
+        assert copied.engine.pool.checkedout() == 0
+        copied.engine.dispose()
+        with copied.engine.connect() as reopened:
+            assert all(reopened.connection.driver_connection is not raw for raw in previous_raw)
+            assert policy(reopened) == expected
+            refuse_missing_parent(reopened)
+        assert copied.engine.pool.checkedout() == 0
+        assert sqlite_snapshot(copied.path) == copied_rows
+        assert _witness(root / "fresh.sqlite") == source_before
+        assert _witness(sibling.path) == sibling_before
+        assert sqlite_snapshot(sibling.path) == sibling_rows
+    finally:
+        for case in cases:
             case.dispose()
         template.close()
