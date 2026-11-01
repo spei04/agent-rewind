@@ -41,13 +41,25 @@ class ReservationCase:
 
 
 def build_reservation_case(
-    tmp_path, monkeypatch, *, budget=1_000_000, account_limit=1_000_000, legacy=False
+    tmp_path,
+    monkeypatch,
+    *,
+    budget=1_000_000,
+    account_limit=1_000_000,
+    legacy=False,
+    fresh_ar6_template=None,
 ):
     if type(budget) is not int or not 1 <= budget <= 200_000_000:
         raise ValueError("invalid_fixture_budget")
     if type(account_limit) is not int or not 0 <= account_limit <= 2**63 - 1:
         raise ValueError("invalid_fixture_account_limit")
-    fixture = build_case(tmp_path / "reservations.db", legacy=legacy)
+    fixture = (
+        build_case(tmp_path / "reservations.db", legacy=legacy)
+        if fresh_ar6_template is None
+        else build_case(
+            tmp_path / "reservations.db", legacy=legacy, fresh_ar6_template=fresh_ar6_template
+        )
+    )
     engine = None
     events = []
     try:

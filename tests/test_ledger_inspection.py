@@ -117,10 +117,12 @@ def test_original_api_key_grant_remains_valid_without_live_membership_equality(
         case.dispose()
 
 
-def test_expiry_between_descriptor_validations_stops_before_the_next_body(tmp_path, monkeypatch):
+def test_expiry_between_descriptor_validations_stops_before_the_next_body(
+    tmp_path, monkeypatch, fresh_sqlite_ar6_template
+):
     from agent_rewind.migrations import ledger_reader_financial, ledger_work
 
-    case = seed_ar7(complete_ar6(tmp_path / "reader.sqlite"))
+    case = seed_ar7(fresh_sqlite_ar6_template.copy_to(tmp_path / "reader.sqlite"))
     engine = None
     try:
         ledger_reader_fixture.later_admitted_call(case, effect="settled")
@@ -178,7 +180,9 @@ def integration_reader_case(request, tmp_path):
     case = (
         complete_postgres_ar6(native, legacy=False)
         if native is not None
-        else complete_ar6(tmp_path / "integration.sqlite")
+        else request.getfixturevalue("fresh_sqlite_ar6_template").copy_to(
+            tmp_path / "integration.sqlite"
+        )
     )
     try:
         yield case, native

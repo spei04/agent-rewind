@@ -2,12 +2,10 @@
 
 ## Current status
 
-- **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129), including installed-package evidence.
-- **Validated:** 35 source-qualified F3 cases per interpreter, reviewed 9,198-node inventories, unchanged skip allowances and 16 baseline controls. [Qualifications](VALIDATION.md#remaining-f3-controls).
-- **Assigned:** Backend handles concrete fixes; Quality runs configured checks; Lead owns planned source-only publication, required CI and installed delivery, with Review.
-- **Next:** Full F3 acceptance remains pending before F4/F5/P2; funding, live startup and production remain gated.
-- **Dashboard:** The saved monochrome dashboard is unchanged; its private preview has expired.
-
+- **Verified:** Four diagnostic cases and 165 existing CI controls per Python version passed. The full-timing display change is reviewed.
+- **Blocked:** The original Python 3.12 run exceeded its 3,600-second limit by 56.450653 seconds; [F3 remains open](VALIDATION.md#remaining-f3-controls).
+- **Next:** Quality captures one diagnostic CI run; Review verifies its timing evidence. Keep all execution and receipt limits unchanged.
+- **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -24,6 +22,101 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**CI timing visibility decision — 2026-11-01 (Pacific)**
+
+- Backend and Quality investigated shared storage setup at `3f735a26`. Collection retained 9,231 ordered IDs and found 60 static root-storage consumers, with overrides and dynamic requests kept explicit. Three original engine cases passed; their migration spans were 0.920340, 0.030190 and 0.030657 seconds. The first sample excludes interpreter startup and collection. This does not justify shared database templates.
+- A separate original fresh PostgreSQL completion case passed. Seven unchanged `whole_state` captures totaled 0.814086 seconds within its 2.941002-second call phase. All native assertions and process/database cleanup passed independent review; no removable work or suite-wide saving was established.
+- Backend prepared the two-file change at `5b8e52b2`: use pytest's existing full-duration display and update the existing workflow expectation. All 165 relevant controls passed per interpreter, with 495 phase rows displayed, including rounded zeros. Receipt schemas, limits, ordering, tests and dependencies are unchanged.
+- Quality prepared explicit bounded capture and reproduced the 814,301-byte original log exactly. Review accepted the source, offline controls and small transfer; larger-log completeness remains unproven. Lead owns the complete one-run decision and publication. No unchanged-source retry, performance-repair claim or F4 start follows from these diagnostics.
+
+**Third PR131 duration-gate failure — 2026-11-01 (Pacific)**
+
+- At `369e033b`, [run 41347058924, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41347058924) passed all six component jobs. The required gate failed: the full Python 3.12 UTC receipt spans 3,656.450653 seconds, exceeding 3,600 by 56.450653.
+- Quality retained the original logs and receipts once. Review verified all 9,231 ordered IDs, expected skips, 7,242 required phase facts and 120 passing phase facts for the 20 previously added cases. Both Python 3.11 legs met their limits. Source, environments and private data were preserved; owned processes were released.
+- Backend owns a source-based investigation of repeated setup cost. The top-50 timing rows are partial; phase outcomes do not supply missing durations. The expired-opening SQLite case requires a real 150-second native horizon, so it is not an established optimization target.
+- Lead records the failure and keeps F3 open. A further hosted attempt requires a reviewed change and a defensible aggregate timing case, preserving the full Python 3.12 order and the 2,700 / 2,700 / 3,600-second limits. There is no unchanged-source retry or F4 start.
+
+**Additional SQLite fixture reuse validated — 2026-11-01 (Pacific)**
+
+- Backend extended the existing template to 42 explicit cases in four test files at `646d9c0c`. Four provenance/budget-drift controls retain their original fixture path. Test names, parameters, assertions, native limits and PostgreSQL behavior are unchanged.
+- Quality ran 42 Python 3.12 baseline cases at `03f1ed37`, then the same 42 cases and four exclusions on each candidate interpreter. All 134 executions passed once across 23 groups. Review verified original outcomes, setup counts, source/environment preservation and process release.
+- Matched Python 3.12 JUnit time fell from 38.819 to 24.361 seconds, a 14.458-second local reduction. Child time fell separately by 14.655676 seconds. Each of the seven candidate groups includes a cold build; nested setup spans are not added. Existing controls are common CI cost and are not deducted again.
+- Both final collections at `646d9c0c` retained the exact 9,231 IDs, order and skip declarations without executing bodies. Scoped lint, format and committed-diff whitespace checks passed. Two known import-time expiry values retain their explicit prior qualification; the stopped raw-value analysis is preserved. Application code and other configured-check inputs are unchanged.
+- Lead owns publication and one required current-source CI measurement. Quality retains originals; Review checks required CI and exact-main delivery. The earlier failed runs remain retained. No whole-CI margin, F3 acceptance or research repair result is claimed.
+
+**Second PR131 run failed the duration gate — 2026-11-01 (Pacific)**
+
+- Lead published `2e8e44c1`. The original [run 41336608900, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41336608900) passed all six component jobs, but Python 3.12 exceeded its unchanged 3,600-second limit by 15.714774 seconds. Both Python 3.11 legs were within 2,700 seconds. F3 remains unaccepted; no unchanged-source rerun was started.
+- Quality retained the original receipts, logs, ordered inventories, skips and phase results. Review independently verified the failure and process release. Candidate delivery is expected to skip on pull requests; its skip is not evidence of main delivery.
+- Backend confirmed 42 further uses of the existing SQLite template across four test files. Quality owns a bounded, matched comparison and the four excluded fixture-selection controls; Review checks source, results and cost. These cases remain unimplemented at this checkpoint. PostgreSQL restore and new helper abstractions remain outside this correction.
+- Lead reconciled superseded ledger status in PLAN with its dated October 29 acceptance and the current assignment log. The ledger delivery and the still-open worker F3 delivery remain distinct. No additional full CI is authorized solely for this documentation change.
+
+**Final inventory and source checks completed — 2026-11-01 (Pacific)**
+
+- Quality collected 9,231 ordered test IDs on each interpreter. All 9,211 prior IDs remain once and in order; the 20 additions are three positive-duration cases, one capacity rollback regression and 16 SQLite helper controls. Collection ran no tests or fixtures.
+- Review accepted the exact four count/digest fields, preserving expected skips and the 4,809 / 4,422 / 9,231 partitions. Commit `186151f5` changes only that metadata. The 16 retained CI controls and nine configured lint, format, type, contract, security, JavaScript and lockfile checks passed; source, environments and process cleanup were verified.
+- Lead owns publication and the required PR/main runs. Quality retains originals and checks the exact main package; Review independently verifies the results. Backend checked the unchanged workflow: candidate delivery is expected to skip on PRs and requires a successful protected-main build. No CI time limit, native assertion or test order changed.
+- The grouped local comparisons are software-validation evidence. They do not predict whole-CI margin or establish research repair performance. Full F3 acceptance, F4 implementation, provider spending and production remain gated.
+
+**Validation scope frozen — 2026-11-01 (Pacific)**
+
+- Quality ran one original fresh PostgreSQL completion case on Python 3.12; it passed. The original `complete_postgres_ar6` span took 1.394928 seconds, including its admission initialization, capture and drain. Unique database and role creation precede the span; later operator admission and native completion checks remain outside it. Review verified the original result and cleanup.
+- The measured setup cost does not justify a PostgreSQL restore implementation now. The additional 42 SQLite candidates also remain unimplemented. Backend's ownership findings are retained for future work.
+- Lead froze the tested scope. Quality owns actual full test collection, permitted baseline metadata reconciliation and configured checks; Review checks the results. The next runtime gate is one required whole-CI measurement, with unchanged limits, test order and assertions.
+- The 102-case SQLite comparison ran on Python 3.12 only; its 16 controls passed on both interpreters. The 27 grouped cold builds include 23.560444 seconds of nested work, which cannot be added to measured savings or treated as a whole-CI forecast. No new provider call or production action is part of this handoff.
+
+**SQLite comparison completed — 2026-11-01 (Pacific)**
+
+- Backend applied the existing SQLite connection utility before capture. Quality's added native regression checks initial, separate and reopened connections, real foreign-key refusal, rollback and preserved source/sibling state. All 16 controls passed per interpreter at `8f9fd7e5`.
+- The corrected candidate passed the same 102 existing cases as the original baseline, in the same 27 groups. Independent review accepted all originals and cleanup. The failed `996afee8` attempt and its costs remain separate.
+- Emitted JUnit totals fell from 270.127 to 240.499 seconds. Charging all 16 controls' 8.694 seconds leaves a 20.934-second local reduction. The separate child-time measure leaves 19.704630 seconds after its control cost. Each candidate group includes a cold build, copies, native capture and cleanup.
+- The earlier capacity slice's 27.754 seconds and this slice's 20.934 seconds add to 48.688 seconds only as local arithmetic. That leaves 59.346295 seconds of the earlier 108.034295-second overrun unexplained under that comparison; it is not an observed whole-CI residual or margin.
+- The next bounded action is one existing fresh PostgreSQL setup measurement. Backend identified 38 potential cases in two failure families and confirmed distinct per-case owners and roles. Direct database-template cloning would retain incompatible object owners/ACLs; owner-free restore remains unproven. Quality will time the original builder before any reuse implementation, with independent Review and unchanged native checks.
+- Lead retains the full CI and delivery gates. These are software-validation results, not research repairs. No new model call or production action has run.
+
+**Fixture comparison stopped on connection policy — 2026-11-01 (Pacific)**
+
+- At `996afee8`, 15 helper controls passed on each interpreter. Review accepted the filesystem isolation and cleanup evidence. The earlier exception-note assertion failure remains separately recorded.
+- Quality ran all 102 baseline cases once in 27 groups. Their phase durations total 270.127504 seconds; child runtimes total 375.578187 seconds. These are separate measures.
+- The candidate stopped at the first case's setup: the native oracle observed `PRAGMA foreign_keys = 0`, where it requires `1`. No candidate case passed. File and catalog equality did not establish connection-policy equivalence.
+- Backend owns the connection setup correction using the existing SQLite engine utility; Quality owns native enforcement coverage; Review checks the result before the comparison continues. Passing baseline tests will not be repeated solely to repair evidence metadata.
+- Lead retains the failed full CI gate and the expired-preview warning. The corrected baseline release index preserves its malformed predecessor and the original handoff; recovered SSH response losses did not cause test retries. No SQLite performance saving, new model call or F3 acceptance is claimed.
+
+**Capacity fixture validation completed — 2026-11-01 (Pacific)**
+
+- Backend preserved the 255 separate provision transactions and per-commit state while removing repeated source digest calculation from the four exclusive PostgreSQL fixtures. Production readers, generic provisioning and SQLite behavior are unchanged.
+- Quality ran the four retained cases and a real final-source-change rollback regression once per interpreter. Review verified all ten passes, original native limits and complete database/process release.
+- The four matched Python 3.12 cases took 48.762 seconds against 87.521 before. Including the new regression's 11.005 seconds leaves a 27.754-second local slice reduction; no full-suite margin is claimed.
+- Lead retains the failed CI gate. SQLite ar6 fixture reuse is a separate proposed measurement, with independent databases and all per-case admission, ledger, authority and ar8 checks preserved. The SQLite proposal has not run; no new model calls were made.
+
+**PR131 original time gate failed; receipt boundary corrected — 2026-11-01 (Pacific)**
+
+- The original PR131 run completed 9,211 outcomes, including 9,180 passes and
+  31 skips on Python 3.12, but its receipt duration was 3,708.034295 seconds
+  against the unchanged 3,600-second limit. This is not campaign acceptance.
+- Backend corrected the zero-duration validator boundary and its focused
+  regressions. The UTC receipt format and upper limits are unchanged; no
+  monotonic timing claim or fixture optimization follows from this correction.
+- The original failures and expired preview remain preserved. Quality owns
+  subsequent inventory/checks; Lead owns delivery after a supported performance
+  correction, with independent Review. See
+  [validation](VALIDATION.md#remaining-f3-controls).
+
+**Catalog reflection correction validated — 2026-11-01 (Pacific)**
+
+- PR130 merged the worker failure records and plain dashboard. Its original
+  main run failed the full Python 3.12 time gate; candidate delivery was skipped.
+- Backend implemented bounded, fresh PostgreSQL catalog batching. Quality
+  supplied regression coverage and exact execution controls; Review checked
+  the original results. All 26 focused cases passed per interpreter.
+- The same-environment two-case comparison reduced the pytest child from
+  29.370009 to 25.655575 seconds, with all 21 ordered snapshots matching.
+  This single local pair does not establish full-session margin.
+- Lead owns source integration and delivery. Quality next collects both actual
+  inventories and runs configured checks, with independent Review. The original
+  CI and pre-test launcher failures remain qualified in
+  [validation](VALIDATION.md#remaining-f3-controls); F3 acceptance is pending.
 
 **F3 CI inventory and baseline controls completed — 2026-10-31 (Pacific)**
 

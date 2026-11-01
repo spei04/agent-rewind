@@ -11,6 +11,8 @@ from typing import Any
 
 from sqlalchemy import inspect, text
 from sqlalchemy.engine import Connection
+from sqlalchemy.engine.reflection import Inspector, ObjectKind, ObjectScope
+from sqlalchemy.exc import NoSuchTableError
 
 BASELINE = "ar_0001_baseline"
 HEAD = "ar_0002_adoption"  # Explicit install/adopt preparation target, retained for compatibility.
@@ -513,6 +515,47 @@ def schema_table_names(connection: Connection) -> tuple[list[str], str | None]:
     return tables, revision
 
 
+def _postgres_catalog_reflection(
+    inspector: Inspector, tables: list[str]
+) -> dict[str, dict[str, Any]]:
+    """Bound columns first, then read each remaining family on this same inspector."""
+    names = sorted(tables)
+    reflected: dict[str, dict[str, Any]] = {}
+    for table in names:
+        columns = inspector.get_columns(table, schema="public")
+        if len(columns) > 32:
+            raise MigrationRefused("schema_incompatible")
+        reflected[table] = {"columns": columns}
+    if not names:
+        return reflected
+    expected = {("public", table) for table in names}
+    for family, read in (
+        ("indexes", inspector.get_multi_indexes),
+        ("uniques", inspector.get_multi_unique_constraints),
+        ("pk", inspector.get_multi_pk_constraint),
+        ("foreign_keys", inspector.get_multi_foreign_keys),
+        ("checks", inspector.get_multi_check_constraints),
+    ):
+        values = read(
+            schema="public",
+            filter_names=names,
+            kind=ObjectKind.TABLE,
+            scope=ObjectScope.DEFAULT,
+        )
+        if set(values) - expected:
+            raise MigrationRefused("schema_incompatible")
+        for table in names:
+            try:
+                value = values.pop(("public", table))
+            except KeyError:
+                # Match the pinned single-table reflector's missing-table semantics.
+                raise NoSuchTableError(f"public.{table}") from None
+            # Transfer references rather than duplicate decoded metadata. The caller
+            # consumes these per-table entries through the existing normalizers.
+            reflected[table][family] = value
+    return reflected
+
+
 def catalog(connection: Connection) -> dict[str, Any]:
     """Read bounded structure and the exact revision-owned executable inventory."""
     name = dialect(connection)
@@ -575,12 +618,22 @@ def catalog(connection: Connection) -> dict[str, Any]:
         )
         if extras or executable:
             raise MigrationRefused("schema_incompatible")
+    postgres = _postgres_catalog_reflection(inspector, tables) if name == "postgresql" else None
     result: dict[str, Any] = {}
     for table in sorted(tables):
-        columns = inspector.get_columns(table, schema=schema)
+        reflected = postgres.pop(table) if postgres is not None else None
+        columns = (
+            inspector.get_columns(table, schema=schema)
+            if reflected is None
+            else reflected["columns"]
+        )
         if len(columns) > 32:
             raise MigrationRefused("schema_incompatible")
-        indexes = inspector.get_indexes(table, schema=schema)
+        indexes = (
+            inspector.get_indexes(table, schema=schema)
+            if reflected is None
+            else reflected["indexes"]
+        )
         for reflected_index in indexes:
             if "dialect_options" in reflected_index:
                 reflected_index["dialect_options"] = {
@@ -632,9 +685,9 @@ def catalog(connection: Connection) -> dict[str, Any]:
             if any(r[1] == table and (r[4] or r[5]) for r in options):
                 raise MigrationRefused("schema_incompatible")
         else:
-            uniques = sorted(
-                [c["column_names"] for c in inspector.get_unique_constraints(table, schema=schema)]
-            )
+            if reflected is None:
+                raise MigrationRefused("schema_incompatible")
+            uniques = sorted([c["column_names"] for c in reflected["uniques"]])
         result[table] = {
             "columns": [
                 [
@@ -647,10 +700,22 @@ def catalog(connection: Connection) -> dict[str, Any]:
                 ]
                 for c in columns
             ],
-            "pk": inspector.get_pk_constraint(table, schema=schema)["constrained_columns"],
+            "pk": (
+                inspector.get_pk_constraint(table, schema=schema)
+                if reflected is None
+                else reflected["pk"]
+            )["constrained_columns"],
             "uniques": uniques,
-            "foreign_keys": inspector.get_foreign_keys(table, schema=schema),
-            "checks": inspector.get_check_constraints(table, schema=schema),
+            "foreign_keys": (
+                inspector.get_foreign_keys(table, schema=schema)
+                if reflected is None
+                else reflected["foreign_keys"]
+            ),
+            "checks": (
+                inspector.get_check_constraints(table, schema=schema)
+                if reflected is None
+                else reflected["checks"]
+            ),
             # Reflection values retain their SQLAlchemy types; the persisted
             # catalog uses JSON arrays without dropping sort/null-order modifiers.
             "indexes": [

@@ -9,6 +9,7 @@ import test_migrations_postgres as migration_tests
 from ledger_reader_fixture import complete_ar6
 from ledger_service_fixture import service_postgres_state
 from sqlalchemy import inspect, text
+from sqlalchemy.engine.reflection import ObjectKind, ObjectScope
 from test_ledger_service import intent, invoke
 
 from agent_rewind.migrations.failure_schema import create_failure_schema
@@ -292,11 +293,39 @@ def full_shape(connection, raw):
     sqlite = connection.dialect.name == "sqlite"
     schema = None if sqlite else "public"
     names = sorted(raw["tables"]) if sqlite else [r[0] for r in raw["table_names"]]
+    postgres = {}
+    if not sqlite and names:
+        # Reflect this observation's exact ordinary tables; never reuse a prior snapshot.
+        options = {
+            "schema": schema,
+            "filter_names": names,
+            "kind": ObjectKind.TABLE,
+            "scope": ObjectScope.DEFAULT,
+        }
+        postgres = {
+            "columns": observer.get_multi_columns(**options),
+            "indexes": observer.get_multi_indexes(**options),
+            "uniques": observer.get_multi_unique_constraints(**options),
+            "pk": observer.get_multi_pk_constraint(**options),
+            "foreign_keys": observer.get_multi_foreign_keys(**options),
+            "checks": observer.get_multi_check_constraints(**options),
+        }
+        expected = {(schema, name) for name in names}
+        assert len(expected) == len(names)
+        assert all(set(rows) == expected for rows in postgres.values())
     result = {}
     for name in names:
-        columns = observer.get_columns(name, schema=schema)
+        columns = (
+            observer.get_columns(name, schema=schema)
+            if sqlite
+            else postgres["columns"][schema, name]
+        )
         assert len(columns) <= 32
-        indexes = observer.get_indexes(name, schema=schema)
+        indexes = (
+            observer.get_indexes(name, schema=schema)
+            if sqlite
+            else postgres["indexes"][schema, name]
+        )
         for index in indexes:
             if "dialect_options" in index:
                 index["dialect_options"] = {
@@ -315,9 +344,7 @@ def full_shape(connection, raw):
                 ]
             )
         else:
-            uniques = sorted(
-                c["column_names"] for c in observer.get_unique_constraints(name, schema=schema)
-            )
+            uniques = sorted(c["column_names"] for c in postgres["uniques"][schema, name])
         result[name] = {
             "columns": [
                 [
@@ -330,10 +357,22 @@ def full_shape(connection, raw):
                 ]
                 for c in columns
             ],
-            "pk": observer.get_pk_constraint(name, schema=schema)["constrained_columns"],
+            "pk": (
+                observer.get_pk_constraint(name, schema=schema)
+                if sqlite
+                else postgres["pk"][schema, name]
+            )["constrained_columns"],
             "uniques": uniques,
-            "foreign_keys": observer.get_foreign_keys(name, schema=schema),
-            "checks": observer.get_check_constraints(name, schema=schema),
+            "foreign_keys": (
+                observer.get_foreign_keys(name, schema=schema)
+                if sqlite
+                else postgres["foreign_keys"][schema, name]
+            ),
+            "checks": (
+                observer.get_check_constraints(name, schema=schema)
+                if sqlite
+                else postgres["checks"][schema, name]
+            ),
             "indexes": [i for i in indexes if not i.get("duplicates_constraint")],
         }
         if sqlite:

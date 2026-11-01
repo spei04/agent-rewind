@@ -158,8 +158,14 @@ class ProvisioningFixture:
         self.case.dispose()
 
 
-def build_case(path, *, legacy=True):
-    case = complete_ar6(path, legacy=legacy)
+def build_case(path, *, legacy=True, fresh_ar6_template=None):
+    if fresh_ar6_template is not None and legacy:
+        raise ValueError("fresh_ar6_requires_fresh")
+    case = (
+        complete_ar6(path, legacy=legacy)
+        if fresh_ar6_template is None
+        else fresh_ar6_template.copy_to(path)
+    )
     try:
         original = source_rows(case.path)
         with reader(case.path) as connection:
