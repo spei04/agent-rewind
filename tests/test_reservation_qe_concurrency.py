@@ -23,8 +23,10 @@ from agent_rewind.reservation_types import ClaimIntent, ReservationRefusal
 
 
 @pytest.fixture
-def case(tmp_path, monkeypatch):
-    value = build_reservation_case(tmp_path, monkeypatch)
+def case(tmp_path, monkeypatch, fresh_sqlite_ar6_template):
+    value = build_reservation_case(
+        tmp_path, monkeypatch, fresh_ar6_template=fresh_sqlite_ar6_template
+    )
     yield value
     value.close()
 

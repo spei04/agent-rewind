@@ -259,17 +259,26 @@ def restore_producer_grant(case, before):
 
 
 @contextmanager
-def genuine_failure_case(tmp_path, monkeypatch, record_property, *, pg=None, legacy=False):
+def genuine_failure_case(
+    tmp_path, monkeypatch, record_property, *, pg=None, legacy=False, fresh_ar6_template=None
+):
     """Admit/provision genuinely, upgrade to ar8, then expose a restricted claim fixture.
 
     The existing predecessor builder confines its synthetic readiness adapter to
     admission. No override survives into F2 setup or the forthcoming F3 call.
     """
-    case = (
-        build_reservation_case(tmp_path, monkeypatch, legacy=legacy)
-        if pg is None
-        else build_postgres_reservation_case(pg, tmp_path, monkeypatch, legacy=legacy)
-    )
+    if fresh_ar6_template is not None and (pg is not None or legacy):
+        raise ValueError("fresh_ar6_requires_fresh")
+    if fresh_ar6_template is not None:
+        case = build_reservation_case(
+            tmp_path, monkeypatch, legacy=False, fresh_ar6_template=fresh_ar6_template
+        )
+    else:
+        case = (
+            build_reservation_case(tmp_path, monkeypatch, legacy=legacy)
+            if pg is None
+            else build_postgres_reservation_case(pg, tmp_path, monkeypatch, legacy=legacy)
+        )
     primary = None
     old_acl = None
     try:
@@ -321,8 +330,18 @@ def legacy():
 @pytest.fixture(params=["sqlite", pytest.param("postgresql", marks=POSTGRES)])
 def failure_case(request, tmp_path, monkeypatch, record_property, legacy):
     selected_pg = request.getfixturevalue("pg") if request.param == "postgresql" else None
+    template = (
+        request.getfixturevalue("fresh_sqlite_ar6_template")
+        if selected_pg is None and not legacy
+        else None
+    )
     with genuine_failure_case(
-        tmp_path, monkeypatch, record_property, pg=selected_pg, legacy=legacy
+        tmp_path,
+        monkeypatch,
+        record_property,
+        pg=selected_pg,
+        legacy=legacy,
+        fresh_ar6_template=template,
     ) as fixture:
         yield fixture
 

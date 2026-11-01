@@ -468,7 +468,10 @@ def test_service_key_completion_or_native_revocation_consumes_genuine_event(
     request, tmp_path, monkeypatch, record_property, dialect, revoked
 ):
     native = request.getfixturevalue("pg") if dialect == "postgresql" else None
-    with genuine_failure_case(tmp_path, monkeypatch, record_property, pg=native) as fixture:
+    template = request.getfixturevalue("fresh_sqlite_ar6_template") if dialect == "sqlite" else None
+    with genuine_failure_case(
+        tmp_path, monkeypatch, record_property, pg=native, fresh_ar6_template=template
+    ) as fixture:
         original_case = fixture.case
         case, actions, key_id = _service_key(original_case, record_property)
         controls = observe_controls(monkeypatch)
@@ -520,7 +523,10 @@ def test_terminal_wrong_scope_consumes_genuine_event_before_native_work(
     request, tmp_path, monkeypatch, record_property, dialect, scope
 ):
     native = request.getfixturevalue("pg") if dialect == "postgresql" else None
-    with genuine_failure_case(tmp_path, monkeypatch, record_property, pg=native) as fixture:
+    template = request.getfixturevalue("fresh_sqlite_ar6_template") if dialect == "sqlite" else None
+    with genuine_failure_case(
+        tmp_path, monkeypatch, record_property, pg=native, fresh_ar6_template=template
+    ) as fixture:
         case = fixture.case
         controls = observe_controls(monkeypatch)
         with genuine_terminal_event(case, controls, record_property) as issued:
