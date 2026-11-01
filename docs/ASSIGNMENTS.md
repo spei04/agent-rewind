@@ -2,12 +2,9 @@
 
 ## Current status
 
-- **Merged:** [PR130](https://github.com/spei04/agent-rewind/pull/130) adds worker failure records and the simple black-and-white dashboard. Its private preview has expired.
-- **Blocker:** Original main [run 41241550155](https://github.com/spei04/agent-rewind/actions/runs/41241550155) failed the CI gate: the full Python 3.12 session took 3,928.283202 seconds against a 3,600-second limit. Candidate delivery was skipped.
-- **Verified correction:** The shared schema reader preserves the existing column limit and batches the other five PostgreSQL reflection families. All 26 focused cases passed on each interpreter; [validation](VALIDATION.md#remaining-f3-controls) keeps source and failure qualifications explicit.
-- **Inventory:** Reviewed collection found 9,211 ordered tests per interpreter, preserving all 9,198 prior tests and adding 13. The four count/digest fields and 16 retained CI controls are verified.
-- **Assigned:** Quality owns configured checks; Review checks original evidence; Lead owns publication and required delivery. Backend handles concrete findings.
-- **Next:** Full F3 acceptance still requires passing required CI and verification of the exact main candidate. F4/F5/P2, live startup, funding and production remain gated.
+- **Blocked:** [PR131](https://github.com/spei04/agent-rewind/pull/131) completed 9,211 outcomes but failed the Python 3.12 time gate by 108.034295 seconds. Full F3 and exact-main candidate acceptance remain pending.
+- **Current:** Zero-duration receipts now fail validation; upper limits, order and skips are unchanged. [Validation](VALIDATION.md#remaining-f3-controls) retains original failures and qualified local checks. The private preview remains expired.
+- **Next:** Backend prepares a supported cost correction; Quality owns inventory/checks, Review verifies evidence, and Lead owns delivery after credible margin. F4/F5/P2, live startup, funding and production remain gated.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -24,6 +21,19 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**PR131 original time gate failed; receipt boundary corrected — 2026-11-01 (Pacific)**
+
+- The original PR131 run completed 9,211 outcomes, including 9,180 passes and
+  31 skips on Python 3.12, but its receipt duration was 3,708.034295 seconds
+  against the unchanged 3,600-second limit. This is not campaign acceptance.
+- Backend corrected the zero-duration validator boundary and its focused
+  regressions. The UTC receipt format and upper limits are unchanged; no
+  monotonic timing claim or fixture optimization follows from this correction.
+- The original failures and expired preview remain preserved. Quality owns
+  subsequent inventory/checks; Lead owns delivery after a supported performance
+  correction, with independent Review. See
+  [validation](VALIDATION.md#remaining-f3-controls).
 
 **Catalog reflection correction validated — 2026-11-01 (Pacific)**
 

@@ -277,6 +277,26 @@ CI controls passed; the original analysis and pre-mutation preparation failures
 remain retained separately. These are inventory and gate controls, not a
 successful full CI session.
 
+The original [PR131 run 41289850037, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41289850037)
+at `1c0572f5` completed all 9,211 ordered outcomes, but failed the required
+elapsed-time gate. The Python 3.11 early and late receipts were 1,934.435499
+and 1,093.779826 seconds, within their unchanged 2,700-second limits.
+Python 3.12 completed 9,180 passes and 31 expected skips; its exact UTC
+receipt duration was 3,708.034295 seconds, exceeding 3,600 by 108.034295
+seconds. The pytest summary of 3,708.14 seconds is a separate observation.
+Independent review verified the original receipts, expected skips and 7,242
+selected terminal phase facts. Those facts do not override the duration
+failure or establish full F3 delivery.
+
+The receipt validator now rejects a zero interval as well as a negative one.
+Its focused boundary regressions cover all three legs, one microsecond (the
+smallest positive serialized UTC interval), exact upper limits and one
+microsecond over. Timestamp, type, schema, source and outcome rules remain
+unchanged. UTC fields remain audit evidence; no monotonic duration is inferred
+or synthesized. Fresh inventory and required CI apply to the final composed
+correction. Local diagnostic profiles are not measured full-session savings;
+fixture optimization remains unapplied pending a supported performance scope.
+
 Full F3 acceptance still precedes F4/F5/P2. No new model calls,
 public preview, live startup or production acceptance follows from these checks.
 
