@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Both interpreters collect 9,231 tests, retaining all prior IDs. The 16 CI controls and nine configured source checks passed.
-- **Next:** Lead publishes the reviewed changes to [PR131](https://github.com/spei04/agent-rewind/pull/131). Quality and Review verify required CI and the exact main candidate.
-- **Gate:** The earlier full-CI run exceeded its unchanged limit by 108.034295 seconds. Full F3 acceptance remains open; [validation](VALIDATION.md#remaining-f3-controls) retains the evidence and limits.
+- **Verified:** All six component jobs passed at `2e8e44c1`; both Python 3.11 legs met their limits.
+- **Blocked:** Python 3.12 took 3,615.714774 seconds, exceeding 3,600 by 15.714774. [Original results](VALIDATION.md#remaining-f3-controls) remain retained; F3 acceptance is open.
+- **Next:** Backend prepares 42 additional SQLite fixture opt-ins. Quality measures the bounded comparison; Review checks correctness and cost before another full attempt.
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,13 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Second PR131 run failed the duration gate — 2026-11-01 (Pacific)**
+
+- Lead published `2e8e44c1`. The original [run 41336608900, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41336608900) passed all six component jobs, but Python 3.12 exceeded its unchanged 3,600-second limit by 15.714774 seconds. Both Python 3.11 legs were within 2,700 seconds. F3 remains unaccepted; no unchanged-source rerun was started.
+- Quality retained the original receipts, logs, ordered inventories, skips and phase results. Review independently verified the failure and process release. Candidate delivery is expected to skip on pull requests; its skip is not evidence of main delivery.
+- Backend confirmed 42 further uses of the existing SQLite template across four test files. Quality owns a bounded, matched comparison and the four excluded fixture-selection controls; Review checks source, results and cost. These cases remain unimplemented at this checkpoint. PostgreSQL restore and new helper abstractions remain outside this correction.
+- Lead reconciled superseded ledger status in PLAN with its dated October 29 acceptance and the current assignment log. The ledger delivery and the still-open worker F3 delivery remain distinct. No additional full CI is authorized solely for this documentation change.
 
 **Final inventory and source checks completed — 2026-11-01 (Pacific)**
 

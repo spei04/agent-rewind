@@ -409,14 +409,38 @@ type, API-contract, security, JavaScript and offline lockfile checks passed.
 Source/environment/private-file preservation and process release were verified.
 Inventory equivalence does not transfer old execution outcomes to changed tests.
 
-The next required evidence is whole CI on the published source, followed by
-verification of the exact protected-main candidate. Candidate delivery is
-expected to skip on a PR; it runs only after a successful protected-main CI
-gate. The 2,700 / 2,700 / 3,600-second limits and full Python 3.12 order remain
-unchanged. These configured checks establish no whole-CI margin or full F3
-acceptance.
+The original [PR131 run 41336608900, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41336608900)
+at source `2e8e44c1` passed all six component jobs but failed the required
+duration gate. The exact UTC receipt durations are:
 
-Full F3 acceptance still precedes F4/F5/P2. No new model calls,
+| Core leg | Passed | Skipped | Receipt seconds | Limit |
+| --- | ---: | ---: | ---: | ---: |
+| Python 3.11 early | 4,799 | 10 | 1,854.786812 | 2,700 |
+| Python 3.11 late | 4,387 | 35 | 1,169.848056 | 2,700 |
+| Python 3.12 all | 9,200 | 31 | 3,615.714774 | 3,600 |
+
+The Python 3.12 overrun is **15.714774 seconds**. Its pytest summary reports
+3,615.76 seconds; that rounded observation is separate from the receipt.
+Independent review verified both 9,231-item inventories and order, the
+4,809 / 4,422 / 9,231 selections, expected skip reasons, 7,242 required phase
+facts and 120 passing phase facts for the 20 added cases across both versions.
+All original failure evidence and cleanup records remain retained. Passing
+components do not override the gate failure. Candidate delivery is expected
+to skip on a pull request and provides no protected-main delivery evidence.
+
+The next proposed correction extends the existing SQLite template to 42
+eligible cases in four test files, preserving per-case mutation, admission,
+native checks and assertions. Four excluded consumers keep their original
+fixture path. No new helper or PostgreSQL restore is proposed. The bounded
+validation proposal uses seven matched groups of 6 / 6 / 6 / 7 / 7 / 3 / 7
+cases, followed by Python 3.11 correctness checks. Cold-build and copy spans
+are nested and must not be added. The existing 16 helper controls are common
+CI cost and are not deducted a second time. Fit and savings are unmeasured;
+the 15.714774-second CI gap is not a transferable local target or forecast.
+These changes and their test bodies have not run at this checkpoint.
+
+Full F3 acceptance still requires successful required CI and verification of
+the exact protected-main candidate before F4/F5/P2. No new provider calls,
 public preview, live startup or production acceptance follows from these checks.
 
 ## Historical live procedure
