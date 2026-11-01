@@ -9,7 +9,10 @@ import json
 import time
 from collections import Counter
 from contextlib import contextmanager
+from copy import deepcopy
+from datetime import datetime
 
+import ledger_capacity_fixture as capacity
 import pytest
 import test_ledger_compatibility_postgres as native
 from ledger_capacity_fixture import (
@@ -28,6 +31,7 @@ from test_ledger_service_postgres import controlled_database_name
 from test_run_projection_postgres import drain, observed_reader
 
 from agent_rewind.migrations import compatibility as guard
+from agent_rewind.migrations.inputs import source_digest
 from agent_rewind.migrations.ledger_history_sql import SQL as HISTORY_SQL
 from agent_rewind.migrations.schema import LEDGER, MigrationRefused, installed_profile
 
@@ -289,6 +293,196 @@ def test_postgres_complete_capacity_and_cursor_gate(
                     "strict_json_values_and_bytes_unchanged": True,
                     "owner_acl_catalog_unchanged": True,
                     "ciphertexts_unchanged": True,
+                }
+            ),
+        )
+    finally:
+        case.dispose()
+        drain(pg)
+
+
+def test_postgres_capacity_final_source_mismatch_preserves_acknowledged_prefix(
+    pg, monkeypatch, record_property
+):
+    """Fixture-only source drift rolls back batch 255, without erasing 254 commits."""
+    case = complete_postgres_ar6(pg, legacy=True)
+    original_batches = capacity._capacity_batches
+    original_insert = capacity._insert_provision
+    snapshots = {}
+    acknowledged = []
+    writer_xids = []
+    roles = []
+    injected = {}
+
+    def observed_batches(template, accounts):
+        assert accounts == 319
+        snapshots["initial"] = strict_native_snapshot(case, pg)
+        snapshots["initial_python"] = deepcopy((case.manifest, case.cursor, case.expected))
+        snapshots["ciphertext"] = capacity.object_hashes(case, directory=FIXTURE_ROOT / "objects")
+        for sequence, rows in enumerate(original_batches(template, accounts), 1):
+            assert len(rows) == 1
+            if sequence == 255:
+                assert len(acknowledged) == 254
+                snapshots["prefix"] = strict_native_snapshot(case, pg)
+                snapshots["prefix_python"] = deepcopy((case.manifest, case.cursor, case.expected))
+            yield rows
+            # Resumption occurs only after the preceding real transaction exits.
+            assert case.cursor["sequence"] == sequence
+            assert case.manifest == case.cursor["manifest"]
+            assert case.expected["manifest_count"] == sequence + 1
+            assert case.expected["account_count"] == 64 + sequence
+            assert case.expected["head"]["manifest_digest"] == digest(case.manifest)
+            assert case.manifest["parent_manifest_digest"] == (
+                digest(acknowledged[-1][0])
+                if acknowledged
+                else digest(snapshots["initial_python"][0])
+            )
+            with case.engine.connect() as connection:
+                stored = connection.execute(
+                    text(
+                        "SELECT CAST(cursor AS TEXT),source_digest,rows_verified,status "
+                        "FROM migration_progress WHERE revision=:revision AND phase=:phase"
+                    ),
+                    {
+                        "revision": LEDGER,
+                        "phase": "ledger_manifest_" + case.manifest["manifest_id"],
+                    },
+                ).one()
+                assert stored == (
+                    canonical_bytes(case.cursor).decode(),
+                    case.original_digest,
+                    1,
+                    "complete",
+                )
+                account = dict(
+                    connection.execute(
+                        text("SELECT * FROM budget_accounts WHERE id=:id"),
+                        {"id": rows[0]["id"]},
+                    )
+                    .mappings()
+                    .one()
+                )
+                for field, value in rows[0].items():
+                    if field in {"period_start", "period_end"}:
+                        value = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                    assert account[field] == value
+                assert (
+                    account["held_microusd"],
+                    account["accounted_microusd"],
+                    account["opening_held_microusd"],
+                ) == (0, 0, 0)
+            acknowledged.append(deepcopy((case.manifest, case.cursor, case.expected)))
+
+    def insert_then_change_source(connection, raw, cursor):
+        sequence = cursor["sequence"]
+        assert sequence == len(writer_xids) + 1
+        xid, role = connection.exec_driver_sql("SELECT txid_current(),current_user").one()
+        writer_xids.append(xid)
+        roles.append(role)
+        original_insert(connection, raw, cursor)
+        if sequence == 255:
+            job, actor = connection.exec_driver_sql(
+                "SELECT id,actor FROM jobs ORDER BY id LIMIT 1"
+            ).one()
+            changed = "capacity-source-drift"
+            assert actor != changed
+            result = connection.execute(
+                text("UPDATE jobs SET actor=:actor WHERE id=:job"),
+                {"actor": changed, "job": job},
+            )
+            assert type(result.rowcount) is int and result.rowcount == 1
+            assert (
+                connection.execute(
+                    text("SELECT actor FROM jobs WHERE id=:job"), {"job": job}
+                ).scalar_one()
+                == changed
+            )
+            changed_digest = source_digest(connection)
+            assert changed_digest != case.original_digest
+            injected.update(job=job, actor=actor, changed_digest=changed_digest, raw=deepcopy(raw))
+
+    try:
+        with monkeypatch.context() as local:
+            local.setattr(capacity, "_capacity_batches", observed_batches)
+            local.setattr(capacity, "_insert_provision", insert_then_change_source)
+            with pytest.raises(AssertionError) as caught:
+                capacity_history(
+                    case,
+                    accounts=319,
+                    object_directory=FIXTURE_ROOT / "objects",
+                    database_role=pg["owner_role"],
+                )
+        assert injected and len(writer_xids) == len(set(writer_xids)) == 255
+        assert roles == [pg["owner_role"]] * 255
+        traceback = caught.value.__traceback__
+        assert traceback is not None
+        while traceback.tb_next is not None:
+            traceback = traceback.tb_next
+        assert traceback.tb_frame.f_code is capacity._append_postgres_capacity.__code__
+        assert traceback.tb_frame.f_locals["count"] == 255
+        assert traceback.tb_frame.f_locals["source"] == case.original_digest
+        assert len(acknowledged) == 254
+        assert (case.manifest, case.cursor, case.expected) == snapshots["prefix_python"]
+        assert snapshots["prefix_python"] == acknowledged[-1]
+        assert case.expected["manifest_count"] == 255
+        assert case.expected["account_count"] == 318
+        prefix = snapshots["prefix"]
+        initial = snapshots["initial"]
+        assert prefix["catalog"] == initial["catalog"] == installed_profile("postgresql", LEDGER)
+        assert prefix["authority"] == initial["authority"] and prefix["role"] == initial["role"]
+        for name, state in initial["tables"].items():
+            if name not in {"budget_accounts", "migration_progress"}:
+                assert prefix["tables"][name] == state
+            else:
+                assert prefix["tables"][name]["columns"] == state["columns"]
+                assert set(state["rows"]) <= set(prefix["tables"][name]["rows"])
+        assert len(prefix["tables"]["budget_accounts"]["rows"]) == 318
+        assert len(prefix["tables"]["migration_progress"]["rows"]) == (
+            len(initial["tables"]["migration_progress"]["rows"]) + 254
+        )
+        assert strict_native_snapshot(case, pg) == prefix
+        with case.engine.connect() as connection:
+            assert source_digest(connection) == case.original_digest
+            assert (
+                connection.execute(
+                    text("SELECT actor FROM jobs WHERE id=:job"), {"job": injected["job"]}
+                ).scalar_one()
+                == injected["actor"]
+            )
+            assert (
+                connection.execute(
+                    text("SELECT 1 FROM budget_accounts WHERE id=:id"),
+                    {"id": injected["raw"]["accounts"][0]["id"]},
+                ).first()
+                is None
+            )
+            assert (
+                connection.execute(
+                    text(
+                        "SELECT 1 FROM migration_progress WHERE revision=:revision AND phase=:phase"
+                    ),
+                    {
+                        "revision": LEDGER,
+                        "phase": "ledger_manifest_" + injected["raw"]["manifest_id"],
+                    },
+                ).first()
+                is None
+            )
+        assert (
+            capacity.object_hashes(case, directory=FIXTURE_ROOT / "objects")
+            == snapshots["ciphertext"]
+        )
+        record_property(
+            "native_capacity_source_failure",
+            json.dumps(
+                {
+                    "provision_transactions": len(writer_xids),
+                    "acknowledged_prefix": len(acknowledged),
+                    "rolled_back_final_batch": True,
+                    "python_prefix_preserved": True,
+                    "full_native_prefix_preserved": True,
+                    "source_restored": True,
+                    "ciphertexts_preserved": True,
                 }
             ),
         )
