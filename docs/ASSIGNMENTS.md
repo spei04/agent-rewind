@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Blocked:** [PR131](https://github.com/spei04/agent-rewind/pull/131) completed 9,211 outcomes but failed the Python 3.12 time gate by 108.034295 seconds. Full F3 and exact-main candidate acceptance remain pending.
-- **Current:** Zero-duration receipts now fail validation; upper limits, order and skips are unchanged. [Validation](VALIDATION.md#remaining-f3-controls) retains original failures and qualified local checks. The private preview remains expired.
-- **Next:** Backend prepares a supported cost correction; Quality owns inventory/checks, Review verifies evidence, and Lead owns delivery after credible margin. F4/F5/P2, live startup, funding and production remain gated.
+- **Blocked:** [PR131](https://github.com/spei04/agent-rewind/pull/131) failed the full Python 3.12 time gate by 108.034295 seconds. F3 acceptance remains pending.
+- **Verified locally:** Five capacity cases pass per interpreter. Including the added rollback regression, the matched 3.12 slice saves 27.754 seconds. This is not full-session margin.
+- **Next:** Backend scopes SQLite fixture reuse; Quality and Review validate it before further delivery. [Validation](VALIDATION.md#remaining-f3-controls) retains the evidence. The plain dashboard is merged; its private preview is expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,13 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Capacity fixture validation completed — 2026-11-01 (Pacific)**
+
+- Backend preserved the 255 separate provision transactions and per-commit state while removing repeated source digest calculation from the four exclusive PostgreSQL fixtures. Production readers, generic provisioning and SQLite behavior are unchanged.
+- Quality ran the four retained cases and a real final-source-change rollback regression once per interpreter. Review verified all ten passes, original native limits and complete database/process release.
+- The four matched Python 3.12 cases took 48.762 seconds against 87.521 before. Including the new regression's 11.005 seconds leaves a 27.754-second local slice reduction; no full-suite margin is claimed.
+- Lead retains the failed CI gate. SQLite ar6 fixture reuse is a separate proposed measurement, with independent databases and all per-case admission, ledger, authority and ar8 checks preserved. The SQLite proposal has not run; no new model calls were made.
 
 **PR131 original time gate failed; receipt boundary corrected — 2026-11-01 (Pacific)**
 

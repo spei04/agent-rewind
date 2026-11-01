@@ -294,8 +294,29 @@ smallest positive serialized UTC interval), exact upper limits and one
 microsecond over. Timestamp, type, schema, source and outcome rules remain
 unchanged. UTC fields remain audit evidence; no monotonic duration is inferred
 or synthesized. Fresh inventory and required CI apply to the final composed
-correction. Local diagnostic profiles are not measured full-session savings;
-fixture optimization remains unapplied pending a supported performance scope.
+correction. Local diagnostic profiles are not measured full-session savings.
+
+A separate fixture-only correction at `651fcb2f` retains all 255 native
+provision transactions, current-role observations and per-commit state. It
+reuses the unchanged source digest only inside the four exclusive PostgreSQL
+capacity fixtures, verifies it before the first provision and again before the
+last commit, and leaves generic provisioning and production readers unchanged.
+
+The four retained cases and one new final-source-mismatch regression passed
+once on each interpreter. The regression observes 255 real transactions and
+254 acknowledged prefixes, refuses the changed final source, and verifies
+rollback plus native, Python and ciphertext preservation. All reader time and
+transfer limits remain unchanged. Independent review verified the originals
+and complete database/process release.
+
+In the matched unprofiled Python 3.12 comparison, the four existing cases'
+JUnit times totaled 87.521 seconds before and 48.762 after. The added regression
+took 11.005 seconds, leaving a local slice reduction of 27.754 seconds. Python
+3.11 has correctness and limit evidence, with no matched timing baseline.
+These are emitted JUnit timings from one comparison, not full-session savings
+or repeatability evidence. The original 108.034295-second CI overrun and all
+session limits remain unchanged. SQLite ar6 fixture reuse is a proposed
+separate investigation; it has no execution or savings credit.
 
 Full F3 acceptance still precedes F4/F5/P2. No new model calls,
 public preview, live startup or production acceptance follows from these checks.
