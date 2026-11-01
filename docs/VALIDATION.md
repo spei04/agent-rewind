@@ -265,7 +265,19 @@ seconds. All 21 ordered state snapshots matched. Helper timings were 0.785178
 and 0.766862 seconds; these measure the test oracle, not the production reader.
 The candidate branch, source, environments and database baseline were restored
 and verified. This was one fixed-order local comparison, not evidence of
-repeatability or recovery of the full CI overrun. Full F3 acceptance still precedes F4/F5/P2. No new model calls,
+repeatability or recovery of the full CI overrun.
+
+Fresh ordinary collection at source 19abe5ee observed 9,211 identical ordered
+IDs on each interpreter. All 9,198 previous IDs remain once and in order; the
+13 additions are catalog regressions. No test or fixture bodies ran.
+Independent review verified the existing partitions (4,805 / 4,406 / 9,211)
+and expected skips (10 / 35 / 31). Only the two count and two ordered-digest
+fields changed in the CI baseline. The direct-array validator and 16 retained
+CI controls passed; the original analysis and pre-mutation preparation failures
+remain retained separately. These are inventory and gate controls, not a
+successful full CI session.
+
+Full F3 acceptance still precedes F4/F5/P2. No new model calls,
 public preview, live startup or production acceptance follows from these checks.
 
 ## Historical live procedure

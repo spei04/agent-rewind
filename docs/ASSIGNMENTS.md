@@ -5,7 +5,8 @@
 - **Merged:** [PR130](https://github.com/spei04/agent-rewind/pull/130) adds worker failure records and the simple black-and-white dashboard. Its private preview has expired.
 - **Blocker:** Original main [run 41241550155](https://github.com/spei04/agent-rewind/actions/runs/41241550155) failed the CI gate: the full Python 3.12 session took 3,928.283202 seconds against a 3,600-second limit. Candidate delivery was skipped.
 - **Verified correction:** The shared schema reader preserves the existing column limit and batches the other five PostgreSQL reflection families. All 26 focused cases passed on each interpreter; [validation](VALIDATION.md#remaining-f3-controls) keeps source and failure qualifications explicit.
-- **Assigned:** Quality owns fresh collection and configured checks; Review checks original evidence; Lead owns integration and required delivery. Backend handles concrete findings.
+- **Inventory:** Reviewed collection found 9,211 ordered tests per interpreter, preserving all 9,198 prior tests and adding 13. The four count/digest fields and 16 retained CI controls are verified.
+- **Assigned:** Quality owns configured checks; Review checks original evidence; Lead owns publication and required delivery. Backend handles concrete findings.
 - **Next:** Full F3 acceptance still requires passing required CI and verification of the exact main candidate. F4/F5/P2, live startup, funding and production remain gated.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
