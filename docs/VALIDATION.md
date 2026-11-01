@@ -396,6 +396,26 @@ whole-CI success. The unchanged full-CI gate remains open.
 Cross-role ownership, schema and ACL equivalence remains unproven. These are
 software-validation results, not research repair results.
 
+Collection at `3bd44fb3` observed 9,231 identical ordered IDs on each
+interpreter. All 9,211 prior IDs remain once and in order, with 20 additions:
+three positive-duration cases, one capacity rollback regression and 16 SQLite
+helper controls. Both collections ran zero test or fixture bodies. The 105
+skip declarations remain unchanged; expected skips are 10 / 35 on Python 3.11
+and 31 on Python 3.12, with partitions of 4,809 / 4,422 / 9,231.
+
+Review accepted only four count/digest metadata changes and the original
+16 retained CI-control passes. At the sole-metadata commit `186151f5`, all nine configured lint, format,
+type, API-contract, security, JavaScript and offline lockfile checks passed.
+Source/environment/private-file preservation and process release were verified.
+Inventory equivalence does not transfer old execution outcomes to changed tests.
+
+The next required evidence is whole CI on the published source, followed by
+verification of the exact protected-main candidate. Candidate delivery is
+expected to skip on a PR; it runs only after a successful protected-main CI
+gate. The 2,700 / 2,700 / 3,600-second limits and full Python 3.12 order remain
+unchanged. These configured checks establish no whole-CI margin or full F3
+acceptance.
+
 Full F3 acceptance still precedes F4/F5/P2. No new model calls,
 public preview, live startup or production acceptance follows from these checks.
 

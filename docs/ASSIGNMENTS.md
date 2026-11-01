@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** 102 comparison cases pass on Python 3.12; 16 controls pass on each interpreter. The local SQLite comparison saves 20.934 seconds after control costs.
-- **Next:** Quality reconciles the full test inventory and runs configured checks. Review verifies the results before one required whole-CI measurement.
-- **Gate:** [PR131 CI](https://github.com/spei04/agent-rewind/actions/runs/41289850037) exceeded its unchanged limit by 108.034295 seconds. F3 acceptance remains open. [Evidence](VALIDATION.md#remaining-f3-controls) and [history](#assignment-history) retain unsuccessful attempts and costs.
+- **Verified:** Both interpreters collect 9,231 tests, retaining all prior IDs. The 16 CI controls and nine configured source checks passed.
+- **Next:** Lead publishes the reviewed changes to [PR131](https://github.com/spei04/agent-rewind/pull/131). Quality and Review verify required CI and the exact main candidate.
+- **Gate:** The earlier full-CI run exceeded its unchanged limit by 108.034295 seconds. Full F3 acceptance remains open; [validation](VALIDATION.md#remaining-f3-controls) retains the evidence and limits.
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,13 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Final inventory and source checks completed — 2026-11-01 (Pacific)**
+
+- Quality collected 9,231 ordered test IDs on each interpreter. All 9,211 prior IDs remain once and in order; the 20 additions are three positive-duration cases, one capacity rollback regression and 16 SQLite helper controls. Collection ran no tests or fixtures.
+- Review accepted the exact four count/digest fields, preserving expected skips and the 4,809 / 4,422 / 9,231 partitions. Commit `186151f5` changes only that metadata. The 16 retained CI controls and nine configured lint, format, type, contract, security, JavaScript and lockfile checks passed; source, environments and process cleanup were verified.
+- Lead owns publication and the required PR/main runs. Quality retains originals and checks the exact main package; Review independently verifies the results. Backend checked the unchanged workflow: candidate delivery is expected to skip on PRs and requires a successful protected-main build. No CI time limit, native assertion or test order changed.
+- The grouped local comparisons are software-validation evidence. They do not predict whole-CI margin or establish research repair performance. Full F3 acceptance, F4 implementation, provider spending and production remain gated.
 
 **Validation scope frozen — 2026-11-01 (Pacific)**
 
