@@ -478,8 +478,44 @@ Current-environment lint, format and committed-diff whitespace checks passed
 for the four changed test files. Configured `mypy agent_rewind` excludes tests;
 its earlier result and the unchanged contract, security, JavaScript and
 lockfile checks retain explicit source applicability. They were not rerun
-solely for this fixture-selection change. Required hosted CI remains pending.
+solely for this fixture-selection change. Required hosted CI then ran as recorded below.
 
+
+### Third PR131 duration-gate failure — 2026-11-01
+
+The original [run 41347058924, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41347058924)
+at `369e033b` passed all six component jobs and failed the required duration
+gate. Its retained UTC receipt intervals are:
+
+| Core leg | Passed | Skipped | Receipt seconds | Limit |
+| --- | ---: | ---: | ---: | ---: |
+| Python 3.11 early | 4,799 | 10 | 1,509.916668 | 2,700 |
+| Python 3.11 late | 4,387 | 35 | 1,032.984488 | 2,700 |
+| Python 3.12 all | 9,200 | 31 | 3,656.450653 | 3,600 |
+
+The full Python 3.12 interval exceeded its limit by **56.450653 seconds**.
+Its rounded pytest summary of 3,656.52 seconds is a separate observation.
+Review independently decoded the original receipts and verified all 9,231
+ordered IDs, the 4,809 / 4,422 / 9,231 selections, expected skip reasons,
+7,242 required phase facts and 120 passing phase facts for the 20 added cases.
+All original logs, failure evidence and release records remain retained.
+Candidate delivery is expected to skip on a pull request; it provides no
+protected-main acceptance.
+
+The earlier 42-case local improvement did not establish reliable whole-CI
+margin. Differences between these separate hosted runs do not measure its
+effect. Original receipt phase records contain outcomes, not per-test timing;
+the logs contain only the 50 slowest rounded phase durations per leg.
+Source inspection confirms a 150-second native expiry horizon in the
+expired-opening SQLite replay test, but does not apportion sleep and other
+work. No removable delay was established.
+
+Backend is investigating repeated setup cost before proposing another
+change. A further hosted attempt requires a reviewed aggregate timing case
+with unchanged test order, native assertions and session limits. The failed
+source will not be retried unchanged. The two existing cloud checkouts remain
+in use; retention created 3,178,496 allocated bytes of unique evidence and
+left no disposable scratch.
 
 Full F3 acceptance still requires successful required CI and verification of
 the exact protected-main candidate before F4/F5/P2. No new provider calls,

@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** The 42 additional SQLite cases and four exclusion controls passed on both Python versions.
-- **Next:** Lead publishes the correction to [PR131](https://github.com/spei04/agent-rewind/pull/131). Quality and Review verify required CI and the exact main candidate.
-- **Gate:** The previous Python 3.12 run exceeded its limit by 15.714774 seconds. A 14.458-second local reduction does not establish full-CI margin; [F3 acceptance remains open](VALIDATION.md#remaining-f3-controls).
+- **Verified:** All six component jobs passed at `369e033b`; both Python 3.11 legs met their limits.
+- **Blocked:** Python 3.12 took 3,656.450653 seconds, exceeding 3,600 by 56.450653. [Original results](VALIDATION.md#remaining-f3-controls) remain retained; F3 acceptance is open.
+- **Next:** Backend investigates avoidable aggregate test cost. Quality preserves the original results; Review checks them before another changed-source attempt.
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,13 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Third PR131 duration-gate failure — 2026-11-01 (Pacific)**
+
+- At `369e033b`, [run 41347058924, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41347058924) passed all six component jobs. The required gate failed: the full Python 3.12 UTC receipt spans 3,656.450653 seconds, exceeding 3,600 by 56.450653.
+- Quality retained the original logs and receipts once. Review verified all 9,231 ordered IDs, expected skips, 7,242 required phase facts and 120 passing phase facts for the 20 previously added cases. Both Python 3.11 legs met their limits. Source, environments and private data were preserved; owned processes were released.
+- Backend owns a source-based investigation of repeated setup cost. The top-50 timing rows are partial; phase outcomes do not supply missing durations. The expired-opening SQLite case requires a real 150-second native horizon, so it is not an established optimization target.
+- Lead records the failure and keeps F3 open. A further hosted attempt requires a reviewed change and a defensible aggregate timing case, preserving the full Python 3.12 order and the 2,700 / 2,700 / 3,600-second limits. There is no unchanged-source retry or F4 start.
 
 **Additional SQLite fixture reuse validated — 2026-11-01 (Pacific)**
 
