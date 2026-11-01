@@ -493,8 +493,10 @@ def test_identical_target_replacement_is_refused_before_native_capture(tmp_path,
     monkeypatch.setattr(template_module, "_digest", replace_after_digest)
     monkeypatch.setattr(template_module, "capture_ar6", no_capture)
     try:
-        with pytest.raises(ValueError, match="^fresh_ar6_template_invalid$"):
+        with pytest.raises(ValueError) as refused:
             template.copy_to(target)
+        assert refused.value.args == ("fresh_ar6_template_invalid",)
+        assert refused.value.__notes__ == ["Fresh ar6 copy cleanup also failed."]
         assert len(foreign) == 1 and _witness(target) == foreign[0]
         with pytest.raises(RuntimeError, match="^fresh_ar6_template_failed$"):
             template.copy_to(tmp_path / "retry.sqlite")
