@@ -352,8 +352,8 @@ connections. Their emitted JUnit costs are 8.694 seconds on Python 3.12 and
 8.368 on Python 3.11; corresponding child times are 10.955099067 and
 10.455364045 seconds.
 
-The corrected candidate then passed all 102 existing cases once in the same
-27 groups as the accepted `fac9f546` baseline. Original assertions, native
+On Python 3.12, the corrected candidate passed all 102 existing cases once in
+the same 27 groups as the accepted `fac9f546` baseline. Original assertions, native
 limits, source/environment/private-file preservation and complete process
 release were independently verified. Baseline tests were not rerun, and the
 failed `996afee8` attempt remains separate.
@@ -376,15 +376,25 @@ unexplained by those local figures. This is not a measurement or prediction of
 the current whole-CI residual. The original CI failure and all session limits
 remain unchanged.
 
-The next bounded diagnostic is the existing fresh PostgreSQL completion case,
-timing only `complete_postgres_ar6` entry through return, including capture
-and drain. Unique database/role creation precedes that span; admission,
-ar7/ar8, claim, original deadlines and assertions remain afterward. Backend's
-bounded scope contains 38 fresh PostgreSQL cases in the two failure families;
-the earlier legacy setup profile is inapplicable. Cross-role restoration of
-owners, schema posture, ACLs and defaults is unproven. No PostgreSQL reuse
-implementation is admitted by this measurement, and these software checks
-are not research repair results.
+One subsequent original fresh PostgreSQL completion case passed on Python 3.12
+at `cc90b0f4`. Its unprofiled `complete_postgres_ar6` span took 1.394928 seconds,
+including admission initialization inside that builder, native capture and
+drain. Unique database/role creation precedes the span; later operator
+admission and the unchanged completion checks remain outside it. The original
+phases total 8.410353 seconds; the separate child time is 13.610492 seconds.
+Review verified source, environment and private-file preservation, restored
+role/database state, stopped PostgreSQL and complete process release.
+
+This result does not justify a PostgreSQL restore implementation now. The
+tested scope is frozen for actual full inventory, permitted baseline metadata
+reconciliation, configured checks and one required whole-CI measurement.
+The additional 42 SQLite candidates remain unimplemented. The existing
+27 grouped SQLite cold builds contain 23.560444 seconds of nested work;
+that work is already included in the measured phases and is not additional
+savings. Neither that observation nor separate local reductions predicts
+whole-CI success. The unchanged full-CI gate remains open.
+Cross-role ownership, schema and ACL equivalence remains unproven. These are
+software-validation results, not research repair results.
 
 Full F3 acceptance still precedes F4/F5/P2. No new model calls,
 public preview, live startup or production acceptance follows from these checks.

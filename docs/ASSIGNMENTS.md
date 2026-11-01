@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** The corrected fixture passes 102 existing cases and 16 controls per interpreter. Its local comparison saves 20.934 seconds after control costs.
-- **Next:** Measure one existing fresh PostgreSQL ar6 setup before considering reuse; Quality runs the bounded check and Review verifies it.
-- **Gate:** [PR131 CI](https://github.com/spei04/agent-rewind/actions/runs/41289850037) exceeded its unchanged limit by 108.034295 seconds. Full-CI margin and F3 acceptance remain unverified. [Evidence](VALIDATION.md#remaining-f3-controls) and [history](#assignment-history) retain the failed attempt and costs.
+- **Verified:** 102 comparison cases pass on Python 3.12; 16 controls pass on each interpreter. The local SQLite comparison saves 20.934 seconds after control costs.
+- **Next:** Quality reconciles the full test inventory and runs configured checks. Review verifies the results before one required whole-CI measurement.
+- **Gate:** [PR131 CI](https://github.com/spei04/agent-rewind/actions/runs/41289850037) exceeded its unchanged limit by 108.034295 seconds. F3 acceptance remains open. [Evidence](VALIDATION.md#remaining-f3-controls) and [history](#assignment-history) retain unsuccessful attempts and costs.
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,13 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Validation scope frozen — 2026-11-01 (Pacific)**
+
+- Quality ran one original fresh PostgreSQL completion case on Python 3.12; it passed. The original `complete_postgres_ar6` span took 1.394928 seconds, including its admission initialization, capture and drain. Unique database and role creation precede the span; later operator admission and native completion checks remain outside it. Review verified the original result and cleanup.
+- The measured setup cost does not justify a PostgreSQL restore implementation now. The additional 42 SQLite candidates also remain unimplemented. Backend's ownership findings are retained for future work.
+- Lead froze the tested scope. Quality owns actual full test collection, permitted baseline metadata reconciliation and configured checks; Review checks the results. The next runtime gate is one required whole-CI measurement, with unchanged limits, test order and assertions.
+- The 102-case SQLite comparison ran on Python 3.12 only; its 16 controls passed on both interpreters. The 27 grouped cold builds include 23.560444 seconds of nested work, which cannot be added to measured savings or treated as a whole-CI forecast. No new provider call or production action is part of this handoff.
 
 **SQLite comparison completed — 2026-11-01 (Pacific)**
 
