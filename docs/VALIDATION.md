@@ -342,9 +342,49 @@ release index incorrectly listed itself with an empty-file hash; a corrected,
 versioned index excludes itself and preserves that original. This metadata
 correction does not change results or costs.
 
-The comparison is incomplete and establishes no SQLite savings or full-suite
-margin. The 108.034295-second CI overrun, the session limits and the remaining
-F3 delivery gates remain unchanged.
+That failed attempt establishes no SQLite savings or full-suite margin.
+
+At `8f9fd7e5`, the copied engine uses the existing SQLite connection
+configuration before capture. All 16 focused controls passed on each
+interpreter, including real foreign-key rejection, rollback and comparison
+with the original connection defaults across distinct and reopened physical
+connections. Their emitted JUnit costs are 8.694 seconds on Python 3.12 and
+8.368 on Python 3.11; corresponding child times are 10.955099067 and
+10.455364045 seconds.
+
+The corrected candidate then passed all 102 existing cases once in the same
+27 groups as the accepted `fac9f546` baseline. Original assertions, native
+limits, source/environment/private-file preservation and complete process
+release were independently verified. Baseline tests were not rerun, and the
+failed `996afee8` attempt remains separate.
+
+The paired raw phase totals are 270.127504 and 240.498866 seconds. Emitted
+JUnit totals are 270.127 and 240.499 seconds; subtracting the current controls'
+8.694 seconds leaves a 20.934-second local reduction. Child totals are
+375.578187 and 344.918458 seconds; charging the 10.955099-second control child
+leaves 19.704630 seconds on that separate measure. Nested timer spans are not
+added to these totals.
+
+Observed candidate calls are 27 cold builds, 102 copies and 27 closes. All
+native recapture and finalization remain in the measured work. The 129 capture
+calls are source-derived, not independently instrumented. This fixed-order,
+grouped comparison establishes neither repeatability nor full-session margin.
+
+The capacity and SQLite local reductions sum arithmetically to 48.688 seconds.
+Compared with the retained 108.034295-second CI overrun, 59.346295 seconds remain
+unexplained by those local figures. This is not a measurement or prediction of
+the current whole-CI residual. The original CI failure and all session limits
+remain unchanged.
+
+The next bounded diagnostic is the existing fresh PostgreSQL completion case,
+timing only `complete_postgres_ar6` entry through return, including capture
+and drain. Unique database/role creation precedes that span; admission,
+ar7/ar8, claim, original deadlines and assertions remain afterward. Backend's
+bounded scope contains 38 fresh PostgreSQL cases in the two failure families;
+the earlier legacy setup profile is inapplicable. Cross-role restoration of
+owners, schema posture, ACLs and defaults is unproven. No PostgreSQL reuse
+implementation is admitted by this measurement, and these software checks
+are not research repair results.
 
 Full F3 acceptance still precedes F4/F5/P2. No new model calls,
 public preview, live startup or production acceptance follows from these checks.

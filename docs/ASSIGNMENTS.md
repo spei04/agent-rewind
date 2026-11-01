@@ -2,10 +2,9 @@
 
 ## Current status
 
-- **Verified:** All 15 fixture controls pass on each interpreter; all 102 baseline cases pass.
-- **Found:** The first candidate case fails because SQLite foreign-key enforcement is off. The comparison stopped; no SQLite savings are established.
-- **Assigned:** Backend fixes connection setup, Quality adds a regression, and Review verifies both before timing continues. [Evidence](VALIDATION.md#remaining-f3-controls) and [history](#assignment-history) retain the results.
-- **Gate:** [PR131 CI](https://github.com/spei04/agent-rewind/actions/runs/41289850037) exceeded the unchanged limit by 108.034295 seconds. F3 acceptance remains pending.
+- **Verified:** The corrected fixture passes 102 existing cases and 16 controls per interpreter. Its local comparison saves 20.934 seconds after control costs.
+- **Next:** Measure one existing fresh PostgreSQL ar6 setup before considering reuse; Quality runs the bounded check and Review verifies it.
+- **Gate:** [PR131 CI](https://github.com/spei04/agent-rewind/actions/runs/41289850037) exceeded its unchanged limit by 108.034295 seconds. Full-CI margin and F3 acceptance remain unverified. [Evidence](VALIDATION.md#remaining-f3-controls) and [history](#assignment-history) retain the failed attempt and costs.
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -23,6 +22,15 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**SQLite comparison completed — 2026-11-01 (Pacific)**
+
+- Backend applied the existing SQLite connection utility before capture. Quality's added native regression checks initial, separate and reopened connections, real foreign-key refusal, rollback and preserved source/sibling state. All 16 controls passed per interpreter at `8f9fd7e5`.
+- The corrected candidate passed the same 102 existing cases as the original baseline, in the same 27 groups. Independent review accepted all originals and cleanup. The failed `996afee8` attempt and its costs remain separate.
+- Emitted JUnit totals fell from 270.127 to 240.499 seconds. Charging all 16 controls' 8.694 seconds leaves a 20.934-second local reduction. The separate child-time measure leaves 19.704630 seconds after its control cost. Each candidate group includes a cold build, copies, native capture and cleanup.
+- The earlier capacity slice's 27.754 seconds and this slice's 20.934 seconds add to 48.688 seconds only as local arithmetic. That leaves 59.346295 seconds of the earlier 108.034295-second overrun unexplained under that comparison; it is not an observed whole-CI residual or margin.
+- The next bounded action is one existing fresh PostgreSQL setup measurement. Backend identified 38 potential cases in two failure families and confirmed distinct per-case owners and roles. Direct database-template cloning would retain incompatible object owners/ACLs; owner-free restore remains unproven. Quality will time the original builder before any reuse implementation, with independent Review and unchanged native checks.
+- Lead retains the full CI and delivery gates. These are software-validation results, not research repairs. No new model call or production action has run.
 
 **Fixture comparison stopped on connection policy — 2026-11-01 (Pacific)**
 
