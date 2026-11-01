@@ -439,6 +439,48 @@ CI cost and are not deducted a second time. Fit and savings are unmeasured;
 the 15.714774-second CI gap is not a transferable local target or forecast.
 These changes and their test bodies have not run at this checkpoint.
 
+At `646d9c0c`, four test files explicitly reuse the existing fresh SQLite
+template for 42 additional cases. The four excluded provenance/budget-drift
+controls keep their original setup; PostgreSQL paths, native limits, test
+names, parameters and assertions are unchanged. No test or helper was added.
+
+Quality ran the same 42 Python 3.12 cases at baseline `03f1ed37` and candidate
+`646d9c0c`, in seven fixed groups. The candidate also passed all 42 cases on
+Python 3.11 and four excluded controls per interpreter. All 134 executions
+passed once, with zero skips, errors or failures. Independent review checked
+the original ordered outcomes, 402 passing phases, preservation and release.
+
+| Matched Python 3.12 measure | Baseline | Candidate | Local reduction |
+| --- | ---: | ---: | ---: |
+| Emitted JUnit seconds | 38.819 | 24.361 | 14.458 |
+| Full phase seconds | 38.818540 | 24.362029 | 14.456510 |
+| Child runtime seconds | 56.318042 | 41.662365 | 14.655676 |
+
+Each candidate interpreter observed seven cold template builds, 42 copies and
+seven closes for the matched cases. Both exclusion groups observed zero
+template calls. Cold-build spans are nested within copy and phase durations;
+they are not extra savings. The four excluded tests and earlier 16 helper
+controls are existing CI cost, not newly added work to deduct again.
+Python 3.11 supplies correctness evidence for this slice; no matched 3.11
+baseline was run. This single fixed-order comparison does not establish
+repeatability, closure of the 15.714774-second hosted deficit or CI margin.
+
+Final collection at `646d9c0c` retained the exact 9,231 ordered IDs and
+per-node skip metadata on both interpreters. No test or fixture bodies ran;
+the existing count/digest metadata is unchanged. An initial raw-parameter
+equality check stopped on the same two import-time expiry values already
+qualified at `3bd44fb3`. Their complete source modules are byte-identical;
+raw old/new values and the stopped analysis are retained. The corrected
+comparison permits only those two value differences and still requires exact
+IDs, names, other parameters and skip declarations. No collection was repeated.
+
+Current-environment lint, format and committed-diff whitespace checks passed
+for the four changed test files. Configured `mypy agent_rewind` excludes tests;
+its earlier result and the unchanged contract, security, JavaScript and
+lockfile checks retain explicit source applicability. They were not rerun
+solely for this fixture-selection change. Required hosted CI remains pending.
+
+
 Full F3 acceptance still requires successful required CI and verification of
 the exact protected-main candidate before F4/F5/P2. No new provider calls,
 public preview, live startup or production acceptance follows from these checks.

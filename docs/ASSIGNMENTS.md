@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** All six component jobs passed at `2e8e44c1`; both Python 3.11 legs met their limits.
-- **Blocked:** Python 3.12 took 3,615.714774 seconds, exceeding 3,600 by 15.714774. [Original results](VALIDATION.md#remaining-f3-controls) remain retained; F3 acceptance is open.
-- **Next:** Backend prepares 42 additional SQLite fixture opt-ins. Quality measures the bounded comparison; Review checks correctness and cost before another full attempt.
+- **Verified:** The 42 additional SQLite cases and four exclusion controls passed on both Python versions.
+- **Next:** Lead publishes the correction to [PR131](https://github.com/spei04/agent-rewind/pull/131). Quality and Review verify required CI and the exact main candidate.
+- **Gate:** The previous Python 3.12 run exceeded its limit by 15.714774 seconds. A 14.458-second local reduction does not establish full-CI margin; [F3 acceptance remains open](VALIDATION.md#remaining-f3-controls).
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,14 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Additional SQLite fixture reuse validated — 2026-11-01 (Pacific)**
+
+- Backend extended the existing template to 42 explicit cases in four test files at `646d9c0c`. Four provenance/budget-drift controls retain their original fixture path. Test names, parameters, assertions, native limits and PostgreSQL behavior are unchanged.
+- Quality ran 42 Python 3.12 baseline cases at `03f1ed37`, then the same 42 cases and four exclusions on each candidate interpreter. All 134 executions passed once across 23 groups. Review verified original outcomes, setup counts, source/environment preservation and process release.
+- Matched Python 3.12 JUnit time fell from 38.819 to 24.361 seconds, a 14.458-second local reduction. Child time fell separately by 14.655676 seconds. Each of the seven candidate groups includes a cold build; nested setup spans are not added. Existing controls are common CI cost and are not deducted again.
+- Both final collections at `646d9c0c` retained the exact 9,231 IDs, order and skip declarations without executing bodies. Scoped lint, format and committed-diff whitespace checks passed. Two known import-time expiry values retain their explicit prior qualification; the stopped raw-value analysis is preserved. Application code and other configured-check inputs are unchanged.
+- Lead owns publication and one required current-source CI measurement. Quality retains originals; Review checks required CI and exact-main delivery. The earlier failed runs remain retained. No whole-CI margin, F3 acceptance or research repair result is claimed.
 
 **Second PR131 run failed the duration gate — 2026-11-01 (Pacific)**
 
