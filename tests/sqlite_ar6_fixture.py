@@ -85,7 +85,7 @@ def _remove_owned(path: Path, identity: tuple[int, int]) -> None:
 
 
 class FreshSqliteAr6Template:
-    """Own one sealed predecessor file, never a returned case or live SQL handle."""
+    """Own one sealed file and read-only descriptor, never a live SQL handle."""
 
     def __init__(self, root: Path):
         _checked_path(root)
@@ -104,6 +104,7 @@ class FreshSqliteAr6Template:
         self.source = root / "fresh.sqlite"
         self._root_identity = info.st_dev, info.st_ino
         self._owned_source = None
+        self._source_descriptor = None
         self._sealed_identity = None
         self._sealed_digest = None
         self._baseline = None
@@ -135,39 +136,36 @@ class FreshSqliteAr6Template:
         if any(self.root.iterdir()):
             raise ValueError(_INVALID)
         descriptor = os.open(
-            self.source, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600
+            self.source, os.O_RDONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600
         )
+        self._source_descriptor = descriptor
         try:
             owned = os.fstat(descriptor)
             self._owned_source = owned.st_dev, owned.st_ino
             case = None
             try:
-                try:
-                    case = complete_ar6(self.source, legacy=False)
-                    self._baseline = _observations(case)
-                except BaseException as error:
-                    if case is not None:
-                        try:
-                            case.dispose()
-                        except BaseException:
-                            error.add_note("Fresh ar6 source disposal also failed.")
-                    raise
-                else:
-                    case.dispose()
-                if (
-                    set(self.root.iterdir()) != {self.source}
-                    or _identity(self.source)[:2] != self._owned_source
-                ):
-                    raise ValueError(_INVALID)
+                case = complete_ar6(self.source, legacy=False)
+                self._baseline = _observations(case)
             except BaseException as error:
-                # Keep the acquired inode alive until ownership-checked cleanup.
-                try:
-                    self._discard_source()
-                except BaseException:
-                    error.add_note("Fresh ar6 source cleanup also failed.")
+                if case is not None:
+                    try:
+                        case.dispose()
+                    except BaseException:
+                        error.add_note("Fresh ar6 source disposal also failed.")
                 raise
-        finally:
-            os.close(descriptor)
+            else:
+                case.dispose()
+            if (
+                set(self.root.iterdir()) != {self.source}
+                or _identity(self.source)[:2] != self._owned_source
+            ):
+                raise ValueError(_INVALID)
+        except BaseException as error:
+            try:
+                self._discard_source()
+            except BaseException:
+                error.add_note("Fresh ar6 source cleanup also failed.")
+            raise
         self.source.chmod(0o400)
         identity = _identity(self.source)
         if identity[:2] != self._owned_source:
@@ -177,9 +175,30 @@ class FreshSqliteAr6Template:
         self._sealed_digest = digest
 
     def _discard_source(self) -> None:
-        self._check_root()
-        if self._owned_source is not None:
-            _remove_owned(self.source, self._owned_source)
+        primary = None
+        try:
+            self._check_root()
+            if self._owned_source is not None:
+                # Stored identity alone cannot authorize deletion after pin retirement.
+                if self._source_descriptor is None:
+                    if os.path.lexists(self.source):
+                        raise ValueError(_INVALID)
+                else:
+                    _remove_owned(self.source, self._owned_source)
+        except BaseException as error:
+            primary = error
+            raise
+        finally:
+            descriptor = self._source_descriptor
+            # Retire deletion authority before a close with uncertain failure state.
+            self._source_descriptor = None
+            if descriptor is not None:
+                try:
+                    os.close(descriptor)
+                except BaseException:
+                    if primary is None:
+                        raise
+                    primary.add_note("Fresh ar6 source descriptor close also failed.")
 
     def copy_to(self, path: Path) -> ReaderFixture:
         if self._closed:
@@ -211,6 +230,7 @@ class FreshSqliteAr6Template:
         owned = os.fstat(descriptor)
         target_identity = owned.st_dev, owned.st_ino
         engine = None
+        close_attempted = False
         try:
             with (
                 os.fdopen(descriptor, "wb", closefd=False) as target,
@@ -238,6 +258,8 @@ class FreshSqliteAr6Template:
             if _observations(case) != self._baseline:
                 raise ValueError(_INVALID)
             self._check_source()
+            close_attempted = True
+            os.close(descriptor)
             return case
         except BaseException as error:
             self._failed = True
@@ -250,9 +272,12 @@ class FreshSqliteAr6Template:
                 _remove_owned(path, target_identity)
             except BaseException:
                 error.add_note("Fresh ar6 copy cleanup also failed.")
+            if not close_attempted:
+                try:
+                    os.close(descriptor)
+                except BaseException:
+                    error.add_note("Fresh ar6 copy descriptor close also failed.")
             raise
-        finally:
-            os.close(descriptor)
 
     def close(self) -> None:
         if self._closed:
