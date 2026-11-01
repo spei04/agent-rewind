@@ -12,6 +12,7 @@ from pathlib import Path
 from ledger_reader_fixture import ReaderFixture, capture_ar6, complete_ar6
 from sqlalchemy import create_engine
 
+from agent_rewind.artifact_metadata import configure_artifact_engine
 from agent_rewind.migrations.schema import ADMISSION
 
 _INVALID = "fresh_ar6_template_invalid"
@@ -254,6 +255,7 @@ class FreshSqliteAr6Template:
             if _identity(path)[:2] != target_identity:
                 raise ValueError(_INVALID)
             engine = create_engine(f"sqlite:///{path}")
+            configure_artifact_engine(engine)
             case = capture_ar6(path, engine, legacy=False)
             if _observations(case) != self._baseline:
                 raise ValueError(_INVALID)
