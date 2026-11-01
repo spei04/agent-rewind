@@ -315,8 +315,36 @@ took 11.005 seconds, leaving a local slice reduction of 27.754 seconds. Python
 3.11 has correctness and limit evidence, with no matched timing baseline.
 These are emitted JUnit timings from one comparison, not full-session savings
 or repeatability evidence. The original 108.034295-second CI overrun and all
-session limits remain unchanged. SQLite ar6 fixture reuse is a proposed
-separate investigation; it has no execution or savings credit.
+session limits remain unchanged.
+
+The fresh SQLite fixture candidate at `996afee8` passed 15 focused controls
+on each interpreter. These check independent copies, source and target
+ownership, tamper refusal and cleanup. The earlier run with 13 passes and an
+exception-note assertion failure remains separate; its later assertions were
+not credited until the corrected run passed. The new controls cost 7.736
+seconds in Python 3.12 JUnit output and 7.404 seconds on Python 3.11. Their
+respective child runtimes were 10.003728 and 9.453193 seconds.
+
+The original `fac9f546` baseline then passed all 102 selected existing cases
+once, in 27 fixed groups. Whole-phase durations totaled 270.127504 seconds;
+child runtimes totaled 375.578187 seconds. The candidate's first fresh-claim
+setup failed the existing native oracle: `PRAGMA foreign_keys` returned
+`0`, where the required value is `1`. No candidate case passed and no
+later candidate group ran. Durable database equality alone was insufficient:
+the copied engine also needs the existing connection configuration. Backend
+owns that correction, Quality adds native enforcement coverage, and Review
+checks it before continuation.
+
+The original results, source and environment checks, process release and
+baseline-to-candidate handoff are retained. Lost SSH responses were recovered
+from completed originals without repeating test bodies. The first baseline
+release index incorrectly listed itself with an empty-file hash; a corrected,
+versioned index excludes itself and preserves that original. This metadata
+correction does not change results or costs.
+
+The comparison is incomplete and establishes no SQLite savings or full-suite
+margin. The 108.034295-second CI overrun, the session limits and the remaining
+F3 delivery gates remain unchanged.
 
 Full F3 acceptance still precedes F4/F5/P2. No new model calls,
 public preview, live startup or production acceptance follows from these checks.

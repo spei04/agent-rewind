@@ -2,9 +2,11 @@
 
 ## Current status
 
-- **Blocked:** [PR131](https://github.com/spei04/agent-rewind/pull/131) failed the full Python 3.12 time gate by 108.034295 seconds. F3 acceptance remains pending.
-- **Verified locally:** Five capacity cases pass per interpreter. Including the added rollback regression, the matched 3.12 slice saves 27.754 seconds. This is not full-session margin.
-- **Next:** Backend scopes SQLite fixture reuse; Quality and Review validate it before further delivery. [Validation](VALIDATION.md#remaining-f3-controls) retains the evidence. The plain dashboard is merged; its private preview is expired.
+- **Verified:** All 15 fixture controls pass on each interpreter; all 102 baseline cases pass.
+- **Found:** The first candidate case fails because SQLite foreign-key enforcement is off. The comparison stopped; no SQLite savings are established.
+- **Assigned:** Backend fixes connection setup, Quality adds a regression, and Review verifies both before timing continues. [Evidence](VALIDATION.md#remaining-f3-controls) and [history](#assignment-history) retain the results.
+- **Gate:** [PR131 CI](https://github.com/spei04/agent-rewind/actions/runs/41289850037) exceeded the unchanged limit by 108.034295 seconds. F3 acceptance remains pending.
+- **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +23,14 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Fixture comparison stopped on connection policy — 2026-11-01 (Pacific)**
+
+- At `996afee8`, 15 helper controls passed on each interpreter. Review accepted the filesystem isolation and cleanup evidence. The earlier exception-note assertion failure remains separately recorded.
+- Quality ran all 102 baseline cases once in 27 groups. Their phase durations total 270.127504 seconds; child runtimes total 375.578187 seconds. These are separate measures.
+- The candidate stopped at the first case's setup: the native oracle observed `PRAGMA foreign_keys = 0`, where it requires `1`. No candidate case passed. File and catalog equality did not establish connection-policy equivalence.
+- Backend owns the connection setup correction using the existing SQLite engine utility; Quality owns native enforcement coverage; Review checks the result before the comparison continues. Passing baseline tests will not be repeated solely to repair evidence metadata.
+- Lead retains the failed full CI gate and the expired-preview warning. The corrected baseline release index preserves its malformed predecessor and the original handoff; recovered SSH response losses did not cause test retries. No SQLite performance saving, new model call or F3 acceptance is claimed.
 
 **Capacity fixture validation completed — 2026-11-01 (Pacific)**
 
