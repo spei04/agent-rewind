@@ -31,8 +31,8 @@ class Checks:
 
 
 @pytest.fixture
-def successor(tmp_path):
-    case = seed_ar7(complete_ar6(tmp_path / "failure.sqlite", legacy=False))
+def successor(tmp_path, fresh_sqlite_ar6_template):
+    case = seed_ar7(fresh_sqlite_ar6_template.copy_to(tmp_path / "failure.sqlite"))
     with case.engine.begin() as connection:
         create_failure_schema(connection)
     try:

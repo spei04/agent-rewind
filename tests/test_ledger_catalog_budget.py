@@ -142,9 +142,9 @@ def test_optimized_catalog_keeps_complete_original_and_literal_profile_equality(
     ids=["direction", "partial", "collation", "unique"],
 )
 def test_fresh_catalog_still_rejects_index_drift_after_an_accepted_observation(
-    tmp_path, index, replacement
+    tmp_path, index, replacement, fresh_sqlite_ar6_template
 ):
-    case = seed_ar7(complete_ar6(tmp_path / "drift.sqlite", legacy=False))
+    case = seed_ar7(fresh_sqlite_ar6_template.copy_to(tmp_path / "drift.sqlite"))
     try:
         assert observed(case, LEDGER) == installed_profile("sqlite", LEDGER)
         with case.engine.begin() as connection:
@@ -447,14 +447,14 @@ def test_sqlite_clause_policy_does_not_leak_jobs_exceptions(
 
 
 def test_persisted_inspector_rejects_comment_separated_check_without_restamping(
-    tmp_path, record_property, monkeypatch
+    tmp_path, record_property, monkeypatch, fresh_sqlite_ar6_template
 ):
     import sqlite3
     from contextlib import closing
 
     from agent_rewind.migrations.ledger_inspection import inspect_ledger_state
 
-    case = seed_ar7(complete_ar6(tmp_path / "clause-policy.sqlite", legacy=False))
+    case = seed_ar7(fresh_sqlite_ar6_template.copy_to(tmp_path / "clause-policy.sqlite"))
     profile = installed_profile("sqlite", LEDGER)
     from agent_rewind.migrations import ledger_reader_catalog as reader
 
@@ -617,7 +617,7 @@ def jobs_check_native_state(case):
 
 @pytest.mark.parametrize("candidate_kind", ["extra", "compensated"])
 def test_persisted_inspector_rejects_unreflected_jobs_checks(
-    tmp_path, record_property, candidate_kind
+    tmp_path, record_property, candidate_kind, fresh_sqlite_ar6_template
 ):
     import hashlib
     import sqlite3
@@ -627,7 +627,7 @@ def test_persisted_inspector_rejects_unreflected_jobs_checks(
 
     from agent_rewind.migrations.ledger_inspection import inspect_ledger_state
 
-    case = seed_ar7(complete_ar6(tmp_path / "jobs-check.sqlite", legacy=False))
+    case = seed_ar7(fresh_sqlite_ar6_template.copy_to(tmp_path / "jobs-check.sqlite"))
     profile = installed_profile("sqlite", LEDGER)
 
     def full_inspection(outcome):
