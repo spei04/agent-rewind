@@ -2,12 +2,11 @@
 
 ## Current status
 
-- **Delivered:** [F2 / PR129](https://github.com/spei04/agent-rewind/pull/129), including installed-package evidence.
-- **Validated:** 35 source-qualified F3 cases per interpreter, reviewed 9,198-node inventories, unchanged skip allowances and 16 baseline controls. [Qualifications](VALIDATION.md#remaining-f3-controls).
-- **Assigned:** Backend handles concrete fixes; Quality runs configured checks; Lead owns planned source-only publication, required CI and installed delivery, with Review.
-- **Next:** Full F3 acceptance remains pending before F4/F5/P2; funding, live startup and production remain gated.
-- **Dashboard:** The saved monochrome dashboard is unchanged; its private preview has expired.
-
+- **Merged:** [PR130](https://github.com/spei04/agent-rewind/pull/130) adds worker failure records and the simple black-and-white dashboard. Its private preview has expired.
+- **Blocker:** Original main [run 41241550155](https://github.com/spei04/agent-rewind/actions/runs/41241550155) failed the CI gate: the full Python 3.12 session took 3,928.283202 seconds against a 3,600-second limit. Candidate delivery was skipped.
+- **Verified correction:** The shared schema reader preserves the existing column limit and batches the other five PostgreSQL reflection families. All 26 focused cases passed on each interpreter; [validation](VALIDATION.md#remaining-f3-controls) keeps source and failure qualifications explicit.
+- **Assigned:** Quality owns fresh collection and configured checks; Review checks original evidence; Lead owns integration and required delivery. Backend handles concrete findings.
+- **Next:** Full F3 acceptance still requires passing required CI and verification of the exact main candidate. F4/F5/P2, live startup, funding and production remain gated.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -24,6 +23,21 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Catalog reflection correction validated — 2026-11-01 (Pacific)**
+
+- PR130 merged the worker failure records and plain dashboard. Its original
+  main run failed the full Python 3.12 time gate; candidate delivery was skipped.
+- Backend implemented bounded, fresh PostgreSQL catalog batching. Quality
+  supplied regression coverage and exact execution controls; Review checked
+  the original results. All 26 focused cases passed per interpreter.
+- The same-environment two-case comparison reduced the pytest child from
+  29.370009 to 25.655575 seconds, with all 21 ordered snapshots matching.
+  This single local pair does not establish full-session margin.
+- Lead owns source integration and delivery. Quality next collects both actual
+  inventories and runs configured checks, with independent Review. The original
+  CI and pre-test launcher failures remain qualified in
+  [validation](VALIDATION.md#remaining-f3-controls); F3 acceptance is pending.
 
 **F3 CI inventory and baseline controls completed — 2026-10-31 (Pacific)**
 

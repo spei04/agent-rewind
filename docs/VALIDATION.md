@@ -210,11 +210,63 @@ matched both inventories and their partitions. Runtime and test definitions
 were unchanged by that metadata update. These results do not relabel the
 separate targeted native groups or their retained failures.
 
-Configured final-check results, required CI and installed-package qualification
-remain pending. Source-only publication and a draft PR are planned; full F3
-acceptance still precedes F4/F5/P2. Development environments do not substitute
-for the established candidate-build workflow. No new model calls, public
-preview, live startup or production acceptance follows from these checks.
+Configured final checks passed, and [PR130](https://github.com/spei04/agent-rewind/pull/130)
+passed all seven required jobs before merging at `f516bc9c`. Original PR
+receipts verified the complete inventories, ordered selections and declared
+skips. The installed-package check exercised the synthetic SQLite failure path;
+loading a PostgreSQL profile did not establish installed PostgreSQL execution.
+
+The original protected-main [run 41241550155, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41241550155)
+then passed all six underlying jobs but failed the required CI gate:
+
+| Core leg | Passed | Skipped | Session seconds | Limit |
+| --- | ---: | ---: | ---: | ---: |
+| Python 3.11 early | 4,795 | 10 | 1,751.939918 | 2,700 |
+| Python 3.11 late | 4,358 | 35 | 1,784.933394 | 2,700 |
+| Python 3.12 all | 9,167 | 31 | 3,928.283202 | 3,600 |
+
+The exact overrun was 328.283202 seconds. Independent inspection of the
+retained originals confirmed all 9,198 ordered IDs, expected skips and the
+7,086 selected terminal phase outcomes. Those outcomes do not override the
+elapsed-time failure. Main candidate delivery was skipped; this attempt did
+not complete F3. The originals remain retained, and the limits, test inventory
+and full Python 3.12 order remain unchanged.
+
+A local comparison of the test-only PostgreSQL snapshot helper passed all
+21 old/new observations, including raw input effects. Across two existing
+Python 3.12 cases, unprofiled helper time fell from 3.852227 to 0.746533 seconds
+and the pytest child from 31.475356 to 28.414980 seconds. This was one
+fixed-order comparison; its limited scope does not establish repeatability
+or recovery of the full-session overrun.
+
+The shared schema reader at `cbca3810` keeps the existing per-table column
+limit before batching the other five PostgreSQL reflection families. Each call
+uses fresh connection-bound observations; native guards and SQLite behavior
+are unchanged. All 26 focused cases passed on each interpreter: 13 new
+PostgreSQL regressions, 10 retained PostgreSQL cases and three SQLite controls.
+Independent review checked the original ordered results and state preservation.
+Coverage includes the 32/33-column boundary, empty catalogs, invalid reflection
+maps, genuine table disappearance, and fresh observations after native changes
+and rollback.
+
+An original private SQLite launcher failed before pytest because its input path
+still pointed to an earlier preparation directory. That failure has no test
+credit and remains retained. A corrected continuation supplied the remaining
+four groups; the earlier 23 PostgreSQL passes were preserved. Dependency
+reconciliation also remains explicit: two existing Python 3.12 packages were
+aligned with the unchanged lockfile before these correctness runs. The earlier
+helper comparison retains its original environment qualification.
+
+A subsequent unprofiled comparison ran the old and new schema readers in the
+same repaired Python 3.12 environment, with the same optimized test helper.
+Across the same two cases, the pytest child fell from 29.370009 to 25.655575
+seconds and the combined setup/call/teardown phases from 23.944531 to 20.403707
+seconds. All 21 ordered state snapshots matched. Helper timings were 0.785178
+and 0.766862 seconds; these measure the test oracle, not the production reader.
+The candidate branch, source, environments and database baseline were restored
+and verified. This was one fixed-order local comparison, not evidence of
+repeatability or recovery of the full CI overrun. Full F3 acceptance still precedes F4/F5/P2. No new model calls,
+public preview, live startup or production acceptance follows from these checks.
 
 ## Historical live procedure
 
