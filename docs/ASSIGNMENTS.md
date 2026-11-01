@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** All six component jobs passed at `369e033b`; both Python 3.11 legs met their limits.
-- **Blocked:** Python 3.12 took 3,656.450653 seconds, exceeding 3,600 by 56.450653. [Original results](VALIDATION.md#remaining-f3-controls) remain retained; F3 acceptance is open.
-- **Next:** Backend investigates avoidable aggregate test cost. Quality preserves the original results; Review checks them before another changed-source attempt.
+- **Verified:** Four diagnostic cases and 165 existing CI controls per Python version passed. The full-timing display change is reviewed.
+- **Blocked:** The original Python 3.12 run exceeded its 3,600-second limit by 56.450653 seconds; [F3 remains open](VALIDATION.md#remaining-f3-controls).
+- **Next:** Quality captures one diagnostic CI run; Review verifies its timing evidence. Keep all execution and receipt limits unchanged.
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,13 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**CI timing visibility decision — 2026-11-01 (Pacific)**
+
+- Backend and Quality investigated shared storage setup at `3f735a26`. Collection retained 9,231 ordered IDs and found 60 static root-storage consumers, with overrides and dynamic requests kept explicit. Three original engine cases passed; their migration spans were 0.920340, 0.030190 and 0.030657 seconds. The first sample excludes interpreter startup and collection. This does not justify shared database templates.
+- A separate original fresh PostgreSQL completion case passed. Seven unchanged `whole_state` captures totaled 0.814086 seconds within its 2.941002-second call phase. All native assertions and process/database cleanup passed independent review; no removable work or suite-wide saving was established.
+- Backend prepared the two-file change at `5b8e52b2`: use pytest's existing full-duration display and update the existing workflow expectation. All 165 relevant controls passed per interpreter, with 495 phase rows displayed, including rounded zeros. Receipt schemas, limits, ordering, tests and dependencies are unchanged.
+- Quality prepared explicit bounded capture and reproduced the 814,301-byte original log exactly. Review accepted the source, offline controls and small transfer; larger-log completeness remains unproven. Lead owns the complete one-run decision and publication. No unchanged-source retry, performance-repair claim or F4 start follows from these diagnostics.
 
 **Third PR131 duration-gate failure — 2026-11-01 (Pacific)**
 

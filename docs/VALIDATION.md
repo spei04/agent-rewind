@@ -517,6 +517,78 @@ source will not be retried unchanged. The two existing cloud checkouts remain
 in use; retention created 3,178,496 allocated bytes of unique evidence and
 left no disposable scratch.
 
+### CI timing visibility decision — 2026-11-01
+
+Two finite diagnostics at `3f735a26` found no supported performance fix.
+The shared-storage collection retained all 9,231 IDs with no test or fixture
+execution. It identified 60 static consumers of the root storage fixture;
+local overrides and dynamic fixture requests prevent treating this as an
+observed build count. Three original engine cases passed. Their original
+migration calls took 0.920340 / 0.030190 / 0.030657 seconds, with the original
+binding restored before fixture continuation. The first call excludes
+interpreter startup and collection; its additional cost was not attributed.
+
+One existing fresh PostgreSQL completion case then passed with all native
+assertions intact. Its seven disjoint `whole_state` captures totaled
+0.814086129 seconds within a 2.941001935-second call phase. Setup
+(5.504797077), teardown (0.093175607) and the whole child (13.613516587 seconds)
+remain separate. The capture sum is nested within the call phase and must not
+be added to it. Both diagnostics and complete release were independently
+reviewed. Exactly 524,288 allocated bytes of reproducible storage-diagnostic
+scratch were removed; unique originals remain private.
+
+The original CI log has 129 progress rows matching all 9,231 ordered
+outcomes. Its largest emission gap spans several modules, including the
+native persistence tests. Buffering and phase boundaries prevent interpreting
+that gap as a module or per-test duration. The original log's 50 displayed
+durations total 659.11 rounded seconds; they do not account for the full
+3,656.450653-second session, which also includes collection and other overhead.
+
+The minimum next change is diagnostic visibility. At `5b8e52b2`, the core
+command uses `--durations=0 --durations-min=0`. Pinned pytest prints
+nonnegative phase durations to two decimal places; `0.00s` is rounded
+display, not an exact zero interval. The existing workflow contract checks
+both flags and the unchanged first-failure setting. All 165 existing
+workflow/receipt controls passed on each interpreter, with exactly 495 phase
+rows displayed per run. Scoped lint, format and whitespace checks passed.
+No test identities, receipt schemas, artifact types, dependencies or native
+limits changed.
+
+**Bounded next allocation:** one workflow run on the changed observability source,
+after exact source and bounded-capture review. The core job ceilings remain
+45 / 45 / 75 minutes; receipt limits remain 2,700 / 2,700 / 3,600 seconds.
+The same ordered tests, expected skips, native assertions and required CI gate
+apply. This run would supply timing data; it is not a claimed performance
+repair or permission to retry unchanged CI.
+
+The current originals contain 14,419 / 13,258 / 27,680 phase reports. For the
+Python 3.12 leg, current IDs imply about 5.31 MB of timing payload with the
+declared formatting allowance; a wider finite-number allowance gives
+13,615,045 bytes, plus the existing 814,301-byte log and a small heading.
+These are payload estimates, not a guarantee about hosted transport. The
+existing connector exposes no job-log capture ceiling. The separate receiver
+therefore declares 32 MiB per raw, strict-UTF-8 core log and 96 MiB total.
+Independent review accepted the receiver and one authenticated transfer of
+the old original: all 814,301 bytes and its SHA-256 matched exactly. That
+proves this small transfer only. Future run/job/source bindings and larger-log
+completeness still require verification; the receipt consumer's separate
+8 MiB bound remains unchanged.
+
+Standard `ubuntu-24.04` runner compute is free for public repositories under
+[GitHub's published billing policy](https://docs.github.com/en/actions/concepts/billing-and-usage).
+This allocation adds no model API calls, paid infrastructure or artifact type;
+existing retention and the project's lifetime API cap remain unchanged.
+Natural-failure research and reconciliation of earlier model charges remain
+separate work.
+
+**Stop conditions:** identity mismatch, failed assertions, missing or duplicate
+phase rows, truncated/invalid/oversized logs, interrupted cleanup or an elapsed
+gate failure retain their original evidence and stop acceptance. Match any
+timing data to the same run's original receipts and preserve rounding
+uncertainty. A small original-log transfer can validate authentication and
+exact bytes; it cannot establish support for a larger future log. There is no
+automatic retry, merge, production claim or transfer of older outcomes.
+
 Full F3 acceptance still requires successful required CI and verification of
 the exact protected-main candidate before F4/F5/P2. No new provider calls,
 public preview, live startup or production acceptance follows from these checks.
