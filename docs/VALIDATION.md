@@ -167,6 +167,40 @@ acceptance remain incomplete.
 
 #### Current checkpoint — 2026-11-02 (Pacific)
 
+Lead admitted the [bounded F3 delivery allocation](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f3-delivery-checkpoint-and-admitted-allocation--2026-11-02-pacific)
+and merged [PR133](https://github.com/spei04/agent-rewind/pull/133) once through normal
+protection at 17:46:40 UTC. Main `078226e8811851983a32b55360997cadaeaf2a41`
+has parents `7ba25d65` and `bfcce760`, with the exact reviewed tree
+`f778b526cddf7aa13d265957f826c7f31e92bbcc`. Protection was unchanged.
+
+The original push [run 41494342148, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41494342148)
+was created at 17:46:43 UTC and is **in progress**. Quality owns its source-bound
+job outcomes, original receipts, four-file candidate, 161 runtime-member
+comparison and own installed smoke/CLI and current-main image CA/CLI evidence.
+Review independently accepts the originals before Lead records F3 delivery;
+the accepted PR observation does not supply this main run's acceptance.
+
+The metadata monitor stops at 19:16:43 UTC (11:16:43 Pacific), 90 minutes after
+run creation. A nonterminal run then stops monitoring without automatic
+extension or retry; this deadline does not cover every possible queue or
+worst-case job duration. The 235 aggregate configured job-minutes are not an
+established bill. Receipt limits remain 2700/2700/3600 seconds; full order,
+coverage, skip allowances and native limits remain unchanged. Any failed,
+cancelled or missing required outcome, identity mismatch or bound violation
+stops acceptance and retains the original evidence.
+
+**F3 is not accepted.** The first-lookup `503` in original main run
+`41426339301/1` remains unexplained; neither the PR pass nor this merge proves
+a repair. Installed SQLite component execution remains distinct from loading
+a PostgreSQL profile: installed PostgreSQL execution is unproven and is not
+an added gate. F4 and stakeholder demonstration, including restarting the
+expired private preview, remain separate. No release, deployment, provider
+call or new paid resource is included. The $200 lifetime cap, $36.567974
+recorded reservations, unknown historical exposure and billing question are
+unchanged; no spendable balance is inferred.
+
+#### PR133 original accepted before main integration — 2026-11-02 (Pacific)
+
 [PR133 run 41440988895, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41440988895)
 at `bfcce760` passed all six component jobs and the required CI gate.
 Quality retained the three original receipt archives and three core logs once;

@@ -16,6 +16,29 @@ P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2
 
 ## Entry, ownership and acceptance
 
+### F3 delivery checkpoint and admitted allocation — 2026-11-02 (Pacific)
+
+Lead admitted this bounded allocation under the existing project authority. [PR133](https://github.com/spei04/agent-rewind/pull/133) merged once through normal protection at 17:46:40 UTC as `078226e8811851983a32b55360997cadaeaf2a41`, with parents `7ba25d65` and `bfcce760` and the exact reviewed tree `f778b526cddf7aa13d265957f826c7f31e92bbcc`. Protection was unchanged. The original push [run 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148), created at 17:46:43 UTC, is in progress; exact-main evidence and F3 acceptance remain pending. The diagnostic preserves the expected `200` assertion and does not explain or repair the original main `503`.
+
+| Step | Owner | Entry condition and observable exit |
+| --- | --- | --- |
+| Protected integration | Lead | Completed once as `078226e8` from reviewed `bfcce760`, with the expected parents and exact tree. Protection was unchanged; merge and original CI identity are retained. |
+| Original main validation | Quality | Observe only that merge's original automatic push workflow. Retain all eight job outcomes, original receipts, ordered coverage, skips and bounded logs. No rerun or manual dispatch. |
+| Candidate and installed evidence | Quality | Verify that main run's four files—`agent_rewind-0.1.0-py3-none-any.whl`, `agent_rewind-0.1.0.tar.gz`, `candidate.json`, `SHA256SUMS`—including all three checksum entries, provenance and all 161 runtime members. Verify its own installed module locations and smoke/CLI output outside the checkout, and CA verification in the image built by that main run and offline CLI proof. Retain originals before their seven-day expiry. |
+| F3 delivery decision | Review, then Lead | Independently accept the original evidence for that main commit and installed evidence before recording F3 delivery acceptance. Missing or failed evidence leaves the gate open; no F4 activation follows automatically. |
+
+The configured job timeouts remain 45/45/75 minutes for core, 20 for isolation, 15 each for security and package, 5 for the gate and 15 for candidate delivery: **235 runner-minutes in aggregate configured job timeouts**, not an established bill or wall-clock deadline. Receipt limits remain 2700/2700/3600 seconds, with the full Python 3.12 order and unchanged coverage, skips and native limits. For original run `41494342148/1`, metadata monitoring stops at 19:16:43 UTC (11:16:43 Pacific), 90 minutes from creation, if still nonterminal; that deadline does not cover all possible queueing or worst-case execution. No automatic extension or retry is included.
+
+Any failure, cancellation, skipped required job, identity/artifact mismatch or bound violation stops acceptance. Preserve original and partial outcomes, reap owned capture processes, and remove only reproducible owned scratch after preservation. Use the existing checkouts, independent environments and bounded collectors; private originals remain outside disposable checkouts. Fresh preflight/source mismatch stops the allocation rather than substituting a new revision or artifact.
+
+Installed SQLite component evidence remains distinct from merely loading a PostgreSQL profile; installed PostgreSQL execution remains unproven and is not an added gate. Stakeholder demonstration and restarting the expired recorded preview are separate from package acceptance. This allocation authorizes no release, deployment, production resource, partner-data access or new provider call.
+
+The $200 lifetime cap, $36.567974 recorded reservations, unknown historical exposure and outstanding billing-access question remain unchanged. No spendable balance is inferred. No new paid resources are admitted; actual historical billing is not established by the configured CI timeouts.
+
+
+<details>
+<summary>Superseded allocation proposal retained — 2026-11-02 (Pacific)</summary>
+
 ### F3 delivery checkpoint and proposed next allocation — 2026-11-02 (Pacific)
 
 The diagnostic change in [PR133](https://github.com/spei04/agent-rewind/pull/133) preserves the expected `200` assertion. Its passing observation does not explain or repair the first lookup `503` in [main run 41426339301/1](https://github.com/spei04/agent-rewind/actions/runs/41426339301). Closeout of the original run and independent review are authorized; the next execution below is a **proposal awaiting a separate Lead allocation**.
@@ -34,6 +57,9 @@ Any failure, cancellation, skipped required job, identity/artifact mismatch or b
 Installed SQLite component evidence remains distinct from merely loading a PostgreSQL profile; installed PostgreSQL execution remains unproven and is not an added gate. Stakeholder demonstration and restarting the expired recorded preview are separate from package acceptance. This proposal authorizes no release, deployment, production resource, partner-data access or new provider call.
 
 The $200 lifetime cap, $36.567974 recorded reservations, unknown historical exposure and outstanding billing-access question remain unchanged. No spendable balance is inferred. No new paid resources are proposed; actual historical billing is not established by the configured CI timeouts.
+
+
+</details>
 
 ### F3 claim component validated; terminal persistence next — 2026-10-31 (Pacific)
 

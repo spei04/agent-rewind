@@ -2,10 +2,9 @@
 
 ## Current status
 
-- **Verified:** [PR133 run 41440988895/1](https://github.com/spei04/agent-rewind/actions/runs/41440988895) passed all seven required jobs. Review accepted its original receipts, logs and unchanged timing limits.
-- **Blocked:** [Main run 41426339301/1](https://github.com/spei04/agent-rewind/actions/runs/41426339301) failed its Python 3.11 late job: the first operation lookup returned `503` instead of `200`. [F3 remains open](VALIDATION.md#remaining-f3-controls).
-- **Next:** Lead owns the [bounded delivery allocation proposal](delivery/WORKER_FAILURE_EXECUTION_PLAN.md); Quality would verify the resulting main run and installed package, followed by independent Review.
-- **Dashboard:** The plain dashboard is merged; its private preview has expired.
+- **Verified:** PR133's original CI and review passed. Lead merged it as [`078226e8`](https://github.com/spei04/agent-rewind/commit/078226e8811851983a32b55360997cadaeaf2a41) with the reviewed source tree.
+- **In progress:** Quality owns [main run 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148), its original receipts and installed candidate; Review checks acceptance. Metadata monitoring stops at 11:16:43 Pacific.
+- **Open:** The earlier `503` remains unexplained; [F3 is not accepted](VALIDATION.md#remaining-f3-controls). F4 and stakeholder demonstration remain separate. The dashboard is merged; its private preview is expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -22,6 +21,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**PR133 protected merge; original main delivery in progress — 2026-11-02 (Pacific)**
+
+- Lead admitted the bounded delivery allocation under the existing project authority and merged [PR133](https://github.com/spei04/agent-rewind/pull/133) once through normal protection at 17:46:40 UTC. Main `078226e8811851983a32b55360997cadaeaf2a41` has parents `7ba25d65` and `bfcce760`, and the exact reviewed tree `f778b526cddf7aa13d265957f826c7f31e92bbcc`. Protection was unchanged.
+- Quality bound the original push [run 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148), created at 17:46:43 UTC. It is in progress. Quality owns its original receipts, four-file candidate and own installed smoke/CLI and image CA/CLI evidence; Review independently checks those originals before Lead records delivery. The earlier main `503` remains unresolved; the diagnostic is not a demonstrated repair.
+- The [admitted allocation](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f3-delivery-checkpoint-and-admitted-allocation--2026-11-02-pacific) retains 235 aggregate configured job-minutes, not an established bill, and the unchanged 2700/2700/3600-second receipt limits. Metadata monitoring stops at 19:16:43 UTC (11:16:43 Pacific), without extension or retry. F3 acceptance, F4, release and stakeholder demonstration remain separate; the expired preview, $200 lifetime cap, $36.567974 reservations and unknown historical exposure are unchanged.
 
 **PR133 original diagnostic CI accepted — 2026-11-02 (Pacific)**
 
