@@ -4,7 +4,7 @@
 
 - **Verified:** [PR131 run 41358343831/1](https://github.com/spei04/agent-rewind/actions/runs/41358343831) passed all required checks. Its full Python 3.12 receipt was 2,534.144654 seconds against the unchanged 3,600-second limit.
 - **Blocked:** [Main run 41426339301/1](https://github.com/spei04/agent-rewind/actions/runs/41426339301) failed its Python 3.11 late job: the first operation lookup returned `503` instead of `200`. [F3 remains open](VALIDATION.md#remaining-f3-controls).
-- **Next:** Backend adds bounded diagnostics to the failing test; Quality tracks the remaining jobs; Review checks the original failure and diagnostic evidence.
+- **Next:** Quality tracks the original CI run for [diagnostic PR133](https://github.com/spei04/agent-rewind/pull/133); Review checks its evidence. Backend resumes diagnosis if the failure recurs.
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Diagnostic PR133 opened — 2026-11-02 (Pacific)**
+
+- Main run `41426339301/1` finished with five jobs passed, the Python 3.11 late job and CI gate failed, and candidate delivery skipped. No candidate artifact was produced. The original first-lookup failure remains unresolved.
+- Backend added the existing bounded failure witness only around that lookup at `bfcce760`. The exact Python 3.11 test passed once locally; lint, formatting and whitespace checks passed. Review verified all original assertions, forwarding, evidence bounds and cleanup. This is a diagnostic change, not a demonstrated repair.
+- Lead opened [PR133](https://github.com/spei04/agent-rewind/pull/133) for one original full CI observation of the instrumented source. Quality owns metadata monitoring and any separately scoped original capture; Review checks evidence. No unchanged-source retry, merge, F3 acceptance or provider call is implied.
 
 **Main HTTP failure under investigation — 2026-11-02 (Pacific)**
 

@@ -195,10 +195,17 @@ has a failed Python 3.11 late job. The test
 received `202` on submission, then `503 dependency_unavailable` on its first
 lookup, where it requires `200`. Its later assertions were not reached. The
 original log records 1 failed, 2,148 passed, 27 skipped and 4,809 deselected;
-Quality retained it once and Review verified it. The underlying exception is
-not present in that safe public error response. Backend is adding the existing
-bounded test diagnostics and performing one local Python 3.11 execution; this
-is investigation, not a fix or CI retry.
+Quality retained it once and Review verified it. The run finished with five
+jobs passed, the late Python 3.11 job and CI gate failed, and candidate delivery
+skipped; no candidate artifact was produced.
+
+The underlying exception is absent from that safe public error response.
+Backend added the existing bounded test diagnostics at `bfcce760`; one local
+Python 3.11 execution passed. Review verified the patch, original assertions,
+forwarding, evidence limits and cleanup. The cause remains unresolved.
+[PR133](https://github.com/spei04/agent-rewind/pull/133) starts one original full
+CI observation with the diagnostic witness. This is investigation, not a
+demonstrated repair, and a passing observation would not establish the cause.
 
 F3 requires a successful exact-main eight-job campaign, three receipt artifacts
 and four-file candidate archive. The wheel and sdist
