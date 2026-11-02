@@ -204,6 +204,28 @@ be added. Increases were diffuse: the ten largest phase increases total 21.67
 printed seconds; the largest phase increase was 2.81, versus 3.25 for a whole
 node. Neither identifies removable work or explains the original `503`.
 
+#### INSERT-only candidate source prepared — 2026-11-02 (Pacific)
+
+Review accepted the exact two-file source candidate: a 32-line PostgreSQL
+multi-row INSERT branch within existing chunks of at most 64 rows, and one
+native late-duplicate rollback regression. Scoped AST, Ruff format/check and
+whitespace checks passed. Existing definitions, initial single-row and SQLite
+paths, both construction commits, trigger-sensitive UPDATEs, all independent
+receipts/snapshots and native assertions remain intact. These are source/static
+findings, not an executed regression, speedup or CI repair; the patch remains
+uncommitted and unvalidated.
+
+Source authoring/static review is complete. Authentication was restored at 20:45:59 UTC without
+extending the original 21:14:39 deadline. [Complete validation](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#proposed-next-action-insert-candidate-validation)
+remains unadmitted. Its allocation must include the proposed eight native
+groups/24 prospective cases, fresh full ordinary collection on both pinned
+Python versions, actual skip/order/digest review, any justified four-leaf
+metadata update, the retained direct-array validator and 16 controls, and
+independent preservation/cleanup review. The earlier 75-minute proposal did
+not include those collection/metadata dependencies and is not execution-ready.
+The new regression's exact ID/count/digest remains unobserved; no collection,
+metadata update or new CI follows from this source checkpoint.
+
 The **first and only native calibration invocation passed** after the corrected
 private lifecycle and three bounded synthetic cleanup cases were independently
 reviewed. Review then accepted the native original, source/environment/private

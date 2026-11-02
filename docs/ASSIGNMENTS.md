@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** The sole native calibration case passed: helper 9.113230 seconds, complete phases 17.847252. Review accepted the lifecycle and preservation; no saving was established.
+- **Prepared:** The INSERT-only fixture candidate and late-duplicate regression passed source review and scoped static checks. The patch remains uncommitted and unvalidated; performance is unmeasured.
 - **Blocked:** [Main 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) exceeded the Python 3.12 bound by 30.383034 seconds. Candidate delivery skipped; [F3 remains unaccepted](VALIDATION.md#remaining-f3-controls), and the earlier `503` is unresolved.
-- **Next:** Lead admitted INSERT-only source work through 21:14:39 UTC; Quality prepares helper/regression source; Backend maintains progress and Review checks the exact design. No further native or CI execution is granted; F4 stays inactive; demonstration remains separate and the preview expired.
+- **Next:** Lead must allocate complete validation, including native comparisons, fresh inventories and metadata controls. Nothing is activated. Quality would own execution, Backend analysis and Review acceptance; F4 stays inactive; demonstration remains separate and the preview expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,11 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**INSERT-only candidate source reviewed; validation remains unadmitted — 2026-11-02 (Pacific)**
+
+- Quality prepared the bounded PostgreSQL INSERT branch and one native late-duplicate rollback regression; Review accepted the exact source design and scoped AST/Ruff results. The patch remains uncommitted and unvalidated. Initial single-row and SQLite construction, both commits, UPDATEs, independent receipts/control and existing assertions remain unchanged.
+- Source authoring/static review is complete. The SSH authentication interruption was resolved at 20:45:59 UTC without extending the 21:14:39 deadline. [The next validation allocation](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#proposed-next-action-insert-candidate-validation) remains unadmitted: the earlier 75-minute proposal did not include the recovered collection/metadata prerequisites. No native, collection, metadata or CI operation follows. The accepted local helper interval remains 9.113230 seconds, with no established saving.
 
 **First calibration measured; INSERT-only feasibility reviewed — 2026-11-02 (Pacific)**
 
