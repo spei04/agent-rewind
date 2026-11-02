@@ -204,6 +204,56 @@ be added. Increases were diffuse: the ten largest phase increases total 21.67
 printed seconds; the largest phase increase was 2.81, versus 3.25 for a whole
 node. Neither identifies removable work or explains the original `503`.
 
+#### INSERT candidate validation outcome — 2026-11-02 (Pacific)
+
+Independent review accepted both ordinary pinned inventories, each with 9,232
+ordered IDs. All prior 9,231 IDs retain their relative order; the sole addition
+is the late-duplicate rollback case. Expected skips and their reasons remain
+unchanged. The accepted four count/digest leaves, direct-array validator and
+16 retained controls passed. All eight fixed native groups/24 cases passed
+once, without retry, and source/environment/private-data preservation and
+owned process/database cleanup were accepted.
+
+The table uses full-case JUnit times in seconds. Baseline B restores only the
+original helper; it retains the same new regression and metadata as candidate
+C2. The comparison below deliberately excludes the baseline regression from
+the original-five total and charges the candidate's full added regression.
+
+| Python | Baseline original five | Candidate original five | Added candidate regression | Full candidate contribution | Change from baseline original five |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 3.12 | 67.707 | 64.664 | 5.027 | 69.691 | +1.984 |
+| 3.11 | 67.185 | 64.158 | 4.792 | 68.950 | +1.765 |
+
+Each charged difference has a rounding-only bound of ±0.0055 seconds from the
+11 three-decimal rows. This is not a confidence interval or a bound on
+run-to-run variability. There was one sequential local comparison per
+interpreter, not repeated or hosted performance evidence. The separately
+recorded one-call helper intervals are nested in call phases; enriched child
+and controller totals include the regression in both arms. Their reductions
+cannot replace the complete added-test charge or be added to case differences.
+Two-decimal displayed phase rows are rounded; they do not attribute SQL cost.
+
+Reported cohort sizes and native/canonical boundaries match across cells.
+Every run retains its own independent expected-state, receipt, snapshot,
+authority and native-clock proofs. Each late-duplicate case produced
+`23505`/`jobs_pkey`, preserved the pre-existing state and committed anchor,
+and rolled back the entire second construction transaction. Equal reported dimensions do not prove
+all cross-run input identities or raw-hash equivalence.
+
+**The candidate is not promoted as a CI timing repair.** C2, B and the original
+results remain retained experimentally. The required control cost exceeded the
+observed original-five reduction in both comparisons. The remaining helper
+span is not evidence of removable work, reliable savings, or coverage of the
+separate main receipt's 30.383034-second overrun. No next optimization is
+selected; only an unadmitted source question is described in the
+[execution plan](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#insert-validation-disposition-and-proposed-source-question).
+Receipt limits remain 2700/2700/3600 seconds. F3 is unaccepted, the earlier
+`503` unresolved, and installed-package or real-agent repair evidence is not
+established by these fixture results.
+
+<details>
+<summary>Prior validation admission retained — 2026-11-02 (superseded by the measured outcome)</summary>
+
 #### Complete local INSERT validation admitted — 2026-11-02 (Pacific)
 
 The source-only allocation closed; Lead separately admitted [complete local
@@ -231,6 +281,8 @@ The operation stops on its first failure, uncertain preservation/cleanup or
 deadline; originals remain retained and no retry or automatic extension follows.
 No hosted CI, source push, provider call, new resource or receipt-limit change
 is admitted. F3 remains unaccepted and the earlier `503` remains unresolved.
+
+</details>
 
 <details>
 <summary>Prior source-only checkpoint retained — 2026-11-02 (superseded by separate validation allocation)</summary>

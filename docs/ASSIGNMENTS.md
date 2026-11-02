@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Prepared:** Review accepted the INSERT-only fixture source and regression design. Correctness and performance remain unvalidated.
-- **Blocked:** [Main 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) exceeded the Python 3.12 bound by 30.383034 seconds. Candidate delivery skipped; [F3 remains unaccepted](VALIDATION.md#remaining-f3-controls), and the earlier `503` is unresolved.
-- **Active:** Lead admitted complete local validation through 22:36:43 UTC, with native entry first allowed only after staged review and by 21:31:43. Quality owns revisions/execution, Backend inventories/analysis and Review acceptance. No hosted CI or source publication is granted; F4 stays inactive; demonstration and expired preview remain separate.
+- **Measured:** Both pinned inventories contain 9,232 IDs; 16 controls and all 24 native cases passed with independent review.
+- **Decision:** The candidate remains experimental and is declined as a CI timing repair: including its required regression increased local totals by [1.984/1.765 seconds](VALIDATION.md#insert-candidate-validation-outcome--2026-11-02-pacific). No next optimization is selected or execution granted.
+- **Blocked:** [Main 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) exceeded the 3.12 bound by 30.383034 seconds. F3 remains unaccepted and the earlier `503` unresolved. F4 stays inactive; installed-package acceptance, demonstration and expired preview remain separate.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**INSERT candidate validation outcome — 2026-11-02 (Pacific)**
+
+- Quality completed both guarded inventories, the four-leaf metadata update and 16 retained controls, then all eight fixed native groups/24 cases once. Backend reconciled the original inventory and complete comparison; Review accepted correctness, preservation, cleanup and cost interpretation. Local candidate C2 and baseline B remain retained with the originals.
+- The original five cases decreased locally, but the full required new regression cost exceeded those reductions on both interpreters. Lead declined promotion as a CI timing repair. [The outcome table](VALIDATION.md#insert-candidate-validation-outcome--2026-11-02-pacific) separates this cost comparison from nested helper time, enriched child intervals and unchanged hosted receipt limits.
+- No next optimization or runtime allocation follows. A [proposed source-only question](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#insert-validation-disposition-and-proposed-source-question) must establish credible redundant work and a complete net-cost hypothesis before another patch. Main delivery, the earlier `503`, F3/F4 gates, funding and the expired preview retain their prior qualifications.
 
 **Complete local INSERT validation admitted — 2026-11-02 (Pacific)**
 

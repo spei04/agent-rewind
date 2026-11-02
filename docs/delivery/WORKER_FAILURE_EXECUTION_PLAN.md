@@ -24,6 +24,46 @@ Review independently accepted inspection of the original receipts for [main run 
 
 Quality retained the main log once; Backend reconciled all 9,231 ordered IDs and 27,680 phase rows against the saved PR133 log, and Review accepted the comparison. Lead closed the read-only operation at 19:53:15 UTC, before 20:05:14. The same-tree timing difference was diffuse; no causal correction or removable budget was established. [Rounded timing qualifications](../VALIDATION.md#completed-original-log-comparison) remain separate from the receipt overrun above.
 
+#### INSERT validation disposition and proposed source question
+
+**Local correctness passed; promotion as a CI timing repair is declined.**
+Quality completed both 9,232-ID inventories, accepted metadata/16 controls and
+the fixed eight native groups/24 cases. Backend's complete cost comparison and
+Review's independent checks show that the required new regression outweighed
+the original-five reductions in both local comparisons. The
+[outcome table](../VALIDATION.md#insert-candidate-validation-outcome--2026-11-02-pacific)
+retains the costs, precision and evidence limits. C2, baseline B and all
+originals remain experimental; no source push, revert or deletion follows.
+
+No next optimization is selected. The observed remaining helper span does not
+identify removable work or establish a credible whole-suite saving against
+the failed 3600-second gate. A proposed, **unadmitted** 20-minute source-only
+assessment would answer one prerequisite: does the exact fixture contain a
+provably redundant, exclusively owned operation with a source-established
+affected count, preserved proofs and a credible end-to-end cost hypothesis?
+Backend would use 12 minutes, Review five and Lead three. It would use retained
+immutable source and originals, preserving both commits, UPDATEs, four
+independent receipt walks, snapshots, native clocks and failure behavior.
+
+Source alone cannot establish the operation's cost. If that semantic question
+has no defensible answer, return no-go. Otherwise specify one minimal
+attribution design and a separately allocated complete comparison that charges
+all mandatory new controls, changed cold/setup/cleanup work, preparation,
+inventory/metadata checks, analysis and independent review. Do not infer
+savings from nested helper or enriched matrix child differences. Stop at the
+proposed deadline, an identity mismatch or unresolved semantic uncertainty;
+no retry or automatic extension.
+
+This proposal grants no source patch, instrumentation, UPDATE rewrite,
+collection, native test, hosted CI, provider call or paid resource. Remaining
+time in the completed native stage is not another execution allocation.
+Receipt limits remain 2700/2700/3600 seconds. Main/F3 acceptance, the earlier
+`503`, F4, installed-package proof, stakeholder demonstration and the expired
+preview remain separate; existing funding qualifications are unchanged.
+
+<details>
+<summary>Prior complete-validation allocation retained — 2026-11-02 (superseded by the measured outcome)</summary>
+
 #### Admitted action: complete INSERT candidate validation
 
 **Separately admitted; staged preparation is in progress.** Lead issued a 100-minute local allocation at 20:56:43 UTC, ending 22:36:43 UTC (14:36:43 Pacific). First native activation must occur by 21:31:43 UTC (13:31:43 Pacific), after all prerequisite reviews. This supersedes the incomplete 75/90-minute proposals without extending any prior allocation. Quality alone owns SECONDARY revisions/metadata/execution; Backend independently reconciles inventories/results and maintains PRIMARY progress; Review accepts exact entries/actuals; Lead owns runway and closeout.
@@ -39,6 +79,8 @@ Collections retain child 120 seconds/CPU 60 seconds/output 32 MiB/100,000 items 
 Keep both construction commits, initial anchor, UPDATEs, all four receipt walks/two snapshots and every native history/authority/refusal/rollback proof. Late-duplicate must establish valid prestate and genuine `23505` on `jobs`/`jobs_pkey`, leaving only the committed anchor and rolling back the entire second transaction. Use each run's independent expected state; raw cross-run hashes need proved input equivalence. Report old-five totals separately and include the full regression cost; helper, phase, child and controller intervals are nested, not additive savings.
 
 First failure, unexpected inventory/skip/digest/source change, identity mismatch, cap, uncertain ownership/cleanup or deadline stops later work. Retain originals, reap owned resources, restore the database/role baseline and report uncertainty. No retries, regrouping or extension, including after reauthentication. No hosted CI, source push/PR, merge, release, environment install, new checkout/resource or provider call is granted. Receipt limits remain 2700/2700/3600 seconds; no hosted margin, `503` repair or F3 acceptance is claimed. F4, installed-package acceptance, demonstration and expired preview remain separate.
+
+</details>
 
 <details>
 <summary>Prior unadmitted validation proposal retained — 2026-11-02 (superseded by separate 100-minute allocation)</summary>
