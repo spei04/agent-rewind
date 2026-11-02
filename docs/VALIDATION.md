@@ -190,8 +190,18 @@ whole-suite speedup to the timing-display change.
 normal protected integration as `7ba25d65`, with parents `f516bc9c` and
 `be2974bf` and the exact reviewed Git tree. Its original
 [main run 41426339301, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41426339301)
-is running. Quality verifies this main commit and its own successful eight-job campaign,
-three receipt artifacts and four-file candidate archive. The wheel and sdist
+has a failed Python 3.11 late job. The test
+`test_real_submit_get_cancel_and_replay_with_unavailable_dependencies`
+received `202` on submission, then `503 dependency_unavailable` on its first
+lookup, where it requires `200`. Its later assertions were not reached. The
+original log records 1 failed, 2,148 passed, 27 skipped and 4,809 deselected;
+Quality retained it once and Review verified it. The underlying exception is
+not present in that safe public error response. Backend is adding the existing
+bounded test diagnostics and performing one local Python 3.11 execution; this
+is investigation, not a fix or CI retry.
+
+F3 requires a successful exact-main eight-job campaign, three receipt artifacts
+and four-file candidate archive. The wheel and sdist
 must match all 161 runtime members from exact main, with that run's own
 installed smoke/CLI and container CA/CLI evidence. Review accepts those
 originals before F3 closes. Main candidate delivery skipped on the PR by

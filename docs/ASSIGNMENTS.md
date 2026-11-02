@@ -3,8 +3,8 @@
 ## Current status
 
 - **Verified:** [PR131 run 41358343831/1](https://github.com/spei04/agent-rewind/actions/runs/41358343831) passed all required checks. Its full Python 3.12 receipt was 2,534.144654 seconds against the unchanged 3,600-second limit.
-- **Pending:** [Main run 41426339301/1](https://github.com/spei04/agent-rewind/actions/runs/41426339301) and installed-candidate verification; [F3 remains open](VALIDATION.md#remaining-f3-controls).
-- **Next:** Quality retains main receipts and package evidence; Review verifies exact-main delivery.
+- **Blocked:** [Main run 41426339301/1](https://github.com/spei04/agent-rewind/actions/runs/41426339301) failed its Python 3.11 late job: the first operation lookup returned `503` instead of `200`. [F3 remains open](VALIDATION.md#remaining-f3-controls).
+- **Next:** Backend adds bounded diagnostics to the failing test; Quality tracks the remaining jobs; Review checks the original failure and diagnostic evidence.
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Main HTTP failure under investigation — 2026-11-02 (Pacific)**
+
+- The original main run failed `test_real_submit_get_cancel_and_replay_with_unavailable_dependencies`: submission returned `202`, then the first lookup returned `503 dependency_unavailable` instead of `200`. The late Python 3.11 leg stopped with 1 failed, 2,148 passed, 27 skipped and 4,809 deselected. Later assertions were not reached.
+- Quality retained the original failed-job log once; Review verified the capture and exact failure. The generic response does not establish the underlying exception. Backend owns a small diagnostic-only test change using the existing bounded helper and one local Python 3.11 execution. All assertions and limits remain unchanged; a local pass would not explain the CI failure.
+- Quality continues metadata monitoring of the other original main jobs. No CI retry, candidate acceptance, F3 completion or new provider spending follows from this investigation.
 
 **Protected integration completed; main verification running — 2026-11-02 (Pacific)**
 
