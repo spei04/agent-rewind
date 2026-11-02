@@ -3,8 +3,8 @@
 ## Current status
 
 - **Verified:** [PR131 run 41358343831/1](https://github.com/spei04/agent-rewind/actions/runs/41358343831) passed all required checks. Its full Python 3.12 receipt was 2,534.144654 seconds against the unchanged 3,600-second limit.
-- **Pending:** Protected-main and installed-candidate verification; [F3 remains open](VALIDATION.md#remaining-f3-controls).
-- **Next:** Lead completes normal integration preflight; Quality verifies main delivery; Review checks its original evidence.
+- **Pending:** [Main run 41426339301/1](https://github.com/spei04/agent-rewind/actions/runs/41426339301) and installed-candidate verification; [F3 remains open](VALIDATION.md#remaining-f3-controls).
+- **Next:** Quality retains main receipts and package evidence; Review verifies exact-main delivery.
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Protected integration completed; main verification running — 2026-11-02 (Pacific)**
+
+- Lead merged PR131 once through normal protection as `7ba25d65`. Its parents are the expected `f516bc9c` base and reviewed `be2974bf` head; the whole Git tree is identical to that reviewed head. No protection bypass or automatic retry was used.
+- The original [main run 41426339301, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41426339301) is running. Quality owns its exact receipt and candidate binding; Review checks those originals. The accepted PR results do not establish main, installed-package or F3 delivery acceptance.
+- The separate progress branch carries this tracker update without changing the tested PR source. The prior failures, `migration_only`, expired preview and unresolved billing coverage remain explicit.
 
 **PR131 original CI accepted — 2026-11-02 (Pacific)**
 

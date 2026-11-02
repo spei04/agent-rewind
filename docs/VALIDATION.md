@@ -186,9 +186,11 @@ ordered step bounds, parser corrections and prior failed runs remain retained.
 This one accepted run establishes neither repeatability nor attribution of a
 whole-suite speedup to the timing-display change.
 
-**The next F3 prerequisite is protected-main delivery.** Lead completes the
-normal integration preflight and explicit integration decision. Quality then
-verifies the resulting main commit and its own successful eight-job campaign,
+**The remaining F3 prerequisite is exact-main delivery.** Lead completed the
+normal protected integration as `7ba25d65`, with parents `f516bc9c` and
+`be2974bf` and the exact reviewed Git tree. Its original
+[main run 41426339301, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41426339301)
+is running. Quality verifies this main commit and its own successful eight-job campaign,
 three receipt artifacts and four-file candidate archive. The wheel and sdist
 must match all 161 runtime members from exact main, with that run's own
 installed smoke/CLI and container CA/CLI evidence. Review accepts those
