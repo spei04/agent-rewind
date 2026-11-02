@@ -167,6 +167,87 @@ acceptance remain incomplete.
 
 #### Current checkpoint — 2026-11-02 (Pacific)
 
+Review independently accepted diagnostic inspection of the three original
+receipts for [main run 41494342148, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41494342148)
+at `078226e8811851983a32b55360997cadaeaf2a41`. The timestamps below are UTC
+on 2026-11-02; each interval is positive, complete and exit-zero.
+
+| Core leg | Started UTC | Finished UTC | Receipt seconds | Limit |
+| --- | --- | --- | ---: | ---: |
+| Python 3.11 early | 17:47:22.331585 | 18:20:01.295078 | 1,958.963493 | 2,700 |
+| Python 3.11 late | 17:47:25.944391 | 18:13:32.717194 | 1,566.772803 | 2,700 |
+| Python 3.12 all | 17:47:28.763622 | 18:47:59.146656 | 3,630.383034 | 3,600 |
+
+**Python 3.12 exceeded its receipt upper bound by 30.383034 seconds.**
+This identifies the leg and failure of `0 < elapsed <= maximum_seconds`
+that the gate log alone did not resolve. All six component jobs passed,
+but gate `125479039298` failed and candidate `125479149302` skipped without
+an artifact. F3 remains unaccepted. The original main `503` is unresolved;
+neither later passes nor differences between hosted runs establish a repair,
+repeatability or a code-caused slowdown.
+
+Receipts contain node outcomes and phase labels, not per-test duration fields.
+The existing PR133 Python 3.12 log is retained; the main Python 3.12 log has not
+been captured. The [complete next action](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#admitted-next-action-original-log-comparison)
+was **separately admitted and is in progress**. Lead activated it at
+19:35:14 UTC with a hard stop at 20:05:14 UTC (12:05:14 Pacific), covering
+Quality's existing bounded one-log capture, Backend's offline comparison/source
+inspection, Review and closeout.
+Any exact saved main log must be reused before attempting a transfer.
+
+The comparison must reconcile complete/missing phase rows and printed precision,
+keeping summed rounded durations separate from receipt wall-clock elapsed
+and unmeasured overhead. It may recommend a minimal correction and bounded
+validation plan, or report a precise evidence gap. Missing data, identity,
+digest, privacy, parser or transport mismatch and the deadline stop the
+operation without renewal or retry; missing timings do not authorize another
+log, test or gate change. No new test, benchmark, CI, source implementation,
+provider call, install or paid resource is granted.
+
+The 2700/2700/3600-second receipt bounds, full order, coverage, skips and native
+assertions remain unchanged. The 235 aggregate configured job-minutes are not
+an established bill. Installed PostgreSQL execution remains unproven beyond
+profile loading and is not an added gate. F4, stakeholder demonstration and
+the expired preview remain separate. The $200 lifetime cap, $36.567974
+reservations, unknown historical exposure and billing question remain
+unchanged; no spendable balance is inferred.
+
+#### Predicate-only checkpoint retained before receipt review — 2026-11-02 (Pacific)
+
+Original [main run 41494342148, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41494342148)
+at `078226e8811851983a32b55360997cadaeaf2a41` is terminal with **failure**.
+All six component jobs passed. CI gate `125479039298` failed at step 3;
+candidate job `125479149302` skipped and produced no artifact. Monitoring
+stopped at 18:50 UTC, before the fixed 19:16:43 UTC deadline.
+
+Quality captured the failed gate's original log once; Review independently
+accepted it. The gate rejected a core receipt's elapsed-time check with
+`Session exceeded core leg bound` in `ci_receipts.validate_receipt`. Its
+predicate is `0 < elapsed <= maximum_seconds`: both the positive lower bound
+and the upper limit are checked. The log does not identify the leg or print
+that receipt's interval. **The exact leg and receipt elapsed time remain
+unverified**; component step timing is not a substitute, and no particular
+overrun is established here. Lead owns the next evidence/allocation decision.
+There is no automatic retry, monitor extension, fix claim or new CI grant.
+
+**F3 is not accepted.** The successful PR133 observation does not replace
+this failed main campaign or supply a candidate. The original first-lookup
+`503` in main run `41426339301/1` remains unresolved; neither a later component
+pass nor the diagnostic source establishes a repair. All originals and prior
+checkpoints remain retained.
+
+The 235 aggregate configured job-minutes are not an established bill.
+Receipt limits remain 2700/2700/3600 seconds with unchanged full order,
+coverage, skips and native assertions. Installed SQLite component evidence
+remains distinct from loading a PostgreSQL profile; installed PostgreSQL
+execution is unproven and is not an added gate. F4, stakeholder demonstration
+and the expired private preview remain separate. No release, deployment,
+provider call or new paid resource follows. The $200 lifetime cap,
+$36.567974 recorded reservations, unknown historical exposure and billing
+question are unchanged; no spendable balance is inferred.
+
+#### Protected merge checkpoint retained — 2026-11-02 (Pacific)
+
 Lead admitted the [bounded F3 delivery allocation](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#f3-delivery-checkpoint-and-admitted-allocation--2026-11-02-pacific)
 and merged [PR133](https://github.com/spei04/agent-rewind/pull/133) once through normal
 protection at 17:46:40 UTC. Main `078226e8811851983a32b55360997cadaeaf2a41`

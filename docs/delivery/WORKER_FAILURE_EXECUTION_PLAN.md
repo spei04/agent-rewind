@@ -1,6 +1,6 @@
 # Worker failure execution plan
 
-F1 and F2 are **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb) and [main47](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2). F2's original PR/main/candidate, native migration/service, installed package and current image evidence are independently accepted. F3 is **In progress**: component work is in the reviewed source, while delivery of the main commit, its candidate and installed package remains open. The original main HTTP `503` is unresolved; diagnostic PR133 passed without establishing a repair. F4-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. P1 and aggregate AR-010-B remain **In progress** with null final acceptance. The [machine ledger](../../contracts/proposals/execution-backlog.json), [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) and [assignment log](../ASSIGNMENTS.md#current-status) record current evidence; five planned F1-F5 PRs, estimates and sequential gates are unchanged.
+F1 and F2 are **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb) and [main47](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2). F2's original PR/main/candidate, native migration/service, installed package and current image evidence are independently accepted. F3 is **In progress**: the original main Python 3.12 receipt exceeded its 3,600-second upper bound by 30.383034 seconds and no candidate was produced; delivery remains unaccepted. The original main HTTP `503` is unresolved; diagnostic PR133 passed without establishing a repair. F4-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. P1 and aggregate AR-010-B remain **In progress** with null final acceptance. The [machine ledger](../../contracts/proposals/execution-backlog.json), [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) and [assignment log](../ASSIGNMENTS.md#current-status) record current evidence; five planned F1-F5 PRs, estimates and sequential gates are unchanged.
 
 ## Allocation and sequence
 
@@ -15,6 +15,43 @@ P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2
 | F5 | Restart-safe operator markers, preservation, restore and P1 delivery | 3 [2.5–4.5] | low |
 
 ## Entry, ownership and acceptance
+
+### F3 delivery checkpoint — verified main receipt upper-bound failure, 2026-11-02 (Pacific)
+
+Review independently accepted inspection of the original receipts for [main run 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) at `078226e8`. Python 3.12 all ran from 17:47:28.763622 to 18:47:59.146656 UTC on November 2: 3,630.383034 seconds against 3,600, an upper-bound overrun of 30.383034 seconds. The positive Python 3.11 early/late intervals were 1,958.963493 and 1,566.772803 seconds, both within 2,700. All sessions were complete and exit-zero; six component jobs passed, the required gate failed and candidate delivery skipped without an artifact. F3 is not accepted; the original `503` remains unresolved.
+
+#### Admitted next action: original log comparison
+
+**Separately admitted and in progress.** Lead activated this complete read-only operation at 19:35:14 UTC, with a hard stop at 20:05:14 UTC (12:05:14 Pacific). The 30 minutes cover preparation, capture, comparison, review and closeout. This is a separate grant from the completed receipt inspection. Receipts contain phase outcomes, not per-test durations; the missing input is the original main `core (3.12, all)` log for job `125445225903`, run `41494342148/1`, source `078226e8` and reviewed tree `f778b526`.
+
+| Stage | Owner | Included minutes and output |
+| --- | --- | --- |
+| Exact entry and at most one original capture | Quality | 8: reuse any exact saved main log first; verify the retained PR133 log and fresh main job identity, then use the existing bounded collector after independent entry review. Save the complete original privately before parsing. |
+| Offline comparison and implicated source | Backend | 12: align original main and PR133 `41440988895/1` node/phase duration rows; report complete/missing counts, precision, totals and largest deltas. Inspect only implicated immutable source; recommend a minimal correction and validation plan, or state the evidence gap. |
+| Independent evidence review | Review | 7: verify identities, parsing, arithmetic, uncertainty and cleanup. |
+| Record disposition | Lead | 3: close the result and separately decide any proposed implementation allocation. |
+
+The single payload is limited to 32 MiB raw network bytes, 32 MiB each for raw and decoded log data, 256 KiB metadata and 68 MiB new disk allocation. Existing limits remain HTTP110s, child120s, transport180s, SSH connect45s and TERM/KILL5s each. The whole operation, including preparation, comparison, review and closeout, remains within 30 minutes; do not activate its payload with fewer than 20 minutes left.
+
+Stop on identity, digest, privacy, output, parser or transport mismatch, missing/insufficient data or the absolute deadline. Preserve partial evidence, reap owned processes and retain private originals outside checkouts with owner-only permissions. No renewal, payload retry, additional log/candidate capture, tests, benchmarks, services, CI rerun/dispatch, source implementation, installs, provider calls, paid resources, merge, release or deployment is included. Missing timings are a finding, not permission to expand execution.
+
+Printed durations remain rounded; their sums are separate from receipt wall-clock elapsed and unmeasured overhead. A single same-tree PR/main difference does not prove a code regression, runner cause or repeatability. Full Python 3.12 order, coverage, skips, native assertions and the 2700/2700/3600-second bounds remain unchanged. The completed workflow's 235 aggregate configured job-minutes are not an established bill. F4, stakeholder demonstration and the expired preview stay separate. Funding remains a $200 lifetime cap, $36.567974 reservations, unknown historical exposure and an outstanding billing question; no spendable balance is inferred.
+
+<details>
+<summary>Predicate-only checkpoint retained before receipt review — 2026-11-02 (Pacific)</summary>
+
+### F3 delivery checkpoint — original main gate failure, 2026-11-02 (Pacific)
+
+The admitted one-run allocation reached a failed terminal outcome. Original [main run 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) at `078226e8` passed all six component jobs, but CI gate `125479039298` failed at step 3 and candidate `125479149302` skipped without an artifact. Metadata monitoring stopped at 18:50 UTC, before the 19:16:43 UTC hard stop.
+
+Quality retained the gate's original log once and Review independently accepted it. The gate rejected a core receipt's elapsed-time check with `Session exceeded core leg bound`; the predicate checks `0 < elapsed <= maximum_seconds`. The exact leg and receipt interval remain unverified because the log prints neither; a component step duration cannot establish a particular overrun. Lead owns the next evidence/allocation decision. The completed allocation grants no automatic retry, deadline extension or substitute source/artifact. F3 remains unaccepted, and the earlier main `503` remains unresolved without a repair claim.
+
+The existing 235 aggregate configured job-minutes are not an established bill. The 90-minute metadata bound, 2700/2700/3600-second receipts, full Python 3.12 order, coverage, skips and native limits remain unchanged. Exact-main candidate and installed evidence still require independent acceptance. Installed PostgreSQL execution remains unproven beyond profile loading and is not an added gate. F4, stakeholder demonstration and restarting the expired preview remain separate; no release, production change, provider call or new paid resource is granted. The $200 lifetime cap, $36.567974 reservations, unknown historical exposure and billing question remain unchanged; no spendable balance is inferred.
+
+</details>
+
+<details>
+<summary>Superseded in-progress main checkpoint retained — 2026-11-02 (Pacific)</summary>
 
 ### F3 delivery checkpoint and admitted allocation — 2026-11-02 (Pacific)
 
@@ -58,6 +95,8 @@ Installed SQLite component evidence remains distinct from merely loading a Postg
 
 The $200 lifetime cap, $36.567974 recorded reservations, unknown historical exposure and outstanding billing-access question remain unchanged. No spendable balance is inferred. No new paid resources are proposed; actual historical billing is not established by the configured CI timeouts.
 
+
+</details>
 
 </details>
 

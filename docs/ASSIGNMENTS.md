@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** PR133's original CI and review passed. Lead merged it as [`078226e8`](https://github.com/spei04/agent-rewind/commit/078226e8811851983a32b55360997cadaeaf2a41) with the reviewed source tree.
-- **In progress:** Quality owns [main run 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148), its original receipts and installed candidate; Review checks acceptance. Metadata monitoring stops at 11:16:43 Pacific.
-- **Open:** The earlier `503` remains unexplained; [F3 is not accepted](VALIDATION.md#remaining-f3-controls). F4 and stakeholder demonstration remain separate. The dashboard is merged; its private preview is expired.
+- **Verified:** Review accepted inspection of the three original main receipts; both Python 3.11 legs stayed within their limits.
+- **Blocked:** [Main run 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) took 3,630.383034 seconds in Python 3.12, exceeding 3,600 by 30.383034 seconds. Candidate delivery skipped; [F3 is not accepted](VALIDATION.md#remaining-f3-controls).
+- **Next:** Lead admitted one bounded log inspection through 20:05:14 UTC; Quality, Backend and Review own it. The earlier `503` remains unresolved; F4 and demonstration stay separate, and the private preview is expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,23 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Original main receipt interval verified — 2026-11-02 (Pacific)**
+
+- Quality retained the three original receipts for [main run 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) at `078226e8`; Review independently accepted their inspection and source binding. Python 3.12 all ran from 17:47:28.763622 to 18:47:59.146656 UTC: 3,630.383034 seconds against 3,600, an upper-bound overrun of 30.383034 seconds. Both Python 3.11 intervals were positive and within 2,700 seconds: early 1,958.963493 and late 1,566.772803.
+- All three receipts record complete, exit-zero sessions. Six component jobs passed, but the required elapsed-time gate failed and candidate delivery skipped without an artifact. These receipt clocks supply the previously missing leg and bound evidence; component step timing is not substituted for them. Receipts contain phase outcomes, not per-test durations. The original `503` remains unresolved; differences between hosted runs do not establish a code-caused slowdown or repair.
+- The [next complete action](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#admitted-next-action-original-log-comparison) was separately admitted at 19:35:14 UTC: Quality captures at most one original main Python 3.12 log, Backend compares it with the retained PR log and implicated immutable source, Review checks the findings, then Lead closes the record. Its 30-minute whole-operation deadline is 20:05:14 UTC, including preparation, capture, comparison, review and closeout; the existing capture bounds apply. No new tests, CI, implementation, provider calls or paid resources are granted. Prior predicate-only and cleanup checkpoints remain below.
+
+**Original main gate failed; delivery remains open — 2026-11-02 (Pacific)**
+
+- Original [main run 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) at `078226e8` finished with all six component jobs passed, CI gate `125479039298` failed at step 3, and candidate `125479149302` skipped without an artifact. Monitoring stopped at 18:50 UTC, before its 19:16:43 UTC deadline.
+- Quality captured the failed gate's original log once; Review independently accepted it. The gate rejected a core receipt's elapsed-time check with `Session exceeded core leg bound`. The predicate checks both a strictly positive interval and its upper limit; the exact leg and receipt interval are not printed and remain unverified. Component step timing is not a substitute. Lead owns any next bounded allocation; the completed workflow grants no automatic extension or retry.
+- F3 is not accepted; the original main `503` remains unresolved and the diagnostic is not a demonstrated repair. Coverage, native assertions, 2700/2700/3600-second receipt limits, funding and separate F4/demo gates remain unchanged.
+
+**Six reproducible tool caches removed — 2026-11-02 (Pacific)**
+
+- Backend removed only the two checkouts' Mypy, pytest and Ruff cache roots after independent eligibility review and fresh privileged read-only consumer checks. Review independently accepted the cleanup. Removed allocation was 181,444,608 bytes; the separate filesystem free-space increase was 181,424,128 bytes, with 20,480 bytes not attributed.
+- Both source checkouts and Git identities remained clean; active environments and required private evidence were retained. Preservation checks covered tracked source bytes and protected root identities, not a new full environment/evidence content audit. The stopped pre-deletion guard attempt remains recorded. No tests, provider calls, new resources or CI run accompanied cleanup.
 
 **PR133 protected merge; original main delivery in progress — 2026-11-02 (Pacific)**
 
