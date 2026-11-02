@@ -26,8 +26,10 @@ MAX_MONEY = 2**63 - 1
 
 
 @pytest.fixture
-def case(tmp_path, monkeypatch):
-    value = build_reservation_case(tmp_path, monkeypatch)
+def case(tmp_path, monkeypatch, fresh_sqlite_ar6_template):
+    value = build_reservation_case(
+        tmp_path, monkeypatch, fresh_ar6_template=fresh_sqlite_ar6_template
+    )
     yield value
     value.close()
 
@@ -48,11 +50,17 @@ def test_reservation_keeps_exact_native_integers(case, amount):
 @pytest.mark.parametrize(
     "amount", [2**53 + 1, MAX_MONEY], ids=["above_float_precision", "signed64_max"]
 )
-def test_wide_integer_never_bypasses_the_real_admitted_job_cap(tmp_path, monkeypatch, amount):
+def test_wide_integer_never_bypasses_the_real_admitted_job_cap(
+    tmp_path, monkeypatch, amount, fresh_sqlite_ar6_template
+):
     # Actual admission caps this budget at 200M; wider financial inputs must not
     # be made successful by fabricating an unsupported admitted association.
     case = build_reservation_case(
-        tmp_path, monkeypatch, budget=200_000_000, account_limit=MAX_MONEY
+        tmp_path,
+        monkeypatch,
+        budget=200_000_000,
+        account_limit=MAX_MONEY,
+        fresh_ar6_template=fresh_sqlite_ar6_template,
     )
     try:
         fence = claim(case)

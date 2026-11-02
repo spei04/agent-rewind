@@ -28,6 +28,28 @@ def storage(settings):
     db.engine.dispose()
 
 
+@pytest.fixture(scope="session")
+def fresh_sqlite_ar6_template(tmp_path_factory):
+    from sqlite_ar6_fixture import FreshSqliteAr6Template
+
+    root = tmp_path_factory.mktemp("fresh-ar6-template")
+    root.chmod(0o700)
+    template = FreshSqliteAr6Template(root)
+    primary = None
+    try:
+        yield template
+    except BaseException as error:
+        primary = error
+        raise
+    finally:
+        try:
+            template.close()
+        except BaseException:
+            if primary is None:
+                raise
+            primary.add_note("Fresh ar6 session template cleanup also failed.")
+
+
 @pytest.fixture
 def task():
     return TaskSpec(

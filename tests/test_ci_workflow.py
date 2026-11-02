@@ -112,7 +112,9 @@ def test_tested_python_versions_and_pinned_external_inputs():
     assert core["strategy"]["fail-fast"] is False
     assert core["timeout-minutes"] == "${{ matrix.timeout }}"
     command = next(step["run"] for step in core["steps"] if step.get("name") == "Run core tests")
-    assert command.split().count("--maxfail=1") == command.split().count("--durations=50") == 1
+    assert command.split().count("--maxfail=1") == 1
+    assert command.split().count("--durations=0") == 1
+    assert command.split().count("--durations-min=0") == 1
     assert core["name"] == "core (${{ matrix.python }}, ${{ matrix.leg }})"
     assert re.fullmatch(
         r"postgres:16-alpine@sha256:[0-9a-f]{64}", core["services"]["postgres"]["image"]

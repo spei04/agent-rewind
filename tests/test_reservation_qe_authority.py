@@ -31,8 +31,12 @@ from agent_rewind.scoped_repositories import members, scopes
 from agent_rewind.sqlite_ownership import owned_begin, owned_connect
 
 
-def build_keyed_case(tmp_path, monkeypatch):
-    case = build_reservation_case(tmp_path, monkeypatch)
+def build_keyed_case(tmp_path, monkeypatch, *, fresh_ar6_template=None):
+    case = (
+        build_reservation_case(tmp_path, monkeypatch)
+        if fresh_ar6_template is None
+        else build_reservation_case(tmp_path, monkeypatch, fresh_ar6_template=fresh_ar6_template)
+    )
     try:
         key_id = identity(120001)
         principal = VerifiedPrincipal.service_key(key_id)
@@ -148,8 +152,8 @@ def key_mutation(case, mode):
 
 
 @pytest.mark.parametrize("mode", ["revoked", "expired"])
-def test_key_waiter_revalidates_current_key(tmp_path, monkeypatch, mode):
-    case = build_keyed_case(tmp_path, monkeypatch)
+def test_key_waiter_revalidates_current_key(tmp_path, monkeypatch, mode, fresh_sqlite_ar6_template):
+    case = build_keyed_case(tmp_path, monkeypatch, fresh_ar6_template=fresh_sqlite_ar6_template)
     try:
         fence = claim(case)
         value = intent(case, fence)
@@ -165,14 +169,16 @@ def test_key_waiter_revalidates_current_key(tmp_path, monkeypatch, mode):
 
 
 @pytest.mark.parametrize("mode", ["key-revoked", "key-expired", "membership-revoked"])
-def test_original_inspection_rechecks_current_authority_after_wait(tmp_path, monkeypatch, mode):
+def test_original_inspection_rechecks_current_authority_after_wait(
+    tmp_path, monkeypatch, mode, fresh_sqlite_ar6_template
+):
     # Membership and key invalidation preserve existing visibility refusal
     # and never disclose the previously authorized saved call.
     own = mode == "membership-revoked"
     case = (
-        build_reservation_case(tmp_path, monkeypatch)
+        build_reservation_case(tmp_path, monkeypatch, fresh_ar6_template=fresh_sqlite_ar6_template)
         if own
-        else build_keyed_case(tmp_path, monkeypatch)
+        else build_keyed_case(tmp_path, monkeypatch, fresh_ar6_template=fresh_sqlite_ar6_template)
     )
     try:
         fence = claim(case)

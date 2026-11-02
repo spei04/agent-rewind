@@ -305,7 +305,7 @@ def validate_receipt(value, identity, versions, tracked):
     require(receipt["errors"] == [] and type(receipt["errors"]) is list, "Receipt errors")
     elapsed = (timestamp(receipt["finished_at"]) - timestamp(receipt["started_at"])).total_seconds()
     maximum_seconds = (60 if (python, leg) == ("3.12", "all") else 45) * 60
-    require(0 <= elapsed <= maximum_seconds, "Session exceeded core leg bound")
+    require(0 < elapsed <= maximum_seconds, "Session exceeded core leg bound")
     outcomes = receipt["outcomes"]
     require(type(outcomes) is list and len(outcomes) == len(selected), "Missing terminal outcomes")
     skips = []

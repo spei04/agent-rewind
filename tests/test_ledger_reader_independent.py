@@ -388,7 +388,11 @@ def test_financial_native_job_values_refuse_before_body_transfer(
 
 @pytest.fixture(params=["reserved", "settled", "released"])
 def evolved_case(request, tmp_path):
-    case = complete_ar6(tmp_path / "evolved.sqlite")
+    case = (
+        request.getfixturevalue("fresh_sqlite_ar6_template").copy_to(tmp_path / "evolved.sqlite")
+        if "fresh_sqlite_ar6_template" in request.fixturenames
+        else complete_ar6(tmp_path / "evolved.sqlite")
+    )
     try:
         seed_ar7(case)
         identities = later_admitted_call(case, effect=request.param)
@@ -442,7 +446,9 @@ def test_evolved_fixture_preserves_opening_and_has_exact_call_triple(evolved_cas
         assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
 
 
-def test_live_v2_job_and_older_call_generation_are_valid_complete_state(evolved_case):
+def test_live_v2_job_and_older_call_generation_are_valid_complete_state(
+    evolved_case, fresh_sqlite_ar6_template
+):
     case, _, _ = evolved_case
     before = sqlite_snapshot(case.path)
     assert inspect(case).model_dump(mode="json") == case.expected
@@ -493,7 +499,9 @@ def test_transfer_witness_detects_real_fetched_text_and_bytes(
         "missing-entry-project",
     ],
 )
-def test_required_financial_associations_refuse_without_partial_state(evolved_case, damage):
+def test_required_financial_associations_refuse_without_partial_state(
+    evolved_case, damage, fresh_sqlite_ar6_template
+):
     case, ids, _ = evolved_case
     # Deliberately bypass SQLite FK enforcement to model an existing damaged
     # installation. The inspector must prove required closure independently.
@@ -622,7 +630,9 @@ def test_later_current_reservation_does_not_invalidate_affordable_future_period(
 
 
 @pytest.mark.parametrize("evolved_case", ["settled"], indirect=True)
-def test_complete_equal_amount_cohorts_refuse_gross_settle_plus_release_excess(evolved_case):
+def test_complete_equal_amount_cohorts_refuse_gross_settle_plus_release_excess(
+    evolved_case, fresh_sqlite_ar6_template
+):
     case, _, _ = evolved_case
     with case.engine.begin() as connection:
         result = connection.exec_driver_sql(

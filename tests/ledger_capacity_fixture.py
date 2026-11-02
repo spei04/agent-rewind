@@ -17,7 +17,6 @@ from ledger_reader_fixture import (
     _insert_provision,
     _provision_expected,
     _provision_manifest,
-    append_provision,
     seed_ar7,
 )
 from sqlalchemy import text
@@ -189,6 +188,36 @@ def _append_sqlite_capacity(case, batches):
     case.manifest, case.cursor, case.expected = manifest, cursor, expected
 
 
+def _append_postgres_capacity(case, batches, *, database_role):
+    """Keep separate commits while reusing only this owned fixture's stable source."""
+    assert case.engine.dialect.name == "postgresql"
+    assert case.manifest is not None and case.opening is not None
+    source = None
+    count = 0
+    for rows in batches:
+        count += 1
+        assert count <= 255 and 1 <= len(rows) <= 16
+        sequence = case.expected["manifest_count"]
+        raw = _provision_manifest(case.manifest, sequence, rows)
+        with case.engine.begin() as connection:
+            if source is None:
+                source = source_digest(connection)
+                assert source == case.original_digest == raw["source_digest"]
+            assert raw["source_digest"] == source
+            role = connection.exec_driver_sql("SELECT current_user").scalar_one()
+            assert role == database_role
+            cursor = cursor_for(raw, sequence=sequence, role=role)
+            _insert_provision(connection, raw, cursor)
+            if count == 255:
+                # All loop writes target additive tables; fixed native checks only read.
+                # This is a final fixture check, not protection against external writers.
+                assert source_digest(connection) == source
+        # Keep the same acknowledged-prefix publication as append_provision.
+        case.manifest, case.cursor = raw, cursor
+        case.expected = _provision_expected(case.expected, raw, sequence)
+    assert count == 255
+
+
 def capacity_history(case, *, accounts, object_directory=None, database_role=None):
     """256 manifests; initial 64 rows and 255 nonempty adjacent provision batches."""
     assert accounts in {319, 4096}
@@ -210,8 +239,7 @@ def capacity_history(case, *, accounts, object_directory=None, database_role=Non
     if case.engine.dialect.name == "sqlite":
         _append_sqlite_capacity(case, batches)
     else:
-        for rows in batches:
-            append_provision(case, rows)
+        _append_postgres_capacity(case, batches, database_role=database_role)
     return {
         "accounts": accounts,
         "manifests": 256,

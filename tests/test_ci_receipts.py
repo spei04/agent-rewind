@@ -336,20 +336,21 @@ def test_baseline_must_be_final_reviewed_exact_inventory(variant):
 @pytest.mark.parametrize(
     "python,leg,seconds", [("3.11", "early", 2700), ("3.11", "late", 2700), ("3.12", "all", 3600)]
 )
-@pytest.mark.parametrize("position", ["negative", "zero", "exact", "over"])
+@pytest.mark.parametrize("position", ["negative", "zero", "positive", "exact", "over"])
 def test_session_duration_has_exact_per_leg_bound(python, leg, seconds, position):
     items, baseline = campaign()
     receipt = next(item for item in items if (item["python"], item["leg"]) == (python, leg))
     microseconds = {
         "negative": -1,
         "zero": 0,
+        "positive": 1,
         "exact": seconds * 1_000_000,
         "over": seconds * 1_000_000 + 1,
     }[position]
     receipt["finished_at"] = (
         datetime.fromisoformat(receipt["started_at"]) + timedelta(microseconds=microseconds)
     ).isoformat()
-    if position in ("zero", "exact"):
+    if position in ("positive", "exact"):
         assert check(items, baseline)[(python, leg)] == receipt
     else:
         with pytest.raises(ValueError, match="Session exceeded core leg bound"):

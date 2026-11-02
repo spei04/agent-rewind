@@ -67,9 +67,10 @@ jobs:
       - run: uv run --no-sync mypy agent_rewind
       - name: Validate M1 contracts and frozen fixtures
         run: uv run --no-sync python scripts/check_m1_contracts.py --openapi-model
+      # Built-in phase timings are rounded to 0.01s for diagnostics.
       - name: Run core tests
         run: >-
-          uv run --no-sync python -m pytest -q --maxfail=1 --durations=50 -p no:cacheprovider -p scripts.ci_core
+          uv run --no-sync python -m pytest -q --maxfail=1 --durations=0 --durations-min=0 -p no:cacheprovider -p scripts.ci_core
           --core-leg "${{ matrix.leg }}"
           --core-receipt "$RUNNER_TEMP/core-receipt/receipt.json"
         env:
