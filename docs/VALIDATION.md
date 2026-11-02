@@ -165,6 +165,47 @@ acceptance remain incomplete.
 
 ### Remaining F3 controls
 
+#### Current checkpoint — 2026-11-02 (Pacific)
+
+[PR131 run 41358343831, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41358343831)
+at `be2974bf` passed all six component jobs and the required CI gate.
+Quality retained the originals; independent review accepted the exact run.
+
+| Core leg | Passed | Skipped | UTC receipt seconds | Limit |
+| --- | ---: | ---: | ---: | ---: |
+| Python 3.11 early | 4,799 | 10 | 1,454.586093 | 2,700 |
+| Python 3.11 late | 4,387 | 35 | 1,455.911970 | 2,700 |
+| Python 3.12 all | 9,200 | 31 | 2,534.144654 | 3,600 |
+
+Both versions retained the full 9,231-item order and expected skip reasons.
+Review verified 7,242 required phase facts and 120 additional passing facts.
+All 14,419 / 13,258 / 27,680 emitted phase-duration rows matched the original
+receipts. Their values remain rounded to 0.01 seconds, including displayed
+zeros; they are not exact phase costs. The original receipt and pytest clocks,
+ordered step bounds, parser corrections and prior failed runs remain retained.
+This one accepted run establishes neither repeatability nor attribution of a
+whole-suite speedup to the timing-display change.
+
+**The next F3 prerequisite is protected-main delivery.** Lead completes the
+normal integration preflight and explicit integration decision. Quality then
+verifies the resulting main commit and its own successful eight-job campaign,
+three receipt artifacts and four-file candidate archive. The wheel and sdist
+must match all 161 runtime members from exact main, with that run's own
+installed smoke/CLI and container CA/CLI evidence. Review accepts those
+originals before F3 closes. Main candidate delivery skipped on the PR by
+design; that skip supplies no main-delivery credit.
+
+The installed smoke covers the retained SQLite lifecycle while
+`migration_only`; installed PostgreSQL execution remains unproven. The plain
+dashboard is merged, but its private preview has expired. No new live worker,
+paid demonstration, production resource or F4 work is authorized by this
+checkpoint.
+
+#### Earlier F3 checkpoints
+
+The dated attempts and intermediate statements below retain their original
+scope. The current acceptance and remaining delivery prerequisite are above.
+
 The targeted composed phase has 35 applicable cases per interpreter: 10 pure
 mapping checks, 9 SQLite cases and 16 PostgreSQL cases. Python 3.12 retains
 17 source-applicable pure/SQLite passes from `9e01a773` plus two corrected

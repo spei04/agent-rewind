@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Four diagnostic cases and 165 existing CI controls per Python version passed. The full-timing display change is reviewed.
-- **Blocked:** The original Python 3.12 run exceeded its 3,600-second limit by 56.450653 seconds; [F3 remains open](VALIDATION.md#remaining-f3-controls).
-- **Next:** Quality captures one diagnostic CI run; Review verifies its timing evidence. Keep all execution and receipt limits unchanged.
+- **Verified:** [PR131 run 41358343831/1](https://github.com/spei04/agent-rewind/actions/runs/41358343831) passed all required checks. Its full Python 3.12 receipt was 2,534.144654 seconds against the unchanged 3,600-second limit.
+- **Pending:** Protected-main and installed-candidate verification; [F3 remains open](VALIDATION.md#remaining-f3-controls).
+- **Next:** Lead completes normal integration preflight; Quality verifies main delivery; Review checks its original evidence.
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,13 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**PR131 original CI accepted — 2026-11-02 (Pacific)**
+
+- Quality retained [run 41358343831, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41358343831) at `be2974bf`; Review accepted the originals. All six component jobs and the required CI gate passed. Main candidate delivery skipped as expected for a pull request.
+- Both versions retained all 9,231 ordered IDs and expected skips. Review verified 7,242 required phase facts, 120 additional passing facts, receipt limits, summary agreement and complete rounded phase-duration rows. This one original pass is not a repeatability or optimization-attribution claim.
+- Lead owns the normal protected-integration decision. Quality then verifies the original main run, its four-file candidate archive, exact runtime bytes and its own installed smoke/CLI and container evidence; Review checks those originals. PR success does not establish exact-main delivery or complete F3.
+- The earlier failed runs remain retained. All CI and native limits, `migration_only`, the expired-preview warning and the unresolved historical billing coverage remain unchanged.
 
 **CI timing visibility decision — 2026-11-01 (Pacific)**
 

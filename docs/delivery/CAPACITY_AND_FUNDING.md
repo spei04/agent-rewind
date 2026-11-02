@@ -1,5 +1,19 @@
 # Capacity, ownership and funding decision record
 
+## Current reconciliation — 2026-11-02
+
+The private audit confirms **$36.567974 in recorded reservations**. The reported
+$1.668527 usage-derived ceiling covers 67 recorded calls, overlaps those
+reservations and excludes three proposal calls. It is not an invoice or
+provider-settled lifetime actual. The audit preserved ten original records;
+two positive job reservations account for the recorded total.
+
+Provider usage/invoices, proposal-call records, complete settlement history
+and activity outside the recorded snapshot remain unresolved. The provider
+account/project and billing-access owner are still requested; no available
+balance is established. The approved $200 lifetime cap is unchanged. New paid
+experiments remain gated on a reconciled cumulative bound.
+
 ## Owner payment decision — 2026-10-30
 
 The owner approved model API payment and clarified that the **$200 total includes all earlier Agent Rewind charges**. This is not a fresh $200 allowance. No additional approval is needed merely to establish permission to pay within that cap.
