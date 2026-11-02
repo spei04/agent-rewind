@@ -1,6 +1,6 @@
 # Worker failure execution plan
 
-F1 and F2 are **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb) and [main47](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2). F2's original PR/main/candidate, native migration/service, installed package and current image evidence are independently accepted. F3 is **In progress**: Backend implements trusted bounded claims/persistence, Quality supplies independent native oracles, Review checks source/security and the lead integrates. F4-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. P1 and aggregate AR-010-B remain **In progress** with null final acceptance. The [machine ledger](../../contracts/proposals/execution-backlog.json), [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) and [assignment log](../ASSIGNMENTS.md#current-status) record current evidence; five planned F1-F5 PRs, estimates and sequential gates are unchanged.
+F1 and F2 are **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb) and [main47](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2). F2's original PR/main/candidate, native migration/service, installed package and current image evidence are independently accepted. F3 is **In progress**: component work is in the reviewed source, while delivery of the main commit, its candidate and installed package remains open. The original main HTTP `503` is unresolved; diagnostic PR133 passed without establishing a repair. F4-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. P1 and aggregate AR-010-B remain **In progress** with null final acceptance. The [machine ledger](../../contracts/proposals/execution-backlog.json), [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) and [assignment log](../ASSIGNMENTS.md#current-status) record current evidence; five planned F1-F5 PRs, estimates and sequential gates are unchanged.
 
 ## Allocation and sequence
 
@@ -15,6 +15,25 @@ P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2
 | F5 | Restart-safe operator markers, preservation, restore and P1 delivery | 3 [2.5–4.5] | low |
 
 ## Entry, ownership and acceptance
+
+### F3 delivery checkpoint and proposed next allocation — 2026-11-02 (Pacific)
+
+The diagnostic change in [PR133](https://github.com/spei04/agent-rewind/pull/133) preserves the expected `200` assertion. Its passing observation does not explain or repair the first lookup `503` in [main run 41426339301/1](https://github.com/spei04/agent-rewind/actions/runs/41426339301). Closeout of the original run and independent review are authorized; the next execution below is a **proposal awaiting a separate Lead allocation**.
+
+| Step | Owner | Entry condition and observable exit |
+| --- | --- | --- |
+| Protected integration | Lead | Accepted original PR133 evidence and source review; fresh main `7ba25d65`, head and protection checks. Merge exact `bfcce760` / tree `f778b526` once through normal protection, then record the resulting main commit, parents and source equivalence. |
+| Original main validation | Quality | Observe only that merge's original automatic push workflow. Retain all eight job outcomes, original receipts, ordered coverage, skips and bounded logs. No rerun or manual dispatch. |
+| Candidate and installed evidence | Quality | Verify that main run's four files—`agent_rewind-0.1.0-py3-none-any.whl`, `agent_rewind-0.1.0.tar.gz`, `candidate.json`, `SHA256SUMS`—including all three checksum entries, provenance and all 161 runtime members. Verify its own installed module locations and smoke/CLI output outside the checkout, and CA verification in the image built by that main run and offline CLI proof. Retain originals before their seven-day expiry. |
+| F3 delivery decision | Review, then Lead | Independently accept the original evidence for that main commit and installed evidence before recording F3 delivery acceptance. Missing or failed evidence leaves the gate open; no F4 activation follows automatically. |
+
+The configured job timeouts remain 45/45/75 minutes for core, 20 for isolation, 15 each for security and package, 5 for the gate and 15 for candidate delivery: **235 runner-minutes in aggregate configured job timeouts**, not an established bill or wall-clock deadline. Receipt limits remain 2700/2700/3600 seconds, with the full Python 3.12 order and unchanged coverage, skips and native limits. The metadata monitor stops at 90 minutes from run creation if still nonterminal; that deadline does not cover all possible queueing or worst-case execution. No automatic extension or retry is included.
+
+Any failure, cancellation, skipped required job, identity/artifact mismatch or bound violation stops acceptance. Preserve original and partial outcomes, reap owned capture processes, and remove only reproducible owned scratch after preservation. Use the existing checkouts, independent environments and bounded collectors; private originals remain outside disposable checkouts. Fresh preflight/source mismatch stops the allocation rather than substituting a new revision or artifact.
+
+Installed SQLite component evidence remains distinct from merely loading a PostgreSQL profile; installed PostgreSQL execution remains unproven and is not an added gate. Stakeholder demonstration and restarting the expired recorded preview are separate from package acceptance. This proposal authorizes no release, deployment, production resource, partner-data access or new provider call.
+
+The $200 lifetime cap, $36.567974 recorded reservations, unknown historical exposure and outstanding billing-access question remain unchanged. No spendable balance is inferred. No new paid resources are proposed; actual historical billing is not established by the configured CI timeouts.
 
 ### F3 claim component validated; terminal persistence next — 2026-10-31 (Pacific)
 

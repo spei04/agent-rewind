@@ -167,6 +167,56 @@ acceptance remain incomplete.
 
 #### Current checkpoint — 2026-11-02 (Pacific)
 
+[PR133 run 41440988895, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41440988895)
+at `bfcce760` passed all six component jobs and the required CI gate.
+Quality retained the three original receipt archives and three core logs once;
+Review independently accepted their source binding and reconciliation. The
+candidate job skipped as expected for a pull request; no candidate was produced.
+
+| Core leg | Passed | Skipped | UTC receipt seconds | Limit |
+| --- | ---: | ---: | ---: | ---: |
+| Python 3.11 early | 4,799 | 10 | 1,964.477367 | 2,700 |
+| Python 3.11 late | 4,387 | 35 | 1,574.623918 | 2,700 |
+| Python 3.12 all | 9,200 | 31 | 3,323.003618 | 3,600 |
+
+Both versions retained the complete 9,231-item order and expected skips.
+Review verified 7,242 required plus 120 additional passing phase facts
+(7,362 combined), and all 14,419 / 13,258 / 27,680 duration rows. The phase
+display is rounded to 0.01 seconds; printed zeros are not measured zeros.
+UTC receipts, pytest summaries and enclosing job steps were checked separately.
+The originals remain private, with no download or CI retry.
+
+**The earlier main failure remains unresolved.** In
+[main run 41426339301/1](https://github.com/spei04/agent-rewind/actions/runs/41426339301)
+at `7ba25d65`, submission returned `202`, then the first operation lookup
+returned `503 dependency_unavailable` instead of the required `200`.
+PR133 adds only bounded diagnostics around that assertion. Its passing run
+does not explain the original failure, prove a repair or establish repeatability.
+Backend owns the unresolved diagnosis; the original log and all earlier
+failures remain retained.
+
+**The next delivery gate belongs to Lead:** the
+[bounded F3 allocation proposal](delivery/WORKER_FAILURE_EXECUTION_PLAN.md)
+requires a separate execution allocation for one normal protected merge and
+that main commit's own original workflow. Quality then retains its own eight-job
+results, receipts, four-file candidate, matching runtime members and installed
+smoke/CLI and container evidence; Review checks those originals. No merge,
+release, deployment or further CI execution was allocated by this closeout.
+
+F3 remains open. Installed SQLite component evidence while `migration_only`
+does not prove installed PostgreSQL execution; the latter remains unproven
+and is not an added gate. Stakeholder demonstration and the expired recorded
+preview are separate from package acceptance. No F4 work, new provider call
+or paid resource follows from this checkpoint. The lifetime funding question
+and prior reservations remain unchanged.
+
+#### Earlier F3 checkpoints
+
+The dated attempts and intermediate statements below retain their original
+scope. The current acceptance and remaining delivery prerequisite are above.
+
+##### Checkpoint retained from before PR133 closeout — 2026-11-02 (Pacific)
+
 [PR131 run 41358343831, attempt 1](https://github.com/spei04/agent-rewind/actions/runs/41358343831)
 at `be2974bf` passed all six component jobs and the required CI gate.
 Quality retained the originals; independent review accepted the exact run.
@@ -219,11 +269,6 @@ The installed smoke covers the retained SQLite lifecycle while
 dashboard is merged, but its private preview has expired. No new live worker,
 paid demonstration, production resource or F4 work is authorized by this
 checkpoint.
-
-#### Earlier F3 checkpoints
-
-The dated attempts and intermediate statements below retain their original
-scope. The current acceptance and remaining delivery prerequisite are above.
 
 The targeted composed phase has 35 applicable cases per interpreter: 10 pure
 mapping checks, 9 SQLite cases and 16 PostgreSQL cases. Python 3.12 retains

@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** [PR131 run 41358343831/1](https://github.com/spei04/agent-rewind/actions/runs/41358343831) passed all required checks. Its full Python 3.12 receipt was 2,534.144654 seconds against the unchanged 3,600-second limit.
+- **Verified:** [PR133 run 41440988895/1](https://github.com/spei04/agent-rewind/actions/runs/41440988895) passed all seven required jobs. Review accepted its original receipts, logs and unchanged timing limits.
 - **Blocked:** [Main run 41426339301/1](https://github.com/spei04/agent-rewind/actions/runs/41426339301) failed its Python 3.11 late job: the first operation lookup returned `503` instead of `200`. [F3 remains open](VALIDATION.md#remaining-f3-controls).
-- **Next:** Quality tracks the original CI run for [diagnostic PR133](https://github.com/spei04/agent-rewind/pull/133); Review checks its evidence. Backend resumes diagnosis if the failure recurs.
+- **Next:** Lead owns the [bounded delivery allocation proposal](delivery/WORKER_FAILURE_EXECUTION_PLAN.md); Quality would verify the resulting main run and installed package, followed by independent Review.
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,12 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**PR133 original diagnostic CI accepted — 2026-11-02 (Pacific)**
+
+- Quality retained [run 41440988895/1](https://github.com/spei04/agent-rewind/actions/runs/41440988895) at `bfcce760`; Review accepted the original receipts, logs, order, skips, phase results and timing bounds. All seven required jobs passed. The candidate job skipped as expected on a PR.
+- The original main run's first-lookup `503` remains unresolved. The diagnostic preserves the `200` assertion; this passing observation is not evidence of a runtime repair or repeatability.
+- Lead owns the [next bounded delivery allocation](delivery/WORKER_FAILURE_EXECUTION_PLAN.md). Quality would verify that new main run's own candidate and installed evidence; Review would check the originals. The proposal is saved without a merge or new CI allocation. Installed-package and stakeholder-demo acceptance remain separate; no provider spending or F3 completion is implied.
 
 **Diagnostic PR133 opened — 2026-11-02 (Pacific)**
 
