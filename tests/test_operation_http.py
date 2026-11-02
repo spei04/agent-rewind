@@ -122,7 +122,9 @@ def post(f, body=None, headers=None):
     )
 
 
-def test_real_submit_get_cancel_and_replay_with_unavailable_dependencies(http_operation):
+def test_real_submit_get_cancel_and_replay_with_unavailable_dependencies(
+    http_operation, monkeypatch
+):
     f = http_operation
     response = post(f)
     assert response.status_code == 202, response.text
@@ -130,8 +132,9 @@ def test_real_submit_get_cancel_and_replay_with_unavailable_dependencies(http_op
     assert set(accepted) == {"operation_id", "job_id"}
     origin = response.headers["x-request-id"]
     operation = f.base + "/operations/" + accepted["operation_id"]
-    view = f.client.get(operation, headers=f.headers)
-    assert view.status_code == 200, view.text
+    with first_get_failure(monkeypatch) as diagnostic:
+        view = f.client.get(operation, headers=f.headers)
+        assert view.status_code == 200, (view.text, diagnostic())
     assert view.json() == {
         "id": accepted["operation_id"],
         "project_id": f.f.context.project_id,
