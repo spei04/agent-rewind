@@ -24,6 +24,25 @@ Review independently accepted inspection of the original receipts for [main run 
 
 Quality retained the main log once; Backend reconciled all 9,231 ordered IDs and 27,680 phase rows against the saved PR133 log, and Review accepted the comparison. Lead closed the read-only operation at 19:53:15 UTC, before 20:05:14. The same-tree timing difference was diffuse; no causal correction or removable budget was established. [Rounded timing qualifications](../VALIDATION.md#completed-original-log-comparison) remain separate from the receipt overrun above.
 
+#### Current action: lifecycle correction and first measurement
+
+**Separately admitted; preparation is in progress.** The prior calibration allocation closed at entry at 20:01:05 UTC with zero test/helper invocations and zero PostgreSQL starts. Review found that the inherited private runner lacked general interruption cleanup for its separately sessioned child. Its stopped preparation and original grant remain history; no timing result or performance fix exists.
+
+Lead issued a new 45-minute allocation at 20:02:39 UTC, hard stop 20:47:39 UTC (12:47:39 Pacific), with native activation cutoff 20:24:39 UTC. Quality owns only the narrow private lifecycle correction, at most three harmless synthetic process-tree cleanup cases, and then the **first and only** unchanged node below after exact Review entry acceptance. Synthetic cases cover normal completion, timeout and interruption: each wall30s/CPU10s, total wall120s/output1MiB, no native test, PostgreSQL or network; stop on the first failed or uncertain cleanup. They do not establish actual PostgreSQL cleanup safety.
+
+```text
+tests/test_ledger_reader_native.py::test_postgres_complete_financial_boundaries[native-cap-legacy-opening-ar7]
+```
+
+Use existing SECONDARY Python 3.12 and actual clean `bfcce760` only through reviewed full-tree equivalence to target main `078226e8`/tree `f778b526`, with current environment/ownership bindings. No branch switch or project-source change. The external calibration timer still forwards exactly one original call with unchanged arguments, return/exception identity, clocks, snapshots, native history/authority and transaction/refusal/rollback proofs. Retain helper, three phase and child times separately.
+
+The complete budget is correction/statics10 minutes, synthetic checks5, entry Review7, native lifecycle4, Backend analysis6, actual Review8 and Lead closeout5. Native child wall180s/CPU60s/output32MiB, parent240s **including owned cleanup**, and TERM5/KILL5 remain fixed. No hidden supervisory extension; native activation requires at least23 minutes left and independent acceptance of interruption and PG ownership cleanup. Only this invocation's process groups/PG instance may be stopped.
+
+Stop on uncertain cleanup/ownership, source/environment/observer mismatch, first assertion, forwarding/count/output/preservation failure or deadline; retain originals and reap owned processes. No native retry, sampling or automatic extension. Acceptance still requires all original phases and native proofs, one forwarded helper call, and independent source/environment/private/PG/process preservation. A measured span can only guide a separately reviewed next action, not establish a causal hosted slowdown or CI saving. No production/test-source, environment, dependency, full-CI, provider, paid-resource, merge or release change is admitted. F3 remains unaccepted and the original `503` unresolved.
+
+<details>
+<summary>Prior single-measurement allocation retained — 2026-11-02, 19:55 UTC (stopped at entry 20:01:05 UTC; zero bodies)</summary>
+
 #### Admitted next action: one calibration measurement
 
 **Separately admitted; preparation is in progress.** Lead issued the new grant at 19:55:22 UTC with a 20:25:22 UTC hard stop (12:25:22 Pacific); activation must occur by 20:03:22 UTC and only after exact-entry review. This is distinct from the completed read-only allocation and the earlier proposed-only record.
@@ -39,6 +58,8 @@ Reuse the existing SECONDARY environment and native runner, binding immutable ma
 The five existing PostgreSQL modes total 43.14 PR versus 55.45 main printed whole-phase seconds, including required proofs; the unmeasured calibration fraction is not a saving. The allocation is 30 minutes total: preparation/entry review 8, one lifecycle 4, Backend interpretation 8, Review 7 and Lead closeout 3. Child wall180s/CPU60s/output32MiB, parent240s and TERM5/KILL5 remain unchanged. Do not start without enough time for execution, review and closeout.
 
 Stop on the first assertion, source/environment identity, forwarding/count, output, preservation, lifecycle or deadline failure; preserve the original and clean only owned process groups/PG lifecycle. No retry, sampling or automatic extension. Acceptance requires the unchanged node's three phases, exactly one helper forwarding, native proofs and independent preservation/reaping review. A small span rejects this setup candidate; a large span only motivates separately reviewed source proof. No cache, skipped proof, production/test-source edit, full-suite/CI rerun, new environment, install, provider call or paid resource is granted. The earlier `503`, F3 acceptance, F4/demo/preview and funding qualifications remain unchanged.
+
+</details>
 
 <details>
 <summary>Prior admitted original-log allocation retained — 2026-11-02, 19:35 UTC (completed 19:53:15 UTC)</summary>

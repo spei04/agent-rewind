@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Review accepted the completed original-log comparison: 9,231 ordered IDs and 27,680 phases per run matched; no causal correction was established.
-- **Blocked:** [Main 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) exceeded the Python 3.12 bound by 30.383034 seconds. Candidate delivery skipped; [F3 is not accepted](VALIDATION.md#remaining-f3-controls), and the earlier `503` remains unresolved.
-- **Next:** Lead separately admitted one calibration measurement through 20:25:22 UTC; Quality executes, Backend analyzes and Review verifies. F4, demonstration and the expired preview remain separate.
+- **Verified:** Review accepted the complete original-log comparison; no causal correction was established. The first calibration allocation stopped at entry with zero tests or PostgreSQL starts.
+- **Blocked:** [Main 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) exceeded the Python 3.12 bound by 30.383034 seconds. Candidate delivery skipped; [F3 remains unaccepted](VALIDATION.md#remaining-f3-controls), and the earlier `503` is unresolved.
+- **Next:** Lead admitted private lifecycle correction and the first measurement through 20:47:39 UTC. Quality owns execution, Backend analysis and Review acceptance; F4, demonstration and the expired preview remain separate.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,11 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Calibration entry stopped; separate lifecycle correction admitted — 2026-11-02 (Pacific)**
+
+- Review found that the inherited private runner did not guarantee interruption cleanup of its separately sessioned pytest child. The first calibration allocation closed at entry at 20:01:05 UTC with zero test/helper invocations and zero PostgreSQL starts; no timing result exists. Its stopped preparation remains retained, and this is not a product failure or repair finding.
+- Lead separately admitted [private lifecycle correction and the first measurement](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#current-action-lifecycle-correction-and-first-measurement) at 20:02:39 UTC, ending 20:47:39 UTC. Quality owns correction, at most three harmless synthetic cleanup cases and one unchanged native case after Review entry acceptance; native activation stops at 20:24:39 UTC. Backend interprets the sole result, Review verifies preservation and Lead closes the allocation. No native retry, CI, project-source/environment change, provider call or new resource is granted.
 
 **Original log comparison completed — 2026-11-02 (Pacific)**
 

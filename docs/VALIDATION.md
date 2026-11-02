@@ -204,12 +204,32 @@ be added. Increases were diffuse: the ten largest phase increases total 21.67
 printed seconds; the largest phase increase was 2.81, versus 3.25 for a whole
 node. Neither identifies removable work or explains the original `503`.
 
+The first calibration allocation **stopped at entry at 20:01:05 UTC**: Review
+found missing general interruption cleanup for a separately sessioned pytest
+child in the inherited private runner. There were zero test/helper invocations
+and zero PostgreSQL starts; no calibration timing exists. Historical successful
+runs did not establish interruption safety.
+
+Lead separately admitted [lifecycle correction and the first measurement](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#current-action-lifecycle-correction-and-first-measurement)
+at 20:02:39 UTC, with a 20:47:39 UTC hard stop and 20:24:39 native activation
+cutoff. Quality may correct only private lifecycle controls and run at most
+three bounded harmless synthetic cleanup cases; Review must accept their
+limits and exact native entry before the one unchanged node. Synthetic checks
+do not prove actual PostgreSQL cleanup. Backend interprets the sole timing;
+Review verifies actual preservation. Source, environment, assertions and CI
+limits remain unchanged; no native retry or new CI is included.
+
+<details>
+<summary>Prior single-measurement allocation retained — 2026-11-02, 19:55 UTC (stopped at entry 20:01:05 UTC; zero bodies)</summary>
+
 The [separately admitted next action](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#admitted-next-action-one-calibration-measurement)
 is one unchanged native-cap case with an external calibration-helper timer.
 It preserves all native assertions and internal deadlines; any result remains
 a local diagnostic, not a whole-CI margin or repair claim. Its separate grant
 runs from 19:55:22 to 20:25:22 UTC, with activation cutoff 20:03:22 UTC
 and independent entry review required before the single invocation.
+
+</details>
 
 <details>
 <summary>Prior admitted log inspection retained — 2026-11-02, 19:35 UTC (completed 19:53:15 UTC)</summary>
