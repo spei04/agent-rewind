@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Review accepted the complete original-log comparison; no causal correction was established. The first calibration allocation stopped at entry with zero tests or PostgreSQL starts.
+- **Verified:** The sole native calibration case passed: helper 9.113230 seconds, complete phases 17.847252. Review accepted the lifecycle and preservation; no saving was established.
 - **Blocked:** [Main 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) exceeded the Python 3.12 bound by 30.383034 seconds. Candidate delivery skipped; [F3 remains unaccepted](VALIDATION.md#remaining-f3-controls), and the earlier `503` is unresolved.
-- **Next:** Lead admitted private lifecycle correction and the first measurement through 20:47:39 UTC. Quality owns execution, Backend analysis and Review acceptance; F4, demonstration and the expired preview remain separate.
+- **Next:** Lead admitted INSERT-only source work through 21:14:39 UTC; Quality prepares helper/regression source; Backend maintains progress and Review checks the exact design. No further native or CI execution is granted; F4 stays inactive; demonstration remains separate and the preview expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,11 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**First calibration measured; INSERT-only feasibility reviewed — 2026-11-02 (Pacific)**
+
+- After the separately reviewed lifecycle correction and three bounded synthetic cleanup checks, Quality ran the unchanged native-cap case once. All three phases passed; the helper took 9.113230 seconds within its call phase, with 17.847252 seconds across complete phases, 20.965898 child and 29.377416 controller. Review accepted native/source/environment/private preservation and owned cleanup. Lead closed that allocation at 20:25:58 UTC; the native slot is consumed. These nested local intervals are not additive savings or a hosted slowdown explanation.
+- Backend's separate source-only assessment identified a conditional PostgreSQL INSERT-only candidate: keep existing chunks of at most 64 rows, initial anchor, transactions, UPDATE path and every independent proof. Review accepted the feasibility qualification, including conditional driver pipelining and cross-run input equivalence. [The next source-only allocation](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#current-action-insert-only-candidate-source) covers helper/regression authoring and exact review, not another native run, CI or paid/provider activity.
 
 **Calibration entry stopped; separate lifecycle correction admitted — 2026-11-02 (Pacific)**
 

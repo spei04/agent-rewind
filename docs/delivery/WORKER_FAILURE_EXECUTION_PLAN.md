@@ -24,6 +24,21 @@ Review independently accepted inspection of the original receipts for [main run 
 
 Quality retained the main log once; Backend reconciled all 9,231 ordered IDs and 27,680 phase rows against the saved PR133 log, and Review accepted the comparison. Lead closed the read-only operation at 19:53:15 UTC, before 20:05:14. The same-tree timing difference was diffuse; no causal correction or removable budget was established. [Rounded timing qualifications](../VALIDATION.md#completed-original-log-comparison) remain separate from the receipt overrun above.
 
+#### Current action: INSERT-only candidate source
+
+**Separately admitted; source preparation is in progress.** Lead issued this 35-minute source-only allocation at 20:39:39 UTC, ending 21:14:39 UTC (13:14:39 Pacific): Quality source 15 minutes, Review 10 and Lead closeout 10. Quality may change only `tests/ledger_reader_fixture.py` and `tests/test_ledger_reader_native.py` in the reused SECONDARY; Backend keeps the three PRIMARY progress documents. Stop at the deadline or if regression validity, constraints or ownership cannot be established. No automatic extension. The helper/test patch stays uncommitted pending review and later correctness evidence.
+
+The one native calibration original passed, with helper 9.113230 s inside call 13.929135 s, complete phases 17.847252 s, child 20.965898 s and controller 29.377416 s. Review accepted actual native/source/environment/private preservation and owned cleanup; Lead closed that allocation at 20:25:58 UTC. Its one native slot is consumed. The nested observation does not measure SQL construction separately or establish a saving/hosted cause.
+
+The reviewed feasibility is restricted to PostgreSQL multi-VALUES INSERTs for existing chunks of at most 64 rows, jobs before scopes. Preserve the initial one-row anchor, both construction commits, separate complete-reader control, all four receipt walks/two snapshots, and every boundary/history/authority/refusal/rollback assertion. Leave the trigger-sensitive payload UPDATE, SQLite paths, production and environment untouched. Parameter-list execution may already use pipelining; loaded capability/runtime state and benefit remain unmeasured.
+
+Quality owns the existing SECONDARY helper/regression source; Backend owns these PRIMARY progress documents; Review independently checks the exact diff/design, including a real late-duplicate rollback control with a valid independently established prestate. Preserve the first committed prefix and reject any design that weakens native failure behavior or independent proofs. Raw cross-run receipt/hash equality is conditional on equivalent relevant seeded inputs; otherwise validate each original against its own independent expected state. Do not normalize away unknown differences.
+
+Only source/static preparation is included. No native test, collection, benchmark, new CI, PostgreSQL startup, provider call, new resource, environment/lock change or automatic retry follows. Any later correctness/performance comparison needs its own complete Lead allocation and exact-entry review; fixed 2700/2700/3600 receipt limits and full-order coverage remain unchanged. No F3 acceptance or original 503 repair is claimed; F4 stays inactive, demonstration separate and the preview expired.
+
+<details>
+<summary>Prior lifecycle correction allocation retained — 2026-11-02, 20:02 UTC (completed 20:25:58 UTC)</summary>
+
 #### Current action: lifecycle correction and first measurement
 
 **Separately admitted; preparation is in progress.** The prior calibration allocation closed at entry at 20:01:05 UTC with zero test/helper invocations and zero PostgreSQL starts. Review found that the inherited private runner lacked general interruption cleanup for its separately sessioned child. Its stopped preparation and original grant remain history; no timing result or performance fix exists.
@@ -39,6 +54,8 @@ Use existing SECONDARY Python 3.12 and actual clean `bfcce760` only through revi
 The complete budget is correction/statics10 minutes, synthetic checks5, entry Review7, native lifecycle4, Backend analysis6, actual Review8 and Lead closeout5. Native child wall180s/CPU60s/output32MiB, parent240s **including owned cleanup**, and TERM5/KILL5 remain fixed. No hidden supervisory extension; native activation requires at least23 minutes left and independent acceptance of interruption and PG ownership cleanup. Only this invocation's process groups/PG instance may be stopped.
 
 Stop on uncertain cleanup/ownership, source/environment/observer mismatch, first assertion, forwarding/count/output/preservation failure or deadline; retain originals and reap owned processes. No native retry, sampling or automatic extension. Acceptance still requires all original phases and native proofs, one forwarded helper call, and independent source/environment/private/PG/process preservation. A measured span can only guide a separately reviewed next action, not establish a causal hosted slowdown or CI saving. No production/test-source, environment, dependency, full-CI, provider, paid-resource, merge or release change is admitted. F3 remains unaccepted and the original `503` unresolved.
+
+</details>
 
 <details>
 <summary>Prior single-measurement allocation retained — 2026-11-02, 19:55 UTC (stopped at entry 20:01:05 UTC; zero bodies)</summary>

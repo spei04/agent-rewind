@@ -204,6 +204,38 @@ be added. Increases were diffuse: the ten largest phase increases total 21.67
 printed seconds; the largest phase increase was 2.81, versus 3.25 for a whole
 node. Neither identifies removable work or explains the original `503`.
 
+The **first and only native calibration invocation passed** after the corrected
+private lifecycle and three bounded synthetic cleanup cases were independently
+reviewed. Review then accepted the native original, source/environment/private
+preservation, restored database/role baseline and owned process/PG cleanup.
+Lead closed that allocation at 20:25:58 UTC; its native slot is consumed.
+
+| Local observed scope | Seconds |
+| --- | ---: |
+| Calibration helper, one call | 9.113230 |
+| Complete setup/call/teardown sum | 17.847252 |
+| Pytest child | 20.965898 |
+| Native controller | 29.377416 |
+
+These rounded reporting values describe nested scopes and must not be added.
+The helper is inside the 13.929135-second call phase; it includes construction,
+four independent receipt walks, two snapshots and a complete reader/control
+transaction. Internal costs and observer overhead remain unmeasured. This is
+one local observation, not removable cost, a hosted cause or a CI saving.
+
+The separately reviewed source-only feasibility supports considering only
+PostgreSQL multi-row INSERT construction within existing 64-row chunks.
+Keep the initial one-row anchor, both construction commits, separate control,
+all receipts/snapshots, trigger-sensitive UPDATE, SQLite and production exact.
+Driver pipelining is conditional; actual activation was not probed. Cross-run
+raw receipt/hash equality requires proved equivalent relevant inputs; otherwise
+each run retains its own independent expected-state and native proofs.
+[Source-only authoring and review](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#current-action-insert-only-candidate-source)
+is separate from any future implementation validation or native/CI allocation.
+
+<details>
+<summary>Prior lifecycle correction allocation retained — 2026-11-02, 20:02 UTC (completed 20:25:58 UTC)</summary>
+
 The first calibration allocation **stopped at entry at 20:01:05 UTC**: Review
 found missing general interruption cleanup for a separately sessioned pytest
 child in the inherited private runner. There were zero test/helper invocations
@@ -218,6 +250,8 @@ limits and exact native entry before the one unchanged node. Synthetic checks
 do not prove actual PostgreSQL cleanup. Backend interprets the sole timing;
 Review verifies actual preservation. Source, environment, assertions and CI
 limits remain unchanged; no native retry or new CI is included.
+
+</details>
 
 <details>
 <summary>Prior single-measurement allocation retained — 2026-11-02, 19:55 UTC (stopped at entry 20:01:05 UTC; zero bodies)</summary>
