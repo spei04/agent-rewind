@@ -24,6 +24,25 @@ Review independently accepted inspection of the original receipts for [main run 
 
 Quality retained the main log once; Backend reconciled all 9,231 ordered IDs and 27,680 phase rows against the saved PR133 log, and Review accepted the comparison. Lead closed the read-only operation at 19:53:15 UTC, before 20:05:14. The same-tree timing difference was diffuse; no causal correction or removable budget was established. [Rounded timing qualifications](../VALIDATION.md#completed-original-log-comparison) remain separate from the receipt overrun above.
 
+#### Admitted action: complete INSERT candidate validation
+
+**Separately admitted; staged preparation is in progress.** Lead issued a 100-minute local allocation at 20:56:43 UTC, ending 22:36:43 UTC (14:36:43 Pacific). First native activation must occur by 21:31:43 UTC (13:31:43 Pacific), after all prerequisite reviews. This supersedes the incomplete 75/90-minute proposals without extending any prior allocation. Quality alone owns SECONDARY revisions/metadata/execution; Backend independently reconciles inventories/results and maintains PRIMARY progress; Review accepts exact entries/actuals; Lead owns runway and closeout.
+
+Quality may bind local C1 from the exact reviewed two-file patch, preserving clean HEAD/tree/source/environment guards. Then collect the full ordinary inventory once on Python 3.11 and once on 3.12, without receipt/partition flags or fixture/test/SQL/network bodies. Backend and Review reconcile actual IDs, source-derived skips/reasons, order, partitions and digests. Only accepted unchanged skip semantics permit four count/digest metadata leaves, followed by the retained direct-array validator and 16 controls. C2 adds only accepted metadata. These local commits provide immutable validation inputs, not correctness or publication acceptance.
+
+Baseline B restores only the helper in C2 to original main `078226e8` bytes; the new regression and metadata remain identical. Review its exact inverse. The fixed cells are 3.12 B, 3.12 C2, 3.11 B, 3.11 C2. Each has native-cap alone with the one-call observer, then native-one-over, canonical-expansion, canonical-cap, canonical-one-over and late-duplicate in order: eight groups/24 prospective cases, with actual selectors confirmed before execution. Switch only between fully stopped/released groups; restore C2 at cleanup.
+
+The complete stage budgets are 20 minutes preparation/entry review, 15 inventory/metadata controls/review, 36 native groups/transitions, 10 analysis, 10 actual review and 9 progress/closeout. Inventory's three 160-second outers consume eight minutes; seven remain for transport/checks/review. Native parents consume 32 minutes; four remain for transitions. Before each native group, retain at least 270 seconds per remaining group plus 1,740 seconds for analysis/review/closeout.
+
+Collections retain child 120 seconds/CPU 60 seconds/output 32 MiB/100,000 items and outer 160 seconds including cleanup. Metadata controls retain 120/60 seconds/32 MiB and outer 160 seconds. Native groups retain child 180 seconds/CPU 60 seconds/output 32 MiB, parent 240 seconds including cleanup, TERM 5/KILL 5. Review each applicable lifecycle; corrected native cleanup does not prove an unrelated launcher's safety.
+
+Keep both construction commits, initial anchor, UPDATEs, all four receipt walks/two snapshots and every native history/authority/refusal/rollback proof. Late-duplicate must establish valid prestate and genuine `23505` on `jobs`/`jobs_pkey`, leaving only the committed anchor and rolling back the entire second transaction. Use each run's independent expected state; raw cross-run hashes need proved input equivalence. Report old-five totals separately and include the full regression cost; helper, phase, child and controller intervals are nested, not additive savings.
+
+First failure, unexpected inventory/skip/digest/source change, identity mismatch, cap, uncertain ownership/cleanup or deadline stops later work. Retain originals, reap owned resources, restore the database/role baseline and report uncertainty. No retries, regrouping or extension, including after reauthentication. No hosted CI, source push/PR, merge, release, environment install, new checkout/resource or provider call is granted. Receipt limits remain 2700/2700/3600 seconds; no hosted margin, `503` repair or F3 acceptance is claimed. F4, installed-package acceptance, demonstration and expired preview remain separate.
+
+<details>
+<summary>Prior unadmitted validation proposal retained — 2026-11-02 (superseded by separate 100-minute allocation)</summary>
+
 #### Proposed next action: INSERT candidate validation
 
 **Source authoring/static review is complete; validation is not admitted.** Quality prepared the 32-line PostgreSQL multi-row INSERT branch and one late-duplicate rollback regression in the existing SECONDARY. Review accepted the exact source design and scoped AST/Ruff/whitespace checks. The patch remains uncommitted and unvalidated; no regression result or performance benefit is claimed. SSH authentication was restored at 20:45:59 UTC without extending the source allocation's 21:14:39 deadline.
@@ -33,6 +52,8 @@ The historical 75-minute comparison proposal did not include the recovered colle
 Preserve all five existing financial modes in order, the new late-duplicate control's independently established valid prestate, both construction commits, jobs-before-scopes chunks, trigger-sensitive UPDATEs, separate reader control, four receipt walks, two snapshots and every native constraint/authority/refusal/rollback assertion. Keep the first committed prefix and each run's independent expected-state proofs; raw cross-run hashes require proved relevant-input equivalence. Include complete case/child intervals and all added-control costs; nested helper time or conditional driver pipelining is not a saving.
 
 The proposed native per-group limits remain child wall 180 seconds/CPU 60 seconds/output 32 MiB and parent 240 seconds including owned cleanup. Collection retains its separate 120-second child/60 CPU seconds/32 MiB/100,000-item and 160-second outer bounds; metadata controls retain their existing reviewed lifecycle. Stop at the first failed or uncertain proof, source/environment identity, output, cleanup/ownership or deadline check; retain originals and reap only owned processes. No retries, sampling or automatic extension. No native test, collection, metadata update, new CI, provider call or paid resource is activated here. Receipt limits remain 2700/2700/3600 seconds with full order/coverage intact; F3 remains unaccepted, the original `503` unresolved, and F4/demo/expired-preview gates separate.
+
+</details>
 
 <details>
 <summary>Prior INSERT-only source allocation retained — 2026-11-02, 20:39 UTC (authoring/static review complete)</summary>

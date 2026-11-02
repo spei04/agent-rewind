@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Prepared:** The INSERT-only fixture candidate and late-duplicate regression passed source review and scoped static checks. The patch remains uncommitted and unvalidated; performance is unmeasured.
+- **Prepared:** Review accepted the INSERT-only fixture source and regression design. Correctness and performance remain unvalidated.
 - **Blocked:** [Main 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) exceeded the Python 3.12 bound by 30.383034 seconds. Candidate delivery skipped; [F3 remains unaccepted](VALIDATION.md#remaining-f3-controls), and the earlier `503` is unresolved.
-- **Next:** Lead must allocate complete validation, including native comparisons, fresh inventories and metadata controls. Nothing is activated. Quality would own execution, Backend analysis and Review acceptance; F4 stays inactive; demonstration remains separate and the preview expired.
+- **Active:** Lead admitted complete local validation through 22:36:43 UTC, with native entry first allowed only after staged review and by 21:31:43. Quality owns revisions/execution, Backend inventories/analysis and Review acceptance. No hosted CI or source publication is granted; F4 stays inactive; demonstration and expired preview remain separate.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,11 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Complete local INSERT validation admitted — 2026-11-02 (Pacific)**
+
+- The prior source-only allocation closed with the exact helper/regression source and progress documents independently reviewed. Lead separately admitted [100 minutes of complete local validation](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#admitted-action-complete-insert-candidate-validation) at 20:56:43 UTC, ending 22:36:43 UTC (14:36:43 Pacific). Quality owns local revision binding, two guarded collections, reviewed metadata/16 controls and eight native groups; Backend independently reconciles inventories and results, Review accepts staged entries/actuals and Lead closes the operation.
+- This allocation explicitly permits local immutable source commits for validation, without correctness or publication credit. Native work cannot start before its prerequisites pass or after 21:31:43 UTC; each later group needs the remaining group and review/closeout budget. First failure, uncertainty or deadline stops progression without retry or extension. The original main failure, `503`, fixed receipt limits, funding and separate F3/F4/demo gates remain unchanged; no hosted CI, provider call or new resource is granted.
 
 **INSERT-only candidate source reviewed; validation remains unadmitted — 2026-11-02 (Pacific)**
 

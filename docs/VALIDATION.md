@@ -204,6 +204,37 @@ be added. Increases were diffuse: the ten largest phase increases total 21.67
 printed seconds; the largest phase increase was 2.81, versus 3.25 for a whole
 node. Neither identifies removable work or explains the original `503`.
 
+#### Complete local INSERT validation admitted — 2026-11-02 (Pacific)
+
+The source-only allocation closed; Lead separately admitted [complete local
+validation](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#admitted-action-complete-insert-candidate-validation)
+at 20:56:43 UTC, with a 22:36:43 UTC hard stop. This grants staged preparation
+and execution, not a correctness result. Quality must first bind reviewed local
+candidate commits, run one guarded ordinary full collection per pinned Python
+version, and obtain independent reconciliation of actual IDs, skips, order and
+digests. Only accepted evidence permits the four metadata count/digest leaves,
+the retained direct-array validator and 16 controls. No totals or new ID are
+assumed in advance.
+
+The later fixed matrix has eight groups/24 prospective cases: Python 3.12
+baseline/candidate followed by Python 3.11 baseline/candidate, with one native-cap
+case and a separate five-case group per cell. Baseline means the original helper
+with the identical new regression and reviewed metadata, not unchanged main.
+All existing native proofs, two commits, rollback checks and independent receipt
+walks remain required. Count old-five results separately and charge the complete
+new regression; helper, phase, child and controller scopes are nested, not
+additive savings. Native activation requires staged Review acceptance and the
+21:31:43 first-start cutoff plus per-group remaining-time checks.
+
+No actual collection, metadata-control or matrix outcome is claimed here.
+The operation stops on its first failure, uncertain preservation/cleanup or
+deadline; originals remain retained and no retry or automatic extension follows.
+No hosted CI, source push, provider call, new resource or receipt-limit change
+is admitted. F3 remains unaccepted and the earlier `503` remains unresolved.
+
+<details>
+<summary>Prior source-only checkpoint retained — 2026-11-02 (superseded by separate validation allocation)</summary>
+
 #### INSERT-only candidate source prepared — 2026-11-02 (Pacific)
 
 Review accepted the exact two-file source candidate: a 32-line PostgreSQL
@@ -225,6 +256,8 @@ independent preservation/cleanup review. The earlier 75-minute proposal did
 not include those collection/metadata dependencies and is not execution-ready.
 The new regression's exact ID/count/digest remains unobserved; no collection,
 metadata update or new CI follows from this source checkpoint.
+
+</details>
 
 The **first and only native calibration invocation passed** after the corrected
 private lifecycle and three bounded synthetic cleanup cases were independently
