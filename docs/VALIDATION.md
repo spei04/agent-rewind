@@ -186,6 +186,34 @@ an artifact. F3 remains unaccepted. The original main `503` is unresolved;
 neither later passes nor differences between hosted runs establish a repair,
 repeatability or a code-caused slowdown.
 
+##### Completed original log comparison
+
+Quality captured the original main Python 3.12 log once. Backend's comparison
+with PR133 run `41440988895/1` reconciled all 9,231 ordered selected IDs and
+27,680 phase rows per run, with no missing, duplicate or unexpected rows.
+Review accepted the originals, parser, source applicability and arithmetic;
+Lead closed the read-only allocation at 19:53:15 UTC, before 20:05:14.
+Both runs used the same whole source tree. No causal correction was established.
+
+Printed phase sums were 3,297.73 seconds for PR and 3,601.02 for main
+(+303.29); their exact receipt intervals differ by 307.379416 seconds.
+Values are rounded to 0.01 seconds: conservative accumulated uncertainty is
+±138.40 seconds per printed sum and ±276.80 for the difference. The residual
+is not proven overhead, and overlapping node/module/phase aggregates cannot
+be added. Increases were diffuse: the ten largest phase increases total 21.67
+printed seconds; the largest phase increase was 2.81, versus 3.25 for a whole
+node. Neither identifies removable work or explains the original `503`.
+
+The [separately admitted next action](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#admitted-next-action-one-calibration-measurement)
+is one unchanged native-cap case with an external calibration-helper timer.
+It preserves all native assertions and internal deadlines; any result remains
+a local diagnostic, not a whole-CI margin or repair claim. Its separate grant
+runs from 19:55:22 to 20:25:22 UTC, with activation cutoff 20:03:22 UTC
+and independent entry review required before the single invocation.
+
+<details>
+<summary>Prior admitted log inspection retained — 2026-11-02, 19:35 UTC (completed 19:53:15 UTC)</summary>
+
 Receipts contain node outcomes and phase labels, not per-test duration fields.
 The existing PR133 Python 3.12 log is retained; the main Python 3.12 log has not
 been captured. The [complete next action](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#admitted-next-action-original-log-comparison)
@@ -203,6 +231,9 @@ digest, privacy, parser or transport mismatch and the deadline stop the
 operation without renewal or retry; missing timings do not authorize another
 log, test or gate change. No new test, benchmark, CI, source implementation,
 provider call, install or paid resource is granted.
+
+
+</details>
 
 The 2700/2700/3600-second receipt bounds, full order, coverage, skips and native
 assertions remain unchanged. The 235 aggregate configured job-minutes are not

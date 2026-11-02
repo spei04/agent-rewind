@@ -20,6 +20,29 @@ P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2
 
 Review independently accepted inspection of the original receipts for [main run 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) at `078226e8`. Python 3.12 all ran from 17:47:28.763622 to 18:47:59.146656 UTC on November 2: 3,630.383034 seconds against 3,600, an upper-bound overrun of 30.383034 seconds. The positive Python 3.11 early/late intervals were 1,958.963493 and 1,566.772803 seconds, both within 2,700. All sessions were complete and exit-zero; six component jobs passed, the required gate failed and candidate delivery skipped without an artifact. F3 is not accepted; the original `503` remains unresolved.
 
+#### Completed original log inspection — 2026-11-02 (Pacific)
+
+Quality retained the main log once; Backend reconciled all 9,231 ordered IDs and 27,680 phase rows against the saved PR133 log, and Review accepted the comparison. Lead closed the read-only operation at 19:53:15 UTC, before 20:05:14. The same-tree timing difference was diffuse; no causal correction or removable budget was established. [Rounded timing qualifications](../VALIDATION.md#completed-original-log-comparison) remain separate from the receipt overrun above.
+
+#### Admitted next action: one calibration measurement
+
+**Separately admitted; preparation is in progress.** Lead issued the new grant at 19:55:22 UTC with a 20:25:22 UTC hard stop (12:25:22 Pacific); activation must occur by 20:03:22 UTC and only after exact-entry review. This is distinct from the completed read-only allocation and the earlier proposed-only record.
+
+Quality owns exactly one unchanged Python 3.12 invocation:
+
+```text
+tests/test_ledger_reader_native.py::test_postgres_complete_financial_boundaries[native-cap-legacy-opening-ar7]
+```
+
+Reuse the existing SECONDARY environment and native runner, binding immutable main `078226e8`/tree `f778b526` (or its verified identical source) and the current admitted environment manifest. Review must accept the exact observer/source/environment/lifecycle entry before activation. A forwarding timer surrounds only the test-module `calibrate_financial_boundary` call: original arguments, one original call, identical return or exception, then alias restoration. Keep its native clocks, control snapshots, four projection receipts, history, authority and transaction proofs intact; the later reader/refusal/rollback assertions are unchanged. Retain helper, complete phase and child times separately.
+
+The five existing PostgreSQL modes total 43.14 PR versus 55.45 main printed whole-phase seconds, including required proofs; the unmeasured calibration fraction is not a saving. The allocation is 30 minutes total: preparation/entry review 8, one lifecycle 4, Backend interpretation 8, Review 7 and Lead closeout 3. Child wall180s/CPU60s/output32MiB, parent240s and TERM5/KILL5 remain unchanged. Do not start without enough time for execution, review and closeout.
+
+Stop on the first assertion, source/environment identity, forwarding/count, output, preservation, lifecycle or deadline failure; preserve the original and clean only owned process groups/PG lifecycle. No retry, sampling or automatic extension. Acceptance requires the unchanged node's three phases, exactly one helper forwarding, native proofs and independent preservation/reaping review. A small span rejects this setup candidate; a large span only motivates separately reviewed source proof. No cache, skipped proof, production/test-source edit, full-suite/CI rerun, new environment, install, provider call or paid resource is granted. The earlier `503`, F3 acceptance, F4/demo/preview and funding qualifications remain unchanged.
+
+<details>
+<summary>Prior admitted original-log allocation retained — 2026-11-02, 19:35 UTC (completed 19:53:15 UTC)</summary>
+
 #### Admitted next action: original log comparison
 
 **Separately admitted and in progress.** Lead activated this complete read-only operation at 19:35:14 UTC, with a hard stop at 20:05:14 UTC (12:05:14 Pacific). The 30 minutes cover preparation, capture, comparison, review and closeout. This is a separate grant from the completed receipt inspection. Receipts contain phase outcomes, not per-test durations; the missing input is the original main `core (3.12, all)` log for job `125445225903`, run `41494342148/1`, source `078226e8` and reviewed tree `f778b526`.
@@ -36,6 +59,9 @@ The single payload is limited to 32 MiB raw network bytes, 32 MiB each for raw a
 Stop on identity, digest, privacy, output, parser or transport mismatch, missing/insufficient data or the absolute deadline. Preserve partial evidence, reap owned processes and retain private originals outside checkouts with owner-only permissions. No renewal, payload retry, additional log/candidate capture, tests, benchmarks, services, CI rerun/dispatch, source implementation, installs, provider calls, paid resources, merge, release or deployment is included. Missing timings are a finding, not permission to expand execution.
 
 Printed durations remain rounded; their sums are separate from receipt wall-clock elapsed and unmeasured overhead. A single same-tree PR/main difference does not prove a code regression, runner cause or repeatability. Full Python 3.12 order, coverage, skips, native assertions and the 2700/2700/3600-second bounds remain unchanged. The completed workflow's 235 aggregate configured job-minutes are not an established bill. F4, stakeholder demonstration and the expired preview stay separate. Funding remains a $200 lifetime cap, $36.567974 reservations, unknown historical exposure and an outstanding billing question; no spendable balance is inferred.
+
+
+</details>
 
 <details>
 <summary>Predicate-only checkpoint retained before receipt review — 2026-11-02 (Pacific)</summary>

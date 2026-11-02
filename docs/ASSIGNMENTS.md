@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Review accepted inspection of the three original main receipts; both Python 3.11 legs stayed within their limits.
-- **Blocked:** [Main run 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) took 3,630.383034 seconds in Python 3.12, exceeding 3,600 by 30.383034 seconds. Candidate delivery skipped; [F3 is not accepted](VALIDATION.md#remaining-f3-controls).
-- **Next:** Lead admitted one bounded log inspection through 20:05:14 UTC; Quality, Backend and Review own it. The earlier `503` remains unresolved; F4 and demonstration stay separate, and the private preview is expired.
+- **Verified:** Review accepted the completed original-log comparison: 9,231 ordered IDs and 27,680 phases per run matched; no causal correction was established.
+- **Blocked:** [Main 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) exceeded the Python 3.12 bound by 30.383034 seconds. Candidate delivery skipped; [F3 is not accepted](VALIDATION.md#remaining-f3-controls), and the earlier `503` remains unresolved.
+- **Next:** Lead separately admitted one calibration measurement through 20:25:22 UTC; Quality executes, Backend analyzes and Review verifies. F4, demonstration and the expired preview remain separate.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
 
@@ -21,6 +21,11 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+**Original log comparison completed — 2026-11-02 (Pacific)**
+
+- Quality captured the original main Python 3.12 log once; Backend compared it with the saved PR133 log, and Review accepted all 9,231 ordered IDs and 27,680 phase rows per run. Lead closed the read-only allocation at 19:53:15 UTC, before its 20:05:14 deadline. The difference was diffuse; rounded phase sums do not establish a causal fix or measured overhead. [Timing qualifications](VALIDATION.md#completed-original-log-comparison).
+- The separately admitted [one-case calibration measurement](delivery/WORKER_FAILURE_EXECUTION_PLAN.md#admitted-next-action-one-calibration-measurement) preserves native proofs, existing limits and source. Quality owns execution, Backend interpretation, Review acceptance and Lead closeout. It is a diagnostic, not a repair or whole-CI saving claim; the earlier `503` remains unresolved.
 
 **Original main receipt interval verified — 2026-11-02 (Pacific)**
 
