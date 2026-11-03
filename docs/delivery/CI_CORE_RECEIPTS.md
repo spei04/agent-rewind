@@ -3,7 +3,7 @@
 Core CI uses Python 3.11 `early` and `late` jobs, and one unpartitioned Python
 3.12 `all` job. The 3.11 jobs and their pytest-session receipts retain
 45-minute limits. The full 3.12 job has a 75-minute outer limit, while its
-pytest-session receipt retains a separate 60-minute elapsed limit. A session
+pytest-session receipt retains a separate 65-minute elapsed limit. A session
 exceeding that receipt limit still fails the gate. Each job owns its disposable
 PostgreSQL service. The 3.11 cut is by complete file at
 `tests/test_ledger_recovery.py`: earlier paths run in `early`, the boundary and
@@ -20,8 +20,17 @@ failure ends the session with its original traceback instead of waiting for a
 later job timeout. Its incomplete or failed receipt cannot pass the gate.
 Successful sessions still require every selected node and complete passing or
 declared-skip phases. The 75-minute outer allowance provides bounded CI job
-headroom, not a completion guarantee; the 60-minute session guard and product,
-native and sandbox deadlines are unchanged.
+headroom, not a completion guarantee. The separate session guard is 65 minutes;
+product, native and sandbox deadlines are unchanged.
+
+On 2026-11-03, the owner approved this prospective 60-to-65-minute receipt
+amendment. Original protected-main run `41494342148` remains failed under its
+then-applicable 3600-second limit: its Python 3.12 `all` interval was
+3630.383034 seconds. This policy amendment supplies no performance or research
+credit. Correctness, security, native, coverage and identity checks remain
+unchanged. Acceptance requires fresh, independently reviewed inventories for
+both Python versions, original PR and protected-main evidence, and the current
+main candidate.
 
 ## Updating the collection baseline
 

@@ -4,6 +4,8 @@
 
 See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status).
 
+The [owner-approved November 3 CI allowance amendment](ASSIGNMENTS.md#ci-receipt-allowance-amendment-2026-11-03) is delivery maintenance for the open F3 checkpoint. Quality owns the receipt/test change and inventories; Review owns independent evidence assessment; Lead owns integration and the single original PR/main validation sequence. The estimate is 4–6 engineering hours with medium-low confidence, excluding queues and unrelated remediation. The prospective 65-minute Python 3.12 receipt policy leaves the 75-minute outer job, 45-minute Python 3.11 legs, all correctness/security/native checks, task graph and product acceptance criteria unchanged. Historical failures, the unexplained HTTP `503`, later worker/research gates and unreconciled funding remain visible.
+
 ## Approval boundary and readiness
 
 The instruction “Do not start implementation until I approve the execution backlog” is enforced by **E0**. Day 1 means the first staffed working day after that approval. E0 authorizes only its recorded scope; it does not satisfy architecture, funding, data rights, cloud access, customer, assessor or release gates. M0 and explicitly marked fixture/design preparation can proceed after E0; runtime M1 implementation also requires G0. Later tasks become assignable only when their exact prerequisites and contract-producer reviews pass. No task is scheduled on the assumption that an unavailable credential, future schema or customer approval already exists.

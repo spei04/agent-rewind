@@ -2,9 +2,9 @@
 
 ## Current status
 
-- **Verified:** Four diagnostic cases and 165 existing CI controls per Python version passed. The full-timing display change is reviewed.
-- **Blocked:** The original Python 3.12 run exceeded its 3,600-second limit by 56.450653 seconds; [F3 remains open](VALIDATION.md#remaining-f3-controls).
-- **Next:** Quality captures one diagnostic CI run; Review verifies its timing evidence. Keep all execution and receipt limits unchanged.
+- **Approved:** The owner approved a prospective Python 3.12 full-session receipt limit of 65 minutes. Both Python 3.11 limits remain 45 minutes and the outer Python 3.12 job remains 75 minutes.
+- **Prepared:** The receipt validator, existing boundary cases and CI contract are updated. Fresh inventories on both interpreters, independent review and the original PR/main validation sequence remain required.
+- **Unaccepted:** F3 delivery remains open; the earlier HTTP `503` is unexplained. Installed PostgreSQL, F4/F5/P2, the real-failure demonstration and research acceptance remain separate.
 - **Dashboard:** The plain dashboard is merged; its private preview has expired.
 
 [Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
@@ -22,6 +22,32 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+<a id="ci-receipt-allowance-amendment-2026-11-03"></a>
+
+**CI receipt allowance amendment approved — 2026-11-03 (Pacific)**
+
+The owner approved the [prospective CI timing policy](delivery/CI_CORE_RECEIPTS.md): Python 3.12 `all` changes from 3,600 to 3,900 seconds; Python 3.11 `early`/`late` stay at 2,700 seconds and the Python 3.12 outer job stays at 75 minutes. Original protected-main [run 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148) remains failed under its original 3,600-second contract, with a 3,630.383034-second receipt. This is an explicit resource-policy amendment, not a performance repair or research result.
+
+| Engineer / owner | Assignment | Acceptance boundary |
+| --- | --- | --- |
+| Quality | Apply the two receipt/test literals and CI contract; prepare bounded local checks and both full collection originals. | Preserve all existing assertions, ordering, skips, native limits and security checks. |
+| Independent reviewer | Review composed source, interpreter inventories, baseline-only changes, lifecycle and delivery evidence. | No inferred collection, reused old-run success or automatic F3 acceptance. |
+| Lead | Reconcile planning, preserve prior source/evidence, and control publication and one original PR/main sequence. | Fresh required checks, source identity and candidate evidence; no automatic retries. |
+
+The declined INSERT candidate and the uncommitted tracking checkout remain preserved. The closed private qualification is not restarted. The cancelled November 3 maintenance entry has released scheduling; actual resource checks still apply. Development reuses the existing cloud checkout and environments, with a 1 GiB incremental local accounting allowance and no new installation, local PostgreSQL diagnostic, model call or paid service. Existing host/storage charges and earlier API exposure remain unreconciled; the $200 lifetime cap and $36.567974 historical reservations are unchanged.
+
+The amendment-through-CI/candidate review estimate is 4–6 engineering hours, with medium-low confidence; queue time and unrelated remediation are separate. Product task dependencies and acceptance gates remain unchanged.
+
+<details>
+<summary>Prior current summary, retained before the November 3 amendment</summary>
+
+- **Verified:** Four diagnostic cases and 165 existing CI controls per Python version passed. The full-timing display change is reviewed.
+- **Blocked:** The original Python 3.12 run exceeded its 3,600-second limit by 56.450653 seconds; [F3 remains open](VALIDATION.md#remaining-f3-controls).
+- **Next:** Quality captures one diagnostic CI run; Review verifies its timing evidence. Keep all execution and receipt limits unchanged.
+- **Dashboard:** The plain dashboard is merged; its private preview has expired.
+
+</details>
 
 **CI timing visibility decision — 2026-11-01 (Pacific)**
 
