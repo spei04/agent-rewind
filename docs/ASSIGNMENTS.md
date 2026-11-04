@@ -2,11 +2,11 @@
 
 ## Current status
 
-- **Verified:** Worker-F3 is accepted at `439fca55`: retained native evidence, current CI and exact candidate passed independent review. The accepted issuer scope is dependency failure and lease expiry.
-- **Next:** Review the frozen complete source candidate and exact no-body collector entry. Controller and component source findings are closed. Current source and test drafts are not runtime acceptance; F4 validation remains inactive.
-- **Open:** F4/F5, whole P1, P2 startup, installed PostgreSQL execution and faithful replay remain open. The historical HTTP `503` is unexplained; paid experiments await cost reconciliation.
+- **Verified:** Worker-F3 remains accepted at `439fca55`. F4 source C1 at `8225246` and the exact first-collection preparation are independently accepted as source only.
+- **Next:** Lead owns fresh shared-capacity/maintenance coordination, exact source bindings and the first-collection allocation. After admission, Runtime owns the original collection and Quality owns inventory and cleanup reconciliation. No execution is admitted.
+- **Unmeasured:** F4 collection counts, runtime/output fit and cleanup outcomes; faithful replay and budget-matched independently confirmed repairs. F4/F5, whole P1, P2 startup, installed PostgreSQL execution and production readiness remain open. The historical HTTP `503` is unexplained; paid studies await cost reconciliation.
 
-[Acceptance and current assignments](#worker-f3-accepted-2026-11-03)
+[Accepted source preparation and next owners](#worker-f4-source-preparation-accepted-2026-11-04) · [F3 acceptance and dated history](#worker-f3-accepted-2026-11-03)
 
 ## Execution location — 2026-10-23
 
@@ -21,6 +21,20 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+<a id="worker-f4-source-preparation-accepted-2026-11-04"></a>
+
+**Worker-F4 source preparation accepted — 2026-11-04 (Pacific)**
+
+The private reviewed checkpoint `FIRST_COLLECTION_ENTRY.v1.json` (`5c3ea18a`) binds C1 `82252460951a1cc1aeb494f63bfd0e5fdf65f25b`, collection-preparation-v3 (`61a22946`) and independent Quality acceptance `d64672c6`. This closes the source handoff; it does not admit collection, native execution or CI. Earlier caller, physical cleanup-check and final-accounting findings remain retained in the linked checkpoint history.
+
+| Owner | Completed work | Next gate |
+| --- | --- | --- |
+| Runtime | Concrete collector, caller, physical readback and failure-accounting sources. | Exact admitted entry before one original collection. |
+| Quality | Independent source review and verification of the corrected entry. | Actual inventory, timing, output and cleanup evidence after admission. |
+| Lead | Source integration, accounting review and durable checkpoint. | Fresh named shared commitments/maintenance state, exact source bindings and first-collection allocation. |
+
+Only the existing 256 MiB source-preparation allowance is active. Collection, native/hosted validation and the full 8 GiB peak remain unreserved. The observed free-space snapshots are not reservations; no hold, process stop, clock reset or spending is introduced here. This documentation-only checkpoint changes the checkout identity; the prepared entry remains bound to `8225246` until Lead reconciles its exact source/manifest bindings before execution. Runtime and research outcomes remain unmeasured.
 
 <a id="worker-f4-reviewed-coverage-2026-11-04"></a>
 

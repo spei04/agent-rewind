@@ -4,7 +4,7 @@
 
 See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status).
 
-F3 is accepted. F4 source preparation is active; its complete source gate and runtime validation remain open. The November 3 CI allowance amendment and its original PR/main validation are completed F3 delivery work. Dated amendment details and unsuccessful attempts remain in the history. F5, P1/P2, research validation and unreconciled funding retain their separate gates.
+That summary records accepted F4 source preparation, the next owner and allocation gates, and unmeasured runtime/research outcomes. Dated amendment details and unsuccessful attempts below remain historical evidence; they do not reopen accepted source preparation or grant execution.
 
 ## Approval boundary and readiness
 
