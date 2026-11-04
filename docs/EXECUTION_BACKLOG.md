@@ -4,7 +4,7 @@
 
 See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status).
 
-That summary records accepted F4 source preparation, the next owner and allocation gates, and unmeasured runtime/research outcomes. Dated amendment details and unsuccessful attempts below remain historical evidence; they do not reopen accepted source preparation or grant execution.
+That summary records accepted F4 collection evidence, its closeout-timing and named-capacity qualifications, the source-only reforecast, and the next owner and allocation gates. Runtime/research outcomes remain unmeasured. Dated amendment details and unsuccessful attempts below remain historical evidence; they do not grant downstream execution.
 
 ## Approval boundary and readiness
 

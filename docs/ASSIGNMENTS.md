@@ -2,11 +2,12 @@
 
 ## Current status
 
-- **Verified:** Worker-F3 remains accepted at `439fca55`. F4 source C1 at `8225246` and the exact first-collection preparation are independently accepted as source only.
-- **Next:** Lead owns fresh shared-capacity/maintenance coordination, exact source bindings and the first-collection allocation. After admission, Runtime owns the original collection and Quality owns inventory and cleanup reconciliation. No execution is admitted.
-- **Unmeasured:** F4 collection counts, runtime/output fit and cleanup outcomes; faithful replay and budget-matched independently confirmed repairs. F4/F5, whole P1, P2 startup, installed PostgreSQL execution and production readiness remain open. The historical HTTP `503` is unexplained; paid studies await cost reconciliation.
+- **Verified:** Worker-F3 remains accepted at `439fca55`. At run source `3b4b061`, guarded Python 3.11 and 3.12 collection each produced the same 9,570 collected node IDs in order, including 128 F4 PostgreSQL markers. No test or fixture body ran; caller completion, physical release and preserved-source checks passed.
+- **Qualified:** Independent review accepts the collection evidence only. Final peer retention was not proved within the 120-second closeout window, and a later-discovered 256 MiB intake commitment was missing from the named capacity coverage. Saved disk snapshots show numerical headroom, not retrospective full-interval admission. Both 900-second attempts and both 352 MiB reservations remain charged/held; 1,800 seconds remain in the planned configured-check budget.
+- **Next:** Runtime owns exact metadata-oracle, selector and bounded-entry preparation from the accepted source-only reforecast. Quality reviews those sources and measured-case coverage; Lead owns fresh named capacity, source binding and finite admission. No downstream execution is admitted.
+- **Open:** F4 runtime/CPU/output fit, native and hosted validation, faithful replay and budget-matched independently confirmed repairs. F4/F5, whole P1, P2 startup and production readiness remain open. The historical HTTP `503` is unexplained; paid studies await cost reconciliation.
 
-[Accepted source preparation and next owners](#worker-f4-source-preparation-accepted-2026-11-04) · [F3 acceptance and dated history](#worker-f3-accepted-2026-11-03)
+[Collection result, qualifications and next owners](#worker-f4-collection-evidence-2026-11-04) · [F3 acceptance and dated history](#worker-f3-accepted-2026-11-03)
 
 ## Execution location — 2026-10-23
 
@@ -21,6 +22,28 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+<a id="worker-f4-collection-evidence-2026-11-04"></a>
+
+**Worker-F4 collection evidence and reforecast — 2026-11-04 (Pacific)**
+
+The owner approved one replacement collection attempt after the first attempt failed during pytest's capture-file probe. The original failure remains retained. The replacement ran against commit `3b4b06104308f78a51f4b26e3874d53a125cf403`, tree `1ffc9806c195cfcbca4d8401dd53ae429bf52779`, using the independently reviewed capture and caller fixes. Python 3.12 followed successful Python 3.11 collection and physical release.
+
+Both inventories contain 9,570 unique collected node IDs in identical order (ordered digest `e4bcc559545ab3417354fef0f828458d52403ef997d091de5918372f2a045efd`), with 128 exact-bool F4 PostgreSQL markers each. All 9,231 earlier IDs remain in order. Zero test bodies, fixture bodies or writer denials occurred. All four caller processes exited successfully and their final process-group probes established absence; remote release and source/environment preservation records passed. These are collection and closure results, not executed test passes.
+
+Independent review accepted the collection evidence. The exact independent-review completion time is unknown; its final peer and result files were retained at 21:10:00.954 UTC, after the 21:07:22 UTC closeout deadline. Timely final review and retention therefore cannot be claimed. A separate 256 MiB intake reservation, issued during the phase, was later found missing from its named shared-capacity ledger. Adding it to the saved entry/closeout calculations leaves more than 19.5 billion bytes of numerical headroom at those snapshots; that does not prove continuous capacity coverage or retroactively admit the phase. Neither qualification is repaired by recollecting or by resetting clocks. Immutable private result `95149d5a`, review `2d958a66` and the subsequent capacity qualification retain the evidence and scope.
+
+The source-only reforecast maps all 339 added cases per interpreter without exclusions: 128 PostgreSQL cases, 121 corresponding non-PostgreSQL cases and 90 other configured-check cases. Four PostgreSQL groups contain 42/15/30/41 cases; their counterpart groups contain 30/15/30/46. Across both interpreters that is 16 proposed native groups and 498 prospective native executions. Each group is below the local 64-case limit; runtime, CPU, output, scratch and hosted whole-session fit remain unproved. The hosted manifest has its own limits and must not inherit an invented 64-case cap.
+
+Both 900-second attempts remain charged, leaving 1,800 seconds in the planned configured-check window. Both 352 MiB reservations remain held: 192 MiB normal and 512 MiB failure in total. The reforecast proposes 180 seconds for preflight, four 300-second stages, 300 seconds for actual independent review and 120 seconds for durable closeout. Its proposed 64 MiB normal output envelope is not a grant. Exact commands and all writers must fit before admission; any necessary timing/storage change requires a concrete reviewed proposal.
+
+| Owner | Completed work | Next gate |
+| --- | --- | --- |
+| Runtime | Guarded collection, complete inventory partition and source-only reforecast. | Replace the obsolete equal-count metadata oracle with the exact 339-addition inverse; prepare exact selectors, command closure and bounded writers. |
+| Quality | Independent collection-evidence and reforecast review; no omitted or duplicate new cases. | Review source-derived skip expectations, the two precise generated-expiry exceptions, existing controls, focused legacy coverage and entry limits. |
+| Lead | Retain failed and successful evidence, both qualifications, accounting and current tracker. | Bind the documentation successor explicitly, refresh named commitments and admit only a complete reviewed entry. |
+
+The private reforecast index is `af7b2f3c`, with full projection `8e360c3b`; acceptance is source-only. The existing 256 MiB source-preparation category remains the scope for further preparation, subject to fresh shared-capacity coverage. Native validation, hosted CI, providers and production are not dispatched by this checkpoint. This documentation-only successor does not change or relabel the run source, and it does not require a collection rerun. Earlier dated entries below preserve their original scope.
 
 <a id="worker-f4-source-preparation-accepted-2026-11-04"></a>
 
