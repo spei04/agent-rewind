@@ -198,6 +198,7 @@ def _install_marker(fixture):
 @pytest.mark.parametrize(
     ("field", "exact", "limit"),
     [("owner", "\u2603" * 21 + "x", 64), ("error", "\u2603" * 400, 1200)],
+    ids=["owner-utf8-64", "error-utf8-1200"],
 )
 @pytest.mark.parametrize("extra", [0, 1], ids=["exact-bytes", "one-byte-over"])
 def test_utf8_cell_guard_is_native_and_reached_by_complete_cancellation(
