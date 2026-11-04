@@ -334,7 +334,7 @@ def test_baseline_must_be_final_reviewed_exact_inventory(variant):
 
 
 @pytest.mark.parametrize(
-    "python,leg,seconds", [("3.11", "early", 2700), ("3.11", "late", 2700), ("3.12", "all", 3600)]
+    "python,leg,seconds", [("3.11", "early", 2700), ("3.11", "late", 2700), ("3.12", "all", 3900)]
 )
 @pytest.mark.parametrize("position", ["negative", "zero", "positive", "exact", "over"])
 def test_session_duration_has_exact_per_leg_bound(python, leg, seconds, position):
