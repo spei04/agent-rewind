@@ -3,8 +3,9 @@
 ## Current status — November 4, 2026
 
 - **Accepted:** F3 delivery; F4 source, inventory validator and collection evidence. Collection closeout remains timing-qualified. Candidate `e02ad6b` stays frozen in the cloud.
-- **Owners:** Runner, package and preflight source are reviewed. Runtime and Package Engineers finish the operator steps; Quality reviews them. Lead owns validation and progress records.
-- **Pending:** Execution awaits final operator review and resource admission. Configured checks, native validation and new CI remain unrun for this candidate. Research still requires real-failure comparisons and independent confirmation.
+- **Latest result:** Validation stopped during preflight on a process-inspection permission error. No test or package stage started; the failure record and earlier resource charges are retained.
+- **Owners:** Runtime prepares the process-observer correction; Package binds a replacement run to separate output paths; Quality reviews both. Lead maintains evidence and the complete execution proposal.
+- **Pending:** A replacement attempt needs reviewed source and approval. Configured checks, native validation and new CI remain unrun for this candidate. Research still requires real-failure comparisons and independent confirmation.
 
 This is the canonical current summary. Earlier checkout copies and the linked assignment log are historical snapshots.
 
