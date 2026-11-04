@@ -59,7 +59,8 @@ jobs:
         timeout-minutes: 1
         env:
           REWIND_CI_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
-        run: python3 scripts/ci_postgres.py
+          REWIND_CI_POSTGRES_RECEIPT: ${{ runner.temp }}/f4-postgres/receipt.json
+        run: python3 -m scripts.ci_postgres
       - run: uv lock --check --offline
       - run: uv sync --frozen --group dev
       - run: uv run --no-sync ruff check .
@@ -73,11 +74,13 @@ jobs:
           uv run --no-sync python -m pytest -q --maxfail=1 --durations=0 --durations-min=0 -p no:cacheprovider -p scripts.ci_core
           --core-leg "${{ matrix.leg }}"
           --core-receipt "$RUNNER_TEMP/core-receipt/receipt.json"
+          --core-failure-cases "$RUNNER_TEMP/f4-case-control/control.json"
         env:
           CI_SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
           REWIND_TEST_POSTGRES: postgresql+psycopg://postgres:test-only@127.0.0.1:5432/rewind
           REWIND_TEST_POSTGRES_URL: postgresql+psycopg://postgres:test-only@127.0.0.1:5432/rewind
           REWIND_TEST_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+          REWIND_CI_POSTGRES_RECEIPT: ${{ runner.temp }}/f4-postgres/receipt.json
       - run: node --check agent_rewind/web/app.js
       - name: Upload core receipt
         if: ${{ always() }}

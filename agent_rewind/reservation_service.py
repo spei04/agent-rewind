@@ -216,3 +216,34 @@ class ReservationCoordinator:
             # cannot replace the first attempt's retained transaction facts.
             with self._lock:
                 self._outcome = TransactionFacts.observe(self._transaction)
+
+    def _claim_successor(
+        self, principal: VerifiedPrincipal, context: ProjectContext, intent: ClaimIntent
+    ) -> JobFence:
+        """Fixed private ar8 claim; no execution registration or dispatch permission."""
+        from .reservation_successor import run_successor
+
+        result = run_successor(self, "claim", principal, context, claim=intent)
+        if not isinstance(result, JobFence):
+            raise ReservationRefusal("ledger_state_invalid")
+        return result
+
+    def _reserve_successor(
+        self,
+        principal: VerifiedPrincipal,
+        context: ProjectContext,
+        fence: JobFence,
+        intent: ReservationIntent,
+        *,
+        configuration: NativeConfiguration | None = None,
+    ) -> ReservationDecision:
+        """Fixed private ar8 reservation, excluding every new evidenced job effect."""
+        from .reservation_successor import run_successor
+
+        result = run_successor(
+            self, "reserve", principal, context, fence=fence, identity=intent,
+            configuration=configuration,
+        )
+        if isinstance(result, JobFence):
+            raise ReservationRefusal("ledger_state_invalid")
+        return result

@@ -9,6 +9,12 @@ from agent_rewind.models import Action, TaskSpec
 from agent_rewind.workspace import File
 
 
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "f4_owned_postgres: PostgreSQL case requiring an explicit ownership manifest"
+    )
+
+
 @pytest.fixture
 def settings(tmp_path):
     return Settings(

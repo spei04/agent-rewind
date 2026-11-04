@@ -6,7 +6,7 @@ import hashlib
 import inspect
 import json
 import uuid
-from typing import Literal, TypedDict, cast
+from typing import TYPE_CHECKING, Literal, TypedDict, cast
 
 from sqlalchemy import and_, literal, select
 from sqlalchemy.engine import Connection, Engine
@@ -46,6 +46,9 @@ from .scoped_lineage import ResourceNotFound, identifier
 from .scoped_locks import lock_authority, lock_resource
 from .scoped_repositories import ProjectContext, RepositoryUnavailable, scopes
 from .sqlite_ownership import require_owned_sqlite
+
+if TYPE_CHECKING:
+    from .operation_failure_service import SuccessorOperationView
 
 Status = Literal["queued", "running", "succeeded", "cancelled"]
 
@@ -408,3 +411,29 @@ class OperationService:
             data.close()
             raise invalid()
         return _result_id(data, descriptor, cohort)
+
+    def _read_successor(
+        self, principal: VerifiedPrincipal, context: ProjectContext, operation_id: str
+    ) -> SuccessorOperationView:
+        """Explicit private ar8 consumer; never used by the public readiness path."""
+        from .operation_failure_service import _SuccessorService
+
+        try:
+            return _SuccessorService(self).read(principal, context, operation_id)
+        except (AdmissionError, RepositoryUnavailable, SQLAlchemyError):
+            raise Fault("dependency_unavailable") from None
+
+    def _cancel_successor(
+        self, principal: VerifiedPrincipal, context: ProjectContext, operation_id: str
+    ) -> CancellationView:
+        """Explicit private ar8 cancellation, preserving its separate effect facts."""
+        from .operation_failure_service import _SuccessorService
+
+        try:
+            return _SuccessorService(self).cancel(principal, context, operation_id)
+        except (AdmissionError, RepositoryUnavailable, SQLAlchemyError) as error:
+            raise Fault(
+                "outcome_uncertain"
+                if isinstance(error, AdmissionError) and error.code == "outcome_uncertain"
+                else "dependency_unavailable"
+            ) from None

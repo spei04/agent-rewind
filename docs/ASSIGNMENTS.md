@@ -2,12 +2,11 @@
 
 ## Current status
 
-- **Approved:** The owner approved a prospective Python 3.12 full-session receipt limit of 65 minutes. Both Python 3.11 limits remain 45 minutes and the outer Python 3.12 job remains 75 minutes.
-- **Prepared:** The receipt validator, existing boundary cases and CI contract are updated. Fresh inventories on both interpreters, independent review and the original PR/main validation sequence remain required.
-- **Unaccepted:** F3 delivery remains open; the earlier HTTP `503` is unexplained. Installed PostgreSQL, F4/F5/P2, the real-failure demonstration and research acceptance remain separate.
-- **Dashboard:** The plain dashboard is merged; its private preview has expired.
+- **Verified:** Worker-F3 is accepted at `439fca55`: retained native evidence, current CI and exact candidate passed independent review. The accepted issuer scope is dependency failure and lease expiry.
+- **Next:** Review the frozen complete source candidate and exact no-body collector entry. Controller and component source findings are closed. Current source and test drafts are not runtime acceptance; F4 validation remains inactive.
+- **Open:** F4/F5, whole P1, P2 startup, installed PostgreSQL execution and faithful replay remain open. The historical HTTP `503` is unexplained; paid experiments await cost reconciliation.
 
-[Dispatch and startup work](delivery/WORKER_DISPATCH.md) · [Active worker task](EXECUTION_BACKLOG.md#ar-010-b)
+[Acceptance and current assignments](#worker-f3-accepted-2026-11-03)
 
 ## Execution location — 2026-10-23
 
@@ -22,6 +21,99 @@ computer-use project. This rule adds no capacity purchase, budget, provider,
 partner-data or production authorization.
 
 ## Assignment history
+
+<a id="worker-f4-reviewed-coverage-2026-11-04"></a>
+
+**Worker-F4 reviewed coverage integration — 2026-11-04 (Pacific)**
+
+The remaining service, policy, paid-transaction and component test drafts are integrated in the cloud working copy. Independent source review found two test defects: incorrect evidence column names and a missing acquisition clock. Both are corrected in preserved successor packets. The controller durability/output findings also have a saved independent source review.
+
+| Engineer role | Delivered work | Review and next step |
+| --- | --- | --- |
+| Quality | Service semantics/races, consumer policy and cross-project visibility cases. | Source reviewed; corrected component bytes independently verified. |
+| Component Engineer | Provenance/parser, final matcher and single-phase capacity controls. | Source reviewed; clock correction and final bytes independently verified. |
+| Runtime Engineer | Paid rollback, uncertain commits, periods, authority waits and five late-evidence guards. | Source reviewed; actual collection and execution fit remain unobserved. |
+| Lead | Integrate exact packets and reconcile current tracker status. | Complete source candidate frozen; collector and runtime entry review remain open. |
+
+The late-evidence cases exercise actual SQLite statement/fence guards with a valid marker in the same transaction; they do not claim PostgreSQL owner access or competing-writer behavior. Malformed evidence components and valid native paths retain distinct evidence.
+
+No F4 test, collection, SQL, provider call or CI dispatch ran. Source checks do not establish runtime fit, F4/F5/P1 acceptance or production readiness. Existing capacity, execution and spending gates remain unchanged.
+
+<a id="worker-f4-source-coverage-2026-11-04"></a>
+
+**Worker-F4 source coverage review — 2026-11-04 (Pacific)**
+
+CI case binding, installed smoke and the initial successor/maximum-capacity tests are integrated as source drafts. The current review confirms that old public ar7 tests do not establish the new private successor orchestrator's behavior. Full source C1 remains open for the original Q1–Q5 coverage requirements.
+
+| Engineer role | Next independently reviewable work |
+| --- | --- |
+| Quality | Actual successor service semantics, visibility, late state/authority changes and cancellation uncertainty. |
+| Runtime Engineer | Close native-controller source findings; author successor paid-publication rollback, period and uncertainty cases. |
+| Component Engineer | Parser/provenance and final-matcher components after controller review and checkout handoff. |
+| Lead | Review and integrate exact handoffs; maintain the complete applicability matrix and source freeze. |
+
+Maximum native raw selected cells are bounded by 2,040 job bytes + 372 evidence bytes + 19 generation bytes = 2,431. This is separate from canonical JSON and typed frames; escaping can expand a valid retained receipt. Independent source arithmetic bounds the current verified association/source frames at 3,326/1,892 bytes. Reachable native boundaries and direct serializer-limit controls receive separate credit.
+
+No test body, collection, native service, provider call or CI dispatch has run for F4. Source checks do not accept F4/F5/P1, startup, replay, production or research claims. Existing execution, shared-capacity and spending gates remain unchanged.
+
+<a id="worker-f4-source-integration-2026-11-03"></a>
+
+**Worker-F4 source integration — 2026-11-03 (Pacific)**
+
+The fixed consumer, successor read/cancel paths and paid-action refusal seams are drafted on the existing integration checkout. The complete Backend handoff is frozen at source index `e0ed1dfc`; this is source evidence, not accepted F4 behavior. Both existing checkouts and their independent environments are reused.
+
+| Engineer role | Current assignment | Status |
+| --- | --- | --- |
+| Quality | Independent whole-path, maximum-capacity, cancellation and paid-action tests. | Source authoring; remaining aggregate-data and contention cases must be closed before the full composition freezes. |
+| Backend | Exact native runner and PostgreSQL case ownership/reconciliation entry. | Source preparation under the original phase deadlines; no execution. |
+| Review | Runtime, oracle, fixture lifecycle and runner composition review. | Cleanup-grace and fixture-disposal source findings closed; final composition review remains open. |
+| Lead | Integrate the installed successor smoke, distribution inventory and hosted case binding; keep the roadmap and assignment log current. | Source integration; no native or hosted validation started. |
+
+The reviewed process helper keeps TERM and KILL within five seconds each and one shared cleanup deadline. The reviewed fixture attempts admin disposal before reporting and retains cleanup/reporting errors separately. These source checks do not prove cleanup under actual termination. Hosted case manifests consume the existing core-session deadline; the 45/45/65-minute receipt allowances and 45/45/75-minute outer jobs remain unchanged.
+
+Only the shared 256 MiB source/Git/private-preparation envelope is active. The proposed 8 GiB native/delivery peak is unreserved and needs exact executable/source/case bindings, named shared commitments and the existing capacity gate. No hold, paid experiment, production activation, larger deadline, test retry or CI dispatch is created by this source checkpoint. F5, whole P1 and P2 remain open.
+
+<a id="worker-f3-accepted-2026-11-03"></a>
+
+**Worker-F3 accepted; F4 preparation assigned — 2026-11-03 (Pacific)**
+
+Lead and independent Review accept AR-010-B/P1/F3 at protected main `439fca552bf8bee05d223a6e7c174e55a1d70d00`, reviewed source `55036a557bff6dff9494096796fa53c89662142e`. Acceptance record SHA256: `e83f6291bb2f803bf5660293a269b1675edddffbc394ef1e1d919b360f0e82ad`. This is trusted internal worker failure persistence, distinct from delivered ledger AR-010-A.
+
+The accepted issuer refinement (proposal `f458a8d9`, v2 `d63b227c`, design index `6735ffcf`, independent peer `bd0e5c42`) explicitly leaves unavailable reserve/dispatch/internal-stage issuers incapable. Initial F3 emits dependency_failed and lease_expired with outcome_unknown. Five-cause parser/mapping coverage is not five implemented live issuers; the older entry wording is reconciled to this dated refinement.
+
+Native index `8951eccb` and applicability `2cc482b3` retain 35 applicable cases per interpreter as separate originals: 10 pure, 9 SQLite and 16 restricted PostgreSQL. Corrected receiver bridge `2eec3acc` preserves the original failure and source-specific credit. Actual deferred SQLSTATE 23514, conditional-write refusal, competing writers, original identity/timestamp, complete state and truthful ACK/cleanup are established. The SQLite losing contender retains SQLITE_BUSY and cleanup_failed=true. Recorded maxima of 497 ordinary/498 total Work units, two cleanup units and 1.244274 seconds are specific-case observations, not F4 maximum-capacity proof.
+
+Persistence runtime bytes remain identical from the native source to the reviewed delivery source; later fresh-SQLite fixture changes have current full CI evidence. Original main `41764627836/1`, source-bound receipts/full logs, own installed SQLite/CLI checks and candidate `13294044119` close the delivery gate. No F3 test, CI run or capture was repeated. The unexplained historical HTTP 503 and earlier failures remain retained without a repair claim.
+
+| Owner | Current assignment | Exit evidence |
+| --- | --- | --- |
+| Backend | Prepare the F4 bounded Operation/successor-ledger/reservation implementation and explicit read/cancel authority policy. | Complete source-bound proposal preserving ar7, final snapshots and unfiltered paid denial. |
+| Quality | Define independent full-path native oracles and finite test/process/database/resource lifecycle. | Exact proposed test matrix, maximum cohorts, both dialects and cleanup observations. |
+| Review | Review the composed query/authority/accounting design and executable allocation. | Explicit accepted entry or concrete gaps; no borrowed closed diagnostic allowance. |
+| Lead | Record F3 acceptance, preserve drafts and integrate the reviewed F4 entry. | Prerequisite-aware implementation assignment within existing P1 authority. |
+
+F4 source implementation is active under its reviewed entry; runtime validation remains inactive. F5 remains sequentially gated on accepted F4. Whole P1 and P2 are not accepted. Installed PostgreSQL execution, faithful replay, paid-study exposure reconciliation and production remain separate. These status/wording changes are cloud drafts pending the next reviewed source publication; the accepted runtime remains main `439fca55`.
+
+<a id="ci-receipt-allowance-delivery-2026-11-03"></a>
+
+**CI receipt allowance delivery accepted — 2026-11-03 (Pacific)**
+
+This closeout checkpoint is a cloud working-copy draft. The accepted release remains `439fca55`; these document changes await a later reviewed source change. The delivery checkpoint is published in the verified PR #134 body and project chat; no PR comment was posted. No additional workflow is authorized by this refresh.
+
+[PR #134](https://github.com/spei04/agent-rewind/pull/134) merged the reviewed source `55036a55` as `439fca55`, preserving tree `f71680e7f57d62774070c2cb71c58389ebddb4e9`. Both original workflows passed without reruns: [PR 41744667807/1](https://github.com/spei04/agent-rewind/actions/runs/41744667807) and [main 41764627836/1](https://github.com/spei04/agent-rewind/actions/runs/41764627836). Local checks passed: 165 focused tests per interpreter, 9,231-item full collections without test bodies, 16 metadata controls, lint/format and backlog validation.
+
+Main receipt durations were 1,961.506662 seconds (3.11 early: 4,799 passed/10 expected skips), 1,050.045582 (3.11 late: 4,387/35), and 3,168.706974 (3.12 all: 9,200/31). Independent review reconciled inventories, skips, all 55,357 phase facts and original full core logs. Packaging and delivery each supplied their own installed SQLite/component and CLI smoke; current-image CA and network-disabled checks were also verified.
+
+Candidate artifact `13294044119` is 1,076,645 bytes with SHA256 `8bdd7aaad4f7bb32f70bef790df6c330206c2653089cde21a529448efb9012e2`. Its archive, provenance, checksums and exact source contents passed independent review. Both distributions contain the same 161 runtime files as main. These findings close the CI amendment's delivery scope; Worker-F3 disposition, installed PostgreSQL qualification, startup, faithful replay and enterprise/research acceptance are separate.
+
+| Engineer / owner | Closed assignment | Next handoff |
+| --- | --- | --- |
+| Artifact capture | Original PR/main receipts, full logs and main candidate retained once; bounded processes released. | Preserve the private indexed originals. |
+| Independent reviewers | Source, inventories, complete logs, installed smoke and candidate contents accepted. | Review the P2 contract/test-vector preparation before implementation entry. |
+| Lead | Protected merge and scoped CI delivery accepted; current tracker refreshed. | Assess Worker-F3 against its own contract; retain the F3→F4→F5/P1→P2 sequence and reforecast. |
+| Backend / Platform / Quality | No downstream implementation started by this CI amendment. | Prepare the already-approved startup handoff and observable refusal/restart vectors in parallel with prerequisite work. |
+
+The earlier [failed main 41494342148/1](https://github.com/spei04/agent-rewind/actions/runs/41494342148), prior failed attempts and unexplained HTTP `503` remain in the dated history below and the [CI receipt contract](delivery/CI_CORE_RECEIPTS.md). No model-provider experiment, installation, local PostgreSQL diagnostic, new resource or deployment was added. The $200 lifetime API limit and unreconciled earlier exposure remain unchanged.
 
 <a id="ci-receipt-allowance-amendment-2026-11-03"></a>
 

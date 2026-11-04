@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -17,6 +18,7 @@ from scripts.ci_receipts import (
     receipt_bytes,
     require,
     select_nodes,
+    session_limit_seconds,
     terminal_skip_reason,
     tracked_tests,
 )
@@ -26,21 +28,30 @@ def pytest_addoption(parser):
     group = parser.getgroup("core receipt")
     group.addoption("--core-leg", choices=("early", "late", "all"))
     group.addoption("--core-receipt")
+    group.addoption("--core-failure-cases")
 
 
 def pytest_configure(config):
     leg, output = config.getoption("--core-leg"), config.getoption("--core-receipt")
-    if leg is None and output is None:
+    failure_output = config.getoption("--core-failure-cases")
+    if leg is None and output is None and failure_output is None:
         return
     if not leg or not output or config.option.collectonly:
         raise pytest.UsageError("Core receipts require both options and test execution")
-    config.pluginmanager.register(CoreReceipt(config, leg, output), "core-terminal-receipt")
+    config.pluginmanager.register(
+        CoreReceipt(config, leg, output, failure_output), "core-terminal-receipt"
+    )
 
 
 class CoreReceipt:
-    def __init__(self, config, leg, output):
+    def __init__(self, config, leg, output, failure_output=None):
         self.root = Path(config.rootpath)
         self.output = Path(output)
+        # Anchor both clocks before source observation and collection. Fixtures
+        # consume this session's remaining time; they never start a new clock.
+        self.session_origin = time.monotonic()
+        started_at = datetime.now(UTC).isoformat()
+        self.failure_output = failure_output
         self.python = ".".join(map(str, sys.version_info[:2]))
         require((self.python, leg) in LEGS, "Unknown interpreter/leg")
         self.identity = observe_identity(self.root, os.environ)
@@ -57,7 +68,7 @@ class CoreReceipt:
             "selected": [],
             "selected_sha256": node_digest([]),
             "outcomes": [],
-            "started_at": datetime.now(UTC).isoformat(),
+            "started_at": started_at,
             "finished_at": None,
             "session_finished": False,
             "pytest_exit_code": None,
@@ -95,9 +106,32 @@ class CoreReceipt:
         items[:] = [item for item in items if item.nodeid in selected_set]
         self.save()
 
+    @pytest.hookimpl(trylast=True)
     def pytest_collection_finish(self, session):
         if [item.nodeid for item in session.items] != self.receipt["selected"]:
             self.error("selection-changed-after-observation")
+            if self.failure_output is not None:
+                raise pytest.UsageError("Owned cases require the final observed selection")
+        if self.failure_output is not None:
+            from scripts.ci_failure_cases import publish_actions_control
+
+            owned = [
+                item.nodeid for item in session.items
+                if item.get_closest_marker("f4_owned_postgres") is not None
+            ]
+            try:
+                control = publish_actions_control(
+                    root=self.root, output=self.failure_output, identity=self.identity,
+                    python=self.python, leg=self.receipt["leg"],
+                    session_origin=self.session_origin,
+                    session_limit=session_limit_seconds(self.python, self.receipt["leg"]),
+                    nodeids=owned, environment=os.environ,
+                )
+            except (ValueError, OSError, KeyError):
+                self.error("owned-case-binding-failed")
+                self.save()
+                raise pytest.UsageError("Owned PostgreSQL case binding failed") from None
+            os.environ["REWIND_F4_CASE_CONTROL"] = control
 
     def pytest_collectreport(self, report):
         if report.failed:

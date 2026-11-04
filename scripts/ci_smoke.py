@@ -1657,6 +1657,7 @@ def failure_terminal_smoke(root: Path) -> None:
     from agent_rewind.migrations.ledger_work import LedgerWork
     from agent_rewind.migrations.projection_service import initialize_projection
     from agent_rewind.models import canonical
+    from agent_rewind.operation_service import OperationService
     from agent_rewind.request_authority import RequestAuthority
     from agent_rewind.request_identity import VerifiedPrincipal
     from agent_rewind.reservation_types import ClaimIntent
@@ -2017,6 +2018,86 @@ def failure_terminal_smoke(root: Path) -> None:
             }
         ):
             raise RuntimeError("Installed component altered preserved data or customer readiness")
+
+        # Exercise the installed successor consumer on the same genuine failure.
+        # Default public readiness remains migration-only throughout this fixture.
+        service = OperationService(engine, authority)
+        expected_error = {
+            "code": "outcome_uncertain",
+            "message": "The operation outcome is not yet known; reconcile the original request.",
+            "request_id": "8" * 32,
+            "retryable": False,
+        }
+        expected_view = {
+            "id": "b" * 32,
+            "project_id": project,
+            "job_id": job,
+            "client_operation_id": "5" * 32,
+            "status": "failed",
+            "cancel_requested": False,
+            "result_run_id": None,
+            "budget_microusd": 1,
+            "reserved_microusd": 0,
+            "error": expected_error,
+        }
+        observed = service._read_successor(principal, context, "b" * 32)
+        if (
+            observed != expected_view
+            or observed["cancel_requested"] is not False
+            or type(observed["budget_microusd"]) is not int
+            or type(observed["reserved_microusd"]) is not int
+            or observed["error"] is None
+            or observed["error"]["retryable"] is not False
+            or snapshot() != completed
+            or engine.pool.checkedout() != 0
+        ):
+            raise RuntimeError("Installed successor GET changed failure or preserved state")
+
+        def audits():
+            with closing(sqlite3.connect(path)) as connection:
+                return {
+                    row[0]: tuple(row)
+                    for row in connection.execute("SELECT * FROM audit ORDER BY id")
+                }
+
+        audits_before = audits()
+        cancelled = service._cancel_successor(principal, context, "b" * 32)
+        after_cancel = snapshot()
+        audits_after = audits()
+        if (
+            cancelled
+            != {"operation_id": "b" * 32, "cancel_requested": True, "status": "failed"}
+            or cancelled["cancel_requested"] is not True
+            or after_cancel[0] != completed[0]
+            or after_cancel[2] != [{**completed[2][0], "cancel": 1}]
+            or after_cancel[3] != completed[3]
+            or tuple(line for line in after_cancel[1] if not line.startswith('INSERT INTO "audit"'))
+            != tuple(line for line in completed[1] if not line.startswith('INSERT INTO "audit"'))
+            or len(audits_after) != len(audits_before) + 1
+            or any(audits_after.get(identity) != row for identity, row in audits_before.items())
+        ):
+            raise RuntimeError("Installed successor cancellation changed more than its effects")
+        new_audit = audits_after[next(iter(audits_after.keys() - audits_before.keys()))]
+        if new_audit[2:] != (principal.principal_id, "job.cancel", job):
+            raise RuntimeError("Installed successor cancellation lost its exact audit")
+        observed_after = service._read_successor(principal, context, "b" * 32)
+        compatibility = runtime_schema_compatibility(engine)
+        if (
+            observed_after != {**expected_view, "cancel_requested": True}
+            or snapshot() != after_cancel
+            or audits() != audits_after
+            or engine.pool.checkedout() != 0
+            or (compatibility.status, compatibility.code) != ("incompatible", "migration_only")
+            or ciphertexts
+            != {
+                file.relative_to(artifact_root).as_posix(): hashlib.sha256(
+                    file.read_bytes()
+                ).hexdigest()
+                for file in artifact_root.rglob("*")
+                if file.is_file()
+            }
+        ):
+            raise RuntimeError("Installed post-terminal GET changed failure identity or readiness")
 
 
 package = Path(agent_rewind.__file__).resolve()

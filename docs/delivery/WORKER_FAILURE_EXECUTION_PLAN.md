@@ -1,6 +1,6 @@
 # Worker failure execution plan
 
-F1 and F2 are **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb) and [main47](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2). F2's original PR/main/candidate, native migration/service, installed package and current image evidence are independently accepted. F3 is **In progress**: Backend implements trusted bounded claims/persistence, Quality supplies independent native oracles, Review checks source/security and the lead integrates. F4-F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. P1 and aggregate AR-010-B remain **In progress** with null final acceptance. The [machine ledger](../../contracts/proposals/execution-backlog.json), [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) and [assignment log](../ASSIGNMENTS.md#current-status) record current evidence; five planned F1-F5 PRs, estimates and sequential gates are unchanged.
+F1, F2 and F3 are **Merged; checkpoint accepted** at [main89](https://github.com/spei04/agent-rewind/commit/89a43e4355413ba5cca96e09c410c63c634138fb), [main47](https://github.com/spei04/agent-rewind/commit/47da5b44e3bf53b2c0352f42366e4632abfed4c2) and [main439](https://github.com/spei04/agent-rewind/commit/439fca552bf8bee05d223a6e7c174e55a1d70d00). F3 acceptance binds the retained native originals and source applicability to current PR/main, installed SQLite and exact-candidate evidence. F4 source implementation is admitted under the accepted authority policy and implementation plan. Collection/native validation still requires an exact reviewed executable entry and verified finite allocation. F5 and [P2 #98](https://github.com/spei04/agent-rewind/issues/98) remain **Not started**. P1 and aggregate AR-010-B remain **In progress** with null final acceptance. The [machine ledger](../../contracts/proposals/execution-backlog.json), [checkpoint cards](../EXECUTION_BACKLOG.md#ar-010-b-p1) and [dated acceptance/assignments](../ASSIGNMENTS.md#worker-f3-accepted-2026-11-03) retain the evidence and remaining gates. No fixed product limit, paid authority or production gate changes.
 
 ## Allocation and sequence
 
@@ -15,6 +15,10 @@ P1 is 12 [9–18] BE engineering days, low confidence, replacing its former 2 [2
 | F5 | Restart-safe operator markers, preservation, restore and P1 delivery | 3 [2.5–4.5] | low |
 
 ## Entry, ownership and acceptance
+
+### F3 accepted; F4 preparation assigned — 2026-11-03 (Pacific)
+
+Lead acceptance e83f6291bb2f803bf5660293a269b1675edddffbc394ef1e1d919b360f0e82ad; accepted issuer refinement f458a8d9/d63b227c with peer bd0e5c42; native final8951eccb, applicability2cc482b3 and receiver bridge2eec3acc; current original main41764627836/1 with receipt/core/package/candidate peers bc440028/b8dcf8d6/777147e8/72a1eaec; candidate13294044119 matches all161 runtime members in each distribution. Scoped internal persistence only; historical HTTP503 cause remains unknown. See the [dated assignment](../ASSIGNMENTS.md#worker-f3-accepted-2026-11-03) for the explicit issuer phasing and current owners. F4 source-bound authority/query/accounting and finite native execution entry precede implementation; no accepted run is repeated for this disposition.
 
 ### F3 claim component validated; terminal persistence next — 2026-10-31 (Pacific)
 

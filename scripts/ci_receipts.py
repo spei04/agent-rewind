@@ -56,6 +56,11 @@ def require(condition, message):
         raise ValueError(message)
 
 
+def session_limit_seconds(python, leg):
+    require((python, leg) in LEGS, "Unknown interpreter/leg")
+    return 3900 if python == "3.12" else 2700
+
+
 def object_fields(value, keys):
     require(type(value) is dict and set(value) == set(keys), "Unexpected object fields")
     return value
@@ -304,7 +309,7 @@ def validate_receipt(value, identity, versions, tracked):
     )
     require(receipt["errors"] == [] and type(receipt["errors"]) is list, "Receipt errors")
     elapsed = (timestamp(receipt["finished_at"]) - timestamp(receipt["started_at"])).total_seconds()
-    maximum_seconds = (65 if (python, leg) == ("3.12", "all") else 45) * 60
+    maximum_seconds = session_limit_seconds(python, leg)
     require(0 < elapsed <= maximum_seconds, "Session exceeded core leg bound")
     outcomes = receipt["outcomes"]
     require(type(outcomes) is list and len(outcomes) == len(selected), "Missing terminal outcomes")
@@ -453,6 +458,7 @@ def git_output(root, *arguments):
 
     fixed = {
         ("ls-files", "--", "tests"),
+        ("ls-files", "-z"),
         ("rev-parse", "HEAD"),
         ("rev-parse", "HEAD^{tree}"),
         ("rev-list", "--parents", "-n", "1", "HEAD"),

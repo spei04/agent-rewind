@@ -1,5 +1,15 @@
 # Live integration validation
 
+## Worker-F3 acceptance — 2026-11-03 (Pacific)
+
+Worker AR-010-B/P1/F3 is accepted at main `439fca55`, reviewed source `55036a55`. Lead acceptance `e83f6291bb2f803bf5660293a269b1675edddffbc394ef1e1d919b360f0e82ad` binds the retained native originals, source-specific applicability and unchanged persistence runtime to current original PR/main receipts, complete core logs, own installed SQLite/CLI evidence and exact candidate `13294044119`. No F3 execution was repeated for this disposition.
+
+The accepted initial issuers are dependency_failed and lease_expired, both outcome_unknown, under design `6735ffcf` and peer `bd0e5c42`. Unavailable reserve/dispatch/internal-stage issuers remain incapable; parser vocabulary is not emitted-stage evidence. Native final `8951eccb`, applicability `2cc482b3` and receiver bridge `2eec3acc` retain the separate original groups and failed receiver qualification described below. The historical HTTP 503 remains unexplained.
+
+F4 maximum-cohort consumers, F5 operator recovery/restore, whole P1, P2 startup, installed PostgreSQL execution, faithful replay and production remain separate. See the [current assignment record](ASSIGNMENTS.md#worker-f3-accepted-2026-11-03).
+
+## Historical live integration — 2026-10-06
+
 On 2026-10-06, the service completed a live model run, restored a failed branch,
 automatically proposed interventions, and finished a separate confirmation
 phase. This is a controlled fault-injection integration test, not a benchmark

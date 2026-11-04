@@ -6,6 +6,8 @@ See the [canonical current summary and dated assignment log](ASSIGNMENTS.md#curr
 
 The owner approved the [November 3 CI allowance amendment](ASSIGNMENTS.md#ci-receipt-allowance-amendment-2026-11-03): the Python 3.12 full-session receipt allowance is 65 minutes, with the 75-minute outer job and both 45-minute Python 3.11 legs unchanged. This prospective resource-policy change preserves original failed evidence and every correctness, native, security and source-identity requirement. Its scoped 4–6 engineering-hour estimate covers amendment through CI/candidate review; it grants no F3, product, production or research acceptance.
 
+Worker-F3 is accepted at `439fca55` for the scoped internal claim, dependency-failure and lease-expiry paths; see [its acceptance record](ASSIGNMENTS.md#worker-f3-accepted-2026-11-03). F4 source integration is active, with native and hosted validation still inactive. F4/F5, whole P1, P2 startup and faithful replay remain separate open gates.
+
 ## Contents
 
 1. [Context, assumptions, and progress](#1-context-assumptions-and-progress)
@@ -1177,7 +1179,7 @@ The existing task graph separates these evidence boundaries:
 
 | Existing producers | Owner | Required observable artifact |
 | --- | --- | --- |
-| Accepted F2 foundation; remaining worker F3–F5/P1, then [P2](delivery/WORKER_DISPATCH.md#remaining-admitted-startup-integration--2026-10-30); AR-006-C/011-C/012-B and G1 | Backend, Platform, Quality | Accepted ownership, atomic admission/account/provenance and generation-fenced publication, followed by actual packaged startup without patched readiness. A disconnected adapter closes plumbing only. |
+| Accepted F2 and F3 (strict claim, terminal failure and lease expiry); remaining worker F4/F5/P1, then [P2](delivery/WORKER_DISPATCH.md#remaining-admitted-startup-integration--2026-10-30); AR-006-C/011-C/012-B and G1 | Backend, Platform, Quality | Accepted ownership, atomic admission/account/provenance and generation-fenced publication, followed by actual packaged startup without patched readiness. A disconnected adapter closes plumbing only. |
 | AR-013–018, especially checkpoint AR-014 and fenced replay AR-017; AR-019-A | Backend, Platform, Research, Quality | Supported task/policy/image/evaluator manifest, faithful restore, preserved parent/effect provenance, independent grading and integrated fault/recovery evidence. |
 | AR-019-B after AR-019-A and PAID0; AR-019-C contributes to G2 | Research/Quality, Platform/Security review | One predeclared live-provider failed-run/branch smoke with complete runtime, outcome and cost receipts. This card excludes natural-failure and statistically reliable effect claims; G2 follows AR-019-C review and the other existing G2 prerequisites. |
 | AR-020–025, selected AR-024-D/025-D; AR-026 and G3 | Backend, Research, independent Quality/statistics review | Durable trial/attempt identities, complete cost/uncertainty accounting, cost-matched controls, a frozen winner before fresh confirmation, calibrated reports and an affordable frozen claim or explicit narrowing. |

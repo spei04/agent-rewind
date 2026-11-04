@@ -194,10 +194,68 @@ def test_workflow_binds_setup_to_disposable_service_before_every_test():
     position, step = next(
         (index, step)
         for index, step in enumerate(steps)
-        if step.get("run") == "python3 scripts/ci_postgres.py"
+        if step.get("run") == "python3 -m scripts.ci_postgres"
     )
-    assert step["env"] == {"REWIND_CI_POSTGRES_CONTAINER": "\u0024{{ job.services.postgres.id }}"}
+    assert step["env"] == {
+        "REWIND_CI_POSTGRES_CONTAINER": "\u0024{{ job.services.postgres.id }}",
+        "REWIND_CI_POSTGRES_RECEIPT": "\u0024{{ runner.temp }}/f4-postgres/receipt.json",
+    }
     assert step["timeout-minutes"] == 1
     assert all(
         position < index for index, step in enumerate(steps) if "pytest" in step.get("run", "")
     )
+
+
+def test_receipt_is_written_only_after_effective_service_observation(monkeypatch):
+    from scripts import ci_failure_cases
+
+    calls = runner(
+        monkeypatch,
+        [identity(), "ALTER SYSTEM", "t", "off|configuration file|f|1",
+         "off|configuration file|f|0"],
+    )
+    observed = []
+
+    def retain(environment, *, image):
+        observed.append((len(calls), environment, image))
+
+    monkeypatch.setattr(ci_failure_cases, "write_service_receipt", retain)
+    environment = {**ENV, "REWIND_CI_POSTGRES_RECEIPT": "/synthetic/receipt.json"}
+    setup.configure(environment)
+    assert observed == [(5, environment, setup.IMAGE)]
+    assert [arguments[-1] for arguments, _ in calls[1:]] == [
+        "ALTER SYSTEM SET autovacuum = off",
+        "SELECT pg_catalog.pg_reload_conf()",
+        setup.OBSERVE,
+        setup.OBSERVE,
+    ]
+
+
+def test_receipt_failure_is_fixed_and_does_not_repeat_service_mutation(monkeypatch):
+    from scripts import ci_failure_cases
+
+    calls = runner(monkeypatch, [identity(), "ALTER SYSTEM", "t", "off|configuration file|f|0"])
+
+    def fail(*_args, **_kwargs):
+        raise OSError("private-canary")
+
+    monkeypatch.setattr(ci_failure_cases, "write_service_receipt", fail)
+    with pytest.raises(setup.SetupRefused, match="^ci_postgres_receipt_failed$"):
+        setup.configure({**ENV, "REWIND_CI_POSTGRES_RECEIPT": "/synthetic/receipt.json"})
+    assert len(calls) == 4
+
+
+def test_receipt_retention_consumes_the_original_setup_deadline(monkeypatch):
+    from scripts import ci_failure_cases
+
+    calls = runner(monkeypatch, [identity(), "ALTER SYSTEM", "t", "off|configuration file|f|0"])
+    clock = [0.0]
+    monkeypatch.setattr(setup.time, "monotonic", lambda: clock[0])
+
+    def delayed(*_args, **_kwargs):
+        clock[0] = setup.MAX_SECONDS
+
+    monkeypatch.setattr(ci_failure_cases, "write_service_receipt", delayed)
+    with pytest.raises(setup.SetupRefused, match="^ci_postgres_setup_timeout$"):
+        setup.configure({**ENV, "REWIND_CI_POSTGRES_RECEIPT": "/synthetic/receipt.json"})
+    assert len(calls) == 4

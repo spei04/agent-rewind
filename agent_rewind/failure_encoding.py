@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import math
+from collections.abc import Callable
+from contextlib import AbstractContextManager
 from typing import Any
 
 from .admission_records import AdmissionStorageError
@@ -63,8 +65,57 @@ def _row(label: str, fields: tuple[str, ...], values: dict[str, Any]) -> list[An
     return [label, [[name, _tag(values[name])] for name in fields]]
 
 
-def _digest(frame: list[Any], remaining: int) -> tuple[str, int]:
+def _measure_frame(frame: list[Any], limit: int) -> int:
+    # Adopted frames contain only lists, strings and integer tags. Measure the
+    # canonical ASCII encoding without allocating its output buffer. The old
+    # encoder below independently checks the resulting exact length.
+    total = 0
+
+    def add(size: int) -> None:
+        nonlocal total
+        total += size
+        if total > limit:
+            raise FailureRefusal("capacity_exceeded")
+
+    def visit(value: Any) -> None:
+        if type(value) is list:
+            add(2 + max(0, len(value) - 1))
+            for item in value:
+                visit(item)
+        elif type(value) is str:
+            add(2)
+            for char in value:
+                point = ord(char)
+                if 0xD800 <= point <= 0xDFFF:
+                    raise FailureRefusal("invalid_intent")
+                if char in '"\\\\\b\f\n\r\t':
+                    add(2)
+                else:
+                    add(1 if 0x20 <= point <= 0x7E else 6 if point <= 0xFFFF else 12)
+        elif type(value) is int and -(2**63) <= value < 2**63:
+            add(len(str(value)))
+        else:
+            raise FailureRefusal("invalid_intent")
+
+    visit(frame)
+    return total
+
+
+def _digest(
+    frame: list[Any],
+    remaining: int,
+    *,
+    _reserve: Callable[[int], AbstractContextManager[None]] | None = None,
+) -> tuple[str, int]:
     if type(remaining) is not int or not 0 <= remaining <= MAX_RECEIPT_BYTES:
+        raise FailureRefusal("invalid_intent")
+    if _reserve is not None:
+        size = _measure_frame(frame, min(4096, remaining))
+        with _reserve(size):
+            result = _digest(frame, remaining)
+            if result[1] != size:
+                raise FailureRefusal("invalid_intent")
+            return result
         raise FailureRefusal("invalid_intent")
     try:
         # The existing encoder measures escaping and complete byte length before
@@ -94,6 +145,7 @@ def association_digest(
     configuration: RawReceipt,
     *,
     remaining: int,
+    _reserve: Callable[[int], AbstractContextManager[None]] | None = None,
 ) -> tuple[str, int]:
     """Hash only the adopted scope/op14/immutable-job9/config8 representation."""
     _dialect(dialect)
@@ -129,6 +181,7 @@ def association_digest(
             _row("admission_config", configuration.fields, config),
         ],
         remaining,
+        _reserve=_reserve,
     )
 
 
@@ -141,6 +194,7 @@ def source_digest(
     record: FailureRecord,
     *,
     remaining: int,
+    _reserve: Callable[[int], AbstractContextManager[None]] | None = None,
 ) -> tuple[str, int]:
     """Hash the tag2 terminal after-image, excluding cancel and both digests."""
     _dialect(dialect)
@@ -187,4 +241,5 @@ def source_digest(
             _row("evidence_core", _CORE_FIELDS, core),
         ],
         remaining,
+        _reserve=_reserve,
     )

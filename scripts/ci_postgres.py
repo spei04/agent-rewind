@@ -105,6 +105,17 @@ def configure(environment: Mapping[str, str]) -> None:
     while True:
         observation = _run([*command, OBSERVE], deadline)
         if observation == "off|configuration file|f|0":
+            if environment.get("REWIND_CI_POSTGRES_RECEIPT"):
+                from scripts.ci_failure_cases import write_service_receipt
+
+                if time.monotonic() >= deadline:
+                    raise SetupRefused("ci_postgres_setup_timeout")
+                try:
+                    write_service_receipt(environment, image=IMAGE)
+                except (ValueError, OSError, KeyError):
+                    raise SetupRefused("ci_postgres_receipt_failed") from None
+                if time.monotonic() >= deadline:
+                    raise SetupRefused("ci_postgres_setup_timeout")
             return
         if re.fullmatch(r"(on|off)\|[^|\r\n]{1,64}\|(t|f)\|[0-9]{1,8}", observation) is None:
             raise SetupRefused("ci_postgres_observation_invalid")
