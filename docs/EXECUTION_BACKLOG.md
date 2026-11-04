@@ -2,9 +2,9 @@
 
 ## Current status
 
-See the [canonical delivery summary and assignment log](ASSIGNMENTS.md#current-status).
+See the [canonical delivery summary and assignment log](ASSIGNMENTS.md).
 
-The [owner-approved November 3 CI allowance amendment](ASSIGNMENTS.md#ci-receipt-allowance-amendment-2026-11-03) is delivery maintenance for the open F3 checkpoint. Quality owns the receipt/test change and inventories; Review owns independent evidence assessment; Lead owns integration and the single original PR/main validation sequence. The estimate is 4–6 engineering hours with medium-low confidence, excluding queues and unrelated remediation. The prospective 65-minute Python 3.12 receipt policy leaves the 75-minute outer job, 45-minute Python 3.11 legs, all correctness/security/native checks, task graph and product acceptance criteria unchanged. Historical failures, the unexplained HTTP `503`, later worker/research gates and unreconciled funding remain visible.
+The [November 3, 2026 CI allowance amendment](https://github.com/spei04/agent-rewind/blob/439fca552bf8bee05d223a6e7c174e55a1d70d00/docs/ASSIGNMENTS.md#ci-receipt-allowance-amendment-2026-11-03) is retained as historical F3 delivery authority. Its limits, estimates and evidence qualifications remain in that dated record; the [canonical delivery summary](ASSIGNMENTS.md) tracks current F4 work.
 
 ## Approval boundary and readiness
 

@@ -2,9 +2,9 @@
 
 ## Current status
 
-See the [canonical current summary and dated assignment log](ASSIGNMENTS.md#current-status) for accepted checkpoints, active work and the next delivery gate.
+See the [canonical current summary and dated assignment log](ASSIGNMENTS.md) for accepted checkpoints, active work and the next delivery gate.
 
-The owner approved the [November 3 CI allowance amendment](ASSIGNMENTS.md#ci-receipt-allowance-amendment-2026-11-03): the Python 3.12 full-session receipt allowance is 65 minutes, with the 75-minute outer job and both 45-minute Python 3.11 legs unchanged. This prospective resource-policy change preserves original failed evidence and every correctness, native, security and source-identity requirement. Its scoped 4–6 engineering-hour estimate covers amendment through CI/candidate review; it grants no F3, product, production or research acceptance.
+The [November 3, 2026 CI allowance amendment](https://github.com/spei04/agent-rewind/blob/439fca552bf8bee05d223a6e7c174e55a1d70d00/docs/ASSIGNMENTS.md#ci-receipt-allowance-amendment-2026-11-03) is historical F3 delivery context. Its recorded limits and qualifications remain unchanged in that dated record; current F4 status is maintained in the [canonical delivery summary](ASSIGNMENTS.md).
 
 ## Contents
 

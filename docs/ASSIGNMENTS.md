@@ -3,8 +3,8 @@
 ## Current status — November 4, 2026
 
 - **Accepted:** F3 delivery; F4 source, inventory validator and collection evidence. Collection closeout remains timing-qualified. Candidate `e02ad6b` stays frozen in the cloud.
-- **Owners:** Runner source is reviewed. Package Engineer completes installed-package integration; Runtime and Quality Engineers review the final entry. Lead owns validation and progress records.
-- **Pending:** Execution awaits reviewed package integration and resource admission. Configured checks, native validation and new CI remain unrun for this candidate. Research still requires real-failure comparisons and independent confirmation.
+- **Owners:** Runner, package and preflight source are reviewed. Runtime and Package Engineers finish the operator steps; Quality reviews them. Lead owns validation and progress records.
+- **Pending:** Execution awaits final operator review and resource admission. Configured checks, native validation and new CI remain unrun for this candidate. Research still requires real-failure comparisons and independent confirmation.
 
 This is the canonical current summary. Earlier checkout copies and the linked assignment log are historical snapshots.
 
