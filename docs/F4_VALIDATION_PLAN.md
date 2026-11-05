@@ -21,9 +21,13 @@ The historical reader correction passed 27 retained-data controls and independen
 
 The successor package integrates that correction into the actual operator path. The shared authority foundation passed ten pure predicate controls. Twenty preflight activation-guard controls cover allowed changes and refusals, including non-finite timestamps, changed static fields and reduced capacity floors. Independent review confirmed both preflight fixes.
 
-Configured-source review then found two copied historical references with the old attempt's path and the new attempt's hash. An additive correction is in progress; the failed preparation is preserved. The remaining operator capture, package, closeout and whole-entry review must finish before the owner decision.
+Configured-source review found two copied historical references with the old attempt's path and the new attempt's hash. Additive corrections are complete, and independent review verified the corrected index's 66 unique members. The earlier failed preparation remains preserved.
 
-Every operative source and input will be pinned by the stopped entry. The operator must call the pinned reader rather than reconstruct field assumptions inline. Actual foreground exits, configured summaries, package summaries, saved readbacks and issuer outputs retain their separate contracts. Successful closeout is distinct from candidate acceptance.
+Operator review identified retry, deadline and mutable-snapshot problems. The corrections make dispatch failures remain blocked, preserve the original completion cutoff, and return detached snapshots. They separate the actual Python child exit from the surrounding tool's completion. All three corrected sources received preliminary memory-only review with no open finding. Retained controls cover 25 admission-reader cases and 27 operator cases; those are source controls, not product tests.
+
+The corrected operator files and the assembled complete entry remain unpublished. Shared capacity refused publication before any writes. Published readback and independent whole-entry review must finish before the owner decision.
+
+Every operative source and input will be pinned by the stopped entry. The operator must call the pinned reader rather than reconstruct field assumptions inline. Actual foreground exits, configured summaries, package summaries, saved readbacks and issuer outputs retain their separate contracts. Successful closeout is distinct from candidate acceptance. Final candidate acceptance remains unknown until the surrounding tool completion is independently observed within the original cutoff; a late child return cannot establish acceptance or complete retention.
 
 ## Proposed single continuation
 
@@ -48,6 +52,8 @@ max(38,296,905,984 + 536,870,912, 38,843,776,896)
 + 67,108,864 + 268,435,456
 = 39,179,321,216 bytes, including the existing 1 MiB margin
 ```
+
+At November 5, 2026 12:10 UTC, independently observed free space was 38,835,073,024 bytes: 344,248,192 bytes below the conditional runtime requirement and 8,703,872 bytes below the retained shared floor. The source-publication guard also preserves a 1 MiB publication buffer. No reservation was released and no validation attempt started. Saving the corrected package requires measured authorized recovery and a fresh complete commitment census.
 
 Without the explicitly approved scratch transfer, the requirement is 43,474,288,512 bytes. These are conditional requirements, not admission receipts. Fresh local/cloud controls, complete shared commitments covering the full interval, exact source/dependency checks and process-ownership checks must pass. New commitments strengthen the floor.
 
