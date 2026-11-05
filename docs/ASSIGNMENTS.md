@@ -4,8 +4,8 @@
 
 - **Accepted:** F3 delivery; F4 source, inventory validator and collection evidence. Collection closeout remains timing-qualified. Candidate `e02ad6b` stays frozen in the cloud.
 - **Latest result:** Validation stopped during preflight on a process-inspection permission error. No test or package stage started; the failure record and earlier resource charges are retained.
-- **Owners:** Runtime prepares the process-observer correction; Package binds a replacement run to separate output paths; Quality reviews both. Lead maintains evidence and the complete execution proposal.
-- **Pending:** A replacement attempt needs reviewed source and approval. Configured checks, native validation and new CI remain unrun for this candidate. Research still requires real-failure comparisons and independent confirmation.
+- **Completed:** Runtime's process-observer correction and Package's replacement bindings passed independent source review. The exact observer command passed a permission lookup; the observer has not run.
+- **Next:** A reviewed 30-minute replacement attempt awaits approval. Lead owns execution and progress records; Quality owns the resulting evidence review. Configured tests, package validation, native checks and new CI remain unrun for this candidate. Research still requires real-failure comparisons and independent confirmation.
 
 This is the canonical current summary. Earlier checkout copies and the linked assignment log are historical snapshots.
 
