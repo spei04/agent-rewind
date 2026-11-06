@@ -1,64 +1,52 @@
-# F4 validation — stopped successor preparation
+# F4 replacement validation proposal
 
-Replacement 2 is closed. Its preflight passed, then the follow-up reader used the wrong consumer-observation field path. No product test started. The frozen candidate remains unaccepted.
+Status: source preparation only. Candidate `e02ad6be0a44d282085e534212ce237377d6be64` remains frozen and unaccepted. The saved entry is not execution-ready. Review found two contradictory scratch-transfer descriptions; correcting them requires rebinding dependent artifacts. Entry SHA-256: `c8a609cc7487b4849122225924afeb3650d166ffeb52b9cc4c6eee5c02d7979c`.
 
-The producer stores consumer success inside `observation`, with a separate release proof. The reader expected success on the wrapper and raised `KeyError`. The original preflight and reader failure remain separate, unchanged records.
+This replaces the earlier scratch-transfer proposal. Replacement 2 stopped on an evidence-reader schema mismatch before product tests. Its failed attempt, closeout, historical charges and unknown usage remain recorded. Retiring its unused future scratch access did not transfer access or reclaim physical disk space.
 
-The approved stop rule was: “A failed or unknown result stops later stages. There is no retry or clock reset within this authorization.” The attempt therefore cannot be resumed.
+## Source review outcome
 
-| Stage | Planned checks | Replacement 2 result |
-| --- | --- | --- |
-| Metadata | Contract/inventory controls and 16 tests | Not started |
-| Python 3.11 | 320 selected tests | Not started |
-| Python 3.12 | 320 selected tests | Not started |
-| Package | Isolated staging and installed-package checks | Not started |
+The saved package contains 58 files: 864,080 apparent bytes and 991,232 allocated bytes including directory growth. Independent readback verified the saved identities. The current `WRITERS.package.json.package_scratch` and `INPUT.stopped.json.capacity.reservation_coverage_basis` descriptions still refer to replacement-2 reassignment. They must be corrected together with their dependent source and input identities. A prose override does not repair the pinned package.
 
-Independent review verified the original preflight, absence of its five known process identities, and absence of all 16 stage-related paths. Closeout retained 22 files: 233,472 allocated bytes and 177,280 apparent bytes. Named scratch and configured outputs charge zero; anonymous live usage was not measured. Cleanup and retention were accepted, without candidate acceptance or reservation release.
+The entry remains stopped with changes required. Further repair must retain this failed preparation and its full time/storage charges. The proposed 60-minute envelope is not ready for execution: additional preparation must be reforecast within the remaining cumulative budget or covered by an explicit amendment; inactive waiting cannot hide additional work. No successful-preparation receipt or runtime approval is implied.
 
-## Source repair and integration
+## Smallest observable product gate
 
-The historical reader correction passed 27 retained-data controls and independent source review. It remains pinned to the closed attempt and cannot authorize another run.
+Validate the installed successor failure interface: a supported failure returns the safe four-field error with its original correlation identifier across fresh polls; unsupported or invalid evidence refuses conservatively; a current failure blocks new paid transitions. Cancellation after a terminal outcome may change only permitted cancellation/audit data and must preserve the failure, ciphertexts and all other original state. The default migration-only/customer-admission restriction remains enforced.
 
-The successor package integrates that correction into the actual operator path. The shared authority foundation passed ten pure predicate controls. Twenty preflight activation-guard controls cover allowed changes and refusals, including non-finite timestamps, changed static fields and reduced capacity floors. Independent review confirmed both preflight fixes.
+Use the unchanged 16-case metadata stage, 320-case focused Python 3.11 stage, 320-case focused Python 3.12 stage and installed-package smoke check. Each stage needs its actual foreground exit and matching producer/consumer evidence. Acceptance also requires independent review of actual outcomes and timely verified cleanup, retained closeout and external completion, all within the runtime interval. A failed or unknown result stops later stages; only necessary completion of the original stage pair and bounded failure closeout remain. There is no retry or clock reset. Source controls and successful evidence retention do not substitute for this product gate.
 
-Configured-source review found two copied historical references with the old attempt's path and the new attempt's hash. Additive corrections are complete, and independent review verified the corrected index's 66 unique members. The earlier failed preparation remains preserved.
+This is local F4 qualification. Full native-path, dialect, transaction, concurrency and limit validation, protected CI and delivery remain outstanding. F5, P2 and the reproducible live failure-to-checkpoint-to-repair demonstration remain separate work. No research improvement is claimed.
 
-Operator review identified retry, deadline and mutable-snapshot problems. The corrections make dispatch failures remain blocked, preserve the original completion cutoff, and return detached snapshots. They separate the actual Python child exit from the surrounding tool's completion. All three corrected sources received preliminary memory-only review with no open finding. Retained controls cover 25 admission-reader cases and 27 operator cases; those are source controls, not product tests.
+## Proposed cumulative time budget
 
-The corrected operator files and the assembled complete entry remain unpublished. Shared capacity refused publication before any writes. Published readback and independent whole-entry review must finish before the owner decision.
+The new proposal charges 1,800 seconds for preparation and independent review, including publication, readback and tracker updates. This charge is nonrefundable. Today's continuous preparation interval is November 6, 2026, 20:34:01–21:04:01 UTC. A missing or late completion cannot be treated as an on-time completed preparation.
 
-Every operative source and input will be pinned by the stopped entry. The operator must call the pinned reader rather than reconstruct field assumptions inline. Actual foreground exits, configured summaries, package summaries, saved readbacks and issuer outputs retain their separate contracts. Successful closeout is distinct from candidate acceptance. Final candidate acceptance remains unknown until the surrounding tool completion is independently observed within the original cutoff; a late child return cannot establish acceptance or complete retention.
+A future approved validation gets one continuous interval of at most 1,800 seconds through closeout. Existing stage start cutoffs of 180/480/780/1,080 seconds remain. Once admitted, the runtime clock cannot pause or reset. Historical consumption of 7,200 seconds remains; the proposed campaign ceiling becomes 10,800 seconds.
 
-## Proposed single continuation
+This is a new cumulative-budget interpretation requiring explicit acceptance in the final execution approval: 30 minutes charged preparation plus at most 30 minutes runtime. Inactive waiting for the owner or capacity is excluded only while no work occurs and no runtime grant or clock exists. It is not a claim that one 60-minute wall-clock interval spans that waiting period. Additional preparation cannot be silently added after the charged interval.
 
-All four stages remain necessary, in the same order. The proposal is one distinct 1,800-second attempt with the existing absolute cutoffs, two fixed read-only process observations, independent outcome review and bounded closeout. No failed or unknown result permits a later stage, retry or clock reset.
+## Fresh storage reservation
 
-The proposed exception reassigns only replacement 2's 4 GiB prospective scratch reservation exclusively to the successor and retires replacement 2's future access. Its historical allocation, failed outcome, retained evidence and charges remain immutable. The other 8 GiB scratch holds and all unrelated reservations remain retained. Unknown historical usage is not converted to zero or refunded.
+| Additional category | Bytes |
+| --- | ---: |
+| Scratch, acquired afresh | 4,294,967,296 |
+| Normal output | 67,108,864 |
+| Failure retention | 268,435,456 |
+| **Total new runtime envelope** | **4,630,511,616** |
 
-| Resource | Existing | Proposed change | Proposed total |
-| --- | ---: | ---: | ---: |
-| Normal output | 384 MiB | +64 MiB | 448 MiB |
-| Failure output | 1,280 MiB | +256 MiB | 1,536 MiB |
-| Prospective scratch | 12 GiB | Reassign 4 GiB; zero net increase | 12 GiB |
-| Campaign time | 7,200 seconds | +1,800 seconds | 9,000 seconds |
-| Source allowance | 256 MiB | None | 256 MiB |
+There is no transfer credit. The other 8 GiB future scratch holds and historical 12 GiB scratch charge remain; fresh acquisition would bring prospective scratch holds to 12 GiB. Normal/failure totals would become 448/1,536 MiB. The failure ceiling permits no extra attempt. The existing 256 MiB source category is unchanged.
 
-The failure reservation would reach its existing ceiling. No allowance for another attempt follows.
+Preparation is bounded to 2 MiB of new allocated source and metadata, with a separate 1 MiB publication buffer in the capacity check. At 20:37:30 UTC, source-category use was 145,833,984 bytes and cloud free space was 38,651,392,000 bytes. The conservative source-write requirement was 36,225,248,128 bytes, which fit. Retaining that full source allowance and buffer, the illustrative combined runtime requirement was 40,855,759,744 bytes and did not fit. Unused publication headroom is not credited automatically. These are dated observations; immediate checks and all stronger current commitments govern admission.
 
-The new Intake commitment adds 536,870,912 bytes, counted once; its 8 MiB CPU work is inside that bound. The stronger independent Physics floor already includes it. The remaining 10,000,000-byte difference is conservatively retained.
+## Entry, evidence and approval
 
-```text
-max(38,296,905,984 + 536,870,912, 38,843,776,896)
-+ 67,108,864 + 268,435,456
-= 39,179,321,216 bytes, including the existing 1 MiB margin
-```
+The private entry must bind every operative source, policy, allocation, input and caller by exact identity. Unchanged artifacts retain their existing pins. The new authority schema must reject old transfer approvals, incomplete preparation, missing external completion and changed graph members.
 
-At November 5, 2026 12:10 UTC, independently observed free space was 38,835,073,024 bytes: 344,248,192 bytes below the conditional runtime requirement and 8,703,872 bytes below the retained shared floor. The source-publication guard also preserves a 1 MiB publication buffer. No reservation was released and no validation attempt started. Saving the corrected package requires measured authorized recovery and a fresh complete commitment census.
+The dependency order avoids a circular approval: entry → preparation policy and a fixed pending receipt path; completed preparation receipt → entry, independent review and measured accounting; future combined approval → entry, review, receipt, independently observed completion and the full fresh reservation. A receipt cannot attest to its own final write, surrounding tool exit or independent readback.
 
-Without the explicitly approved scratch transfer, the requirement is 43,474,288,512 bytes. These are conditional requirements, not admission receipts. Fresh local/cloud controls, complete shared commitments covering the full interval, exact source/dependency checks and process-ownership checks must pass. New commitments strengthen the floor.
+One combined owner decision would approve the exact reviewed entry, this cumulative interpretation and fresh acquisition, after capacity is sufficient. This proposal grants no runtime authority. No tests, CI, service, model call, infrastructure change or retry is admitted by source preparation.
 
-The previously reviewed package check retains its existing `uv 0.13.4` pin; ordinary workspace dependency management remains on `uv 0.11.21`. No tool is installed or switched by this preparation.
+The research budget remains $200 total. The $36.567974 historical reservation is separate from unknown settled charges and unknown spendable balance.
 
-One combined owner decision will bind the complete stopped entry, exact independent whole-package review, resource policy and scratch transfer. Pending approval fails closed. No paid model calls, new infrastructure, native validation, hosted CI, checkout creation, deletion or retrospective refund are included. The $200 total API cap remains unchanged.
-
-Runtime validation, enterprise readiness and research comparisons retain their separate exit gates.
+[Current assignments](ASSIGNMENTS.md) · [Earlier proposal and dated evidence](https://github.com/spei04/agent-rewind/blob/50b462dfab23d092458ba63b958d3a1adef829c4/docs/F4_VALIDATION_PLAN.md)
