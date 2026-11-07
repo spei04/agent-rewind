@@ -50,7 +50,7 @@ Current obligations remain:
 
 - Future scratch: the other original 4 GiB hold plus the new R3 4 GiB grant. R1's future 4 GiB hold was retired once; R2's earlier retirement is not credited again.
 - Normal output ceiling: 448 MiB. Failure-retention ceiling: 1,536 MiB. Neither authorizes another attempt.
-- Historical scratch: 12 GiB, with all prior charges, retained evidence and unknown usage preserved.
+- Scratch reservation history: the inherited 12 GiB record remains unchanged. The separately granted R3 4 GiB makes the cumulative reservation lineage 16 GiB. This is not measured physical usage; retained evidence and unknown usage remain preserved. A fresh R4 grant would add another 4 GiB, independently of retiring old future access.
 - Approved accounting: 13,814 seconds prior consumption plus the 1,800-second runtime ceiling, totaling 15,614 seconds. Early failure does not create a reusable attempt.
 - Joint cloud floor: 36,630,481,792 bytes, including Physics's new 65 MiB and Rewind's 320 MiB output reservations once. Safety's existing 256 MiB was already counted.
 - Research cap: $200 total. The $36.567974 historical reservation remains separate from unknown settled spending and unknown available balance.
@@ -111,26 +111,79 @@ The first JavaScript check exited 1 because its synthetic closeout template inse
 
 The corrected factory and administrative entrypoint remain disabled. The API exports the original final control output after its wait completes, but exporting into memory is not durable storage. C4 must add a bounded writer, original exit observation and independent readback before a future all-original-retention claim. It cannot recursively attest to its own future completion.
 
-## C4 operative proposal in preparation
+## C4 validation proposal
 
-A distinct R4 source package is being authored under existing development authority. It does not create a runtime clock, retirement or grant. The completed correction package and every failed R3 record remain immutable.
+The distinct R4 package has passed its affected source checks. **Independent review accepted the saved source package for a separate owner decision.** The production candidate remains `e02ad6be0a44d282085e534212ce237377d6be64`; no product stage, new retirement, runtime grant, provider call, hosted CI or infrastructure change occurred during this preparation.
 
-A separate **2,097,152-byte** source allowance fits the unchanged 256 MiB category. The fresh census at 01:49:19 UTC measured 150,450,176 source bytes; adding the new package and 1 MiB margin gives 153,595,904 bytes. Free cloud space was 38,704,529,408 bytes, above the 36,634,151,808-byte source floor. Both existing checkouts retain their original heads; no checkout or dependency installation was created.
+Runtime implemented the authority, retirement and resource contracts. Integration implemented the operator sequences and terminal persistence. Quality authored the affected fixtures; Lead and Integration independently reviewed their isolation and interfaces. The saved implementation provides:
 
-The authoring plan preserves the 16/320/320/package qualification inventory and the original runtime/closeout limits. It adds the final control export's bounded durable writer and separate reader, explicit success/failure writer maxima, complete operative references and one-use invocation ordering. Only changed interfaces and new persistence behavior will receive new source checks; the accepted 65 checks remain historical evidence.
+- One admission sequence using a private copy of the supplied capacity and identity data. Allocation state is committed only after the reader's full checks.
+- Explicit original-clock propagation and one-use operation ordering. Failed closeout suppresses root exit, including through the direct method.
+- A bounded terminal writer and separate reader that retain exact original control bytes, including failed or incomplete controls. Their own final completion still requires external observation.
+- Same-realm lexical loading that preserves the consumed R3 operator's globals and capsule. The distinct R4 identity was initialized in the original main VM realm at 08:17:20.840 UTC, with every pre-existing global descriptor unchanged. No factory was evaluated and no clock started.
 
-Current capacity cannot admit another 4 GiB scratch reservation while all earlier holds remain. The draft therefore proposes a future, explicit decision to retire **only R3's unused future access**, followed by fresh R4 scratch after verified retirement. The old allocation file, historical charges, failed evidence and unknown usage remain preserved. No retirement has been applied, no R1/R2 credit is reused, and no physical reclamation is claimed.
+| Affected source checks | Passed | Original completion |
+| --- | ---: | --- |
+| Terminal helper and storage boundaries | 66 | Python exit 0; 0.719855 seconds |
+| Actual operator factory with closed transport fixtures | 25 | JavaScript worker exit 0; 0.969 seconds |
+| Authority, historical integrity, deadlines and actual JavaScript payload joins | 36 | Python exit 0; 0.386 seconds |
+| **Total** | **127** | Both streams complete; no stderr or unresolved worker |
 
-| Draft state, before later commitments | Required bytes |
+The 36 authority cases include 18 qualifier cases; those 18 are not counted again. The earlier 65 accepted C1–C3 checks were not rerun. These checks use synthetic process/filesystem adapters and do not substitute for native product validation.
+
+The first bootstrap stopped before either worker because its recipe retained one stale input hash. The first JavaScript worker then exposed a fixture comparison that treated object key order as significant; the corrected comparison still requires complete structural equality after caller mutation. Two subsequent result emissions exceeded the unchanged 49,152-byte cap. All failed originals remain retained; no pass count is inferred from a failed emission.
+
+The final result transport removes redundant base64 encoding from exactly two terminal-export values on the wire. Before Python receives the result, the reader reconstructs every original field and verifies each export's bytes/hash and the complete original result's length/hash. The final raw output was **24,704 bytes**; wire content was **241,705 bytes**, restoring the exact **285,742-byte** original result. The 1 MiB decoded limit and 8-second work / 10-second total worker limits remain unchanged. The largest actual control request was 3,113,429 bytes; the logical maximum export plus actual proof/entry wrapper measured **4,002,121 bytes**, below the 4 MiB limit.
+
+The literal administrative writer bound includes partial success plus failure records, all terminal metadata/failure slots and directory allocation:
+
+| Reachable branch | Maximum KiB |
+| --- | ---: |
+| Full success | 8,048 |
+| Sealer fails after writing its index; root exit suppressed | 7,984 |
+| Admission reader fails after partial writes | 6,640 |
+| Preflight fails after partial writes | 5,776 |
+| **Existing partition limit** | **8,192** |
+
+Configured output retains 40 MiB, installed-package output 16 MiB, and administration/review/terminal evidence 8 MiB within the existing proposed 64 MiB normal envelope. No stream cap was reduced to obtain this fit.
+
+### Source resources and preservation
+
+The separate **2,097,152-byte** preparation allowance remains inside the unchanged 256 MiB source category. It includes current sources, fixtures, original results, review/approval records and revision preservation. External Quality review and future owner approval reserve 32 KiB and 64 KiB inside the metadata partition; the future retirement receipt reserves 16 KiB inside the correction partition. Final accounting uses actual-or-reserved values once.
+
+The final read-only audit at **08:17:53.132 UTC** passed. The 94-file package used **1,642,496 allocated bytes**. Including the actual 8 KiB review, future 64 KiB approval, 32 KiB final-record forecast and 16 KiB retirement receipt once gives **1,765,376 of 2,097,152 bytes**. Metadata is **258,048 / 262,144 bytes** and correction is **196,608 / 196,608 bytes**. The complete source category plus remaining named records and the existing publication margin is **153,272,320 / 268,435,456 bytes**. Cloud free space measured **39,013,183,488 bytes**, above the source-only floor; this does not admit a future runtime.
+
+The audit verified 45 current source/input references and 10 immutable R3 references. The R3 grant remains unchanged; all 19 new runtime roots, new approval and retirement receipt were absent. Both existing checkouts remain active dependencies and were retained. No checkout removal or disk savings are claimed.
+
+Preserved working revisions temporarily exceeded the internal correction partition: the measured allocation was 229,376 bytes, or 245,760 bytes including the future receipt reservation, against its 196,608-byte limit. The overall 2 MiB preparation allowance remained intact. Verified archival and reconstruction records preserve the prior bytes and this accounting history; they do not erase the overshoot. A later abandoned archive encoding was removed only after its inputs were verified retained; its individual allocation was not measured and is conservatively bounded at 16 KiB. No historical R3 evidence or current operative source was deleted. Temporary consolidation used at most 8 KiB of the already reserved late-metadata allowance and was released after verification.
+
+Workspace environment operations retain pinned uv 0.11.21. The frozen installed-package helper retains its explicit, pre-existing uv 0.13.4 requirement. Both executables were hash-checked and returned the expected versions; no installation, replacement, version impersonation or candidate-helper edit occurred.
+
+### Separate execution decision
+
+A future owner decision must bind the stopped entry, accepted review, preparation receipt, externally observed preparation completion and actual private R4 session. The proposal is to retire **only R3's unused 4 GiB future scratch access**, verify the retirement writer and independent readback, and then admit **one fresh 30-minute R4 validation**. No R1/R2 credit is repeated, no historical charge is refunded, and no file deletion or physical reclamation is claimed.
+
+Future scratch would transition from 8 GiB to 4 GiB after retirement, then to 8 GiB after fresh R4 admission. The inherited 12 GiB reservation history remains unchanged; adding the actual R3 grant makes current cumulative reservation lineage 16 GiB. A fresh R4 grant would make that lineage 20 GiB. These are reservation records, not measured physical use.
+
+The proposed new normal/failure reservations are 64 MiB and 256 MiB, taking their cumulative totals to 512 MiB and 1,792 MiB. The exact 16 metadata / 320 Python 3.11 / 320 Python 3.12 / existing installed-package qualification inventory, continuous 1,800-second phase, stage-start cutoffs and original 120-second closeout remain unchanged. There are no retries, paid provider calls, new infrastructure or hosted CI in this proposal.
+
+| State, before any later commitments | Required free bytes |
 | --- | ---: |
 | Source preparation only | 36,634,151,808 |
 | Administrative phase / verified-retirement successor | 36,969,696,128 |
-| Full new runtime with every old scratch hold retained | 41,264,663,424 |
+| Full fresh runtime while retaining every old scratch hold | 41,264,663,424 |
 
-The proposed new normal/failure reservations would be 64 MiB and 256 MiB, taking their cumulative totals to 512 MiB and 1,792 MiB. These are proposal figures, not execution authorization. The exact terminal writer table and its fit inside the existing normal envelope must be proved before source freeze. Tool selection must also be reconciled explicitly: the workspace names uv 0.11.21, while the inherited package command names 0.13.4.
+Fresh complete capacity reconciliation remains mandatory. A historical free-space observation cannot admit a future run.
 
-Source preparation remains continuous from 01:11:10 UTC, including correction, review, publication and successor authoring. Its actual end is still pending. Preserve R3's immutable 15,614-second authorization ceiling and consumed attempt separately from elapsed work. The adapter's 195.543 seconds and external completion's 228.589 seconds are nested observations, not additive. The following 752.587-second preservation/review/publication span is counted once. Future accounting must use the union of observed intervals and a separately observed source-completion time; no CPU-total or reusable-runtime claim follows.
+Source preparation is conservatively accounted from 01:11:10 UTC, including review, publication and all unexcluded delays. Its planning estimate was nonbinding. Preserve R3's immutable 15,614-second authorization ceiling and consumed attempt separately. For final externally observed completion `E`, the preparation charge is `ceil(E - 1794013870)`; the carried interval is `ceil(E - 1794012888.824)`. Future actual prior consumption is 13,814 plus that carried interval; a separate fresh 1,800 seconds produces the proposed campaign ceiling. Overlapping observations are counted once. These elapsed-wall-time figures are not CPU measurements or reusable runtime. The final decision request must state the observed completion and resulting exact counters.
 
-Finally, F4 qualification does not enable the live customer workflow. The current compatibility release intentionally keeps customer/auth routes unavailable and worker claims disabled. F5, worker P2, AR-012-B integration and an admitted release profile remain prerequisites for a usable failure-to-branch workflow. Static dashboard evidence must remain labeled as such.
+### Evidence and remaining product gates
+
+- Stopped entry: `2fed2645d99b78dab5e55d4958dafe088a08b8a83ebec69718bda322102dfe1b`.
+- Core source index: `3b9304ce18f5b89ba7ef5cbe95dd6439bbb1f29ba057945bd32185acbf0c6c8b`.
+- Final verification graph: `e12d5b430353e4b4ca33768e873e31c57517a82f073a4fcef857148d4c33c404`.
+- Independent review: `eca9d982cc4e00288d23c690092db45d48c2321128a56717e6962ca50ac3e544`.
+
+F4 qualification does not enable the live customer workflow. The current compatibility release intentionally keeps customer/auth routes unavailable and worker claims disabled. F5, worker P2, AR-012-B integration and an admitted release profile remain prerequisites for a usable failure-to-branch workflow. Static dashboard evidence remains labeled as such.
 
 [Assignments](ASSIGNMENTS.md) · [Roadmap](PLAN.md) · [Execution backlog](EXECUTION_BACKLOG.md#ar-010-b)
