@@ -83,9 +83,9 @@ Runtime owns the sequential changes to the shared operator files; Quality's fixt
 
 The eventual product qualification still requires 16 metadata cases, 320 focused cases on each Python version, and installed-package smoke, with original exits, evidence joins, cleanup and timely external completion. Full native-path, database/dialect, concurrency, protected CI and production gates remain separate. F5, P2 and the live failure-to-repair workflow remain open.
 
-## Active source correction checkpoint
+## Accepted source correction
 
-C1–C3 are proceeding under existing source-development authority. The old preparation estimate was explicitly nonbinding; the consumed R3 runtime supplies no reusable time or execution credit. This work creates no new runtime authority.
+C1–C3 are independently accepted as source corrections only. The final result is 28 JavaScript and 37 Python checks, including expected refusals. Both cloud workers exited 0 with completed output and release observations in 0.114210 and 0.227691 seconds respectively. Whole-file syntax checks passed. Quality verified all 29 indexed members and 44 graph/index references. The old preparation estimate was explicitly nonbinding; the consumed R3 runtime supplies no reusable time or execution credit. This work creates no new runtime authority.
 
 The previous 2,621,440-byte source pool stays fixed and retained. A separate **1,572,864-byte** package allowance fits within the unchanged **268,435,456-byte** source category. The fresh complete census, including source parent directories, shared Git once and the entire F4 evidence tree, measured **149,680,128 bytes** at 01:17:19 UTC. Adding the new maximum and the existing 1 MiB publication margin gives **152,301,568 bytes**. Ignored checkout state is outside this source category.
 
@@ -99,12 +99,38 @@ The cloud check measured **38,758,760,448 free bytes**, above the conservative *
 | Bounded failure records | 65,536 |
 | **Total** | **1,572,864** |
 
-Runtime owns the corrected control code and stopped manifest. Quality owns isolated integration fixtures and independent review. Lead owns the resource and progress records. The private start record is pinned by SHA-256 `d857df4314d2d74b495b872fbb4c8330d3bd4d58b5a5f5f3dd6d60015100dcea`.
+Runtime authored the corrected control code and stopped manifest. Quality authored the fixtures and independently verified the complete saved package. Lead reviewed the interfaces, isolation and resource records. The private start record is pinned by SHA-256 `d857df4314d2d74b495b872fbb4c8330d3bd4d58b5a5f5f3dd6d60015100dcea`.
 
-After independent isolation review, source verification may use one Python worker and one JavaScript worker, each limited to **10 seconds**, with combined retained records bounded to 128 KiB. These checks must exercise actual producers and authority validators through fixture-only adapters. Ambient filesystem, network, provider and process access is denied; no real approval documents, live operator capsule, retirement writer or product stage may execute. Only an affected changed unit may be rerun during development, with its earlier failure retained.
+The source workers ran after independent isolation review, with a **10-second** external limit each and retained records inside the 128 KiB results/review allowance. They exercised actual producers and authority validators through fixture-only adapters. Ambient filesystem, network, provider and process access is denied; no real approval documents, live operator capsule, retirement writer or product stage may execute. Only an affected changed unit may be rerun during development, with its earlier failure retained.
 
 Preparation is conservatively tracked from 01:11:10 UTC. The 1,800-second planning estimate is not an execution allowance or an owner-imposed engineering cutoff. Its actual charge remains pending through source work, checks, review and publication; completion needs a later external observation. Earlier post-closeout preservation, review and publication intervals remain recorded separately; overlapping observations are not added as independent elapsed time or reported as measured CPU.
 
-C4 requires the complete corrected source graph and independent review. Any subsequent product validation needs its own separately reviewed execution proposal. The failed R3 grant remains retained.
+The corrected source index is `2396774fdd20d902448c8a98beeae9229f53d1be6c59d95c44ce728fffd2b35d`; Quality's accepted review is `6ff2d92ed548e410a2809a4ebe91d4a34b670317e50f7799ec6050504531ecca`. At review completion the private package used 770,048 allocated bytes, including all prior working versions and source-check failures. Metadata/results used 73,728 of 131,072 bytes.
+
+The first JavaScript check exited 1 because its synthetic closeout template inserted undefined fields. The production JSON validator rejected them. That original failure was saved; only the changed fixture was rerun, and Python then ran for the first time. The accepted results are **source checks**, with zero product tests or live operator executions.
+
+The corrected factory and administrative entrypoint remain disabled. The API exports the original final control output after its wait completes, but exporting into memory is not durable storage. C4 must add a bounded writer, original exit observation and independent readback before a future all-original-retention claim. It cannot recursively attest to its own future completion.
+
+## C4 operative proposal in preparation
+
+A distinct R4 source package is being authored under existing development authority. It does not create a runtime clock, retirement or grant. The completed correction package and every failed R3 record remain immutable.
+
+A separate **2,097,152-byte** source allowance fits the unchanged 256 MiB category. The fresh census at 01:49:19 UTC measured 150,450,176 source bytes; adding the new package and 1 MiB margin gives 153,595,904 bytes. Free cloud space was 38,704,529,408 bytes, above the 36,634,151,808-byte source floor. Both existing checkouts retain their original heads; no checkout or dependency installation was created.
+
+The authoring plan preserves the 16/320/320/package qualification inventory and the original runtime/closeout limits. It adds the final control export's bounded durable writer and separate reader, explicit success/failure writer maxima, complete operative references and one-use invocation ordering. Only changed interfaces and new persistence behavior will receive new source checks; the accepted 65 checks remain historical evidence.
+
+Current capacity cannot admit another 4 GiB scratch reservation while all earlier holds remain. The draft therefore proposes a future, explicit decision to retire **only R3's unused future access**, followed by fresh R4 scratch after verified retirement. The old allocation file, historical charges, failed evidence and unknown usage remain preserved. No retirement has been applied, no R1/R2 credit is reused, and no physical reclamation is claimed.
+
+| Draft state, before later commitments | Required bytes |
+| --- | ---: |
+| Source preparation only | 36,634,151,808 |
+| Administrative phase / verified-retirement successor | 36,969,696,128 |
+| Full new runtime with every old scratch hold retained | 41,264,663,424 |
+
+The proposed new normal/failure reservations would be 64 MiB and 256 MiB, taking their cumulative totals to 512 MiB and 1,792 MiB. These are proposal figures, not execution authorization. The exact terminal writer table and its fit inside the existing normal envelope must be proved before source freeze. Tool selection must also be reconciled explicitly: the workspace names uv 0.11.21, while the inherited package command names 0.13.4.
+
+Source preparation remains continuous from 01:11:10 UTC, including correction, review, publication and successor authoring. Its actual end is still pending. Preserve R3's immutable 15,614-second authorization ceiling and consumed attempt separately from elapsed work. The adapter's 195.543 seconds and external completion's 228.589 seconds are nested observations, not additive. The following 752.587-second preservation/review/publication span is counted once. Future accounting must use the union of observed intervals and a separately observed source-completion time; no CPU-total or reusable-runtime claim follows.
+
+Finally, F4 qualification does not enable the live customer workflow. The current compatibility release intentionally keeps customer/auth routes unavailable and worker claims disabled. F5, worker P2, AR-012-B integration and an admitted release profile remain prerequisites for a usable failure-to-branch workflow. Static dashboard evidence must remain labeled as such.
 
 [Assignments](ASSIGNMENTS.md) · [Roadmap](PLAN.md) · [Execution backlog](EXECUTION_BACKLOG.md#ar-010-b)

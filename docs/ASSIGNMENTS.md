@@ -3,15 +3,16 @@
 ## Current status — November 7, 2026 UTC
 
 - F1–F3 are delivered. F4 candidate `e02ad6b` remains frozen and unaccepted; R3 stopped before product tests.
-- R1's unused future hold was retired; the written R3 allocation, failed-attempt evidence and prior charges remain retained. No retry, paid provider call, hosted CI or production deployment occurred.
-- Runtime and Quality are correcting and testing the control interfaces under the existing source allowance. The [outcome and active correction checkpoint](F4_VALIDATION_PLAN.md#active-source-correction-checkpoint) records the scope and resource limits; no replacement runtime is authorized.
+- C1–C3 source corrections are independently accepted: **28 JavaScript + 37 Python checks passed**. The original failed fixture run and all R3 evidence remain retained.
+- C4 is preparing a complete, separately reviewed validation proposal with durable terminal-output storage. The [current checkpoint](F4_VALIDATION_PLAN.md#c4-operative-proposal-in-preparation) records the remaining work and future decision; no R3 reservation has been released or new runtime authorized.
 
-| Engineer | Assignment | Status |
+| Engineer | Current assignment | Checkpoint |
 | --- | --- | --- |
-| Runtime | C1/C2: propagate clocks through the actual builders; export failed original control envelopes; preserve factual grant state. | Implementing a separate stopped source package. Failed R3 source remains immutable. |
-| Quality | C3: test the actual builder/authority boundaries and failed-reader closeout; independently review isolation and the complete graph. | Preparing fixtures in parallel. Source checks cannot qualify the product. |
-| Lead | Reconcile resources, preserve history and publish the checkpoint. | Fresh category and disk guards passed; allocated a bounded source package within the existing category. |
+| Runtime | Build the distinct R4 authority, command and resource graph. | C1/C2 source accepted; conditional future-hold proposal now in preparation. |
+| Integration | Add bounded terminal evidence storage and independent readback. | Required interfaces and the later live-workflow gates identified. |
+| Quality | Verify affected interfaces, isolation and the complete operative package. | C1–C3 accepted; 29 indexed files and 65 source cases verified. |
+| Lead | Reconcile resources and accounting; keep the roadmap and decisions current. | Source preparation fits the existing category; execution remains gated. |
 
-[Failed-attempt review and earlier assignments](https://github.com/spei04/agent-rewind/blob/ad0b7e3af526e85d8600bd6010d3925bdb2f69ae/docs/ASSIGNMENTS.md) · [Roadmap](PLAN.md) · [Execution backlog](EXECUTION_BACKLOG.md#ar-010-b)
+[Accepted source-correction history](F4_VALIDATION_PLAN.md#accepted-source-correction) · [Earlier assignments](https://github.com/spei04/agent-rewind/blob/5f2ae1a125af365d99e89759efe1e213cf384e59/docs/ASSIGNMENTS.md) · [Roadmap](PLAN.md) · [Execution backlog](EXECUTION_BACKLOG.md#ar-010-b)
 
-Detailed evidence remains private. Source checks and failed-attempt evidence are not product acceptance, production readiness or research results.
+No paid provider calls, hosted CI, new infrastructure or production activation occurred. Source checks are not product acceptance or research results.
