@@ -83,4 +83,28 @@ Runtime owns the sequential changes to the shared operator files; Quality's fixt
 
 The eventual product qualification still requires 16 metadata cases, 320 focused cases on each Python version, and installed-package smoke, with original exits, evidence joins, cleanup and timely external completion. Full native-path, database/dialect, concurrency, protected CI and production gates remain separate. F5, P2 and the live failure-to-repair workflow remain open.
 
+## Active source correction checkpoint
+
+C1–C3 are proceeding under existing source-development authority. The old preparation estimate was explicitly nonbinding; the consumed R3 runtime supplies no reusable time or execution credit. This work creates no new runtime authority.
+
+The previous 2,621,440-byte source pool stays fixed and retained. A separate **1,572,864-byte** package allowance fits within the unchanged **268,435,456-byte** source category. The fresh complete census, including source parent directories, shared Git once and the entire F4 evidence tree, measured **149,680,128 bytes** at 01:17:19 UTC. Adding the new maximum and the existing 1 MiB publication margin gives **152,301,568 bytes**. Ignored checkout state is outside this source category.
+
+The cloud check measured **38,758,760,448 free bytes**, above the conservative **36,632,054,656-byte** floor that retains all earlier commitments and adds the new source maximum. No current additional named commitment was known at admission; later writes must recheck the floor. No old reservation or unknown usage was released.
+
+| Source package partition | Maximum bytes |
+| --- | ---: |
+| Corrected source and fixtures | 1,310,720 |
+| Results, independent review and metadata | 131,072 |
+| Directory allocation overhead | 65,536 |
+| Bounded failure records | 65,536 |
+| **Total** | **1,572,864** |
+
+Runtime owns the corrected control code and stopped manifest. Quality owns isolated integration fixtures and independent review. Lead owns the resource and progress records. The private start record is pinned by SHA-256 `d857df4314d2d74b495b872fbb4c8330d3bd4d58b5a5f5f3dd6d60015100dcea`.
+
+After independent isolation review, source verification may use one Python worker and one JavaScript worker, each limited to **10 seconds**, with combined retained records bounded to 128 KiB. These checks must exercise actual producers and authority validators through fixture-only adapters. Ambient filesystem, network, provider and process access is denied; no real approval documents, live operator capsule, retirement writer or product stage may execute. Only an affected changed unit may be rerun during development, with its earlier failure retained.
+
+Preparation is conservatively tracked from 01:11:10 UTC. The 1,800-second planning estimate is not an execution allowance or an owner-imposed engineering cutoff. Its actual charge remains pending through source work, checks, review and publication; completion needs a later external observation. Earlier post-closeout preservation, review and publication intervals remain recorded separately; overlapping observations are not added as independent elapsed time or reported as measured CPU.
+
+C4 requires the complete corrected source graph and independent review. Any subsequent product validation needs its own separately reviewed execution proposal. The failed R3 grant remains retained.
+
 [Assignments](ASSIGNMENTS.md) · [Roadmap](PLAN.md) · [Execution backlog](EXECUTION_BACKLOG.md#ar-010-b)

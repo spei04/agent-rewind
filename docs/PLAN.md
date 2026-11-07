@@ -4,7 +4,7 @@
 
 See the [canonical current summary and dated assignment log](ASSIGNMENTS.md) for accepted checkpoints, active work and the next delivery gate.
 
-Worker persistence F3 is delivered. F4's frozen consumer candidate remains in progress and unaccepted. The approved R3 attempt stopped at admission readback before product tests; R1 retirement and the written R3 allocation remain recorded. Its [outcome and correction plan](F4_VALIDATION_PLAN.md) tracks the clock-contract defect, retained evidence and next source work. F5, worker P2 and enterprise production gates remain open.
+Worker persistence F3 is delivered. F4's frozen consumer candidate remains in progress and unaccepted. The approved R3 attempt stopped at admission readback before product tests; R1 retirement and the written R3 allocation remain recorded. Its [outcome and correction plan](F4_VALIDATION_PLAN.md) tracks the clock-contract defect, retained evidence and the active source correction. F5, worker P2 and enterprise production gates remain open.
 
 The [November 3, 2026 CI allowance amendment](https://github.com/spei04/agent-rewind/blob/439fca552bf8bee05d223a6e7c174e55a1d70d00/docs/ASSIGNMENTS.md#ci-receipt-allowance-amendment-2026-11-03) is historical F3 delivery context. Its recorded limits and qualifications remain unchanged in that dated record; current F4 status is maintained in the [canonical delivery summary](ASSIGNMENTS.md).
 
