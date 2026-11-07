@@ -4,7 +4,7 @@
 
 See the [canonical current summary and dated assignment log](ASSIGNMENTS.md) for accepted checkpoints, active work and the next delivery gate.
 
-Worker persistence F3 is delivered. F4's frozen consumer candidate remains unaccepted after R3 stopped before product tests. C1–C3 corrections passed 65 source checks; C4 passed 127 additional checks and independent source review. The original preparation completion and exact accounting are preserved in the [reviewed validation proposal](F4_VALIDATION_PLAN.md#c4-validation-proposal); the follow-up completion must be included in a new owner decision for R3 future-access retirement and one R4 run. R3's grant remains held. F5, worker P2, live customer workflow and enterprise production gates remain open.
+Worker persistence F3 is delivered. F4's original candidate remains unaccepted after R4 passed 16 metadata and 320 Python 3.11 cases, then stopped at Ruff lint before Python 3.12 pytest; package qualification was skipped. The [reviewed repair](F4_VALIDATION_PLAN.md#reviewed-source-repair) passes full lint and formatting for 569 files. Product validation of the repair remains gated on a frozen successor package, sufficient capacity and new execution approval. F5, worker P2, live customer workflow and enterprise production gates remain open.
 
 The [November 3, 2026 CI allowance amendment](https://github.com/spei04/agent-rewind/blob/439fca552bf8bee05d223a6e7c174e55a1d70d00/docs/ASSIGNMENTS.md#ci-receipt-allowance-amendment-2026-11-03) is historical F3 delivery context. Its recorded limits and qualifications remain unchanged in that dated record; current F4 status is maintained in the [canonical delivery summary](ASSIGNMENTS.md).
 
