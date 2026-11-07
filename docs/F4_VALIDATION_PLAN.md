@@ -159,6 +159,25 @@ Preserved working revisions temporarily exceeded the internal correction partiti
 
 Workspace environment operations retain pinned uv 0.11.21. The frozen installed-package helper retains its explicit, pre-existing uv 0.13.4 requirement. Both executables were hash-checked and returned the expected versions; no installation, replacement, version impersonation or candidate-helper edit occurred.
 
+### Original preparation completion witness
+
+The original preparation writer exited **0**, with both streams complete and exact readback, at Unix time **1794039640.058**. Its separate external completion was observed at **1794039647.359**: November 7, 2026, **00:20:47.359 PST** (08:20:47.359 UTC). This is an observation of the original save; no writer or source check was replayed.
+
+| Original completion accounting | Exact seconds |
+| --- | ---: |
+| Source preparation: `ceil(1794039647.359 - 1794013870)` | 25,778 |
+| Carried interval: `ceil(1794039647.359 - 1794012888.824)` | 26,759 |
+| Actual prior: `13814 + 26759` | 40,573 |
+| Proposed campaign ceiling at that observation: `40573 + 1800` | 42,373 |
+
+The original approval question included these exact counters. They describe that observation, not the later evidence-publication work. This follow-up is charged conservatively through its later externally observed completion `E2`, using the same original origins and no intervening wait exclusion. The revised decision message must state `E2` and its resulting exact counters; it supersedes the original question's accounting. Preparation and carried intervals overlap and are never added together.
+
+Private witness `PREPARATION.external-completion-witness.v1.json` is **3,247 bytes**, SHA-256 `54c966224cee2e38df0bc08aa6a13e54f5a34c855ecd8e382a5bc2907e8c4b08`. It preserves the original writer's exact returned output, exit/EOF observation, external completion, counters and private session binding. Its own original save/readback also exited 0. The witness uses 4 KiB within the existing final-record reservation; total final records currently use 16 KiB of 32 KiB. Metadata plus future approval uses 241,664 of 262,144 bytes; the preparation pool with future reservations uses 1,748,992 of 2,097,152 bytes.
+
+The bound original receipt is **8,617 bytes**, SHA-256 `e720c8a6652c6926b6c6f998003a4d846d265300b675df3eb51f5743b392b4ce`; entry `2fed2645d99b78dab5e55d4958dafe088a08b8a83ebec69718bda322102dfe1b` and independent review `eca9d982cc4e00288d23c690092db45d48c2321128a56717e6962ca50ac3e544` remain unchanged. The actual private session's SHA-256 identity fingerprint is `bfe2e3c049a810f4f7a4c8e12a490bbc59660a367c1d872dbe17f234ade57af2`; its identity stays private.
+
+The receipt deliberately retains `external_completion_pending=true` and null future budget counters: bytes written before a process returns cannot attest to that process's later exit or tool completion. The external witness and eventual approval supply those observations without rewriting the receipt. The later completion will remain a separate observation, not a replacement timestamp for the original writer. No new runtime origin, retirement, approval or product acceptance was created.
+
 ### Separate execution decision
 
 A future owner decision must bind the stopped entry, accepted review, preparation receipt, externally observed preparation completion and actual private R4 session. The proposal is to retire **only R3's unused 4 GiB future scratch access**, verify the retirement writer and independent readback, and then admit **one fresh 30-minute R4 validation**. No R1/R2 credit is repeated, no historical charge is refunded, and no file deletion or physical reclamation is claimed.

@@ -11,7 +11,7 @@
 | Runtime | R4 authority, retirement and resource contracts; bounded source verification. | Complete: 25 operator and 36 authority cases passed; exact results retained. |
 | Integration | Terminal persistence, operator sequencing and independent resource audit. | Implemented: 66 terminal cases passed; final resource audit passed. |
 | Quality | Actual-factory fixtures and independent final evidence review. | Complete source review; product acceptance remains pending. |
-| Lead | Publish reviewed proposal, close preparation accounting and obtain the separate execution decision. | No new runtime or retirement admitted. |
+| Lead | Retain the original completion witness, carry follow-up elapsed time forward and obtain the revised execution decision. | Original receipt and exact counters linked; no new runtime or retirement admitted. |
 
 [Accepted source-correction history](F4_VALIDATION_PLAN.md#accepted-source-correction) · [Earlier assignments](https://github.com/spei04/agent-rewind/blob/5f2ae1a125af365d99e89759efe1e213cf384e59/docs/ASSIGNMENTS.md) · [Roadmap](PLAN.md) · [Execution backlog](EXECUTION_BACKLOG.md#ar-010-b)
 
