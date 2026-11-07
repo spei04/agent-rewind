@@ -41,9 +41,12 @@ POSTGRES = pytest.mark.skipif(
 F4_POSTGRES = pytest.mark.f4_owned_postgres
 
 
-@pytest.fixture(params=[
-    "sqlite", pytest.param("postgresql", marks=(POSTGRES, F4_POSTGRES)),
-])
+@pytest.fixture(
+    params=[
+        "sqlite",
+        pytest.param("postgresql", marks=(POSTGRES, F4_POSTGRES)),
+    ]
+)
 def dialect(request):
     return request.param
 
@@ -51,12 +54,14 @@ def dialect(request):
 @contextmanager
 def policy_case(request, tmp_path, monkeypatch, record_property, dialect):
     selected_pg = request.getfixturevalue("pg") if dialect == "postgresql" else None
-    template = (
-        request.getfixturevalue("fresh_sqlite_ar6_template") if selected_pg is None else None
-    )
+    template = request.getfixturevalue("fresh_sqlite_ar6_template") if selected_pg is None else None
     with consumer_fixture(
-        tmp_path, monkeypatch, record_property, pg=selected_pg,
-        producer=True, template=template,
+        tmp_path,
+        monkeypatch,
+        record_property,
+        pg=selected_pg,
+        producer=True,
+        template=template,
     ) as fixture:
         yield fixture
 
@@ -77,18 +82,19 @@ def temp_count(connection, dialect):
     statement = (
         "SELECT count(*) FROM sqlite_temp_master"
         if dialect == "sqlite"
-        else "SELECT count(*) FROM pg_catalog.pg_class "
-             "WHERE relnamespace=pg_my_temp_schema()"
+        else "SELECT count(*) FROM pg_catalog.pg_class WHERE relnamespace=pg_my_temp_schema()"
     )
     return connection.exec_driver_sql(statement).scalar_one()
 
 
 def test_actual_session_temporary_relation_refuses_before_catalog_projection(
-    request, tmp_path, monkeypatch, record_property, dialect,
+    request,
+    tmp_path,
+    monkeypatch,
+    record_property,
+    dialect,
 ):
-    with policy_case(
-        request, tmp_path, monkeypatch, record_property, dialect
-    ) as fixture:
+    with policy_case(request, tmp_path, monkeypatch, record_property, dialect) as fixture:
         before = whole_state(fixture.case)
         fixture.engine.dispose()
         created = []
@@ -103,8 +109,8 @@ def test_actual_session_temporary_relation_refuses_before_catalog_projection(
                     "SELECT count(*) FROM sqlite_temp_master WHERE name='f4_policy_temporary'"
                     if dialect == "sqlite"
                     else "SELECT count(*) FROM pg_catalog.pg_class "
-                         "WHERE relnamespace=pg_my_temp_schema() "
-                         "AND relname='f4_policy_temporary'"
+                    "WHERE relnamespace=pg_my_temp_schema() "
+                    "AND relname='f4_policy_temporary'"
                 )
                 assert cursor.fetchone()[0] == 1
                 dbapi_connection.commit()
@@ -117,9 +123,11 @@ def test_actual_session_temporary_relation_refuses_before_catalog_projection(
         projections = forwarding_gate(monkeypatch, failure_consumer, "_catalog_result")
         event.listen(fixture.engine, "connect", install_temporary)
         try:
-            with pytest.raises(MigrationRefused) as caught:
-                with observed_read(fixture.engine, monkeypatch, record_property) as observed:
-                    validated_consumer_history(observed.connection, observed.work)
+            with (
+                pytest.raises(MigrationRefused) as caught,
+                observed_read(fixture.engine, monkeypatch, record_property) as observed,
+            ):
+                validated_consumer_history(observed.connection, observed.work)
             assert caught.value.code == "schema_incompatible"
             assert created == [True] and gates == [gate_name] and projections == []
             assert_released(observed)
@@ -132,19 +140,29 @@ def test_actual_session_temporary_relation_refuses_before_catalog_projection(
             assert temp_count(connection, dialect) == 0
         fixture.engine.dispose()
         assert_same_state(before, whole_state(fixture.case))
-        record_property("f4_temporary_gate", json.dumps({
-            "dialect": dialect, "native_session_fixture": True,
-            "shared_gate_forwarded": gates, "observed_catalog_projection": projections,
-            "new_session_temporary_count": 0,
-        }, sort_keys=True))
+        record_property(
+            "f4_temporary_gate",
+            json.dumps(
+                {
+                    "dialect": dialect,
+                    "native_session_fixture": True,
+                    "shared_gate_forwarded": gates,
+                    "observed_catalog_projection": projections,
+                    "new_session_temporary_count": 0,
+                },
+                sort_keys=True,
+            ),
+        )
 
 
 def test_actual_installation_fingerprint_drift_reaches_successor_history(
-    request, tmp_path, monkeypatch, record_property, dialect,
+    request,
+    tmp_path,
+    monkeypatch,
+    record_property,
+    dialect,
 ):
-    with policy_case(
-        request, tmp_path, monkeypatch, record_property, dialect
-    ) as fixture:
+    with policy_case(request, tmp_path, monkeypatch, record_property, dialect) as fixture:
         before = whole_state(fixture.case)
         rows = before["tables"]["installation_adoptions"]["rows"]
         assert len(rows) == 1
@@ -160,28 +178,26 @@ def test_actual_installation_fingerprint_drift_reaches_successor_history(
         applied = False
         try:
             with owner.begin() as connection:
-                assert connection.execute(
-                    statement, {"value": changed, "key": key}
-                ).rowcount == 1
+                assert connection.execute(statement, {"value": changed, "key": key}).rowcount == 1
             applied = True
             drain_case(fixture.case)
             injected = unvalidated_native_state(fixture.case, table_count=21)
             histories = forwarding_gate(monkeypatch, failure_consumer, "read_history")
-            with pytest.raises(MigrationRefused) as caught:
-                with observed_read(fixture.engine, monkeypatch, record_property) as observed:
-                    validated_consumer_history(observed.connection, observed.work)
+            with (
+                pytest.raises(MigrationRefused) as caught,
+                observed_read(fixture.engine, monkeypatch, record_property) as observed,
+            ):
+                validated_consumer_history(observed.connection, observed.work)
             assert caught.value.code == "schema_incompatible"
             assert histories == ["read_history"]
             assert_released(observed)
-            assert_same_state(
-                injected, unvalidated_native_state(fixture.case, table_count=21)
-            )
+            assert_same_state(injected, unvalidated_native_state(fixture.case, table_count=21))
         finally:
             if applied:
                 with owner.begin() as connection:
-                    assert connection.execute(
-                        statement, {"value": original, "key": key}
-                    ).rowcount == 1
+                    assert (
+                        connection.execute(statement, {"value": original, "key": key}).rowcount == 1
+                    )
             drain_case(fixture.case)
         assert_same_state(before, whole_state(fixture.case))
 
@@ -190,26 +206,32 @@ def producer_native_state(fixture):
     producer = fixture.case.pg["app_role"]
     role = reader_role_state(fixture.case.pg, producer)
     with fixture.case.pg["owner"].connect() as connection:
-        acl = tuple(connection.execute(
-            text(
-                "SELECT privilege_type,is_grantable,grantor::bigint "
-                "FROM pg_catalog.pg_class c,"
-                "LATERAL aclexplode(c.relacl) x "
-                "WHERE c.oid='public.job_failure_evidence'::regclass "
-                "AND x.grantee=CAST(:producer AS regrole) "
-                "ORDER BY privilege_type,is_grantable,grantor"
-            ), {"producer": producer},
-        ).all())
-        privileges = tuple(connection.execute(
-            text(
-                "SELECT has_schema_privilege(CAST(:producer AS regrole),'public','CREATE'),"
-                "has_table_privilege(CAST(:producer AS regrole),'public.jobs','SELECT'),"
-                "has_table_privilege(CAST(:producer AS regrole),"
-                "'public.job_failure_evidence','SELECT'),"
-                "has_table_privilege(CAST(:producer AS regrole),"
-                "'public.job_failure_evidence','INSERT')"
-            ), {"producer": producer},
-        ).one())
+        acl = tuple(
+            connection.execute(
+                text(
+                    "SELECT privilege_type,is_grantable,grantor::bigint "
+                    "FROM pg_catalog.pg_class c,"
+                    "LATERAL aclexplode(c.relacl) x "
+                    "WHERE c.oid='public.job_failure_evidence'::regclass "
+                    "AND x.grantee=CAST(:producer AS regrole) "
+                    "ORDER BY privilege_type,is_grantable,grantor"
+                ),
+                {"producer": producer},
+            ).all()
+        )
+        privileges = tuple(
+            connection.execute(
+                text(
+                    "SELECT has_schema_privilege(CAST(:producer AS regrole),'public','CREATE'),"
+                    "has_table_privilege(CAST(:producer AS regrole),'public.jobs','SELECT'),"
+                    "has_table_privilege(CAST(:producer AS regrole),"
+                    "'public.job_failure_evidence','SELECT'),"
+                    "has_table_privilege(CAST(:producer AS regrole),"
+                    "'public.job_failure_evidence','INSERT')"
+                ),
+                {"producer": producer},
+            ).one()
+        )
     drain_postgres(fixture.case.pg)
     return role, acl, privileges
 
@@ -218,11 +240,13 @@ def producer_native_state(fixture):
 @F4_POSTGRES
 @pytest.mark.parametrize("mutation", ["nologin", "createdb", "schema_create"])
 def test_native_discovered_producer_refuses_forbidden_role_or_effective_authority(
-    request, tmp_path, monkeypatch, record_property, mutation,
+    request,
+    tmp_path,
+    monkeypatch,
+    record_property,
+    mutation,
 ):
-    with policy_case(
-        request, tmp_path, monkeypatch, record_property, "postgresql"
-    ) as fixture:
+    with policy_case(request, tmp_path, monkeypatch, record_property, "postgresql") as fixture:
         before = whole_state(fixture.case)
         native_before = producer_native_state(fixture)
         assert native_before[0][0][0] is True
@@ -235,9 +259,7 @@ def test_native_discovered_producer_refuses_forbidden_role_or_effective_authorit
             restore_sql = f"REVOKE CREATE ON SCHEMA public FROM {role}"
         else:
             engine = fixture.case.pg["control"]
-            apply_sql = f"ALTER ROLE {role} " + (
-                "NOLOGIN" if mutation == "nologin" else "CREATEDB"
-            )
+            apply_sql = f"ALTER ROLE {role} " + ("NOLOGIN" if mutation == "nologin" else "CREATEDB")
             restore_sql = f"ALTER ROLE {role} " + (
                 "LOGIN" if mutation == "nologin" else "NOCREATEDB"
             )
@@ -259,9 +281,11 @@ def test_native_discovered_producer_refuses_forbidden_role_or_effective_authorit
                 monkeypatch, failure_consumer, "_postgres_consumer_principal"
             )
             histories = forwarding_gate(monkeypatch, failure_consumer, "read_history")
-            with pytest.raises(MigrationRefused) as caught:
-                with observed_read(fixture.engine, monkeypatch, record_property) as observed:
-                    validated_consumer_history(observed.connection, observed.work)
+            with (
+                pytest.raises(MigrationRefused) as caught,
+                observed_read(fixture.engine, monkeypatch, record_property) as observed,
+            ):
+                validated_consumer_history(observed.connection, observed.work)
             assert caught.value.code == "schema_incompatible"
             assert principals == ["_postgres_consumer_principal"] and histories == []
             assert_released(observed)
@@ -279,32 +303,50 @@ def test_native_discovered_producer_refuses_forbidden_role_or_effective_authorit
 
 @pytest.mark.parametrize("entry", ["get", "cancel"])
 def test_actual_successor_hides_an_existing_operation_in_another_authorized_project(
-    request, tmp_path, monkeypatch, record_property, dialect, entry,
+    request,
+    tmp_path,
+    monkeypatch,
+    record_property,
+    dialect,
+    entry,
 ):
     with service_case(
-        request, tmp_path, monkeypatch, record_property, dialect,
+        request,
+        tmp_path,
+        monkeypatch,
+        record_property,
+        dialect,
         cancel=entry == "cancel",
     ) as fixture:
         other = f"{971001:032x}"
         with fixture.engine.begin() as connection:
-            assert connection.execute(
-                text(
-                    "INSERT INTO projects(id,organization_id,name,created_at) "
-                    "SELECT :other,organization_id,'Other F4 project',created_at "
-                    "FROM projects WHERE id=:source"
-                ), {"other": other, "source": fixture.context.project_id},
-            ).rowcount == 1
-            assert connection.execute(
-                text(
-                    "INSERT INTO project_memberships"
-                    "(project_id,principal_id,role,revoked_at,legacy_default) "
-                    "VALUES(:project,:principal,'operator',NULL,false)"
-                ), {"project": other, "principal": fixture.principal.principal_id},
-            ).rowcount == 1
+            assert (
+                connection.execute(
+                    text(
+                        "INSERT INTO projects(id,organization_id,name,created_at) "
+                        "SELECT :other,organization_id,'Other F4 project',created_at "
+                        "FROM projects WHERE id=:source"
+                    ),
+                    {"other": other, "source": fixture.context.project_id},
+                ).rowcount
+                == 1
+            )
+            assert (
+                connection.execute(
+                    text(
+                        "INSERT INTO project_memberships"
+                        "(project_id,principal_id,role,revoked_at,legacy_default) "
+                        "VALUES(:project,:principal,'operator',NULL,false)"
+                    ),
+                    {"project": other, "principal": fixture.principal.principal_id},
+                ).rowcount
+                == 1
+            )
         context = replace(fixture.context, project_id=other)
         before = whole_state(fixture.case)
         actual = next(
-            row for row in before["tables"]["operations"]["rows"]
+            row
+            for row in before["tables"]["operations"]["rows"]
             if row["id"] == fixture.operation_id
         )
         assert actual["project_id"] == fixture.context.project_id != other
@@ -325,12 +367,13 @@ def test_actual_successor_hides_an_existing_operation_in_another_authorized_proj
         monkeypatch.setattr(fixture.service.authority, "check", authority)
         fixture.service.artifact_loader = lambda _value: pytest.fail("Foreign target loaded")
         method = (
-            fixture.service._read_successor if entry == "get"
-            else fixture.service._cancel_successor
+            fixture.service._read_successor if entry == "get" else fixture.service._cancel_successor
         )
-        with observe_service(fixture, monkeypatch, record_property) as observed:
-            with pytest.raises(ResourceNotFound):
-                method(fixture.principal, context, fixture.operation_id)
+        with (
+            observe_service(fixture, monkeypatch, record_property) as observed,
+            pytest.raises(ResourceNotFound),
+        ):
+            method(fixture.principal, context, fixture.operation_id)
         assert reads == [True] and checks == ["read"]
         assert_service_released(observed)
         assert_same_state(before, whole_state(fixture.case))

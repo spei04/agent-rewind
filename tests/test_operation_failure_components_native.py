@@ -40,16 +40,25 @@ PG = pytest.param(
     "postgresql",
     marks=(
         pytest.mark.f4_owned_postgres,
-        pytest.mark.skipif(
-            not migration_tests.POSTGRES, reason="Opt-in synthetic F4 components"
-        ),
+        pytest.mark.skipif(not migration_tests.POSTGRES, reason="Opt-in synthetic F4 components"),
     ),
     id="postgresql",
 )
 EVIDENCE_FIELDS = (
-    "schema_version", "kind", "project_id", "job_resource_kind", "job_id",
-    "operation_id", "lease_generation", "job_status", "cause", "phase",
-    "origin_kind", "correlation_id", "association_sha256", "source_sha256",
+    "schema_version",
+    "kind",
+    "project_id",
+    "job_resource_kind",
+    "job_id",
+    "operation_id",
+    "lease_generation",
+    "job_status",
+    "cause",
+    "phase",
+    "origin_kind",
+    "correlation_id",
+    "association_sha256",
+    "source_sha256",
     "created_at_micros",
 )
 
@@ -138,16 +147,18 @@ def test_genuine_failure_inputs_reach_provenance_and_transfer_rejection_gates(
 
         def retained(value):
             return clone_book(
-                (operation, job, configuration), {job.identity: value},
+                (operation, job, configuration),
+                {job.identity: value},
                 {("result_count", job.identity): (0,)},
             )
 
         # Genuine retained inputs must pass before any deliberately malformed
         # Python component input is considered.
         positive = retained(observation)
-        assert reads.successor_error(
-            dialect, context, operation, job, configuration, positive
-        ) == wanted_error
+        assert (
+            reads.successor_error(dialect, context, operation, job, configuration, positive)
+            == wanted_error
+        )
         assert positive.active_frame_bytes == 0
 
         cells = dict(zip(EVIDENCE_FIELDS, observation.evidence, strict=True))
@@ -184,21 +195,21 @@ def test_genuine_failure_inputs_reach_provenance_and_transfer_rejection_gates(
             real_association = reads.association_digest
             real_source = reads.source_digest
 
-            def verified(*args):
-                visits["verified"] += 1
+            def verified(*args, _visits=visits):
+                _visits["verified"] += 1
                 return original_verified(*args)
 
-            def record(**kwargs):
-                visits["record"] += 1
-                return real_record(**kwargs)
+            def record(*, _visits=visits, _real_record=real_record, **kwargs):
+                _visits["record"] += 1
+                return _real_record(**kwargs)
 
-            def association(*args, **kwargs):
-                visits["association"] += 1
-                return real_association(*args, **kwargs)
+            def association(*args, _visits=visits, _real_association=real_association, **kwargs):
+                _visits["association"] += 1
+                return _real_association(*args, **kwargs)
 
-            def source_digest(*args, **kwargs):
-                visits["source"] += 1
-                return real_source(*args, **kwargs)
+            def source_digest(*args, _visits=visits, _real_source=real_source, **kwargs):
+                _visits["source"] += 1
+                return _real_source(*args, **kwargs)
 
             with monkeypatch.context() as patch:
                 patch.setattr(reads, "_verified_error", verified)
@@ -206,12 +217,12 @@ def test_genuine_failure_inputs_reach_provenance_and_transfer_rejection_gates(
                 patch.setattr(reads, "association_digest", association)
                 patch.setattr(reads, "source_digest", source_digest)
                 with pytest.raises(AdmissionStorageError):
-                    reads.successor_error(
-                        dialect, context, operation, job, configuration, book
-                    )
+                    reads.successor_error(dialect, context, operation, job, configuration, book)
             assert visits == {
-                "verified": 1, "record": 1,
-                "association": association_calls, "source": source_calls,
+                "verified": 1,
+                "record": 1,
+                "association": association_calls,
+                "source": source_calls,
             }, label
             assert book.active_frame_bytes == 0 and book.encoded() == initial_wire
             witnessed.append({"component": label, "visits": visits})
@@ -249,8 +260,8 @@ def test_genuine_failure_inputs_reach_provenance_and_transfer_rejection_gates(
             candidate = ComponentConnection(dialect, rows)
             book = reads.SuccessorReceiptBook()
 
-            def post_init(value):
-                visits.append("observation")
+            def post_init(value, *, _visits=visits):
+                _visits.append("observation")
                 return original_post_init(value)
 
             with monkeypatch.context() as patch:
@@ -282,10 +293,18 @@ def test_native_259_matcher_260_sentinel_and_separate_key_validation_components(
             assert query._limit_clause.value == 260
             receipts = tuple(book.receipts)
             assert len(receipts) == 259
-            captured.append((
-                context, receipts, {fixture.case.job_id: book.job_observation(fixture.case.job_id)},
-                dict(book.observations), cohort, query, dict(parameters), len(compiled.params),
-            ))
+            captured.append(
+                (
+                    context,
+                    receipts,
+                    {fixture.case.job_id: book.job_observation(fixture.case.job_id)},
+                    dict(book.observations),
+                    cohort,
+                    query,
+                    dict(parameters),
+                    len(compiled.params),
+                )
+            )
             return query, parameters
 
         with monkeypatch.context() as patch:
@@ -313,10 +332,19 @@ def test_native_259_matcher_260_sentinel_and_separate_key_validation_components(
             connection = ComponentConnection(dialect, result_rows)
             initial = book.encoded()
 
-            def fixed_query(actual_connection, actual_context, actual_book, actual_cohort):
-                assert actual_connection is connection and actual_context == context
-                assert actual_book is book and actual_cohort is cohort
-                visits.append(label)
+            def fixed_query(
+                actual_connection,
+                actual_context,
+                actual_book,
+                actual_cohort,
+                *,
+                _connection=connection,
+                _book=book,
+                _label=label,
+            ):
+                assert actual_connection is _connection and actual_context == context
+                assert actual_book is _book and actual_cohort is cohort
+                visits.append(_label)
                 return query, parameters
 
             with monkeypatch.context() as patch:
@@ -329,10 +357,18 @@ def test_native_259_matcher_260_sentinel_and_separate_key_validation_components(
             assert len(connection.calls) == 1 and connection.result.closed
             assert book.encoded() == initial
         assert visits == ["exact", "duplicate", "missing", "foreign"]
-        record_property("f4_final_matcher_components", json.dumps({
-            "native_identities": 259, "compiled_sentinel": 260, "compiled_binds": binds,
-            "python_result_controls": visits,
-        }, sort_keys=True))
+        record_property(
+            "f4_final_matcher_components",
+            json.dumps(
+                {
+                    "native_identities": 259,
+                    "compiled_sentinel": 260,
+                    "compiled_binds": binds,
+                    "python_result_controls": visits,
+                },
+                sort_keys=True,
+            ),
+        )
         assert_same_state(before, whole_state(fixture.case))
 
 
@@ -385,12 +421,17 @@ def test_single_successor_cancellation_phase_accepts_255_roots_without_effect(
                     original_rows = [
                         [row.domain, row.identity, list(row.values)]
                         for row in (
-                            association.operation, association.job, association.configuration
+                            association.operation,
+                            association.job,
+                            association.configuration,
                         )
                     ]
-                    combined = canonical({
-                        "original": original_rows, "phase": json.loads(book.encoded()),
-                    })
+                    combined = canonical(
+                        {
+                            "original": original_rows,
+                            "phase": json.loads(book.encoded()),
+                        }
+                    )
                     assert book.remaining == 4 * 1024**2 - len(combined)
                     query, parameters = sources._matching_successor_query(
                         connection, fixture.context, book, cohort, cancellation=True
@@ -402,8 +443,7 @@ def test_single_successor_cancellation_phase_accepts_255_roots_without_effect(
             assert owner._active is None and not owner._failed
         elapsed = time.monotonic() - started
         cleanup = sum(
-            after - before for kind, before, after in controls
-            if kind not in {"begin", "commit"}
+            after - before for kind, before, after in controls if kind not in {"begin", "commit"}
         )
         assert owner.source_visits == 256 and owner.edges == 510
         assert book._receipts == {} and book.observations == {} and book._active_frame == 0
@@ -411,11 +451,21 @@ def test_single_successor_cancellation_phase_accepts_255_roots_without_effect(
         assert work._detached and not work._listeners and work._invocation_started is not None
         assert 0 < cleanup <= 8 and work.statements - cleanup <= 504
         assert work.statements <= 512 and work.instructions < 20_000_000 and elapsed < 10
-        record_property("f4_single_cancellation_phase", json.dumps({
-            "scope": "one phase only; not a three-phase service",
-            "roots": 255, "identities": 258, "source_visits": owner.source_visits,
-            "edges": owner.edges, "total_statements": work.statements,
-            "cleanup_statements": cleanup, "elapsed_seconds": elapsed,
-            "combined_retained_bytes": len(combined),
-        }, sort_keys=True))
+        record_property(
+            "f4_single_cancellation_phase",
+            json.dumps(
+                {
+                    "scope": "one phase only; not a three-phase service",
+                    "roots": 255,
+                    "identities": 258,
+                    "source_visits": owner.source_visits,
+                    "edges": owner.edges,
+                    "total_statements": work.statements,
+                    "cleanup_statements": cleanup,
+                    "elapsed_seconds": elapsed,
+                    "combined_retained_bytes": len(combined),
+                },
+                sort_keys=True,
+            ),
+        )
         assert_same_state(before, whole_state(fixture.case))

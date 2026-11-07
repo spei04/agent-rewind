@@ -51,17 +51,43 @@ def job(*, status="failed", cancel=False):
         JOB,
         JOB_FIELDS,
         (
-            JOB, "run", 0.0, "b" * 64, status, None, None, cancel, 7, 0,
-            None, None, None, 2, "c" * 64, "d" * 64,
+            JOB,
+            "run",
+            0.0,
+            "b" * 64,
+            status,
+            None,
+            None,
+            cancel,
+            7,
+            0,
+            None,
+            None,
+            None,
+            2,
+            "c" * 64,
+            "d" * 64,
         ),
     )
 
 
 def evidence():
     return (
-        1, "verified_failure", "e" * 32, "job", JOB, "f" * 32, 1, "failed",
-        "dependency_failed", "outcome_unknown", "admission", "1" * 32,
-        "2" * 64, "3" * 64, 0,
+        1,
+        "verified_failure",
+        "e" * 32,
+        "job",
+        JOB,
+        "f" * 32,
+        1,
+        "failed",
+        "dependency_failed",
+        "outcome_unknown",
+        "admission",
+        "1" * 32,
+        "2" * 64,
+        "3" * 64,
+        0,
     )
 
 
@@ -82,8 +108,12 @@ def remember_run(book, row):
 def fingerprint(book):
     wire = book.encoded()
     return (
-        len(wire), hashlib.sha256(wire).hexdigest(), book.byte_count,
-        book._wire_bytes, len(book.receipts), book.active_frame_bytes,
+        len(wire),
+        hashlib.sha256(wire).hexdigest(),
+        book.byte_count,
+        book._wire_bytes,
+        len(book.receipts),
+        book.active_frame_bytes,
     )
 
 
@@ -104,7 +134,7 @@ def test_wire_counter_uses_ascii_escaped_json_and_independent_array_layout():
     row = run_row(1, 'quoted" slash\\ control\n snowman\u2603')
     assert canonical(row["body"]) == b'"quoted\\" slash\\\\ control\\n snowman\\u2603"'
     assert b"\\u2603" in canonical(row)
-    assert "\u2603".encode("utf-8") not in canonical(row)
+    assert "\u2603".encode() not in canonical(row)
     remember_run(book, row)
     rows.append(["run", row["id"], [row[field] for field in RUN_FIELDS]])
     assert_wire(book, rows, observations)
@@ -221,8 +251,11 @@ def test_synthetic_serialized_book_exact_byte_ceiling_and_one_over(extra):
     book = SuccessorReceiptBook()
     row = run_row(1)
     empty = canonical(
-        {"v": 1, "rows": [["run", row["id"], [row[field] for field in RUN_FIELDS]]],
-         "observations": []}
+        {
+            "v": 1,
+            "rows": [["run", row["id"], [row[field] for field in RUN_FIELDS]]],
+            "observations": [],
+        }
     )
     # Deliberately serializer-only: this body exceeds the native source-body
     # ceiling and supplies no supported GET or complete-service fit credit.
@@ -235,8 +268,11 @@ def test_synthetic_serialized_book_exact_byte_ceiling_and_one_over(extra):
     else:
         remember_run(book, row)
         expected = canonical(
-            {"v": 1, "rows": [["run", row["id"], [row[field] for field in RUN_FIELDS]]],
-             "observations": []}
+            {
+                "v": 1,
+                "rows": [["run", row["id"], [row[field] for field in RUN_FIELDS]]],
+                "observations": [],
+            }
         )
         actual = book.encoded()
         assert len(actual) == book.byte_count == book._wire_bytes == BOOK_LIMIT
@@ -252,9 +288,11 @@ def test_synthetic_serialized_book_exact_byte_ceiling_and_one_over(extra):
 def test_frame_rejects_noninteger_or_oversize_before_reservation(size):
     book = SuccessorReceiptBook()
     before = fingerprint(book)
-    with pytest.raises(AdmissionStorageError):
-        with book.frame(size):
-            pytest.fail("Invalid frame was entered")
+    with (
+        pytest.raises(AdmissionStorageError),
+        book.frame(size),
+    ):
+        pytest.fail("Invalid frame was entered")
     assert fingerprint(book) == before
 
 
@@ -262,8 +300,11 @@ def test_frame_reservation_covers_remaining_capacity_and_blocks_cohort_loading()
     book = SuccessorReceiptBook()
     row = run_row(1)
     empty = canonical(
-        {"v": 1, "rows": [["run", row["id"], [row[field] for field in RUN_FIELDS]]],
-         "observations": []}
+        {
+            "v": 1,
+            "rows": [["run", row["id"], [row[field] for field in RUN_FIELDS]]],
+            "observations": [],
+        }
     )
     row["body"] = "x" * (BOOK_LIMIT - 4096 - len(empty))
     remember_run(book, row)
@@ -276,9 +317,11 @@ def test_frame_reservation_covers_remaining_capacity_and_blocks_cohort_loading()
             book.encoded()
         with pytest.raises(AdmissionStorageError):
             book._before_cohort()
-        with pytest.raises(AdmissionStorageError):
-            with book.frame(1):
-                pytest.fail("Nested frame was entered")
+        with (
+            pytest.raises(AdmissionStorageError),
+            book.frame(1),
+        ):
+            pytest.fail("Nested frame was entered")
         assert book.active_frame_bytes == 4096
     assert fingerprint(book) == before
 
@@ -287,9 +330,11 @@ def test_frame_release_preserves_the_original_error_and_does_not_refund_retained
     book = SuccessorReceiptBook()
     before = fingerprint(book)
     failure = RuntimeError("synthetic_frame_failure")
-    with pytest.raises(RuntimeError) as error:
-        with book.frame(4096):
-            raise failure
+    with (
+        pytest.raises(RuntimeError) as error,
+        book.frame(4096),
+    ):
+        raise failure
     assert error.value is failure
     assert fingerprint(book) == before
     row = run_row(1, "retained")
@@ -316,8 +361,10 @@ def test_original_ar7_wire_remains_distinct_after_successor_use():
     row = run_row(1, "unchanged")
     remember_run(original, row)
     old_expected = canonical(
-        {"rows": [["run", row["id"], list(RUN_FIELDS), [row[field] for field in RUN_FIELDS]]],
-         "observations": []}
+        {
+            "rows": [["run", row["id"], list(RUN_FIELDS), [row[field] for field in RUN_FIELDS]]],
+            "observations": [],
+        }
     )
     before = (original.encoded(), original.byte_count, original._wire_bytes)
     assert before[0] == old_expected

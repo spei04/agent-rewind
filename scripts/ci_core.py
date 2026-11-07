@@ -116,16 +116,21 @@ class CoreReceipt:
             from scripts.ci_failure_cases import publish_actions_control
 
             owned = [
-                item.nodeid for item in session.items
+                item.nodeid
+                for item in session.items
                 if item.get_closest_marker("f4_owned_postgres") is not None
             ]
             try:
                 control = publish_actions_control(
-                    root=self.root, output=self.failure_output, identity=self.identity,
-                    python=self.python, leg=self.receipt["leg"],
+                    root=self.root,
+                    output=self.failure_output,
+                    identity=self.identity,
+                    python=self.python,
+                    leg=self.receipt["leg"],
                     session_origin=self.session_origin,
                     session_limit=session_limit_seconds(self.python, self.receipt["leg"]),
-                    nodeids=owned, environment=os.environ,
+                    nodeids=owned,
+                    environment=os.environ,
                 )
             except (ValueError, OSError, KeyError):
                 self.error("owned-case-binding-failed")

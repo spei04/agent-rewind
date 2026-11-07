@@ -64,7 +64,9 @@ def select_reader(case, *, producer, record_property):
                 f"ALTER ROLE {reader_sql} LOGIN NOINHERIT PASSWORD 'synthetic-test-only'"
             )
         with pg["owner"].begin() as connection:
-            connection.exec_driver_sql(f"GRANT SELECT ON ALL TABLES IN SCHEMA public TO {reader_sql}")
+            connection.exec_driver_sql(
+                f"GRANT SELECT ON ALL TABLES IN SCHEMA public TO {reader_sql}"
+            )
             if not producer:
                 connection.exec_driver_sql(f"REVOKE INSERT ON job_failure_evidence FROM {app_sql}")
         engine = create_engine(
@@ -261,9 +263,7 @@ def assert_history(inspection, fixture, before):
     assert history.opening is not None
     assert len(history.manifests) == fixture.initialization.retained_ar7.manifest_count
     accounts = {
-        account.id: account
-        for cursor in history.manifests
-        for account in cursor.manifest.accounts
+        account.id: account for cursor in history.manifests for account in cursor.manifest.accounts
     }
     native = {row["id"]: row for row in before["tables"]["budget_accounts"]["rows"]}
     assert set(accounts) == set(native)

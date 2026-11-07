@@ -27,20 +27,23 @@ from agent_rewind.reservation_types import ReservationRefusal
 __all__ = ["pg"]
 
 
-@pytest.fixture(params=[
-    "sqlite",
-    pytest.param("postgresql", marks=(
-        pytest.mark.f4_owned_postgres,
-        pytest.mark.skipif(
-            not migration_tests.POSTGRES, reason="Opt-in synthetic PostgreSQL F4 paid paths"
+@pytest.fixture(
+    params=[
+        "sqlite",
+        pytest.param(
+            "postgresql",
+            marks=(
+                pytest.mark.f4_owned_postgres,
+                pytest.mark.skipif(
+                    not migration_tests.POSTGRES, reason="Opt-in synthetic PostgreSQL F4 paid paths"
+                ),
+            ),
         ),
-    )),
-])
+    ]
+)
 def case(request, tmp_path, monkeypatch, record_property):
     selected_pg = request.getfixturevalue("pg") if request.param == "postgresql" else None
-    template = (
-        request.getfixturevalue("fresh_sqlite_ar6_template") if selected_pg is None else None
-    )
+    template = request.getfixturevalue("fresh_sqlite_ar6_template") if selected_pg is None else None
     with genuine_failure_case(
         tmp_path, monkeypatch, record_property, pg=selected_pg, fresh_ar6_template=template
     ) as fixture:
@@ -78,8 +81,7 @@ def test_successor_claim_reserve_and_original_readback_have_exact_native_deltas(
     with observe_paid(case, monkeypatch, record_property, repeated) as statements:
         original = repeated._reserve_successor(principal, context, fence, intent)
     assert original.kind == "original" and original.record == created.record
-    assert not any(sql.lstrip().startswith(("INSERT", "UPDATE", "DELETE"))
-                   for sql, _ in statements)
+    assert not any(sql.lstrip().startswith(("INSERT", "UPDATE", "DELETE")) for sql, _ in statements)
     assert_same_state(reserved, whole_state(case))
 
 
@@ -101,21 +103,24 @@ def test_existing_verified_evidence_denies_new_paid_work_at_unfiltered_job_check
 
     monkeypatch.setattr(reservation_successor, "_absence", absence)
     coordinator = ReservationCoordinator(case.engine, case.authority)
-    with observe_paid(case, monkeypatch, record_property, coordinator) as statements:
-        with pytest.raises(FailureRefusal) as caught:
-            if entry == "claim":
-                coordinator._claim_successor(principal, context, claim_intent(case))
-            else:
-                coordinator._reserve_successor(
-                    principal, context, original_failure.fence,
-                    reservation_intent(case, original_failure.fence),
-                )
+    with (
+        observe_paid(case, monkeypatch, record_property, coordinator) as statements,
+        pytest.raises(FailureRefusal) as caught,
+    ):
+        if entry == "claim":
+            coordinator._claim_successor(principal, context, claim_intent(case))
+        else:
+            coordinator._reserve_successor(
+                principal,
+                context,
+                original_failure.fence,
+                reservation_intent(case, original_failure.fence),
+            )
     assert caught.value.reason == "not_eligible"
     assert len(visits) == 1 and visits[0][1] == case.job_id
     assert visits[0][0].closed
     assert coordinator.outcome.rollback_acknowledged and not coordinator.outcome.commit_attempted
-    assert not any(sql.lstrip().startswith(("INSERT", "UPDATE", "DELETE"))
-                   for sql, _ in statements)
+    assert not any(sql.lstrip().startswith(("INSERT", "UPDATE", "DELETE")) for sql, _ in statements)
     assert_same_state(before, whole_state(case))
 
 
@@ -148,15 +153,17 @@ def test_final_paid_fence_refuses_real_same_body_native_drift_and_rolls_back(
 
     monkeypatch.setattr(reservation_successor, "_refresh_producer_authority", drift)
     coordinator = ReservationCoordinator(case.engine, case.authority)
-    with observe_paid(case, monkeypatch, record_property, coordinator):
-        with pytest.raises(ReservationRefusal) as caught:
-            if entry == "claim":
-                coordinator._claim_successor(case.principal, case.context, claim_intent(case))
-            else:
-                assert fence is not None
-                coordinator._reserve_successor(
-                    case.principal, case.context, fence, reservation_intent(case, fence)
-                )
+    with (
+        observe_paid(case, monkeypatch, record_property, coordinator),
+        pytest.raises(ReservationRefusal) as caught,
+    ):
+        if entry == "claim":
+            coordinator._claim_successor(case.principal, case.context, claim_intent(case))
+        else:
+            assert fence is not None
+            coordinator._reserve_successor(
+                case.principal, case.context, fence, reservation_intent(case, fence)
+            )
     assert visits == [True] and caught.value.reason == "job_not_live"
     assert coordinator.outcome.rollback_acknowledged and not coordinator.outcome.commit_attempted
     assert_same_state(before, whole_state(case))

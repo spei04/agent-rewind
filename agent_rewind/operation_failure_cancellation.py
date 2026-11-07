@@ -199,7 +199,11 @@ class SuccessorCancellationPhase:
             raise invalid()
 
     def associate(
-        self, connection: Connection, operation: RawReceipt, job: RawReceipt, configuration: RawReceipt
+        self,
+        connection: Connection,
+        operation: RawReceipt,
+        job: RawReceipt,
+        configuration: RawReceipt,
     ) -> None:
         self.check()
         try:
@@ -220,7 +224,12 @@ class SuccessorCancellationPhase:
                     connection, self._owner.context, job.identity, self._book
                 )
             validate_cancellation_evidence(
-                connection.dialect.name, self._owner.context, operation, job, configuration, self._book
+                connection.dialect.name,
+                self._owner.context,
+                operation,
+                job,
+                configuration,
+                self._book,
             )
             original = self._owner._original
             if original is None:

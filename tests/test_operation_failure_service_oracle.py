@@ -42,9 +42,7 @@ def dialect(request):
 
 
 def read(fixture):
-    return fixture.service._read_successor(
-        fixture.principal, fixture.context, fixture.operation_id
-    )
+    return fixture.service._read_successor(fixture.principal, fixture.context, fixture.operation_id)
 
 
 def cancel(fixture):
@@ -64,9 +62,7 @@ def dependency(call):
 def test_complete_empty_get_uses_one_work_and_preserves_every_native_row(
     request, tmp_path, monkeypatch, record_property, dialect, key
 ):
-    with service_case(
-        request, tmp_path, monkeypatch, record_property, dialect, key=key
-    ) as fixture:
+    with service_case(request, tmp_path, monkeypatch, record_property, dialect, key=key) as fixture:
         before = whole_state(fixture.case)
         with observe_service(fixture, monkeypatch, record_property) as observed:
             response = read(fixture)
@@ -92,8 +88,10 @@ def test_supported_full_get_shapes_have_exact_identity_count_and_native_work(
         if failed:
             assert one(before, "jobs", id=fixture.case.job_id)["result"] is None
             assert not [
-                row for row in before["tables"]["artifact_refs"]["rows"]
-                if row["owner_kind"] == "job" and row["owner_id"] == fixture.case.job_id
+                row
+                for row in before["tables"]["artifact_refs"]["rows"]
+                if row["owner_kind"] == "job"
+                and row["owner_id"] == fixture.case.job_id
                 and row["role"] == "result"
             ]
         with observe_service(fixture, monkeypatch, record_property) as observed:
@@ -121,8 +119,7 @@ def test_get_one_over_source_capacity_refuses_without_disclosure_or_mutation(
         with observe_service(fixture, monkeypatch, record_property) as observed:
             dependency(lambda: read(fixture))
         assert_service_released(observed)
-        assert all(not any(key[0] == "run" for key in book._receipts)
-                   for book in observed.books)
+        assert all(not any(key[0] == "run" for key in book._receipts) for book in observed.books)
         assert_same_state(before, whole_state(fixture.case))
 
 
@@ -141,7 +138,8 @@ def test_complete_cancellation_has_exact_effect_and_cumulative_capacity(
             response = cancel(fixture)
         last = time.time()
         assert response == {
-            "operation_id": fixture.operation_id, "cancel_requested": True,
+            "operation_id": fixture.operation_id,
+            "cancel_requested": True,
             "status": "cancelled",
         }
         assert len(canonical(response)) <= 2048
@@ -172,8 +170,9 @@ def test_cancellation_85_roots_refuses_before_effect_and_commit(
         assert observed.owners[0].source_visits == 172
         assert observed.owners[0].edges == 340 and observed.owners[0]._failed
         assert not any(kind == "commit" for _, kind, _, _ in observed.controls)
-        assert not any(sql.lstrip().startswith(("UPDATE jobs", "INSERT INTO audit"))
-                       for sql in observed.sql)
+        assert not any(
+            sql.lstrip().startswith(("UPDATE jobs", "INSERT INTO audit")) for sql in observed.sql
+        )
         assert_same_state(before, whole_state(fixture.case))
 
 
@@ -186,14 +185,23 @@ def test_verified_failure_with_null_result_and_actual_result_ref_refuses_at_nati
     ) as fixture:
         identifier = add_roots(fixture, 1)[0]
         publish_result(fixture, identifier, publish=False)
-        fixture.service.artifact_loader = lambda _value: pytest.fail("refused evidence loaded bytes")
+        fixture.service.artifact_loader = lambda _value: pytest.fail(
+            "refused evidence loaded bytes"
+        )
         before = whole_state(fixture.case)
         assert one(before, "jobs", id=fixture.case.job_id)["result"] is None
-        assert len([
-            row for row in before["tables"]["artifact_refs"]["rows"]
-            if row["owner_kind"] == "job" and row["owner_id"] == fixture.case.job_id
-            and row["role"] == "result"
-        ]) == 1
+        assert (
+            len(
+                [
+                    row
+                    for row in before["tables"]["artifact_refs"]["rows"]
+                    if row["owner_kind"] == "job"
+                    and row["owner_id"] == fixture.case.job_id
+                    and row["role"] == "result"
+                ]
+            )
+            == 1
+        )
         target = operation_failure_service if entry == "get" else operation_failure_cancellation
         original = target.observe_failure_result_absence
         proof_visits = []
@@ -223,7 +231,9 @@ def test_cancel_of_verified_failure_retains_original_evidence_and_get_error(
             response = cancel(fixture)
         last = time.time()
         assert response == {
-            "operation_id": fixture.operation_id, "cancel_requested": True, "status": "failed",
+            "operation_id": fixture.operation_id,
+            "cancel_requested": True,
+            "status": "failed",
         }
         assert_service_released(observed)
         after = whole_state(fixture.case)
@@ -251,11 +261,19 @@ def test_cancellation_preserves_allowed_worker_progress_without_evidence(
             assert service.engine is fixture.reader_engine
             visits.append(True)
             with fixture.engine.begin() as connection:
-                connection.execute(text(
-                    "UPDATE jobs SET status='succeeded',result=:result,error=:error,"
-                    "owner=:owner,lease_until=:lease WHERE id=:job"
-                ), {"result": "d" * 64, "error": "bounded legacy progress", "owner": "worker",
-                    "lease": 1900000000.0, "job": fixture.case.job_id})
+                connection.execute(
+                    text(
+                        "UPDATE jobs SET status='succeeded',result=:result,error=:error,"
+                        "owner=:owner,lease_until=:lease WHERE id=:job"
+                    ),
+                    {
+                        "result": "d" * 64,
+                        "error": "bounded legacy progress",
+                        "owner": "worker",
+                        "lease": 1900000000.0,
+                        "job": fixture.case.job_id,
+                    },
+                )
             return original(service, *args, **kwargs)
 
         monkeypatch.setattr(operation_failure_service._SuccessorService, name, progress)
@@ -265,14 +283,17 @@ def test_cancellation_preserves_allowed_worker_progress_without_evidence(
             response = cancel(fixture)
         last = time.time()
         assert visits == [True]
-        assert response["status"] == (
-            "succeeded" if boundary == "before_mutation" else "cancelled"
-        )
+        assert response["status"] == ("succeeded" if boundary == "before_mutation" else "cancelled")
         assert_service_released(observed)
         expected_before = before
         job = one(expected_before, "jobs", id=fixture.case.job_id)
-        job.update(status="succeeded", result="d" * 64, error="bounded legacy progress",
-                   owner="worker", lease_until=1900000000.0)
+        job.update(
+            status="succeeded",
+            result="d" * 64,
+            error="bounded legacy progress",
+            owner="worker",
+            lease_until=1900000000.0,
+        )
         assert_cancel_delta(fixture, expected_before, whole_state(fixture.case), (first, last))
 
 

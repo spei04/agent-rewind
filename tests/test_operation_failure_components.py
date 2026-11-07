@@ -83,9 +83,7 @@ def test_synthetic_frame_encoder_4096_boundary_is_not_native_reachability(extra)
             failure_encoding._digest(frame, 4096)
         assert caught.value.reason == "capacity_exceeded"
     else:
-        assert failure_encoding._digest(frame, 4096) == (
-            hashlib.sha256(wire).hexdigest(), 4096
-        )
+        assert failure_encoding._digest(frame, 4096) == (hashlib.sha256(wire).hexdigest(), 4096)
 
 
 @pytest.mark.parametrize("extra", [0, 1], ids=["exact", "one-over"])
@@ -100,6 +98,4 @@ def test_2048_response_encoder_ceiling_without_invented_operation_fields(extra):
             bounded_canonical(value, limit=2048, limit_code="admission_body_limit")
         assert caught.value.code == "admission_body_limit"
     else:
-        assert bounded_canonical(
-            value, limit=2048, limit_code="admission_body_limit"
-        ) == wanted
+        assert bounded_canonical(value, limit=2048, limit_code="admission_body_limit") == wanted

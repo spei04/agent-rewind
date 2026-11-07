@@ -241,7 +241,12 @@ class ReservationCoordinator:
         from .reservation_successor import run_successor
 
         result = run_successor(
-            self, "reserve", principal, context, fence=fence, identity=intent,
+            self,
+            "reserve",
+            principal,
+            context,
+            fence=fence,
+            identity=intent,
             configuration=configuration,
         )
         if isinstance(result, JobFence):

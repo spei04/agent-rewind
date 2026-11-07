@@ -130,16 +130,18 @@ def test_serializer_exact_limit_and_one_over_are_distinct_from_native_shape(extr
 def test_frame_reservation_is_live_until_release_and_never_refunds_receipts():
     book = SuccessorReceiptBook()
     initial = book.remaining
-    with pytest.raises(RuntimeError, match="original"):
-        with book.frame(4096):
-            assert book.active_frame_bytes == 4096 and book.remaining == initial - 4096
-            with pytest.raises(AdmissionStorageError), book.frame(1):
-                pass
-            with pytest.raises(AdmissionStorageError):
-                book._before_cohort()
-            with pytest.raises(AdmissionStorageError):
-                book.encoded()
-            raise RuntimeError("original")
+    with (
+        pytest.raises(RuntimeError, match="original"),
+        book.frame(4096),
+    ):
+        assert book.active_frame_bytes == 4096 and book.remaining == initial - 4096
+        with pytest.raises(AdmissionStorageError), book.frame(1):
+            pass
+        with pytest.raises(AdmissionStorageError):
+            book._before_cohort()
+        with pytest.raises(AdmissionStorageError):
+            book.encoded()
+        raise RuntimeError("original")
     assert book.active_frame_bytes == 0 and book.remaining == initial
     assert book.byte_count == book._wire_bytes == 35
     book._before_cohort()

@@ -131,9 +131,14 @@ def _service(environment, origin, now):
     value = load_json(_read_private(path, 4096), limit=4096)
     require(
         type(value) is dict
-        and set(value) == {
-            "schema_version", "boot_id", "run_id", "run_attempt",
-            "verified_at_monotonic", "service",
+        and set(value)
+        == {
+            "schema_version",
+            "boot_id",
+            "run_id",
+            "run_attempt",
+            "verified_at_monotonic",
+            "service",
         },
         "Malformed service receipt",
     )
@@ -177,8 +182,10 @@ def _source_map(root, deadline):
         require(time.monotonic() < deadline, "Core session deadline reached")
         relative = Path(name)
         require(
-            not relative.is_absolute() and ".." not in relative.parts
-            and str(relative) == name and bool(name),
+            not relative.is_absolute()
+            and ".." not in relative.parts
+            and str(relative) == name
+            and bool(name),
             "Unsafe tracked source path",
         )
         path = root / relative
@@ -226,14 +233,16 @@ def publish_actions_control(
     now = time.monotonic()
     require(
         type(session_origin) in (int, float)
-        and math.isfinite(session_origin) and 0 < session_origin <= now
+        and math.isfinite(session_origin)
+        and 0 < session_origin <= now
         and now < session_origin + session_limit,
         "Core session deadline reached",
     )
     deadline = session_origin + session_limit
     require(observe_identity(root, environment) == identity, "Core source identity changed")
     require(
-        type(nodeids) is list and len(set(nodeids)) == len(nodeids)
+        type(nodeids) is list
+        and len(set(nodeids)) == len(nodeids)
         and all(type(node) is str and 0 < len(node) <= 1024 for node in nodeids),
         "Invalid owned-case inventory",
     )
@@ -242,7 +251,8 @@ def publish_actions_control(
     # fixture may silently skip or use an implicit connection on that account.
     source_map = _source_map(root, deadline)
     fixture_rows = [
-        row for row in json.loads(source_map)["files"]
+        row
+        for row in json.loads(source_map)["files"]
         if row["path"] == "tests/failure_postgres_fixture.py"
     ]
     require(len(fixture_rows) == 1, "Owned fixture is missing from tracked source")
@@ -250,11 +260,13 @@ def publish_actions_control(
     cases = []
     for nodeid in nodeids:
         namespace = uuid.uuid4().hex
-        cases.append({
-            "nodeid": nodeid,
-            "namespace": namespace,
-            "record_path": str(output.parent / "cases" / namespace / "intent.json"),
-        })
+        cases.append(
+            {
+                "nodeid": nodeid,
+                "namespace": namespace,
+                "record_path": str(output.parent / "cases" / namespace / "intent.json"),
+            }
+        )
     manifest = {
         "schema_version": 1,
         "group_id": f"core-{python.replace('.', '')}-{leg}",

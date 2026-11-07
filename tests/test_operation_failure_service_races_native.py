@@ -42,15 +42,21 @@ from agent_rewind.scoped_lineage import ResourceNotFound
 __all__ = ["pg"]
 
 
-@pytest.fixture(params=[
-    "sqlite",
-    pytest.param("postgresql", marks=(
-        pytest.mark.f4_owned_postgres,
-        pytest.mark.skipif(
-            not migration_tests.POSTGRES, reason="Opt-in synthetic PostgreSQL F4 service races"
+@pytest.fixture(
+    params=[
+        "sqlite",
+        pytest.param(
+            "postgresql",
+            marks=(
+                pytest.mark.f4_owned_postgres,
+                pytest.mark.skipif(
+                    not migration_tests.POSTGRES,
+                    reason="Opt-in synthetic PostgreSQL F4 service races",
+                ),
+            ),
         ),
-    )),
-])
+    ]
+)
 def dialect(request):
     return request.param
 
@@ -96,16 +102,18 @@ def test_supported_non_failure_outcomes_keep_null_error(
     request, tmp_path, monkeypatch, record_property, dialect, state
 ):
     with service_case(
-        request, tmp_path, monkeypatch, record_property, dialect,
+        request,
+        tmp_path,
+        monkeypatch,
+        record_property,
+        dialect,
         cancel=state == "already_cancelled",
     ) as fixture:
         result_id = None
         if state == "evaluator_false":
             # These are the Engine's established evaluator-result fields.
             # The consumer test does not run an evaluator or invent a terminal error.
-            result_id = add_roots(
-                fixture, 1, update={"status": "complete", "success": False}
-            )[0]
+            result_id = add_roots(fixture, 1, update={"status": "complete", "success": False})[0]
             publish_result(fixture, result_id)
         else:
             before_cancel = whole_state(fixture.case)
@@ -118,9 +126,7 @@ def test_supported_non_failure_outcomes_keep_null_error(
                 }
             last = time.time()
             assert_service_released(cancelled)
-            assert_cancel_delta(
-                fixture, before_cancel, whole_state(fixture.case), (first, last)
-            )
+            assert_cancel_delta(fixture, before_cancel, whole_state(fixture.case), (first, last))
         before = whole_state(fixture.case)
         assert before["tables"]["job_failure_evidence"]["rows"] == []
         with observe_service(fixture, monkeypatch, record_property) as observed:
@@ -135,19 +141,34 @@ def test_supported_non_failure_outcomes_keep_null_error(
 @pytest.mark.parametrize("visible", [False, True], ids=["absent-target", "visible-target"])
 @pytest.mark.parametrize("failed_without_evidence", [False, True])
 def test_current_viewer_visibility_precedes_action_and_unsupported_failure_disclosure(
-    request, tmp_path, monkeypatch, record_property, dialect,
-    entry, visible, failed_without_evidence,
+    request,
+    tmp_path,
+    monkeypatch,
+    record_property,
+    dialect,
+    entry,
+    visible,
+    failed_without_evidence,
 ):
     with service_case(
-        request, tmp_path, monkeypatch, record_property, dialect,
-        key=True, cancel=entry == "cancel",
+        request,
+        tmp_path,
+        monkeypatch,
+        record_property,
+        dialect,
+        key=True,
+        cancel=entry == "cancel",
     ) as fixture:
         with fixture.engine.begin() as connection:
             changed = connection.execute(
-                text("UPDATE project_memberships SET role='viewer' "
-                     "WHERE project_id=:project AND principal_id=:principal"),
-                {"project": fixture.context.project_id,
-                 "principal": fixture.principal.principal_id},
+                text(
+                    "UPDATE project_memberships SET role='viewer' "
+                    "WHERE project_id=:project AND principal_id=:principal"
+                ),
+                {
+                    "project": fixture.context.project_id,
+                    "principal": fixture.principal.principal_id,
+                },
             )
             assert changed.rowcount == 1
             if failed_without_evidence:
@@ -173,6 +194,7 @@ def test_current_viewer_visibility_precedes_action_and_unsupported_failure_discl
         monkeypatch.setattr(operation_failure_service, "successor_error", observed_error)
         target = fixture.operation_id if visible else "f" * 32
         with observe_service(fixture, monkeypatch, record_property) as observed:
+
             def invoke():
                 return read(fixture, target) if entry == "get" else cancel(fixture, target)
 
@@ -200,20 +222,36 @@ def test_current_viewer_visibility_precedes_action_and_unsupported_failure_discl
 def marker_values(fixture, before):
     job = one(before, "jobs", id=fixture.case.job_id)
     return {
-        "schema_version": 1, "kind": "historical_marker",
-        "project_id": fixture.context.project_id, "job_resource_kind": "job",
-        "job_id": fixture.case.job_id, "operation_id": fixture.operation_id,
-        "lease_generation": job["lease_generation"], "job_status": job["status"],
-        "cause": None, "phase": None, "origin_kind": "migration_marker",
-        "correlation_id": "e" * 32, "association_sha256": "a" * 64,
-        "source_sha256": "b" * 64, "created_at_micros": 0,
+        "schema_version": 1,
+        "kind": "historical_marker",
+        "project_id": fixture.context.project_id,
+        "job_resource_kind": "job",
+        "job_id": fixture.case.job_id,
+        "operation_id": fixture.operation_id,
+        "lease_generation": job["lease_generation"],
+        "job_status": job["status"],
+        "cause": None,
+        "phase": None,
+        "origin_kind": "migration_marker",
+        "correlation_id": "e" * 32,
+        "association_sha256": "a" * 64,
+        "source_sha256": "b" * 64,
+        "created_at_micros": 0,
     }
 
 
-@pytest.mark.parametrize("change", [
-    "generation", "evidence", "any_call", "run_scope", "configuration",
-    "configuration_ref", "cohort",
-])
+@pytest.mark.parametrize(
+    "change",
+    [
+        "generation",
+        "evidence",
+        "any_call",
+        "run_scope",
+        "configuration",
+        "configuration_ref",
+        "cohort",
+    ],
+)
 def test_final_get_rejects_actual_separate_transaction_snapshot_drift(
     request, tmp_path, monkeypatch, record_property, dialect, change
 ):
@@ -224,10 +262,13 @@ def test_final_get_rejects_actual_separate_transaction_snapshot_drift(
             # A dormant historical association is supported without evidence.
             # The later valid marker INSERT needs no disabled constraint/trigger.
             with fixture.engine.begin() as connection:
-                assert connection.execute(
-                    text("UPDATE operations SET failure_correlation_id=NULL WHERE id=:id"),
-                    {"id": fixture.operation_id},
-                ).rowcount == 1
+                assert (
+                    connection.execute(
+                        text("UPDATE operations SET failure_correlation_id=NULL WHERE id=:id"),
+                        {"id": fixture.operation_id},
+                    ).rowcount
+                    == 1
+                )
         elif change == "any_call":
             owner = ReservationCoordinator(fixture.case.engine, fixture.case.authority)
             fence = owner._claim_successor(
@@ -260,17 +301,22 @@ def test_final_get_rejects_actual_separate_transaction_snapshot_drift(
                 paid.append((intent, first, last, asdict(writer.outcome)))
             elif change == "cohort":
                 identifier = add_roots(fixture, 1, start=10001)[0]
-                body = {
-                    "job_id": fixture.case.job_id, "parent_id": None, "source": "preserved"
-                }
-                expected["tables"]["records"]["rows"].append({
-                    "id": identifier, "kind": "run", "created": 1700000000.125,
-                    "data": body if fixture.pg is not None else json.dumps(body),
-                })
-                expected["tables"]["resource_scopes"]["rows"].append({
-                    "resource_kind": "run", "resource_id": identifier,
-                    "project_id": fixture.context.project_id,
-                })
+                body = {"job_id": fixture.case.job_id, "parent_id": None, "source": "preserved"}
+                expected["tables"]["records"]["rows"].append(
+                    {
+                        "id": identifier,
+                        "kind": "run",
+                        "created": 1700000000.125,
+                        "data": body if fixture.pg is not None else json.dumps(body),
+                    }
+                )
+                expected["tables"]["resource_scopes"]["rows"].append(
+                    {
+                        "resource_kind": "run",
+                        "resource_id": identifier,
+                        "project_id": fixture.context.project_id,
+                    }
+                )
             else:
                 with fixture.engine.begin() as connection:
                     if change == "generation":
@@ -299,8 +345,11 @@ def test_final_get_rejects_actual_separate_transaction_snapshot_drift(
                         values = {"id": first_root, "project": fixture.context.project_id}
                         rows = expected["tables"]["resource_scopes"]["rows"]
                         original = one(
-                            expected, "resource_scopes", resource_kind="run",
-                            resource_id=first_root, project_id=fixture.context.project_id,
+                            expected,
+                            "resource_scopes",
+                            resource_kind="run",
+                            resource_id=first_root,
+                            project_id=fixture.context.project_id,
                         )
                         rows.remove(original)
                     elif change == "configuration":
@@ -319,8 +368,13 @@ def test_final_get_rejects_actual_separate_transaction_snapshot_drift(
                             "owner_id=:id AND role='admission_config'"
                         )
                         values = {"id": fixture.case.job_id}
-                        original = one(expected, "artifact_refs", owner_kind="job",
-                                       owner_id=fixture.case.job_id, role="admission_config")
+                        original = one(
+                            expected,
+                            "artifact_refs",
+                            owner_kind="job",
+                            owner_id=fixture.case.job_id,
+                            role="admission_config",
+                        )
                         expected["tables"]["artifact_refs"]["rows"].remove(original)
                     assert connection.execute(text(sql), values).rowcount == 1
             for table in expected["tables"].values():
@@ -350,13 +404,21 @@ def test_final_get_rejects_actual_separate_transaction_snapshot_drift(
         else:
             facts = None
             assert_same_state(expected, after)
-        assert not any(kind == "commit" and work is observed.works[0]
-                       for work, kind, _, _ in observed.controls)
-        record_property("f4_successor_snapshot_drift", json.dumps({
-            "change": change, "final_match_gate_visits": len(gates),
-            "writer_transaction_committed": True,
-            "paid_writer_facts": facts,
-        }, sort_keys=True))
+        assert not any(
+            kind == "commit" and work is observed.works[0] for work, kind, _, _ in observed.controls
+        )
+        record_property(
+            "f4_successor_snapshot_drift",
+            json.dumps(
+                {
+                    "change": change,
+                    "final_match_gate_visits": len(gates),
+                    "writer_transaction_committed": True,
+                    "paid_writer_facts": facts,
+                },
+                sort_keys=True,
+            ),
+        )
 
 
 @pytest.mark.parametrize("stage", ["UPDATE jobs", "INSERT INTO audit"])
@@ -388,8 +450,14 @@ def test_successor_cancel_native_effect_failure_rolls_back_job_and_audit_togethe
         assert not facts[0]["commit_attempted"] and not facts[0]["cleanup_failed"]
         assert_service_released(observed)
         assert_same_state(before, whole_state(fixture.case))
-        record_property("f4_successor_cancel_rollback", json.dumps({
-            "native_writes_before_failure": writes,
-            "transaction_facts": facts[0],
-            "exact_original_restored": True,
-        }, sort_keys=True))
+        record_property(
+            "f4_successor_cancel_rollback",
+            json.dumps(
+                {
+                    "native_writes_before_failure": writes,
+                    "transaction_facts": facts[0],
+                    "exact_original_restored": True,
+                },
+                sort_keys=True,
+            ),
+        )

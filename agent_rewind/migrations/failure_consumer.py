@@ -36,9 +36,7 @@ class ConsumerInspection:
     principal: ConsumerPrincipal | None
 
 
-def _postgres_consumer_principal(
-    connection: Connection, checks: LedgerCheck
-) -> ConsumerPrincipal:
+def _postgres_consumer_principal(connection: Connection, checks: LedgerCheck) -> ConsumerPrincipal:
     # Discover a producer from the owner-issued INSERT ACL, independently of the
     # current reader. A dormant installation has no such nonowner grantee.
     checks.check()
@@ -111,10 +109,7 @@ def _postgres_consumer_principal(
         len(rows) != 1
         or len(rows[0]) != 5
         or any(type(value) is not int or not 0 < value < 2**32 for value in rows[0][:3])
-        or (
-            rows[0][3] is not None
-            and (type(rows[0][3]) is not int or not 0 < rows[0][3] < 2**32)
-        )
+        or (rows[0][3] is not None and (type(rows[0][3]) is not int or not 0 < rows[0][3] < 2**32))
         or rows[0][4] is not True
     ):
         raise MigrationRefused("schema_incompatible")
@@ -161,9 +156,7 @@ def inspect_consumer_catalog(
 ) -> tuple[FailureCatalog, ConsumerPrincipal | None]:
     """Observe complete ar8 with the fixed consumer policy, without admission."""
     name, selected, expected, predecessor = _catalog_inputs(connection, checks)
-    principal = (
-        _postgres_consumer_principal(connection, checks) if name == "postgresql" else None
-    )
+    principal = _postgres_consumer_principal(connection, checks) if name == "postgresql" else None
     observed = _catalog_result(connection, checks, name, selected, expected, predecessor)
     checks.check()
     return observed, principal
@@ -184,9 +177,7 @@ def refresh_consumer_principal(
     checks.check()
 
 
-def validated_consumer_history(
-    connection: Connection, checks: LedgerCheck
-) -> ConsumerInspection:
+def validated_consumer_history(connection: Connection, checks: LedgerCheck) -> ConsumerInspection:
     """Validate immutable provenance inside the caller's existing online work."""
     checks.check()
     observed, principal = inspect_consumer_catalog(connection, checks)

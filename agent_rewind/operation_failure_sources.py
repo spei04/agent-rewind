@@ -89,21 +89,26 @@ def _failure_matches(connection: Connection, wanted: CTE, job_id: str) -> list[A
         select(literal_column("1")).select_from(candidates).where(*exact).correlate(wanted).exists()
     )
     verified = (
-        select(literal_column("1")).select_from(candidates)
-        .where(candidates.c.kind == literal_column("'verified_failure'")).exists()
+        select(literal_column("1"))
+        .select_from(candidates)
+        .where(candidates.c.kind == literal_column("'verified_failure'"))
+        .exists()
     )
     result_exists = (
-        select(literal_column("1")).select_from(_refs)
+        select(literal_column("1"))
+        .select_from(_refs)
         .where(
             _refs.c.owner_kind == literal_column("'job'"),
             _refs.c.owner_id == job_id,
             _refs.c.role == literal_column("'result'"),
-        ).exists()
+        )
+        .exists()
     )
     return [
         or_(~verified, ~result_exists),
         _equal(
-            connection, JOBS.c.lease_generation,
+            connection,
+            JOBS.c.lease_generation,
             _extension(connection, wanted, (0,), BigInteger()),
         ),
         _equal(connection, count, _extension(connection, wanted, (1,), BigInteger())),
@@ -370,7 +375,6 @@ def _matching_successor_query(
         if len(query.compile(dialect=connection.dialect).params) > 64:
             raise invalid()
         return query, {"receipts": encoded}
-
 
 
 def verify_successor_snapshot(

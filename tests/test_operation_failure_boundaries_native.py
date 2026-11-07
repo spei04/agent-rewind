@@ -32,14 +32,39 @@ __all__ = ["pg"]
 
 # Literal contract fields, independent of the producer's dictionaries/size helper.
 JOB_FIELDS = (
-    "id", "kind", "created", "payload", "status", "owner", "lease_until", "cancel",
-    "budget", "reserved", "result", "error", "actor", "payload_version",
-    "execution_config_ref", "execution_config_digest",
+    "id",
+    "kind",
+    "created",
+    "payload",
+    "status",
+    "owner",
+    "lease_until",
+    "cancel",
+    "budget",
+    "reserved",
+    "result",
+    "error",
+    "actor",
+    "payload_version",
+    "execution_config_ref",
+    "execution_config_digest",
 )
 EVIDENCE_FIELDS = (
-    "schema_version", "kind", "project_id", "job_resource_kind", "job_id", "operation_id",
-    "lease_generation", "job_status", "cause", "phase", "origin_kind", "correlation_id",
-    "association_sha256", "source_sha256", "created_at_micros",
+    "schema_version",
+    "kind",
+    "project_id",
+    "job_resource_kind",
+    "job_id",
+    "operation_id",
+    "lease_generation",
+    "job_status",
+    "cause",
+    "phase",
+    "origin_kind",
+    "correlation_id",
+    "association_sha256",
+    "source_sha256",
+    "created_at_micros",
 )
 UPDATES = {
     "owner": "UPDATE jobs SET owner=:value WHERE id=:job",
@@ -70,9 +95,7 @@ def _sort_rows(state):
 
 
 def _read(fixture):
-    return fixture.service._read_successor(
-        fixture.principal, fixture.context, fixture.operation_id
-    )
+    return fixture.service._read_successor(fixture.principal, fixture.context, fixture.operation_id)
 
 
 def _cancel(fixture):
@@ -96,8 +119,11 @@ def _selected(fixture, *, remaining, cancellation=False):
         )
         with connection.execute(
             text(query),
-            {"project": fixture.context.project_id, "job": fixture.case.job_id,
-             "remaining": remaining},
+            {
+                "project": fixture.context.project_id,
+                "job": fixture.case.job_id,
+                "remaining": remaining,
+            },
         ) as result:
             rows = result.mappings().all()
     assert len(rows) == 1
@@ -105,7 +131,10 @@ def _selected(fixture, *, remaining, cancellation=False):
     assert set(row) == {
         *("j_" + field for field in JOB_FIELDS),
         *("f_" + field for field in EVIDENCE_FIELDS),
-        "generation", "evidence_count", "any_provider_call", "safe",
+        "generation",
+        "evidence_count",
+        "any_provider_call",
+        "safe",
     }
     assert type(row["safe"]) is int
     return row
@@ -129,13 +158,12 @@ def _native_raw_size(fixture):
         def width(column):
             return (
                 f"octet_length(CAST({column} AS text))"
-                if postgres else f"length(CAST({column} AS BLOB))"
+                if postgres
+                else f"length(CAST({column} AS BLOB))"
             )
 
         job = "+".join(f"coalesce({width('j.' + field)},0)" for field in JOB_FIELDS)
-        evidence = "+".join(
-            f"coalesce({width('f.' + field)},0)" for field in EVIDENCE_FIELDS
-        )
+        evidence = "+".join(f"coalesce({width('f.' + field)},0)" for field in EVIDENCE_FIELDS)
         query = (
             f"SELECT {job}+coalesce({width('j.lease_generation')},0)+"
             f"(SELECT coalesce(sum({evidence}),0) FROM {prefix}job_failure_evidence f "
@@ -156,12 +184,20 @@ def _install_marker(fixture):
     assert job["payload_version"] == 2 and operation["failure_correlation_id"] is not None
     assert before["tables"]["job_failure_evidence"]["rows"] == []
     marker = {
-        "schema_version": 1, "kind": "historical_marker",
-        "project_id": fixture.context.project_id, "job_resource_kind": "job",
-        "job_id": fixture.case.job_id, "operation_id": fixture.operation_id,
-        "lease_generation": 0, "job_status": "queued", "cause": None, "phase": None,
-        "origin_kind": "migration_marker", "correlation_id": "e" * 32,
-        "association_sha256": "c" * 64, "source_sha256": "d" * 64,
+        "schema_version": 1,
+        "kind": "historical_marker",
+        "project_id": fixture.context.project_id,
+        "job_resource_kind": "job",
+        "job_id": fixture.case.job_id,
+        "operation_id": fixture.operation_id,
+        "lease_generation": 0,
+        "job_status": "queued",
+        "cause": None,
+        "phase": None,
+        "origin_kind": "migration_marker",
+        "correlation_id": "e" * 32,
+        "association_sha256": "c" * 64,
+        "source_sha256": "d" * 64,
         "created_at_micros": 0,
     }
     with fixture.engine.begin() as connection:
@@ -178,14 +214,17 @@ def _install_marker(fixture):
             {"operation": fixture.operation_id},
         )
         assert changed.rowcount == 1
-        connection.execute(text(
-            "INSERT INTO job_failure_evidence (schema_version,kind,project_id,"
-            "job_resource_kind,job_id,operation_id,lease_generation,job_status,cause,phase,"
-            "origin_kind,correlation_id,association_sha256,source_sha256,created_at_micros) "
-            "VALUES (:schema_version,:kind,:project_id,:job_resource_kind,:job_id,"
-            ":operation_id,:lease_generation,:job_status,:cause,:phase,:origin_kind,"
-            ":correlation_id,:association_sha256,:source_sha256,:created_at_micros)"
-        ), marker)
+        connection.execute(
+            text(
+                "INSERT INTO job_failure_evidence (schema_version,kind,project_id,"
+                "job_resource_kind,job_id,operation_id,lease_generation,job_status,cause,phase,"
+                "origin_kind,correlation_id,association_sha256,source_sha256,created_at_micros) "
+                "VALUES (:schema_version,:kind,:project_id,:job_resource_kind,:job_id,"
+                ":operation_id,:lease_generation,:job_status,:cause,:phase,:origin_kind,"
+                ":correlation_id,:association_sha256,:source_sha256,:created_at_micros)"
+            ),
+            marker,
+        )
     expected = deepcopy(before)
     one(expected, "operations", id=fixture.operation_id)["failure_correlation_id"] = None
     expected["tables"]["job_failure_evidence"]["rows"].append(marker)
@@ -244,12 +283,15 @@ def test_utf8_cell_guard_is_native_and_reached_by_complete_cancellation(
         assert visits == ([True] if extra else [True, True, True])
         if extra:
             assert not any(kind == "commit" for _, kind, _, _ in observed.controls)
-            assert not any(sql.lstrip().startswith(("UPDATE jobs", "INSERT INTO audit"))
-                           for sql in observed.sql)
+            assert not any(
+                sql.lstrip().startswith(("UPDATE jobs", "INSERT INTO audit"))
+                for sql in observed.sql
+            )
             assert_same_state(before, whole_state(fixture.case))
         else:
             assert response == {
-                "operation_id": fixture.operation_id, "cancel_requested": True,
+                "operation_id": fixture.operation_id,
+                "cancel_requested": True,
                 "status": "cancelled",
             }
             assert_cancel_delta(fixture, before, whole_state(fixture.case), (first, last))
@@ -261,7 +303,11 @@ def test_native_remaining_transfer_budget_is_exact_and_one_short(
 ):
     """Native raw-byte query component; no whole-service or serialized-frame claim."""
     with service_case(
-        request, tmp_path, monkeypatch, record_property, dialect,
+        request,
+        tmp_path,
+        monkeypatch,
+        record_property,
+        dialect,
         failed=kind == "verified_failure",
     ) as fixture:
         if kind == "historical_marker":
@@ -280,11 +326,21 @@ def test_native_remaining_transfer_budget_is_exact_and_one_short(
         short = _selected(fixture, remaining=size - 1)
         _assert_not_transferred(short, evidence_count=count)
         assert_same_state(before, whole_state(fixture.case))
-        record_property("f4_native_transfer_component", json.dumps({
-            "kind": kind, "raw_bytes": size, "exact_safe": enough["safe"],
-            "one_short_safe": short["safe"], "raw_cell_upper_bound": 2431,
-            "whole_service_claim": False, "serialized_frame_bound_claim": False,
-        }, sort_keys=True))
+        record_property(
+            "f4_native_transfer_component",
+            json.dumps(
+                {
+                    "kind": kind,
+                    "raw_bytes": size,
+                    "exact_safe": enough["safe"],
+                    "one_short_safe": short["safe"],
+                    "raw_cell_upper_bound": 2431,
+                    "whole_service_claim": False,
+                    "serialized_frame_bound_claim": False,
+                },
+                sort_keys=True,
+            ),
+        )
 
 
 def test_opaque_marker_get_keeps_stored_w_across_allowed_current_state_drift(
@@ -314,15 +370,23 @@ def test_opaque_marker_get_keeps_stored_w_across_allowed_current_state_drift(
         assert_same_state(before, whole_state(fixture.case))
 
         with fixture.engine.begin() as connection:
-            changed = connection.execute(text(
-                "UPDATE jobs SET cancel=:cancel,owner=:owner,lease_until=:lease WHERE id=:job"
-            ), {"cancel": True, "owner": "later-worker", "lease": 1900000000.0,
-                "job": fixture.case.job_id})
+            changed = connection.execute(
+                text(
+                    "UPDATE jobs SET cancel=:cancel,owner=:owner,lease_until=:lease WHERE id=:job"
+                ),
+                {
+                    "cancel": True,
+                    "owner": "later-worker",
+                    "lease": 1900000000.0,
+                    "job": fixture.case.job_id,
+                },
+            )
             assert changed.rowcount == 1
         expected = deepcopy(before)
         one(expected, "jobs", id=fixture.case.job_id).update(
             cancel=True if fixture.pg is not None else 1,
-            owner="later-worker", lease_until=1900000000.0,
+            owner="later-worker",
+            lease_until=1900000000.0,
         )
         current = whole_state(fixture.case)
         assert_same_state(_sort_rows(expected), current)

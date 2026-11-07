@@ -32,15 +32,20 @@ from agent_rewind.reservation_service import ReservationCoordinator
 __all__ = ["pg"]
 
 
-@pytest.fixture(params=[
-    "sqlite",
-    pytest.param("postgresql", marks=(
-        pytest.mark.f4_owned_postgres,
-        pytest.mark.skipif(
-            not migration_tests.POSTGRES, reason="Opt-in synthetic PostgreSQL F4 contention"
+@pytest.fixture(
+    params=[
+        "sqlite",
+        pytest.param(
+            "postgresql",
+            marks=(
+                pytest.mark.f4_owned_postgres,
+                pytest.mark.skipif(
+                    not migration_tests.POSTGRES, reason="Opt-in synthetic PostgreSQL F4 contention"
+                ),
+            ),
         ),
-    )),
-])
+    ]
+)
 def case(request, tmp_path, monkeypatch, record_property):
     selected = request.getfixturevalue("pg") if request.param == "postgresql" else None
     template = request.getfixturevalue("fresh_sqlite_ar6_template") if selected is None else None
@@ -129,7 +134,8 @@ def test_terminal_and_reservation_exclude_or_serialize_actual_native_writers(
                 try:
                     value = (
                         terminal.complete_failure(case.principal, case.context, issued.event)
-                        if actor == "terminal" else reserve._reserve_successor(
+                        if actor == "terminal"
+                        else reserve._reserve_successor(
                             case.principal, case.context, issued.fence, intent
                         )
                     )
@@ -214,13 +220,20 @@ def test_terminal_and_reservation_exclude_or_serialize_actual_native_writers(
             # concurrent database observation.
             expected_reserved = deepcopy(after)
             expected_reserved["tables"]["job_failure_evidence"]["rows"] = []
-            next(row for row in expected_reserved["tables"]["jobs"]["rows"]
-                 if row["id"] == case.job_id)["status"] = "running"
+            next(
+                row
+                for row in expected_reserved["tables"]["jobs"]["rows"]
+                if row["id"] == case.job_id
+            )["status"] = "running"
             assert_reservation_delta(
                 case, before, expected_reserved, intent, (first_tick, last_tick)
             )
             assert_only_completion_changed(
-                case, expected_reserved, after, created.original, native_inputs,
+                case,
+                expected_reserved,
+                after,
+                created.original,
+                native_inputs,
                 (first_tick, last_tick),
             )
         else:
@@ -234,8 +247,11 @@ def test_terminal_and_reservation_exclude_or_serialize_actual_native_writers(
         for actor, coordinator in coordinators.items():
             work = coordinator._work
             assert work is not None
-            cleanup = sum(after_ - before_ for target, kind, before_, after_ in controls
-                          if target is work and kind not in {"begin", "commit"})
+            cleanup = sum(
+                after_ - before_
+                for target, kind, before_, after_ in controls
+                if target is work and kind not in {"begin", "commit"}
+            )
             assert work._invocation_started is not None
             assert 0 <= cleanup <= 8 and work.statements - cleanup <= 504
             assert work.statements <= 512 and work.instructions < 20_000_000
@@ -244,14 +260,25 @@ def test_terminal_and_reservation_exclude_or_serialize_actual_native_writers(
             assert work._detached and not work._listeners and work._connection is None
             assert work._started is None and work._lease is None
             facts[actor] = {
-                "outcome": asdict(coordinator.outcome), "total": work.statements,
-                "cleanup": cleanup, "elapsed_seconds": elapsed[actor],
+                "outcome": asdict(coordinator.outcome),
+                "total": work.statements,
+                "cleanup": cleanup,
+                "elapsed_seconds": elapsed[actor],
                 "vm": work.instructions,
                 "maximum_compiled_binds": max(compiled_binds[actor], default=0),
             }
         assert case.engine.pool.checkedout() == 0
-        record_property("f4_terminal_reservation_contention", json.dumps({
-            "winner": winner, "native_postgres_pids": pids,
-            "native_postgres_blockers": blockers, "native_sqlite_busy": busy_codes,
-            "observations": facts, "no_provider_request": True,
-        }, sort_keys=True))
+        record_property(
+            "f4_terminal_reservation_contention",
+            json.dumps(
+                {
+                    "winner": winner,
+                    "native_postgres_pids": pids,
+                    "native_postgres_blockers": blockers,
+                    "native_sqlite_busy": busy_codes,
+                    "observations": facts,
+                    "no_provider_request": True,
+                },
+                sort_keys=True,
+            ),
+        )

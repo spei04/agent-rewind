@@ -2065,8 +2065,7 @@ def failure_terminal_smoke(root: Path) -> None:
         after_cancel = snapshot()
         audits_after = audits()
         if (
-            cancelled
-            != {"operation_id": "b" * 32, "cancel_requested": True, "status": "failed"}
+            cancelled != {"operation_id": "b" * 32, "cancel_requested": True, "status": "failed"}
             or cancelled["cancel_requested"] is not True
             or after_cancel[0] != completed[0]
             or after_cancel[2] != [{**completed[2][0], "cancel": 1}]

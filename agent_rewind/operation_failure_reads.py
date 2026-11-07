@@ -191,9 +191,7 @@ class SuccessorReceiptBook(ReceiptBook):
         if self._scope is not None:
             self._scope.reserve(self, size, key)
 
-    def _remember(
-        self, receipt: RawReceipt, observation: JobObservation | None
-    ) -> RawReceipt:
+    def _remember(self, receipt: RawReceipt, observation: JobObservation | None) -> RawReceipt:
         self._check_live(domain=receipt.domain, identity=receipt.identity)
         hexadecimal(receipt.identity, 32)
         if (
@@ -330,9 +328,7 @@ def _job_query(name: str, *, _cancellation: bool = False) -> str:
     job_columns = ",".join("j." + field for field in JOB_LIMITS)
     evidence_columns = ",".join("f." + field for field in EVIDENCE_FIELDS)
     job_size = "+".join("coalesce(" + size("j." + field) + ",0)" for field in JOB_LIMITS)
-    evidence_size = "+".join(
-        "coalesce(" + size("f." + field) + ",0)" for field in EVIDENCE_FIELDS
-    )
+    evidence_size = "+".join("coalesce(" + size("f." + field) + ",0)" for field in EVIDENCE_FIELDS)
     job_guards = [
         f"(j.{field} IS NULL OR {size('j.' + field)}<={limit})"
         for field, limit in JOB_LIMITS.items()
@@ -362,12 +358,8 @@ def _job_query(name: str, *, _cancellation: bool = False) -> str:
     eligibility = "" if _cancellation else "AND j.error IS NULL"
     evidence_safe = " AND ".join(evidence_guards)
     projected = [
-        f"CASE WHEN checked.safe=1 THEN j.{field} END AS j_{field}"
-        for field in JOB_LIMITS
-    ] + [
-        f"CASE WHEN checked.safe=1 THEN f.{field} END AS f_{field}"
-        for field in EVIDENCE_FIELDS
-    ]
+        f"CASE WHEN checked.safe=1 THEN j.{field} END AS j_{field}" for field in JOB_LIMITS
+    ] + [f"CASE WHEN checked.safe=1 THEN f.{field} END AS f_{field}" for field in EVIDENCE_FIELDS]
     # Only fixed source identifiers, native predicates and finite limits enter
     # this SQL. The three request values remain named parameters.
     return f"""
@@ -391,12 +383,12 @@ def _job_query(name: str, *, _cancellation: bool = False) -> str:
           AND j.kind='run' AND j.payload_version=2 {eligibility}
           AND j.lease_generation BETWEEN 0 AND 9223372036854775807
           AND e.count<=1 AND e.valid=1
-          AND {job_size}+coalesce({size('j.lease_generation')},0)+e.bytes<=4096
-          AND {job_size}+coalesce({size('j.lease_generation')},0)+e.bytes<=:remaining
+          AND {job_size}+coalesce({size("j.lease_generation")},0)+e.bytes<=4096
+          AND {job_size}+coalesce({size("j.lease_generation")},0)+e.bytes<=:remaining
         THEN 1 ELSE 0 END AS safe
       FROM j CROSS JOIN evidence_stats e
     )
-    SELECT {','.join(projected)},
+    SELECT {",".join(projected)},
       CASE WHEN checked.safe=1 THEN j.lease_generation END AS generation,
       e.count AS evidence_count,
       EXISTS(SELECT 1 FROM {prefix}provider_calls c WHERE c.job_id=j.id) AS any_provider_call,

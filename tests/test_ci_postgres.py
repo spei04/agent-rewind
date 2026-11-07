@@ -211,8 +211,13 @@ def test_receipt_is_written_only_after_effective_service_observation(monkeypatch
 
     calls = runner(
         monkeypatch,
-        [identity(), "ALTER SYSTEM", "t", "off|configuration file|f|1",
-         "off|configuration file|f|0"],
+        [
+            identity(),
+            "ALTER SYSTEM",
+            "t",
+            "off|configuration file|f|1",
+            "off|configuration file|f|0",
+        ],
     )
     observed = []
 

@@ -319,4 +319,3 @@ class _SuccessorService:
             self._cancel_snapshot(connection, principal, context, owner, phase, original_job_id)
             refresh_consumer_principal(connection, owner.work, original_principal)
             self.authority.check(connection, principal, context, "cancel")
-

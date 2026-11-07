@@ -39,9 +39,13 @@ __all__ = ["pg"]
 CASES = [
     pytest.param("sqlite", False, False, id="sqlite-fresh"),
     pytest.param("sqlite", True, False, id="sqlite-legacy"),
-    pytest.param("postgresql", False, False, marks=(POSTGRES, F4_POSTGRES), id="pg-fresh-no-producer"),
+    pytest.param(
+        "postgresql", False, False, marks=(POSTGRES, F4_POSTGRES), id="pg-fresh-no-producer"
+    ),
     pytest.param("postgresql", False, True, marks=(POSTGRES, F4_POSTGRES), id="pg-fresh-producer"),
-    pytest.param("postgresql", True, False, marks=(POSTGRES, F4_POSTGRES), id="pg-legacy-no-producer"),
+    pytest.param(
+        "postgresql", True, False, marks=(POSTGRES, F4_POSTGRES), id="pg-legacy-no-producer"
+    ),
     pytest.param("postgresql", True, True, marks=(POSTGRES, F4_POSTGRES), id="pg-legacy-producer"),
 ]
 
@@ -75,9 +79,7 @@ def test_complete_consumer_history_preserves_native_rows_and_restricted_identity
 
 @pytest.fixture
 def reader_case(pg, tmp_path, monkeypatch, record_property):
-    with consumer_fixture(
-        tmp_path, monkeypatch, record_property, pg=pg, producer=True
-    ) as fixture:
+    with consumer_fixture(tmp_path, monkeypatch, record_property, pg=pg, producer=True) as fixture:
         yield fixture
 
 
@@ -94,7 +96,10 @@ def forbidden_grant(fixture, kind):
         grant = f"GRANT UPDATE ON {table} TO {reader.reader_sql}"
         revoke = f"REVOKE UPDATE ON {table} FROM {reader.reader_sql}"
     elif kind == "public_select":
-        grant, revoke = f"GRANT SELECT ON {table} TO PUBLIC", f"REVOKE SELECT ON {table} FROM PUBLIC"
+        grant, revoke = (
+            f"GRANT SELECT ON {table} TO PUBLIC",
+            f"REVOKE SELECT ON {table} FROM PUBLIC",
+        )
     elif kind == "column_select":
         grant = f"GRANT SELECT(job_id) ON {table} TO {reader.reader_sql}"
         revoke = f"REVOKE SELECT(job_id) ON {table} FROM {reader.reader_sql}"
@@ -129,14 +134,19 @@ def test_reader_refuses_real_native_privilege_expansion_without_source_mutation(
         injected = whole_state(fixture.case)
         if kind == "producer_membership":
             with fixture.case.pg["control"].connect() as connection:
-                assert connection.execute(
-                    text("SELECT pg_has_role(:reader,:producer,'MEMBER')"),
-                    {"reader": fixture.reader.reader, "producer": fixture.case.pg["app_role"]},
-                ).scalar_one() is True
+                assert (
+                    connection.execute(
+                        text("SELECT pg_has_role(:reader,:producer,'MEMBER')"),
+                        {"reader": fixture.reader.reader, "producer": fixture.case.pg["app_role"]},
+                    ).scalar_one()
+                    is True
+                )
             drain_postgres(fixture.case.pg)
-        with pytest.raises(MigrationRefused) as error:
-            with observed_read(fixture.engine, monkeypatch, record_property) as observed:
-                validated_consumer_history(observed.connection, observed.work)
+        with (
+            pytest.raises(MigrationRefused) as error,
+            observed_read(fixture.engine, monkeypatch, record_property) as observed,
+        ):
+            validated_consumer_history(observed.connection, observed.work)
         assert error.value.code == "schema_incompatible"
         assert_released(observed)
         assert_same_state(injected, whole_state(fixture.case))
@@ -150,9 +160,11 @@ def test_consumer_policy_does_not_widen_the_public_f2_catalog_policy(
 ):
     fixture = reader_case
     before = whole_state(fixture.case)
-    with pytest.raises(MigrationRefused) as error:
-        with observed_read(fixture.engine, monkeypatch, record_property) as observed:
-            inspect_failure_catalog(observed.connection, observed.work)
+    with (
+        pytest.raises(MigrationRefused) as error,
+        observed_read(fixture.engine, monkeypatch, record_property) as observed,
+    ):
+        inspect_failure_catalog(observed.connection, observed.work)
     assert error.value.code == "schema_incompatible"
     assert_released(observed)
     assert_same_state(before, whole_state(fixture.case))
@@ -168,24 +180,24 @@ def test_refresh_refuses_a_real_producer_change_during_the_read(
     before = whole_state(case)
     changed = False
     try:
-        with pytest.raises(MigrationRefused) as error:
-            with observed_read(fixture.engine, monkeypatch, record_property) as observed:
-                _, principal = inspect_consumer_catalog(observed.connection, observed.work)
-                assert principal is not None
-                assert principal.producer == fixture.expected_principal["producer"]
-                with case.pg["owner"].begin() as connection:
-                    connection.exec_driver_sql(
-                        f"REVOKE INSERT ON job_failure_evidence FROM {reader.app_sql}"
-                    )
-                changed = True
-                refresh_consumer_principal(observed.connection, observed.work, principal)
+        with (
+            pytest.raises(MigrationRefused) as error,
+            observed_read(fixture.engine, monkeypatch, record_property) as observed,
+        ):
+            _, principal = inspect_consumer_catalog(observed.connection, observed.work)
+            assert principal is not None
+            assert principal.producer == fixture.expected_principal["producer"]
+            with case.pg["owner"].begin() as connection:
+                connection.exec_driver_sql(
+                    f"REVOKE INSERT ON job_failure_evidence FROM {reader.app_sql}"
+                )
+            changed = True
+            refresh_consumer_principal(observed.connection, observed.work, principal)
         assert changed and error.value.code == "schema_incompatible"
         assert_released(observed)
     finally:
         with case.pg["owner"].begin() as connection:
-            connection.exec_driver_sql(
-                f"GRANT INSERT ON job_failure_evidence TO {reader.app_sql}"
-            )
+            connection.exec_driver_sql(f"GRANT INSERT ON job_failure_evidence TO {reader.app_sql}")
         drain_postgres(case.pg)
     assert_same_state(before, whole_state(case))
 
@@ -198,9 +210,7 @@ def test_native_catalog_history_and_projection_fail_closed_on_actual_source_chan
     request, tmp_path, monkeypatch, record_property, dialect, mutation
 ):
     selected_pg = request.getfixturevalue("pg") if dialect == "postgresql" else None
-    template = (
-        request.getfixturevalue("fresh_sqlite_ar6_template") if selected_pg is None else None
-    )
+    template = request.getfixturevalue("fresh_sqlite_ar6_template") if selected_pg is None else None
     with consumer_fixture(
         tmp_path,
         monkeypatch,
@@ -250,9 +260,11 @@ def test_native_catalog_history_and_projection_fail_closed_on_actual_source_chan
 
             with monkeypatch.context() as scoped:
                 scoped.setattr(target_module, target_name, actual_gate)
-                with pytest.raises(MigrationRefused) as error:
-                    with observed_read(fixture.engine, monkeypatch, record_property) as observed:
-                        validated_consumer_history(observed.connection, observed.work)
+                with (
+                    pytest.raises(MigrationRefused) as error,
+                    observed_read(fixture.engine, monkeypatch, record_property) as observed,
+                ):
+                    validated_consumer_history(observed.connection, observed.work)
             assert reached == [target_name]
             assert error.value.code == (
                 "ledger_progress_invalid" if mutation == "projection" else "schema_incompatible"
@@ -274,9 +286,7 @@ def test_original_ar7_history_entry_still_refuses_the_successor(
     request, tmp_path, monkeypatch, record_property, dialect
 ):
     selected_pg = request.getfixturevalue("pg") if dialect == "postgresql" else None
-    template = (
-        request.getfixturevalue("fresh_sqlite_ar6_template") if selected_pg is None else None
-    )
+    template = request.getfixturevalue("fresh_sqlite_ar6_template") if selected_pg is None else None
     with consumer_fixture(
         tmp_path,
         monkeypatch,
@@ -286,9 +296,11 @@ def test_original_ar7_history_entry_still_refuses_the_successor(
         template=template,
     ) as fixture:
         before = whole_state(fixture.case)
-        with pytest.raises(MigrationRefused) as error:
-            with observed_read(fixture.engine, monkeypatch, record_property) as observed:
-                validated_ar7_history(observed.connection, observed.work)
+        with (
+            pytest.raises(MigrationRefused) as error,
+            observed_read(fixture.engine, monkeypatch, record_property) as observed,
+        ):
+            validated_ar7_history(observed.connection, observed.work)
         assert error.value.code == "schema_incompatible"
         assert_released(observed)
         assert_same_state(before, whole_state(fixture.case))

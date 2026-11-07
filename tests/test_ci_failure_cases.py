@@ -7,7 +7,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from scripts import ci_core, ci_failure_cases as cases
+from scripts import ci_core
+from scripts import ci_failure_cases as cases
 from scripts.ci_postgres import IMAGE
 from scripts.ci_receipts import session_limit_seconds
 
@@ -101,7 +102,8 @@ def test_producer_manifest_is_consumed_by_the_real_fixture_without_connecting(en
     source = json.loads(source_bytes)
     assert control.source_sha256 == hashlib.sha256(source_bytes).hexdigest()
     assert {row["path"] for row in source["files"]} == {
-        "README.md", "tests/failure_postgres_fixture.py"
+        "README.md",
+        "tests/failure_postgres_fixture.py",
     }
     for row in source["files"]:
         data = (arguments["root"] / row["path"]).read_bytes()
@@ -243,9 +245,14 @@ def test_core_binds_final_marked_selection_to_its_original_clock(
     early = "tests/test_failure_case.py::test_case[postgres]"
     sqlite = "tests/test_failure_case.py::test_case[sqlite]"
     late = "tests/test_zz_case.py::test_case[postgres]"
-    monkeypatch.setattr(ci_core, "tracked_tests", lambda *_: {
-        "tests/test_failure_case.py", "tests/test_zz_case.py",
-    })
+    monkeypatch.setattr(
+        ci_core,
+        "tracked_tests",
+        lambda *_: {
+            "tests/test_failure_case.py",
+            "tests/test_zz_case.py",
+        },
+    )
     clock = [100.0]
     monkeypatch.setattr(ci_core.time, "monotonic", lambda: clock[0])
     if initial_control is None:
@@ -255,8 +262,10 @@ def test_core_binds_final_marked_selection_to_its_original_clock(
     python = ".".join(map(str, sys.version_info[:2]))
     leg = "all" if python == "3.12" else "early"
     observer = ci_core.CoreReceipt(
-        SimpleNamespace(rootpath=tmp_path), leg,
-        tmp_path / "receipt.json", tmp_path / "control.json",
+        SimpleNamespace(rootpath=tmp_path),
+        leg,
+        tmp_path / "receipt.json",
+        tmp_path / "control.json",
     )
     items = [
         SimpleNamespace(nodeid=node, get_closest_marker=lambda _, pg=pg: object() if pg else None)
@@ -292,8 +301,10 @@ def test_core_refuses_binding_when_final_selection_changes(tmp_path, monkeypatch
     python = ".".join(map(str, sys.version_info[:2]))
     leg = "all" if python == "3.12" else "early"
     observer = ci_core.CoreReceipt(
-        SimpleNamespace(rootpath=tmp_path), leg,
-        tmp_path / "receipt.json", tmp_path / "control.json",
+        SimpleNamespace(rootpath=tmp_path),
+        leg,
+        tmp_path / "receipt.json",
+        tmp_path / "control.json",
     )
     called = []
     monkeypatch.setattr(cases, "publish_actions_control", lambda **kw: called.append(kw))

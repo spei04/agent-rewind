@@ -444,10 +444,7 @@ def run_successor(
             if type(identity) is not ReservationIntent:
                 raise ReservationRefusal("invalid_intent")
             identity.__post_init__()
-            if (
-                identity.job_id != scope.job_id
-                or identity.project_id != scope.context.project_id
-            ):
+            if identity.job_id != scope.job_id or identity.project_id != scope.context.project_id:
                 raise ReservationRefusal("invalid_intent")
         action: Literal["record"] = "record"
         with (

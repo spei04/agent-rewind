@@ -27,15 +27,20 @@ from agent_rewind.scoped_lineage import ResourceNotFound
 __all__ = ["pg"]
 
 
-@pytest.fixture(params=[
-    "sqlite",
-    pytest.param("postgresql", marks=(
-        pytest.mark.f4_owned_postgres,
-        pytest.mark.skipif(
-            not migration_tests.POSTGRES, reason="Opt-in synthetic PostgreSQL F4 authority"
+@pytest.fixture(
+    params=[
+        "sqlite",
+        pytest.param(
+            "postgresql",
+            marks=(
+                pytest.mark.f4_owned_postgres,
+                pytest.mark.skipif(
+                    not migration_tests.POSTGRES, reason="Opt-in synthetic PostgreSQL F4 authority"
+                ),
+            ),
         ),
-    )),
-])
+    ]
+)
 def dialect(request):
     return request.param
 
@@ -70,9 +75,14 @@ def expected_key_change(fixture, original, key_id, change):
 
 
 @pytest.mark.parametrize("change", ["revoked", "expired"])
-@pytest.mark.parametrize("boundary", [
-    "get_after_release", "cancel_before_mutation", "cancel_after_ack",
-])
+@pytest.mark.parametrize(
+    "boundary",
+    [
+        "get_after_release",
+        "cancel_before_mutation",
+        "cancel_after_ack",
+    ],
+)
 def test_successor_rechecks_actual_key_after_release_without_disclosing_or_repeating_effect(
     request, tmp_path, monkeypatch, record_property, dialect, change, boundary
 ):
@@ -134,7 +144,8 @@ def test_successor_rechecks_actual_key_after_release_without_disclosing_or_repea
             observed_ref.append(observed)
             with pytest.raises(ResourceNotFound):
                 entry = (
-                    fixture.service._cancel_successor if cancelling
+                    fixture.service._cancel_successor
+                    if cancelling
                     else fixture.service._read_successor
                 )
                 entry(fixture.principal, fixture.context, fixture.operation_id)
@@ -151,17 +162,29 @@ def test_successor_rechecks_actual_key_after_release_without_disclosing_or_repea
             expected_key_change(fixture, at_change, key_id, change), whole_state(fixture.case)
         )
         assert_service_released(observed)
-        record_property("f4_successor_fresh_key", json.dumps({
-            "boundary": boundary, "change": change,
-            "transaction_facts": transaction_facts,
-            "typed_denial": "ResourceNotFound",
-            "single_mutation": True,
-        }, sort_keys=True))
+        record_property(
+            "f4_successor_fresh_key",
+            json.dumps(
+                {
+                    "boundary": boundary,
+                    "change": change,
+                    "transaction_facts": transaction_facts,
+                    "typed_denial": "ResourceNotFound",
+                    "single_mutation": True,
+                },
+                sort_keys=True,
+            ),
+        )
 
 
-@pytest.mark.parametrize("failure", [
-    "before_native_commit", "after_native_commit_before_ack", "after_ack_close",
-])
+@pytest.mark.parametrize(
+    "failure",
+    [
+        "before_native_commit",
+        "after_native_commit_before_ack",
+        "after_ack_close",
+    ],
+)
 def test_successor_cancel_commit_uncertainty_preserves_actual_effect_and_never_retries(
     request, tmp_path, monkeypatch, record_property, dialect, failure
 ):
@@ -205,11 +228,13 @@ def test_successor_cancel_commit_uncertainty_preserves_actual_effect_and_never_r
         monkeypatch.setattr(Connection, "close", close)
         monkeypatch.setattr(operation_failure_service, "admission_transaction", transaction)
         first = time.time()
-        with observe_service(fixture, monkeypatch, record_property) as observed:
-            with pytest.raises(Fault) as caught:
-                fixture.service._cancel_successor(
-                    fixture.principal, fixture.context, fixture.operation_id
-                )
+        with (
+            observe_service(fixture, monkeypatch, record_property) as observed,
+            pytest.raises(Fault) as caught,
+        ):
+            fixture.service._cancel_successor(
+                fixture.principal, fixture.context, fixture.operation_id
+            )
         last = time.time()
         assert caught.value.code == "outcome_uncertain"
         assert canary not in str(caught.value)
@@ -228,8 +253,16 @@ def test_successor_cancel_commit_uncertainty_preserves_actual_effect_and_never_r
         if failure == "after_ack_close":
             assert facts["cleanup_failed"]
         assert_service_released(observed)
-        record_property("f4_successor_commit_uncertainty", json.dumps({
-            "failure": failure, "transaction_facts": facts,
-            "native_commits": len(native_commits), "commit_attempts": len(attempts),
-            "returned_error": caught.value.code,
-        }, sort_keys=True))
+        record_property(
+            "f4_successor_commit_uncertainty",
+            json.dumps(
+                {
+                    "failure": failure,
+                    "transaction_facts": facts,
+                    "native_commits": len(native_commits),
+                    "commit_attempts": len(attempts),
+                    "returned_error": caught.value.code,
+                },
+                sort_keys=True,
+            ),
+        )

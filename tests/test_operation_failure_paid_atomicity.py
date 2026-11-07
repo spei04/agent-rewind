@@ -116,20 +116,37 @@ def _order(case, entry):
     if entry == "claim":
         return ["claim"]
     held = {
-        key: name for key, name in zip(
+        key: name
+        for key, name in zip(
             case.account_ids, ("held-organization", "held-project", "held-job"), strict=True
         )
     }
     return [
-        "call", "scope", "entry-organization", "entry-project", "entry-job",
-        *(held[key] for key in sorted(held)), "gross",
+        "call",
+        "scope",
+        "entry-organization",
+        "entry-project",
+        "entry-job",
+        *(held[key] for key in sorted(held)),
+        "gross",
     ]
 
 
-@pytest.mark.parametrize("target", [
-    "claim", "call", "scope", "entry-organization", "entry-project", "entry-job",
-    "held-organization", "held-project", "held-job", "gross",
-])
+@pytest.mark.parametrize(
+    "target",
+    [
+        "claim",
+        "call",
+        "scope",
+        "entry-organization",
+        "entry-project",
+        "entry-job",
+        "held-organization",
+        "held-project",
+        "held-job",
+        "gross",
+    ],
+)
 def test_successor_each_native_publication_write_failure_rolls_back(
     case, monkeypatch, record_property, target
 ):
@@ -152,30 +169,42 @@ def test_successor_each_native_publication_write_failure_rolls_back(
 
     event.listen(case.engine, "after_cursor_execute", completed)
     try:
-        with observe_paid(case, monkeypatch, record_property, coordinator):
-            with pytest.raises(AdmissionError) as caught:
-                _call(coordinator, case, entry, fence)
+        with (
+            observe_paid(case, monkeypatch, record_property, coordinator),
+            pytest.raises(AdmissionError) as caught,
+        ):
+            _call(coordinator, case, entry, fence)
     finally:
         event.remove(case.engine, "after_cursor_execute", completed)
     assert caught.value.code == "dependency_unavailable"
     assert canary not in str(caught.value) and caught.value.__cause__ is None
     expected = _order(case, entry)
-    assert observed == expected[:expected.index(target) + 1]
+    assert observed == expected[: expected.index(target) + 1]
     _rollback(coordinator)
     assert_same_state(before, whole_state(case))
-    _record(record_property, "f4_paid_publication_rollback", {
-        "target": target, "actual_native_writes_before_failure": observed,
-        "qualification": (
-            "Controlled exception after a successful native write; no driver error invented."
-        ),
-        "transaction": asdict(coordinator.outcome),
-    })
+    _record(
+        record_property,
+        "f4_paid_publication_rollback",
+        {
+            "target": target,
+            "actual_native_writes_before_failure": observed,
+            "qualification": (
+                "Controlled exception after a successful native write; no driver error invented."
+            ),
+            "transaction": asdict(coordinator.outcome),
+        },
+    )
 
 
 @pytest.mark.parametrize("entry", ["claim", "reserve"])
-@pytest.mark.parametrize("failure", [
-    "before_native_commit", "after_native_commit_before_ack", "after_ack_close",
-])
+@pytest.mark.parametrize(
+    "failure",
+    [
+        "before_native_commit",
+        "after_native_commit_before_ack",
+        "after_ack_close",
+    ],
+)
 def test_successor_paid_commit_uncertainty_retains_exact_native_effect_and_holds(
     case, monkeypatch, record_property, entry, failure
 ):
@@ -209,9 +238,11 @@ def test_successor_paid_commit_uncertainty_retains_exact_native_effect_and_holds
     with monkeypatch.context() as patch:
         patch.setattr(Connection, "commit", commit)
         patch.setattr(Connection, "close", close)
-        with observe_paid(case, patch, record_property, coordinator):
-            with pytest.raises(AdmissionError) as caught:
-                _call(coordinator, case, entry, fence)
+        with (
+            observe_paid(case, patch, record_property, coordinator),
+            pytest.raises(AdmissionError) as caught,
+        ):
+            _call(coordinator, case, entry, fence)
     last = native_clock(case)
     assert caught.value.code == "outcome_uncertain"
     assert canary not in str(caught.value)
@@ -233,11 +264,18 @@ def test_successor_paid_commit_uncertainty_retains_exact_native_effect_and_holds
         assert_reservation_delta(
             case, before, after, reservation_intent(case, fence), (first, last)
         )
-    _record(record_property, "f4_paid_commit_uncertainty", {
-        "entry": entry, "fault": failure, "transaction": asdict(facts),
-        "commit_attempts": len(attempts), "actual_commits": len(committed),
-        "retry_attempts": 0,
-    })
+    _record(
+        record_property,
+        "f4_paid_commit_uncertainty",
+        {
+            "entry": entry,
+            "fault": failure,
+            "transaction": asdict(facts),
+            "commit_attempts": len(attempts),
+            "actual_commits": len(committed),
+            "retry_attempts": 0,
+        },
+    )
 
 
 @pytest.mark.parametrize("target", ["claim", "held-organization", "gross"])
@@ -254,24 +292,37 @@ def test_successor_actual_zero_row_conditional_effect_rolls_back(
     def execute(connection, statement, *args, **kwargs):
         parameters = args[0] if args and isinstance(args[0], dict) else {}
         sql = " ".join(str(statement).split()).lower()
-        tag = (_publication(str(statement), parameters, case)
-               if sql.startswith(("update jobs set ", "update budget_accounts set ")) else None)
+        tag = (
+            _publication(str(statement), parameters, case)
+            if sql.startswith(("update jobs set ", "update budget_accounts set "))
+            else None
+        )
         if connection.engine is case.engine and tag == target:
             assert not injected
             if target == "held-organization":
-                changed = original(connection, text(
-                    "UPDATE budget_accounts SET held_microusd=held_microusd+1 "
-                    "WHERE id=:id RETURNING held_microusd"
-                ), {"id": case.account_ids[0]}).scalar_one()
+                changed = original(
+                    connection,
+                    text(
+                        "UPDATE budget_accounts SET held_microusd=held_microusd+1 "
+                        "WHERE id=:id RETURNING held_microusd"
+                    ),
+                    {"id": case.account_ids[0]},
+                ).scalar_one()
             elif target == "claim":
-                changed = original(connection, text(
-                    "UPDATE jobs SET lease_generation=lease_generation+1 "
-                    "WHERE id=:id RETURNING lease_generation"
-                ), {"id": case.job_id}).scalar_one()
+                changed = original(
+                    connection,
+                    text(
+                        "UPDATE jobs SET lease_generation=lease_generation+1 "
+                        "WHERE id=:id RETURNING lease_generation"
+                    ),
+                    {"id": case.job_id},
+                ).scalar_one()
             else:
-                changed = original(connection, text(
-                    "UPDATE jobs SET reserved=reserved+1 WHERE id=:id RETURNING reserved"
-                ), {"id": case.job_id}).scalar_one()
+                changed = original(
+                    connection,
+                    text("UPDATE jobs SET reserved=reserved+1 WHERE id=:id RETURNING reserved"),
+                    {"id": case.job_id},
+                ).scalar_one()
             assert type(changed) is int
             injected.append(changed)
             actual = original(connection, statement, *args, **kwargs)
@@ -281,19 +332,26 @@ def test_successor_actual_zero_row_conditional_effect_rolls_back(
 
     with monkeypatch.context() as patch:
         patch.setattr(Connection, "execute", execute)
-        with observe_paid(case, patch, record_property, coordinator):
-            with pytest.raises(ReservationRefusal) as caught:
-                _call(coordinator, case, entry, fence)
+        with (
+            observe_paid(case, patch, record_property, coordinator),
+            pytest.raises(ReservationRefusal) as caught,
+        ):
+            _call(coordinator, case, entry, fence)
     assert len(injected) == 1 and rowcounts == [0]
     assert caught.value.reason == (
         "ledger_state_invalid" if target == "held-organization" else "job_not_live"
     )
     _rollback(coordinator)
     assert_same_state(before, whole_state(case))
-    _record(record_property, "f4_paid_native_zero_row", {
-        "target": target, "actual_rowcounts": rowcounts,
-        "qualification": "Same-body native predicate drift, not a competing-writer proof.",
-    })
+    _record(
+        record_property,
+        "f4_paid_native_zero_row",
+        {
+            "target": target,
+            "actual_rowcounts": rowcounts,
+            "qualification": "Same-body native predicate drift, not a competing-writer proof.",
+        },
+    )
 
 
 @pytest.mark.parametrize("entry", ["claim", "reserve"])
@@ -310,13 +368,14 @@ def test_successor_real_deferred_generation_failure_rolls_back_publication(
         before = whole_state(selected)
         coordinator = ReservationCoordinator(selected.engine, selected.authority)
         original_flush, original_sql = (
-            reservation_successor.flush_constraints, Connection.exec_driver_sql
+            reservation_successor.flush_constraints,
+            Connection.exec_driver_sql,
         )
         generations, sqlstates, flushes = [], [], []
 
         def sql(connection, statement, *args, **kwargs):
-            chosen = (
-                connection.engine is selected.engine and statement.startswith("SET CONSTRAINTS ")
+            chosen = connection.engine is selected.engine and statement.startswith(
+                "SET CONSTRAINTS "
             )
             if chosen:
                 flushes.append(statement)
@@ -330,10 +389,13 @@ def test_successor_real_deferred_generation_failure_rolls_back_publication(
         def flush(connection, scope):
             assert connection.engine is selected.engine and not generations
             for value in (0, 1):
-                actual = connection.execute(text(
-                    "UPDATE jobs SET lease_generation=:value WHERE id=:id "
-                    "RETURNING lease_generation"
-                ), {"value": value, "id": selected.job_id}).scalar_one()
+                actual = connection.execute(
+                    text(
+                        "UPDATE jobs SET lease_generation=:value WHERE id=:id "
+                        "RETURNING lease_generation"
+                    ),
+                    {"value": value, "id": selected.job_id},
+                ).scalar_one()
                 assert type(actual) is int and actual == value
                 generations.append(actual)
             return original_flush(connection, scope)
@@ -341,17 +403,26 @@ def test_successor_real_deferred_generation_failure_rolls_back_publication(
         with monkeypatch.context() as patch:
             patch.setattr(Connection, "exec_driver_sql", sql)
             patch.setattr(reservation_successor, "flush_constraints", flush)
-            with observe_paid(selected, patch, record_property, coordinator) as statements:
-                with pytest.raises(AdmissionError) as caught:
-                    _call(coordinator, selected, entry, fence)
+            with (
+                observe_paid(selected, patch, record_property, coordinator) as statements,
+                pytest.raises(AdmissionError) as caught,
+            ):
+                _call(coordinator, selected, entry, fence)
         assert generations == [0, 1] and sqlstates == ["23514"] and len(flushes) == 1
         assert caught.value.code == "dependency_unavailable"
         _rollback(coordinator)
         assert_same_state(before, whole_state(selected))
-        _record(record_property, "f4_paid_deferred_failure", {
-            "entry": entry, "native_generations": generations, "sqlstates": sqlstates,
-            "flushes": flushes, "statement_count": len(statements),
-        })
+        _record(
+            record_property,
+            "f4_paid_deferred_failure",
+            {
+                "entry": entry,
+                "native_generations": generations,
+                "sqlstates": sqlstates,
+                "flushes": flushes,
+                "statement_count": len(statements),
+            },
+        )
 
 
 def _sorted(snapshot):
@@ -369,12 +440,20 @@ def _marker(case, *, corrupt=None):
     assert operation["failure_correlation_id"] is not None
     assert before["tables"]["job_failure_evidence"]["rows"] == []
     marker = {
-        "schema_version": 1, "kind": "historical_marker", "project_id": case.project_id,
-        "job_resource_kind": "job", "job_id": case.job_id,
-        "operation_id": operation["id"], "lease_generation": job["lease_generation"],
-        "job_status": job["status"], "cause": None, "phase": None,
-        "origin_kind": "migration_marker", "correlation_id": "e" * 32,
-        "association_sha256": "c" * 64, "source_sha256": "d" * 64,
+        "schema_version": 1,
+        "kind": "historical_marker",
+        "project_id": case.project_id,
+        "job_resource_kind": "job",
+        "job_id": case.job_id,
+        "operation_id": operation["id"],
+        "lease_generation": job["lease_generation"],
+        "job_status": job["status"],
+        "cause": None,
+        "phase": None,
+        "origin_kind": "migration_marker",
+        "correlation_id": "e" * 32,
+        "association_sha256": "c" * 64,
+        "source_sha256": "d" * 64,
         "created_at_micros": 0,
     }
     if corrupt == "foreign":
@@ -393,14 +472,22 @@ def _marker(case, *, corrupt=None):
     if corrupt is None:
         with engine.begin() as connection:
             if hasattr(case, "pg"):
-                assert connection.exec_driver_sql(
-                    "SELECT current_user=session_user AND NOT EXISTS("
-                    "SELECT 1 FROM pg_catalog.pg_class WHERE relnamespace='public'::regnamespace "
-                    "AND relkind='r' AND relowner<>current_user::regrole)"
-                ).scalar_one() is True
-            assert connection.execute(text(
-                "UPDATE operations SET failure_correlation_id=NULL WHERE id=:operation"
-            ), {"operation": operation["id"]}).rowcount == 1
+                assert (
+                    connection.exec_driver_sql(
+                        "SELECT current_user=session_user AND NOT EXISTS("
+                        "SELECT 1 FROM pg_catalog.pg_class "
+                        "WHERE relnamespace='public'::regnamespace "
+                        "AND relkind='r' AND relowner<>current_user::regrole)"
+                    ).scalar_one()
+                    is True
+                )
+            assert (
+                connection.execute(
+                    text("UPDATE operations SET failure_correlation_id=NULL WHERE id=:operation"),
+                    {"operation": operation["id"]},
+                ).rowcount
+                == 1
+            )
             assert connection.execute(statement, marker).rowcount == 1
     else:
         assert not hasattr(case, "pg") and engine.dialect.name == "sqlite"
@@ -408,10 +495,12 @@ def _marker(case, *, corrupt=None):
         # definitions/settings are restored before the real wrapper is invoked.
         # It cannot count as a supported migration or producer-state control.
         with engine.connect() as connection:
-            triggers = list(connection.exec_driver_sql(
-                "SELECT name,sql FROM sqlite_master WHERE type='trigger' "
-                "AND tbl_name='job_failure_evidence' ORDER BY name"
-            ))
+            triggers = list(
+                connection.exec_driver_sql(
+                    "SELECT name,sql FROM sqlite_master WHERE type='trigger' "
+                    "AND tbl_name='job_failure_evidence' ORDER BY name"
+                )
+            )
             assert triggers and len(triggers) <= 8 and all(sql for _, sql in triggers)
             connection.rollback()
             foreign_keys = connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one()
@@ -426,9 +515,15 @@ def _marker(case, *, corrupt=None):
                 for name, _ in triggers:
                     quoted = connection.dialect.identifier_preparer.quote(name)
                     connection.exec_driver_sql(f"DROP TRIGGER {quoted}")
-                assert connection.execute(text(
-                    "UPDATE operations SET failure_correlation_id=NULL WHERE id=:operation"
-                ), {"operation": operation["id"]}).rowcount == 1
+                assert (
+                    connection.execute(
+                        text(
+                            "UPDATE operations SET failure_correlation_id=NULL WHERE id=:operation"
+                        ),
+                        {"operation": operation["id"]},
+                    ).rowcount
+                    == 1
+                )
                 assert connection.execute(statement, marker).rowcount == 1
                 for _, sql in triggers:
                     connection.exec_driver_sql(sql)
@@ -441,10 +536,12 @@ def _marker(case, *, corrupt=None):
                 assert (
                     connection.exec_driver_sql("PRAGMA ignore_check_constraints").scalar_one() == 0
                 )
-            restored = list(connection.exec_driver_sql(
-                "SELECT name,sql FROM sqlite_master WHERE type='trigger' "
-                "AND tbl_name='job_failure_evidence' ORDER BY name"
-            ))
+            restored = list(
+                connection.exec_driver_sql(
+                    "SELECT name,sql FROM sqlite_master WHERE type='trigger' "
+                    "AND tbl_name='job_failure_evidence' ORDER BY name"
+                )
+            )
             assert [tuple(row) for row in restored] == [tuple(row) for row in triggers]
     expected = deepcopy(before)
     one(expected, "operations", id=operation["id"])["failure_correlation_id"] = None
@@ -467,13 +564,14 @@ def _assert_presence_denial(case, monkeypatch, record_property, entry, fence, be
 
     with monkeypatch.context() as patch:
         patch.setattr(reservation_successor, "_absence", absence)
-        with observe_paid(case, patch, record_property, coordinator) as statements:
-            with pytest.raises(FailureRefusal) as caught:
-                _call(coordinator, case, entry, fence)
+        with (
+            observe_paid(case, patch, record_property, coordinator) as statements,
+            pytest.raises(FailureRefusal) as caught,
+        ):
+            _call(coordinator, case, entry, fence)
     assert caught.value.reason == "not_eligible"
     assert len(visits) == 1 and visits[0].closed
-    assert not any(sql.lstrip().startswith(("INSERT", "UPDATE", "DELETE"))
-                   for sql, _ in statements)
+    assert not any(sql.lstrip().startswith(("INSERT", "UPDATE", "DELETE")) for sql, _ in statements)
     _rollback(coordinator)
     assert_same_state(before, whole_state(case))
 
@@ -485,12 +583,17 @@ def test_successor_valid_current_marker_denies_new_paid_effect(
     fence = None if entry == "claim" else _claim(case, monkeypatch, record_property)
     before = _marker(case)
     _assert_presence_denial(case, monkeypatch, record_property, entry, fence, before)
-    _record(record_property, "f4_paid_marker_denial", {
-        "entry": entry, "native_insert_acknowledged": True,
-        "qualification": (
-            "Current native generation/status marker; no Error or paid authority derived."
-        ),
-    })
+    _record(
+        record_property,
+        "f4_paid_marker_denial",
+        {
+            "entry": entry,
+            "native_insert_acknowledged": True,
+            "qualification": (
+                "Current native generation/status marker; no Error or paid authority derived."
+            ),
+        },
+    )
 
 
 @pytest.mark.parametrize("case", ["sqlite"], indirect=True)
@@ -502,13 +605,19 @@ def test_successor_unfiltered_job_key_corrupt_evidence_component_refuses(
     fence = None if entry == "claim" else _claim(case, monkeypatch, record_property)
     before = _marker(case, corrupt=variant)
     _assert_presence_denial(case, monkeypatch, record_property, entry, fence, before)
-    _record(record_property, "f4_paid_corrupt_evidence_component", {
-        "entry": entry, "variant": variant, "actual_absence_gate_reached": True,
-        "qualification": (
-            "Deliberately corrupt SQLite evidence component, "
-            "not a valid producer/full-path positive."
-        ),
-    })
+    _record(
+        record_property,
+        "f4_paid_corrupt_evidence_component",
+        {
+            "entry": entry,
+            "variant": variant,
+            "actual_absence_gate_reached": True,
+            "qualification": (
+                "Deliberately corrupt SQLite evidence component, "
+                "not a valid producer/full-path positive."
+            ),
+        },
+    )
 
 
 @pytest.mark.parametrize("entry", ["claim", "reserve"])
@@ -521,7 +630,8 @@ def test_successor_native_acquisition_wait_rechecks_revoked_service_key(
         selected = fixture.case
         principal, context = service_key(selected, selected.engine)
         fence = (
-            None if entry == "claim"
+            None
+            if entry == "claim"
             else _claim(selected, monkeypatch, record_property, principal, context)
         )
         before = whole_state(selected)
@@ -547,9 +657,10 @@ def test_successor_native_acquisition_wait_rechecks_revoked_service_key(
                 with pg["owner"].connect() as writer:
                     writer.exec_driver_sql("SET LOCAL statement_timeout='3s'")
                     writer.exec_driver_sql("SET LOCAL lock_timeout='3s'")
-                    writer.execute(text(
-                        "SELECT id FROM organizations WHERE id=:id FOR UPDATE"
-                    ), {"id": selected.organization_id}).scalar_one()
+                    writer.execute(
+                        text("SELECT id FROM organizations WHERE id=:id FOR UPDATE"),
+                        {"id": selected.organization_id},
+                    ).scalar_one()
                     blocker = writer.connection.driver_connection.info.backend_pid
                     try:
                         with observe_paid(selected, patch, record_property, coordinator):
@@ -560,9 +671,13 @@ def test_successor_native_acquisition_wait_rechecks_revoked_service_key(
                             assert len(pids) == 1 and pids[0] != blocker and not future.done()
                             wait_blocked(pg, pids[0], blocker)
                             native_wait.update(actor=pids[0], blocker=blocker, witnessed=True)
-                            assert writer.execute(text(
-                                "UPDATE api_keys SET revoked=true WHERE id=:id"
-                            ), {"id": key_id}).rowcount == 1
+                            assert (
+                                writer.execute(
+                                    text("UPDATE api_keys SET revoked=true WHERE id=:id"),
+                                    {"id": key_id},
+                                ).rowcount
+                                == 1
+                            )
                             assert not future.done()
                             writer.commit()
                             native_wait["revocation_commit_acknowledged"] = True
@@ -576,9 +691,15 @@ def test_successor_native_acquisition_wait_rechecks_revoked_service_key(
             expected = deepcopy(before)
             one(expected, "api_keys", id=key_id)["revoked"] = True
             assert_same_state(expected, whole_state(selected))
-            _record(record_property, "f4_paid_native_authority_wait", {
-                "entry": entry, **native_wait, "transaction": asdict(coordinator.outcome),
-            })
+            _record(
+                record_property,
+                "f4_paid_native_authority_wait",
+                {
+                    "entry": entry,
+                    **native_wait,
+                    "transaction": asdict(coordinator.outcome),
+                },
+            )
         finally:
             event.remove(selected.engine, "checkout", listener)
             # The native blocker is already released; the external owned-process
@@ -628,17 +749,24 @@ def _expiring_successor_case(pg, tmp_path, monkeypatch, record_property, selecte
                 accounts = []
                 for number, family in enumerate(("organization", "project"), 982010):
                     old = next(row for row in previous["accounts"] if row["scope"] == family)
-                    accounts.append({
-                        **old, "id": f"{number:032x}", "period_start": stamp(boundary[0]),
-                        "period_end": stamp(
-                            end if family == selected else datetime(2100, 1, 1, tzinfo=UTC)
-                        ),
-                    })
+                    accounts.append(
+                        {
+                            **old,
+                            "id": f"{number:032x}",
+                            "period_start": stamp(boundary[0]),
+                            "period_end": stamp(
+                                end if family == selected else datetime(2100, 1, 1, tzinfo=UTC)
+                            ),
+                        }
+                    )
                 manifest = {
-                    **previous, "manifest_id": f"{982012:032x}", "operation": "provision",
+                    **previous,
+                    "manifest_id": f"{982012:032x}",
+                    "operation": "provision",
                     "source_digest": fixture.source,
                     "parent_manifest_digest": digest(previous),
-                    "opening_accounts": None, "accounts": accounts,
+                    "opening_accounts": None,
+                    "accounts": accounts,
                 }
                 receipt = invoke(fixture, pg, manifest)
             assert receipt.account_rows == 2 and receipt.sequence == 1
@@ -649,19 +777,29 @@ def _expiring_successor_case(pg, tmp_path, monkeypatch, record_property, selecte
             current = {row["id"]: row for row in after["tables"]["budget_accounts"]["rows"]}
             assert set(current) == set(old) | {row["id"] for row in accounts}
             assert all(current[key] == value for key, value in old.items())
-            assert all(current[row["id"]]["held_microusd"] == 0
-                       and current[row["id"]]["accounted_microusd"] == 0 for row in accounts)
+            assert all(
+                current[row["id"]]["held_microusd"] == 0
+                and current[row["id"]]["accounted_microusd"] == 0
+                for row in accounts
+            )
             provisioned.append((end, accounts, receipt.model_dump(mode="json")))
-            _record(record_property, "f4_paid_period_setup", {
-                "initial_end": boundary[0], "initial_expiry_samples": samples,
-                "selected_end": end, "accounts": accounts,
-                "receipt": receipt.model_dump(mode="json"),
-                "qualification": (
-                    "Real native P1 provision before ar8; fixed deadline is never extended."
-                ),
-            })
+            _record(
+                record_property,
+                "f4_paid_period_setup",
+                {
+                    "initial_end": boundary[0],
+                    "initial_expiry_samples": samples,
+                    "selected_end": end,
+                    "accounts": accounts,
+                    "receipt": receipt.model_dump(mode="json"),
+                    "qualification": (
+                        "Real native P1 provision before ar8; fixed deadline is never extended."
+                    ),
+                },
+            )
             return replace(
-                built, provisioning=fixture,
+                built,
+                provisioning=fixture,
                 account_ids=(accounts[0]["id"], accounts[1]["id"], built.account_ids[2]),
             )
         except BaseException:
@@ -688,14 +826,15 @@ def _expiring_successor_case(pg, tmp_path, monkeypatch, record_property, selecte
 def test_successor_selected_period_expires_after_selection_while_job_lease_is_live(
     pg, tmp_path, monkeypatch, record_property, selected
 ):
-    with _expiring_successor_case(
-        pg, tmp_path, monkeypatch, record_property, selected
-    ) as (paid_case, selected_end):
+    with _expiring_successor_case(pg, tmp_path, monkeypatch, record_property, selected) as (
+        paid_case,
+        selected_end,
+    ):
         fence = _claim(paid_case, monkeypatch, record_property)
         before = whole_state(paid_case)
         accounts = [one(before, "budget_accounts", id=key) for key in paid_case.account_ids]
         alignment_started = time.monotonic()
-        for samples in range(1, 1025):
+        for _samples in range(1, 1025):
             observed = native_time(pg)
             remaining = (selected_end - observed).total_seconds()
             if remaining <= 4:
@@ -705,12 +844,13 @@ def test_successor_selected_period_expires_after_selection_while_job_lease_is_li
         assert 0 < remaining <= 4, (
             "No captured-selection/expiry proof if setup misses its deadline."
         )
-        assert (
-            one(before, "jobs", id=paid_case.job_id)["lease_until"] * 1_000_000 > micros(observed)
+        assert one(before, "jobs", id=paid_case.job_id)["lease_until"] * 1_000_000 > micros(
+            observed
         )
         coordinator = ReservationCoordinator(paid_case.engine, paid_case.authority)
         original_clock, original_final = (
-            reservation_successor._clock, reservation_successor.final_fence
+            reservation_successor._clock,
+            reservation_successor.final_fence,
         )
         clocks, writes, flushes, waits, denials = [], [], [], [], []
 
@@ -738,8 +878,10 @@ def test_successor_selected_period_expires_after_selection_while_job_lease_is_li
             if not statement.startswith("SET CONSTRAINTS "):
                 return
             assert writes == _order(paid_case, "reserve") and not waits and len(clocks) == 1
-            assert all(micros(row["period_start"]) <= clocks[0] < micros(row["period_end"])
-                       for row in accounts)
+            assert all(
+                micros(row["period_start"]) <= clocks[0] < micros(row["period_end"])
+                for row in accounts
+            )
             work = coordinator._work
             assert connection.info["operation_work"] is work
             now = connection.exec_driver_sql("SELECT clock_timestamp()").scalar_one()
@@ -749,12 +891,17 @@ def test_successor_selected_period_expires_after_selection_while_job_lease_is_li
             raw = connection.connection.driver_connection
             connection.execute(text("SELECT pg_sleep(:delay)"), {"delay": delay}).scalar_one()
             assert connection.connection.driver_connection is raw
-            waits.append({
-                "native_before": now, "selected_end": selected_end, "delay": delay,
-                "qualification": (
-                    "Injected bounded native latency, not a naturally occurring constraint wait."
-                ),
-            })
+            waits.append(
+                {
+                    "native_before": now,
+                    "selected_end": selected_end,
+                    "delay": delay,
+                    "qualification": (
+                        "Injected bounded native latency, "
+                        "not a naturally occurring constraint wait."
+                    ),
+                }
+            )
 
         event.listen(paid_case.engine, "before_cursor_execute", inject)
         event.listen(paid_case.engine, "after_cursor_execute", completed)
@@ -762,9 +909,11 @@ def test_successor_selected_period_expires_after_selection_while_job_lease_is_li
             with monkeypatch.context() as patch:
                 patch.setattr(reservation_successor, "_clock", clock)
                 patch.setattr(reservation_successor, "final_fence", final)
-                with observe_paid(paid_case, patch, record_property, coordinator):
-                    with pytest.raises(ReservationRefusal) as caught:
-                        _call(coordinator, paid_case, "reserve", fence)
+                with (
+                    observe_paid(paid_case, patch, record_property, coordinator),
+                    pytest.raises(ReservationRefusal) as caught,
+                ):
+                    _call(coordinator, paid_case, "reserve", fence)
         finally:
             event.remove(paid_case.engine, "before_cursor_execute", inject)
             event.remove(paid_case.engine, "after_cursor_execute", completed)
@@ -772,16 +921,22 @@ def test_successor_selected_period_expires_after_selection_while_job_lease_is_li
         assert len(denials) == 1 and caught.value is denials[0]
         assert len(waits) == len(flushes) == 1 and len(clocks) == 2
         final_clock = clocks[-1]
-        assert (
-            [row["scope"] for row in accounts if micros(row["period_end"]) <= final_clock]
-            == [selected]
-        )
+        assert [row["scope"] for row in accounts if micros(row["period_end"]) <= final_clock] == [
+            selected
+        ]
         assert micros(selected_end) <= final_clock
         assert one(before, "jobs", id=paid_case.job_id)["lease_until"] * 1_000_000 > final_clock
         _rollback(coordinator)
         assert_same_state(before, whole_state(paid_case))
-        _record(record_property, "f4_paid_final_period_expiry", {
-            "selected": selected, "clocks": clocks, "waits": waits,
-            "alignment_samples": samples, "job_lease_still_live": True,
-            "transaction": asdict(coordinator.outcome),
-        })
+        _record(
+            record_property,
+            "f4_paid_final_period_expiry",
+            {
+                "selected": selected,
+                "clocks": clocks,
+                "waits": waits,
+                "alignment_samples": _samples,
+                "job_lease_still_live": True,
+                "transaction": asdict(coordinator.outcome),
+            },
+        )
